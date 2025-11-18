@@ -1,10 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import heroBackground from "@/assets/hero-background.jpg";
 
 export const Hero = () => {
   return (
     <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-muted via-background to-muted opacity-50"></div>
+      <div className="absolute inset-0">
+        <img 
+          src={heroBackground} 
+          alt="Modern café interior" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-background/60"></div>
+      </div>
       
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
