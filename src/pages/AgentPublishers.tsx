@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Users, Building2, BarChart3 } from "lucide-react";
+import { ArrowLeft, Users, Sparkles, UserCircle, Palette } from "lucide-react";
 
 const AgentPublishers = () => {
   const navigate = useNavigate();
@@ -22,23 +22,23 @@ const AgentPublishers = () => {
         <div className="mb-8">
           <h2 className="text-4xl font-bold mb-4">Agent Publishers</h2>
           <p className="text-xl text-muted-foreground">
-            Manage multiple venues and maximize your network reach
+            Connect with guerrilla placements, influencers, models, and artists
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader>
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                <Building2 className="w-6 h-6 text-primary" />
+                <Sparkles className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>Venue Network</CardTitle>
-              <CardDescription>Manage your venue portfolio</CardDescription>
+              <CardTitle>Guerrilla Placements</CardTitle>
+              <CardDescription>Unconventional advertising in unexpected locations</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold mb-2">0</p>
-              <p className="text-sm text-muted-foreground">Venues in network</p>
-              <Button className="w-full mt-4">Add Venue</Button>
+              <p className="text-sm text-muted-foreground">Active placements</p>
+              <Button className="w-full mt-4">Explore</Button>
             </CardContent>
           </Card>
 
@@ -47,28 +47,43 @@ const AgentPublishers = () => {
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
                 <Users className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>Active Campaigns</CardTitle>
-              <CardDescription>Monitor running campaigns</CardDescription>
+              <CardTitle>Influencers</CardTitle>
+              <CardDescription>Partner with social media influencers</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold mb-2">0</p>
-              <p className="text-sm text-muted-foreground">Campaigns active</p>
-              <Button variant="outline" className="w-full mt-4">View All</Button>
+              <p className="text-sm text-muted-foreground">Active partnerships</p>
+              <Button className="w-full mt-4">Explore</Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                <BarChart3 className="w-6 h-6 text-primary" />
+                <UserCircle className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>Network Revenue</CardTitle>
-              <CardDescription>Track total earnings</CardDescription>
+              <CardTitle>Models</CardTitle>
+              <CardDescription>Brand ambassadors and promotional models</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold mb-2">$0</p>
-              <p className="text-sm text-muted-foreground">This month</p>
-              <Button variant="outline" className="w-full mt-4">View Breakdown</Button>
+              <p className="text-3xl font-bold mb-2">0</p>
+              <p className="text-sm text-muted-foreground">Active campaigns</p>
+              <Button className="w-full mt-4">Explore</Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                <Palette className="w-6 h-6 text-primary" />
+              </div>
+              <CardTitle>Artists</CardTitle>
+              <CardDescription>Creative collaborations with artists</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold mb-2">0</p>
+              <p className="text-sm text-muted-foreground">Active projects</p>
+              <Button className="w-full mt-4">Explore</Button>
             </CardContent>
           </Card>
         </div>
@@ -77,29 +92,29 @@ const AgentPublishers = () => {
           <Card>
             <CardHeader>
               <CardTitle>Getting Started as an Agent</CardTitle>
-              <CardDescription>Build and grow your venue network</CardDescription>
+              <CardDescription>Connect with diverse advertising channels</CardDescription>
             </CardHeader>
             <CardContent>
               <ol className="space-y-4">
                 <li className="flex gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">1</span>
                   <div>
-                    <p className="font-medium">Build your network</p>
-                    <p className="text-sm text-muted-foreground">Add multiple venues to your portfolio for maximum reach</p>
+                    <p className="font-medium">Choose your channels</p>
+                    <p className="text-sm text-muted-foreground">Select from guerrilla placements, influencers, models, and artists</p>
                   </div>
                 </li>
                 <li className="flex gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">2</span>
                   <div>
-                    <p className="font-medium">Create packages</p>
-                    <p className="text-sm text-muted-foreground">Offer bundled advertising across multiple locations</p>
+                    <p className="font-medium">Build relationships</p>
+                    <p className="text-sm text-muted-foreground">Connect with talent and coordinate campaigns</p>
                   </div>
                 </li>
                 <li className="flex gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">3</span>
                   <div>
-                    <p className="font-medium">Connect with advertisers</p>
-                    <p className="text-sm text-muted-foreground">Attract larger campaigns with your network reach</p>
+                    <p className="font-medium">Launch campaigns</p>
+                    <p className="text-sm text-muted-foreground">Execute creative advertising strategies with your network</p>
                   </div>
                 </li>
               </ol>
