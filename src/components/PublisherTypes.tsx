@@ -12,7 +12,7 @@ export const PublisherTypes = () => {
     {
       icon: Users,
       title: "Agent Publishers",
-      description: "Independent agents and agencies placing guerrilla, human-worn, or distributed sticker campaigns across urban environments.",
+      description: "Freelance placement agents including guerrilla agents, influencers, models, and artists executing independent campaigns across urban environments.",
       features: ["Flexible placement", "Wide coverage", "Creative campaigns"]
     },
     {
