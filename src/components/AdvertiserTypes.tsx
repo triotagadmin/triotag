@@ -1,4 +1,4 @@
-import { Store, ShoppingBag, Calendar, TrendingUp, Building } from "lucide-react";
+import { Store, ShoppingBag, Calendar, TrendingUp, Building, Users, Megaphone } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -23,6 +23,16 @@ const advertiserTypes = [
     title: "Franchises & Chains",
     description: "Ensure consistent local reach across multiple locations worldwide.",
     icon: Building,
+  },
+  {
+    title: "Service Providers",
+    description: "Connect with local customers through strategic placement in high-traffic areas.",
+    icon: Users,
+  },
+  {
+    title: "Product Launches",
+    description: "Generate buzz and awareness for new products with targeted micro-location campaigns.",
+    icon: Megaphone,
   },
 ];
 
