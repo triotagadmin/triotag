@@ -19,8 +19,7 @@ export const Footer = () => {
     advertisers: [
       { label: "Register as an Advertiser", href: "/auth" },
       { label: "Browse by Publishers", href: "#publishers" },
-      { label: "Browse by Locations", href: "#locations" },
-      { label: "Contact Us", href: "#contact" }
+      { label: "Browse by Locations", href: "#locations" }
     ],
     publishers: [
       { label: "Venue Publisher", href: "/auth" },
