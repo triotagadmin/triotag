@@ -2,20 +2,24 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin } from "lucide-react";
+import venueCafe1 from "@/assets/venue-cafe-1.jpg";
+import venueCafe2 from "@/assets/venue-cafe-2.jpg";
+import venueBathroom from "@/assets/venue-bathroom.jpg";
+
 const locations = [{
   name: "Brew & Bean Café",
   category: "Café",
-  image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400",
+  image: venueCafe1,
   status: "Available"
 }, {
   name: "Metro Station Plaza",
   category: "Kiosk",
-  image: "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400",
+  image: venueCafe2,
   status: "Booked"
 }, {
   name: "Downtown Bar & Lounge",
   category: "Bar",
-  image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400",
+  image: venueBathroom,
   status: "Available"
 }];
 export const FeaturedLocations = () => {
