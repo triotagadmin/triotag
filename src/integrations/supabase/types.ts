@@ -240,7 +240,7 @@ export type Database = {
     }
     Enums: {
       agent_role: "guerrilla" | "influencer" | "model" | "artist"
-      app_role: "admin" | "publisher"
+      app_role: "admin" | "publisher" | "advertiser"
       approval_status: "pending" | "approved" | "rejected"
       publisher_type: "venue" | "digital" | "agent"
     }
@@ -371,7 +371,7 @@ export const Constants = {
   public: {
     Enums: {
       agent_role: ["guerrilla", "influencer", "model", "artist"],
-      app_role: ["admin", "publisher"],
+      app_role: ["admin", "publisher", "advertiser"],
       approval_status: ["pending", "approved", "rejected"],
       publisher_type: ["venue", "digital", "agent"],
     },
