@@ -14,7 +14,13 @@ export const Footer = () => {
     platform: [
       { label: "How It Works", href: "#how-it-works" },
       { label: "Browse Locations", href: "#locations" },
-      { label: "Pricing", href: "#pricing" }
+      { label: "For Advertisers", href: "#advertisers" }
+    ],
+    advertisers: [
+      { label: "Register as an Advertiser", href: "/auth" },
+      { label: "Browse by Publishers", href: "#publishers" },
+      { label: "Browse by Locations", href: "#locations" },
+      { label: "Contact Us", href: "#contact" }
     ],
     publishers: [
       { label: "Venue Publisher", href: "/auth" },
@@ -32,7 +38,7 @@ export const Footer = () => {
   return (
     <footer className="bg-muted/50 border-t">
       <div className="container mx-auto px-6 py-12">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <div className="grid md:grid-cols-5 gap-8 mb-8">
           <div>
             <h3 className="font-bold text-lg mb-4">Tiny Sticky Ads</h3>
             <p className="text-sm text-muted-foreground mb-4">
@@ -48,6 +54,19 @@ export const Footer = () => {
                   <a href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     {link.label}
                   </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-4">For Advertisers</h4>
+            <ul className="space-y-2">
+              {footerLinks.advertisers.map((link) => (
+                <li key={link.label}>
+                  <Link to={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
