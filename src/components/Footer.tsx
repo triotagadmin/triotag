@@ -19,7 +19,7 @@ export const Footer = () => {
     publishers: [
       { label: "Venue Publisher", href: "/auth" },
       { label: "Agent Publisher", href: "/auth" },
-      { label: "Digital Publishers", href: "/auth" }
+      { label: "Digital Publisher", href: "/auth" }
     ],
     company: [
       { label: "About Us", href: "#about" },
