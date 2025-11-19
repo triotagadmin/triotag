@@ -5,6 +5,7 @@ import { FeaturedLocations } from "@/components/FeaturedLocations";
 import { FeaturedAgents } from "@/components/FeaturedAgents";
 import { FeaturedDigitalMedia } from "@/components/FeaturedDigitalMedia";
 import { PublisherTypes } from "@/components/PublisherTypes";
+import { PublisherCTA } from "@/components/PublisherCTA";
 import { AdvertiserTypes } from "@/components/AdvertiserTypes";
 import { CTABanner } from "@/components/CTABanner";
 import { Footer } from "@/components/Footer";
@@ -20,6 +21,7 @@ const Index = () => {
       <FeaturedDigitalMedia />
       <AdvertiserTypes />
       <PublisherTypes />
+      <PublisherCTA />
       <CTABanner />
       <Footer />
     </div>
