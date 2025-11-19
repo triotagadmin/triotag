@@ -15,7 +15,7 @@ const steps = [
   {
     icon: Camera,
     title: "Publish & Verify",
-    description: "Automated verification with AI and geolocation",
+    description: "Send campaign details and Approve campaign.",
   },
   {
     icon: TrendingUp,
