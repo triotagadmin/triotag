@@ -129,7 +129,18 @@ const Auth = () => {
         description: "Successfully signed in.",
       });
 
-      navigate("/dashboard");
+      // Check user role and redirect to appropriate dashboard
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      if (roles && roles.role === "advertiser") {
+        navigate("/advertiser-dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast({
