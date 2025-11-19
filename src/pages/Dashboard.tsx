@@ -112,7 +112,7 @@ const Dashboard = () => {
                   <Users className="w-6 h-6 text-primary" />
                 </div>
                 <CardTitle className="group-hover:text-primary transition-colors">Agent Publishers</CardTitle>
-                <CardDescription>Manage multiple venues and maximize reach</CardDescription>
+                <CardDescription>Work with freelance guerrilla agents, influencers, models, and artists</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button className="w-full">Explore Agent Publishers</Button>

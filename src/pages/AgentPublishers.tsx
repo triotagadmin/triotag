@@ -22,7 +22,7 @@ const AgentPublishers = () => {
         <div className="mb-8">
           <h2 className="text-4xl font-bold mb-4">Agent Publishers</h2>
           <p className="text-xl text-muted-foreground">
-            Connect with guerrilla placements, influencers, models, and artists
+            Work with freelance placement agents who execute independent campaigns
           </p>
         </div>
 
@@ -32,8 +32,8 @@ const AgentPublishers = () => {
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
                 <Sparkles className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>Guerrilla Placements</CardTitle>
-              <CardDescription>Unconventional advertising in unexpected locations</CardDescription>
+              <CardTitle>Guerrilla Agents</CardTitle>
+              <CardDescription>Freelance agents executing unconventional street placements</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold mb-2">0</p>
@@ -48,7 +48,7 @@ const AgentPublishers = () => {
                 <Users className="w-6 h-6 text-primary" />
               </div>
               <CardTitle>Influencers</CardTitle>
-              <CardDescription>Partner with social media influencers</CardDescription>
+              <CardDescription>Freelance influencers promoting brands through social platforms</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold mb-2">0</p>
@@ -63,7 +63,7 @@ const AgentPublishers = () => {
                 <UserCircle className="w-6 h-6 text-primary" />
               </div>
               <CardTitle>Models</CardTitle>
-              <CardDescription>Brand ambassadors and promotional models</CardDescription>
+              <CardDescription>Independent brand ambassadors and promotional models</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold mb-2">0</p>
@@ -78,7 +78,7 @@ const AgentPublishers = () => {
                 <Palette className="w-6 h-6 text-primary" />
               </div>
               <CardTitle>Artists</CardTitle>
-              <CardDescription>Creative collaborations with artists</CardDescription>
+              <CardDescription>Freelance artists creating branded creative installations</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold mb-2">0</p>
@@ -91,30 +91,30 @@ const AgentPublishers = () => {
         <div className="mt-12">
           <Card>
             <CardHeader>
-              <CardTitle>Getting Started as an Agent</CardTitle>
-              <CardDescription>Connect with diverse advertising channels</CardDescription>
+              <CardTitle>Getting Started as a Freelance Agent</CardTitle>
+              <CardDescription>Execute independent placement campaigns across multiple channels</CardDescription>
             </CardHeader>
             <CardContent>
               <ol className="space-y-4">
                 <li className="flex gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">1</span>
                   <div>
-                    <p className="font-medium">Choose your channels</p>
-                    <p className="text-sm text-muted-foreground">Select from guerrilla placements, influencers, models, and artists</p>
+                    <p className="font-medium">Choose your placement type</p>
+                    <p className="text-sm text-muted-foreground">Work as a guerrilla agent, influencer, model, or artist executing campaigns independently</p>
                   </div>
                 </li>
                 <li className="flex gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">2</span>
                   <div>
-                    <p className="font-medium">Build relationships</p>
-                    <p className="text-sm text-muted-foreground">Connect with talent and coordinate campaigns</p>
+                    <p className="font-medium">Build your profile</p>
+                    <p className="text-sm text-muted-foreground">Showcase your reach, style, and past campaign results as a freelance agent</p>
                   </div>
                 </li>
                 <li className="flex gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">3</span>
                   <div>
-                    <p className="font-medium">Launch campaigns</p>
-                    <p className="text-sm text-muted-foreground">Execute creative advertising strategies with your network</p>
+                    <p className="font-medium">Execute placements</p>
+                    <p className="text-sm text-muted-foreground">Connect with advertisers and execute creative independent campaigns</p>
                   </div>
                 </li>
               </ol>

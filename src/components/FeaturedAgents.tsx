@@ -4,8 +4,8 @@ import { Sparkles, Users, UserCircle, Palette } from "lucide-react";
 
 const agents = [
   {
-    name: "Urban Guerrilla Network",
-    category: "Guerrilla Placements",
+    name: "Urban Guerrilla Collective",
+    category: "Guerrilla Agents",
     reach: "500+ locations",
     rating: "4.9",
     specialty: "Street art & pop-ups",
@@ -50,7 +50,7 @@ export const FeaturedAgents = () => {
             Featured Agents
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Connect with guerrilla placements, influencers, models, and artists
+            Connect with freelance guerrilla agents, influencers, models, and artists
           </p>
         </div>
 
