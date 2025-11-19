@@ -31,7 +31,7 @@ export const Hero = () => {
               </Button>
             </Link>
             <Link to="/auth">
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+              <Button size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
                 Become a Publisher
               </Button>
             </Link>
