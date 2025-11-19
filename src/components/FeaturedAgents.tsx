@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Users, UserCircle, Palette } from "lucide-react";
@@ -58,35 +59,37 @@ export const FeaturedAgents = () => {
           {agents.map((agent, index) => {
             const IconComponent = agent.icon;
             return (
-              <Card key={index} className="hover:shadow-lg transition-all group border-border bg-card">
-                <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <IconComponent className="w-6 h-6 text-primary" />
+              <Link key={index} to="/publishers?type=agent">
+                <Card className="hover:shadow-lg transition-all group border-border bg-card">
+                  <CardHeader>
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <IconComponent className="w-6 h-6 text-primary" />
+                      </div>
+                      <Badge variant={agent.status === "accepting" ? "default" : "secondary"}>
+                        {agent.status === "accepting" ? "Available" : "Limited Availability"}
+                      </Badge>
                     </div>
-                    <Badge variant={agent.status === "accepting" ? "default" : "secondary"}>
-                      {agent.status === "accepting" ? "Available" : "Limited Availability"}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-xl group-hover:text-primary transition-colors text-card-foreground">
-                    {agent.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <span>{agent.category}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{agent.reach}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{agent.rating} ★ rating</span>
-                  </div>
-                  <CardDescription className="text-muted-foreground">
-                    {agent.specialty}
-                  </CardDescription>
-                </CardContent>
-              </Card>
+                    <CardTitle className="text-xl group-hover:text-primary transition-colors text-card-foreground">
+                      {agent.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <span>{agent.category}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{agent.reach}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{agent.rating} ★ rating</span>
+                    </div>
+                    <CardDescription className="text-muted-foreground">
+                      {agent.specialty}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
             );
           })}
         </div>

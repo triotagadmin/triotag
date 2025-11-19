@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Globe, Users, TrendingUp } from "lucide-react";
@@ -52,41 +53,43 @@ export const FeaturedDigitalMedia = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {digitalPublishers.map((publisher, index) => (
-            <Card key={index} className="hover:shadow-lg transition-all group border-border bg-card">
-              <CardHeader>
-                <div className="flex items-start justify-between mb-2">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Globe className="w-6 h-6 text-primary" />
-                  </div>
-                  <Badge variant={publisher.status === "available" ? "default" : "secondary"}>
-                    {publisher.status === "available" ? "Available" : "Limited Slots"}
-                  </Badge>
-                </div>
-                <CardTitle className="text-xl group-hover:text-primary transition-colors text-card-foreground">
-                  {publisher.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <CardDescription className="text-sm font-medium text-foreground">
-                  {publisher.category}
-                </CardDescription>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Users className="w-4 h-4" />
-                  <span>{publisher.reach}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>{publisher.engagement} Engagement</span>
-                </div>
-                <div className="flex gap-1 flex-wrap">
-                  {publisher.platforms.map((platform, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs">
-                      {platform}
+            <Link key={index} to="/publishers?type=digital">
+              <Card className="hover:shadow-lg transition-all group border-border bg-card">
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Globe className="w-6 h-6 text-primary" />
+                    </div>
+                    <Badge variant={publisher.status === "available" ? "default" : "secondary"}>
+                      {publisher.status === "available" ? "Available" : "Limited Slots"}
                     </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors text-card-foreground">
+                    {publisher.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <CardDescription className="text-sm font-medium text-foreground">
+                    {publisher.category}
+                  </CardDescription>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Users className="w-4 h-4" />
+                    <span>{publisher.reach}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>{publisher.engagement} Engagement</span>
+                  </div>
+                  <div className="flex gap-1 flex-wrap">
+                    {publisher.platforms.map((platform, idx) => (
+                      <Badge key={idx} variant="outline" className="text-xs">
+                        {platform}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>
