@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
+import { MapPin, Globe, Users } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -74,6 +75,50 @@ const Dashboard = () => {
             Welcome back, {userType.charAt(0).toUpperCase() + userType.slice(1)}!
           </h2>
           <p className="text-muted-foreground">{user?.email}</p>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="text-xl font-bold mb-4">Publisher Options</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate("/venue")}>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                  <MapPin className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="group-hover:text-primary transition-colors">Venue</CardTitle>
+                <CardDescription>Manage physical venue locations and ad spaces</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full">Explore Venues</Button>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate("/digital-media")}>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                  <Globe className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="group-hover:text-primary transition-colors">Digital Media</CardTitle>
+                <CardDescription>Monetize your digital properties and content</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full">Explore Digital Media</Button>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate("/agent-publishers")}>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="group-hover:text-primary transition-colors">Agent Publishers</CardTitle>
+                <CardDescription>Manage multiple venues and maximize reach</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full">Explore Agent Publishers</Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
