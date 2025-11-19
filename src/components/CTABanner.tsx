@@ -9,11 +9,24 @@ export const CTABanner = () => {
           Start advertising in the real world — from any device
         </h2>
         
-        <Link to="/auth">
-          <Button size="lg" variant="secondary" className="text-lg px-8 py-6 shadow-lg">
-            Get Started Now
-          </Button>
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+          <div className="text-center">
+            <p className="text-sm mb-2 text-primary-foreground/80">For Advertisers</p>
+            <Link to="/auth">
+              <Button size="lg" variant="secondary" className="text-lg px-8 py-6 shadow-lg">
+                Buy Ad Space
+              </Button>
+            </Link>
+          </div>
+          <div className="text-center">
+            <p className="text-sm mb-2 text-primary-foreground/80">For Publishers</p>
+            <Link to="/auth">
+              <Button size="lg" variant="secondary" className="text-lg px-8 py-6 shadow-lg">
+                Sell Ad Space
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   );
