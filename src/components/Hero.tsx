@@ -1,16 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import heroBackground from "@/assets/hero-background.jpg";
-
 export const Hero = () => {
-  return (
-    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+  return <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
-        <img 
-          src={heroBackground} 
-          alt="Modern café interior" 
-          className="w-full h-full object-cover"
-        />
+        <img src={heroBackground} alt="Modern café interior" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-background/60"></div>
       </div>
       
@@ -20,8 +14,8 @@ export const Hero = () => {
             Buy and Sell <span className="text-primary">Ad Space</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-            Connect advertisers with venues, agents, and digital publishers in the micro-advertising revolution
+          <p className="text-xl md:text-2xl max-w-2xl mx-auto text-[#101010]">
+            Connecting advertisers with venues, agents, and digital publishers in the micro-advertising revolution!
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -40,6 +34,5 @@ export const Hero = () => {
       </div>
       
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent"></div>
-    </section>
-  );
+    </section>;
 };
