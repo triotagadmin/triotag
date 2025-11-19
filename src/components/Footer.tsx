@@ -11,11 +11,6 @@ export const Footer = () => {
   ];
 
   const footerLinks = {
-    platform: [
-      { label: "How It Works", href: "#how-it-works" },
-      { label: "Browse Locations", href: "#locations" },
-      { label: "For Advertisers", href: "#advertisers" }
-    ],
     advertisers: [
       { label: "Register as an Advertiser", href: "/auth" },
       { label: "Browse by Publishers", href: "#publishers" },
@@ -37,25 +32,12 @@ export const Footer = () => {
   return (
     <footer className="bg-muted/50 border-t">
       <div className="container mx-auto px-6 py-12">
-        <div className="grid md:grid-cols-5 gap-8 mb-8">
+        <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
             <h3 className="font-bold text-lg mb-4">Tiny Sticky Ads</h3>
             <p className="text-sm text-muted-foreground mb-4">
               The micro-advertising revolution connecting advertisers with venues, agents, and digital publishers.
             </p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Platform</h4>
-            <ul className="space-y-2">
-              {footerLinks.platform.map((link) => (
-                <li key={link.label}>
-                  <a href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
 
           <div>
