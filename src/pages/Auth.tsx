@@ -40,6 +40,8 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState<string>("advertiser");
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [resendEmail, setResendEmail] = useState("");
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +71,8 @@ const Auth = () => {
         title: "Success!",
         description: "Check your email to confirm your account.",
       });
+      setShowResendVerification(true);
+      setResendEmail(validatedData.email);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast({
@@ -106,6 +110,20 @@ const Auth = () => {
 
       if (error) throw error;
 
+      // Check if email is verified
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user && !session.user.email_confirmed_at) {
+        toast({
+          title: "Email not verified",
+          description: "Please check your email and click the verification link before signing in.",
+          variant: "destructive",
+        });
+        setShowResendVerification(true);
+        setResendEmail(validatedData.email);
+        await supabase.auth.signOut();
+        return;
+      }
+
       toast({
         title: "Welcome back!",
         description: "Successfully signed in.",
@@ -126,6 +144,36 @@ const Auth = () => {
           variant: "destructive",
         });
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!resendEmail) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: resendEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Verification email sent!",
+        description: "Please check your inbox for the verification link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -217,6 +265,28 @@ const Auth = () => {
               </form>
             </TabsContent>
           </Tabs>
+          
+          {showResendVerification && (
+            <Card className="mt-6 border-blue-500 bg-blue-50 dark:bg-blue-950/20">
+              <CardHeader>
+                <CardTitle className="text-blue-800 dark:text-blue-200 text-lg">Verify Your Email</CardTitle>
+                <CardDescription className="text-blue-700 dark:text-blue-300">
+                  We've sent a verification link to <strong>{resendEmail}</strong>. 
+                  Please check your inbox (and spam folder) to activate your account.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  onClick={handleResendVerification} 
+                  disabled={loading}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {loading ? "Sending..." : "Resend Verification Email"}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </CardContent>
       </Card>
     </div>
