@@ -22,7 +22,7 @@ const Dashboard = () => {
         return;
       }
       
-      // Check if user is advertiser and redirect to advertiser dashboard
+      // Check user role
       const { data: roles } = await supabase
         .from("user_roles")
         .select("role")
@@ -32,6 +32,34 @@ const Dashboard = () => {
       if (roles && roles.role === "advertiser") {
         navigate("/advertiser-dashboard");
         return;
+      }
+      
+      // For publishers, check if they have a profile
+      if (roles && roles.role === "publisher") {
+        const { data: profile } = await supabase
+          .from("publisher_profiles")
+          .select("publisher_type")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        
+        if (!profile) {
+          // No profile yet, redirect to complete profile
+          navigate("/complete-profile");
+          return;
+        }
+        
+        // Redirect to appropriate publisher dashboard
+        switch (profile.publisher_type) {
+          case "venue":
+            navigate("/venue");
+            return;
+          case "digital":
+            navigate("/digital-media");
+            return;
+          case "agent":
+            navigate("/agent-publishers");
+            return;
+        }
       }
       
       setUser(session.user);
