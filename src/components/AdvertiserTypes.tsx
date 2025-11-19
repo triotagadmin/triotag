@@ -20,11 +20,6 @@ const advertiserTypes = [
     icon: Calendar,
   },
   {
-    title: "Digital Marketers & Agencies",
-    description: "Integrate micro-location campaigns into social media, tracking performance in real time.",
-    icon: TrendingUp,
-  },
-  {
     title: "Franchises & Chains",
     description: "Ensure consistent local reach across multiple locations worldwide.",
     icon: Building,
