@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 const steps = [
   {
     icon: MapPin,
-    title: "Find Locations",
+    title: "Register as Advertiser",
     description: "Browse venues, agents, and digital publishers worldwide",
   },
   {
