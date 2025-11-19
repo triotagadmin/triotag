@@ -6,10 +6,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import CompleteProfile from "./pages/CompleteProfile";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
 import Venue from "./pages/Venue";
+import VenueDashboard from "./pages/VenueDashboard";
 import DigitalMedia from "./pages/DigitalMedia";
+import DigitalMediaDashboard from "./pages/DigitalMediaDashboard";
 import AgentPublishers from "./pages/AgentPublishers";
+import AgentDashboard from "./pages/AgentDashboard";
 import Publishers from "./pages/Publishers";
 import NotFound from "./pages/NotFound";
 
@@ -25,10 +29,14 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/advertiser-dashboard" element={<AdvertiserDashboard />} />
-          <Route path="/venue" element={<Venue />} />
-          <Route path="/digital-media" element={<DigitalMedia />} />
-          <Route path="/agent-publishers" element={<AgentPublishers />} />
+          <Route path="/venue" element={<VenueDashboard />} />
+          <Route path="/venue-info" element={<Venue />} />
+          <Route path="/digital-media" element={<DigitalMediaDashboard />} />
+          <Route path="/digital-media-info" element={<DigitalMedia />} />
+          <Route path="/agent-publishers" element={<AgentDashboard />} />
+          <Route path="/agent-info" element={<AgentPublishers />} />
           <Route path="/publishers" element={<Publishers />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
