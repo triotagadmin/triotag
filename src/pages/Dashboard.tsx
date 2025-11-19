@@ -22,6 +22,18 @@ const Dashboard = () => {
         return;
       }
       
+      // Check if user is advertiser and redirect to advertiser dashboard
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      if (roles && roles.role === "advertiser") {
+        navigate("/advertiser-dashboard");
+        return;
+      }
+      
       setUser(session.user);
       setLoading(false);
     };
