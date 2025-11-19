@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Venue from "./pages/Venue";
 import DigitalMedia from "./pages/DigitalMedia";
 import AgentPublishers from "./pages/AgentPublishers";
+import Publishers from "./pages/Publishers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/venue" element={<Venue />} />
           <Route path="/digital-media" element={<DigitalMedia />} />
           <Route path="/agent-publishers" element={<AgentPublishers />} />
+          <Route path="/publishers" element={<Publishers />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -12,7 +12,7 @@ export const CTABanner = () => {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           <div className="text-center">
             <p className="text-sm mb-2 text-primary-foreground/80">For Advertisers</p>
-            <Link to="/auth">
+            <Link to="/publishers">
               <Button size="lg" variant="secondary" className="text-lg px-8 py-6 shadow-lg">
                 Buy Ad Space
               </Button>

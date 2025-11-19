@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin } from "lucide-react";
@@ -34,29 +35,31 @@ export const FeaturedLocations = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {locations.map((location, index) => (
-            <Card key={index} className="overflow-hidden hover:shadow-xl transition-all cursor-pointer group">
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src={location.image}
-                  alt={location.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <CardContent className="p-6 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-bold text-lg">{location.name}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {location.category}
-                    </p>
-                  </div>
-                  <Badge variant={location.status === "Available" ? "default" : "secondary"}>
-                    {location.status}
-                  </Badge>
+            <Link key={index} to="/publishers?type=venue">
+              <Card className="overflow-hidden hover:shadow-xl transition-all cursor-pointer group">
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img
+                    src={location.image}
+                    alt={location.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
-              </CardContent>
-            </Card>
+                <CardContent className="p-6 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-bold text-lg">{location.name}</h3>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {location.category}
+                      </p>
+                    </div>
+                    <Badge variant={location.status === "Available" ? "default" : "secondary"}>
+                      {location.status}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>
