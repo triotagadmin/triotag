@@ -48,6 +48,33 @@ const Dashboard = () => {
     navigate("/");
   };
 
+  const handleResendVerification = async () => {
+    if (!user?.email) return;
+    
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: user.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Verification email sent",
+        description: "Please check your inbox for the verification link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -76,6 +103,22 @@ const Dashboard = () => {
           </h2>
           <p className="text-muted-foreground">{user?.email}</p>
         </div>
+
+        {user && !user.email_confirmed_at && (
+          <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+            <CardHeader>
+              <CardTitle className="text-yellow-800 dark:text-yellow-200">Email Verification Required</CardTitle>
+              <CardDescription className="text-yellow-700 dark:text-yellow-300">
+                Please verify your email address to access all features. Check your inbox for the verification link.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={handleResendVerification} variant="outline">
+                Resend Verification Email
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="mb-8">
           <h3 className="text-xl font-bold mb-4">Publisher Options</h3>
