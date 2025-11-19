@@ -9,7 +9,7 @@ const steps = [
   },
   {
     icon: Calendar,
-    title: "Book Placement",
+    title: "Book Publisher",
     description: "Select your ad slots and schedule your campaign",
   },
   {
