@@ -14,7 +14,7 @@ const steps = [
   },
   {
     icon: Camera,
-    title: "Publish & Verify",
+    title: "Verify & Approve",
     description: "Send campaign details and Approve campaign.",
   },
   {
