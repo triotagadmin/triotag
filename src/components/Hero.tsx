@@ -27,7 +27,7 @@ export const Hero = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to="/auth">
               <Button size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
-                Explore Now
+                Advertise Now
               </Button>
             </Link>
             <Link to="/auth">
