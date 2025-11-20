@@ -1,5 +1,7 @@
 import { Building2, Users, Globe } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export const PublisherTypes = () => {
   const publisherTypes = [
@@ -57,6 +59,14 @@ export const PublisherTypes = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <Link to="/auth">
+            <Button size="lg" className="text-lg px-8 py-6">
+              Sell Ad Space
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
