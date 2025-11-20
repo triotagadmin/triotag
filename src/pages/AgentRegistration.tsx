@@ -39,6 +39,7 @@ const AgentRegistration = () => {
   const [description, setDescription] = useState("");
   const [services, setServices] = useState<string[]>([]);
   const [certifications, setCertifications] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
 
   const agentRoles = ["guerrilla", "influencer", "model", "artist"];
 
@@ -62,6 +63,8 @@ const AgentRegistration = () => {
         return;
       }
 
+      setUserId(session.user.id);
+
       const { data: profile } = await supabase
         .from("publisher_profiles")
         .select("id, contact_email, contact_phone, business_name")
@@ -76,6 +79,16 @@ const AgentRegistration = () => {
       } else {
         navigate("/complete-profile");
       }
+
+      // Load existing photos from agent_service_files
+      const { data: files } = await supabase
+        .from("agent_service_files")
+        .select("file_url")
+        .eq("owner_id", session.user.id);
+      
+      if (files) {
+        setUploadedPortfolio(files.map(f => f.file_url));
+      }
     };
 
     checkAuth();
@@ -85,6 +98,41 @@ const AgentRegistration = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "User not authenticated",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file types - only images allowed
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const invalidFiles = Array.from(files).filter(file => !allowedTypes.includes(file.type));
+    
+    if (invalidFiles.length > 0) {
+      toast({
+        title: "Invalid File Type",
+        description: "Only image files are allowed (JPG, PNG, WEBP).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check 30 photo limit
+    const currentCount = uploadedPortfolio.length;
+    const newCount = currentCount + files.length;
+    
+    if (newCount > 30) {
+      toast({
+        title: "Photo Limit Exceeded",
+        description: `You can only upload up to 30 photos. You currently have ${currentCount} photo${currentCount !== 1 ? 's' : ''}.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploadingMedia(true);
 
     try {
@@ -93,6 +141,7 @@ const AgentRegistration = () => {
         const fileName = `portfolio-${Math.random()}-${Date.now()}.${fileExt}`;
         const filePath = `${publisherId}/${fileName}`;
 
+        // Upload to storage
         const { error: uploadError } = await supabase.storage
           .from('ad-space-media')
           .upload(filePath, file);
@@ -103,6 +152,18 @@ const AgentRegistration = () => {
           .from('ad-space-media')
           .getPublicUrl(filePath);
 
+        // Insert into agent_service_files table
+        const { error: dbError } = await supabase
+          .from('agent_service_files')
+          .insert({
+            owner_id: userId,
+            file_path: filePath,
+            file_url: publicUrl,
+            file_type: file.type,
+          });
+
+        if (dbError) throw dbError;
+
         return publicUrl;
       });
 
@@ -111,7 +172,7 @@ const AgentRegistration = () => {
       
       toast({
         title: "Success",
-        description: "Portfolio media uploaded successfully",
+        description: "Portfolio photos uploaded successfully",
       });
     } catch (error: any) {
       toast({
@@ -124,8 +185,32 @@ const AgentRegistration = () => {
     }
   };
 
-  const removePortfolioItem = (url: string) => {
-    setUploadedPortfolio(uploadedPortfolio.filter(u => u !== url));
+  const removePortfolioItem = async (url: string) => {
+    if (!userId) return;
+
+    try {
+      // Delete from database
+      const { error } = await supabase
+        .from('agent_service_files')
+        .delete()
+        .eq('owner_id', userId)
+        .eq('file_url', url);
+
+      if (error) throw error;
+
+      setUploadedPortfolio(uploadedPortfolio.filter(u => u !== url));
+      
+      toast({
+        title: "Success",
+        description: "Photo removed successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const toggleService = (service: string) => {
@@ -221,7 +306,7 @@ const AgentRegistration = () => {
       <div className="container mx-auto px-6 py-12 max-w-3xl">
         <Card>
           <CardHeader>
-            <CardTitle>Register Agent Profile</CardTitle>
+            <CardTitle>Register Agent Services</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -343,19 +428,22 @@ const AgentRegistration = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Portfolio (Photos/Videos)</Label>
+                <Label>Portfolio Photos (Max 30)</Label>
+                <p className="text-sm text-muted-foreground">
+                  {uploadedPortfolio.length}/30 photos uploaded
+                </p>
                 <div className="border-2 border-dashed rounded-lg p-6 text-center">
                   <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground mb-2">
-                    Upload your portfolio images and videos
+                    Upload your portfolio images (JPG, PNG, WEBP only)
                   </p>
                   <Input
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/jpeg,image/png,image/webp"
                     multiple
                     onChange={handlePortfolioUpload}
                     className="max-w-xs mx-auto"
-                    disabled={uploadingMedia}
+                    disabled={uploadingMedia || uploadedPortfolio.length >= 30}
                   />
                 </div>
 

@@ -196,7 +196,7 @@ const AgentDashboard = () => {
               </div>
               <Button onClick={() => navigate("/agent/register")}>
                 <Upload className="w-4 h-4 mr-2" />
-                Add Service
+                Register Agent Services
               </Button>
             </div>
           </CardHeader>
