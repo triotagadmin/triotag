@@ -35,11 +35,9 @@ export const AdvertiserTypes = () => {
             Advertise with Precision & Impact
           </h2>
           <p className="text-xl text-muted-foreground">
-            Tiny Sticky Ads enables brands to leverage hyper-local micro advertising with cross-platform reach. Create measurable, scalable campaigns that compete globally—no matter your size.
+            Tiny Sticky Ads enables brands to leverage hyper-local micro advertising with cross-platform reach. Create measurable, scalable campaigns that compete globally.
           </p>
-          <p className="text-lg text-muted-foreground">
-            Small brands can now compete with big names through strategic micro-location placements and real-time tracking.
-          </p>
+          
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
