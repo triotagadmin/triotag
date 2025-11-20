@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin } from "lucide-react";
 import venueCafe1 from "@/assets/venue-cafe-1.jpg";
-import venueCafe2 from "@/assets/venue-cafe-2.jpg";
+import venueMetroStation from "@/assets/venue-metro-station.jpg";
 import venueBathroom from "@/assets/venue-bathroom.jpg";
 
 const locations = [{
@@ -14,7 +14,7 @@ const locations = [{
 }, {
   name: "Metro Station Plaza",
   category: "Kiosk",
-  image: venueCafe2,
+  image: venueMetroStation,
   status: "Booked"
 }, {
   name: "Downtown Bar & Lounge",
