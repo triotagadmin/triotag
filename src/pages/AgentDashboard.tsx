@@ -152,7 +152,7 @@ const AgentDashboard = () => {
                 <CardTitle>Manage Agent Services</CardTitle>
                 <CardDescription>Add and update your available services and rates</CardDescription>
               </div>
-              <Button>
+              <Button onClick={() => navigate("/agent/register")}>
                 <Upload className="w-4 h-4 mr-2" />
                 Add Service
               </Button>
@@ -163,7 +163,7 @@ const AgentDashboard = () => {
               <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No services yet</h3>
               <p className="text-muted-foreground mb-4">Add your first service to start receiving job offers</p>
-              <Button>Add Your First Service</Button>
+              <Button onClick={() => navigate("/agent/register")}>Add Your First Service</Button>
             </div>
           </CardContent>
         </Card>
@@ -181,12 +181,12 @@ const AgentDashboard = () => {
               <div className="flex items-center gap-3">
                 <IdCard className="w-5 h-5 text-yellow-800 dark:text-yellow-200" />
                 <span className="text-sm">Upload ID verification</span>
-                <Button size="sm" variant="outline">Upload</Button>
+                <Button size="sm" variant="outline" onClick={() => navigate("/agent/verify")}>Upload</Button>
               </div>
               <div className="flex items-center gap-3">
                 <Camera className="w-5 h-5 text-yellow-800 dark:text-yellow-200" />
                 <span className="text-sm">Upload portfolio photos/videos</span>
-                <Button size="sm" variant="outline">Upload</Button>
+                <Button size="sm" variant="outline" onClick={() => navigate("/agent/verify")}>Upload</Button>
               </div>
             </CardContent>
           </Card>

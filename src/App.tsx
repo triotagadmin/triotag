@@ -19,6 +19,10 @@ import DigitalMedia from "./pages/DigitalMedia";
 import DigitalMediaDashboard from "./pages/DigitalMediaDashboard";
 import AgentPublishers from "./pages/AgentPublishers";
 import AgentDashboard from "./pages/AgentDashboard";
+import AgentRegistration from "./pages/AgentRegistration";
+import AgentVerification from "./pages/AgentVerification";
+import DigitalServiceRegistration from "./pages/DigitalServiceRegistration";
+import DigitalVerification from "./pages/DigitalVerification";
 import Publishers from "./pages/Publishers";
 import NotFound from "./pages/NotFound";
 
@@ -42,8 +46,12 @@ const App = () => (
           <Route path="/venue/verify" element={<VenueVerification />} />
           <Route path="/digital-media" element={<DigitalMediaDashboard />} />
           <Route path="/digital-media-info" element={<DigitalMedia />} />
+          <Route path="/digital-media/register" element={<DigitalServiceRegistration />} />
+          <Route path="/digital-media/verify" element={<DigitalVerification />} />
           <Route path="/agent-publishers" element={<AgentDashboard />} />
           <Route path="/agent-info" element={<AgentPublishers />} />
+          <Route path="/agent/register" element={<AgentRegistration />} />
+          <Route path="/agent/verify" element={<AgentVerification />} />
           <Route path="/publishers" element={<Publishers />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
