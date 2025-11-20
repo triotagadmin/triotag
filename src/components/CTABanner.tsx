@@ -1,12 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
 export const CTABanner = () => {
-  return (
-    <section className="py-24 bg-primary text-primary-foreground">
+  return <section className="py-24 bg-primary text-primary-foreground">
       <div className="container mx-auto px-6 text-center space-y-8">
         <h2 className="text-4xl md:text-5xl font-bold max-w-3xl mx-auto">
-          Start advertising in the real world — from any device
+          Start advertising from any device!
         </h2>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
@@ -28,6 +26,5 @@ export const CTABanner = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
