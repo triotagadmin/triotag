@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
+import { create } from "https://deno.land/x/djwt@v3.0.0/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const JWT_SECRET = Deno.env.get("JWT_SECRET") || "your-secret-key-change-in-production";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +15,7 @@ interface AdminRegistrationRequest {
   fullName: string;
   email: string;
   phoneNumber?: string;
+  userId: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -20,9 +24,32 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { fullName, email, phoneNumber }: AdminRegistrationRequest = await req.json();
+    const { fullName, email, phoneNumber, userId }: AdminRegistrationRequest & { userId: string } = await req.json();
 
     console.log("Sending admin registration notification for:", email);
+
+    // Generate verification token (JWT)
+    const key = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(JWT_SECRET),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    const token = await create(
+      { alg: "HS256", typ: "JWT" },
+      {
+        sub: userId,
+        email: email,
+        fullName: fullName,
+        verifiedBy: "system",
+        exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7 days
+      },
+      key
+    );
+
+    const verificationUrl = `${SUPABASE_URL}/functions/v1/verify-admin?token=${token}`;
 
     const emailResponse = await resend.emails.send({
       from: "TinyStickyAds <onboarding@resend.dev>",
@@ -43,8 +70,18 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
 
           <div style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
-            <p style="margin: 0; color: #856404;">
-              <strong>Action Required:</strong> Please review and approve this admin registration in the admin dashboard.
+            <p style="margin: 0 0 15px 0; color: #856404;">
+              <strong>Action Required:</strong> Click the button below to approve this admin registration.
+            </p>
+            <a href="${verificationUrl}" 
+               style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              Approve Admin Registration
+            </a>
+          </div>
+
+          <div style="background-color: #f3f4f6; padding: 15px; border-radius: 6px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 13px; color: #6b7280;">
+              <strong>Security Note:</strong> This verification link will expire in 7 days. The admin cannot log in until you approve their registration.
             </p>
           </div>
 

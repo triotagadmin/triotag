@@ -66,6 +66,7 @@ export default function AdminRegister() {
           fullName: validated.fullName,
           email: validated.email,
           phoneNumber: validated.phoneNumber,
+          userId: authData.user.id,
         },
       });
 
