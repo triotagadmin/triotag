@@ -76,6 +76,42 @@ export type Database = {
           },
         ]
       }
+      admin_profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string
+          id: string
+          phone_number: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["admin_status"]
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name: string
+          id?: string
+          phone_number?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["admin_status"]
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string
+          id?: string
+          phone_number?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["admin_status"]
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -237,8 +273,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_verified_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
+      admin_status: "pending" | "verified" | "rejected"
       agent_role: "guerrilla" | "influencer" | "model" | "artist"
       app_role: "admin" | "publisher" | "advertiser"
       approval_status: "pending" | "approved" | "rejected"
@@ -370,6 +408,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_status: ["pending", "verified", "rejected"],
       agent_role: ["guerrilla", "influencer", "model", "artist"],
       app_role: ["admin", "publisher", "advertiser"],
       approval_status: ["pending", "approved", "rejected"],
