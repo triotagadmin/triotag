@@ -29,6 +29,8 @@ const AgentRegistration = () => {
   const [publisherId, setPublisherId] = useState<string | null>(null);
   const [uploadedPortfolio, setUploadedPortfolio] = useState<string[]>([]);
   const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const [fullName, setFullName] = useState("");
   const [location, setLocation] = useState("");
@@ -80,23 +82,75 @@ const AgentRegistration = () => {
         navigate("/complete-profile");
       }
 
-      // Load existing photos from agent_service_files
+      // Load existing photos from agent_service_files with signed URLs
       const { data: files } = await supabase
         .from("agent_service_files")
-        .select("file_url")
+        .select("file_path")
         .eq("owner_id", session.user.id);
       
-      if (files) {
-        setUploadedPortfolio(files.map(f => f.file_url));
+      if (files && files.length > 0) {
+        const signedUrls = await Promise.all(
+          files.map(async (file) => {
+            const { data } = await supabase.storage
+              .from('agent-service-photos')
+              .createSignedUrl(file.file_path, 3600); // 1 hour expiry
+            return data?.signedUrl || '';
+          })
+        );
+        setUploadedPortfolio(signedUrls.filter(url => url !== ''));
       }
     };
 
     checkAuth();
   }, [navigate]);
 
-  const handlePortfolioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
+    // Validate file types - only images allowed
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const fileArray = Array.from(files);
+    const invalidFiles = fileArray.filter(file => !allowedTypes.includes(file.type));
+    
+    if (invalidFiles.length > 0) {
+      toast({
+        title: "Invalid File Type",
+        description: "Only image files are allowed (JPG, PNG, WEBP).",
+        variant: "destructive",
+      });
+      e.target.value = ''; // Clear input
+      return;
+    }
+
+    // Check 30 photo limit
+    const currentCount = uploadedPortfolio.length + selectedFiles.length;
+    const newCount = currentCount + fileArray.length;
+    
+    if (newCount > 30) {
+      toast({
+        title: "Photo Limit Exceeded",
+        description: `You can only upload up to 30 photos. You currently have ${currentCount} photo${currentCount !== 1 ? 's' : ''}.`,
+        variant: "destructive",
+      });
+      e.target.value = ''; // Clear input
+      return;
+    }
+
+    setSelectedFiles([...selectedFiles, ...fileArray]);
+    e.target.value = ''; // Clear input for next selection
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+  };
+
+  const clearSelectedFiles = () => {
+    setSelectedFiles([]);
+  };
+
+  const handlePortfolioUpload = async () => {
+    if (selectedFiles.length === 0) return;
 
     if (!userId) {
       toast({
@@ -107,50 +161,31 @@ const AgentRegistration = () => {
       return;
     }
 
-    // Validate file types - only images allowed
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const invalidFiles = Array.from(files).filter(file => !allowedTypes.includes(file.type));
-    
-    if (invalidFiles.length > 0) {
-      toast({
-        title: "Invalid File Type",
-        description: "Only image files are allowed (JPG, PNG, WEBP).",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check 30 photo limit
-    const currentCount = uploadedPortfolio.length;
-    const newCount = currentCount + files.length;
-    
-    if (newCount > 30) {
-      toast({
-        title: "Photo Limit Exceeded",
-        description: `You can only upload up to 30 photos. You currently have ${currentCount} photo${currentCount !== 1 ? 's' : ''}.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
     setUploadingMedia(true);
+    setUploadProgress(0);
 
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `portfolio-${Math.random()}-${Date.now()}.${fileExt}`;
-        const filePath = `${publisherId}/${fileName}`;
+      const totalFiles = selectedFiles.length;
+      let completed = 0;
 
-        // Upload to storage
+      const uploadPromises = selectedFiles.map(async (file) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(7)}-${Date.now()}.${fileExt}`;
+        const filePath = `${userId}/${fileName}`;
+
+        // Upload to storage (private bucket)
         const { error: uploadError } = await supabase.storage
-          .from('ad-space-media')
-          .upload(filePath, file);
+          .from('agent-service-photos')
+          .upload(filePath, file, {
+            contentType: file.type,
+          });
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('ad-space-media')
-          .getPublicUrl(filePath);
+        // Get signed URL for display
+        const { data: signedData } = await supabase.storage
+          .from('agent-service-photos')
+          .createSignedUrl(filePath, 3600);
 
         // Insert into agent_service_files table
         const { error: dbError } = await supabase
@@ -158,21 +193,32 @@ const AgentRegistration = () => {
           .insert({
             owner_id: userId,
             file_path: filePath,
-            file_url: publicUrl,
+            file_url: signedData?.signedUrl || '',
             file_type: file.type,
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          // Rollback: delete the uploaded file from storage
+          await supabase.storage
+            .from('agent-service-photos')
+            .remove([filePath]);
+          throw dbError;
+        }
 
-        return publicUrl;
+        completed++;
+        setUploadProgress(Math.round((completed / totalFiles) * 100));
+
+        return signedData?.signedUrl || '';
       });
 
       const urls = await Promise.all(uploadPromises);
-      setUploadedPortfolio([...uploadedPortfolio, ...urls]);
+      const validUrls = urls.filter(url => url !== '');
+      setUploadedPortfolio([...uploadedPortfolio, ...validUrls]);
+      setSelectedFiles([]); // Clear selected files after successful upload
       
       toast({
         title: "Success",
-        description: "Portfolio photos uploaded successfully",
+        description: `${validUrls.length} photo${validUrls.length !== 1 ? 's' : ''} uploaded successfully`,
       });
     } catch (error: any) {
       toast({
@@ -182,23 +228,41 @@ const AgentRegistration = () => {
       });
     } finally {
       setUploadingMedia(false);
+      setUploadProgress(0);
     }
   };
 
-  const removePortfolioItem = async (url: string) => {
+  const removePortfolioItem = async (index: number) => {
     if (!userId) return;
 
     try {
-      // Delete from database
-      const { error } = await supabase
+      // Get file path from database
+      const { data: files } = await supabase
+        .from('agent_service_files')
+        .select('file_path')
+        .eq('owner_id', userId);
+
+      if (!files || !files[index]) return;
+
+      const filePath = files[index].file_path;
+
+      // Delete from database first
+      const { error: dbError } = await supabase
         .from('agent_service_files')
         .delete()
         .eq('owner_id', userId)
-        .eq('file_url', url);
+        .eq('file_path', filePath);
 
-      if (error) throw error;
+      if (dbError) throw dbError;
 
-      setUploadedPortfolio(uploadedPortfolio.filter(u => u !== url));
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('agent-service-photos')
+        .remove([filePath]);
+
+      if (storageError) console.error('Storage deletion error:', storageError);
+
+      setUploadedPortfolio(uploadedPortfolio.filter((_, i) => i !== index));
       
       toast({
         title: "Success",
@@ -427,46 +491,99 @@ const AgentRegistration = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Portfolio Photos (Max 30)</Label>
-                <p className="text-sm text-muted-foreground">
-                  {uploadedPortfolio.length}/30 photos uploaded
-                </p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Portfolio Photos (Max 30)</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {uploadedPortfolio.length + selectedFiles.length}/30 photos
+                  </p>
+                </div>
+
                 <div className="border-2 border-dashed rounded-lg p-6 text-center">
                   <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground mb-2">
-                    Upload your portfolio images (JPG, PNG, WEBP only)
+                    Select portfolio images (JPG, PNG, WEBP only)
                   </p>
                   <Input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     multiple
-                    onChange={handlePortfolioUpload}
+                    onChange={handleFileSelect}
                     className="max-w-xs mx-auto"
-                    disabled={uploadingMedia || uploadedPortfolio.length >= 30}
+                    disabled={uploadingMedia || (uploadedPortfolio.length + selectedFiles.length) >= 30}
                   />
                 </div>
 
+                {selectedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Selected Files ({selectedFiles.length})</Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearSelectedFiles}
+                        disabled={uploadingMedia}
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      {selectedFiles.map((file, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Selected ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
+                            onClick={() => removeSelectedFile(index)}
+                            disabled={uploadingMedia}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={handlePortfolioUpload}
+                      disabled={uploadingMedia}
+                      className="w-full"
+                    >
+                      {uploadingMedia ? `Uploading... ${uploadProgress}%` : `Upload ${selectedFiles.length} Photo${selectedFiles.length !== 1 ? 's' : ''}`}
+                    </Button>
+                  </div>
+                )}
+
                 {uploadedPortfolio.length > 0 && (
-                  <div className="grid grid-cols-3 gap-4 mt-4">
-                    {uploadedPortfolio.map((url, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={url}
-                          alt={`Portfolio ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
-                          onClick={() => removePortfolioItem(url)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
+                  <div className="space-y-2">
+                    <Label className="text-sm">Uploaded Photos ({uploadedPortfolio.length})</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {uploadedPortfolio.map((url, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={url}
+                            alt={`Portfolio ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
+                            onClick={() => removePortfolioItem(index)}
+                            disabled={uploadingMedia}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
