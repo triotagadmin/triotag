@@ -54,7 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`[Notify Admin] Created verification token for admin: ${userId}, expires in 24 hours`);
 
     // Use the appropriate frontend URL
-    const verificationUrl = `https://tinystickyads.com/admin/approve?token=${token}`;
+    const verificationUrl = `https://tinystickyads.com/admin/verify?token=${token}`;
 
     const emailResponse = await resend.emails.send({
       from: "TinyStickyAds <onboarding@resend.dev>",

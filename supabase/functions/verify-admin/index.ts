@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `${url.origin}/admin/approve?verified=error`,
+          Location: `${url.origin}/admin/verify?verified=error`,
           ...corsHeaders,
         },
       });
@@ -60,7 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `${url.origin}/admin/approve?verified=error`,
+          Location: `${url.origin}/admin/verify?verified=error`,
           ...corsHeaders,
         },
       });
@@ -103,7 +103,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `${url.origin}/admin/approve?verified=already`,
+          Location: `${url.origin}/admin/verify?verified=already`,
           ...corsHeaders,
         },
       });
@@ -131,11 +131,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`[Verify Admin Success] Admin ${adminProfile.full_name} (${adminUserId}) verified successfully at ${timestamp} by ${verifiedBy}`);
 
-    // Redirect to approval confirmation page (not login page)
+    // Redirect to verification confirmation page (not login page)
     return new Response(null, {
       status: 302,
       headers: {
-        Location: `${url.origin}/admin/approve?verified=success`,
+        Location: `${url.origin}/admin/verify?verified=success`,
         ...corsHeaders,
       },
     });
