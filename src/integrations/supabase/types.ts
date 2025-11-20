@@ -172,6 +172,33 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_service_files: {
+        Row: {
+          file_path: string
+          file_type: string
+          file_url: string
+          id: string
+          owner_id: string
+          uploaded_at: string
+        }
+        Insert: {
+          file_path: string
+          file_type: string
+          file_url: string
+          id?: string
+          owner_id: string
+          uploaded_at?: string
+        }
+        Update: {
+          file_path?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          owner_id?: string
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           advertiser_id: string
