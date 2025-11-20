@@ -52,6 +52,8 @@ export default function AdminLogin() {
     setIsLoading(true);
 
     try {
+      console.log(`[Admin Login] Attempting login for: ${email}`);
+      
       // Sign in with Supabase (uses JWT tokens internally)
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
@@ -59,6 +61,7 @@ export default function AdminLogin() {
       });
 
       if (authError) {
+        console.error("[Admin Login Error] Authentication failed:", authError);
         if (authError.message.includes("Invalid login credentials")) {
           toast.error("Invalid email or password. Please check your credentials.");
         } else {
@@ -68,9 +71,12 @@ export default function AdminLogin() {
       }
 
       if (!authData.user || !authData.session) {
+        console.error("[Admin Login Error] No user or session returned");
         toast.error("Authentication failed. Please try again.");
         return;
       }
+
+      console.log(`[Admin Login] User authenticated: ${authData.user.id}`);
 
       // Verify admin role
       const { data: roleData, error: roleError } = await supabase
@@ -80,45 +86,54 @@ export default function AdminLogin() {
         .single();
 
       if (roleError || roleData?.role !== "admin") {
+        console.error("[Admin Login Error] User does not have admin role:", roleError);
         await supabase.auth.signOut();
         toast.error("Access denied. Admin credentials required.");
         return;
       }
 
+      console.log(`[Admin Login] Admin role verified for user: ${authData.user.id}`);
+
       // Check admin verification status
       const { data: adminProfile, error: profileError } = await supabase
         .from("admin_profiles")
-        .select("status")
+        .select("status, full_name")
         .eq("user_id", authData.user.id)
         .single();
 
       if (profileError || !adminProfile) {
+        console.error("[Admin Login Error] Admin profile not found:", profileError);
         await supabase.auth.signOut();
         toast.error("Admin profile not found. Please contact support.");
         return;
       }
 
+      console.log(`[Admin Login] Admin profile status: ${adminProfile.status} for user: ${authData.user.id}`);
+
       if (adminProfile.status === "pending") {
+        console.log(`[Admin Login] Access denied - pending verification: ${authData.user.id}`);
         await supabase.auth.signOut();
-        toast.warning("Your account is pending approval. Please wait for super-admin verification.", {
+        toast.warning("Your account is pending super-admin approval. Please wait for verification.", {
           duration: 6000,
         });
         return;
       }
 
       if (adminProfile.status === "rejected") {
+        console.log(`[Admin Login] Access denied - rejected account: ${authData.user.id}`);
         await supabase.auth.signOut();
         toast.error("Your admin account has been rejected. Please contact support for more information.");
         return;
       }
 
       if (adminProfile.status === "verified") {
-        toast.success("Login successful! Redirecting to dashboard...");
+        console.log(`[Admin Login Success] Admin ${adminProfile.full_name} (${authData.user.id}) logged in successfully at ${new Date().toISOString()}`);
+        toast.success(`Welcome back, ${adminProfile.full_name}! Redirecting to dashboard...`);
         // Session is stored in localStorage with JWT token
         navigate("/admin/dashboard");
       }
     } catch (error: any) {
-      console.error("Login error:", error);
+      console.error("[Admin Login Error] Unexpected error:", error);
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);

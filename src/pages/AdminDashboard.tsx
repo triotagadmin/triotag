@@ -260,10 +260,20 @@ export default function AdminDashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
+      const timestamp = new Date().toISOString();
       const newStatus = actionType === "approve" ? "approved" : actionType === "reject" ? "rejected" : selectedSubmission.status;
+      
+      console.log(`[Admin Action] Admin ${adminName} (${session.user.id}) ${actionType}ing ${selectedSubmission.type} submission:`, {
+        submissionId: selectedSubmission.id,
+        submissionName: selectedSubmission.name,
+        action: actionType,
+        timestamp,
+        note: actionNote || "none"
+      });
+
       const updateData: any = {
         ...(actionType === "approve" && {
-          approved_at: new Date().toISOString(),
+          approved_at: timestamp,
           approved_by: session.user.id,
         }),
         ...(actionType === "reject" && {
@@ -289,6 +299,10 @@ export default function AdminDashboard() {
           .update({
             ...updateData,
             status: newStatus === "approved" ? "verified" : newStatus,
+            ...(actionType === "approve" && {
+              verified_at: timestamp,
+              verified_by: session.user.id,
+            }),
           })
           .eq("id", selectedSubmission.id);
         error = updateError;
@@ -321,7 +335,12 @@ export default function AdminDashboard() {
         error = updateError;
       }
 
-      if (error) throw error;
+      if (error) {
+        console.error(`[Admin Action Error] Failed to ${actionType} submission:`, error);
+        throw error;
+      }
+
+      console.log(`[Admin Action Success] Submission ${selectedSubmission.id} ${actionType}ed successfully`);
 
       // Send notification
       if (selectedSubmission.userId && selectedSubmission.email) {
@@ -336,13 +355,15 @@ export default function AdminDashboard() {
             requestedInfo: actionType === "info" ? actionNote : undefined,
           },
         });
+        
+        console.log(`[Notification Sent] Notified user ${selectedSubmission.userId} about ${actionType} action`);
       }
 
       toast.success(`Submission ${actionType === "approve" ? "approved" : actionType === "reject" ? "rejected" : "updated"} successfully`);
       setIsDialogOpen(false);
       loadSubmissions();
     } catch (error) {
-      console.error("Action error:", error);
+      console.error("[Admin Action Error]", error);
       toast.error("Failed to process action");
     }
   };

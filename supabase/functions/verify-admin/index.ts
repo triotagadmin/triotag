@@ -55,6 +55,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     const adminUserId = payload.sub as string;
     const verifiedBy = payload.verifiedBy as string;
+    const timestamp = new Date().toISOString();
+
+    console.log(`[Verify Admin] Processing verification for admin: ${adminUserId} at ${timestamp}`);
+    console.log(`[Verify Admin] Verified by: ${verifiedBy}`);
 
     // Update admin profile status
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -66,7 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (fetchError || !adminProfile) {
-      console.error("Admin profile not found:", fetchError);
+      console.error("[Verify Admin Error] Admin profile not found:", fetchError);
       return new Response(
         JSON.stringify({ error: "Admin profile not found" }),
         {
@@ -76,7 +80,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log(`[Verify Admin] Found admin profile: ${adminProfile.full_name}, current status: ${adminProfile.status}`);
+
     if (adminProfile.status === "verified") {
+      console.log(`[Verify Admin] Admin ${adminUserId} is already verified`);
       // Already verified, redirect to success page
       return new Response(null, {
         status: 302,
@@ -91,13 +98,13 @@ const handler = async (req: Request): Promise<Response> => {
       .from("admin_profiles")
       .update({
         status: "verified",
-        verified_at: new Date().toISOString(),
+        verified_at: timestamp,
         verified_by: verifiedBy,
       })
       .eq("user_id", adminUserId);
 
     if (updateError) {
-      console.error("Failed to update admin profile:", updateError);
+      console.error("[Verify Admin Error] Failed to update admin profile:", updateError);
       return new Response(
         JSON.stringify({ error: "Failed to verify admin" }),
         {
@@ -107,7 +114,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Admin ${adminUserId} verified successfully`);
+    console.log(`[Verify Admin Success] Admin ${adminProfile.full_name} (${adminUserId}) verified successfully at ${timestamp} by ${verifiedBy}`);
 
     // Redirect to success page
     return new Response(null, {
