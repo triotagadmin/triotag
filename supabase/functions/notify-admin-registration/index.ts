@@ -45,7 +45,6 @@ const handler = async (req: Request): Promise<Response> => {
         purpose: "verification",
         fullName: fullName,
         email: email,
-        verifiedBy: "super-admin",
         exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
       },
       key

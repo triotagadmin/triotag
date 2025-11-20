@@ -67,12 +67,10 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const adminUserId = payload.sub as string;
-    const verifiedBy = payload.verifiedBy as string;
     const timestamp = new Date().toISOString();
 
     console.log(`[Verify Admin] Processing verification for admin: ${adminUserId} at ${timestamp}`);
     console.log(`[Verify Admin] Token purpose: ${payload.purpose}`);
-    console.log(`[Verify Admin] Verified by: ${verifiedBy}`);
 
     // Update admin profile status
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -98,7 +96,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (adminProfile.status === "verified") {
       console.log(`[Verify Admin] Admin ${adminProfile.full_name} (${adminUserId}) is already verified`);
-      console.log(`[Verify Admin] Previously verified at: ${adminProfile.verified_at} by: ${adminProfile.verified_by}`);
+      console.log(`[Verify Admin] Previously verified at: ${adminProfile.verified_at}`);
       // Already verified, redirect to approval page
       return new Response(null, {
         status: 302,
@@ -114,7 +112,7 @@ const handler = async (req: Request): Promise<Response> => {
       .update({
         status: "verified",
         verified_at: timestamp,
-        verified_by: verifiedBy,
+        verified_by: null, // Set to null since we don't have a super-admin user UUID
       })
       .eq("user_id", adminUserId);
 
@@ -129,7 +127,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`[Verify Admin Success] Admin ${adminProfile.full_name} (${adminUserId}) verified successfully at ${timestamp} by ${verifiedBy}`);
+    console.log(`[Verify Admin Success] Admin ${adminProfile.full_name} (${adminUserId}) verified successfully at ${timestamp}`);
 
     // Redirect to verification confirmation page (not login page)
     return new Response(null, {
