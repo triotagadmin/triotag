@@ -5,6 +5,7 @@ import { create, verify } from "https://deno.land/x/djwt@v3.0.0/mod.ts";
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const JWT_SECRET = Deno.env.get("JWT_SECRET") || "RadXT9RTrMZvVsSccejHkrsIx3BDMLqRI10t1vKVH0U=";
+const FRONTEND_URL = "https://tinystickyads.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,7 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `${url.origin}/admin/verify?verified=error`,
+          Location: `${FRONTEND_URL}/admin/verify?verified=error`,
           ...corsHeaders,
         },
       });
@@ -60,7 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `${url.origin}/admin/verify?verified=error`,
+          Location: `${FRONTEND_URL}/admin/verify?verified=error`,
           ...corsHeaders,
         },
       });
@@ -101,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `${url.origin}/admin/verify?verified=already`,
+          Location: `${FRONTEND_URL}/admin/verify?verified=already`,
           ...corsHeaders,
         },
       });
@@ -133,7 +134,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, {
       status: 302,
       headers: {
-        Location: `${url.origin}/admin/verify?verified=success`,
+        Location: `${FRONTEND_URL}/admin/verify?verified=success`,
         ...corsHeaders,
       },
     });
