@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle } from "lucide-react";
+import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import SubmissionDetailsDialog from "@/components/SubmissionDetailsDialog";
 
 interface Submission {
   id: string;
@@ -48,6 +50,9 @@ export default function AdminDashboard() {
   const [actionType, setActionType] = useState<"approve" | "reject" | "info" | null>(null);
   const [actionNote, setActionNote] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [viewDetailsSubmission, setViewDetailsSubmission] = useState<Submission | null>(null);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
 
   useEffect(() => {
     checkAdminAccess();
@@ -57,7 +62,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     filterSubmissions();
-  }, [submissions, statusFilter, typeFilter]);
+  }, [submissions, statusFilter, typeFilter, searchTerm]);
 
   const checkAdminAccess = async () => {
     try {
@@ -228,6 +233,16 @@ export default function AdminDashboard() {
       filtered = filtered.filter((s) => s.type === typeFilter);
     }
 
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter((s) => 
+        s.name.toLowerCase().includes(term) ||
+        s.email?.toLowerCase().includes(term) ||
+        s.location?.toLowerCase().includes(term) ||
+        s.publisherType?.toLowerCase().includes(term)
+      );
+    }
+
     setFilteredSubmissions(filtered);
   };
 
@@ -362,6 +377,137 @@ export default function AdminDashboard() {
     );
   };
 
+  const renderSubmissionsPanel = (submissions: Submission[], title: string, description: string) => (
+    <>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Total</CardDescription>
+            <CardTitle className="text-3xl">{submissions.length}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Users className="w-4 h-4 text-muted-foreground" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Pending</CardDescription>
+            <CardTitle className="text-3xl text-yellow-600">
+              {submissions.filter((s) => s.status === "pending").length}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Clock className="w-4 h-4 text-muted-foreground" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Approved</CardDescription>
+            <CardTitle className="text-3xl text-green-600">
+              {submissions.filter((s) => ["approved", "verified"].includes(s.status)).length}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CheckCircle className="w-4 h-4 text-muted-foreground" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Rejected</CardDescription>
+            <CardTitle className="text-3xl text-red-600">
+              {submissions.filter((s) => s.status === "rejected").length}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <XCircle className="w-4 h-4 text-muted-foreground" />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Submissions Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Type</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {submissions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                    No submissions found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                submissions.map((submission) => (
+                  <TableRow key={submission.id}>
+                    <TableCell>
+                      {getTypeBadge(submission.type, submission.publisherType)}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {submission.name}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {submission.email || submission.location || "-"}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(submission.status)}</TableCell>
+                    <TableCell className="text-sm">
+                      {new Date(submission.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setViewDetailsSubmission(submission);
+                            setIsDetailsDialogOpen(true);
+                          }}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        {submission.status === "pending" && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => openActionDialog(submission, "approve")}
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => openActionDialog(submission, "reject")}
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </>
+  );
+
   const stats = {
     total: submissions.length,
     pending: submissions.filter((s) => s.status === "pending").length,
@@ -398,10 +544,22 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="submissions" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="submissions">
+            <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="all">
               <FileText className="w-4 h-4 mr-2" />
-              Submissions
+              All
+            </TabsTrigger>
+            <TabsTrigger value="publishers">
+              <Building className="w-4 h-4 mr-2" />
+              Publishers
+            </TabsTrigger>
+            <TabsTrigger value="advertisers">
+              <Monitor className="w-4 h-4 mr-2" />
+              Advertisers
+            </TabsTrigger>
+            <TabsTrigger value="campaigns">
+              <FileText className="w-4 h-4 mr-2" />
+              Campaigns
             </TabsTrigger>
             <TabsTrigger value="notifications">
               <Bell className="w-4 h-4 mr-2" />
@@ -414,7 +572,7 @@ export default function AdminDashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="submissions" className="space-y-6">
+          <TabsContent value="all" className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
@@ -455,17 +613,26 @@ export default function AdminDashboard() {
           </Card>
             </div>
 
-            {/* Filters */}
+            {/* Search and Filters */}
             <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Filter className="w-5 h-5" />
-              Filters
+              Search & Filters
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex gap-4">
+          <CardContent className="flex flex-wrap gap-4">
+            <div className="relative flex-1 min-w-[250px]">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, email, location..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -478,7 +645,7 @@ export default function AdminDashboard() {
             </Select>
 
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Filter by type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -508,7 +675,7 @@ export default function AdminDashboard() {
                       <TableHead>Contact</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -535,7 +702,17 @@ export default function AdminDashboard() {
                             {new Date(submission.createdAt).toLocaleDateString()}
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setViewDetailsSubmission(submission);
+                                  setIsDetailsDialogOpen(true);
+                                }}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
                               {submission.status === "pending" && (
                                 <>
                                   <Button
@@ -543,24 +720,14 @@ export default function AdminDashboard() {
                                     variant="default"
                                     onClick={() => openActionDialog(submission, "approve")}
                                   >
-                                    <CheckCircle className="w-4 h-4 mr-1" />
-                                    Approve
+                                    <CheckCircle className="w-4 h-4" />
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="destructive"
                                     onClick={() => openActionDialog(submission, "reject")}
                                   >
-                                    <XCircle className="w-4 h-4 mr-1" />
-                                    Reject
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => openActionDialog(submission, "info")}
-                                  >
-                                    <AlertCircle className="w-4 h-4 mr-1" />
-                                    Info
+                                    <XCircle className="w-4 h-4" />
                                   </Button>
                                 </>
                               )}
@@ -573,6 +740,21 @@ export default function AdminDashboard() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Publishers Tab */}
+          <TabsContent value="publishers" className="space-y-6">
+            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "publisher" || s.type === "ad_space"), "Publisher Submissions", "Manage venue, digital, and agent publisher submissions")}
+          </TabsContent>
+
+          {/* Advertisers Tab */}
+          <TabsContent value="advertisers" className="space-y-6">
+            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "advertiser"), "Advertiser Submissions", "Manage advertiser profile submissions")}
+          </TabsContent>
+
+          {/* Campaigns Tab */}
+          <TabsContent value="campaigns" className="space-y-6">
+            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "campaign"), "Campaign Submissions", "Manage advertiser campaign submissions")}
           </TabsContent>
 
           <TabsContent value="notifications">
@@ -659,6 +841,13 @@ export default function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Details Dialog */}
+      <SubmissionDetailsDialog
+        open={isDetailsDialogOpen}
+        onOpenChange={setIsDetailsDialogOpen}
+        submission={viewDetailsSubmission}
+      />
     </div>
   );
 }

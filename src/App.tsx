@@ -10,6 +10,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminRegister from "./pages/AdminRegister";
 import AdminApproval from "./pages/AdminApproval";
 import AdminDashboard from "./pages/AdminDashboard";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import CompleteProfile from "./pages/CompleteProfile";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
 import Venue from "./pages/Venue";
@@ -57,7 +58,11 @@ const App = () => (
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
           <Route path="/admin/approve" element={<AdminApproval />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={
+            <ProtectedAdminRoute>
+              <AdminDashboard />
+            </ProtectedAdminRoute>
+          } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
