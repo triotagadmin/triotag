@@ -1,20 +1,34 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Shield, ArrowLeft } from "lucide-react";
+import { Shield, ArrowLeft, CheckCircle } from "lucide-react";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // Show verification success message
+    const verified = searchParams.get("verified");
+    if (verified === "success") {
+      toast.success("Admin verified successfully! You can now log in.", {
+        duration: 5000,
+        icon: <CheckCircle className="h-5 w-5" />,
+      });
+    } else if (verified === "already") {
+      toast.info("This admin account is already verified. You can log in.", {
+        duration: 5000,
+      });
+    }
+
     // Check if user is already logged in as verified admin
     const checkAdmin = async () => {
       const { data: { session } } = await supabase.auth.getSession();
