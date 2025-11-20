@@ -112,6 +112,125 @@ export type Database = {
         }
         Relationships: []
       }
+      advertiser_profiles: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_description: string | null
+          company_name: string
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["approval_status"]
+          updated_at: string | null
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_description?: string | null
+          company_name: string
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["approval_status"]
+          updated_at?: string | null
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_description?: string | null
+          company_name?: string
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["approval_status"]
+          updated_at?: string | null
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      campaigns: {
+        Row: {
+          advertiser_id: string
+          approved_at: string | null
+          approved_by: string | null
+          budget_amount: number | null
+          budget_currency: string | null
+          campaign_description: string | null
+          campaign_name: string
+          created_at: string | null
+          creative_assets: Json | null
+          end_date: string | null
+          id: string
+          payment_status: string | null
+          rejection_reason: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["approval_status"]
+          target_audience: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          advertiser_id: string
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_amount?: number | null
+          budget_currency?: string | null
+          campaign_description?: string | null
+          campaign_name: string
+          created_at?: string | null
+          creative_assets?: Json | null
+          end_date?: string | null
+          id?: string
+          payment_status?: string | null
+          rejection_reason?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["approval_status"]
+          target_audience?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          advertiser_id?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_amount?: number | null
+          budget_currency?: string | null
+          campaign_description?: string | null
+          campaign_name?: string
+          created_at?: string | null
+          creative_assets?: Json | null
+          end_date?: string | null
+          id?: string
+          payment_status?: string | null
+          rejection_reason?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["approval_status"]
+          target_audience?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertiser_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
