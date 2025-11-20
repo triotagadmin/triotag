@@ -4,7 +4,7 @@ import { create, verify } from "https://deno.land/x/djwt@v3.0.0/mod.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const JWT_SECRET = Deno.env.get("JWT_SECRET") || "your-secret-key-change-in-production";
+const JWT_SECRET = Deno.env.get("JWT_SECRET") || "RadXT9RTrMZvVsSccejHkrsIx3BDMLqRI10t1vKVH0U=";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,14 +43,27 @@ const handler = async (req: Request): Promise<Response> => {
     try {
       payload = await verify(token, key);
     } catch (error) {
-      console.error("Token verification failed:", error);
-      return new Response(
-        JSON.stringify({ error: "Invalid or expired verification token" }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+      console.error("[Verify Admin Error] Token verification failed:", error);
+      // Redirect to error page instead of returning JSON
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: `${url.origin}/admin/approve?verified=error`,
+          ...corsHeaders,
+        },
+      });
+    }
+
+    // Validate token purpose
+    if (payload.purpose !== "verification") {
+      console.error("[Verify Admin Error] Invalid token purpose:", payload.purpose);
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: `${url.origin}/admin/approve?verified=error`,
+          ...corsHeaders,
+        },
+      });
     }
 
     const adminUserId = payload.sub as string;
@@ -58,6 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
     const timestamp = new Date().toISOString();
 
     console.log(`[Verify Admin] Processing verification for admin: ${adminUserId} at ${timestamp}`);
+    console.log(`[Verify Admin] Token purpose: ${payload.purpose}`);
     console.log(`[Verify Admin] Verified by: ${verifiedBy}`);
 
     // Update admin profile status
@@ -83,7 +97,8 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`[Verify Admin] Found admin profile: ${adminProfile.full_name}, current status: ${adminProfile.status}`);
 
     if (adminProfile.status === "verified") {
-      console.log(`[Verify Admin] Admin ${adminUserId} is already verified`);
+      console.log(`[Verify Admin] Admin ${adminProfile.full_name} (${adminUserId}) is already verified`);
+      console.log(`[Verify Admin] Previously verified at: ${adminProfile.verified_at} by: ${adminProfile.verified_by}`);
       // Already verified, redirect to approval page
       return new Response(null, {
         status: 302,
