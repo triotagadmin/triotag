@@ -157,7 +157,7 @@ const VenueDashboard = () => {
                 <CardTitle>Manage Venue Ad Spaces</CardTitle>
                 <CardDescription>Add, edit, and manage your advertising spaces</CardDescription>
               </div>
-              <Button>
+              <Button onClick={() => navigate("/venue/register")}>
                 <Upload className="w-4 h-4 mr-2" />
                 Add New Space
               </Button>
@@ -169,7 +169,7 @@ const VenueDashboard = () => {
                 <MapPin className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No ad spaces yet</h3>
                 <p className="text-muted-foreground mb-4">Create your first ad space to start accepting bookings</p>
-                <Button>Add Your First Space</Button>
+                <Button onClick={() => navigate("/venue/register")}>Add Your First Space</Button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -204,7 +204,7 @@ const VenueDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button>
+              <Button onClick={() => navigate("/venue/verify")}>
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Verification Documents
               </Button>
