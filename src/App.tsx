@@ -57,7 +57,7 @@ const App = () => (
           <Route path="/publishers" element={<Publishers />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
-          <Route path="/admin/approve" element={<AdminApproval />} />
+          <Route path="/admin/verify" element={<AdminApproval />} />
           <Route path="/admin/dashboard" element={
             <ProtectedAdminRoute>
               <AdminDashboard />
