@@ -52,19 +52,27 @@ export default function AdminLogin() {
     setIsLoading(true);
 
     try {
-      // Sign in with Supabase
+      // Sign in with Supabase (uses JWT tokens internally)
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (authError) throw authError;
-
-      if (!authData.user) {
-        throw new Error("Authentication failed");
+      if (authError) {
+        if (authError.message.includes("Invalid login credentials")) {
+          toast.error("Invalid email or password. Please check your credentials.");
+        } else {
+          toast.error(authError.message);
+        }
+        return;
       }
 
-      // Check if user has admin role
+      if (!authData.user || !authData.session) {
+        toast.error("Authentication failed. Please try again.");
+        return;
+      }
+
+      // Verify admin role
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("role")
@@ -84,31 +92,34 @@ export default function AdminLogin() {
         .eq("user_id", authData.user.id)
         .single();
 
-      if (profileError) {
+      if (profileError || !adminProfile) {
         await supabase.auth.signOut();
-        toast.error("Admin profile not found.");
+        toast.error("Admin profile not found. Please contact support.");
         return;
       }
 
       if (adminProfile.status === "pending") {
         await supabase.auth.signOut();
-        toast.warning("Your account is pending approval by Tiny Sticky Ads.");
+        toast.warning("Your account is pending approval. Please wait for super-admin verification.", {
+          duration: 6000,
+        });
         return;
       }
 
       if (adminProfile.status === "rejected") {
         await supabase.auth.signOut();
-        toast.error("Your admin account has been rejected. Please contact support.");
+        toast.error("Your admin account has been rejected. Please contact support for more information.");
         return;
       }
 
       if (adminProfile.status === "verified") {
-        toast.success("Welcome back, Admin!");
+        toast.success("Login successful! Redirecting to dashboard...");
+        // Session is stored in localStorage with JWT token
         navigate("/admin/dashboard");
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      toast.error(error.message || "Login failed. Please check your credentials.");
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -174,13 +185,17 @@ export default function AdminLogin() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center space-y-2">
+            <div className="mt-6 text-center space-y-3">
               <p className="text-sm text-muted-foreground">
                 Need admin access?{" "}
                 <Link to="/admin/register" className="text-primary hover:underline font-medium">
                   Request Registration
                 </Link>
               </p>
+              <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
+                <p className="font-semibold mb-1">🔒 Secure Authentication</p>
+                <p>Your session is protected with industry-standard JWT tokens and encrypted connections.</p>
+              </div>
             </div>
           </CardContent>
         </Card>
