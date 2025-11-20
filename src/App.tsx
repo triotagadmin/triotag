@@ -26,6 +26,7 @@ import AgentVerification from "./pages/AgentVerification";
 import DigitalServiceRegistration from "./pages/DigitalServiceRegistration";
 import DigitalVerification from "./pages/DigitalVerification";
 import Publishers from "./pages/Publishers";
+import Verify from "./pages/Verify";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/verify" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />

@@ -102,6 +102,7 @@ const CompleteProfile = () => {
         business_name: validatedData.businessName,
         contact_email: validatedData.contactEmail,
         verification_status: "pending",
+        verified: true, // Set to true since email was verified at signup
       };
 
       if (publisherType === "agent" && agentRole) {

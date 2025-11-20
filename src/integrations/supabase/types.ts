@@ -125,8 +125,11 @@ export type Database = {
           id: string
           rejection_reason: string | null
           status: Database["public"]["Enums"]["approval_status"]
+          token_expires: string | null
           updated_at: string | null
           user_id: string
+          verification_token: string | null
+          verified: boolean | null
           website_url: string | null
         }
         Insert: {
@@ -141,8 +144,11 @@ export type Database = {
           id?: string
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["approval_status"]
+          token_expires?: string | null
           updated_at?: string | null
           user_id: string
+          verification_token?: string | null
+          verified?: boolean | null
           website_url?: string | null
         }
         Update: {
@@ -157,8 +163,11 @@ export type Database = {
           id?: string
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["approval_status"]
+          token_expires?: string | null
           updated_at?: string | null
           user_id?: string
+          verification_token?: string | null
+          verified?: boolean | null
           website_url?: string | null
         }
         Relationships: []
@@ -278,9 +287,12 @@ export type Database = {
           publisher_type: Database["public"]["Enums"]["publisher_type"]
           rejection_reason: string | null
           social_media: Json | null
+          token_expires: string | null
           updated_at: string | null
           user_id: string
           verification_status: Database["public"]["Enums"]["approval_status"]
+          verification_token: string | null
+          verified: boolean | null
         }
         Insert: {
           agent_role?: Database["public"]["Enums"]["agent_role"] | null
@@ -298,9 +310,12 @@ export type Database = {
           publisher_type: Database["public"]["Enums"]["publisher_type"]
           rejection_reason?: string | null
           social_media?: Json | null
+          token_expires?: string | null
           updated_at?: string | null
           user_id: string
           verification_status?: Database["public"]["Enums"]["approval_status"]
+          verification_token?: string | null
+          verified?: boolean | null
         }
         Update: {
           agent_role?: Database["public"]["Enums"]["agent_role"] | null
@@ -318,9 +333,12 @@ export type Database = {
           publisher_type?: Database["public"]["Enums"]["publisher_type"]
           rejection_reason?: string | null
           social_media?: Json | null
+          token_expires?: string | null
           updated_at?: string | null
           user_id?: string
           verification_status?: Database["public"]["Enums"]["approval_status"]
+          verification_token?: string | null
+          verified?: boolean | null
         }
         Relationships: []
       }
