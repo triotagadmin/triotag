@@ -133,11 +133,34 @@ const Auth = () => {
       const { data: roles } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", session.user.id)
+        .eq("user_id", session?.user?.id)
         .single();
       
-      if (roles && roles.role === "advertiser") {
+      if (roles?.role === "advertiser") {
         navigate("/advertiser-dashboard");
+      } else if (roles?.role === "publisher") {
+        // Fetch publisher profile to get publisher_type
+        const { data: profile } = await supabase
+          .from("publisher_profiles")
+          .select("publisher_type")
+          .eq("user_id", session?.user?.id)
+          .single();
+        
+        if (profile) {
+          // Redirect to specific publisher dashboard
+          if (profile.publisher_type === "venue") {
+            navigate("/venue");
+          } else if (profile.publisher_type === "digital") {
+            navigate("/digital-media");
+          } else if (profile.publisher_type === "agent") {
+            navigate("/agent-publishers");
+          } else {
+            navigate("/dashboard");
+          }
+        } else {
+          // No profile yet, go to complete profile
+          navigate("/complete-profile");
+        }
       } else {
         navigate("/dashboard");
       }

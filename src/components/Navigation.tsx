@@ -63,11 +63,17 @@ export const Navigation = () => {
         </Link>
         
         <div className="flex items-center space-x-4">
-          <Link to="/publishers">
-            <Button variant="ghost">Buy</Button>
-          </Link>
           {user ? (
             <>
+              {userRole === "advertiser" ? (
+                <Link to="/publishers">
+                  <Button variant="ghost">Buy Ad Space</Button>
+                </Link>
+              ) : userRole === "publisher" ? (
+                <Link to={getDashboardLink()}>
+                  <Button variant="ghost">Sell Ad Space</Button>
+                </Link>
+              ) : null}
               <Link to={getDashboardLink()}>
                 <Button variant="ghost">Dashboard</Button>
               </Link>
@@ -77,6 +83,9 @@ export const Navigation = () => {
             </>
           ) : (
             <>
+              <Link to="/publishers">
+                <Button variant="ghost">Buy</Button>
+              </Link>
               <Link to="/auth">
                 <Button variant="ghost">Sell</Button>
               </Link>
