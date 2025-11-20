@@ -92,7 +92,7 @@ export default function AdminLogin() {
 
       if (adminProfile.status === "pending") {
         await supabase.auth.signOut();
-        toast.warning("Your admin account is pending approval. Please wait for verification.");
+        toast.warning("Your account is pending approval by Tiny Sticky Ads.");
         return;
       }
 
