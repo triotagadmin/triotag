@@ -157,7 +157,7 @@ const DigitalMediaDashboard = () => {
                 <CardTitle>Manage Digital Ad Spots</CardTitle>
                 <CardDescription>Add and manage your digital advertising placements</CardDescription>
               </div>
-              <Button>
+              <Button onClick={() => navigate("/digital-media/register")}>
                 <Upload className="w-4 h-4 mr-2" />
                 Add New Property
               </Button>
@@ -169,7 +169,7 @@ const DigitalMediaDashboard = () => {
                 <Globe className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No properties yet</h3>
                 <p className="text-muted-foreground mb-4">Add your first digital property to start earning</p>
-                <Button>Add Your First Property</Button>
+                <Button onClick={() => navigate("/digital-media/register")}>Add Your First Property</Button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -204,7 +204,7 @@ const DigitalMediaDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button>
+              <Button onClick={() => navigate("/digital-media/verify")}>
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Verification Screenshots
               </Button>
