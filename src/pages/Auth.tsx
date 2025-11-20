@@ -54,22 +54,39 @@ const Auth = () => {
         password,
       });
 
-      const { error } = await supabase.auth.signUp({
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: validatedData.email,
         password: validatedData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
           data: {
             user_type: userType,
           },
         },
       });
 
-      if (error) throw error;
+      if (signUpError) throw signUpError;
+      if (!authData.user) throw new Error("User creation failed");
+
+      // Sign out the user immediately (they must verify email first)
+      await supabase.auth.signOut();
+
+      // Send verification email via edge function
+      const { error: emailError } = await supabase.functions.invoke("send-verification-email", {
+        body: {
+          email: validatedData.email,
+          userId: authData.user.id,
+          userType: userType,
+        },
+      });
+
+      if (emailError) {
+        console.error("Error sending verification email:", emailError);
+        throw new Error("Failed to send verification email. Please contact support.");
+      }
 
       toast({
-        title: "Success!",
-        description: "Check your email to confirm your account.",
+        title: "Registration Successful!",
+        description: "A verification email has been sent. Please check your inbox.",
       });
       setShowResendVerification(true);
       setResendEmail(validatedData.email);
@@ -103,50 +120,73 @@ const Auth = () => {
         password,
       });
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: validatedData.email,
         password: validatedData.password,
       });
 
-      if (error) throw error;
+      if (signInError) throw signInError;
 
-      // Check if email is verified
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user && !session.user.email_confirmed_at) {
-        toast({
-          title: "Email not verified",
-          description: "Please check your email and click the verification link before signing in.",
-          variant: "destructive",
-        });
-        setShowResendVerification(true);
-        setResendEmail(validatedData.email);
-        await supabase.auth.signOut();
-        return;
-      }
+      if (!session?.user) throw new Error("No session found");
 
-      toast({
-        title: "Welcome back!",
-        description: "Successfully signed in.",
-      });
-
-      // Check user role and redirect to appropriate dashboard
+      // Check user role
       const { data: roles } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", session?.user?.id)
+        .eq("user_id", session.user.id)
         .single();
       
+      // Check verification status based on role
       if (roles?.role === "advertiser") {
-        navigate("/advertiser-dashboard");
-      } else if (roles?.role === "publisher") {
-        // Fetch publisher profile to get publisher_type
         const { data: profile } = await supabase
-          .from("publisher_profiles")
-          .select("publisher_type")
-          .eq("user_id", session?.user?.id)
+          .from("advertiser_profiles")
+          .select("verified")
+          .eq("user_id", session.user.id)
           .single();
         
+        if (profile && !profile.verified) {
+          toast({
+            title: "Email not verified",
+            description: "Please verify your email before logging in.",
+            variant: "destructive",
+          });
+          setShowResendVerification(true);
+          setResendEmail(validatedData.email);
+          await supabase.auth.signOut();
+          return;
+        }
+        
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in.",
+        });
+        navigate("/advertiser-dashboard");
+      } else if (roles?.role === "publisher") {
+        const { data: profile } = await supabase
+          .from("publisher_profiles")
+          .select("verified, publisher_type")
+          .eq("user_id", session.user.id)
+          .single();
+        
+        if (profile && !profile.verified) {
+          toast({
+            title: "Email not verified",
+            description: "Please verify your email before logging in.",
+            variant: "destructive",
+          });
+          setShowResendVerification(true);
+          setResendEmail(validatedData.email);
+          await supabase.auth.signOut();
+          return;
+        }
+        
         if (profile) {
+          toast({
+            title: "Welcome back!",
+            description: "Successfully signed in.",
+          });
+          
           // Redirect to specific publisher dashboard
           if (profile.publisher_type === "venue") {
             navigate("/venue");
