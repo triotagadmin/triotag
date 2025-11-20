@@ -13,6 +13,7 @@ const DigitalMediaDashboard = () => {
   const [profile, setProfile] = useState<any>(null);
   const [adSpaces, setAdSpaces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,6 +23,8 @@ const DigitalMediaDashboard = () => {
         navigate("/auth");
         return;
       }
+
+      setUser(session.user);
 
       // Fetch publisher profile
       const { data: profileData, error: profileError } = await supabase
@@ -58,6 +61,28 @@ const DigitalMediaDashboard = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
+  };
+
+  const handleResendVerification = async () => {
+    if (!user?.email) return;
+    
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: user.email,
+    });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Verification email sent!",
+      });
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -103,6 +128,23 @@ const DigitalMediaDashboard = () => {
             <div className="mt-2">{getStatusBadge(profile?.verification_status)}</div>
           </div>
         </div>
+
+        {/* Email Verification Warning */}
+        {!user?.email_confirmed_at && (
+          <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+            <CardHeader>
+              <CardTitle className="text-yellow-800 dark:text-yellow-200">Email Verification Required</CardTitle>
+              <CardDescription className="text-yellow-700 dark:text-yellow-300">
+                Please verify your email address to access all features. Check your inbox for the verification link.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={handleResendVerification} variant="outline">
+                Resend Verification Email
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
