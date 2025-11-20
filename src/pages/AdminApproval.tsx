@@ -20,9 +20,12 @@ export default function AdminApproval() {
     } else if (verified === "already") {
       setStatus("already");
       setMessage("This admin account has already been verified. The admin can log in with their credentials.");
+    } else if (verified === "error") {
+      setStatus("error");
+      setMessage("Verification failed: Invalid or expired link. Please request a new verification link.");
     } else {
       setStatus("error");
-      setMessage("Invalid verification link. Please check your email for the correct link.");
+      setMessage("Invalid verification request. Please check your email for the correct link.");
     }
   }, [searchParams]);
 

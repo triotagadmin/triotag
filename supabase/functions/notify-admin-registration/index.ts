@@ -3,7 +3,7 @@ import { Resend } from "https://esm.sh/resend@4.0.0";
 import { create } from "https://deno.land/x/djwt@v3.0.0/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-const JWT_SECRET = Deno.env.get("JWT_SECRET") || "your-secret-key-change-in-production";
+const JWT_SECRET = Deno.env.get("JWT_SECRET") || "RadXT9RTrMZvVsSccejHkrsIx3BDMLqRI10t1vKVH0U=";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 
 const corsHeaders = {
@@ -37,18 +37,21 @@ const handler = async (req: Request): Promise<Response> => {
       ["sign"]
     );
 
-    // Generate frontend URL based on environment
+    // Create verification token (not a login token)
     const token = await create(
       { alg: "HS256", typ: "JWT" },
       {
-        sub: userId,
-        email: email,
+        sub: userId, // Admin being verified
+        purpose: "verification",
         fullName: fullName,
-        verifiedBy: "system",
+        email: email,
+        verifiedBy: "super-admin",
         exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
       },
       key
     );
+
+    console.log(`[Notify Admin] Created verification token for admin: ${userId}, expires in 24 hours`);
 
     // Use the appropriate frontend URL
     const verificationUrl = `https://tinystickyads.com/admin/approve?token=${token}`;
