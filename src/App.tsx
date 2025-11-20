@@ -13,6 +13,8 @@ import CompleteProfile from "./pages/CompleteProfile";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
 import Venue from "./pages/Venue";
 import VenueDashboard from "./pages/VenueDashboard";
+import VenueRegistration from "./pages/VenueRegistration";
+import VenueVerification from "./pages/VenueVerification";
 import DigitalMedia from "./pages/DigitalMedia";
 import DigitalMediaDashboard from "./pages/DigitalMediaDashboard";
 import AgentPublishers from "./pages/AgentPublishers";
@@ -36,6 +38,8 @@ const App = () => (
           <Route path="/advertiser-dashboard" element={<AdvertiserDashboard />} />
           <Route path="/venue" element={<VenueDashboard />} />
           <Route path="/venue-info" element={<Venue />} />
+          <Route path="/venue/register" element={<VenueRegistration />} />
+          <Route path="/venue/verify" element={<VenueVerification />} />
           <Route path="/digital-media" element={<DigitalMediaDashboard />} />
           <Route path="/digital-media-info" element={<DigitalMedia />} />
           <Route path="/agent-publishers" element={<AgentDashboard />} />
