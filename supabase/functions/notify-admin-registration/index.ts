@@ -37,6 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
       ["sign"]
     );
 
+    // Generate frontend URL based on environment
     const token = await create(
       { alg: "HS256", typ: "JWT" },
       {
@@ -44,12 +45,13 @@ const handler = async (req: Request): Promise<Response> => {
         email: email,
         fullName: fullName,
         verifiedBy: "system",
-        exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7 days
+        exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
       },
       key
     );
 
-    const verificationUrl = `${SUPABASE_URL}/functions/v1/verify-admin?token=${token}`;
+    // Use the appropriate frontend URL
+    const verificationUrl = `https://tinystickyads.com/admin/approve?token=${token}`;
 
     const emailResponse = await resend.emails.send({
       from: "TinyStickyAds <onboarding@resend.dev>",
@@ -81,7 +83,7 @@ const handler = async (req: Request): Promise<Response> => {
 
           <div style="background-color: #f3f4f6; padding: 15px; border-radius: 6px; margin: 20px 0;">
             <p style="margin: 0; font-size: 13px; color: #6b7280;">
-              <strong>Security Note:</strong> This verification link will expire in 7 days. The admin cannot log in until you approve their registration.
+              <strong>Security Note:</strong> This verification link will expire in 24 hours. The admin cannot log in until you approve their registration.
             </p>
           </div>
 
