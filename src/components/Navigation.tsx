@@ -93,7 +93,7 @@ export const Navigation = () => {
                 <Button variant="ghost">Insights</Button>
               </Link>
               <Link to="/publishers">
-                <Button variant="ghost">Explore</Button>
+                <Button variant="ghost">Buy</Button>
               </Link>
               <Link to="/auth">
                 <Button variant="ghost">Sell</Button>
