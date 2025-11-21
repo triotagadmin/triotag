@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +23,7 @@ interface Publisher {
 }
 
 const Publishers = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [publishers, setPublishers] = useState<Publisher[]>([]);
   const [filteredPublishers, setFilteredPublishers] = useState<Publisher[]>([]);
@@ -30,7 +31,16 @@ const Publishers = () => {
   const [typeFilter, setTypeFilter] = useState<string>(searchParams.get("type") || "all");
   const [locationFilter, setLocationFilter] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     fetchPublishers();
@@ -49,6 +59,7 @@ const Publishers = () => {
 
   const fetchPublishers = async () => {
     try {
+      // Fetch all approved publishers (no auth required to view)
       const { data, error } = await supabase
         .from("publisher_profiles")
         .select("*")
@@ -66,6 +77,17 @@ const Publishers = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePublisherClick = (e: React.MouseEvent, publisherId: string) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      toast({
+        title: "Authentication Required",
+        description: "Please log in or sign up to view publisher details",
+      });
+      navigate("/auth");
     }
   };
 
@@ -197,7 +219,11 @@ const Publishers = () => {
                   {filteredPublishers.map((publisher) => {
                     const Icon = getPublisherIcon(publisher.publisher_type);
                     return (
-                      <Link key={publisher.id} to={`/publisher/${publisher.id}`}>
+                      <Link 
+                        key={publisher.id} 
+                        to={isAuthenticated ? `/publisher/${publisher.id}` : "#"}
+                        onClick={(e) => handlePublisherClick(e, publisher.id)}
+                      >
                         <Card className="h-full hover:shadow-lg transition-all cursor-pointer group">
                           <CardHeader>
                             <div className="flex items-start justify-between mb-2">
