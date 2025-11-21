@@ -161,7 +161,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "Successfully signed in.",
         });
-        navigate("/advertiser-dashboard");
+        navigate("/home");
       } else if (roles?.role === "publisher") {
         const { data: profile } = await supabase
           .from("publisher_profiles")
@@ -186,23 +186,13 @@ const Auth = () => {
             title: "Welcome back!",
             description: "Successfully signed in.",
           });
-          
-          // Redirect to specific publisher dashboard
-          if (profile.publisher_type === "venue") {
-            navigate("/venue");
-          } else if (profile.publisher_type === "digital") {
-            navigate("/digital-media");
-          } else if (profile.publisher_type === "agent") {
-            navigate("/agent-publishers");
-          } else {
-            navigate("/dashboard");
-          }
+          navigate("/home");
         } else {
           // No profile yet, go to complete profile
           navigate("/complete-profile");
         }
       } else {
-        navigate("/dashboard");
+        navigate("/home");
       }
     } catch (error: any) {
       if (error instanceof z.ZodError) {
