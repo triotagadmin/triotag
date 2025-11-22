@@ -29,6 +29,9 @@ import Publishers from "./pages/Publishers";
 import Verify from "./pages/Verify";
 import Home from "./pages/Home";
 import Insights from "./pages/Insights";
+import VenueExplore from "./pages/VenueExplore";
+import VenueInventory from "./pages/VenueInventory";
+import VenueDetail from "./pages/VenueDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +46,10 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/home" element={<Home />} />
           <Route path="/insights" element={<Insights />} />
+          <Route path="/explore" element={<VenueExplore />} />
+          <Route path="/inventory" element={<VenueInventory />} />
+          <Route path="/venue/:id" element={<VenueDetail />} />
+          <Route path="/venue-registration" element={<VenueRegistration />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />

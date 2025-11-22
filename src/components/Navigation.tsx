@@ -65,24 +65,49 @@ export const Navigation = () => {
         <div className="flex items-center space-x-4">
           {user ? (
             <>
-              <Link to="/home">
-                <Button variant="ghost">Home</Button>
-              </Link>
-              <Link to="/insights">
-                <Button variant="ghost">Insights</Button>
-              </Link>
               {userRole === "advertiser" ? (
-                <Link to="/publishers">
-                  <Button variant="ghost">Explore</Button>
-                </Link>
+                <>
+                  <Link to="/home">
+                    <Button variant="ghost">Home</Button>
+                  </Link>
+                  <Link to="/insights">
+                    <Button variant="ghost">Insights</Button>
+                  </Link>
+                  <Link to="/publishers">
+                    <Button variant="ghost">Buy</Button>
+                  </Link>
+                  <Link to={getDashboardLink()}>
+                    <Button variant="ghost">Dashboard</Button>
+                  </Link>
+                </>
               ) : userRole === "publisher" ? (
-                <Link to={getDashboardLink()}>
-                  <Button variant="ghost">My Space</Button>
-                </Link>
-              ) : null}
-              <Link to={getDashboardLink()}>
-                <Button variant="ghost">Dashboard</Button>
-              </Link>
+                <>
+                  <Link to="/explore">
+                    <Button variant="ghost">Explore</Button>
+                  </Link>
+                  <Link to="/inventory">
+                    <Button variant="ghost">Inventory</Button>
+                  </Link>
+                  <Link to="/insights">
+                    <Button variant="ghost">Insights</Button>
+                  </Link>
+                  <Link to={getDashboardLink()}>
+                    <Button variant="ghost">Dashboard</Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/home">
+                    <Button variant="ghost">Home</Button>
+                  </Link>
+                  <Link to="/insights">
+                    <Button variant="ghost">Insights</Button>
+                  </Link>
+                  <Link to={getDashboardLink()}>
+                    <Button variant="ghost">Dashboard</Button>
+                  </Link>
+                </>
+              )}
               <Button variant="outline" onClick={handleSignOut}>
                 Sign Out
               </Button>
