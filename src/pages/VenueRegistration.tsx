@@ -19,12 +19,17 @@ const venueSchema = z.object({
   state: z.string().trim().max(100).optional(),
   postalCode: z.string().trim().max(20).optional(),
   country: z.string().trim().min(1, "Country is required").max(100),
+  latitude: z.string().trim().optional(),
+  longitude: z.string().trim().optional(),
+  contactPerson: z.string().trim().min(1, "Contact person is required").max(100),
   contactEmail: z.string().trim().email("Invalid email").max(255),
   contactPhone: z.string().trim().min(1, "Phone is required").max(20),
   venueType: z.string().min(1, "Venue type is required"),
-  capacity: z.number().min(1, "Capacity must be at least 1"),
+  operatingHours: z.string().trim().min(1, "Operating hours are required").max(500),
+  expectedFootTraffic: z.string().trim().min(1, "Expected foot traffic is required").max(500),
   description: z.string().trim().max(1000).optional(),
-  pricing: z.string().trim().max(500).optional(),
+  weeklyPrice: z.string().trim().optional(),
+  monthlyPrice: z.string().trim().optional(),
 });
 
 const VenueRegistration = () => {
@@ -42,13 +47,19 @@ const VenueRegistration = () => {
   const [state, setState] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [venueType, setVenueType] = useState("");
-  const [capacity, setCapacity] = useState("");
+  const [operatingHours, setOperatingHours] = useState("");
+  const [expectedFootTraffic, setExpectedFootTraffic] = useState("");
   const [description, setDescription] = useState("");
-  const [pricing, setPricing] = useState("");
+  const [weeklyPrice, setWeeklyPrice] = useState("");
+  const [monthlyPrice, setMonthlyPrice] = useState("");
   const [amenities, setAmenities] = useState<string[]>([]);
+  const [allowedAdFormats, setAllowedAdFormats] = useState<string[]>([]);
 
   const amenitiesList = [
     "Wi-Fi",
@@ -59,6 +70,17 @@ const VenueRegistration = () => {
     "Air Conditioning",
     "Restrooms",
     "Stage/Platform",
+  ];
+
+  const adFormatsList = [
+    "Poster Display",
+    "Digital Screen",
+    "Table Tents",
+    "Wall Murals",
+    "Floor Graphics",
+    "Window Clings",
+    "Standee/Cutout",
+    "Banner/Flag",
   ];
 
   useEffect(() => {
@@ -91,6 +113,16 @@ const VenueRegistration = () => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
+    // Check photo limit
+    if (uploadedImages.length + files.length > 30) {
+      toast({
+        title: "Error",
+        description: "Maximum 30 photos allowed",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setUploadingImage(true);
 
@@ -143,6 +175,14 @@ const VenueRegistration = () => {
     );
   };
 
+  const toggleAdFormat = (format: string) => {
+    setAllowedAdFormats(prev => 
+      prev.includes(format) 
+        ? prev.filter(f => f !== format)
+        : [...prev, format]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -158,12 +198,17 @@ const VenueRegistration = () => {
         state: state || undefined,
         postalCode: postalCode || undefined,
         country,
+        latitude: latitude || undefined,
+        longitude: longitude || undefined,
+        contactPerson,
         contactEmail,
         contactPhone,
         venueType,
-        capacity: parseInt(capacity),
+        operatingHours,
+        expectedFootTraffic,
         description: description || undefined,
-        pricing: pricing || undefined,
+        weeklyPrice: weeklyPrice || undefined,
+        monthlyPrice: monthlyPrice || undefined,
       });
 
       const fullAddress = [
@@ -173,6 +218,10 @@ const VenueRegistration = () => {
         validatedData.postalCode,
         validatedData.country
       ].filter(Boolean).join(", ");
+
+      const pricingData: any = {};
+      if (validatedData.weeklyPrice) pricingData.weekly = parseFloat(validatedData.weeklyPrice);
+      if (validatedData.monthlyPrice) pricingData.monthly = parseFloat(validatedData.monthlyPrice);
 
       const { error } = await supabase
         .from("ad_spaces")
@@ -184,12 +233,18 @@ const VenueRegistration = () => {
           approval_status: "pending",
           specifications: {
             venue_type: validatedData.venueType,
-            capacity: validatedData.capacity,
-            amenities,
+            full_address: fullAddress,
+            latitude: validatedData.latitude,
+            longitude: validatedData.longitude,
+            contact_person: validatedData.contactPerson,
             contact_email: validatedData.contactEmail,
-            contact_phone: validatedData.contactPhone,
+            contact_number: validatedData.contactPhone,
+            operating_hours: validatedData.operatingHours,
+            expected_foot_traffic: validatedData.expectedFootTraffic,
+            amenities,
+            allowed_ad_formats: allowedAdFormats,
           },
-          pricing: validatedData.pricing ? { details: validatedData.pricing } : null,
+          pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
           media_urls: uploadedImages,
         });
 
@@ -200,7 +255,7 @@ const VenueRegistration = () => {
         description: "Venue submitted for approval",
       });
 
-      navigate("/venue");
+      navigate("/inventory");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -216,9 +271,9 @@ const VenueRegistration = () => {
     <div className="min-h-screen bg-muted/30">
       <nav className="bg-card border-b">
         <div className="container mx-auto px-6 py-4">
-          <Button variant="ghost" onClick={() => navigate("/venue")}>
+          <Button variant="ghost" onClick={() => navigate("/inventory")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            Back to Inventory
           </Button>
         </div>
       </nav>
@@ -227,6 +282,9 @@ const VenueRegistration = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">Register New Venue Space</CardTitle>
+            <p className="text-muted-foreground mt-2">
+              Complete all required fields to submit your venue for approval
+            </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -242,9 +300,32 @@ const VenueRegistration = () => {
                 />
               </div>
 
+              {/* Venue Type */}
+              <div>
+                <Label htmlFor="venueType">Venue Type *</Label>
+                <Select value={venueType} onValueChange={setVenueType} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select venue type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="restaurant">Restaurant</SelectItem>
+                    <SelectItem value="cafe">Café</SelectItem>
+                    <SelectItem value="gym">Gym/Fitness Center</SelectItem>
+                    <SelectItem value="mall_corridor">Mall Corridor</SelectItem>
+                    <SelectItem value="restroom">Restroom Stall</SelectItem>
+                    <SelectItem value="salon">Salon/Spa</SelectItem>
+                    <SelectItem value="bar">Bar/Lounge</SelectItem>
+                    <SelectItem value="hotel">Hotel</SelectItem>
+                    <SelectItem value="retail">Retail Store</SelectItem>
+                    <SelectItem value="coworking">Co-Working Space</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Address Fields */}
               <div className="space-y-4">
-                <h3 className="font-semibold">Address</h3>
+                <h3 className="font-semibold">Full Address</h3>
                 
                 <div>
                   <Label htmlFor="street">Street Address *</Label>
@@ -302,82 +383,113 @@ const VenueRegistration = () => {
                     />
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="latitude">Latitude (Google Maps)</Label>
+                    <Input
+                      id="latitude"
+                      value={latitude}
+                      onChange={(e) => setLatitude(e.target.value)}
+                      placeholder="e.g., 40.7128"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="longitude">Longitude (Google Maps)</Label>
+                    <Input
+                      id="longitude"
+                      value={longitude}
+                      onChange={(e) => setLongitude(e.target.value)}
+                      placeholder="e.g., -74.0060"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Contact Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <h3 className="font-semibold">Contact Information</h3>
+                
                 <div>
-                  <Label htmlFor="contactEmail">Contact Email *</Label>
+                  <Label htmlFor="contactPerson">Contact Person *</Label>
                   <Input
-                    id="contactEmail"
-                    type="email"
-                    value={contactEmail}
-                    onChange={(e) => setContactEmail(e.target.value)}
+                    id="contactPerson"
+                    value={contactPerson}
+                    onChange={(e) => setContactPerson(e.target.value)}
+                    placeholder="Full name"
                     required
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="contactPhone">Contact Phone *</Label>
-                  <Input
-                    id="contactPhone"
-                    value={contactPhone}
-                    onChange={(e) => setContactPhone(e.target.value)}
-                    required
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="contactEmail">Contact Email *</Label>
+                    <Input
+                      id="contactEmail"
+                      type="email"
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="contactPhone">Contact Number *</Label>
+                    <Input
+                      id="contactPhone"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                      placeholder="+1 234 567 8900"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Venue Type */}
+              {/* Operating Hours */}
               <div>
-                <Label htmlFor="venueType">Venue Type *</Label>
-                <Select value={venueType} onValueChange={setVenueType} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select venue type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="event_hall">Event Hall</SelectItem>
-                    <SelectItem value="bar">Bar/Lounge</SelectItem>
-                    <SelectItem value="coworking">Co-Working Space</SelectItem>
-                    <SelectItem value="restaurant">Restaurant</SelectItem>
-                    <SelectItem value="cafe">Cafe</SelectItem>
-                    <SelectItem value="hotel">Hotel</SelectItem>
-                    <SelectItem value="retail">Retail Store</SelectItem>
-                    <SelectItem value="gym">Gym/Fitness Center</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="operatingHours">Operating Hours *</Label>
+                <Textarea
+                  id="operatingHours"
+                  value={operatingHours}
+                  onChange={(e) => setOperatingHours(e.target.value)}
+                  placeholder="e.g., Monday-Friday: 9 AM - 10 PM, Saturday-Sunday: 10 AM - 11 PM"
+                  rows={3}
+                  required
+                />
               </div>
 
-              {/* Capacity */}
+              {/* Expected Foot Traffic */}
               <div>
-                <Label htmlFor="capacity">Maximum Capacity *</Label>
+                <Label htmlFor="expectedFootTraffic">Expected Foot Traffic *</Label>
                 <Input
-                  id="capacity"
-                  type="number"
-                  value={capacity}
-                  onChange={(e) => setCapacity(e.target.value)}
-                  placeholder="Enter maximum capacity"
-                  min="1"
+                  id="expectedFootTraffic"
+                  value={expectedFootTraffic}
+                  onChange={(e) => setExpectedFootTraffic(e.target.value)}
+                  placeholder="e.g., 500-1000 daily visitors"
                   required
                 />
               </div>
 
               {/* Description */}
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">Venue Description</Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe your venue..."
+                  placeholder="Describe your venue and what makes it unique..."
                   rows={4}
                 />
               </div>
 
               {/* Photo Upload */}
               <div>
-                <Label>Upload Photos</Label>
+                <Label>Upload Photos (Max 30, JPEG/PNG) *</Label>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {uploadedImages.length}/30 photos uploaded
+                </p>
                 <div className="mt-2">
                   <label className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
                     <div className="flex flex-col items-center">
@@ -389,10 +501,10 @@ const VenueRegistration = () => {
                     <input
                       type="file"
                       className="hidden"
-                      accept="image/*"
+                      accept="image/jpeg,image/png"
                       multiple
                       onChange={handleImageUpload}
-                      disabled={uploadingImage}
+                      disabled={uploadingImage || uploadedImages.length >= 30}
                     />
                   </label>
                 </div>
@@ -421,9 +533,31 @@ const VenueRegistration = () => {
                 )}
               </div>
 
+              {/* Allowed Ad Formats */}
+              <div>
+                <Label>Allowed Ad Formats (check all that apply) *</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                  {adFormatsList.map((format) => (
+                    <div key={format} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`format-${format}`}
+                        checked={allowedAdFormats.includes(format)}
+                        onCheckedChange={() => toggleAdFormat(format)}
+                      />
+                      <label
+                        htmlFor={`format-${format}`}
+                        className="text-sm cursor-pointer"
+                      >
+                        {format}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Amenities */}
               <div>
-                <Label>Amenities</Label>
+                <Label>Amenities (optional)</Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                   {amenitiesList.map((amenity) => (
                     <div key={amenity} className="flex items-center space-x-2">
@@ -445,18 +579,38 @@ const VenueRegistration = () => {
 
               {/* Pricing */}
               <div>
-                <Label htmlFor="pricing">Pricing Options (Optional)</Label>
-                <Textarea
-                  id="pricing"
-                  value={pricing}
-                  onChange={(e) => setPricing(e.target.value)}
-                  placeholder="e.g., Hourly: $50/hr, Daily: $300/day"
-                  rows={3}
-                />
+                <h3 className="font-semibold mb-4">Pricing</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="weeklyPrice">Price per Week ($)</Label>
+                    <Input
+                      id="weeklyPrice"
+                      type="number"
+                      value={weeklyPrice}
+                      onChange={(e) => setWeeklyPrice(e.target.value)}
+                      placeholder="e.g., 500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="monthlyPrice">Price per Month ($)</Label>
+                    <Input
+                      id="monthlyPrice"
+                      type="number"
+                      value={monthlyPrice}
+                      onChange={(e) => setMonthlyPrice(e.target.value)}
+                      placeholder="e.g., 1800"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Submitting..." : "Register Space"}
+              <Button type="submit" className="w-full" disabled={loading || uploadedImages.length === 0}>
+                {loading ? "Submitting..." : "Submit for Approval"}
               </Button>
             </form>
           </CardContent>

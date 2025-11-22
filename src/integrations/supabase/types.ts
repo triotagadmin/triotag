@@ -208,10 +208,12 @@ export type Database = {
           budget_currency: string | null
           campaign_description: string | null
           campaign_name: string
+          campaign_type: string | null
           created_at: string | null
           creative_assets: Json | null
           end_date: string | null
           id: string
+          location: string | null
           payment_status: string | null
           rejection_reason: string | null
           start_date: string | null
@@ -227,10 +229,12 @@ export type Database = {
           budget_currency?: string | null
           campaign_description?: string | null
           campaign_name: string
+          campaign_type?: string | null
           created_at?: string | null
           creative_assets?: Json | null
           end_date?: string | null
           id?: string
+          location?: string | null
           payment_status?: string | null
           rejection_reason?: string | null
           start_date?: string | null
@@ -246,10 +250,12 @@ export type Database = {
           budget_currency?: string | null
           campaign_description?: string | null
           campaign_name?: string
+          campaign_type?: string | null
           created_at?: string | null
           creative_assets?: Json | null
           end_date?: string | null
           id?: string
+          location?: string | null
           payment_status?: string | null
           rejection_reason?: string | null
           start_date?: string | null
