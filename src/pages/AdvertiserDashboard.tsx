@@ -19,6 +19,7 @@ import {
   TrendingUp,
   Calendar
 } from "lucide-react";
+import { Navigation } from "@/components/Navigation";
 
 const AdvertiserDashboard = () => {
   const navigate = useNavigate();
@@ -110,14 +111,7 @@ const AdvertiserDashboard = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <nav className="bg-card border-b">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="font-bold text-xl">Tiny Sticky Ads</h1>
-          <Button variant="outline" onClick={handleSignOut}>
-            Sign Out
-          </Button>
-        </div>
-      </nav>
+      <Navigation />
 
       <div className="container mx-auto px-6 py-12">
         <div className="mb-8">
@@ -191,7 +185,7 @@ const AdvertiserDashboard = () => {
           </div>
 
           <div className="mt-6 flex gap-4">
-            <Button onClick={() => navigate("/publishers")} size="lg" className="gap-2">
+            <Button onClick={() => navigate("/campaign-builder")} size="lg" className="gap-2">
               <Plus className="h-4 w-4" />
               Create Campaign
             </Button>
@@ -212,7 +206,7 @@ const AdvertiserDashboard = () => {
               <div className="text-center py-12">
                 <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground mb-4">No campaigns yet</p>
-                <Button onClick={() => navigate("/publishers")}>
+                <Button onClick={() => navigate("/campaign-builder")}>
                   Create Your First Campaign
                 </Button>
               </div>
