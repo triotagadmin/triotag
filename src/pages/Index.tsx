@@ -1,10 +1,10 @@
 import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
+import { PublisherTypes } from "@/components/PublisherTypes";
 import { HowItWorks } from "@/components/HowItWorks";
 import { FeaturedLocations } from "@/components/FeaturedLocations";
 import { FeaturedAgents } from "@/components/FeaturedAgents";
 import { FeaturedDigitalMedia } from "@/components/FeaturedDigitalMedia";
-import { PublisherTypes } from "@/components/PublisherTypes";
 import { AdvertiserTypes } from "@/components/AdvertiserTypes";
 import { CTABanner } from "@/components/CTABanner";
 import { Footer } from "@/components/Footer";
