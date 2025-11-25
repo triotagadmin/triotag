@@ -33,6 +33,9 @@ import VenueExplore from "./pages/VenueExplore";
 import VenueInventory from "./pages/VenueInventory";
 import VenueDetail from "./pages/VenueDetail";
 import NotFound from "./pages/NotFound";
+import DigitalInventory from "./pages/DigitalInventory";
+import AgentInventory from "./pages/AgentInventory";
+import CampaignBuilder from "./pages/CampaignBuilder";
 
 const queryClient = new QueryClient();
 
@@ -48,8 +51,11 @@ const App = () => (
           <Route path="/insights" element={<Insights />} />
           <Route path="/explore" element={<VenueExplore />} />
           <Route path="/inventory" element={<VenueInventory />} />
+          <Route path="/digital-inventory" element={<DigitalInventory />} />
+          <Route path="/agent-inventory" element={<AgentInventory />} />
           <Route path="/venue/:id" element={<VenueDetail />} />
           <Route path="/venue-registration" element={<VenueRegistration />} />
+          <Route path="/campaign-builder" element={<CampaignBuilder />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
