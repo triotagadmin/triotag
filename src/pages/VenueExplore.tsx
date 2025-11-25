@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, DollarSign, Calendar, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Navigation } from "@/components/Navigation";
 
 interface Campaign {
   id: string;
@@ -128,6 +129,7 @@ const VenueExplore = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
+      <Navigation />
       <div className="container mx-auto px-6 py-12">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">Explore Campaigns</h1>
