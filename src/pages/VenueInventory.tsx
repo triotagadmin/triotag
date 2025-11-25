@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Edit, Eye, MapPin, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Navigation } from "@/components/Navigation";
 
 interface Venue {
   id: string;
@@ -42,7 +43,7 @@ const VenueInventory = () => {
         .from("publisher_profiles")
         .select("id")
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
       if (!profile) {
@@ -176,6 +177,7 @@ const VenueInventory = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
+      <Navigation />
       <div className="container mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
