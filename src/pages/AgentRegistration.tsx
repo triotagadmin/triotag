@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -358,14 +359,7 @@ const AgentRegistration = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <nav className="bg-card border-b">
-        <div className="container mx-auto px-6 py-4">
-          <Button variant="ghost" onClick={() => navigate("/agent-publishers")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
-        </div>
-      </nav>
+      <Navigation />
 
       <div className="container mx-auto px-6 py-12 max-w-3xl">
         <Card>

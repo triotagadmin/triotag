@@ -47,11 +47,41 @@ export const Navigation = () => {
     navigate("/");
   };
 
+  const [publisherType, setPublisherType] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPublisherType = async () => {
+      if (userRole === "publisher" && user) {
+        const { data } = await supabase
+          .from("publisher_profiles")
+          .select("publisher_type")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        setPublisherType(data?.publisher_type ?? null);
+      }
+    };
+
+    fetchPublisherType();
+  }, [userRole, user]);
+
   const getDashboardLink = () => {
     if (userRole === "advertiser") {
       return "/advertiser-dashboard";
     }
+    if (userRole === "publisher" && publisherType) {
+      if (publisherType === "venue") return "/venue-publishers";
+      if (publisherType === "digital") return "/digital-publishers";
+      if (publisherType === "agent") return "/agent-publishers";
+    }
     return "/dashboard";
+  };
+
+  const getInventoryLink = () => {
+    if (publisherType === "venue") return "/venue-inventory";
+    if (publisherType === "digital") return "/digital-inventory";
+    if (publisherType === "agent") return "/agent-inventory";
+    return "/inventory";
   };
 
   return (
@@ -85,7 +115,7 @@ export const Navigation = () => {
                   <Link to="/explore">
                     <Button variant="ghost">Explore</Button>
                   </Link>
-                  <Link to="/inventory">
+                  <Link to={getInventoryLink()}>
                     <Button variant="ghost">Inventory</Button>
                   </Link>
                   <Link to="/insights">
