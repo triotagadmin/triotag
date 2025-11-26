@@ -16,7 +16,8 @@ const Verify = () => {
       setStatus(verified as "success" | "failed" | "already");
     } else if (token) {
       // Token present - redirect to edge function for verification
-      window.location.href = `https://jungfmgsxbayxzptvpky.supabase.co/functions/v1/verify-email?token=${token}`;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      window.location.href = `${supabaseUrl}/functions/v1/verify-email?token=${token}`;
     }
   }, [searchParams]);
 
