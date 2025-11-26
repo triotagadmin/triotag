@@ -42,6 +42,8 @@ const Auth = () => {
   const [userType, setUserType] = useState<string>("advertiser");
   const [showResendVerification, setShowResendVerification] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
+  const [resendUserId, setResendUserId] = useState("");
+  const [resendUserType, setResendUserType] = useState("");
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +92,8 @@ const Auth = () => {
       });
       setShowResendVerification(true);
       setResendEmail(validatedData.email);
+      setResendUserId(authData.user.id);
+      setResendUserType(userType);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast({
@@ -153,6 +157,8 @@ const Auth = () => {
           });
           setShowResendVerification(true);
           setResendEmail(validatedData.email);
+          setResendUserId(session.user.id);
+          setResendUserType("advertiser");
           await supabase.auth.signOut();
           return;
         }
@@ -177,6 +183,8 @@ const Auth = () => {
           });
           setShowResendVerification(true);
           setResendEmail(validatedData.email);
+          setResendUserId(session.user.id);
+          setResendUserType(profile.publisher_type);
           await supabase.auth.signOut();
           return;
         }
@@ -214,19 +222,20 @@ const Auth = () => {
   };
 
   const handleResendVerification = async () => {
-    if (!resendEmail) return;
+    if (!resendEmail || !resendUserId || !resendUserType) return;
     
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: resendEmail,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-        }
+      // Send custom verification email via edge function
+      const { error: emailError } = await supabase.functions.invoke("send-verification-email", {
+        body: {
+          email: resendEmail,
+          userId: resendUserId,
+          userType: resendUserType,
+        },
       });
 
-      if (error) throw error;
+      if (emailError) throw emailError;
 
       toast({
         title: "Verification email sent!",
