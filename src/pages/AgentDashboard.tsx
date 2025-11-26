@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -103,14 +104,7 @@ const AgentDashboard = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <nav className="bg-card border-b">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="font-bold text-xl">Tiny Sticky Ads</h1>
-          <Button variant="outline" onClick={handleSignOut}>
-            Sign Out
-          </Button>
-        </div>
-      </nav>
+      <Navigation />
 
       <div className="container mx-auto px-6 py-12">
         <div className="mb-8 flex items-start justify-between">

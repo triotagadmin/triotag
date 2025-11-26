@@ -62,10 +62,12 @@ const App = () => (
           <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/advertiser-dashboard" element={<AdvertiserDashboard />} />
           <Route path="/venue" element={<VenueDashboard />} />
+          <Route path="/venue-publishers" element={<VenueDashboard />} />
           <Route path="/venue-info" element={<Venue />} />
           <Route path="/venue/register" element={<VenueRegistration />} />
           <Route path="/venue/verify" element={<VenueVerification />} />
           <Route path="/digital-media" element={<DigitalMediaDashboard />} />
+          <Route path="/digital-publishers" element={<DigitalMediaDashboard />} />
           <Route path="/digital-media-info" element={<DigitalMedia />} />
           <Route path="/digital-media/register" element={<DigitalServiceRegistration />} />
           <Route path="/digital-media/verify" element={<DigitalVerification />} />
