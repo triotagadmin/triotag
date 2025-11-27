@@ -218,12 +218,13 @@ const Auth = () => {
     
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: resendEmail,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-        }
+      // Call the custom edge function to resend verification email
+      const { error } = await supabase.functions.invoke("send-verification-email", {
+        body: {
+          email: resendEmail,
+          userId: "resend-request", // Placeholder since user might not be logged in
+          userType: userType,
+        },
       });
 
       if (error) throw error;
