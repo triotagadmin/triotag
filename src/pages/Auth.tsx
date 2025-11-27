@@ -67,6 +67,25 @@ const Auth = () => {
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error("User creation failed");
 
+      // For publishers, create a basic profile now so verification can work
+      if (userType === "venue" || userType === "digital" || userType === "agent") {
+        const { error: profileError } = await supabase
+          .from("publisher_profiles")
+          .insert({
+            user_id: authData.user.id,
+            publisher_type: userType as "venue" | "digital" | "agent",
+            business_name: "Pending", // Placeholder, will be updated in CompleteProfile
+            contact_email: validatedData.email,
+            verified: false,
+            verification_status: "pending",
+          });
+
+        if (profileError) {
+          console.error("Error creating publisher profile:", profileError);
+          throw new Error("Failed to create profile. Please contact support.");
+        }
+      }
+
       // Sign out the user immediately (they must verify email first)
       await supabase.auth.signOut();
 
@@ -218,11 +237,40 @@ const Auth = () => {
     
     setLoading(true);
     try {
+      // Look up user by email to get their userId
+      let userId = "";
+      
+      // Try advertiser first
+      const { data: advertiser } = await supabase
+        .from("advertiser_profiles")
+        .select("user_id")
+        .eq("contact_email", resendEmail)
+        .maybeSingle();
+      
+      if (advertiser) {
+        userId = advertiser.user_id;
+      } else {
+        // Try publisher
+        const { data: publisher } = await supabase
+          .from("publisher_profiles")
+          .select("user_id")
+          .eq("contact_email", resendEmail)
+          .maybeSingle();
+        
+        if (publisher) {
+          userId = publisher.user_id;
+        }
+      }
+
+      if (!userId) {
+        throw new Error("No account found with this email. Please sign up first.");
+      }
+
       // Call the custom edge function to resend verification email
       const { error } = await supabase.functions.invoke("send-verification-email", {
         body: {
           email: resendEmail,
-          userId: "resend-request", // Placeholder since user might not be logged in
+          userId: userId,
           userType: userType,
         },
       });
