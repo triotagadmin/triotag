@@ -50,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
     const verificationUrl = `https://tinystickyads.com/verify?token=${token}`;
 
     const emailResponse = await resend.emails.send({
-      from: "TinyStickyAds <onboarding@resend.dev>",
+      from: "TinyStickyAds <noreply@tinystickyads.com>",
       to: [email],
       subject: "Verify your TinyStickyAds Account",
       html: `
