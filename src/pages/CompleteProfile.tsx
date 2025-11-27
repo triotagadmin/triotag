@@ -46,16 +46,19 @@ const CompleteProfile = () => {
       setUser(session.user);
       setContactEmail(session.user.email || "");
       
-      // Check if profile already exists
+      // Check if profile already exists and is completed
       const { data: profile } = await supabase
         .from("publisher_profiles")
-        .select("id, publisher_type")
+        .select("id, publisher_type, business_name")
         .eq("user_id", session.user.id)
         .maybeSingle();
       
-      if (profile) {
-        // Profile exists, redirect to appropriate dashboard
+      if (profile && profile.business_name !== "Pending") {
+        // Profile exists and is completed, redirect to appropriate dashboard
         redirectToDashboard(profile.publisher_type);
+      } else if (profile && profile.business_name === "Pending") {
+        // Profile exists but not completed, allow user to update it
+        setPublisherType(profile.publisher_type);
       }
     };
 
@@ -95,14 +98,10 @@ const CompleteProfile = () => {
         description: description || undefined,
       });
 
-      // Create publisher profile
+      // Update existing publisher profile (created during signup)
       const profileData: any = {
-        user_id: user.id,
-        publisher_type: publisherType,
         business_name: validatedData.businessName,
         contact_email: validatedData.contactEmail,
-        verification_status: "pending",
-        verified: true, // Set to true since email was verified at signup
       };
 
       if (publisherType === "agent" && agentRole) {
@@ -123,7 +122,8 @@ const CompleteProfile = () => {
 
       const { error } = await supabase
         .from("publisher_profiles")
-        .insert(profileData);
+        .update(profileData)
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
@@ -166,7 +166,11 @@ const CompleteProfile = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="publisherType">Publisher Type</Label>
-              <Select value={publisherType} onValueChange={setPublisherType}>
+              <Select 
+                value={publisherType} 
+                onValueChange={setPublisherType}
+                disabled={user !== null} // Disable if user exists (profile already created)
+              >
                 <SelectTrigger id="publisherType">
                   <SelectValue />
                 </SelectTrigger>
