@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, Users, TrendingUp } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroBg from "@/assets/habit-tracker-hero-bg.jpg";
 
 const HabitTracker = () => {
@@ -23,9 +24,11 @@ const HabitTracker = () => {
             Stop gambling with your capital. Join elite traders who leverage cutting-edge AI to develop 
             winning philosophies and execute with confidence. Your profitable trading journey starts here.
           </p>
-          <Button size="lg" className="text-lg px-8 py-6 group bg-blue-600 hover:bg-blue-700">
-            Start Trading Smarter
-            <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+          <Button size="lg" className="text-lg px-8 py-6 group bg-blue-600 hover:bg-blue-700" asChild>
+            <Link to="/trading-ai">
+              Start Trading Smarter
+              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </Button>
         </div>
       </section>
@@ -129,9 +132,12 @@ const HabitTracker = () => {
             size="lg" 
             variant="secondary" 
             className="text-lg px-8 py-6 mb-12 group bg-white text-blue-900 hover:bg-gray-100"
+            asChild
           >
-            Get Early Access Now
-            <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+            <Link to="/trading-ai">
+              Get Early Access Now
+              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </Button>
 
           {/* Trust Elements */}

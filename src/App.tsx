@@ -37,6 +37,7 @@ import DigitalInventory from "./pages/DigitalInventory";
 import AgentInventory from "./pages/AgentInventory";
 import CampaignBuilder from "./pages/CampaignBuilder";
 import HabitTracker from "./pages/HabitTracker";
+import TradingAI from "./pages/TradingAI";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/venue-registration" element={<VenueRegistration />} />
           <Route path="/campaign-builder" element={<CampaignBuilder />} />
           <Route path="/habit-tracker" element={<HabitTracker />} />
+          <Route path="/trading-ai" element={<TradingAI />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
