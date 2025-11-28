@@ -30,6 +30,33 @@ const HabitTracker = () => {
               <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
+          
+          <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
+            <a 
+              href="https://play.google.com/store" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="transition-transform hover:scale-105"
+            >
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
+                alt="Get it on Google Play" 
+                className="h-14"
+              />
+            </a>
+            <a 
+              href="https://apps.apple.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="transition-transform hover:scale-105"
+            >
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" 
+                alt="Download on the App Store" 
+                className="h-14"
+              />
+            </a>
+          </div>
         </div>
       </section>
 
@@ -131,7 +158,7 @@ const HabitTracker = () => {
           <Button 
             size="lg" 
             variant="secondary" 
-            className="text-lg px-8 py-6 mb-12 group bg-white text-blue-900 hover:bg-gray-100"
+            className="text-lg px-8 py-6 mb-8 group bg-white text-blue-900 hover:bg-gray-100"
             asChild
           >
             <Link to="/trading-ai">
@@ -139,6 +166,33 @@ const HabitTracker = () => {
               <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+            <a 
+              href="https://play.google.com/store" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="transition-transform hover:scale-105"
+            >
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
+                alt="Get it on Google Play" 
+                className="h-14"
+              />
+            </a>
+            <a 
+              href="https://apps.apple.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="transition-transform hover:scale-105"
+            >
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" 
+                alt="Download on the App Store" 
+                className="h-14"
+              />
+            </a>
+          </div>
 
           {/* Trust Elements */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-12 border-t border-white/20">
