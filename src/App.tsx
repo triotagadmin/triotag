@@ -38,6 +38,7 @@ import AgentInventory from "./pages/AgentInventory";
 import CampaignBuilder from "./pages/CampaignBuilder";
 import HabitTracker from "./pages/HabitTracker";
 import TradingAI from "./pages/TradingAI";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
           <Route path="/campaign-builder" element={<CampaignBuilder />} />
           <Route path="/habit-tracker" element={<HabitTracker />} />
           <Route path="/trading-ai" element={<TradingAI />} />
+          <Route path="/install" element={<Install />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
