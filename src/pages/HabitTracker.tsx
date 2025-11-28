@@ -13,7 +13,6 @@ const HabitTracker = () => {
         className="relative overflow-hidden py-32 px-4 sm:px-6 lg:px-8 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroBg})` }}
       >
-        <div className="absolute inset-0 bg-background/40 backdrop-blur-sm"></div>
       </section>
 
       {/* Main CTA Section */}
