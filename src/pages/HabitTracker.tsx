@@ -104,39 +104,39 @@ const HabitTracker = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-accent/20 via-background to-primary/10 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            Habit Tracker
+          <h1 className="text-4xl font-bold text-primary mb-2">
+            Ad Tracker
           </h1>
-          <p className="text-muted-foreground">
-            Build consistency, one day at a time
+          <p className="text-accent-foreground">
+            Track your advertising campaigns, one day at a time
           </p>
         </div>
 
         {/* Add Habit Section */}
-        <Card className="p-6 mb-6">
+        <Card className="p-6 mb-6 bg-card/80 backdrop-blur border-primary/20">
           <div className="flex gap-3">
             <Input
-              placeholder="Enter new habit..."
+              placeholder="Enter new ad campaign..."
               value={newHabitName}
               onChange={(e) => setNewHabitName(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && addHabit()}
-              className="flex-1"
+              className="flex-1 border-accent/30"
             />
             <Button onClick={addHabit} className="bg-primary hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
-              Add Habit
+              Add Campaign
             </Button>
           </div>
         </Card>
 
         {/* Habits List */}
         {habits.length === 0 ? (
-          <Card className="p-12 text-center">
+          <Card className="p-12 text-center bg-card/80 backdrop-blur border-accent/20">
             <p className="text-muted-foreground text-lg">
-              No habits yet. Add your first habit to get started!
+              No campaigns yet. Add your first ad campaign to get started!
             </p>
           </Card>
         ) : (
@@ -148,10 +148,10 @@ const HabitTracker = () => {
               return (
                 <Card
                   key={habit.id}
-                  className={`p-6 transition-all ${
+                  className={`p-6 transition-all bg-card/80 backdrop-blur ${
                     isCompletedToday
-                      ? "bg-primary/10 border-primary"
-                      : "hover:border-primary/50"
+                      ? "bg-primary/20 border-primary shadow-lg shadow-primary/20"
+                      : "border-accent/20 hover:border-primary/50 hover:shadow-md"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -199,8 +199,8 @@ const HabitTracker = () => {
 
         {/* Stats Section */}
         {habits.length > 0 && (
-          <Card className="mt-8 p-6">
-            <h3 className="text-xl font-semibold text-foreground mb-4">
+          <Card className="mt-8 p-6 bg-card/80 backdrop-blur border-primary/20">
+            <h3 className="text-xl font-semibold text-primary mb-4">
               Today's Progress
             </h3>
             <div className="grid grid-cols-3 gap-4">
