@@ -34,7 +34,7 @@ const HabitTracker = () => {
     if (!newHabitName.trim()) {
       toast({
         title: "Error",
-        description: "Please enter a habit name",
+        description: "Please enter an ad preference",
         variant: "destructive",
       });
       return;
@@ -50,16 +50,16 @@ const HabitTracker = () => {
     setHabits([...habits, newHabit]);
     setNewHabitName("");
     toast({
-      title: "Success",
-      description: "Habit added successfully",
+      title: "Preference Added",
+      description: "Your ad preference has been saved",
     });
   };
 
   const deleteHabit = (id: string) => {
     setHabits(habits.filter((h) => h.id !== id));
     toast({
-      title: "Deleted",
-      description: "Habit removed",
+      title: "Removed",
+      description: "Ad preference removed",
     });
   };
 
@@ -104,40 +104,51 @@ const HabitTracker = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent/20 via-background to-primary/10 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-accent/30 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">
-            Ad Tracker
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">
+            AI Adstreem
           </h1>
-          <p className="text-accent-foreground">
-            Track your advertising campaigns, one day at a time
+          <p className="text-xl text-foreground font-medium">
+            Choose Your Own Ads, Power Your Experience
+          </p>
+          <p className="text-muted-foreground mt-2">
+            Take control of your advertising experience with AI-powered personalization
           </p>
         </div>
 
-        {/* Add Habit Section */}
-        <Card className="p-6 mb-6 bg-card/80 backdrop-blur border-primary/20">
+        {/* Add Ad Preference Section */}
+        <Card className="p-6 mb-6 bg-card/95 backdrop-blur-xl border-primary/30 shadow-xl shadow-primary/10">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
+            Add Ad Preference
+          </h3>
           <div className="flex gap-3">
             <Input
-              placeholder="Enter new ad campaign..."
+              placeholder="Enter ad category or brand you want to see..."
               value={newHabitName}
               onChange={(e) => setNewHabitName(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && addHabit()}
-              className="flex-1 border-accent/30"
+              className="flex-1 border-accent/40 focus:border-primary"
             />
-            <Button onClick={addHabit} className="bg-primary hover:bg-primary/90">
+            <Button onClick={addHabit} className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity">
               <Plus className="w-4 h-4 mr-2" />
-              Add Campaign
+              Choose Ad
             </Button>
           </div>
         </Card>
 
-        {/* Habits List */}
+        {/* Ad Preferences List */}
         {habits.length === 0 ? (
-          <Card className="p-12 text-center bg-card/80 backdrop-blur border-accent/20">
-            <p className="text-muted-foreground text-lg">
-              No campaigns yet. Add your first ad campaign to get started!
-            </p>
+          <Card className="p-12 text-center bg-card/95 backdrop-blur-xl border-accent/20">
+            <div className="max-w-md mx-auto">
+              <p className="text-foreground text-lg font-medium mb-2">
+                No ad preferences yet
+              </p>
+              <p className="text-muted-foreground">
+                Start choosing the ads you want to see! Add your favorite brands, products, or categories above.
+              </p>
+            </div>
           </Card>
         ) : (
           <div className="space-y-4">
@@ -148,10 +159,10 @@ const HabitTracker = () => {
               return (
                 <Card
                   key={habit.id}
-                  className={`p-6 transition-all bg-card/80 backdrop-blur ${
+                  className={`p-6 transition-all bg-card/95 backdrop-blur-xl ${
                     isCompletedToday
-                      ? "bg-primary/20 border-primary shadow-lg shadow-primary/20"
-                      : "border-accent/20 hover:border-primary/50 hover:shadow-md"
+                      ? "bg-gradient-to-br from-primary/20 to-accent/20 border-primary shadow-xl shadow-primary/20 scale-[1.02]"
+                      : "border-accent/20 hover:border-primary/50 hover:shadow-lg hover:scale-[1.01]"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -172,12 +183,12 @@ const HabitTracker = () => {
                           {habit.name}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
-                          <Flame className="w-4 h-4 text-orange-500" />
-                          <span className="text-sm text-muted-foreground">
-                            {streak} day streak
+                          <Flame className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-medium text-primary">
+                            {streak} day engagement streak
                           </span>
                           <span className="text-sm text-muted-foreground">
-                            • {habit.completedDates.length} total completions
+                            • {habit.completedDates.length} times viewed
                           </span>
                         </div>
                       </div>
@@ -199,25 +210,25 @@ const HabitTracker = () => {
 
         {/* Stats Section */}
         {habits.length > 0 && (
-          <Card className="mt-8 p-6 bg-card/80 backdrop-blur border-primary/20">
+          <Card className="mt-8 p-6 bg-gradient-to-br from-card/95 to-primary/5 backdrop-blur-xl border-primary/30 shadow-xl">
             <h3 className="text-xl font-semibold text-primary mb-4">
-              Today's Progress
+              Today's Ad Engagement
             </h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-primary">
+            <div className="grid grid-cols-3 gap-6">
+              <div className="text-center p-4 rounded-lg bg-primary/10 border border-primary/20">
+                <p className="text-4xl font-bold text-primary">
                   {habits.filter((h) => h.completedDates.includes(today)).length}
                 </p>
-                <p className="text-sm text-muted-foreground">Completed</p>
+                <p className="text-sm text-muted-foreground font-medium mt-1">Ads Viewed</p>
               </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold text-foreground">
+              <div className="text-center p-4 rounded-lg bg-accent/10 border border-accent/20">
+                <p className="text-4xl font-bold text-accent">
                   {habits.length}
                 </p>
-                <p className="text-sm text-muted-foreground">Total Habits</p>
+                <p className="text-sm text-muted-foreground font-medium mt-1">Preferences</p>
               </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold text-accent">
+              <div className="text-center p-4 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
+                <p className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {Math.round(
                     (habits.filter((h) => h.completedDates.includes(today))
                       .length /
@@ -226,7 +237,7 @@ const HabitTracker = () => {
                   )}
                   %
                 </p>
-                <p className="text-sm text-muted-foreground">Completion Rate</p>
+                <p className="text-sm text-muted-foreground font-medium mt-1">Engagement Rate</p>
               </div>
             </div>
           </Card>
