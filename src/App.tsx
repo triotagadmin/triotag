@@ -36,6 +36,7 @@ import NotFound from "./pages/NotFound";
 import DigitalInventory from "./pages/DigitalInventory";
 import AgentInventory from "./pages/AgentInventory";
 import CampaignBuilder from "./pages/CampaignBuilder";
+import HabitTracker from "./pages/HabitTracker";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
           <Route path="/venue/:id" element={<VenueDetail />} />
           <Route path="/venue-registration" element={<VenueRegistration />} />
           <Route path="/campaign-builder" element={<CampaignBuilder />} />
+          <Route path="/habit-tracker" element={<HabitTracker />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
