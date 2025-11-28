@@ -67,25 +67,8 @@ const Auth = () => {
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error("User creation failed");
 
-      // For publishers, create a basic profile now so verification can work
-      if (userType === "venue" || userType === "digital" || userType === "agent") {
-        const { error: profileError } = await supabase
-          .from("publisher_profiles")
-          .insert({
-            user_id: authData.user.id,
-            publisher_type: userType as "venue" | "digital" | "agent",
-            business_name: "Pending", // Placeholder, will be updated in CompleteProfile
-            contact_email: validatedData.email,
-            verified: false,
-            verification_status: "pending",
-          });
-
-        if (profileError) {
-          console.error("Error creating publisher profile:", profileError);
-          throw new Error("Failed to create profile. Please contact support.");
-        }
-      }
-
+      // Profile is automatically created by database trigger
+      
       // Sign out the user immediately (they must verify email first)
       await supabase.auth.signOut();
 
