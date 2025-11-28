@@ -113,17 +113,45 @@ const HabitTracker = () => {
           <p className="text-xl text-foreground font-medium">
             Choose Your Own Ads, Power Your Experience
           </p>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-2 mb-6">
             Take control of your advertising experience with AI-powered personalization
           </p>
+          
+          {/* App Store Buttons */}
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <a 
+              href="https://play.google.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block transition-transform hover:scale-105"
+            >
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
+                alt="Get it on Google Play" 
+                className="h-14"
+              />
+            </a>
+            <a 
+              href="https://apps.apple.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block transition-transform hover:scale-105"
+            >
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" 
+                alt="Download on the App Store" 
+                className="h-14"
+              />
+            </a>
+          </div>
         </div>
 
         {/* Add Ad Preference Section */}
         <Card className="p-6 mb-6 bg-card/95 backdrop-blur-xl border-primary/30 shadow-xl shadow-primary/10">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
-            Add Ad Preference
+          <h3 className="text-2xl font-bold text-foreground mb-1 text-center">
+            Ad Tracker
           </h3>
-          <div className="flex gap-3">
+          <div className="flex gap-3 mb-3">
             <Input
               placeholder="Enter ad category or brand you want to see..."
               value={newHabitName}
@@ -136,6 +164,9 @@ const HabitTracker = () => {
               Choose Ad
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground text-center">
+            Track your advertising campaigns, one day at a time
+          </p>
         </Card>
 
         {/* Ad Preferences List */}
