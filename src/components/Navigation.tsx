@@ -144,6 +144,9 @@ export const Navigation = () => {
             </>
           ) : (
             <>
+              <Link to="/habit-tracker">
+                <Button variant="ghost">Habit Tracker</Button>
+              </Link>
               <Link to="/insights">
                 <Button variant="ghost">Insights</Button>
               </Link>
