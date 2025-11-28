@@ -32,10 +32,8 @@ const HabitTracker = () => {
           </Button>
           
           <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
-            <a 
-              href="https://play.google.com/store" 
-              target="_blank" 
-              rel="noopener noreferrer"
+            <Link 
+              to="/install"
               className="transition-transform hover:scale-105"
             >
               <img 
@@ -43,11 +41,9 @@ const HabitTracker = () => {
                 alt="Get it on Google Play" 
                 className="h-14"
               />
-            </a>
-            <a 
-              href="https://apps.apple.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
+            </Link>
+            <Link 
+              to="/install"
               className="transition-transform hover:scale-105"
             >
               <img 
@@ -55,7 +51,7 @@ const HabitTracker = () => {
                 alt="Download on the App Store" 
                 className="h-14"
               />
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -168,10 +164,8 @@ const HabitTracker = () => {
           </Button>
 
           <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
-            <a 
-              href="https://play.google.com/store" 
-              target="_blank" 
-              rel="noopener noreferrer"
+            <Link 
+              to="/install"
               className="transition-transform hover:scale-105"
             >
               <img 
@@ -179,11 +173,9 @@ const HabitTracker = () => {
                 alt="Get it on Google Play" 
                 className="h-14"
               />
-            </a>
-            <a 
-              href="https://apps.apple.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
+            </Link>
+            <Link 
+              to="/install"
               className="transition-transform hover:scale-105"
             >
               <img 
@@ -191,7 +183,7 @@ const HabitTracker = () => {
                 alt="Download on the App Store" 
                 className="h-14"
               />
-            </a>
+            </Link>
           </div>
 
           {/* Trust Elements */}
