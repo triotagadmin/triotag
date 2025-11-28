@@ -1,8 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, Users, TrendingUp } from "lucide-react";
-import screen1 from "@/assets/habit-tracker-screen-1.png";
-import screen2 from "@/assets/habit-tracker-screen-2.png";
-import screen3 from "@/assets/habit-tracker-screen-3.png";
 import heroBg from "@/assets/habit-tracker-hero-bg.jpg";
 
 const HabitTracker = () => {
@@ -35,118 +32,85 @@ const HabitTracker = () => {
 
       {/* Feature 1: Real-Time Market Intelligence */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="order-2 lg:order-1">
-              <img 
-                src={screen1} 
-                alt="AI trading analysis interface" 
-                className="w-full max-w-sm mx-auto drop-shadow-2xl"
-              />
-            </div>
-            <div className="order-1 lg:order-2">
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-                Real-Time AI Market Analysis
-              </h2>
-              <p className="text-lg text-muted-foreground mb-6">
-                Stop trading blind. Our AI analyzes thousands of data points every second, delivering 
-                actionable insights directly to your fingertips. See what institutional traders see. 
-                Make decisions backed by intelligence, not emotion.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-center text-foreground">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  Live market sentiment analysis across all assets
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  AI-powered pattern recognition in milliseconds
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  Smart alerts for high-probability setups
-                </li>
-              </ul>
-            </div>
-          </div>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+            Real-Time AI Market Analysis
+          </h2>
+          <p className="text-lg text-muted-foreground mb-6">
+            Stop trading blind. Our AI analyzes thousands of data points every second, delivering 
+            actionable insights directly to your fingertips. See what institutional traders see. 
+            Make decisions backed by intelligence, not emotion.
+          </p>
+          <ul className="space-y-3 max-w-xl mx-auto text-left">
+            <li className="flex items-center text-foreground">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              Live market sentiment analysis across all assets
+            </li>
+            <li className="flex items-center text-foreground">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              AI-powered pattern recognition in milliseconds
+            </li>
+            <li className="flex items-center text-foreground">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              Smart alerts for high-probability setups
+            </li>
+          </ul>
         </div>
       </section>
 
       {/* Feature 2: Philosophy-Driven Strategy */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-                Build Your Winning Philosophy
-              </h2>
-              <p className="text-lg text-muted-foreground mb-6">
-                Successful traders don't chase signals—they follow philosophy. Our AI helps you develop 
-                and refine your trading approach based on proven principles, backtested strategies, and 
-                your personal risk tolerance. Transform from reactive to strategic.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-center text-foreground">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  Performance analytics revealing your edge
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  Risk management tailored to your goals
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  Strategy optimization based on market conditions
-                </li>
-              </ul>
-            </div>
-            <div>
-              <img 
-                src={screen2} 
-                alt="Trading philosophy analytics" 
-                className="w-full max-w-sm mx-auto drop-shadow-2xl"
-              />
-            </div>
-          </div>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+            Build Your Winning Philosophy
+          </h2>
+          <p className="text-lg text-muted-foreground mb-6">
+            Successful traders don't chase signals—they follow philosophy. Our AI helps you develop 
+            and refine your trading approach based on proven principles, backtested strategies, and 
+            your personal risk tolerance. Transform from reactive to strategic.
+          </p>
+          <ul className="space-y-3 max-w-xl mx-auto text-left">
+            <li className="flex items-center text-foreground">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              Performance analytics revealing your edge
+            </li>
+            <li className="flex items-center text-foreground">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              Risk management tailored to your goals
+            </li>
+            <li className="flex items-center text-foreground">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              Strategy optimization based on market conditions
+            </li>
+          </ul>
         </div>
       </section>
 
       {/* Feature 3: Your AI Trading Mentor */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="order-2 lg:order-1">
-              <img 
-                src={screen3} 
-                alt="AI trading assistant chat" 
-                className="w-full max-w-sm mx-auto drop-shadow-2xl"
-              />
-            </div>
-            <div className="order-1 lg:order-2">
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-                Your 24/7 AI Trading Mentor
-              </h2>
-              <p className="text-lg text-muted-foreground mb-6">
-                Questions about a trade? Market moving against you? Need validation on your analysis? 
-                Our AI assistant is like having a seasoned trading mentor in your pocket. Get instant, 
-                intelligent guidance without the emotional bias. Available whenever inspiration—or doubt—strikes.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-center text-foreground">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  Conversational AI trained on trading psychology
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  Instant analysis of your trade setups
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  Personalized coaching based on your history
-                </li>
-              </ul>
-            </div>
-          </div>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+            Your 24/7 AI Trading Mentor
+          </h2>
+          <p className="text-lg text-muted-foreground mb-6">
+            Questions about a trade? Market moving against you? Need validation on your analysis? 
+            Our AI assistant is like having a seasoned trading mentor in your pocket. Get instant, 
+            intelligent guidance without the emotional bias. Available whenever inspiration—or doubt—strikes.
+          </p>
+          <ul className="space-y-3 max-w-xl mx-auto text-left">
+            <li className="flex items-center text-foreground">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              Conversational AI trained on trading psychology
+            </li>
+            <li className="flex items-center text-foreground">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              Instant analysis of your trade setups
+            </li>
+            <li className="flex items-center text-foreground">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              Personalized coaching based on your history
+            </li>
+          </ul>
         </div>
       </section>
 
