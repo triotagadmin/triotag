@@ -3,13 +3,18 @@ import { ArrowRight, Star, Users, TrendingUp } from "lucide-react";
 import screen1 from "@/assets/habit-tracker-screen-1.png";
 import screen2 from "@/assets/habit-tracker-screen-2.png";
 import screen3 from "@/assets/habit-tracker-screen-3.png";
+import heroBg from "@/assets/habit-tracker-hero-bg.jpg";
 
 const HabitTracker = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/5 py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
+      <section 
+        className="relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8 bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroBg})` }}
+      >
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm"></div>
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
             Transform Your Day,<br />One Habit at a Time
           </h1>
