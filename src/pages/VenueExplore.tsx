@@ -20,6 +20,11 @@ interface Campaign {
   location: string;
   campaign_type: string;
   target_audience: string;
+  creative_assets: {
+    images?: string[];
+    videos?: string[];
+    description?: string;
+  } | null;
   advertiser_profiles: {
     company_name: string;
   };
@@ -91,7 +96,7 @@ const VenueExplore = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setCampaigns(data || []);
+      setCampaigns((data || []) as Campaign[]);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -239,7 +244,16 @@ const VenueExplore = () => {
             </div>
           ) : (
             filteredCampaigns.map((campaign) => (
-              <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
+              <Card key={campaign.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+                {campaign.creative_assets?.images?.[0] && (
+                  <div className="relative h-48 w-full overflow-hidden">
+                    <img
+                      src={campaign.creative_assets.images[0]}
+                      alt={campaign.campaign_name}
+                      className="w-full h-full object-cover transition-transform hover:scale-105"
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <CardTitle className="text-lg">{campaign.campaign_name}</CardTitle>
