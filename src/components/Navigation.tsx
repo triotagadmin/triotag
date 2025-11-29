@@ -43,8 +43,13 @@ export const Navigation = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/");
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
   };
 
   const [publisherType, setPublisherType] = useState<string | null>(null);
@@ -100,6 +105,9 @@ export const Navigation = () => {
                   <Link to="/home">
                     <Button variant="ghost">Home</Button>
                   </Link>
+                  <Link to="/explore">
+                    <Button variant="ghost">Explore</Button>
+                  </Link>
                   <Link to="/insights">
                     <Button variant="ghost">Insights</Button>
                   </Link>
@@ -136,6 +144,9 @@ export const Navigation = () => {
                   <Link to="/home">
                     <Button variant="ghost">Home</Button>
                   </Link>
+                  <Link to="/explore">
+                    <Button variant="ghost">Explore</Button>
+                  </Link>
                   <Link to="/insights">
                     <Button variant="ghost">Insights</Button>
                   </Link>
@@ -153,6 +164,9 @@ export const Navigation = () => {
             </>
           ) : (
             <>
+              <Link to="/explore">
+                <Button variant="ghost">Explore</Button>
+              </Link>
               <Link to="/habit-tracker">
                 <Button variant="ghost">Ad Tracker</Button>
               </Link>
