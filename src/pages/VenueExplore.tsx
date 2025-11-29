@@ -35,6 +35,67 @@ interface Campaign {
 
 const VenueExplore = () => {
   const { toast } = useToast();
+  
+  const mockCampaigns: Campaign[] = [
+    {
+      id: "mock-1",
+      campaign_name: "NBA Championship Finals Viewing Party",
+      campaign_description: "Major sporting event watch party series across multiple cities. Looking for bars, restaurants, and entertainment venues to host official viewing parties with exclusive branded merchandise and promotional giveaways.",
+      budget_amount: 42000,
+      budget_currency: "USD",
+      start_date: "2025-06-01",
+      end_date: "2025-06-20",
+      location: "New York, Los Angeles, Chicago, Dallas",
+      campaign_type: "Sporting Event",
+      target_audience: "Sports fans 21-45, basketball enthusiasts, social groups seeking game day experiences",
+      creative_assets: {
+        images: [campaignNbaImg],
+        description: "Dynamic sports action photography and fan engagement imagery"
+      },
+      advertiser_profiles: {
+        company_name: "Premier Sports Marketing"
+      }
+    },
+    {
+      id: "mock-2",
+      campaign_name: "Broadway Tour: The Modern Musical",
+      campaign_description: "National touring production of award-winning Broadway musical. Seeking venue partnerships in metro stations, theaters, and cultural districts to promote ticket sales and show dates across 20 cities.",
+      budget_amount: 38000,
+      budget_currency: "USD",
+      start_date: "2025-08-01",
+      end_date: "2025-12-31",
+      location: "Boston, Philadelphia, San Francisco, Seattle, Atlanta",
+      campaign_type: "Theater & Entertainment",
+      target_audience: "Theater enthusiasts 30-65, arts supporters, entertainment seekers, date night crowds",
+      creative_assets: {
+        images: [campaignBroadwayImg],
+        description: "Stunning theatrical production photography and promotional materials"
+      },
+      advertiser_profiles: {
+        company_name: "Broadway Touring Co."
+      }
+    },
+    {
+      id: "mock-3",
+      campaign_name: "Comic Con International 2025",
+      campaign_description: "Premier pop culture convention featuring celebrity guests, exclusive merchandise, cosplay competitions, and entertainment panels. Targeting high-traffic urban venues for maximum fan engagement and ticket sales.",
+      budget_amount: 52000,
+      budget_currency: "USD",
+      start_date: "2025-07-01",
+      end_date: "2025-09-15",
+      location: "San Diego, New York, Orlando, Las Vegas",
+      campaign_type: "Convention & Expo",
+      target_audience: "Pop culture fans 16-40, gamers, comic book enthusiasts, cosplayers, collectors",
+      creative_assets: {
+        images: [campaignComicConImg],
+        description: "Vibrant pop culture artwork and celebrity guest announcements"
+      },
+      advertiser_profiles: {
+        company_name: "Pop Culture Events LLC"
+      }
+    }
+  ];
+  
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,8 +146,11 @@ const VenueExplore = () => {
 
       const adminCampaigns = campaignsWithAdminCheck.filter((c): c is NonNullable<typeof c> => c !== null) as Campaign[];
 
-      setCampaigns(adminCampaigns);
-      setFilteredCampaigns(adminCampaigns);
+      // Combine mock campaigns with real campaigns
+      const allCampaigns = [...mockCampaigns, ...adminCampaigns];
+      
+      setCampaigns(allCampaigns);
+      setFilteredCampaigns(allCampaigns);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
       toast({
