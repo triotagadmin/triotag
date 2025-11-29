@@ -235,7 +235,7 @@ const HabitTracker = () => {
         {/* Add Campaign Section */}
         <Card className="p-6 mb-6 bg-card/95 backdrop-blur-xl border-primary/30 shadow-xl shadow-primary/10">
           <h3 className="text-2xl font-bold text-foreground mb-4 text-center">
-            Campaign Tracker
+            Ad Tracker
           </h3>
           <div className="space-y-3 mb-3">
             <Input
