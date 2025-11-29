@@ -11,6 +11,13 @@ import { useToast } from "@/hooks/use-toast";
 import campaignNbaImg from "@/assets/campaign-nba-viewing-party.jpg";
 import campaignBroadwayImg from "@/assets/campaign-broadway-musical.jpg";
 import campaignComicConImg from "@/assets/campaign-comic-con.jpg";
+import campaignMusicFestivalImg from "@/assets/campaign-music-festival.jpg";
+import campaignCharityGalaImg from "@/assets/campaign-charity-gala.jpg";
+import campaignFoodWineImg from "@/assets/campaign-food-wine-expo.jpg";
+import campaignTechSummitImg from "@/assets/campaign-tech-summit.jpg";
+import campaignMarathonImg from "@/assets/campaign-marathon.jpg";
+import campaignHolidayMarketImg from "@/assets/campaign-holiday-market.jpg";
+import campaignClassicCarImg from "@/assets/campaign-classic-car-show.jpg";
 
 interface Campaign {
   id: string;
@@ -106,7 +113,7 @@ const VenueExplore = () => {
       campaign_type: "Music Festival",
       target_audience: "Music lovers 18-35, festival enthusiasts, young professionals seeking live entertainment experiences",
       creative_assets: {
-        images: [campaignNbaImg],
+        images: [campaignMusicFestivalImg],
         description: "Vibrant festival atmosphere and artist lineup promotional materials"
       },
       advertiser_profiles: {
@@ -125,7 +132,7 @@ const VenueExplore = () => {
       campaign_type: "Charity Event",
       target_audience: "Affluent donors 35-70, corporate executives, philanthropists, luxury lifestyle enthusiasts",
       creative_assets: {
-        images: [campaignBroadwayImg],
+        images: [campaignCharityGalaImg],
         description: "Elegant black-tie event photography and impact storytelling visuals"
       },
       advertiser_profiles: {
@@ -144,7 +151,7 @@ const VenueExplore = () => {
       campaign_type: "Food & Beverage Event",
       target_audience: "Food enthusiasts 28-55, wine connoisseurs, culinary professionals, affluent foodies",
       creative_assets: {
-        images: [campaignComicConImg],
+        images: [campaignFoodWineImg],
         description: "Mouth-watering culinary photography and chef celebrity imagery"
       },
       advertiser_profiles: {
@@ -163,7 +170,7 @@ const VenueExplore = () => {
       campaign_type: "Conference & Summit",
       target_audience: "Tech professionals 25-50, entrepreneurs, investors, software developers, startup founders",
       creative_assets: {
-        images: [campaignNbaImg],
+        images: [campaignTechSummitImg],
         description: "Cutting-edge technology and innovation showcase visuals"
       },
       advertiser_profiles: {
@@ -182,7 +189,7 @@ const VenueExplore = () => {
       campaign_type: "Sporting Event",
       target_audience: "Runners and athletes 20-50, fitness enthusiasts, health-conscious individuals, competitive sports fans",
       creative_assets: {
-        images: [campaignBroadwayImg],
+        images: [campaignMarathonImg],
         description: "Athletic achievement and marathon action photography"
       },
       advertiser_profiles: {
@@ -201,7 +208,7 @@ const VenueExplore = () => {
       campaign_type: "Community Festival",
       target_audience: "Holiday shoppers 25-65, craft enthusiasts, families seeking unique gifts and festive experiences",
       creative_assets: {
-        images: [campaignComicConImg],
+        images: [campaignHolidayMarketImg],
         description: "Festive holiday market atmosphere and artisan craft photography"
       },
       advertiser_profiles: {
@@ -220,7 +227,7 @@ const VenueExplore = () => {
       campaign_type: "Auto Show",
       target_audience: "Car collectors 40-75, automotive enthusiasts, luxury lifestyle consumers, high-net-worth individuals",
       creative_assets: {
-        images: [campaignNbaImg],
+        images: [campaignClassicCarImg],
         description: "Stunning classic automobile photography and luxury lifestyle imagery"
       },
       advertiser_profiles: {
