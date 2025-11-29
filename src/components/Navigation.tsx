@@ -105,7 +105,7 @@ export const Navigation = () => {
             <>
               {userRole === "advertiser" ? (
                 <>
-                  <Link to="/explore">
+                  <Link to="/publishers">
                     <Button variant="ghost">Explore</Button>
                   </Link>
                   <Link to="/insights">
