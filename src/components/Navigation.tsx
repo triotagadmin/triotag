@@ -176,7 +176,7 @@ export const Navigation = () => {
               <Link to="/publishers">
                 <Button variant="ghost">Buy</Button>
               </Link>
-              <Link to="/auth">
+              <Link to="/list-space">
                 <Button variant="ghost">Sell</Button>
               </Link>
               <Link to="/auth">
