@@ -40,6 +40,7 @@ import CampaignBuilder from "./pages/CampaignBuilder";
 import HabitTracker from "./pages/HabitTracker";
 import TradingAI from "./pages/TradingAI";
 import Install from "./pages/Install";
+import ListSpace from "./pages/ListSpace";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const App = () => (
           <Route path="/habit-tracker" element={<HabitTracker />} />
           <Route path="/trading-ai" element={<TradingAI />} />
           <Route path="/install" element={<Install />} />
+          <Route path="/list-space" element={<ListSpace />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
