@@ -30,6 +30,7 @@ interface Campaign {
   location: string;
   campaign_type: string;
   target_audience: string;
+  target_publishers?: string[]; // Digital, Venue, Agent
   creative_assets: {
     images?: string[];
     videos?: string[];
@@ -55,6 +56,7 @@ const VenueExplore = () => {
       location: "New York, Los Angeles, Chicago, Dallas",
       campaign_type: "Sporting Event",
       target_audience: "Sports fans 21-45, basketball enthusiasts, social groups seeking game day experiences",
+      target_publishers: ["venue"],
       creative_assets: {
         images: [campaignNbaImg],
         description: "Dynamic sports action photography and fan engagement imagery"
@@ -74,6 +76,7 @@ const VenueExplore = () => {
       location: "Boston, Philadelphia, San Francisco, Seattle, Atlanta",
       campaign_type: "Theater & Entertainment",
       target_audience: "Theater enthusiasts 30-65, arts supporters, entertainment seekers, date night crowds",
+      target_publishers: ["venue", "digital"],
       creative_assets: {
         images: [campaignBroadwayImg],
         description: "Stunning theatrical production photography and promotional materials"
@@ -93,6 +96,7 @@ const VenueExplore = () => {
       location: "San Diego, New York, Orlando, Las Vegas",
       campaign_type: "Convention & Expo",
       target_audience: "Pop culture fans 16-40, gamers, comic book enthusiasts, cosplayers, collectors",
+      target_publishers: ["venue", "digital", "agent"],
       creative_assets: {
         images: [campaignComicConImg],
         description: "Vibrant pop culture artwork and celebrity guest announcements"
@@ -112,6 +116,7 @@ const VenueExplore = () => {
       location: "Austin, Nashville, Portland, Denver",
       campaign_type: "Music Festival",
       target_audience: "Music lovers 18-35, festival enthusiasts, young professionals seeking live entertainment experiences",
+      target_publishers: ["venue", "agent", "digital"],
       creative_assets: {
         images: [campaignMusicFestivalImg],
         description: "Vibrant festival atmosphere and artist lineup promotional materials"
@@ -131,6 +136,7 @@ const VenueExplore = () => {
       location: "Manhattan, Beverly Hills, Miami Beach",
       campaign_type: "Charity Event",
       target_audience: "Affluent donors 35-70, corporate executives, philanthropists, luxury lifestyle enthusiasts",
+      target_publishers: ["venue", "digital"],
       creative_assets: {
         images: [campaignCharityGalaImg],
         description: "Elegant black-tie event photography and impact storytelling visuals"
@@ -150,6 +156,7 @@ const VenueExplore = () => {
       location: "Napa Valley, Charleston, New Orleans, Chicago",
       campaign_type: "Food & Beverage Event",
       target_audience: "Food enthusiasts 28-55, wine connoisseurs, culinary professionals, affluent foodies",
+      target_publishers: ["venue", "digital"],
       creative_assets: {
         images: [campaignFoodWineImg],
         description: "Mouth-watering culinary photography and chef celebrity imagery"
@@ -169,6 +176,7 @@ const VenueExplore = () => {
       location: "San Francisco, Seattle, Austin, Boston",
       campaign_type: "Conference & Summit",
       target_audience: "Tech professionals 25-50, entrepreneurs, investors, software developers, startup founders",
+      target_publishers: ["venue", "digital"],
       creative_assets: {
         images: [campaignTechSummitImg],
         description: "Cutting-edge technology and innovation showcase visuals"
@@ -188,6 +196,7 @@ const VenueExplore = () => {
       location: "Boston, Chicago, New York, Los Angeles, Miami",
       campaign_type: "Sporting Event",
       target_audience: "Runners and athletes 20-50, fitness enthusiasts, health-conscious individuals, competitive sports fans",
+      target_publishers: ["venue", "agent"],
       creative_assets: {
         images: [campaignMarathonImg],
         description: "Athletic achievement and marathon action photography"
@@ -207,6 +216,7 @@ const VenueExplore = () => {
       location: "Portland, Minneapolis, Burlington, Asheville, Santa Fe",
       campaign_type: "Community Festival",
       target_audience: "Holiday shoppers 25-65, craft enthusiasts, families seeking unique gifts and festive experiences",
+      target_publishers: ["venue"],
       creative_assets: {
         images: [campaignHolidayMarketImg],
         description: "Festive holiday market atmosphere and artisan craft photography"
@@ -226,6 +236,7 @@ const VenueExplore = () => {
       location: "Monterey, Scottsdale, Greenwich, Palm Beach",
       campaign_type: "Auto Show",
       target_audience: "Car collectors 40-75, automotive enthusiasts, luxury lifestyle consumers, high-net-worth individuals",
+      target_publishers: ["venue", "digital"],
       creative_assets: {
         images: [campaignClassicCarImg],
         description: "Stunning classic automobile photography and luxury lifestyle imagery"
@@ -482,6 +493,19 @@ const VenueExplore = () => {
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
                       <span className="line-clamp-1">{campaign.target_audience}</span>
+                    </div>
+                  )}
+
+                  {campaign.target_publishers && campaign.target_publishers.length > 0 && (
+                    <div className="pt-2 border-t">
+                      <p className="text-xs text-muted-foreground mb-2">Target Publishers</p>
+                      <div className="flex flex-wrap gap-1">
+                        {campaign.target_publishers.map((publisher) => (
+                          <Badge key={publisher} variant="outline" className="capitalize text-xs">
+                            {publisher}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                   )}
 
