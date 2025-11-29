@@ -10,11 +10,11 @@ export const Hero = () => {
       
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h1 className="text-6xl md:text-7xl font-bold tracking-tight">
+          <h1 className="text-6xl md:text-7xl font-bold tracking-tight text-secondary">
             Buy and Sell <span className="text-primary">Ad Space</span>
           </h1>
           
-          <p className="text-xl md:text-2xl max-w-2xl mx-auto text-[#101010]">
+          <p className="text-xl md:text-2xl max-w-2xl mx-auto text-slate-950 bg-[sidebar-primary-foreground]">
             Connecting advertisers with venues, agents, and digital publishers in the micro advertising revolution!
           </p>
           
