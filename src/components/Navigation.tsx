@@ -103,6 +103,9 @@ export const Navigation = () => {
                   <Link to="/insights">
                     <Button variant="ghost">Insights</Button>
                   </Link>
+                  <Link to="/habit-tracker">
+                    <Button variant="ghost">Ad Tracker</Button>
+                  </Link>
                   <Link to="/publishers">
                     <Button variant="ghost">Buy</Button>
                   </Link>
@@ -121,6 +124,9 @@ export const Navigation = () => {
                   <Link to="/insights">
                     <Button variant="ghost">Insights</Button>
                   </Link>
+                  <Link to="/habit-tracker">
+                    <Button variant="ghost">Ad Tracker</Button>
+                  </Link>
                   <Link to={getDashboardLink()}>
                     <Button variant="ghost">Dashboard</Button>
                   </Link>
@@ -132,6 +138,9 @@ export const Navigation = () => {
                   </Link>
                   <Link to="/insights">
                     <Button variant="ghost">Insights</Button>
+                  </Link>
+                  <Link to="/habit-tracker">
+                    <Button variant="ghost">Ad Tracker</Button>
                   </Link>
                   <Link to={getDashboardLink()}>
                     <Button variant="ghost">Dashboard</Button>
