@@ -70,7 +70,7 @@ export default function AdminBlogSubmission() {
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <Button
           variant="ghost"
-          onClick={() => navigate("/admin-dashboard")}
+          onClick={() => navigate("/admin/dashboard")}
           className="mb-6"
         >
           <ArrowLeft className="mr-2 w-4 h-4" />
@@ -188,7 +188,7 @@ export default function AdminBlogSubmission() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/admin-dashboard")}
+                  onClick={() => navigate("/admin/dashboard")}
                   disabled={isSubmitting}
                 >
                   Cancel
