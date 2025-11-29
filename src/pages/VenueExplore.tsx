@@ -58,7 +58,7 @@ const VenueExplore = () => {
       campaign_type: "Sporting Event",
       target_audience: "Sports fans 21-45, basketball enthusiasts, social groups seeking game day experiences",
       target_publishers: ["venue"],
-      ad_units: ["Venue Signage", "In-Venue Screens", "Table Tents", "Guerilla Stickers"],
+      ad_units: ["Venue Signage", "In-Venue Screens", "Table Tents", "Guerilla Stickers", "Livestreaming Operations"],
       creative_assets: {
         images: [campaignNbaImg],
         description: "Dynamic sports action photography and fan engagement imagery"
