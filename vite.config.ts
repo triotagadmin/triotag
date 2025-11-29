@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'icon-192x192.png', 'icon-512x512.png'],
       manifest: {
-        name: 'Trading AI Assistant',
-        short_name: 'Trading AI',
-        description: 'Your AI-powered trading philosophy mentor for smarter trading decisions',
+        name: 'AI Adstreem - Choose Your Own Ads',
+        short_name: 'AI Adstreem',
+        description: 'Track your ad campaigns and choose the ads you want to see',
         theme_color: '#1e40af',
         background_color: '#0f172a',
         display: 'standalone',
