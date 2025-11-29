@@ -64,11 +64,21 @@ const AgentVerification = () => {
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from("publisher_profiles")
         .select("id, verification_status")
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching publisher profile:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       if (profile) {
         setPublisherId(profile.id);
@@ -79,7 +89,7 @@ const AgentVerification = () => {
     };
 
     checkAuth();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleFileSelect = (index: number, file: File | null) => {
     const newDocuments = [...documents];

@@ -116,6 +116,31 @@ export default function SubmissionDetailsDialog({
       );
     }
 
+    if (submission.type === "verification_document") {
+      return (
+        <div className="space-y-4">
+          <DetailRow label="Document Type" value={details.document_type?.replace("_", " ")} />
+          <DetailRow label="File Name" value={details.file_name} />
+          <DetailRow label="Publisher" value={details.publisher_profiles?.business_name} />
+          <DetailRow label="Contact Email" value={details.publisher_profiles?.contact_email} />
+          <DetailRow label="Verification Status" value={details.publisher_profiles?.verification_status} />
+          <DetailRow label="Uploaded At" value={new Date(details.uploaded_at).toLocaleString()} />
+          {details.file_url && (
+            <div className="pt-4">
+              <a 
+                href={details.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-medium"
+              >
+                View Document →
+              </a>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return <p>No additional details available.</p>;
   };
 

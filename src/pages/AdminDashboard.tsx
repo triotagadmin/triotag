@@ -17,7 +17,7 @@ import SubmissionDetailsDialog from "@/components/SubmissionDetailsDialog";
 
 interface Submission {
   id: string;
-  type: "publisher" | "admin" | "advertiser" | "campaign" | "ad_space";
+  type: "publisher" | "admin" | "advertiser" | "campaign" | "ad_space" | "verification_document";
   name: string;
   email?: string;
   location?: string;
@@ -140,6 +140,20 @@ export default function AdminDashboard() {
         `)
         .order("created_at", { ascending: false });
 
+      // Load verification documents
+      const { data: verificationDocs } = await supabase
+        .from("verification_documents")
+        .select(`
+          *,
+          publisher_profiles (
+            business_name,
+            contact_email,
+            user_id,
+            verification_status
+          )
+        `)
+        .order("uploaded_at", { ascending: false });
+
       const allSubmissions: Submission[] = [
         ...(publishers || []).map((p) => ({
           id: p.id,
@@ -192,6 +206,16 @@ export default function AdminDashboard() {
           createdAt: a.created_at,
           userId: a.publisher_profiles?.user_id,
           details: a,
+        })),
+        ...(verificationDocs || []).map((v) => ({
+          id: v.id,
+          type: "verification_document" as const,
+          name: `${v.document_type} - ${v.publisher_profiles?.business_name}`,
+          email: v.publisher_profiles?.contact_email,
+          status: v.publisher_profiles?.verification_status || "pending",
+          createdAt: v.uploaded_at,
+          userId: v.publisher_profiles?.user_id,
+          details: v,
         })),
       ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
@@ -332,6 +356,23 @@ export default function AdminDashboard() {
             approval_status: newStatus,
           })
           .eq("id", selectedSubmission.id);
+        error = updateError;
+      } else if (selectedSubmission.type === "verification_document") {
+        // Update the publisher profile verification status
+        const verificationStatus = actionType === "approve" ? "approved" : actionType === "reject" ? "rejected" : "pending";
+        const { error: updateError } = await supabase
+          .from("publisher_profiles")
+          .update({
+            verification_status: verificationStatus as "approved" | "pending" | "rejected",
+            ...(actionType === "approve" && {
+              approved_at: timestamp,
+              approved_by: session.user.id,
+            }),
+            ...(actionType === "reject" && {
+              rejection_reason: actionNote,
+            }),
+          })
+          .eq("id", selectedSubmission.details.publisher_id);
         error = updateError;
       }
 
@@ -565,7 +606,7 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="submissions" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="all">
               <FileText className="w-4 h-4 mr-2" />
               All
@@ -581,6 +622,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="campaigns">
               <FileText className="w-4 h-4 mr-2" />
               Campaigns
+            </TabsTrigger>
+            <TabsTrigger value="documents">
+              <UserCircle className="w-4 h-4 mr-2" />
+              Documents
             </TabsTrigger>
             <TabsTrigger value="notifications">
               <Bell className="w-4 h-4 mr-2" />
@@ -675,6 +720,7 @@ export default function AdminDashboard() {
                     <SelectItem value="advertiser">Advertisers</SelectItem>
                     <SelectItem value="campaign">Campaigns</SelectItem>
                     <SelectItem value="ad_space">Ad Spaces</SelectItem>
+                    <SelectItem value="verification_document">Verification Documents</SelectItem>
                     <SelectItem value="admin">Admins</SelectItem>
                   </SelectContent>
                 </Select>
@@ -776,6 +822,11 @@ export default function AdminDashboard() {
           {/* Campaigns Tab */}
           <TabsContent value="campaigns" className="space-y-6">
             {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "campaign"), "Campaign Submissions", "Manage advertiser campaign submissions")}
+          </TabsContent>
+
+          {/* Verification Documents Tab */}
+          <TabsContent value="documents" className="space-y-6">
+            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "verification_document"), "Verification Documents", "Manage agent credential verification documents")}
           </TabsContent>
 
           <TabsContent value="notifications">
