@@ -151,10 +151,12 @@ const AgentVerification = () => {
         }
       }
 
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const { error: updateError } = await supabase
         .from('publisher_profiles')
         .update({ verification_status: 'pending' })
-        .eq('id', publisherId);
+        .eq('user_id', session?.user.id);
 
       if (updateError) throw updateError;
 
