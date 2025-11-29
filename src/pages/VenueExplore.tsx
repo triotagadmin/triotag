@@ -45,6 +45,39 @@ const VenueExplore = () => {
 
   const fetchCampaigns = async () => {
     try {
+      // First, get all admin user IDs
+      const { data: adminUsers, error: adminError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+
+      if (adminError) throw adminError;
+
+      const adminUserIds = adminUsers?.map(u => u.user_id) || [];
+
+      if (adminUserIds.length === 0) {
+        setCampaigns([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get advertiser profiles for admin users
+      const { data: adminAdvertisers, error: advertiserError } = await supabase
+        .from("advertiser_profiles")
+        .select("id")
+        .in("user_id", adminUserIds);
+
+      if (advertiserError) throw advertiserError;
+
+      const adminAdvertiserIds = adminAdvertisers?.map(a => a.id) || [];
+
+      if (adminAdvertiserIds.length === 0) {
+        setCampaigns([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch campaigns from admin advertisers only
       const { data, error } = await supabase
         .from("campaigns")
         .select(`
@@ -54,6 +87,7 @@ const VenueExplore = () => {
           )
         `)
         .eq("status", "approved")
+        .in("advertiser_id", adminAdvertiserIds)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -132,9 +166,9 @@ const VenueExplore = () => {
       <Navigation />
       <div className="container mx-auto px-6 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Explore Campaigns</h1>
+          <h1 className="text-4xl font-bold mb-4">Explore Featured Campaigns</h1>
           <p className="text-xl text-muted-foreground">
-            Discover approved advertising campaigns looking for venue partners
+            Discover curated campaigns from verified advertisers
           </p>
         </div>
 
