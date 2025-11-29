@@ -597,15 +597,21 @@ export default function AdminDashboard() {
               <p className="text-sm text-muted-foreground">Welcome back, {adminName}</p>
             </div>
           </div>
-          <Button variant="outline" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="default" onClick={() => navigate("/admin/blog-submission")}>
+              <FileText className="w-4 h-4 mr-2" />
+              Submit Blog
+            </Button>
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="submissions" className="space-y-6">
+        <Tabs defaultValue="all" className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="all">
               <FileText className="w-4 h-4 mr-2" />
