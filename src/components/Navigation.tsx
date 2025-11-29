@@ -105,9 +105,6 @@ export const Navigation = () => {
             <>
               {userRole === "advertiser" ? (
                 <>
-                  <Link to="/home">
-                    <Button variant="ghost">Home</Button>
-                  </Link>
                   <Link to="/explore">
                     <Button variant="ghost">Explore</Button>
                   </Link>
@@ -144,9 +141,6 @@ export const Navigation = () => {
                 </>
               ) : (
                 <>
-                  <Link to="/home">
-                    <Button variant="ghost">Home</Button>
-                  </Link>
                   <Link to="/explore">
                     <Button variant="ghost">Explore</Button>
                   </Link>
