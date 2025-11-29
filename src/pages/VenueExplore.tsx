@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, DollarSign, Calendar, Users } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import campaignNbaImg from "@/assets/campaign-nba-viewing-party.jpg";
 import campaignBroadwayImg from "@/assets/campaign-broadway-musical.jpg";
 import campaignComicConImg from "@/assets/campaign-comic-con.jpg";
@@ -32,77 +34,70 @@ interface Campaign {
 }
 
 const VenueExplore = () => {
-  const mockCampaigns: Campaign[] = [
-    {
-      id: "1",
-      campaign_name: "NBA Championship Finals Viewing Party",
-      campaign_description: "Major sporting event watch party series across multiple cities. Looking for bars, restaurants, and entertainment venues to host official viewing parties with exclusive branded merchandise and promotional giveaways.",
-      budget_amount: 42000,
-      budget_currency: "USD",
-      start_date: "2025-06-01",
-      end_date: "2025-06-20",
-      location: "New York, Los Angeles, Chicago, Dallas",
-      campaign_type: "Sporting Event",
-      target_audience: "Sports fans 21-45, basketball enthusiasts, social groups seeking game day experiences",
-      creative_assets: {
-        images: [campaignNbaImg],
-        description: "Dynamic sports action photography and fan engagement imagery"
-      },
-      advertiser_profiles: {
-        company_name: "Premier Sports Marketing"
-      }
-    },
-    {
-      id: "2",
-      campaign_name: "Broadway Tour: The Modern Musical",
-      campaign_description: "National touring production of award-winning Broadway musical. Seeking venue partnerships in metro stations, theaters, and cultural districts to promote ticket sales and show dates across 20 cities.",
-      budget_amount: 38000,
-      budget_currency: "USD",
-      start_date: "2025-08-01",
-      end_date: "2025-12-31",
-      location: "Boston, Philadelphia, San Francisco, Seattle, Atlanta",
-      campaign_type: "Theater & Entertainment",
-      target_audience: "Theater enthusiasts 30-65, arts supporters, entertainment seekers, date night crowds",
-      creative_assets: {
-        images: [campaignBroadwayImg],
-        description: "Stunning theatrical production photography and promotional materials"
-      },
-      advertiser_profiles: {
-        company_name: "Broadway Touring Co."
-      }
-    },
-    {
-      id: "3",
-      campaign_name: "Comic Con International 2025",
-      campaign_description: "Premier pop culture convention featuring celebrity guests, exclusive merchandise, cosplay competitions, and entertainment panels. Targeting high-traffic urban venues for maximum fan engagement and ticket sales.",
-      budget_amount: 52000,
-      budget_currency: "USD",
-      start_date: "2025-07-01",
-      end_date: "2025-09-15",
-      location: "San Diego, New York, Orlando, Las Vegas",
-      campaign_type: "Convention & Expo",
-      target_audience: "Pop culture fans 16-40, gamers, comic book enthusiasts, cosplayers, collectors",
-      creative_assets: {
-        images: [campaignComicConImg],
-        description: "Vibrant pop culture artwork and celebrity guest announcements"
-      },
-      advertiser_profiles: {
-        company_name: "Pop Culture Events LLC"
-      }
-    }
-  ];
-
-  const [campaigns] = useState<Campaign[]>(mockCampaigns);
-  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>(mockCampaigns);
-  const [loading] = useState(false);
+  const { toast } = useToast();
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [campaignTypeFilter, setCampaignTypeFilter] = useState("all");
   const [budgetFilter, setBudgetFilter] = useState("all");
 
   useEffect(() => {
+    fetchCampaigns();
+  }, []);
+
+  useEffect(() => {
     applyFilters();
-  }, [searchTerm, locationFilter, campaignTypeFilter, budgetFilter]);
+  }, [campaigns, searchTerm, locationFilter, campaignTypeFilter, budgetFilter]);
+
+  const fetchCampaigns = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch approved campaigns with advertiser profiles
+      const { data: campaignsData, error } = await supabase
+        .from('campaigns')
+        .select(`
+          *,
+          advertiser_profiles!inner(
+            company_name,
+            user_id
+          )
+        `)
+        .eq('status', 'approved');
+
+      if (error) throw error;
+
+      // Filter campaigns where advertiser is an admin
+      const campaignsWithAdminCheck = await Promise.all(
+        (campaignsData || []).map(async (campaign) => {
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', campaign.advertiser_profiles.user_id)
+            .eq('role', 'admin')
+            .single();
+
+          return roleData ? campaign : null;
+        })
+      );
+
+      const adminCampaigns = campaignsWithAdminCheck.filter((c): c is NonNullable<typeof c> => c !== null) as Campaign[];
+
+      setCampaigns(adminCampaigns);
+      setFilteredCampaigns(adminCampaigns);
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load campaigns. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const applyFilters = () => {
     let filtered = campaigns;
