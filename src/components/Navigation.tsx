@@ -44,11 +44,18 @@ export const Navigation = () => {
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      await supabase.auth.signOut();
+      setUser(null);
+      setUserRole(null);
+      setPublisherType(null);
       navigate("/");
     } catch (error) {
       console.error("Sign out error:", error);
+      // Clear state and navigate even if signOut fails
+      setUser(null);
+      setUserRole(null);
+      setPublisherType(null);
+      navigate("/");
     }
   };
 
