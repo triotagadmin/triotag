@@ -9,7 +9,7 @@ export const Hero = () => {
       </div>
       
       <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
+        <div className="max-w-4xl mx-auto text-center space-y-8 border-0 border-chart-1">
           <h1 className="text-6xl font-bold tracking-tight text-secondary bg-[sidebar-primary-foreground] md:text-[sidebar-primary-foreground] bg-chart-5">
             Buy and Sell <span className="text-primary">Ad Space</span>
           </h1>
