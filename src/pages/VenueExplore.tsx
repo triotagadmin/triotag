@@ -35,59 +35,59 @@ const VenueExplore = () => {
   const mockCampaigns: Campaign[] = [
     {
       id: "1",
-      campaign_name: "Summer Music Festival 2025",
-      campaign_description: "Massive 3-day outdoor music festival featuring top international artists across multiple genres. Seeking high-traffic venue partnerships for pre-event promotion and ticket sales activation.",
-      budget_amount: 35000,
+      campaign_name: "NBA Championship Finals Viewing Party",
+      campaign_description: "Major sporting event watch party series across multiple cities. Looking for bars, restaurants, and entertainment venues to host official viewing parties with exclusive branded merchandise and promotional giveaways.",
+      budget_amount: 42000,
       budget_currency: "USD",
       start_date: "2025-06-01",
-      end_date: "2025-08-15",
-      location: "New York, Los Angeles, Chicago",
-      campaign_type: "Event Promotion",
-      target_audience: "Music lovers 18-35, festival-goers, live entertainment enthusiasts",
+      end_date: "2025-06-20",
+      location: "New York, Los Angeles, Chicago, Dallas",
+      campaign_type: "Sporting Event",
+      target_audience: "Sports fans 21-45, basketball enthusiasts, social groups seeking game day experiences",
       creative_assets: {
         images: [campaignFitnessImg],
-        description: "Dynamic festival imagery and artist lineup graphics"
+        description: "Dynamic sports action photography and fan engagement imagery"
       },
       advertiser_profiles: {
-        company_name: "LiveNation Events"
+        company_name: "Premier Sports Marketing"
       }
     },
     {
       id: "2",
-      campaign_name: "Tech Innovation Conference 2025",
-      campaign_description: "Premier technology conference bringing together industry leaders, innovators, and startups. Looking for venue advertising to drive conference registrations and sponsorship visibility.",
-      budget_amount: 28000,
+      campaign_name: "Broadway Tour: The Modern Musical",
+      campaign_description: "National touring production of award-winning Broadway musical. Seeking venue partnerships in metro stations, theaters, and cultural districts to promote ticket sales and show dates across 20 cities.",
+      budget_amount: 38000,
       budget_currency: "USD",
-      start_date: "2025-07-15",
-      end_date: "2025-09-30",
-      location: "San Francisco, Seattle, Austin",
-      campaign_type: "Event Promotion",
-      target_audience: "Tech professionals, entrepreneurs, investors, innovation enthusiasts 25-55",
+      start_date: "2025-08-01",
+      end_date: "2025-12-31",
+      location: "Boston, Philadelphia, San Francisco, Seattle, Atlanta",
+      campaign_type: "Theater & Entertainment",
+      target_audience: "Theater enthusiasts 30-65, arts supporters, entertainment seekers, date night crowds",
       creative_assets: {
         images: [campaignTechImg],
-        description: "Professional conference branding and speaker highlights"
+        description: "Stunning theatrical production photography and promotional materials"
       },
       advertiser_profiles: {
-        company_name: "Summit Conferences Inc"
+        company_name: "Broadway Touring Co."
       }
     },
     {
       id: "3",
-      campaign_name: "Food & Wine Festival Tour",
-      campaign_description: "Multi-city culinary event series featuring celebrity chefs, wine tastings, and cooking demonstrations. Seeking venue advertising partnerships to maximize local event awareness and ticket sales.",
-      budget_amount: 18500,
+      campaign_name: "Comic Con International 2025",
+      campaign_description: "Premier pop culture convention featuring celebrity guests, exclusive merchandise, cosplay competitions, and entertainment panels. Targeting high-traffic urban venues for maximum fan engagement and ticket sales.",
+      budget_amount: 52000,
       budget_currency: "USD",
-      start_date: "2025-05-01",
-      end_date: "2025-10-31",
-      location: "Miami, Boston, Denver, Portland",
-      campaign_type: "Event Promotion",
-      target_audience: "Foodies, wine enthusiasts, culinary professionals 30-60",
+      start_date: "2025-07-01",
+      end_date: "2025-09-15",
+      location: "San Diego, New York, Orlando, Las Vegas",
+      campaign_type: "Convention & Expo",
+      target_audience: "Pop culture fans 16-40, gamers, comic book enthusiasts, cosplayers, collectors",
       creative_assets: {
         images: [campaignInfluencerImg],
-        description: "Elegant food and beverage event photography"
+        description: "Vibrant pop culture artwork and celebrity guest announcements"
       },
       advertiser_profiles: {
-        company_name: "Epicurean Events Group"
+        company_name: "Pop Culture Events LLC"
       }
     }
   ];
