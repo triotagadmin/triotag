@@ -93,6 +93,139 @@ const VenueExplore = () => {
       advertiser_profiles: {
         company_name: "Pop Culture Events LLC"
       }
+    },
+    {
+      id: "mock-4",
+      campaign_name: "Summer Music Festival 2025",
+      campaign_description: "Three-day outdoor music festival featuring top international artists across multiple genres. Seeking high-traffic urban locations for promotional campaigns including digital displays, poster placements, and experiential activations.",
+      budget_amount: 65000,
+      budget_currency: "USD",
+      start_date: "2025-05-15",
+      end_date: "2025-07-30",
+      location: "Austin, Nashville, Portland, Denver",
+      campaign_type: "Music Festival",
+      target_audience: "Music lovers 18-35, festival enthusiasts, young professionals seeking live entertainment experiences",
+      creative_assets: {
+        images: [campaignNbaImg],
+        description: "Vibrant festival atmosphere and artist lineup promotional materials"
+      },
+      advertiser_profiles: {
+        company_name: "Live Nation Events"
+      }
+    },
+    {
+      id: "mock-5",
+      campaign_name: "Charity Gala: Black Tie for Change",
+      campaign_description: "Annual fundraising gala supporting children's education initiatives. Looking for upscale venues and high-end retail locations to promote ticket sales and corporate sponsorship opportunities with luxury brand positioning.",
+      budget_amount: 28000,
+      budget_currency: "USD",
+      start_date: "2025-09-01",
+      end_date: "2025-10-15",
+      location: "Manhattan, Beverly Hills, Miami Beach",
+      campaign_type: "Charity Event",
+      target_audience: "Affluent donors 35-70, corporate executives, philanthropists, luxury lifestyle enthusiasts",
+      creative_assets: {
+        images: [campaignBroadwayImg],
+        description: "Elegant black-tie event photography and impact storytelling visuals"
+      },
+      advertiser_profiles: {
+        company_name: "Children's Future Foundation"
+      }
+    },
+    {
+      id: "mock-6",
+      campaign_name: "International Food & Wine Expo",
+      campaign_description: "Premier culinary showcase featuring celebrity chefs, wine tastings, and gourmet food vendors. Targeting foodie destinations, upscale restaurants, and lifestyle venues for promotional partnerships and ticket distribution.",
+      budget_amount: 45000,
+      budget_currency: "USD",
+      start_date: "2025-10-01",
+      end_date: "2025-11-30",
+      location: "Napa Valley, Charleston, New Orleans, Chicago",
+      campaign_type: "Food & Beverage Event",
+      target_audience: "Food enthusiasts 28-55, wine connoisseurs, culinary professionals, affluent foodies",
+      creative_assets: {
+        images: [campaignComicConImg],
+        description: "Mouth-watering culinary photography and chef celebrity imagery"
+      },
+      advertiser_profiles: {
+        company_name: "Epicurean Events Group"
+      }
+    },
+    {
+      id: "mock-7",
+      campaign_name: "Tech Innovation Summit 2025",
+      campaign_description: "Global technology conference bringing together industry leaders, startups, and investors. Seeking tech hubs, coworking spaces, and innovation districts for targeted advertising and conference promotion.",
+      budget_amount: 72000,
+      budget_currency: "USD",
+      start_date: "2025-03-15",
+      end_date: "2025-05-30",
+      location: "San Francisco, Seattle, Austin, Boston",
+      campaign_type: "Conference & Summit",
+      target_audience: "Tech professionals 25-50, entrepreneurs, investors, software developers, startup founders",
+      creative_assets: {
+        images: [campaignNbaImg],
+        description: "Cutting-edge technology and innovation showcase visuals"
+      },
+      advertiser_profiles: {
+        company_name: "TechWorld Conference Series"
+      }
+    },
+    {
+      id: "mock-8",
+      campaign_name: "Marathon Championship Series",
+      campaign_description: "Elite marathon racing series with qualifying events leading to championship final. Looking for fitness centers, sports retailers, and high-traffic running routes for athlete recruitment and spectator engagement campaigns.",
+      budget_amount: 55000,
+      budget_currency: "USD",
+      start_date: "2025-04-01",
+      end_date: "2025-10-31",
+      location: "Boston, Chicago, New York, Los Angeles, Miami",
+      campaign_type: "Sporting Event",
+      target_audience: "Runners and athletes 20-50, fitness enthusiasts, health-conscious individuals, competitive sports fans",
+      creative_assets: {
+        images: [campaignBroadwayImg],
+        description: "Athletic achievement and marathon action photography"
+      },
+      advertiser_profiles: {
+        company_name: "Elite Running Association"
+      }
+    },
+    {
+      id: "mock-9",
+      campaign_name: "Holiday Market & Crafts Fair",
+      campaign_description: "Multi-city holiday shopping experience featuring local artisans, handmade goods, and seasonal entertainment. Seeking retail districts, community centers, and public spaces for promotional partnerships and event visibility.",
+      budget_amount: 32000,
+      budget_currency: "USD",
+      start_date: "2025-11-01",
+      end_date: "2025-12-24",
+      location: "Portland, Minneapolis, Burlington, Asheville, Santa Fe",
+      campaign_type: "Community Festival",
+      target_audience: "Holiday shoppers 25-65, craft enthusiasts, families seeking unique gifts and festive experiences",
+      creative_assets: {
+        images: [campaignComicConImg],
+        description: "Festive holiday market atmosphere and artisan craft photography"
+      },
+      advertiser_profiles: {
+        company_name: "Holiday Markets Co."
+      }
+    },
+    {
+      id: "mock-10",
+      campaign_name: "Classic Car Show & Auction",
+      campaign_description: "Premium automotive exhibition featuring rare vintage vehicles, classic car auctions, and collector networking. Targeting affluent neighborhoods, luxury retail areas, and automotive enthusiast venues for high-end promotional campaigns.",
+      budget_amount: 48000,
+      budget_currency: "USD",
+      start_date: "2025-06-15",
+      end_date: "2025-08-30",
+      location: "Monterey, Scottsdale, Greenwich, Palm Beach",
+      campaign_type: "Auto Show",
+      target_audience: "Car collectors 40-75, automotive enthusiasts, luxury lifestyle consumers, high-net-worth individuals",
+      creative_assets: {
+        images: [campaignNbaImg],
+        description: "Stunning classic automobile photography and luxury lifestyle imagery"
+      },
+      advertiser_profiles: {
+        company_name: "Classic Auto Collectors Association"
+      }
     }
   ];
   
