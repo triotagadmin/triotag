@@ -6,9 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, DollarSign, Calendar, Users } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
-import campaignFitnessImg from "@/assets/campaign-fitness-brand.jpg";
-import campaignTechImg from "@/assets/campaign-tech-launch.jpg";
-import campaignInfluencerImg from "@/assets/campaign-influencer-hiring.jpg";
+import campaignNbaImg from "@/assets/campaign-nba-viewing-party.jpg";
+import campaignBroadwayImg from "@/assets/campaign-broadway-musical.jpg";
+import campaignComicConImg from "@/assets/campaign-comic-con.jpg";
 
 interface Campaign {
   id: string;
@@ -45,7 +45,7 @@ const VenueExplore = () => {
       campaign_type: "Sporting Event",
       target_audience: "Sports fans 21-45, basketball enthusiasts, social groups seeking game day experiences",
       creative_assets: {
-        images: [campaignFitnessImg],
+        images: [campaignNbaImg],
         description: "Dynamic sports action photography and fan engagement imagery"
       },
       advertiser_profiles: {
@@ -64,7 +64,7 @@ const VenueExplore = () => {
       campaign_type: "Theater & Entertainment",
       target_audience: "Theater enthusiasts 30-65, arts supporters, entertainment seekers, date night crowds",
       creative_assets: {
-        images: [campaignTechImg],
+        images: [campaignBroadwayImg],
         description: "Stunning theatrical production photography and promotional materials"
       },
       advertiser_profiles: {
@@ -83,7 +83,7 @@ const VenueExplore = () => {
       campaign_type: "Convention & Expo",
       target_audience: "Pop culture fans 16-40, gamers, comic book enthusiasts, cosplayers, collectors",
       creative_assets: {
-        images: [campaignInfluencerImg],
+        images: [campaignComicConImg],
         description: "Vibrant pop culture artwork and celebrity guest announcements"
       },
       advertiser_profiles: {
