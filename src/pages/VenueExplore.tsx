@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, DollarSign, Calendar, Users } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
+import campaignFitnessImg from "@/assets/campaign-fitness-brand.jpg";
+import campaignTechImg from "@/assets/campaign-tech-launch.jpg";
+import campaignInfluencerImg from "@/assets/campaign-influencer-hiring.jpg";
 
 interface Campaign {
   id: string;
@@ -31,82 +32,77 @@ interface Campaign {
 }
 
 const VenueExplore = () => {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
-  const [loading, setLoading] = useState(true);
+  const mockCampaigns: Campaign[] = [
+    {
+      id: "1",
+      campaign_name: "FitLife Summer Campaign",
+      campaign_description: "Promote our new line of fitness apparel and wellness products targeting health-conscious millennials and Gen Z consumers in urban areas.",
+      budget_amount: 15000,
+      budget_currency: "USD",
+      start_date: "2025-06-01",
+      end_date: "2025-08-31",
+      location: "New York, Los Angeles, Chicago",
+      campaign_type: "Brand Awareness",
+      target_audience: "Health-conscious adults 25-40, gym members, fitness enthusiasts",
+      creative_assets: {
+        images: [campaignFitnessImg],
+        description: "High-energy fitness lifestyle imagery"
+      },
+      advertiser_profiles: {
+        company_name: "FitLife Athletics"
+      }
+    },
+    {
+      id: "2",
+      campaign_name: "TechNova Product Launch",
+      campaign_description: "Launch campaign for our revolutionary smart home device. Seeking high-traffic venues to showcase interactive product demonstrations and QR code engagement.",
+      budget_amount: 25000,
+      budget_currency: "USD",
+      start_date: "2025-07-15",
+      end_date: "2025-09-15",
+      location: "San Francisco, Seattle, Austin",
+      campaign_type: "Product Launch",
+      target_audience: "Tech-savvy professionals 30-50, early adopters, smart home enthusiasts",
+      creative_assets: {
+        images: [campaignTechImg],
+        description: "Sleek technology product photography"
+      },
+      advertiser_profiles: {
+        company_name: "TechNova Industries"
+      }
+    },
+    {
+      id: "3",
+      campaign_name: "TasteBud Restaurant Network",
+      campaign_description: "Multi-location restaurant promotion campaign featuring seasonal menu items and exclusive dining offers. Looking for venues with high foot traffic near dining districts.",
+      budget_amount: 8500,
+      budget_currency: "USD",
+      start_date: "2025-05-01",
+      end_date: "2025-07-31",
+      location: "Miami, Boston, Denver",
+      campaign_type: "Promotional",
+      target_audience: "Food lovers 25-55, urban professionals, dining enthusiasts",
+      creative_assets: {
+        images: [campaignInfluencerImg],
+        description: "Appetizing food photography and lifestyle shots"
+      },
+      advertiser_profiles: {
+        company_name: "TasteBud Dining Group"
+      }
+    }
+  ];
+
+  const [campaigns] = useState<Campaign[]>(mockCampaigns);
+  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>(mockCampaigns);
+  const [loading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [campaignTypeFilter, setCampaignTypeFilter] = useState("all");
   const [budgetFilter, setBudgetFilter] = useState("all");
-  const { toast } = useToast();
-
-  useEffect(() => {
-    fetchCampaigns();
-  }, []);
 
   useEffect(() => {
     applyFilters();
-  }, [campaigns, searchTerm, locationFilter, campaignTypeFilter, budgetFilter]);
-
-  const fetchCampaigns = async () => {
-    try {
-      // First, get all admin user IDs
-      const { data: adminUsers, error: adminError } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "admin");
-
-      if (adminError) throw adminError;
-
-      const adminUserIds = adminUsers?.map(u => u.user_id) || [];
-
-      if (adminUserIds.length === 0) {
-        setCampaigns([]);
-        setLoading(false);
-        return;
-      }
-
-      // Get advertiser profiles for admin users
-      const { data: adminAdvertisers, error: advertiserError } = await supabase
-        .from("advertiser_profiles")
-        .select("id")
-        .in("user_id", adminUserIds);
-
-      if (advertiserError) throw advertiserError;
-
-      const adminAdvertiserIds = adminAdvertisers?.map(a => a.id) || [];
-
-      if (adminAdvertiserIds.length === 0) {
-        setCampaigns([]);
-        setLoading(false);
-        return;
-      }
-
-      // Fetch campaigns from admin advertisers only
-      const { data, error } = await supabase
-        .from("campaigns")
-        .select(`
-          *,
-          advertiser_profiles (
-            company_name
-          )
-        `)
-        .eq("status", "approved")
-        .in("advertiser_id", adminAdvertiserIds)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setCampaigns((data || []) as Campaign[]);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to load campaigns",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [searchTerm, locationFilter, campaignTypeFilter, budgetFilter]);
 
   const applyFilters = () => {
     let filtered = campaigns;
