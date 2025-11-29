@@ -6,76 +6,71 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Briefcase, DollarSign, Upload, CheckCircle, Clock, XCircle, Camera, IdCard } from "lucide-react";
-
+import { Users, Briefcase, DollarSign, Upload, CheckCircle, Clock, XCircle, IdCard } from "lucide-react";
 const AgentDashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
-
   useEffect(() => {
     const fetchData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
       }
-
       setUser(session.user);
 
       // Fetch publisher profile
-      const { data: profileData, error: profileError } = await supabase
-        .from("publisher_profiles")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .single();
-
+      const {
+        data: profileData,
+        error: profileError
+      } = await supabase.from("publisher_profiles").select("*").eq("user_id", session.user.id).single();
       if (profileError) {
         toast({
           title: "Error",
           description: "Failed to load profile",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
-
       setProfile(profileData);
       setLoading(false);
     };
-
     fetchData();
   }, [navigate, toast]);
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
   };
-
   const handleResendVerification = async () => {
     if (!user?.email) return;
-    
-    const { error } = await supabase.auth.resend({
+    const {
+      error
+    } = await supabase.auth.resend({
       type: 'signup',
-      email: user.email,
+      email: user.email
     });
-
     if (error) {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } else {
       toast({
         title: "Success",
-        description: "Verification email sent!",
+        description: "Verification email sent!"
       });
     }
   };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
@@ -88,22 +83,16 @@ const AgentDashboard = () => {
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
-
   const getRoleLabel = (role: string | null) => {
     if (!role) return "Agent";
     return role.charAt(0).toUpperCase() + role.slice(1);
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-muted/30">
+  return <div className="min-h-screen bg-muted/30">
       <Navigation />
 
       <div className="container mx-auto px-6 py-12">
@@ -119,8 +108,7 @@ const AgentDashboard = () => {
         </div>
 
         {/* Email Verification Warning */}
-        {!user?.email_confirmed_at && (
-          <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+        {!user?.email_confirmed_at && <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
             <CardHeader>
               <CardTitle className="text-yellow-800 dark:text-yellow-200">Email Verification Required</CardTitle>
               <CardDescription className="text-yellow-700 dark:text-yellow-300">
@@ -132,8 +120,7 @@ const AgentDashboard = () => {
                 Resend Verification Email
               </Button>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -205,8 +192,7 @@ const AgentDashboard = () => {
         </Card>
 
         {/* Verification */}
-        {profile?.verification_status === "pending" && (
-          <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+        {profile?.verification_status === "pending" && <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
             <CardHeader>
               <CardTitle className="text-yellow-800 dark:text-yellow-200">Verification Required</CardTitle>
               <CardDescription className="text-yellow-700 dark:text-yellow-300">
@@ -216,17 +202,16 @@ const AgentDashboard = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
                 <IdCard className="w-5 h-5 text-yellow-800 dark:text-yellow-200" />
-                <span className="text-sm">Upload ID verification</span>
+                <span className="text-sm">Upload ID Verification</span>
                 <Button size="sm" variant="outline" onClick={() => navigate("/agent/verify")}>Upload</Button>
               </div>
               <div className="flex items-center gap-3">
-                <Camera className="w-5 h-5 text-yellow-800 dark:text-yellow-200" />
-                <span className="text-sm">Upload portfolio photos/videos</span>
-                <Button size="sm" variant="outline" onClick={() => navigate("/agent/verify")}>Upload</Button>
+                
+                
+                
               </div>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
         {/* Jobs / Tasks */}
         <Card className="mb-8">
@@ -262,8 +247,6 @@ const AgentDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AgentDashboard;
