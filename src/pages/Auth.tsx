@@ -140,7 +140,29 @@ const Auth = () => {
         .single();
       
       // Check verification status based on role
-      if (roles?.role === "advertiser") {
+      if (roles?.role === "admin") {
+        const { data: adminProfile } = await supabase
+          .from("admin_profiles")
+          .select("status")
+          .eq("user_id", session.user.id)
+          .single();
+        
+        if (adminProfile && adminProfile.status !== "verified") {
+          toast({
+            title: "Admin not verified",
+            description: "Your admin account is pending verification.",
+            variant: "destructive",
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+        
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in as admin.",
+        });
+        navigate("/admin/dashboard");
+      } else if (roles?.role === "advertiser") {
         const { data: profile } = await supabase
           .from("advertiser_profiles")
           .select("verified")
