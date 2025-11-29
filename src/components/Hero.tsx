@@ -14,7 +14,7 @@ export const Hero = () => {
             Buy and Sell <span className="text-primary">Ad Space</span>
           </h1>
           
-          <p className="text-xl max-w-2xl mx-auto bg-[sidebar-primary-foreground] font-mono font-bold bg-transparent md:text-[sidebar-primary-foreground] text-gray-50">
+          <p className="text-xl max-w-2xl mx-auto bg-[sidebar-primary-foreground] font-mono font-bold md:text-[sidebar-primary-foreground] text-gray-50 bg-teal-950">
             Connecting advertisers with venues, agents, and digital publishers in the micro advertising revolution!
           </p>
           
