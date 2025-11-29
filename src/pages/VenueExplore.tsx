@@ -31,6 +31,7 @@ interface Campaign {
   campaign_type: string;
   target_audience: string;
   target_publishers?: string[]; // Digital, Venue, Agent
+  ad_units?: string[]; // Types of ads needed
   creative_assets: {
     images?: string[];
     videos?: string[];
@@ -57,6 +58,7 @@ const VenueExplore = () => {
       campaign_type: "Sporting Event",
       target_audience: "Sports fans 21-45, basketball enthusiasts, social groups seeking game day experiences",
       target_publishers: ["venue"],
+      ad_units: ["Venue Signage", "In-Venue Screens", "Table Tents", "Guerilla Stickers"],
       creative_assets: {
         images: [campaignNbaImg],
         description: "Dynamic sports action photography and fan engagement imagery"
@@ -77,6 +79,7 @@ const VenueExplore = () => {
       campaign_type: "Theater & Entertainment",
       target_audience: "Theater enthusiasts 30-65, arts supporters, entertainment seekers, date night crowds",
       target_publishers: ["venue", "digital"],
+      ad_units: ["Poster Placements", "Digital Billboards", "Social Media Posts", "Metro Station Ads"],
       creative_assets: {
         images: [campaignBroadwayImg],
         description: "Stunning theatrical production photography and promotional materials"
@@ -97,6 +100,7 @@ const VenueExplore = () => {
       campaign_type: "Convention & Expo",
       target_audience: "Pop culture fans 16-40, gamers, comic book enthusiasts, cosplayers, collectors",
       target_publishers: ["venue", "digital", "agent"],
+      ad_units: ["Guerilla Stickers", "Cosplay Photo Ops", "Social Media Posts", "Livestream Overlays"],
       creative_assets: {
         images: [campaignComicConImg],
         description: "Vibrant pop culture artwork and celebrity guest announcements"
@@ -117,6 +121,7 @@ const VenueExplore = () => {
       campaign_type: "Music Festival",
       target_audience: "Music lovers 18-35, festival enthusiasts, young professionals seeking live entertainment experiences",
       target_publishers: ["venue", "agent", "digital"],
+      ad_units: ["Stage Banners", "Wristband Branding", "Social Media Posts", "Livestream Overlays"],
       creative_assets: {
         images: [campaignMusicFestivalImg],
         description: "Vibrant festival atmosphere and artist lineup promotional materials"
@@ -137,6 +142,7 @@ const VenueExplore = () => {
       campaign_type: "Charity Event",
       target_audience: "Affluent donors 35-70, corporate executives, philanthropists, luxury lifestyle enthusiasts",
       target_publishers: ["venue", "digital"],
+      ad_units: ["Event Signage", "Table Settings", "Social Media Posts", "Livestream Coverage"],
       creative_assets: {
         images: [campaignCharityGalaImg],
         description: "Elegant black-tie event photography and impact storytelling visuals"
@@ -157,6 +163,7 @@ const VenueExplore = () => {
       campaign_type: "Food & Beverage Event",
       target_audience: "Food enthusiasts 28-55, wine connoisseurs, culinary professionals, affluent foodies",
       target_publishers: ["venue", "digital"],
+      ad_units: ["Booth Displays", "Menu Placements", "Social Media Posts", "Livestream Cooking Demos"],
       creative_assets: {
         images: [campaignFoodWineImg],
         description: "Mouth-watering culinary photography and chef celebrity imagery"
@@ -177,6 +184,7 @@ const VenueExplore = () => {
       campaign_type: "Conference & Summit",
       target_audience: "Tech professionals 25-50, entrepreneurs, investors, software developers, startup founders",
       target_publishers: ["venue", "digital"],
+      ad_units: ["Conference Signage", "Digital Displays", "Social Media Posts", "Livestream Overlays"],
       creative_assets: {
         images: [campaignTechSummitImg],
         description: "Cutting-edge technology and innovation showcase visuals"
@@ -197,6 +205,7 @@ const VenueExplore = () => {
       campaign_type: "Sporting Event",
       target_audience: "Runners and athletes 20-50, fitness enthusiasts, health-conscious individuals, competitive sports fans",
       target_publishers: ["venue", "agent"],
+      ad_units: ["Course Signage", "Runner Bibs", "Social Media Posts", "Guerilla Stickers"],
       creative_assets: {
         images: [campaignMarathonImg],
         description: "Athletic achievement and marathon action photography"
@@ -217,6 +226,7 @@ const VenueExplore = () => {
       campaign_type: "Community Festival",
       target_audience: "Holiday shoppers 25-65, craft enthusiasts, families seeking unique gifts and festive experiences",
       target_publishers: ["venue"],
+      ad_units: ["Booth Displays", "Guerilla Stickers", "Social Media Posts", "Event Signage"],
       creative_assets: {
         images: [campaignHolidayMarketImg],
         description: "Festive holiday market atmosphere and artisan craft photography"
@@ -237,6 +247,7 @@ const VenueExplore = () => {
       campaign_type: "Auto Show",
       target_audience: "Car collectors 40-75, automotive enthusiasts, luxury lifestyle consumers, high-net-worth individuals",
       target_publishers: ["venue", "digital"],
+      ad_units: ["Event Signage", "Car Placard Ads", "Social Media Posts", "Livestream Coverage"],
       creative_assets: {
         images: [campaignClassicCarImg],
         description: "Stunning classic automobile photography and luxury lifestyle imagery"
@@ -503,6 +514,19 @@ const VenueExplore = () => {
                         {campaign.target_publishers.map((publisher) => (
                           <Badge key={publisher} variant="outline" className="capitalize text-xs">
                             {publisher}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {campaign.ad_units && campaign.ad_units.length > 0 && (
+                    <div className="pt-2 border-t">
+                      <p className="text-xs text-muted-foreground mb-2">Ad Units Needed</p>
+                      <div className="flex flex-wrap gap-1">
+                        {campaign.ad_units.map((unit) => (
+                          <Badge key={unit} variant="secondary" className="text-xs">
+                            {unit}
                           </Badge>
                         ))}
                       </div>
