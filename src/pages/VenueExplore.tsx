@@ -35,59 +35,59 @@ const VenueExplore = () => {
   const mockCampaigns: Campaign[] = [
     {
       id: "1",
-      campaign_name: "FitLife Summer Campaign",
-      campaign_description: "Promote our new line of fitness apparel and wellness products targeting health-conscious millennials and Gen Z consumers in urban areas.",
-      budget_amount: 15000,
+      campaign_name: "Summer Music Festival 2025",
+      campaign_description: "Massive 3-day outdoor music festival featuring top international artists across multiple genres. Seeking high-traffic venue partnerships for pre-event promotion and ticket sales activation.",
+      budget_amount: 35000,
       budget_currency: "USD",
       start_date: "2025-06-01",
-      end_date: "2025-08-31",
+      end_date: "2025-08-15",
       location: "New York, Los Angeles, Chicago",
-      campaign_type: "Brand Awareness",
-      target_audience: "Health-conscious adults 25-40, gym members, fitness enthusiasts",
+      campaign_type: "Event Promotion",
+      target_audience: "Music lovers 18-35, festival-goers, live entertainment enthusiasts",
       creative_assets: {
         images: [campaignFitnessImg],
-        description: "High-energy fitness lifestyle imagery"
+        description: "Dynamic festival imagery and artist lineup graphics"
       },
       advertiser_profiles: {
-        company_name: "FitLife Athletics"
+        company_name: "LiveNation Events"
       }
     },
     {
       id: "2",
-      campaign_name: "TechNova Product Launch",
-      campaign_description: "Launch campaign for our revolutionary smart home device. Seeking high-traffic venues to showcase interactive product demonstrations and QR code engagement.",
-      budget_amount: 25000,
+      campaign_name: "Tech Innovation Conference 2025",
+      campaign_description: "Premier technology conference bringing together industry leaders, innovators, and startups. Looking for venue advertising to drive conference registrations and sponsorship visibility.",
+      budget_amount: 28000,
       budget_currency: "USD",
       start_date: "2025-07-15",
-      end_date: "2025-09-15",
+      end_date: "2025-09-30",
       location: "San Francisco, Seattle, Austin",
-      campaign_type: "Product Launch",
-      target_audience: "Tech-savvy professionals 30-50, early adopters, smart home enthusiasts",
+      campaign_type: "Event Promotion",
+      target_audience: "Tech professionals, entrepreneurs, investors, innovation enthusiasts 25-55",
       creative_assets: {
         images: [campaignTechImg],
-        description: "Sleek technology product photography"
+        description: "Professional conference branding and speaker highlights"
       },
       advertiser_profiles: {
-        company_name: "TechNova Industries"
+        company_name: "Summit Conferences Inc"
       }
     },
     {
       id: "3",
-      campaign_name: "TasteBud Restaurant Network",
-      campaign_description: "Multi-location restaurant promotion campaign featuring seasonal menu items and exclusive dining offers. Looking for venues with high foot traffic near dining districts.",
-      budget_amount: 8500,
+      campaign_name: "Food & Wine Festival Tour",
+      campaign_description: "Multi-city culinary event series featuring celebrity chefs, wine tastings, and cooking demonstrations. Seeking venue advertising partnerships to maximize local event awareness and ticket sales.",
+      budget_amount: 18500,
       budget_currency: "USD",
       start_date: "2025-05-01",
-      end_date: "2025-07-31",
-      location: "Miami, Boston, Denver",
-      campaign_type: "Promotional",
-      target_audience: "Food lovers 25-55, urban professionals, dining enthusiasts",
+      end_date: "2025-10-31",
+      location: "Miami, Boston, Denver, Portland",
+      campaign_type: "Event Promotion",
+      target_audience: "Foodies, wine enthusiasts, culinary professionals 30-60",
       creative_assets: {
         images: [campaignInfluencerImg],
-        description: "Appetizing food photography and lifestyle shots"
+        description: "Elegant food and beverage event photography"
       },
       advertiser_profiles: {
-        company_name: "TasteBud Dining Group"
+        company_name: "Epicurean Events Group"
       }
     }
   ];
