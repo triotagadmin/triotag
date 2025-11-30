@@ -59,11 +59,11 @@ const Publishers = () => {
 
   const fetchPublishers = async () => {
     try {
-      // Fetch all approved publishers (no auth required to view)
+      // Fetch all approved and pending publishers (no auth required to view)
       const { data, error } = await supabase
         .from("publisher_profiles")
         .select("*")
-        .eq("verification_status", "approved")
+        .in("verification_status", ["approved", "pending"])
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -230,8 +230,8 @@ const Publishers = () => {
                               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                                 <Icon className="w-6 h-6 text-primary" />
                               </div>
-                              <Badge variant="default">
-                                Verified
+                              <Badge variant={publisher.verification_status === "approved" ? "default" : "outline"}>
+                                {publisher.verification_status === "approved" ? "Verified" : "Pending"}
                               </Badge>
                             </div>
                             <CardTitle className="text-xl group-hover:text-primary transition-colors">
