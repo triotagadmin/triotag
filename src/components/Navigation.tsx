@@ -168,14 +168,14 @@ export const Navigation = () => {
               <Link to="/explore">
                 <Button variant="ghost">Explore</Button>
               </Link>
+              <Link to="/publishers">
+                <Button variant="ghost">Publishers</Button>
+              </Link>
               <Link to="/habit-tracker">
                 <Button variant="ghost">Ad Tracker</Button>
               </Link>
               <Link to="/insights">
                 <Button variant="ghost">Insights</Button>
-              </Link>
-              <Link to="/publishers">
-                <Button variant="ghost">Buy</Button>
               </Link>
               <Link to="/list-space">
                 <Button variant="ghost">Sell</Button>
