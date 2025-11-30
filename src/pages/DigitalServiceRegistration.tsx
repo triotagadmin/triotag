@@ -15,7 +15,9 @@ import { ArrowLeft, Upload, X } from "lucide-react";
 const digitalServiceSchema = z.object({
   title: z.string().trim().min(1, "Service name is required").max(100),
   description: z.string().trim().max(1000).optional(),
-  websiteUrl: z.string().trim().url("Invalid URL").max(500).optional(),
+  websiteUrl: z.string().trim().optional().refine((val) => !val || z.string().url().safeParse(val).success, {
+    message: "Invalid URL"
+  }),
   category: z.string().min(1, "Category is required"),
   pricingModel: z.string().min(1, "Pricing model is required"),
   monthlyRate: z.string().trim().max(50).optional(),
@@ -63,7 +65,7 @@ const DigitalServiceRegistration = () => {
 
       const { data: profile, error } = await supabase
         .from("publisher_profiles")
-        .select("id")
+        .select("id, publisher_type, verification_status")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
@@ -78,8 +80,14 @@ const DigitalServiceRegistration = () => {
       }
 
       if (profile) {
+        console.log("Publisher profile loaded:", profile);
         setPublisherId(profile.id);
       } else {
+        console.log("No publisher profile found, redirecting to complete profile");
+        toast({
+          title: "Profile Required",
+          description: "Please complete your publisher profile first.",
+        });
         navigate("/complete-profile");
       }
     };
@@ -140,9 +148,10 @@ const DigitalServiceRegistration = () => {
     if (!publisherId) {
       toast({
         title: "Error",
-        description: "Publisher ID not found",
+        description: "Publisher ID not found. Please complete your profile first.",
         variant: "destructive",
       });
+      navigate("/complete-profile");
       return;
     }
 
@@ -161,27 +170,35 @@ const DigitalServiceRegistration = () => {
 
       setLoading(true);
 
-      const { error } = await supabase
+      console.log("Submitting digital service with publisher_id:", publisherId);
+
+      const { data, error } = await supabase
         .from("ad_spaces")
         .insert({
           publisher_id: publisherId,
           title,
-          description,
-          location: websiteUrl,
-          media_urls: uploadedMedia,
+          description: description || null,
+          location: websiteUrl || null,
+          media_urls: uploadedMedia.length > 0 ? uploadedMedia : null,
           specifications: {
             category,
             pricingModel,
-            impressions,
+            impressions: impressions || null,
           },
           pricing: {
-            monthlyRate,
+            monthlyRate: monthlyRate || null,
             model: pricingModel,
           },
           approval_status: "pending",
-        });
+        })
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase insert error:", error);
+        throw error;
+      }
+
+      console.log("Successfully inserted:", data);
 
       toast({
         title: "Success",
@@ -190,6 +207,7 @@ const DigitalServiceRegistration = () => {
 
       navigate("/digital-media");
     } catch (error: any) {
+      console.error("Submit error:", error);
       if (error instanceof z.ZodError) {
         toast({
           title: "Validation Error",
@@ -199,7 +217,7 @@ const DigitalServiceRegistration = () => {
       } else {
         toast({
           title: "Error",
-          description: error.message,
+          description: error.message || "Failed to submit. Please check your profile and try again.",
           variant: "destructive",
         });
       }
