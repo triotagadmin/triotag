@@ -2,64 +2,53 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Users, UserCircle, Palette } from "lucide-react";
-
-const agents = [
-  {
-    name: "Urban Guerrilla Collective",
-    category: "Guerrilla Agents",
-    reach: "500+ locations",
-    rating: "4.9",
-    specialty: "Street art & pop-ups",
-    status: "accepting",
-    icon: Sparkles,
-  },
-  {
-    name: "Social Influence Collective",
-    category: "Influencers",
-    reach: "2M+ followers",
-    rating: "4.8",
-    specialty: "Lifestyle & entertainment",
-    status: "accepting",
-    icon: Users,
-  },
-  {
-    name: "Elite Model Network",
-    category: "Models",
-    reach: "300+ models",
-    rating: "4.9",
-    specialty: "Brand ambassadors",
-    status: "accepting",
-    icon: UserCircle,
-  },
-  {
-    name: "Creative Artists Guild",
-    category: "Artists",
-    reach: "200+ artists",
-    rating: "4.7",
-    specialty: "Murals & installations",
-    status: "limited",
-    icon: Palette,
-  },
-];
-
+const agents = [{
+  name: "Urban Guerrilla Collective",
+  category: "Guerrilla Agents",
+  reach: "500+ locations",
+  rating: "4.9",
+  specialty: "Street art & pop-ups",
+  status: "accepting",
+  icon: Sparkles
+}, {
+  name: "Social Influence Collective",
+  category: "Influencers",
+  reach: "2M+ followers",
+  rating: "4.8",
+  specialty: "Lifestyle & entertainment",
+  status: "accepting",
+  icon: Users
+}, {
+  name: "Elite Model Network",
+  category: "Models",
+  reach: "300+ models",
+  rating: "4.9",
+  specialty: "Brand ambassadors",
+  status: "accepting",
+  icon: UserCircle
+}, {
+  name: "Creative Artists Guild",
+  category: "Artists",
+  reach: "200+ artists",
+  rating: "4.7",
+  specialty: "Murals & installations",
+  status: "limited",
+  icon: Palette
+}];
 export const FeaturedAgents = () => {
-  return (
-    <section className="py-24 bg-muted/50">
+  return <section className="py-24 bg-muted/50">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground">
             Featured Agents
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Connect with freelance guerrilla agents, influencers, models, and artists
-          </p>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Connect with guerrilla marketers, influencers, models, and artists</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {agents.map((agent, index) => {
-            const IconComponent = agent.icon;
-            return (
-              <Link key={index} to="/publishers?type=agent">
+          const IconComponent = agent.icon;
+          return <Link key={index} to="/publishers?type=agent">
                 <Card className="hover:shadow-lg transition-all group border-border bg-card">
                   <CardHeader>
                     <div className="flex items-start justify-between mb-2">
@@ -89,11 +78,9 @@ export const FeaturedAgents = () => {
                     </CardDescription>
                   </CardContent>
                 </Card>
-              </Link>
-            );
-          })}
+              </Link>;
+        })}
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
