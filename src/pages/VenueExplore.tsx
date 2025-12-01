@@ -8,6 +8,7 @@ import { Search, MapPin, DollarSign, Calendar, Users } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 import campaignNbaImg from "@/assets/campaign-nba-viewing-party.jpg";
 import campaignBroadwayImg from "@/assets/campaign-broadway-musical.jpg";
 import campaignComicConImg from "@/assets/campaign-comic-con.jpg";
@@ -278,8 +279,8 @@ const VenueExplore = () => {
     try {
       setLoading(true);
       
-      // Fetch approved campaigns with advertiser profiles
-      const { data: campaignsData, error } = await supabase
+      // Fetch approved campaigns
+      const { data: campaignsData } = await supabase
         .from('campaigns')
         .select(`
           *,
@@ -288,31 +289,74 @@ const VenueExplore = () => {
             user_id
           )
         `)
-        .eq('status', 'approved');
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(6);
 
-      if (error) throw error;
+      // Fetch approved venues
+      const { data: venuesData } = await supabase
+        .from('ad_spaces')
+        .select(`
+          *,
+          publisher_profiles(business_name)
+        `)
+        .eq('approval_status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(6);
 
-      // Filter campaigns where advertiser is an admin
-      const campaignsWithAdminCheck = await Promise.all(
-        (campaignsData || []).map(async (campaign) => {
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', campaign.advertiser_profiles.user_id)
-            .eq('role', 'admin')
-            .single();
+      // Fetch approved agent services
+      const { data: servicesData } = await supabase
+        .from('agent_services')
+        .select(`
+          *,
+          publisher_profiles(business_name)
+        `)
+        .eq('approval_status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(6);
 
-          return roleData ? campaign : null;
-        })
+      // Combine all approved listings
+      const allListings = [
+        ...(campaignsData || []),
+        ...(venuesData || []).map(v => ({
+          ...v,
+          campaign_name: v.title,
+          campaign_description: v.description,
+          campaign_type: 'Venue Space',
+          target_audience: 'N/A',
+          budget_amount: (v.pricing as any)?.weekly || (v.pricing as any)?.monthly || 0,
+          budget_currency: 'USD',
+          start_date: '',
+          end_date: '',
+          location: v.location,
+          creative_assets: { images: v.media_urls },
+          advertiser_profiles: { company_name: (v.publisher_profiles as any)?.business_name || 'Venue' }
+        })),
+        ...(servicesData || []).map(s => ({
+          ...s,
+          campaign_name: s.title,
+          campaign_description: s.description,
+          campaign_type: 'Agent Service',
+          target_audience: 'N/A',
+          budget_amount: (s.pricing as any)?.hourly || (s.pricing as any)?.daily || 0,
+          budget_currency: 'USD',
+          start_date: '',
+          end_date: '',
+          location: s.location,
+          creative_assets: { images: s.media_urls },
+          advertiser_profiles: { company_name: (s.publisher_profiles as any)?.business_name || 'Agent' }
+        }))
+      ];
+
+      // Sort by created_at and take only 6 newest
+      allListings.sort((a, b) => 
+        new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
       );
 
-      const adminCampaigns = campaignsWithAdminCheck.filter((c): c is NonNullable<typeof c> => c !== null) as Campaign[];
-
-      // Combine mock campaigns with real campaigns
-      const allCampaigns = [...mockCampaigns, ...adminCampaigns];
+      const newestSix = allListings.slice(0, 6) as Campaign[];
       
-      setCampaigns(allCampaigns);
-      setFilteredCampaigns(allCampaigns);
+      setCampaigns(newestSix);
+      setFilteredCampaigns(newestSix);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
       toast({
@@ -387,11 +431,16 @@ const VenueExplore = () => {
     <div className="min-h-screen bg-muted/30">
       <Navigation />
       <div className="container mx-auto px-6 py-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Explore Featured Campaigns</h1>
-          <p className="text-xl text-muted-foreground">
-            Discover curated campaigns from verified advertisers
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-4">Explore Featured Campaigns</h1>
+            <p className="text-xl text-muted-foreground">
+              Discover the 6 newest approved campaigns, venues, and services
+            </p>
+          </div>
+          <Link to="/explore-all">
+            <Button variant="outline">View All Listings</Button>
+          </Link>
         </div>
 
         <Card className="mb-8">

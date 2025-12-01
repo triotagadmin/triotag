@@ -111,10 +111,16 @@ const AgentInventory = () => {
             <h1 className="text-4xl font-bold mb-2">Agent Services Inventory</h1>
             <p className="text-muted-foreground">Manage your service portfolio</p>
           </div>
-          <Button onClick={() => navigate("/agent-registration")} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Service Photos
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate("/agent-service-submission")} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Submit Service
+            </Button>
+            <Button onClick={() => navigate("/agent-registration")} variant="outline" className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add Photos
+            </Button>
+          </div>
         </div>
 
         {/* Profile Status Card */}

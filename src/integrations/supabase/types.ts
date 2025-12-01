@@ -199,6 +199,71 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_services: {
+        Row: {
+          approval_status: Database["public"]["Enums"]["approval_status"]
+          approved_at: string | null
+          approved_by: string | null
+          availability_status: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          location: string | null
+          media_urls: Json | null
+          pricing: Json | null
+          publisher_id: string
+          rejection_reason: string | null
+          service_type: string
+          specifications: Json | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
+          availability_status?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          media_urls?: Json | null
+          pricing?: Json | null
+          publisher_id: string
+          rejection_reason?: string | null
+          service_type: string
+          specifications?: Json | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
+          availability_status?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          media_urls?: Json | null
+          pricing?: Json | null
+          publisher_id?: string
+          rejection_reason?: string | null
+          service_type?: string
+          specifications?: Json | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_services_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author: string
