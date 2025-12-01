@@ -8,10 +8,10 @@ import logo from "@/assets/logo.png";
 export const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [publisherType, setPublisherType] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -19,13 +19,13 @@ export const Navigation = () => {
       }
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
       } else {
         setUserRole(null);
+        setPublisherType(null);
       }
     });
 
@@ -41,25 +41,6 @@ export const Navigation = () => {
     
     setUserRole(data?.role ?? null);
   };
-
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      setUserRole(null);
-      setPublisherType(null);
-      navigate("/");
-    } catch (error) {
-      console.error("Sign out error:", error);
-      // Clear state and navigate even if signOut fails
-      setUser(null);
-      setUserRole(null);
-      setPublisherType(null);
-      navigate("/");
-    }
-  };
-
-  const [publisherType, setPublisherType] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPublisherType = async () => {
@@ -77,14 +58,26 @@ export const Navigation = () => {
     fetchPublisherType();
   }, [userRole, user]);
 
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setUserRole(null);
+      setPublisherType(null);
+      navigate("/");
+    } catch (error) {
+      console.error("Sign out error:", error);
+      setUser(null);
+      setUserRole(null);
+      setPublisherType(null);
+      navigate("/");
+    }
+  };
+
   const getDashboardLink = () => {
-    if (userRole === "admin") {
-      return "/admin/dashboard";
-    }
-    if (userRole === "advertiser") {
-      return "/advertiser-dashboard";
-    }
-    if (userRole === "publisher" && publisherType) {
+    if (userRole === "admin") return "/admin/dashboard";
+    if (userRole === "advertiser") return "/advertiser-dashboard";
+    if (userRole === "publisher") {
       if (publisherType === "venue") return "/venue-publishers";
       if (publisherType === "digital") return "/digital-publishers";
       if (publisherType === "agent") return "/agent-publishers";
@@ -97,6 +90,10 @@ export const Navigation = () => {
     if (publisherType === "digital") return "/digital-inventory";
     if (publisherType === "agent") return "/agent-inventory";
     return "/inventory";
+  };
+
+  const showPublishersLink = () => {
+    return userRole === "publisher" && ["venue", "digital", "agent"].includes(publisherType || "");
   };
 
   return (
@@ -130,6 +127,11 @@ export const Navigation = () => {
                   <Link to="/explore">
                     <Button variant="ghost">Explore</Button>
                   </Link>
+                  {showPublishersLink() && (
+                    <Link to="/publishers">
+                      <Button variant="ghost">Publishers</Button>
+                    </Link>
+                  )}
                   <Link to={getInventoryLink()}>
                     <Button variant="ghost">Inventory</Button>
                   </Link>

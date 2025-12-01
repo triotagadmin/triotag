@@ -1,0 +1,287 @@
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Search, MapPin, DollarSign, Calendar, ArrowLeft } from "lucide-react";
+import { Navigation } from "@/components/Navigation";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+
+interface UnifiedListing {
+  id: string;
+  type: 'campaign' | 'venue' | 'agent_service';
+  title: string;
+  description: string;
+  location: string;
+  budget?: number;
+  budget_currency?: string;
+  image?: string;
+  publisher_name?: string;
+  created_at: string;
+}
+
+const ExploreAll = () => {
+  const { toast } = useToast();
+  const [listings, setListings] = useState<UnifiedListing[]>([]);
+  const [filteredListings, setFilteredListings] = useState<UnifiedListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+
+  useEffect(() => {
+    fetchAllListings();
+  }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [listings, searchTerm, typeFilter, locationFilter]);
+
+  const fetchAllListings = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch approved campaigns
+      const { data: campaignsData } = await supabase
+        .from('campaigns')
+        .select(`
+          *,
+          advertiser_profiles(company_name)
+        `)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      // Fetch approved venues
+      const { data: venuesData } = await supabase
+        .from('ad_spaces')
+        .select(`
+          *,
+          publisher_profiles(business_name)
+        `)
+        .eq('approval_status', 'approved')
+        .order('created_at', { ascending: false });
+
+      // Fetch approved agent services
+      const { data: servicesData } = await supabase
+        .from('agent_services')
+        .select(`
+          *,
+          publisher_profiles(business_name)
+        `)
+        .eq('approval_status', 'approved')
+        .order('created_at', { ascending: false });
+
+      // Transform all data into unified format
+      const unifiedListings: UnifiedListing[] = [
+        ...(campaignsData || []).map(c => ({
+          id: c.id,
+          type: 'campaign' as const,
+          title: c.campaign_name,
+          description: c.campaign_description || '',
+          location: c.location || 'N/A',
+          budget: c.budget_amount,
+          budget_currency: c.budget_currency,
+          image: (c.creative_assets as any)?.images?.[0],
+          publisher_name: c.advertiser_profiles?.company_name,
+          created_at: c.created_at || ''
+        })),
+        ...(venuesData || []).map(v => ({
+          id: v.id,
+          type: 'venue' as const,
+          title: v.title,
+          description: v.description || '',
+          location: v.location || 'N/A',
+          image: (v.media_urls as any)?.[0],
+          publisher_name: (v.publisher_profiles as any)?.business_name,
+          created_at: v.created_at || ''
+        })),
+        ...(servicesData || []).map(s => ({
+          id: s.id,
+          type: 'agent_service' as const,
+          title: s.title,
+          description: s.description || '',
+          location: s.location || 'N/A',
+          image: (s.media_urls as any)?.[0],
+          publisher_name: (s.publisher_profiles as any)?.business_name,
+          created_at: s.created_at || ''
+        }))
+      ];
+
+      // Sort by created_at
+      unifiedListings.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setListings(unifiedListings);
+      setFilteredListings(unifiedListings);
+    } catch (error) {
+      console.error('Error fetching listings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load listings. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyFilters = () => {
+    let filtered = listings;
+
+    if (searchTerm) {
+      filtered = filtered.filter(l =>
+        l.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        l.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (typeFilter !== "all") {
+      filtered = filtered.filter(l => l.type === typeFilter);
+    }
+
+    if (locationFilter !== "all") {
+      filtered = filtered.filter(l => l.location === locationFilter);
+    }
+
+    setFilteredListings(filtered);
+  };
+
+  const getTypeBadge = (type: string) => {
+    const badges = {
+      campaign: { label: "Campaign", variant: "default" as const },
+      venue: { label: "Venue", variant: "secondary" as const },
+      agent_service: { label: "Agent Service", variant: "outline" as const }
+    };
+    const badge = badges[type as keyof typeof badges];
+    return <Badge variant={badge.variant}>{badge.label}</Badge>;
+  };
+
+  const uniqueLocations = [...new Set(listings.map(l => l.location).filter(Boolean))];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-muted/30">
+      <Navigation />
+      <div className="container mx-auto px-6 py-12">
+        <div className="mb-8">
+          <Link to="/explore" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Featured
+          </Link>
+          <h1 className="text-4xl font-bold mb-4">All Approved Listings</h1>
+          <p className="text-xl text-muted-foreground">
+            Browse all campaigns, venues, and agent services
+          </p>
+        </div>
+
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Search & Filter</CardTitle>
+            <CardDescription>Find the perfect opportunity</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="campaign">Campaigns</SelectItem>
+                  <SelectItem value="venue">Venues</SelectItem>
+                  <SelectItem value="agent_service">Agent Services</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Locations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  {uniqueLocations.map((loc) => (
+                    <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredListings.map((listing) => (
+            <Card key={listing.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              {listing.image && (
+                <div className="aspect-video bg-muted overflow-hidden">
+                  <img
+                    src={listing.image}
+                    alt={listing.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <CardHeader>
+                <div className="flex items-start justify-between mb-2">
+                  {getTypeBadge(listing.type)}
+                  {listing.publisher_name && (
+                    <Badge variant="outline">{listing.publisher_name}</Badge>
+                  )}
+                </div>
+                <CardTitle className="text-xl">{listing.title}</CardTitle>
+                <CardDescription className="line-clamp-2">
+                  {listing.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    {listing.location}
+                  </div>
+                  {listing.budget && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <DollarSign className="h-4 w-4" />
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: listing.budget_currency || "USD",
+                      }).format(listing.budget)}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {filteredListings.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No listings found matching your criteria.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ExploreAll;
