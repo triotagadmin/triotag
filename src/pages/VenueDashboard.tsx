@@ -193,9 +193,9 @@ const VenueDashboard = () => {
                 <CardTitle>Manage Venue Ad Spaces</CardTitle>
                 <CardDescription>Add, edit, and manage your advertising spaces</CardDescription>
               </div>
-              <Button onClick={() => navigate("/venue/register")}>
+              <Button onClick={() => navigate("/venue-inventory")}>
                 <Upload className="w-4 h-4 mr-2" />
-                Add New Space
+                View Full Inventory
               </Button>
             </div>
           </CardHeader>
@@ -209,7 +209,7 @@ const VenueDashboard = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {adSpaces.map((space) => (
+                {adSpaces.slice(0, 3).map((space) => (
                   <div key={space.id} className="border rounded-lg p-4 flex items-center justify-between">
                     <div>
                       <h4 className="font-semibold">{space.title}</h4>
@@ -225,6 +225,11 @@ const VenueDashboard = () => {
                     </div>
                   </div>
                 ))}
+                {adSpaces.length > 3 && (
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/venue-inventory")}>
+                    View All {adSpaces.length} Venues
+                  </Button>
+                )}
               </div>
             )}
           </CardContent>

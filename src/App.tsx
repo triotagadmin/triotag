@@ -38,6 +38,7 @@ import DigitalInventory from "./pages/DigitalInventory";
 import AgentInventory from "./pages/AgentInventory";
 import AgentServiceSubmission from "./pages/AgentServiceSubmission";
 import ExploreAll from "./pages/ExploreAll";
+import CampaignSubmission from "./pages/CampaignSubmission";
 import CampaignBuilder from "./pages/CampaignBuilder";
 import HabitTracker from "./pages/HabitTracker";
 import TradingAI from "./pages/TradingAI";
@@ -89,7 +90,8 @@ const App = () => (
           <Route path="/agent/verify" element={<AgentVerification />} />
           <Route path="/agent-registration" element={<AgentRegistration />} />
           <Route path="/agent-service-submission" element={<AgentServiceSubmission />} />
-          <Route path="/explore-all" element={<ExploreAll />} />
+        <Route path="/explore-all" element={<ExploreAll />} />
+        <Route path="/campaign-submit" element={<CampaignSubmission />} />
           <Route path="/publishers" element={<Publishers />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />

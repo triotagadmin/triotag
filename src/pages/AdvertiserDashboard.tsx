@@ -202,7 +202,19 @@ const AdvertiserDashboard = () => {
             My Campaigns
           </h3>
           <Card>
-            <CardContent className="pt-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Campaign Inventory</CardTitle>
+                  <CardDescription>View and manage all your advertising campaigns</CardDescription>
+                </div>
+                <Button onClick={() => navigate("/campaign-builder")}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Campaign
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
               <div className="text-center py-12">
                 <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground mb-4">No campaigns yet</p>
