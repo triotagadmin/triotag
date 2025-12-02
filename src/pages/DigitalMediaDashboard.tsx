@@ -193,9 +193,9 @@ const DigitalMediaDashboard = () => {
                 <CardTitle>Manage Digital Ad Spots</CardTitle>
                 <CardDescription>Add and manage your digital advertising placements</CardDescription>
               </div>
-              <Button onClick={() => navigate("/digital-media/register")}>
+              <Button onClick={() => navigate("/digital-inventory")}>
                 <Upload className="w-4 h-4 mr-2" />
-                Add New Property
+                View Full Inventory
               </Button>
             </div>
           </CardHeader>
@@ -209,7 +209,7 @@ const DigitalMediaDashboard = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {adSpaces.map((space) => (
+                {adSpaces.slice(0, 3).map((space) => (
                   <div key={space.id} className="border rounded-lg p-4 flex items-center justify-between">
                     <div>
                       <h4 className="font-semibold">{space.title}</h4>
@@ -225,6 +225,11 @@ const DigitalMediaDashboard = () => {
                     </div>
                   </div>
                 ))}
+                {adSpaces.length > 3 && (
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/digital-inventory")}>
+                    View All {adSpaces.length} Properties
+                  </Button>
+                )}
               </div>
             )}
           </CardContent>

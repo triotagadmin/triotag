@@ -175,18 +175,18 @@ const AgentDashboard = () => {
                 <CardTitle>Manage Agent Services</CardTitle>
                 <CardDescription>Add and update your available services and rates</CardDescription>
               </div>
-              <Button onClick={() => navigate("/agent/register")}>
+              <Button onClick={() => navigate("/agent-inventory")}>
                 <Upload className="w-4 h-4 mr-2" />
-                Register Agent Services
+                View Full Inventory
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-center py-12">
               <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No services yet</h3>
-              <p className="text-muted-foreground mb-4">Add your first service to start receiving job offers</p>
-              <Button onClick={() => navigate("/agent/register")}>Add Your First Service</Button>
+              <h3 className="text-lg font-semibold mb-2">Manage your services</h3>
+              <p className="text-muted-foreground mb-4">View and manage all your agent services in one place</p>
+              <Button onClick={() => navigate("/agent-inventory")}>Go to Inventory</Button>
             </div>
           </CardContent>
         </Card>

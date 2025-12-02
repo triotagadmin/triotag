@@ -279,8 +279,11 @@ const VenueExplore = () => {
     try {
       setLoading(true);
       
-      // Fetch approved campaigns
-      const { data: campaignsData } = await supabase
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Fetch campaigns - show all if not authenticated, only approved if authenticated
+      const campaignsQuery = supabase
         .from('campaigns')
         .select(`
           *,
@@ -289,31 +292,47 @@ const VenueExplore = () => {
             user_id
           )
         `)
-        .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(6);
+      
+      // If authenticated, filter only approved
+      if (session) {
+        campaignsQuery.eq('status', 'approved');
+      }
+      
+      const { data: campaignsData } = await campaignsQuery;
 
-      // Fetch approved venues
-      const { data: venuesData } = await supabase
+      // Fetch venues - show all if not authenticated, only approved if authenticated
+      const venuesQuery = supabase
         .from('ad_spaces')
         .select(`
           *,
           publisher_profiles(business_name)
         `)
-        .eq('approval_status', 'approved')
         .order('created_at', { ascending: false })
         .limit(6);
+      
+      if (session) {
+        venuesQuery.eq('approval_status', 'approved');
+      }
+      
+      const { data: venuesData } = await venuesQuery;
 
-      // Fetch approved agent services
-      const { data: servicesData } = await supabase
+      // Fetch agent services - show all if not authenticated, only approved if authenticated
+      const servicesQuery = supabase
         .from('agent_services')
         .select(`
           *,
           publisher_profiles(business_name)
         `)
-        .eq('approval_status', 'approved')
         .order('created_at', { ascending: false })
         .limit(6);
+      
+      if (session) {
+        servicesQuery.eq('approval_status', 'approved');
+      }
+      
+      const { data: servicesData } = await servicesQuery;
 
       // Combine all approved listings
       const allListings = [

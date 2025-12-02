@@ -107,77 +107,47 @@ export const Navigation = () => {
         <div className="flex items-center space-x-4">
           {user ? (
             <>
-              {userRole === "advertiser" ? (
-                <>
-                  <Link to="/insights">
-                    <Button variant="ghost">Insights</Button>
-                  </Link>
-                  <Link to="/habit-tracker">
-                    <Button variant="ghost">Ad Tracker</Button>
-                  </Link>
-                  <Link to="/publishers">
-                    <Button variant="ghost">Buy</Button>
-                  </Link>
-                  <Link to={getDashboardLink()}>
-                    <Button variant="ghost">Dashboard</Button>
-                  </Link>
-                </>
-              ) : userRole === "publisher" ? (
-                <>
-                  <Link to="/explore">
-                    <Button variant="ghost">Explore</Button>
-                  </Link>
-                  {showPublishersLink() && (
-                    <Link to="/publishers">
-                      <Button variant="ghost">Publishers</Button>
-                    </Link>
-                  )}
-                  <Link to={getInventoryLink()}>
-                    <Button variant="ghost">Inventory</Button>
-                  </Link>
-                  <Link to="/insights">
-                    <Button variant="ghost">Insights</Button>
-                  </Link>
-                  <Link to="/habit-tracker">
-                    <Button variant="ghost">Ad Tracker</Button>
-                  </Link>
-                  <Link to={getDashboardLink()}>
-                    <Button variant="ghost">Dashboard</Button>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link to="/explore">
-                    <Button variant="ghost">Explore</Button>
-                  </Link>
-                  <Link to="/insights">
-                    <Button variant="ghost">Insights</Button>
-                  </Link>
-                  <Link to="/habit-tracker">
-                    <Button variant="ghost">Ad Tracker</Button>
-                  </Link>
-                  <Link to={getDashboardLink()}>
-                    <Button variant="ghost">Dashboard</Button>
-                  </Link>
-                </>
-              )}
-              <Button variant="outline" onClick={handleSignOut}>
-                Sign Out
-              </Button>
-            </>
-          ) : (
-            <>
               <Link to="/explore">
-                <Button variant="ghost">Explore</Button>
+                <Button variant="ghost">Advertiser</Button>
               </Link>
               <Link to="/publishers">
                 <Button variant="ghost">Publishers</Button>
               </Link>
               <Link to="/habit-tracker">
-                <Button variant="ghost">Ad Tracker</Button>
+                <Button variant="ghost">Adtracker</Button>
               </Link>
               <Link to="/insights">
                 <Button variant="ghost">Insights</Button>
+              </Link>
+              <Link to={getDashboardLink()}>
+                <Button variant="ghost">Dashboard</Button>
+              </Link>
+              <Link to="/campaign-submit">
+                <Button variant="ghost">Buy</Button>
+              </Link>
+              <Link to="/list-space">
+                <Button variant="ghost">Sell</Button>
+              </Link>
+              <Button variant="outline" onClick={handleSignOut}>
+                Log Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/explore">
+                <Button variant="ghost">Advertiser</Button>
+              </Link>
+              <Link to="/publishers">
+                <Button variant="ghost">Publishers</Button>
+              </Link>
+              <Link to="/habit-tracker">
+                <Button variant="ghost">Adtracker</Button>
+              </Link>
+              <Link to="/insights">
+                <Button variant="ghost">Insights</Button>
+              </Link>
+              <Link to="/campaign-submit">
+                <Button variant="ghost">Buy</Button>
               </Link>
               <Link to="/list-space">
                 <Button variant="ghost">Sell</Button>
