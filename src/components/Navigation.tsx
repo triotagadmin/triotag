@@ -4,22 +4,27 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import logo from "@/assets/logo.png";
-
 export const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [publisherType, setPublisherType] = useState<string | null>(null);
   const navigate = useNavigate();
-
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
       }
     });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
@@ -28,36 +33,25 @@ export const Navigation = () => {
         setPublisherType(null);
       }
     });
-
     return () => subscription.unsubscribe();
   }, []);
-
   const fetchUserRole = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .single();
-    
+    const {
+      data
+    } = await supabase.from("user_roles").select("role").eq("user_id", userId).single();
     setUserRole(data?.role ?? null);
   };
-
   useEffect(() => {
     const fetchPublisherType = async () => {
       if (userRole === "publisher" && user) {
-        const { data } = await supabase
-          .from("publisher_profiles")
-          .select("publisher_type")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        
+        const {
+          data
+        } = await supabase.from("publisher_profiles").select("publisher_type").eq("user_id", user.id).maybeSingle();
         setPublisherType(data?.publisher_type ?? null);
       }
     };
-
     fetchPublisherType();
   }, [userRole, user]);
-
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -73,7 +67,6 @@ export const Navigation = () => {
       navigate("/");
     }
   };
-
   const getDashboardLink = () => {
     if (userRole === "admin") return "/admin/dashboard";
     if (userRole === "advertiser") return "/advertiser-dashboard";
@@ -84,20 +77,16 @@ export const Navigation = () => {
     }
     return "/dashboard";
   };
-
   const getInventoryLink = () => {
     if (publisherType === "venue") return "/venue-inventory";
     if (publisherType === "digital") return "/digital-inventory";
     if (publisherType === "agent") return "/agent-inventory";
     return "/inventory";
   };
-
   const showPublishersLink = () => {
     return userRole === "publisher" && ["venue", "digital", "agent"].includes(publisherType || "");
   };
-
-  return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+  return <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <Link to={user ? "/home" : "/"} className="flex items-center space-x-2">
           <img src={logo} alt="Tiny Sticky Ads Logo" className="w-8 h-8" />
@@ -105,8 +94,7 @@ export const Navigation = () => {
         </Link>
         
         <div className="flex items-center space-x-4">
-          {user ? (
-            <>
+          {user ? <>
               <Link to="/explore">
                 <Button variant="ghost">Advertiser</Button>
               </Link>
@@ -131,17 +119,15 @@ export const Navigation = () => {
               <Button variant="outline" onClick={handleSignOut}>
                 Log Out
               </Button>
-            </>
-          ) : (
-            <>
+            </> : <>
               <Link to="/explore">
-                <Button variant="ghost">Advertiser</Button>
+                <Button variant="ghost">Marketplace</Button>
               </Link>
               <Link to="/publishers">
-                <Button variant="ghost">Publishers</Button>
+                
               </Link>
               <Link to="/habit-tracker">
-                <Button variant="ghost">Adtracker</Button>
+                <Button variant="ghost">Apps</Button>
               </Link>
               <Link to="/insights">
                 <Button variant="ghost">Insights</Button>
@@ -155,10 +141,8 @@ export const Navigation = () => {
               <Link to="/auth">
                 <Button variant="outline">Log In</Button>
               </Link>
-            </>
-          )}
+            </>}
         </div>
       </div>
-    </nav>
-  );
+    </nav>;
 };
