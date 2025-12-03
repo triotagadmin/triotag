@@ -96,13 +96,13 @@ export const Navigation = () => {
         <div className="flex items-center space-x-4">
           {user ? <>
               <Link to="/explore">
-                <Button variant="ghost">Advertiser</Button>
+                <Button variant="ghost">Marketplace</Button>
               </Link>
               <Link to="/publishers">
-                <Button variant="ghost">Publishers</Button>
+                
               </Link>
               <Link to="/habit-tracker">
-                <Button variant="ghost">Adtracker</Button>
+                <Button variant="ghost">Apps</Button>
               </Link>
               <Link to="/insights">
                 <Button variant="ghost">Insights</Button>
