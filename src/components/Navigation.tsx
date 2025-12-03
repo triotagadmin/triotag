@@ -111,10 +111,10 @@ export const Navigation = () => {
                 <Button variant="ghost">Dashboard</Button>
               </Link>
               <Link to="/campaign-submit">
-                <Button variant="ghost">Buy</Button>
+                
               </Link>
               <Link to="/list-space">
-                <Button variant="ghost">Sell</Button>
+                
               </Link>
               <Button variant="outline" onClick={handleSignOut}>
                 Log Out
