@@ -26,11 +26,11 @@ import AgentRegistration from "./pages/AgentRegistration";
 import AgentVerification from "./pages/AgentVerification";
 import DigitalServiceRegistration from "./pages/DigitalServiceRegistration";
 import DigitalVerification from "./pages/DigitalVerification";
-import Publishers from "./pages/Publishers";
 import Verify from "./pages/Verify";
 import Home from "./pages/Home";
 import Insights from "./pages/Insights";
-import VenueExplore from "./pages/VenueExplore";
+import BlogPost from "./pages/BlogPost";
+import Marketplace from "./pages/Marketplace";
 import VenueInventory from "./pages/VenueInventory";
 import VenueDetail from "./pages/VenueDetail";
 import NotFound from "./pages/NotFound";
@@ -44,6 +44,7 @@ import HabitTracker from "./pages/HabitTracker";
 import TradingAI from "./pages/TradingAI";
 import Install from "./pages/Install";
 import ListSpace from "./pages/ListSpace";
+import QRRedirect from "./pages/QRRedirect";
 
 const queryClient = new QueryClient();
 
@@ -57,7 +58,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/home" element={<Home />} />
           <Route path="/insights" element={<Insights />} />
-          <Route path="/explore" element={<VenueExplore />} />
+          <Route path="/insights/:id" element={<BlogPost />} />
+          <Route path="/explore" element={<Marketplace />} />
           <Route path="/inventory" element={<VenueInventory />} />
           <Route path="/venue-inventory" element={<VenueInventory />} />
           <Route path="/digital-inventory" element={<DigitalInventory />} />
@@ -90,9 +92,9 @@ const App = () => (
           <Route path="/agent/verify" element={<AgentVerification />} />
           <Route path="/agent-registration" element={<AgentRegistration />} />
           <Route path="/agent-service-submission" element={<AgentServiceSubmission />} />
-        <Route path="/explore-all" element={<ExploreAll />} />
-        <Route path="/campaign-submit" element={<CampaignSubmission />} />
-          <Route path="/publishers" element={<Publishers />} />
+          <Route path="/explore-all" element={<ExploreAll />} />
+          <Route path="/campaign-submit" element={<CampaignSubmission />} />
+          <Route path="/qr/:shortCode" element={<QRRedirect />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
           <Route path="/admin/verify" element={<AdminApproval />} />
