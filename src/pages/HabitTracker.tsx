@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
-
 interface Campaign {
   id: string;
   name: string;
@@ -22,7 +21,6 @@ interface Campaign {
   activeDates: string[];
   createdAt: string;
 }
-
 interface QRCodeData {
   id: string;
   short_code: string;
@@ -32,7 +30,6 @@ interface QRCodeData {
   totalScans: number;
   uniqueScans: number;
 }
-
 const HabitTracker = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [newCampaignName, setNewCampaignName] = useState("");
@@ -41,7 +38,9 @@ const HabitTracker = () => {
   const [newEndDate, setNewEndDate] = useState("");
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const today = new Date().toISOString().split("T")[0];
 
   // QR Code State
@@ -51,132 +50,131 @@ const HabitTracker = () => {
   const [loadingQR, setLoadingQR] = useState(false);
   const [selectedQR, setSelectedQR] = useState<QRCodeData | null>(null);
   const [lookupCode, setLookupCode] = useState("");
-
   useEffect(() => {
     const stored = localStorage.getItem("campaigns");
     if (stored) {
       setCampaigns(JSON.parse(stored));
     }
     fetchUserQRCodes();
-
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setShowInstallPrompt(true);
     };
-
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
-
   useEffect(() => {
     localStorage.setItem("campaigns", JSON.stringify(campaigns));
   }, [campaigns]);
-
   const fetchUserQRCodes = async () => {
     try {
-      const { data: qrCodes } = await supabase
-        .from('qr_codes')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
+      const {
+        data: qrCodes
+      } = await supabase.from('qr_codes').select('*').order('created_at', {
+        ascending: false
+      }).limit(10);
       if (qrCodes) {
-        const qrsWithStats = await Promise.all(
-          qrCodes.map(async (qr) => {
-            const { count: totalScans } = await supabase
-              .from('qr_code_scans')
-              .select('*', { count: 'exact', head: true })
-              .eq('qr_code_id', qr.id);
-
-            const { data: uniqueData } = await supabase
-              .from('qr_code_scans')
-              .select('ip_hash')
-              .eq('qr_code_id', qr.id);
-
-            const uniqueScans = new Set(uniqueData?.map(s => s.ip_hash)).size;
-
-            return {
-              ...qr,
-              totalScans: totalScans || 0,
-              uniqueScans
-            };
-          })
-        );
+        const qrsWithStats = await Promise.all(qrCodes.map(async qr => {
+          const {
+            count: totalScans
+          } = await supabase.from('qr_code_scans').select('*', {
+            count: 'exact',
+            head: true
+          }).eq('qr_code_id', qr.id);
+          const {
+            data: uniqueData
+          } = await supabase.from('qr_code_scans').select('ip_hash').eq('qr_code_id', qr.id);
+          const uniqueScans = new Set(uniqueData?.map(s => s.ip_hash)).size;
+          return {
+            ...qr,
+            totalScans: totalScans || 0,
+            uniqueScans
+          };
+        }));
         setGeneratedQRs(qrsWithStats);
       }
     } catch (error) {
       console.error('Error fetching QR codes:', error);
     }
   };
-
   const generateQRCode = async () => {
     if (!qrUrl.trim()) {
-      toast({ title: "Error", description: "Please enter a URL", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Please enter a URL",
+        variant: "destructive"
+      });
       return;
     }
-
     setLoadingQR(true);
     try {
       const shortCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      
-      const { data: { user } } = await supabase.auth.getUser();
-
-      const { data, error } = await supabase
-        .from('qr_codes')
-        .insert({
-          destination_url: qrUrl,
-          short_code: shortCode,
-          name: qrName || `QR-${shortCode}`,
-          created_by: user?.id || null
-        })
-        .select()
-        .single();
-
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
+      const {
+        data,
+        error
+      } = await supabase.from('qr_codes').insert({
+        destination_url: qrUrl,
+        short_code: shortCode,
+        name: qrName || `QR-${shortCode}`,
+        created_by: user?.id || null
+      }).select().single();
       if (error) throw error;
-
-      toast({ title: "QR Code Generated!", description: `Code: ${shortCode}` });
+      toast({
+        title: "QR Code Generated!",
+        description: `Code: ${shortCode}`
+      });
       setQrUrl("");
       setQrName("");
       fetchUserQRCodes();
     } catch (error: any) {
       console.error('Error generating QR:', error);
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
     } finally {
       setLoadingQR(false);
     }
   };
-
   const lookupQRCode = async () => {
     if (!lookupCode.trim()) {
-      toast({ title: "Error", description: "Please enter a QR code", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Please enter a QR code",
+        variant: "destructive"
+      });
       return;
     }
-
     try {
-      const { data: qr, error } = await supabase
-        .from('qr_codes')
-        .select('*')
-        .eq('short_code', lookupCode.toUpperCase())
-        .single();
-
+      const {
+        data: qr,
+        error
+      } = await supabase.from('qr_codes').select('*').eq('short_code', lookupCode.toUpperCase()).single();
       if (error || !qr) {
-        toast({ title: "Not Found", description: "QR code not found", variant: "destructive" });
+        toast({
+          title: "Not Found",
+          description: "QR code not found",
+          variant: "destructive"
+        });
         return;
       }
-
-      const { count: totalScans } = await supabase
-        .from('qr_code_scans')
-        .select('*', { count: 'exact', head: true })
-        .eq('qr_code_id', qr.id);
-
-      const { data: uniqueData } = await supabase
-        .from('qr_code_scans')
-        .select('ip_hash')
-        .eq('qr_code_id', qr.id);
-
+      const {
+        count: totalScans
+      } = await supabase.from('qr_code_scans').select('*', {
+        count: 'exact',
+        head: true
+      }).eq('qr_code_id', qr.id);
+      const {
+        data: uniqueData
+      } = await supabase.from('qr_code_scans').select('ip_hash').eq('qr_code_id', qr.id);
       const uniqueScans = new Set(uniqueData?.map(s => s.ip_hash)).size;
-
       setSelectedQR({
         ...qr,
         totalScans: totalScans || 0,
@@ -186,29 +184,34 @@ const HabitTracker = () => {
       console.error('Error looking up QR:', error);
     }
   };
-
   const getQRImageUrl = (shortCode: string) => {
     const trackingUrl = `${window.location.origin}/qr/${shortCode}`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(trackingUrl)}`;
   };
-
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    const {
+      outcome
+    } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
-      toast({ title: "App Installed!", description: "AI Adstreem has been added to your home screen" });
+      toast({
+        title: "App Installed!",
+        description: "AI Adstreem has been added to your home screen"
+      });
     }
     setDeferredPrompt(null);
     setShowInstallPrompt(false);
   };
-
   const addCampaign = () => {
     if (!newCampaignName.trim() || !newBudget || !newStartDate || !newEndDate) {
-      toast({ title: "Error", description: "Please fill in all campaign details", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Please fill in all campaign details",
+        variant: "destructive"
+      });
       return;
     }
-
     const newCampaign: Campaign = {
       id: Date.now().toString(),
       name: newCampaignName.trim(),
@@ -219,87 +222,71 @@ const HabitTracker = () => {
       clicks: 0,
       conversions: 0,
       activeDates: [],
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
-
     setCampaigns([...campaigns, newCampaign]);
     setNewCampaignName("");
     setNewBudget("");
     setNewStartDate("");
     setNewEndDate("");
-    toast({ title: "Campaign Added", description: "Your ad campaign has been created" });
+    toast({
+      title: "Campaign Added",
+      description: "Your ad campaign has been created"
+    });
   };
-
   const deleteCampaign = (id: string) => {
-    setCampaigns(campaigns.filter((c) => c.id !== id));
-    toast({ title: "Removed", description: "Campaign removed" });
+    setCampaigns(campaigns.filter(c => c.id !== id));
+    toast({
+      title: "Removed",
+      description: "Campaign removed"
+    });
   };
-
   const toggleCampaignActive = (id: string) => {
-    setCampaigns(
-      campaigns.map((campaign) => {
-        if (campaign.id === id) {
-          const isActive = campaign.activeDates.includes(today);
-          return {
-            ...campaign,
-            activeDates: isActive
-              ? campaign.activeDates.filter((date) => date !== today)
-              : [...campaign.activeDates, today],
-          };
-        }
-        return campaign;
-      })
-    );
+    setCampaigns(campaigns.map(campaign => {
+      if (campaign.id === id) {
+        const isActive = campaign.activeDates.includes(today);
+        return {
+          ...campaign,
+          activeDates: isActive ? campaign.activeDates.filter(date => date !== today) : [...campaign.activeDates, today]
+        };
+      }
+      return campaign;
+    }));
   };
-
   const updateCampaignMetrics = (id: string, field: 'impressions' | 'clicks' | 'conversions', value: number) => {
-    setCampaigns(
-      campaigns.map((campaign) => 
-        campaign.id === id ? { ...campaign, [field]: value } : campaign
-      )
-    );
+    setCampaigns(campaigns.map(campaign => campaign.id === id ? {
+      ...campaign,
+      [field]: value
+    } : campaign));
   };
-
   const calculateActiveStreak = (activeDates: string[]) => {
     if (activeDates.length === 0) return 0;
     const sortedDates = [...activeDates].sort().reverse();
     let streak = 0;
     let currentDate = new Date();
-
     for (const dateStr of sortedDates) {
       const date = new Date(dateStr);
       const diffDays = Math.floor((currentDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-      if (diffDays === streak) streak++;
-      else break;
+      if (diffDays === streak) streak++;else break;
     }
     return streak;
   };
-
   const calculateCTR = (clicks: number, impressions: number) => {
     if (impressions === 0) return "0.00";
-    return ((clicks / impressions) * 100).toFixed(2);
+    return (clicks / impressions * 100).toFixed(2);
   };
-
   const calculateConversionRate = (conversions: number, clicks: number) => {
     if (clicks === 0) return "0.00";
-    return ((conversions / clicks) * 100).toFixed(2);
+    return (conversions / clicks * 100).toFixed(2);
   };
-
-  return (
-    <>
+  return <>
       <Navigation />
       <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-accent/30 py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">
-              AI Adstreem
-            </h1>
-            <p className="text-xl text-foreground font-medium">
-              Choose Your Own Ads, Power Your Experience
-            </p>
-            <p className="text-muted-foreground mt-2 mb-6">
-              Track campaigns and generate trackable QR codes with full analytics
-            </p>
+            
+            
+            
           </div>
 
           <Tabs defaultValue="qr-generator" className="space-y-6">
@@ -332,21 +319,9 @@ const HabitTracker = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    <Input
-                      placeholder="Enter destination URL..."
-                      value={qrUrl}
-                      onChange={(e) => setQrUrl(e.target.value)}
-                    />
-                    <Input
-                      placeholder="QR Code name (optional)"
-                      value={qrName}
-                      onChange={(e) => setQrName(e.target.value)}
-                    />
-                    <Button 
-                      onClick={generateQRCode} 
-                      disabled={loadingQR}
-                      className="w-full bg-gradient-to-r from-primary to-accent"
-                    >
+                    <Input placeholder="Enter destination URL..." value={qrUrl} onChange={e => setQrUrl(e.target.value)} />
+                    <Input placeholder="QR Code name (optional)" value={qrName} onChange={e => setQrName(e.target.value)} />
+                    <Button onClick={generateQRCode} disabled={loadingQR} className="w-full bg-gradient-to-r from-primary to-accent">
                       <QrCode className="w-4 h-4 mr-2" />
                       {loadingQR ? "Generating..." : "Generate QR Code"}
                     </Button>
@@ -364,25 +339,16 @@ const HabitTracker = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter QR short code..."
-                      value={lookupCode}
-                      onChange={(e) => setLookupCode(e.target.value)}
-                    />
+                    <Input placeholder="Enter QR short code..." value={lookupCode} onChange={e => setLookupCode(e.target.value)} />
                     <Button onClick={lookupQRCode} variant="outline">
                       <Scan className="w-4 h-4 mr-2" />
                       Lookup
                     </Button>
                   </div>
                   
-                  {selectedQR && (
-                    <div className="p-4 border rounded-lg bg-muted/50">
+                  {selectedQR && <div className="p-4 border rounded-lg bg-muted/50">
                       <div className="flex items-center gap-4">
-                        <img 
-                          src={getQRImageUrl(selectedQR.short_code)} 
-                          alt="QR Code"
-                          className="w-24 h-24 border rounded"
-                        />
+                        <img src={getQRImageUrl(selectedQR.short_code)} alt="QR Code" className="w-24 h-24 border rounded" />
                         <div className="flex-1">
                           <h4 className="font-semibold">{selectedQR.name}</h4>
                           <p className="text-sm text-muted-foreground truncate">{selectedQR.destination_url}</p>
@@ -398,26 +364,19 @@ const HabitTracker = () => {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                 </CardContent>
               </Card>
 
               {/* Generated QR Codes List */}
-              {generatedQRs.length > 0 && (
-                <Card className="bg-card/95 backdrop-blur-xl">
+              {generatedQRs.length > 0 && <Card className="bg-card/95 backdrop-blur-xl">
                   <CardHeader>
                     <CardTitle>Your QR Codes</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {generatedQRs.map((qr) => (
-                        <div key={qr.id} className="p-4 border rounded-lg flex items-center gap-4">
-                          <img 
-                            src={getQRImageUrl(qr.short_code)} 
-                            alt="QR Code"
-                            className="w-16 h-16 border rounded"
-                          />
+                      {generatedQRs.map(qr => <div key={qr.id} className="p-4 border rounded-lg flex items-center gap-4">
+                          <img src={getQRImageUrl(qr.short_code)} alt="QR Code" className="w-16 h-16 border rounded" />
                           <div className="flex-1 min-w-0">
                             <p className="font-medium truncate">{qr.name}</p>
                             <p className="text-xs text-muted-foreground">Code: {qr.short_code}</p>
@@ -426,19 +385,13 @@ const HabitTracker = () => {
                               <span>{qr.uniqueScans} unique</span>
                             </div>
                           </div>
-                          <a 
-                            href={getQRImageUrl(qr.short_code)} 
-                            download={`${qr.short_code}.png`}
-                            className="p-2 hover:bg-muted rounded"
-                          >
+                          <a href={getQRImageUrl(qr.short_code)} download={`${qr.short_code}.png`} className="p-2 hover:bg-muted rounded">
                             <Download className="w-4 h-4" />
                           </a>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
               {/* Masahiro Hara Tribute */}
               <Card className="bg-gradient-to-br from-card to-primary/5 border-primary/20">
@@ -468,32 +421,13 @@ const HabitTracker = () => {
               <Card className="p-6 bg-card/95 backdrop-blur-xl border-primary/30 shadow-xl">
                 <h3 className="text-2xl font-bold text-foreground mb-4 text-center">Ad Tracker</h3>
                 <div className="space-y-3 mb-3">
-                  <Input
-                    placeholder="Campaign name..."
-                    value={newCampaignName}
-                    onChange={(e) => setNewCampaignName(e.target.value)}
-                  />
+                  <Input placeholder="Campaign name..." value={newCampaignName} onChange={e => setNewCampaignName(e.target.value)} />
                   <div className="grid grid-cols-2 gap-3">
-                    <Input
-                      type="number"
-                      placeholder="Budget ($)"
-                      value={newBudget}
-                      onChange={(e) => setNewBudget(e.target.value)}
-                    />
-                    <Input
-                      type="date"
-                      placeholder="Start Date"
-                      value={newStartDate}
-                      onChange={(e) => setNewStartDate(e.target.value)}
-                    />
+                    <Input type="number" placeholder="Budget ($)" value={newBudget} onChange={e => setNewBudget(e.target.value)} />
+                    <Input type="date" placeholder="Start Date" value={newStartDate} onChange={e => setNewStartDate(e.target.value)} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <Input
-                      type="date"
-                      placeholder="End Date"
-                      value={newEndDate}
-                      onChange={(e) => setNewEndDate(e.target.value)}
-                    />
+                    <Input type="date" placeholder="End Date" value={newEndDate} onChange={e => setNewEndDate(e.target.value)} />
                     <Button onClick={addCampaign} className="bg-gradient-to-r from-primary to-accent">
                       <Plus className="w-4 h-4 mr-2" />
                       Add Campaign
@@ -502,34 +436,20 @@ const HabitTracker = () => {
                 </div>
               </Card>
 
-              {campaigns.length === 0 ? (
-                <Card className="p-12 text-center bg-card/95 backdrop-blur-xl">
+              {campaigns.length === 0 ? <Card className="p-12 text-center bg-card/95 backdrop-blur-xl">
                   <p className="text-foreground text-lg font-medium mb-2">No campaigns yet</p>
                   <p className="text-muted-foreground">Add your first campaign above to start tracking.</p>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {campaigns.map((campaign) => {
-                    const isActiveToday = campaign.activeDates.includes(today);
-                    const streak = calculateActiveStreak(campaign.activeDates);
-                    const ctr = calculateCTR(campaign.clicks, campaign.impressions);
-                    const conversionRate = calculateConversionRate(campaign.conversions, campaign.clicks);
-
-                    return (
-                      <Card
-                        key={campaign.id}
-                        className={`p-6 transition-all bg-card/95 backdrop-blur-xl ${
-                          isActiveToday ? "bg-gradient-to-br from-primary/20 to-accent/20 border-primary" : "border-accent/20"
-                        }`}
-                      >
+                </Card> : <div className="space-y-4">
+                  {campaigns.map(campaign => {
+                const isActiveToday = campaign.activeDates.includes(today);
+                const streak = calculateActiveStreak(campaign.activeDates);
+                const ctr = calculateCTR(campaign.clicks, campaign.impressions);
+                const conversionRate = calculateConversionRate(campaign.conversions, campaign.clicks);
+                return <Card key={campaign.id} className={`p-6 transition-all bg-card/95 backdrop-blur-xl ${isActiveToday ? "bg-gradient-to-br from-primary/20 to-accent/20 border-primary" : "border-accent/20"}`}>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 flex-1">
-                              <Checkbox
-                                checked={isActiveToday}
-                                onCheckedChange={() => toggleCampaignActive(campaign.id)}
-                                className="w-6 h-6"
-                              />
+                              <Checkbox checked={isActiveToday} onCheckedChange={() => toggleCampaignActive(campaign.id)} className="w-6 h-6" />
                               <div className="flex-1">
                                 <h3 className="text-lg font-semibold">{campaign.name}</h3>
                                 <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
@@ -550,30 +470,15 @@ const HabitTracker = () => {
                           <div className="grid grid-cols-3 gap-3 pt-4 border-t">
                             <div className="space-y-1">
                               <label className="text-xs text-muted-foreground">Impressions</label>
-                              <Input
-                                type="number"
-                                value={campaign.impressions}
-                                onChange={(e) => updateCampaignMetrics(campaign.id, 'impressions', parseInt(e.target.value) || 0)}
-                                className="h-8 text-sm"
-                              />
+                              <Input type="number" value={campaign.impressions} onChange={e => updateCampaignMetrics(campaign.id, 'impressions', parseInt(e.target.value) || 0)} className="h-8 text-sm" />
                             </div>
                             <div className="space-y-1">
                               <label className="text-xs text-muted-foreground">Clicks</label>
-                              <Input
-                                type="number"
-                                value={campaign.clicks}
-                                onChange={(e) => updateCampaignMetrics(campaign.id, 'clicks', parseInt(e.target.value) || 0)}
-                                className="h-8 text-sm"
-                              />
+                              <Input type="number" value={campaign.clicks} onChange={e => updateCampaignMetrics(campaign.id, 'clicks', parseInt(e.target.value) || 0)} className="h-8 text-sm" />
                             </div>
                             <div className="space-y-1">
                               <label className="text-xs text-muted-foreground">Conversions</label>
-                              <Input
-                                type="number"
-                                value={campaign.conversions}
-                                onChange={(e) => updateCampaignMetrics(campaign.id, 'conversions', parseInt(e.target.value) || 0)}
-                                className="h-8 text-sm"
-                              />
+                              <Input type="number" value={campaign.conversions} onChange={e => updateCampaignMetrics(campaign.id, 'conversions', parseInt(e.target.value) || 0)} className="h-8 text-sm" />
                             </div>
                           </div>
 
@@ -588,11 +493,9 @@ const HabitTracker = () => {
                             </div>
                           </div>
                         </div>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
+                      </Card>;
+              })}
+                </div>}
             </TabsContent>
 
             {/* AI Insights Tab */}
@@ -635,20 +538,13 @@ const HabitTracker = () => {
             </TabsContent>
           </Tabs>
 
-          {showInstallPrompt && (
-            <Button
-              onClick={handleInstallClick}
-              className="fixed bottom-6 right-6 bg-gradient-to-r from-primary to-accent shadow-2xl z-50 rounded-full h-14 px-6"
-            >
+          {showInstallPrompt && <Button onClick={handleInstallClick} className="fixed bottom-6 right-6 bg-gradient-to-r from-primary to-accent shadow-2xl z-50 rounded-full h-14 px-6">
               <Plus className="w-5 h-5 mr-2" />
               Install App
-            </Button>
-          )}
+            </Button>}
         </div>
       </div>
       <Footer />
-    </>
-  );
+    </>;
 };
-
 export default HabitTracker;
