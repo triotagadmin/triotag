@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,13 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft, FileText, Upload, Image } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 
 export default function AdminBlogSubmission() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
@@ -23,6 +26,56 @@ export default function AdminBlogSubmission() {
     image_url: "",
     read_time: ""
   });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to upload images");
+        return;
+      }
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `blog-${Date.now()}.${fileExt}`;
+      const filePath = `blog-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("ad-space-media")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("ad-space-media")
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, image_url: publicUrl });
+      setPreviewUrl(publicUrl);
+      toast.success("Image uploaded successfully!");
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      toast.error(error.message || "Failed to upload image");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,6 +167,54 @@ export default function AdminBlogSubmission() {
                 />
               </div>
 
+              {/* Hero Image Upload */}
+              <div className="space-y-2">
+                <Label>Hero Image</Label>
+                <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                  {previewUrl || formData.image_url ? (
+                    <div className="space-y-4">
+                      <img
+                        src={previewUrl || formData.image_url}
+                        alt="Preview"
+                        className="max-h-48 mx-auto rounded-lg object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Change Image
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      className="cursor-pointer py-8"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Image className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Click to upload a hero image
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        PNG, JPG up to 5MB
+                      </p>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+                {isUploading && (
+                  <p className="text-sm text-muted-foreground">Uploading...</p>
+                )}
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="author">Author *</Label>
@@ -138,27 +239,15 @@ export default function AdminBlogSubmission() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="read_time">Read Time *</Label>
-                  <Input
-                    id="read_time"
-                    value={formData.read_time}
-                    onChange={(e) => setFormData({ ...formData, read_time: e.target.value })}
-                    placeholder="e.g., 5 min read"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="image_url">Image URL</Label>
-                  <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="read_time">Read Time *</Label>
+                <Input
+                  id="read_time"
+                  value={formData.read_time}
+                  onChange={(e) => setFormData({ ...formData, read_time: e.target.value })}
+                  placeholder="e.g., 5 min read"
+                  required
+                />
               </div>
 
               <div className="space-y-2">
@@ -180,7 +269,7 @@ export default function AdminBlogSubmission() {
               <div className="flex gap-4 pt-4">
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploading}
                   className="flex-1"
                 >
                   {isSubmitting ? "Publishing..." : "Publish Blog Post"}

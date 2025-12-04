@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, DollarSign, Calendar, Users, ChevronLeft, ChevronRight, Building2, Globe, UserCheck, ShoppingCart, Tag } from "lucide-react";
+import { Search, MapPin, DollarSign, ChevronLeft, ChevronRight, Building2, Globe, UserCheck, ShoppingCart, Tag } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { User } from "@supabase/supabase-js";
 
 interface MarketplaceListing {
   id: string;
@@ -35,6 +36,8 @@ const AD_UNITS = {
 
 const Marketplace = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [filteredListings, setFilteredListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +50,18 @@ const Marketplace = () => {
   const totalSlides = Math.ceil(filteredListings.length / ITEMS_PER_SLIDE);
 
   useEffect(() => {
+    // Check auth status
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
     fetchAllListings();
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -58,30 +72,33 @@ const Marketplace = () => {
     try {
       setLoading(true);
 
-      // Fetch campaigns (Buying - from advertisers)
+      // Fetch approved campaigns (Buying - from advertisers)
       const { data: campaignsData } = await supabase
         .from('campaigns')
         .select(`*, advertiser_profiles(company_name)`)
+        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
-      // Fetch ad spaces (Selling - from venue publishers)
+      // Fetch approved ad spaces (Selling - from venue publishers)
       const { data: venuesData } = await supabase
         .from('ad_spaces')
         .select(`*, publisher_profiles(business_name, publisher_type)`)
+        .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
-      // Fetch agent services (Selling - from agent publishers)
+      // Fetch approved agent services (Selling - from agent publishers)
       const { data: servicesData } = await supabase
         .from('agent_services')
         .select(`*, publisher_profiles(business_name, publisher_type)`)
+        .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
-      // Fetch digital publisher profiles for selling listings
+      // Fetch approved digital publisher profiles for selling listings
       const { data: digitalPublishers } = await supabase
         .from('publisher_profiles')
         .select('*')
         .eq('publisher_type', 'digital')
-        .in('verification_status', ['approved', 'pending'])
+        .eq('verification_status', 'approved')
         .order('created_at', { ascending: false });
 
       const allListings: MarketplaceListing[] = [];
@@ -107,7 +124,6 @@ const Marketplace = () => {
 
       // Process venues (Selling)
       (venuesData || []).forEach(v => {
-        const publisherType = (v.publisher_profiles as any)?.publisher_type || "venue";
         allListings.push({
           id: v.id,
           title: v.title,
@@ -206,6 +222,28 @@ const Marketplace = () => {
     setCurrentSlide(0);
   };
 
+  const handleListingClick = (listing: MarketplaceListing) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to view listing details and make transactions.",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    // Navigate to detail page based on listing type
+    if (listing.category === "venue") {
+      navigate(`/venue/${listing.id}`);
+    } else {
+      // For now, show a toast for other listing types
+      toast({
+        title: "Listing Details",
+        description: `Viewing ${listing.title}. Payment options: Google Pay, Stripe.`,
+      });
+    }
+  };
+
   const formatBudget = (amount: number, currency: string) => {
     if (amount === 0) return "Contact for pricing";
     return new Intl.NumberFormat("en-US", {
@@ -265,6 +303,14 @@ const Marketplace = () => {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Your central hub for buying and selling advertising services, ad space, media, and ad units
           </p>
+          {!user && (
+            <p className="text-sm text-muted-foreground mt-2">
+              <Button variant="link" onClick={() => navigate("/auth")} className="p-0 h-auto">
+                Log in
+              </Button>
+              {" "}to make transactions
+            </p>
+          )}
         </div>
 
         {/* Search & Filters */}
@@ -315,12 +361,12 @@ const Marketplace = () => {
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-muted-foreground">
-            Showing {filteredListings.length} listings
+            Showing {filteredListings.length} approved listings
             {totalSlides > 1 && ` • Slide ${currentSlide + 1} of ${totalSlides}`}
           </p>
-          <Link to="/explore-all">
-            <Button variant="outline">View All Listings</Button>
-          </Link>
+          <Button variant="outline" onClick={() => navigate("/explore-all")}>
+            View All Listings
+          </Button>
         </div>
 
         {/* Carousel Navigation */}
@@ -350,13 +396,17 @@ const Marketplace = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {getCurrentSlideListings().length === 0 ? (
             <div className="col-span-full text-center py-12">
-              <p className="text-muted-foreground">No listings found matching your criteria</p>
+              <p className="text-muted-foreground">No approved listings found matching your criteria</p>
             </div>
           ) : (
             getCurrentSlideListings().map((listing) => {
               const CategoryIcon = getCategoryIcon(listing.category);
               return (
-                <Card key={`${listing.category}-${listing.id}`} className="hover:shadow-lg transition-shadow overflow-hidden">
+                <Card 
+                  key={`${listing.category}-${listing.id}`} 
+                  className="hover:shadow-lg transition-shadow overflow-hidden cursor-pointer"
+                  onClick={() => handleListingClick(listing)}
+                >
                   {listing.image && (
                     <div className="relative h-48 w-full overflow-hidden">
                       <img
@@ -428,7 +478,9 @@ const Marketplace = () => {
                       <p className="text-sm font-medium">{listing.ownerName}</p>
                     </div>
 
-                    <Button className="w-full mt-4">View Details</Button>
+                    <Button className="w-full mt-4">
+                      {user ? "View Details" : "Log in to View"}
+                    </Button>
                   </CardContent>
                 </Card>
               );
@@ -457,18 +509,30 @@ const Marketplace = () => {
                 </div>
               </div>
               <div>
-                <h4 className="font-semibold mb-3">Categories & Ad Units</h4>
-                <div className="space-y-2 text-sm">
-                  <div><strong>Venue:</strong> {AD_UNITS.venue.join(", ")}</div>
-                  <div><strong>Digital:</strong> {AD_UNITS.digital.join(", ")}</div>
-                  <div><strong>Agent:</strong> {AD_UNITS.agent.join(", ")}</div>
+                <h4 className="font-semibold mb-3">Categories</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={getCategoryBadgeColor("advertiser")}>Advertiser</Badge>
+                    <span className="text-sm text-muted-foreground">Brands & businesses buying ad space</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={getCategoryBadgeColor("venue")}>Venue</Badge>
+                    <span className="text-sm text-muted-foreground">Physical locations with ad space</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={getCategoryBadgeColor("digital")}>Digital</Badge>
+                    <span className="text-sm text-muted-foreground">Online advertising services</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={getCategoryBadgeColor("agent")}>Agent</Badge>
+                    <span className="text-sm text-muted-foreground">Marketing & promotion services</span>
+                  </div>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
-
       <Footer />
     </div>
   );
