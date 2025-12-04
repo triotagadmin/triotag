@@ -15,7 +15,7 @@ export const Hero = () => {
           </h1>
           
           <p className="text-xl max-w-2xl mx-auto bg-[sidebar-primary-foreground] font-mono font-bold md:text-[sidebar-primary-foreground] text-gray-50 bg-teal-950">
-            Connecting advertisers with venues, agents, and digital publishers in the micro advertising revolution!
+            Connecting advertisers with venues, agencies, and digital publishers in the micro advertising revolution!
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
