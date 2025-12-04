@@ -102,7 +102,7 @@ export const Navigation = () => {
                 
               </Link>
               <Link to="/habit-tracker">
-                <Button variant="ghost">Apps</Button>
+                <Button variant="ghost">QR Tracker</Button>
               </Link>
               <Link to="/insights">
                 <Button variant="ghost">Insights</Button>
@@ -127,7 +127,7 @@ export const Navigation = () => {
                 
               </Link>
               <Link to="/habit-tracker">
-                <Button variant="ghost">Apps</Button>
+                <Button variant="ghost">QR Tracker</Button>
               </Link>
               <Link to="/insights">
                 <Button variant="ghost">Insights</Button>
