@@ -11,7 +11,7 @@ export const Hero = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8 border-0 border-chart-1">
           <h1 className="text-6xl font-bold tracking-tight text-secondary bg-[sidebar-primary-foreground] md:text-[sidebar-primary-foreground] bg-chart-5">
-            Buy and Sell <span className="text-primary">Ad Space</span>
+            Buy and Sell <span className="text-primary">Micro Ad Space</span>
           </h1>
           
           <p className="text-xl max-w-2xl mx-auto bg-[sidebar-primary-foreground] font-mono font-bold md:text-[sidebar-primary-foreground] text-gray-50 bg-teal-950">
