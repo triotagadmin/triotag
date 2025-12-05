@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,8 +13,11 @@ import { Footer } from "@/components/Footer";
 
 export default function AdminBlogSubmission() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get("edit");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
@@ -26,6 +29,45 @@ export default function AdminBlogSubmission() {
     image_url: "",
     read_time: ""
   });
+
+  useEffect(() => {
+    if (editId) {
+      loadBlogPost(editId);
+    }
+  }, [editId]);
+
+  const loadBlogPost = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setFormData({
+          title: data.title || "",
+          excerpt: data.excerpt || "",
+          content: data.content || "",
+          author: data.author || "",
+          category: data.category || "",
+          image_url: data.image_url || "",
+          read_time: data.read_time || ""
+        });
+        if (data.image_url) {
+          setPreviewUrl(data.image_url);
+        }
+      }
+    } catch (error: any) {
+      console.error("Error loading blog post:", error);
+      toast.error("Failed to load blog post");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -96,17 +138,34 @@ export default function AdminBlogSubmission() {
         return;
       }
 
-      const { error } = await supabase
-        .from("blog_posts")
-        .insert({
-          ...formData,
-          published_by: user.id,
-          status: "published"
-        });
+      if (editId) {
+        // Update existing blog post
+        const { error } = await supabase
+          .from("blog_posts")
+          .update({
+            ...formData,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", editId);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast.success("Blog post published successfully!");
+        toast.success("Blog post updated successfully!");
+      } else {
+        // Create new blog post
+        const { error } = await supabase
+          .from("blog_posts")
+          .insert({
+            ...formData,
+            published_by: user.id,
+            status: "published"
+          });
+
+        if (error) throw error;
+
+        toast.success("Blog post published successfully!");
+      }
+      
       navigate("/insights");
     } catch (error: any) {
       console.error("Error submitting blog post:", error);
@@ -115,6 +174,18 @@ export default function AdminBlogSubmission() {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-6 py-12 max-w-4xl flex items-center justify-center">
+          <p>Loading blog post...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -135,9 +206,11 @@ export default function AdminBlogSubmission() {
             <div className="flex items-center gap-2">
               <FileText className="w-6 h-6 text-primary" />
               <div>
-                <CardTitle className="text-3xl">Submit Blog Post</CardTitle>
+                <CardTitle className="text-3xl">
+                  {editId ? "Edit Blog Post" : "Submit Blog Post"}
+                </CardTitle>
                 <CardDescription className="mt-2">
-                  Create and publish a new blog post for the Insights page
+                  {editId ? "Update your existing blog post" : "Create and publish a new blog post for the Insights page"}
                 </CardDescription>
               </div>
             </div>
@@ -272,7 +345,7 @@ export default function AdminBlogSubmission() {
                   disabled={isSubmitting || isUploading}
                   className="flex-1"
                 >
-                  {isSubmitting ? "Publishing..." : "Publish Blog Post"}
+                  {isSubmitting ? (editId ? "Updating..." : "Publishing...") : (editId ? "Update Blog Post" : "Publish Blog Post")}
                 </Button>
                 <Button
                   type="button"

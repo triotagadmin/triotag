@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle } from "lucide-react";
+import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye } from "lucide-react";
 
 const VenueDashboard = () => {
   const navigate = useNavigate();
@@ -15,6 +15,10 @@ const VenueDashboard = () => {
   const [adSpaces, setAdSpaces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const ITEMS_PER_SLIDE = 3;
+  const totalSlides = Math.max(1, Math.ceil(adSpaces.length / ITEMS_PER_SLIDE));
 
   useEffect(() => {
     const fetchData = async () => {
@@ -86,6 +90,14 @@ const VenueDashboard = () => {
     }
   };
 
+  const handleEditSpace = (spaceId: string) => {
+    navigate(`/venue-inventory?edit=${spaceId}`);
+  };
+
+  const handleViewSpace = (spaceId: string) => {
+    navigate(`/venue/${spaceId}`);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
@@ -97,6 +109,19 @@ const VenueDashboard = () => {
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
+  };
+
+  const getCurrentSlideSpaces = () => {
+    const start = currentSlide * ITEMS_PER_SLIDE;
+    return adSpaces.slice(start, start + ITEMS_PER_SLIDE);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
   };
 
   if (loading) {
@@ -185,7 +210,7 @@ const VenueDashboard = () => {
           </Card>
         </div>
 
-        {/* Manage Ad Spaces */}
+        {/* Manage Ad Spaces - Horizontal Slider */}
         <Card className="mb-8">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -209,26 +234,78 @@ const VenueDashboard = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {adSpaces.slice(0, 3).map((space) => (
-                  <div key={space.id} className="border rounded-lg p-4 flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold">{space.title}</h4>
-                      <p className="text-sm text-muted-foreground">{space.location}</p>
-                      <div className="mt-2 flex gap-2">
-                        {getStatusBadge(space.approval_status)}
-                        <Badge variant="outline">{space.availability_status}</Badge>
-                      </div>
-                    </div>
+                {/* Carousel Navigation */}
+                {totalSlides > 1 && (
+                  <div className="flex items-center justify-center gap-4 mb-4">
+                    <Button variant="outline" size="icon" onClick={prevSlide}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">Edit</Button>
-                      <Button variant="outline" size="sm">View</Button>
+                      {Array.from({ length: totalSlides }).map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentSlide(idx)}
+                          className={`w-2 h-2 rounded-full transition-colors ${
+                            idx === currentSlide ? "bg-primary" : "bg-muted-foreground/30"
+                          }`}
+                        />
+                      ))}
                     </div>
+                    <Button variant="outline" size="icon" onClick={nextSlide}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </div>
-                ))}
-                {adSpaces.length > 3 && (
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/venue-inventory")}>
-                    View All {adSpaces.length} Venues
-                  </Button>
+                )}
+
+                {/* Horizontal Slider */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {getCurrentSlideSpaces().map((space) => (
+                    <Card key={space.id} className="overflow-hidden">
+                      {Array.isArray(space.media_urls) && space.media_urls[0] && (
+                        <div className="h-32 overflow-hidden">
+                          <img 
+                            src={space.media_urls[0]} 
+                            alt={space.title} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="p-4">
+                        <h4 className="font-semibold truncate">{space.title}</h4>
+                        <p className="text-sm text-muted-foreground truncate">{space.location}</p>
+                        <div className="mt-2 flex gap-2 flex-wrap">
+                          {getStatusBadge(space.approval_status)}
+                          <Badge variant="outline">{space.availability_status}</Badge>
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => handleEditSpace(space.id)}
+                          >
+                            <Edit className="w-3 h-3 mr-1" />
+                            Edit
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => handleViewSpace(space.id)}
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            View
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+
+                {adSpaces.length > ITEMS_PER_SLIDE && (
+                  <p className="text-center text-sm text-muted-foreground">
+                    Showing {getCurrentSlideSpaces().length} of {adSpaces.length} spaces
+                  </p>
                 )}
               </div>
             )}
