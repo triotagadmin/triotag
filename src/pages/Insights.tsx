@@ -4,8 +4,8 @@ import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Calendar, Clock, ArrowRight, Edit } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -21,12 +21,28 @@ interface BlogPost {
 }
 
 const Insights = () => {
+  const navigate = useNavigate();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     loadBlogPosts();
+    checkAdminStatus();
   }, []);
+
+  const checkAdminStatus = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin");
+      
+      setIsAdmin(roles && roles.length > 0);
+    }
+  };
 
   const loadBlogPosts = async () => {
     try {
@@ -54,6 +70,10 @@ const Insights = () => {
       month: "long",
       day: "numeric"
     });
+  };
+
+  const handleEditPost = (postId: string) => {
+    navigate(`/admin/blog-submission?edit=${postId}`);
   };
 
   return (
@@ -122,11 +142,22 @@ const Insights = () => {
                         <span>•</span>
                         <span>{post.author}</span>
                       </div>
-                      <Link to={`/insights/${post.id}`}>
-                        <Button variant="ghost" size="sm">
-                          Read More <ArrowRight className="ml-2 w-4 h-4" />
-                        </Button>
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        {isAdmin && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditPost(post.id)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        )}
+                        <Link to={`/insights/${post.id}`}>
+                          <Button variant="ghost" size="sm">
+                            Read More <ArrowRight className="ml-2 w-4 h-4" />
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
