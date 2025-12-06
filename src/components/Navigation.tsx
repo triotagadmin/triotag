@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import logo from "@/assets/logo.png";
+import favicon from "/favicon.gif";
 export const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -89,7 +89,7 @@ export const Navigation = () => {
   return <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <Link to={user ? "/home" : "/"} className="flex items-center space-x-2">
-          <img src={logo} alt="Tiny Sticky Ads Logo" className="w-8 h-8" />
+          <img src={favicon} alt="Tiny Sticky Ads Logo" className="w-8 h-8" />
           <span className="font-bold text-xl">Tiny Sticky Ads</span>
         </Link>
         

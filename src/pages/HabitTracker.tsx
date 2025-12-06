@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, QrCode, Bot, Download, Scan, Copy, RefreshCw } from "lucide-react";
+import { Plus, QrCode, Bot, Download, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -19,15 +19,6 @@ interface QRCodeData {
   uniqueScans: number;
 }
 
-interface QRScanDetail {
-  id: string;
-  scanned_at: string;
-  device_type: string | null;
-  browser: string | null;
-  operating_system: string | null;
-  country: string | null;
-  city: string | null;
-}
 
 const HabitTracker = () => {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
@@ -40,12 +31,8 @@ const HabitTracker = () => {
   const [generatedQRs, setGeneratedQRs] = useState<QRCodeData[]>([]);
   const [loadingQR, setLoadingQR] = useState(false);
   const [selectedQR, setSelectedQR] = useState<QRCodeData | null>(null);
-  const [lookupCode, setLookupCode] = useState("");
-  const [scanDetails, setScanDetails] = useState<QRScanDetail[]>([]);
-  const [loadingScanDetails, setLoadingScanDetails] = useState(false);
   
   // AI Analytics State
-  const [analyticsText, setAnalyticsText] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const [loadingAI, setLoadingAI] = useState(false);
 
@@ -106,8 +93,47 @@ const HabitTracker = () => {
     }
     setLoadingQR(true);
     try {
-      const shortCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       const { data: { user } } = await supabase.auth.getUser();
+      
+      // Check if user is verified
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to generate QR codes",
+          variant: "destructive"
+        });
+        setLoadingQR(false);
+        return;
+      }
+
+      // Check if user account is verified (publisher or advertiser)
+      const { data: publisherProfile } = await supabase
+        .from('publisher_profiles')
+        .select('verified, verification_status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const { data: advertiserProfile } = await supabase
+        .from('advertiser_profiles')
+        .select('verified, status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const isVerified = 
+        (publisherProfile?.verified === true || publisherProfile?.verification_status === 'approved') ||
+        (advertiserProfile?.verified === true || advertiserProfile?.status === 'approved');
+
+      if (!isVerified) {
+        toast({
+          title: "Verification Required",
+          description: "QR code generation is only available for verified accounts. Please complete your verification first.",
+          variant: "destructive"
+        });
+        setLoadingQR(false);
+        return;
+      }
+
+      const shortCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
       const { data, error } = await supabase
         .from('qr_codes')
@@ -115,7 +141,7 @@ const HabitTracker = () => {
           destination_url: qrUrl,
           short_code: shortCode,
           name: qrName || `QR-${shortCode}`,
-          created_by: user?.id || null
+          created_by: user.id
         })
         .select()
         .single();
@@ -141,115 +167,23 @@ const HabitTracker = () => {
     }
   };
 
-  const lookupQRCode = async () => {
-    if (!lookupCode.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a QR code",
-        variant: "destructive"
-      });
-      return;
-    }
-    setLoadingScanDetails(true);
-    try {
-      const { data: qr, error } = await supabase
-        .from('qr_codes')
-        .select('*')
-        .eq('short_code', lookupCode.toUpperCase())
-        .single();
-
-      if (error || !qr) {
-        toast({
-          title: "Not Found",
-          description: "QR code not found in our database",
-          variant: "destructive"
-        });
-        setLoadingScanDetails(false);
-        return;
-      }
-
-      const { count: totalScans } = await supabase
-        .from('qr_code_scans')
-        .select('*', { count: 'exact', head: true })
-        .eq('qr_code_id', qr.id);
-
-      const { data: uniqueData } = await supabase
-        .from('qr_code_scans')
-        .select('ip_hash')
-        .eq('qr_code_id', qr.id);
-
-      const uniqueScans = new Set(uniqueData?.map(s => s.ip_hash)).size;
-
-      // Fetch detailed scan data
-      const { data: scans } = await supabase
-        .from('qr_code_scans')
-        .select('*')
-        .eq('qr_code_id', qr.id)
-        .order('scanned_at', { ascending: false })
-        .limit(50);
-
-      setSelectedQR({
-        ...qr,
-        totalScans: totalScans || 0,
-        uniqueScans
-      });
-      setScanDetails(scans || []);
-    } catch (error) {
-      console.error('Error looking up QR:', error);
-    } finally {
-      setLoadingScanDetails(false);
-    }
-  };
-
   const getQRImageUrl = (shortCode: string) => {
     const trackingUrl = `${window.location.origin}/qr/${shortCode}`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(trackingUrl)}`;
   };
 
-  const copyAnalyticsToClipboard = () => {
-    if (!selectedQR) {
-      toast({
-        title: "No Data",
-        description: "Please lookup a QR code first",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const analyticsData = `
-QR Code Analytics Report
-========================
-Name: ${selectedQR.name}
-Short Code: ${selectedQR.short_code}
-Destination: ${selectedQR.destination_url}
-Created: ${new Date(selectedQR.created_at).toLocaleDateString()}
-
-Performance Metrics:
-- Total Scans: ${selectedQR.totalScans}
-- Unique Scans: ${selectedQR.uniqueScans}
-- Repeat Rate: ${selectedQR.totalScans > 0 ? (((selectedQR.totalScans - selectedQR.uniqueScans) / selectedQR.totalScans) * 100).toFixed(1) : 0}%
-
-Recent Scan Details:
-${scanDetails.slice(0, 10).map(s => `- ${new Date(s.scanned_at || '').toLocaleString()} | ${s.device_type || 'Unknown'} | ${s.browser || 'Unknown'} | ${s.city || 'Unknown'}, ${s.country || 'Unknown'}`).join('\n')}
-`.trim();
-
-    navigator.clipboard.writeText(analyticsData);
-    setAnalyticsText(analyticsData);
-    toast({
-      title: "Copied!",
-      description: "Analytics data copied to clipboard"
-    });
-  };
-
   const generateAIAnalytics = async () => {
-    if (!analyticsText && !selectedQR) {
+    if (generatedQRs.length === 0 && !selectedQR) {
       toast({
         title: "No Data",
-        description: "Please copy analytics data first or lookup a QR code",
+        description: "Please generate a QR code first to analyze",
         variant: "destructive"
       });
       return;
     }
+    
+    // Use selected QR or the first generated QR
+    const qrToAnalyze = selectedQR || generatedQRs[0];
 
     setLoadingAI(true);
     try {
@@ -261,10 +195,10 @@ ${scanDetails.slice(0, 10).map(s => `- ${new Date(s.scanned_at || '').toLocaleSt
 Based on your QR code performance data:
 
 ### Performance Summary
-${selectedQR ? `
-- Your QR code "${selectedQR.name}" has received **${selectedQR.totalScans} total scans** with **${selectedQR.uniqueScans} unique visitors**.
-- The repeat scan rate of **${selectedQR.totalScans > 0 ? (((selectedQR.totalScans - selectedQR.uniqueScans) / selectedQR.totalScans) * 100).toFixed(1) : 0}%** indicates ${selectedQR.totalScans > selectedQR.uniqueScans ? "good engagement with returning users" : "primarily new visitors"}.
-` : "No QR code selected for analysis."}
+${qrToAnalyze ? `
+- Your QR code "${qrToAnalyze.name}" has received **${qrToAnalyze.totalScans} total scans** with **${qrToAnalyze.uniqueScans} unique visitors**.
+- The repeat scan rate of **${qrToAnalyze.totalScans > 0 ? (((qrToAnalyze.totalScans - qrToAnalyze.uniqueScans) / qrToAnalyze.totalScans) * 100).toFixed(1) : 0}%** indicates ${qrToAnalyze.totalScans > qrToAnalyze.uniqueScans ? "good engagement with returning users" : "primarily new visitors"}.
+` : "No QR code available for analysis."}
 
 ### Recommendations
 1. **Increase Visibility**: Place QR codes at eye level in high-traffic areas
@@ -321,14 +255,10 @@ Based on your scan patterns, consider:
           </div>
 
           <Tabs defaultValue="qr-generator" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="qr-generator" className="flex items-center gap-2">
                 <QrCode className="w-4 h-4" />
-                Generator
-              </TabsTrigger>
-              <TabsTrigger value="qr-tracker" className="flex items-center gap-2">
-                <Scan className="w-4 h-4" />
-                Tracker
+                QR Generator
               </TabsTrigger>
               <TabsTrigger value="ai-analytics" className="flex items-center gap-2">
                 <Bot className="w-4 h-4" />
@@ -342,10 +272,10 @@ Based on your scan patterns, consider:
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <QrCode className="w-6 h-6 text-primary" />
-                    Free QR Code Generator
+                    QR Code Generator
                   </CardTitle>
                   <CardDescription>
-                    Create trackable QR codes with full analytics - no login required!
+                    Create trackable QR codes with full analytics - available for verified accounts only
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -432,111 +362,6 @@ Based on your scan patterns, consider:
               </Card>
             </TabsContent>
 
-            {/* QR Code Tracker Tab */}
-            <TabsContent value="qr-tracker" className="space-y-6">
-              <Card className="bg-card/95 backdrop-blur-xl border-accent/30">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Scan className="w-5 h-5" />
-                    QR Code Tracker
-                  </CardTitle>
-                  <CardDescription>
-                    Look up any QR code generated by our platform to view its analytics
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter QR short code (e.g., ABC123)..."
-                      value={lookupCode}
-                      onChange={(e) => setLookupCode(e.target.value)}
-                    />
-                    <Button onClick={lookupQRCode} disabled={loadingScanDetails}>
-                      <Scan className="w-4 h-4 mr-2" />
-                      {loadingScanDetails ? "Loading..." : "Lookup"}
-                    </Button>
-                  </div>
-
-                  {selectedQR && (
-                    <div className="space-y-4">
-                      <div className="p-4 border rounded-lg bg-muted/50">
-                        <div className="flex items-start gap-4">
-                          <img
-                            src={getQRImageUrl(selectedQR.short_code)}
-                            alt="QR Code"
-                            className="w-24 h-24 border rounded"
-                          />
-                          <div className="flex-1">
-                            <h4 className="font-semibold">{selectedQR.name}</h4>
-                            <p className="text-sm text-muted-foreground truncate">
-                              {selectedQR.destination_url}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Created: {new Date(selectedQR.created_at).toLocaleDateString()}
-                            </p>
-                            <div className="grid grid-cols-2 gap-4 mt-3">
-                              <div className="text-center p-2 bg-primary/10 rounded">
-                                <p className="text-2xl font-bold text-primary">{selectedQR.totalScans}</p>
-                                <p className="text-xs text-muted-foreground">Total Scans</p>
-                              </div>
-                              <div className="text-center p-2 bg-accent/10 rounded">
-                                <p className="text-2xl font-bold text-accent">{selectedQR.uniqueScans}</p>
-                                <p className="text-xs text-muted-foreground">Unique Scans</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Copy Analytics Button */}
-                      <Button
-                        onClick={copyAnalyticsToClipboard}
-                        variant="outline"
-                        className="w-full"
-                      >
-                        <Copy className="w-4 h-4 mr-2" />
-                        Copy Analytics to Clipboard
-                      </Button>
-
-                      {/* Scan Details Table */}
-                      {scanDetails.length > 0 && (
-                        <div className="border rounded-lg overflow-hidden">
-                          <div className="p-3 bg-muted/50 border-b">
-                            <h5 className="font-medium">Recent Scans ({scanDetails.length})</h5>
-                          </div>
-                          <div className="max-h-64 overflow-auto">
-                            <table className="w-full text-sm">
-                              <thead className="bg-muted/30 sticky top-0">
-                                <tr>
-                                  <th className="text-left p-2">Time</th>
-                                  <th className="text-left p-2">Device</th>
-                                  <th className="text-left p-2">Location</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {scanDetails.map((scan) => (
-                                  <tr key={scan.id} className="border-t">
-                                    <td className="p-2 text-xs">
-                                      {new Date(scan.scanned_at || '').toLocaleString()}
-                                    </td>
-                                    <td className="p-2 text-xs">
-                                      {scan.device_type || 'Unknown'} / {scan.browser || 'Unknown'}
-                                    </td>
-                                    <td className="p-2 text-xs">
-                                      {scan.city || 'Unknown'}, {scan.country || 'Unknown'}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
 
             {/* AI Analytics Tab */}
             <TabsContent value="ai-analytics" className="space-y-6">
@@ -553,21 +378,8 @@ Based on your scan patterns, consider:
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">
-                      1. First, look up a QR code in the Tracker tab
-                      <br />
-                      2. Copy the analytics data using the "Copy Analytics" button
-                      <br />
-                      3. Click "Generate AI Analytics" below
+                      Generate AI-powered insights from your QR code performance data. Select a QR code from the Generator tab to analyze its performance.
                     </p>
-
-                    {analyticsText && (
-                      <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-xs text-muted-foreground mb-1">Copied Analytics Data:</p>
-                        <pre className="text-xs whitespace-pre-wrap max-h-32 overflow-auto">
-                          {analyticsText.substring(0, 300)}...
-                        </pre>
-                      </div>
-                    )}
 
                     <Button
                       onClick={generateAIAnalytics}
