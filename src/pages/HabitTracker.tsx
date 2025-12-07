@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
-
 interface QRCodeData {
   id: string;
   short_code: string;
@@ -18,12 +17,12 @@ interface QRCodeData {
   totalScans: number;
   uniqueScans: number;
 }
-
-
 const HabitTracker = () => {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
 
   // QR Code State
   const [qrUrl, setQrUrl] = useState("");
@@ -31,11 +30,10 @@ const HabitTracker = () => {
   const [generatedQRs, setGeneratedQRs] = useState<QRCodeData[]>([]);
   const [loadingQR, setLoadingQR] = useState(false);
   const [selectedQR, setSelectedQR] = useState<QRCodeData | null>(null);
-  
+
   // AI Analytics State
   const [aiResponse, setAiResponse] = useState("");
   const [loadingAI, setLoadingAI] = useState(false);
-
   useEffect(() => {
     fetchUserQRCodes();
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -46,29 +44,25 @@ const HabitTracker = () => {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
-
   const fetchUserQRCodes = async () => {
     try {
-      const { data: qrCodes } = await supabase
-        .from('qr_codes')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
+      const {
+        data: qrCodes
+      } = await supabase.from('qr_codes').select('*').order('created_at', {
+        ascending: false
+      }).limit(10);
       if (qrCodes) {
         const qrsWithStats = await Promise.all(qrCodes.map(async qr => {
-          const { count: totalScans } = await supabase
-            .from('qr_code_scans')
-            .select('*', { count: 'exact', head: true })
-            .eq('qr_code_id', qr.id);
-
-          const { data: uniqueData } = await supabase
-            .from('qr_code_scans')
-            .select('ip_hash')
-            .eq('qr_code_id', qr.id);
-
+          const {
+            count: totalScans
+          } = await supabase.from('qr_code_scans').select('*', {
+            count: 'exact',
+            head: true
+          }).eq('qr_code_id', qr.id);
+          const {
+            data: uniqueData
+          } = await supabase.from('qr_code_scans').select('ip_hash').eq('qr_code_id', qr.id);
           const uniqueScans = new Set(uniqueData?.map(s => s.ip_hash)).size;
-
           return {
             ...qr,
             totalScans: totalScans || 0,
@@ -81,7 +75,6 @@ const HabitTracker = () => {
       console.error('Error fetching QR codes:', error);
     }
   };
-
   const generateQRCode = async () => {
     if (!qrUrl.trim()) {
       toast({
@@ -93,8 +86,12 @@ const HabitTracker = () => {
     }
     setLoadingQR(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
+
       // Check if user is verified
       if (!user) {
         toast({
@@ -107,22 +104,13 @@ const HabitTracker = () => {
       }
 
       // Check if user account is verified (publisher or advertiser)
-      const { data: publisherProfile } = await supabase
-        .from('publisher_profiles')
-        .select('verified, verification_status')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      const { data: advertiserProfile } = await supabase
-        .from('advertiser_profiles')
-        .select('verified, status')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      const isVerified = 
-        (publisherProfile?.verified === true || publisherProfile?.verification_status === 'approved') ||
-        (advertiserProfile?.verified === true || advertiserProfile?.status === 'approved');
-
+      const {
+        data: publisherProfile
+      } = await supabase.from('publisher_profiles').select('verified, verification_status').eq('user_id', user.id).maybeSingle();
+      const {
+        data: advertiserProfile
+      } = await supabase.from('advertiser_profiles').select('verified, status').eq('user_id', user.id).maybeSingle();
+      const isVerified = publisherProfile?.verified === true || publisherProfile?.verification_status === 'approved' || advertiserProfile?.verified === true || advertiserProfile?.status === 'approved';
       if (!isVerified) {
         toast({
           title: "Verification Required",
@@ -132,22 +120,17 @@ const HabitTracker = () => {
         setLoadingQR(false);
         return;
       }
-
       const shortCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-      const { data, error } = await supabase
-        .from('qr_codes')
-        .insert({
-          destination_url: qrUrl,
-          short_code: shortCode,
-          name: qrName || `QR-${shortCode}`,
-          created_by: user.id
-        })
-        .select()
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('qr_codes').insert({
+        destination_url: qrUrl,
+        short_code: shortCode,
+        name: qrName || `QR-${shortCode}`,
+        created_by: user.id
+      }).select().single();
       if (error) throw error;
-
       toast({
         title: "QR Code Generated!",
         description: `Code: ${shortCode}`
@@ -166,12 +149,10 @@ const HabitTracker = () => {
       setLoadingQR(false);
     }
   };
-
   const getQRImageUrl = (shortCode: string) => {
     const trackingUrl = `${window.location.origin}/qr/${shortCode}`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(trackingUrl)}`;
   };
-
   const generateAIAnalytics = async () => {
     if (generatedQRs.length === 0 && !selectedQR) {
       toast({
@@ -181,10 +162,9 @@ const HabitTracker = () => {
       });
       return;
     }
-    
+
     // Use selected QR or the first generated QR
     const qrToAnalyze = selectedQR || generatedQRs[0];
-
     setLoadingAI(true);
     try {
       // For now, generate a simple AI-like response
@@ -197,7 +177,7 @@ Based on your QR code performance data:
 ### Performance Summary
 ${qrToAnalyze ? `
 - Your QR code "${qrToAnalyze.name}" has received **${qrToAnalyze.totalScans} total scans** with **${qrToAnalyze.uniqueScans} unique visitors**.
-- The repeat scan rate of **${qrToAnalyze.totalScans > 0 ? (((qrToAnalyze.totalScans - qrToAnalyze.uniqueScans) / qrToAnalyze.totalScans) * 100).toFixed(1) : 0}%** indicates ${qrToAnalyze.totalScans > qrToAnalyze.uniqueScans ? "good engagement with returning users" : "primarily new visitors"}.
+- The repeat scan rate of **${qrToAnalyze.totalScans > 0 ? ((qrToAnalyze.totalScans - qrToAnalyze.uniqueScans) / qrToAnalyze.totalScans * 100).toFixed(1) : 0}%** indicates ${qrToAnalyze.totalScans > qrToAnalyze.uniqueScans ? "good engagement with returning users" : "primarily new visitors"}.
 ` : "No QR code available for analysis."}
 
 ### Recommendations
@@ -212,7 +192,6 @@ Based on your scan patterns, consider:
 - **Event Sponsorships**: Place QR codes at local events for brand awareness
 - **Digital Integration**: Link QR codes to exclusive online content or discounts
       `.trim();
-
       setAiResponse(insights);
       toast({
         title: "Analysis Complete",
@@ -229,11 +208,12 @@ Based on your scan patterns, consider:
       setLoadingAI(false);
     }
   };
-
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    const {
+      outcome
+    } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
       toast({
         title: "App Installed!",
@@ -243,14 +223,12 @@ Based on your scan patterns, consider:
     setDeferredPrompt(null);
     setShowInstallPrompt(false);
   };
-
-  return (
-    <>
+  return <>
       <Navigation />
       <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-accent/30 py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">QR Tracker</h1>
+            <h1 className="text-3xl font-bold mb-2">Apps</h1>
             <p className="text-muted-foreground">Generate, track, and analyze your QR codes</p>
           </div>
 
@@ -280,21 +258,9 @@ Based on your scan patterns, consider:
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    <Input
-                      placeholder="Enter destination URL..."
-                      value={qrUrl}
-                      onChange={(e) => setQrUrl(e.target.value)}
-                    />
-                    <Input
-                      placeholder="QR Code name (optional)"
-                      value={qrName}
-                      onChange={(e) => setQrName(e.target.value)}
-                    />
-                    <Button
-                      onClick={generateQRCode}
-                      disabled={loadingQR}
-                      className="w-full bg-gradient-to-r from-primary to-accent"
-                    >
+                    <Input placeholder="Enter destination URL..." value={qrUrl} onChange={e => setQrUrl(e.target.value)} />
+                    <Input placeholder="QR Code name (optional)" value={qrName} onChange={e => setQrName(e.target.value)} />
+                    <Button onClick={generateQRCode} disabled={loadingQR} className="w-full bg-gradient-to-r from-primary to-accent">
                       <QrCode className="w-4 h-4 mr-2" />
                       {loadingQR ? "Generating..." : "Generate QR Code"}
                     </Button>
@@ -303,20 +269,14 @@ Based on your scan patterns, consider:
               </Card>
 
               {/* Generated QR Codes List */}
-              {generatedQRs.length > 0 && (
-                <Card className="bg-card/95 backdrop-blur-xl">
+              {generatedQRs.length > 0 && <Card className="bg-card/95 backdrop-blur-xl">
                   <CardHeader>
                     <CardTitle>Your QR Codes</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {generatedQRs.map((qr) => (
-                        <div key={qr.id} className="p-4 border rounded-lg flex items-center gap-4">
-                          <img
-                            src={getQRImageUrl(qr.short_code)}
-                            alt="QR Code"
-                            className="w-16 h-16 border rounded"
-                          />
+                      {generatedQRs.map(qr => <div key={qr.id} className="p-4 border rounded-lg flex items-center gap-4">
+                          <img src={getQRImageUrl(qr.short_code)} alt="QR Code" className="w-16 h-16 border rounded" />
                           <div className="flex-1 min-w-0">
                             <p className="font-medium truncate">{qr.name}</p>
                             <p className="text-xs text-muted-foreground">Code: {qr.short_code}</p>
@@ -325,19 +285,13 @@ Based on your scan patterns, consider:
                               <span>{qr.uniqueScans} unique</span>
                             </div>
                           </div>
-                          <a
-                            href={getQRImageUrl(qr.short_code)}
-                            download={`${qr.short_code}.png`}
-                            className="p-2 hover:bg-muted rounded"
-                          >
+                          <a href={getQRImageUrl(qr.short_code)} download={`${qr.short_code}.png`} className="p-2 hover:bg-muted rounded">
                             <Download className="w-4 h-4" />
                           </a>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
               {/* Masahiro Hara Tribute */}
               <Card className="bg-gradient-to-br from-card to-primary/5 border-primary/20">
@@ -381,26 +335,19 @@ Based on your scan patterns, consider:
                       Generate AI-powered insights from your QR code performance data. Select a QR code from the Generator tab to analyze its performance.
                     </p>
 
-                    <Button
-                      onClick={generateAIAnalytics}
-                      disabled={loadingAI}
-                      className="w-full bg-gradient-to-r from-primary to-accent"
-                    >
+                    <Button onClick={generateAIAnalytics} disabled={loadingAI} className="w-full bg-gradient-to-r from-primary to-accent">
                       <RefreshCw className={`w-4 h-4 mr-2 ${loadingAI ? "animate-spin" : ""}`} />
                       {loadingAI ? "Analyzing..." : "Generate AI Analytics"}
                     </Button>
                   </div>
 
-                  {aiResponse && (
-                    <div className="p-4 border rounded-lg bg-muted/30">
+                  {aiResponse && <div className="p-4 border rounded-lg bg-muted/30">
                       <div className="prose prose-sm max-w-none dark:prose-invert">
                         <pre className="whitespace-pre-wrap text-sm font-sans">{aiResponse}</pre>
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
-                  {!aiResponse && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {!aiResponse && <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Card className="p-4 border-dashed">
                         <h5 className="font-medium mb-2">Performance Analysis</h5>
                         <p className="text-xs text-muted-foreground">
@@ -419,27 +366,19 @@ Based on your scan patterns, consider:
                           Get recommendations for new advertising opportunities
                         </p>
                       </Card>
-                    </div>
-                  )}
+                    </div>}
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
 
-          {showInstallPrompt && (
-            <Button
-              onClick={handleInstallClick}
-              className="fixed bottom-6 right-6 bg-gradient-to-r from-primary to-accent shadow-2xl z-50 rounded-full h-14 px-6"
-            >
+          {showInstallPrompt && <Button onClick={handleInstallClick} className="fixed bottom-6 right-6 bg-gradient-to-r from-primary to-accent shadow-2xl z-50 rounded-full h-14 px-6">
               <Plus className="w-5 h-5 mr-2" />
               Install App
-            </Button>
-          )}
+            </Button>}
         </div>
       </div>
       <Footer />
-    </>
-  );
+    </>;
 };
-
 export default HabitTracker;
