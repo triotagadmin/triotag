@@ -73,33 +73,45 @@ const Marketplace = () => {
       setLoading(true);
 
       // Fetch approved campaigns (Buying - from advertisers)
-      const { data: campaignsData } = await supabase
+      const { data: campaignsData, error: campaignsError } = await supabase
         .from('campaigns')
         .select(`*, advertiser_profiles(company_name)`)
         .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
+      if (campaignsError) console.error('Campaigns error:', campaignsError);
+      console.log('Campaigns data:', campaignsData);
+
       // Fetch approved ad spaces (Selling - from venue publishers)
-      const { data: venuesData } = await supabase
+      const { data: venuesData, error: venuesError } = await supabase
         .from('ad_spaces')
         .select(`*, publisher_profiles(business_name, publisher_type)`)
         .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
+      if (venuesError) console.error('Venues error:', venuesError);
+      console.log('Venues data:', venuesData);
+
       // Fetch approved agent services (Selling - from agent publishers)
-      const { data: servicesData } = await supabase
+      const { data: servicesData, error: servicesError } = await supabase
         .from('agent_services')
         .select(`*, publisher_profiles(business_name, publisher_type)`)
         .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
+      if (servicesError) console.error('Services error:', servicesError);
+      console.log('Services data:', servicesData);
+
       // Fetch approved digital publisher profiles for selling listings
-      const { data: digitalPublishers } = await supabase
+      const { data: digitalPublishers, error: digitalError } = await supabase
         .from('publisher_profiles')
         .select('*')
         .eq('publisher_type', 'digital')
         .eq('verification_status', 'approved')
         .order('created_at', { ascending: false });
+
+      if (digitalError) console.error('Digital error:', digitalError);
+      console.log('Digital data:', digitalPublishers);
 
       const allListings: MarketplaceListing[] = [];
 
