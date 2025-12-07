@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ArrowLeft, MapPin, DollarSign, Clock, Users, Phone, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ContactPublisherDialog } from "@/components/ContactPublisherDialog";
+import { Navigation } from "@/components/Navigation";
 
 interface VenueDetails {
   id: string;
@@ -17,7 +19,9 @@ interface VenueDetails {
   pricing: any;
   approval_status: string;
   specifications: any;
+  publisher_id: string;
   publisher_profiles: {
+    user_id: string;
     business_name: string;
     contact_email: string;
     contact_phone: string;
@@ -44,6 +48,7 @@ const VenueDetail = () => {
         .select(`
           *,
           publisher_profiles (
+            user_id,
             business_name,
             contact_email,
             contact_phone
@@ -88,6 +93,7 @@ const VenueDetail = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
+      <Navigation />
       <div className="container mx-auto px-6 py-12">
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -265,7 +271,13 @@ const VenueDetail = () => {
                   </div>
                 )}
 
-                <Button className="w-full mt-4">Contact Publisher</Button>
+                <ContactPublisherDialog
+                  publisherUserId={venue.publisher_profiles?.user_id || ""}
+                  publisherName={venue.publisher_profiles?.business_name || "Publisher"}
+                  listingId={venue.id}
+                  listingType="venue"
+                  listingTitle={venue.title}
+                />
               </CardContent>
             </Card>
           </div>
