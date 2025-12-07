@@ -36,14 +36,26 @@ const VenueDashboard = () => {
         .from("publisher_profiles")
         .select("*")
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) {
+        console.error("Profile error:", profileError);
         toast({
           title: "Error",
           description: "Failed to load profile",
           variant: "destructive",
         });
+        setLoading(false);
+        return;
+      }
+
+      if (!profileData) {
+        // No profile exists, redirect to complete profile
+        toast({
+          title: "Profile Required",
+          description: "Please complete your profile setup.",
+        });
+        navigate("/complete-profile");
         return;
       }
 
