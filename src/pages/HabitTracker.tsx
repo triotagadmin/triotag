@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, QrCode, Bot, Download, RefreshCw } from "lucide-react";
+import { Plus, QrCode, Bot, Download, RefreshCw, ScanLine } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
+import { QRTrackerTab } from "@/components/QRTrackerTab";
 interface QRCodeData {
   id: string;
   short_code: string;
@@ -233,10 +234,14 @@ Based on your scan patterns, consider:
           </div>
 
           <Tabs defaultValue="qr-generator" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="qr-generator" className="flex items-center gap-2">
                 <QrCode className="w-4 h-4" />
                 QR Generator
+              </TabsTrigger>
+              <TabsTrigger value="qr-tracker" className="flex items-center gap-2">
+                <ScanLine className="w-4 h-4" />
+                QR Tracker
               </TabsTrigger>
               <TabsTrigger value="ai-analytics" className="flex items-center gap-2">
                 <Bot className="w-4 h-4" />
@@ -316,6 +321,10 @@ Based on your scan patterns, consider:
               </Card>
             </TabsContent>
 
+            {/* QR Tracker Tab */}
+            <TabsContent value="qr-tracker" className="space-y-6">
+              <QRTrackerTab />
+            </TabsContent>
 
             {/* AI Analytics Tab */}
             <TabsContent value="ai-analytics" className="space-y-6">
