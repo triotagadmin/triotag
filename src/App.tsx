@@ -11,6 +11,7 @@ import AdminRegister from "./pages/AdminRegister";
 import AdminApproval from "./pages/AdminApproval";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminBlogSubmission from "./pages/AdminBlogSubmission";
+import AdminNewsletterDashboard from "./pages/AdminNewsletterDashboard";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import CompleteProfile from "./pages/CompleteProfile";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
@@ -111,6 +112,11 @@ const App = () => (
           <Route path="/admin/blog-submission" element={
             <ProtectedAdminRoute>
               <AdminBlogSubmission />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/newsletter-dashboard" element={
+            <ProtectedAdminRoute>
+              <AdminNewsletterDashboard />
             </ProtectedAdminRoute>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -8,6 +8,7 @@ import { Calendar, Clock, ArrowRight, Edit } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { NewsletterSubscribeDialog } from "@/components/NewsletterSubscribeDialog";
 
 interface BlogPost {
   id: string;
@@ -25,6 +26,7 @@ const Insights = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showNewsletterDialog, setShowNewsletterDialog] = useState(false);
 
   useEffect(() => {
     loadBlogPosts();
@@ -180,14 +182,21 @@ const Insights = () => {
                     type="email" 
                     placeholder="Enter your email"
                     className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    readOnly
+                    onClick={() => setShowNewsletterDialog(true)}
                   />
-                  <Button>Subscribe</Button>
+                  <Button onClick={() => setShowNewsletterDialog(true)}>Subscribe</Button>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
+
+      <NewsletterSubscribeDialog 
+        open={showNewsletterDialog} 
+        onOpenChange={setShowNewsletterDialog} 
+      />
 
       <Footer />
     </div>
