@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 interface NewsletterSubscribeDialogProps {
   open: boolean;
@@ -50,10 +51,68 @@ export async function subscribeToNewsletter(email: string, topics: string[], nam
 }
 
 export function NewsletterSubscribeDialog({ open, onOpenChange }: NewsletterSubscribeDialogProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
+  const [isCheckingVerification, setIsCheckingVerification] = useState(true);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      checkVerification();
+    }
+  }, [open]);
+
+  const checkVerification = async () => {
+    setIsCheckingVerification(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      
+      if (!session?.user) {
+        setIsVerified(false);
+        setIsCheckingVerification(false);
+        return;
+      }
+
+      // Check publisher verification
+      const { data: publisher } = await supabase
+        .from("publisher_profiles")
+        .select("verified, verification_status")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (publisher && (publisher.verified || publisher.verification_status === "approved")) {
+        setIsVerified(true);
+        setEmail(session.user.email || "");
+        setIsCheckingVerification(false);
+        return;
+      }
+
+      // Check advertiser verification
+      const { data: advertiser } = await supabase
+        .from("advertiser_profiles")
+        .select("status")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (advertiser && advertiser.status === "approved") {
+        setIsVerified(true);
+        setEmail(session.user.email || "");
+        setIsCheckingVerification(false);
+        return;
+      }
+
+      setIsVerified(false);
+    } catch (error) {
+      console.error("Error checking verification:", error);
+      setIsVerified(false);
+    } finally {
+      setIsCheckingVerification(false);
+    }
+  };
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -103,6 +162,58 @@ export function NewsletterSubscribeDialog({ open, onOpenChange }: NewsletterSubs
       setIsSubmitting(false);
     }
   };
+
+  if (isCheckingVerification) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex items-center justify-center py-8">
+            <p className="text-muted-foreground">Checking account status...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Login Required</DialogTitle>
+            <DialogDescription>
+              Please log in to subscribe to our newsletter.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center pt-4">
+            <Button onClick={() => { onOpenChange(false); window.location.href = "/auth"; }}>
+              Go to Login
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (!isVerified) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Verification Required</DialogTitle>
+            <DialogDescription>
+              Only verified accounts can subscribe to our newsletter. Please complete your account verification to subscribe.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center pt-4">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
