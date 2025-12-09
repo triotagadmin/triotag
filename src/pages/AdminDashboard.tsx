@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle } from "lucide-react";
+import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,7 +18,7 @@ import { Navigation } from "@/components/Navigation";
 
 interface Submission {
   id: string;
-  type: "publisher" | "admin" | "advertiser" | "campaign" | "ad_space" | "verification_document";
+  type: "publisher" | "admin" | "advertiser" | "campaign" | "ad_space" | "verification_document" | "agent_service";
   name: string;
   email?: string;
   location?: string;
@@ -38,6 +38,18 @@ interface Notification {
   created_at: string;
 }
 
+interface MarketplaceListing {
+  id: string;
+  title: string;
+  description: string;
+  category: "campaign" | "venue" | "digital" | "agent";
+  status: string;
+  location?: string;
+  createdAt: string;
+  ownerName: string;
+  table: string;
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -54,10 +66,21 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewDetailsSubmission, setViewDetailsSubmission] = useState<Submission | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  
+  // Marketplace management state
+  const [marketplaceListings, setMarketplaceListings] = useState<MarketplaceListing[]>([]);
+  const [marketplaceSlide, setMarketplaceSlide] = useState(0);
+  const [editingListing, setEditingListing] = useState<MarketplaceListing | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({ title: "", description: "", location: "" });
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingListing, setDeletingListing] = useState<MarketplaceListing | null>(null);
 
   useEffect(() => {
     checkAdminAccess();
     loadSubmissions();
+    loadMarketplaceListings();
+    loadNotifications();
     loadNotifications();
   }, []);
 
@@ -226,6 +249,86 @@ export default function AdminDashboard() {
       toast.error("Failed to load submissions");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadMarketplaceListings = async () => {
+    try {
+      // Load campaigns
+      const { data: campaigns } = await supabase
+        .from("campaigns")
+        .select(`*, advertiser_profiles(company_name)`)
+        .order("created_at", { ascending: false });
+
+      // Load ad spaces (venues)
+      const { data: adSpaces } = await supabase
+        .from("ad_spaces")
+        .select(`*, publisher_profiles(business_name)`)
+        .order("created_at", { ascending: false });
+
+      // Load agent services
+      const { data: agentServices } = await supabase
+        .from("agent_services")
+        .select(`*, publisher_profiles(business_name)`)
+        .order("created_at", { ascending: false });
+
+      // Load digital publishers
+      const { data: digitalPublishers } = await supabase
+        .from("publisher_profiles")
+        .select("*")
+        .eq("publisher_type", "digital")
+        .order("created_at", { ascending: false });
+
+      const allListings: MarketplaceListing[] = [
+        ...(campaigns || []).map(c => ({
+          id: c.id,
+          title: c.campaign_name,
+          description: c.campaign_description || "",
+          category: "campaign" as const,
+          status: c.status,
+          location: c.location,
+          createdAt: c.created_at || "",
+          ownerName: (c.advertiser_profiles as any)?.company_name || "Advertiser",
+          table: "campaigns"
+        })),
+        ...(adSpaces || []).map(v => ({
+          id: v.id,
+          title: v.title,
+          description: v.description || "",
+          category: "venue" as const,
+          status: v.approval_status,
+          location: v.location,
+          createdAt: v.created_at || "",
+          ownerName: (v.publisher_profiles as any)?.business_name || "Venue",
+          table: "ad_spaces"
+        })),
+        ...(agentServices || []).map(s => ({
+          id: s.id,
+          title: s.title,
+          description: s.description || "",
+          category: "agent" as const,
+          status: s.approval_status,
+          location: s.location,
+          createdAt: s.created_at || "",
+          ownerName: (s.publisher_profiles as any)?.business_name || "Agent",
+          table: "agent_services"
+        })),
+        ...(digitalPublishers || []).map(d => ({
+          id: d.id,
+          title: d.business_name,
+          description: d.description || "",
+          category: "digital" as const,
+          status: d.verification_status,
+          location: d.location,
+          createdAt: d.created_at || "",
+          ownerName: d.business_name,
+          table: "publisher_profiles"
+        }))
+      ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      setMarketplaceListings(allListings);
+    } catch (error) {
+      console.error("Error loading marketplace listings:", error);
     }
   };
 
@@ -416,6 +519,146 @@ export default function AdminDashboard() {
     navigate("/admin");
   };
 
+  // Marketplace management functions
+  const ITEMS_PER_SLIDE = 6;
+  const totalMarketplaceSlides = Math.ceil(marketplaceListings.length / ITEMS_PER_SLIDE);
+
+  const getCurrentMarketplaceItems = () => {
+    const start = marketplaceSlide * ITEMS_PER_SLIDE;
+    return marketplaceListings.slice(start, start + ITEMS_PER_SLIDE);
+  };
+
+  const getCategoryBadgeColor = (category: string) => {
+    switch (category) {
+      case "campaign": return "bg-blue-500/10 text-blue-600 border-blue-500/20";
+      case "venue": return "bg-green-500/10 text-green-600 border-green-500/20";
+      case "digital": return "bg-purple-500/10 text-purple-600 border-purple-500/20";
+      case "agent": return "bg-orange-500/10 text-orange-600 border-orange-500/20";
+      default: return "";
+    }
+  };
+
+  const openEditDialog = (listing: MarketplaceListing) => {
+    setEditingListing(listing);
+    setEditFormData({
+      title: listing.title,
+      description: listing.description,
+      location: listing.location || ""
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingListing) return;
+
+    try {
+      let error = null;
+
+      if (editingListing.table === "campaigns") {
+        const { error: updateError } = await supabase
+          .from("campaigns")
+          .update({
+            campaign_name: editFormData.title,
+            campaign_description: editFormData.description,
+            location: editFormData.location
+          })
+          .eq("id", editingListing.id);
+        error = updateError;
+      } else if (editingListing.table === "ad_spaces") {
+        const { error: updateError } = await supabase
+          .from("ad_spaces")
+          .update({
+            title: editFormData.title,
+            description: editFormData.description,
+            location: editFormData.location
+          })
+          .eq("id", editingListing.id);
+        error = updateError;
+      } else if (editingListing.table === "agent_services") {
+        const { error: updateError } = await supabase
+          .from("agent_services")
+          .update({
+            title: editFormData.title,
+            description: editFormData.description,
+            location: editFormData.location
+          })
+          .eq("id", editingListing.id);
+        error = updateError;
+      } else if (editingListing.table === "publisher_profiles") {
+        const { error: updateError } = await supabase
+          .from("publisher_profiles")
+          .update({
+            business_name: editFormData.title,
+            description: editFormData.description,
+            location: editFormData.location
+          })
+          .eq("id", editingListing.id);
+        error = updateError;
+      }
+
+      if (error) throw error;
+
+      toast.success("Listing updated successfully");
+      setIsEditDialogOpen(false);
+      setEditingListing(null);
+      loadMarketplaceListings();
+    } catch (error) {
+      console.error("Error updating listing:", error);
+      toast.error("Failed to update listing");
+    }
+  };
+
+  const openDeleteDialog = (listing: MarketplaceListing) => {
+    setDeletingListing(listing);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingListing) return;
+
+    try {
+      let error = null;
+
+      if (deletingListing.table === "campaigns") {
+        const { error: deleteError } = await supabase
+          .from("campaigns")
+          .delete()
+          .eq("id", deletingListing.id);
+        error = deleteError;
+      } else if (deletingListing.table === "ad_spaces") {
+        const { error: deleteError } = await supabase
+          .from("ad_spaces")
+          .delete()
+          .eq("id", deletingListing.id);
+        error = deleteError;
+      } else if (deletingListing.table === "agent_services") {
+        const { error: deleteError } = await supabase
+          .from("agent_services")
+          .delete()
+          .eq("id", deletingListing.id);
+        error = deleteError;
+      } else if (deletingListing.table === "publisher_profiles") {
+        // For digital publishers, we reject instead of delete
+        const { error: updateError } = await supabase
+          .from("publisher_profiles")
+          .update({ verification_status: "rejected" })
+          .eq("id", deletingListing.id);
+        error = updateError;
+      }
+
+      if (error) throw error;
+
+      toast.success("Listing deleted successfully");
+      setIsDeleteDialogOpen(false);
+      setDeletingListing(null);
+      loadMarketplaceListings();
+      loadSubmissions();
+    } catch (error) {
+      console.error("Error deleting listing:", error);
+      toast.error("Failed to delete listing");
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
       pending: "secondary",
@@ -604,6 +847,10 @@ export default function AdminDashboard() {
               <FileText className="w-4 h-4 mr-2" />
               Submit Blog
             </Button>
+            <Button variant="default" onClick={() => navigate("/admin/newsletter-dashboard")}>
+              <Bell className="w-4 h-4 mr-2" />
+              Submit News
+            </Button>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Logout
@@ -614,10 +861,14 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="all" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="all">
               <FileText className="w-4 h-4 mr-2" />
               All
+            </TabsTrigger>
+            <TabsTrigger value="marketplace">
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Marketplace
             </TabsTrigger>
             <TabsTrigger value="publishers">
               <Building className="w-4 h-4 mr-2" />
@@ -817,6 +1068,89 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Marketplace Tab */}
+          <TabsContent value="marketplace" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Marketplace Listings</CardTitle>
+                <CardDescription>Manage all marketplace submissions - edit or delete listings</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Carousel Navigation */}
+                {totalMarketplaceSlides > 1 && (
+                  <div className="flex items-center justify-center gap-4 mb-6">
+                    <Button variant="outline" size="icon" onClick={() => setMarketplaceSlide(prev => (prev - 1 + totalMarketplaceSlides) % totalMarketplaceSlides)}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="flex gap-2">
+                      {Array.from({ length: totalMarketplaceSlides }).map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setMarketplaceSlide(idx)}
+                          className={`w-2 h-2 rounded-full transition-colors ${idx === marketplaceSlide ? "bg-primary" : "bg-muted-foreground/30"}`}
+                        />
+                      ))}
+                    </div>
+                    <Button variant="outline" size="icon" onClick={() => setMarketplaceSlide(prev => (prev + 1) % totalMarketplaceSlides)}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+
+                <p className="text-sm text-muted-foreground mb-4">
+                  Showing {getCurrentMarketplaceItems().length} of {marketplaceListings.length} listings
+                  {totalMarketplaceSlides > 1 && ` • Slide ${marketplaceSlide + 1} of ${totalMarketplaceSlides}`}
+                </p>
+
+                {/* Horizontal Listings Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getCurrentMarketplaceItems().length === 0 ? (
+                    <div className="col-span-full text-center py-8 text-muted-foreground">
+                      No marketplace listings found
+                    </div>
+                  ) : (
+                    getCurrentMarketplaceItems().map((listing) => (
+                      <Card key={`${listing.table}-${listing.id}`} className="overflow-hidden">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <CardTitle className="text-sm line-clamp-1">{listing.title}</CardTitle>
+                            <div className="flex gap-1">
+                              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditDialog(listing)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => openDeleteDialog(listing)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 flex-wrap">
+                            <Badge variant="outline" className={`capitalize text-xs ${getCategoryBadgeColor(listing.category)}`}>
+                              {listing.category}
+                            </Badge>
+                            {getStatusBadge(listing.status)}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                            {listing.description || "No description"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            By: {listing.ownerName}
+                          </p>
+                          {listing.location && (
+                            <p className="text-xs text-muted-foreground">
+                              Location: {listing.location}
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Publishers Tab */}
           <TabsContent value="publishers" className="space-y-6">
             {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "publisher" || s.type === "ad_space"), "Publisher Submissions", "Manage venue, digital, and agent publisher submissions")}
@@ -928,6 +1262,73 @@ export default function AdminDashboard() {
         onOpenChange={setIsDetailsDialogOpen}
         submission={viewDetailsSubmission}
       />
+
+      {/* Edit Listing Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Listing</DialogTitle>
+            <DialogDescription>
+              Update the listing information below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                value={editFormData.title}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editFormData.description}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-location">Location</Label>
+              <Input
+                id="edit-location"
+                value={editFormData.location}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, location: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditSave}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Listing</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{deletingListing?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
