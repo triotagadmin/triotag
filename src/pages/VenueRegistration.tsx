@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { ArrowLeft, Upload, X } from "lucide-react";
+import { AdUnitSelector, AdUnitConfig } from "@/components/AdUnitSelector";
 
 const venueSchema = z.object({
   title: z.string().trim().min(1, "Venue name is required").max(100),
@@ -61,6 +62,7 @@ const VenueRegistration = () => {
   const [monthlyPrice, setMonthlyPrice] = useState("");
   const [amenities, setAmenities] = useState<string[]>([]);
   const [allowedAdFormats, setAllowedAdFormats] = useState<string[]>([]);
+  const [selectedAdUnits, setSelectedAdUnits] = useState<AdUnitConfig[]>([]);
 
   const amenitiesList = [
     "Wi-Fi",
@@ -236,12 +238,12 @@ const VenueRegistration = () => {
 
       const { error } = await supabase
         .from("ad_spaces")
-        .insert({
+        .insert([{
           publisher_id: publisherId,
           title: validatedData.title,
           location: fullAddress,
           description: validatedData.description,
-          approval_status: "pending",
+          approval_status: "pending" as const,
           specifications: {
             venue_type: validatedData.venueType,
             full_address: fullAddress,
@@ -254,10 +256,19 @@ const VenueRegistration = () => {
             expected_foot_traffic: validatedData.expectedFootTraffic,
             amenities,
             allowed_ad_formats: allowedAdFormats,
+            ad_units: selectedAdUnits.map(unit => ({
+              type: unit.type,
+              quantity: unit.quantity,
+              pricePerWeek: unit.pricePerWeek,
+              pricePerMonth: unit.pricePerMonth,
+              specialRules: unit.specialRules,
+              customFormat: unit.customFormat || null,
+              thumbnailUrl: unit.thumbnailUrl || null,
+            })),
           },
           pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
           media_urls: uploadedImages,
-        });
+        }]);
 
       if (error) throw error;
 
@@ -535,6 +546,15 @@ const VenueRegistration = () => {
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Ad Unit Types Selection */}
+              <div className="border-t pt-6">
+                <AdUnitSelector
+                  selectedUnits={selectedAdUnits}
+                  onUnitsChange={setSelectedAdUnits}
+                  publisherId={publisherId}
+                />
               </div>
 
               {/* Allowed Ad Formats */}
