@@ -74,6 +74,13 @@ export type Database = {
             referencedRelation: "publisher_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ad_spaces_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       admin_profiles: {
@@ -260,6 +267,13 @@ export type Database = {
             columns: ["publisher_id"]
             isOneToOne: false
             referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_services_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -682,11 +696,71 @@ export type Database = {
             referencedRelation: "publisher_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "verification_documents_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      publisher_profiles_public: {
+        Row: {
+          agent_role: Database["public"]["Enums"]["agent_role"] | null
+          business_name: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          location: string | null
+          metrics: Json | null
+          portfolio_media: Json | null
+          publisher_type: Database["public"]["Enums"]["publisher_type"] | null
+          social_media: Json | null
+          updated_at: string | null
+          user_id: string | null
+          verification_status:
+            | Database["public"]["Enums"]["approval_status"]
+            | null
+        }
+        Insert: {
+          agent_role?: Database["public"]["Enums"]["agent_role"] | null
+          business_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          location?: string | null
+          metrics?: Json | null
+          portfolio_media?: Json | null
+          publisher_type?: Database["public"]["Enums"]["publisher_type"] | null
+          social_media?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["approval_status"]
+            | null
+        }
+        Update: {
+          agent_role?: Database["public"]["Enums"]["agent_role"] | null
+          business_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          location?: string | null
+          metrics?: Json | null
+          portfolio_media?: Json | null
+          publisher_type?: Database["public"]["Enums"]["publisher_type"] | null
+          social_media?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["approval_status"]
+            | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
