@@ -28,7 +28,6 @@ const venueSchema = z.object({
   contactPhone: z.string().trim().min(1, "Phone is required").max(20),
   venueType: z.string().min(1, "Venue type is required"),
   operatingHours: z.string().trim().min(1, "Operating hours are required").max(500),
-  expectedFootTraffic: z.string().trim().min(1, "Expected foot traffic is required").max(500),
   description: z.string().trim().max(1000).optional(),
   weeklyPrice: z.string().trim().optional(),
   monthlyPrice: z.string().trim().optional(),
@@ -41,6 +40,8 @@ const VenueRegistration = () => {
   const [publisherId, setPublisherId] = useState<string | null>(null);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Form fields
   const [title, setTitle] = useState("");
@@ -56,7 +57,6 @@ const VenueRegistration = () => {
   const [contactPhone, setContactPhone] = useState("");
   const [venueType, setVenueType] = useState("");
   const [operatingHours, setOperatingHours] = useState("");
-  const [expectedFootTraffic, setExpectedFootTraffic] = useState("");
   const [description, setDescription] = useState("");
   const [weeklyPrice, setWeeklyPrice] = useState("");
   const [monthlyPrice, setMonthlyPrice] = useState("");
@@ -87,6 +87,13 @@ const VenueRegistration = () => {
   ];
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const editParam = urlParams.get('edit');
+    if (editParam) {
+      setEditId(editParam);
+      setIsEditing(true);
+    }
+
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -115,6 +122,11 @@ const VenueRegistration = () => {
         setPublisherId(profile.id);
         setContactEmail(profile.contact_email || "");
         setContactPhone(profile.contact_phone || "");
+
+        // Load existing venue data if editing
+        if (editParam) {
+          loadVenueData(editParam, profile.id);
+        }
       } else {
         navigate("/complete-profile");
       }
@@ -122,6 +134,78 @@ const VenueRegistration = () => {
 
     checkAuth();
   }, [navigate, toast]);
+
+  const loadVenueData = async (venueId: string, pubId: string) => {
+    try {
+      const { data: venue, error } = await supabase
+        .from("ad_spaces")
+        .select("*")
+        .eq("id", venueId)
+        .eq("publisher_id", pubId)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!venue) {
+        toast({
+          title: "Error",
+          description: "Venue not found or you don't have permission to edit it.",
+          variant: "destructive",
+        });
+        navigate("/venue-inventory");
+        return;
+      }
+
+      // Populate form fields
+      setTitle(venue.title || "");
+      setDescription(venue.description || "");
+      setUploadedImages(Array.isArray(venue.media_urls) ? (venue.media_urls as string[]) : []);
+      
+      const specs = venue.specifications as any || {};
+      setVenueType(specs.venue_type || "");
+      setOperatingHours(specs.operating_hours || "");
+      setAmenities(specs.amenities || []);
+      setAllowedAdFormats(specs.allowed_ad_formats || []);
+      setContactPerson(specs.contact_person || "");
+      setLatitude(specs.latitude || "");
+      setLongitude(specs.longitude || "");
+      
+      // Parse address from location or full_address
+      const fullAddress = specs.full_address || venue.location || "";
+      const addressParts = fullAddress.split(", ");
+      if (addressParts.length >= 2) {
+        setStreet(addressParts[0] || "");
+        setCity(addressParts[1] || "");
+        setState(addressParts[2] || "");
+        setPostalCode(addressParts[3] || "");
+        setCountry(addressParts[addressParts.length - 1] || "");
+      }
+      
+      // Load ad units
+      if (specs.ad_units && Array.isArray(specs.ad_units)) {
+        setSelectedAdUnits(specs.ad_units.map((u: any) => ({
+          type: u.type,
+          quantity: u.quantity || 1,
+          pricePerWeek: u.pricePerWeek || 0,
+          pricePerMonth: u.pricePerMonth || 0,
+          specialRules: u.specialRules || "",
+          customFormat: u.customFormat,
+          thumbnailUrl: u.thumbnailUrl,
+        })));
+      }
+      
+      const pricing = venue.pricing as any || {};
+      setWeeklyPrice(pricing.weekly?.toString() || "");
+      setMonthlyPrice(pricing.monthly?.toString() || "");
+      
+    } catch (error: any) {
+      console.error("Error loading venue:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load venue data.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -218,7 +302,6 @@ const VenueRegistration = () => {
         contactPhone,
         venueType,
         operatingHours,
-        expectedFootTraffic,
         description: description || undefined,
         weeklyPrice: weeklyPrice || undefined,
         monthlyPrice: monthlyPrice || undefined,
@@ -236,48 +319,68 @@ const VenueRegistration = () => {
       if (validatedData.weeklyPrice) pricingData.weekly = parseFloat(validatedData.weeklyPrice);
       if (validatedData.monthlyPrice) pricingData.monthly = parseFloat(validatedData.monthlyPrice);
 
-      const { error } = await supabase
-        .from("ad_spaces")
-        .insert([{
-          publisher_id: publisherId,
-          title: validatedData.title,
-          location: fullAddress,
-          description: validatedData.description,
-          approval_status: "pending" as const,
-          specifications: {
-            venue_type: validatedData.venueType,
-            full_address: fullAddress,
-            latitude: validatedData.latitude,
-            longitude: validatedData.longitude,
-            contact_person: validatedData.contactPerson,
-            contact_email: validatedData.contactEmail,
-            contact_number: validatedData.contactPhone,
-            operating_hours: validatedData.operatingHours,
-            expected_foot_traffic: validatedData.expectedFootTraffic,
-            amenities,
-            allowed_ad_formats: allowedAdFormats,
-            ad_units: selectedAdUnits.map(unit => ({
-              type: unit.type,
-              quantity: unit.quantity,
-              pricePerWeek: unit.pricePerWeek,
-              pricePerMonth: unit.pricePerMonth,
-              specialRules: unit.specialRules,
-              customFormat: unit.customFormat || null,
-              thumbnailUrl: unit.thumbnailUrl || null,
-            })),
-          },
-          pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
-          media_urls: uploadedImages,
-        }]);
+      const venueData = {
+        publisher_id: publisherId,
+        title: validatedData.title,
+        location: fullAddress,
+        description: validatedData.description,
+        specifications: {
+          venue_type: validatedData.venueType,
+          full_address: fullAddress,
+          latitude: validatedData.latitude,
+          longitude: validatedData.longitude,
+          contact_person: validatedData.contactPerson,
+          contact_email: validatedData.contactEmail,
+          contact_number: validatedData.contactPhone,
+          operating_hours: validatedData.operatingHours,
+          amenities,
+          allowed_ad_formats: allowedAdFormats,
+          ad_units: selectedAdUnits.map(unit => ({
+            type: unit.type,
+            quantity: unit.quantity,
+            pricePerWeek: unit.pricePerWeek,
+            pricePerMonth: unit.pricePerMonth,
+            specialRules: unit.specialRules,
+            customFormat: unit.customFormat || null,
+            thumbnailUrl: unit.thumbnailUrl || null,
+          })),
+        },
+        pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
+        media_urls: uploadedImages,
+      };
 
-      if (error) throw error;
+      if (isEditing && editId) {
+        // Update existing venue
+        const { error } = await supabase
+          .from("ad_spaces")
+          .update(venueData)
+          .eq("id", editId)
+          .eq("publisher_id", publisherId);
 
-      toast({
-        title: "Success",
-        description: "Venue submitted for approval",
-      });
+        if (error) throw error;
 
-      navigate("/inventory");
+        toast({
+          title: "Success",
+          description: "Venue updated successfully",
+        });
+      } else {
+        // Create new venue
+        const { error } = await supabase
+          .from("ad_spaces")
+          .insert([{
+            ...venueData,
+            approval_status: "pending" as const,
+          }]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Venue submitted for approval",
+        });
+      }
+
+      navigate("/venue-inventory");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -296,9 +399,13 @@ const VenueRegistration = () => {
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl">Register New Venue Space</CardTitle>
+            <CardTitle className="text-3xl">
+              {isEditing ? "Edit Venue Space" : "Register New Venue Space"}
+            </CardTitle>
             <p className="text-muted-foreground mt-2">
-              Complete all required fields to submit your venue for approval
+              {isEditing 
+                ? "Update your venue details below" 
+                : "Complete all required fields to submit your venue for approval"}
             </p>
           </CardHeader>
           <CardContent>
@@ -475,18 +582,6 @@ const VenueRegistration = () => {
                 />
               </div>
 
-              {/* Expected Foot Traffic */}
-              <div>
-                <Label htmlFor="expectedFootTraffic">Expected Foot Traffic *</Label>
-                <Input
-                  id="expectedFootTraffic"
-                  value={expectedFootTraffic}
-                  onChange={(e) => setExpectedFootTraffic(e.target.value)}
-                  placeholder="e.g., 500-1000 daily visitors"
-                  required
-                />
-              </div>
-
               {/* Description */}
               <div>
                 <Label htmlFor="description">Venue Description</Label>
@@ -633,8 +728,8 @@ const VenueRegistration = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading || uploadedImages.length === 0}>
-                {loading ? "Submitting..." : "Submit for Approval"}
+              <Button type="submit" className="w-full" disabled={loading || (!isEditing && uploadedImages.length === 0)}>
+                {loading ? (isEditing ? "Updating..." : "Submitting...") : (isEditing ? "Update Venue" : "Submit for Approval")}
               </Button>
             </form>
           </CardContent>

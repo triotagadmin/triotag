@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Edit, Eye, MapPin, DollarSign } from "lucide-react";
+import { Plus, Edit, Eye, MapPin, DollarSign, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Venue {
   id: string;
@@ -24,6 +25,8 @@ const VenueInventory = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const [publisherId, setPublisherId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [venueToDelete, setVenueToDelete] = useState<Venue | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -87,6 +90,41 @@ const VenueInventory = () => {
       rejected: "destructive",
     };
     return <Badge variant={variants[status] || "secondary"}>{status}</Badge>;
+  };
+
+  const handleDeleteClick = (venue: Venue) => {
+    setVenueToDelete(venue);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!venueToDelete) return;
+    
+    try {
+      const { error } = await supabase
+        .from("ad_spaces")
+        .delete()
+        .eq("id", venueToDelete.id)
+        .eq("publisher_id", publisherId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Venue deleted successfully",
+      });
+
+      setVenues(venues.filter(v => v.id !== venueToDelete.id));
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setVenueToDelete(null);
+    }
   };
 
   const VenueCard = ({ venue }: { venue: Venue }) => {
@@ -160,6 +198,13 @@ const VenueInventory = () => {
             >
               <Edit className="h-4 w-4 mr-1" />
               Edit
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => handleDeleteClick(venue)}
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </CardContent>
@@ -258,6 +303,26 @@ const VenueInventory = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Venue</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{venueToDelete?.title}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteConfirm}>
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

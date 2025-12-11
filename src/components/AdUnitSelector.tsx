@@ -56,10 +56,11 @@ export const AdUnitSelector = ({ selectedUnits, onUnitsChange, publisherId }: Ad
 
   const toggleUnit = (typeId: string) => {
     if (isSelected(typeId)) {
-      onUnitsChange(selectedUnits.filter(u => u.type !== typeId));
+      // Deselect current unit
+      onUnitsChange([]);
     } else {
+      // Select only this unit (single selection)
       onUnitsChange([
-        ...selectedUnits,
         {
           type: typeId,
           quantity: 1,
@@ -137,9 +138,9 @@ export const AdUnitSelector = ({ selectedUnits, onUnitsChange, publisherId }: Ad
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold text-lg mb-2">Ad Unit Types Available at This Venue</h3>
+        <h3 className="font-semibold text-lg mb-2">Ad Unit Type for This Venue</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Select the ad unit types available at your venue and configure pricing for each.
+          Select one ad unit type for your venue listing and configure pricing.
         </p>
       </div>
 
