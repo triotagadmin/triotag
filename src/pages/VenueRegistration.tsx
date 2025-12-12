@@ -87,14 +87,15 @@ const VenueRegistration = () => {
   ];
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const editParam = urlParams.get('edit');
-    if (editParam) {
-      setEditId(editParam);
-      setIsEditing(true);
-    }
-
     const checkAuth = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const editParam = urlParams.get('edit');
+      
+      if (editParam) {
+        setEditId(editParam);
+        setIsEditing(true);
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -120,12 +121,15 @@ const VenueRegistration = () => {
 
       if (profile) {
         setPublisherId(profile.id);
-        setContactEmail(profile.contact_email || "");
-        setContactPhone(profile.contact_phone || "");
+        // Only set contact info if not editing (will be loaded from venue data)
+        if (!editParam) {
+          setContactEmail(profile.contact_email || "");
+          setContactPhone(profile.contact_phone || "");
+        }
 
         // Load existing venue data if editing
         if (editParam) {
-          loadVenueData(editParam, profile.id);
+          await loadVenueData(editParam, profile.id);
         }
       } else {
         navigate("/complete-profile");
@@ -166,6 +170,8 @@ const VenueRegistration = () => {
       setAmenities(specs.amenities || []);
       setAllowedAdFormats(specs.allowed_ad_formats || []);
       setContactPerson(specs.contact_person || "");
+      setContactEmail(specs.contact_email || "");
+      setContactPhone(specs.contact_number || "");
       setLatitude(specs.latitude || "");
       setLongitude(specs.longitude || "");
       
@@ -285,6 +291,26 @@ const VenueRegistration = () => {
     
     if (!publisherId) return;
     
+    // Require at least one ad unit with generated thumbnail
+    if (selectedAdUnits.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select an ad unit type and generate a thumbnail",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const hasGeneratedThumbnail = selectedAdUnits.some(unit => unit.thumbnailUrl);
+    if (!hasGeneratedThumbnail) {
+      toast({
+        title: "Error",
+        description: "Please generate an AI thumbnail for your ad unit before submitting",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -319,6 +345,14 @@ const VenueRegistration = () => {
       if (validatedData.weeklyPrice) pricingData.weekly = parseFloat(validatedData.weeklyPrice);
       if (validatedData.monthlyPrice) pricingData.monthly = parseFloat(validatedData.monthlyPrice);
 
+      // Get AI-generated thumbnail as the primary image
+      const aiThumbnail = selectedAdUnits.find(unit => unit.thumbnailUrl)?.thumbnailUrl;
+      
+      // Build media_urls with AI thumbnail first, then user-uploaded images
+      const finalMediaUrls = aiThumbnail 
+        ? [aiThumbnail, ...uploadedImages.filter(url => url !== aiThumbnail)]
+        : uploadedImages;
+
       const venueData = {
         publisher_id: publisherId,
         title: validatedData.title,
@@ -346,7 +380,7 @@ const VenueRegistration = () => {
           })),
         },
         pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
-        media_urls: uploadedImages,
+        media_urls: finalMediaUrls,
       };
 
       if (isEditing && editId) {
@@ -596,16 +630,16 @@ const VenueRegistration = () => {
 
               {/* Photo Upload */}
               <div>
-                <Label>Upload Photos (Max 30, JPEG/PNG) *</Label>
+                <Label>Upload Additional Photos (Optional, Max 30, JPEG/PNG)</Label>
                 <p className="text-sm text-muted-foreground mb-2">
-                  {uploadedImages.length}/30 photos uploaded
+                  {uploadedImages.length}/30 photos uploaded. The AI-generated thumbnail will be the main preview image.
                 </p>
                 <div className="mt-2">
                   <label className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
                     <div className="flex flex-col items-center">
                       <Upload className="w-8 h-8 text-muted-foreground" />
                       <span className="mt-2 text-sm text-muted-foreground">
-                        {uploadingImage ? "Uploading..." : "Click to upload images"}
+                        {uploadingImage ? "Uploading..." : "Click to upload additional images (optional)"}
                       </span>
                     </div>
                     <input
@@ -728,7 +762,7 @@ const VenueRegistration = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading || (!isEditing && uploadedImages.length === 0)}>
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (isEditing ? "Updating..." : "Submitting...") : (isEditing ? "Update Venue" : "Submit for Approval")}
               </Button>
             </form>

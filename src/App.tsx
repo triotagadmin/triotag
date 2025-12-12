@@ -12,6 +12,7 @@ import AdminApproval from "./pages/AdminApproval";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminBlogSubmission from "./pages/AdminBlogSubmission";
 import AdminNewsletterDashboard from "./pages/AdminNewsletterDashboard";
+import AdminAuditLog from "./pages/AdminAuditLog";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import CompleteProfile from "./pages/CompleteProfile";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
@@ -34,6 +35,7 @@ import BlogPost from "./pages/BlogPost";
 import Marketplace from "./pages/Marketplace";
 import VenueInventory from "./pages/VenueInventory";
 import VenueDetail from "./pages/VenueDetail";
+import ActivateListing from "./pages/ActivateListing";
 import NotFound from "./pages/NotFound";
 import DigitalInventory from "./pages/DigitalInventory";
 import AgentInventory from "./pages/AgentInventory";
@@ -46,6 +48,7 @@ import TradingAI from "./pages/TradingAI";
 import Install from "./pages/Install";
 import ListSpace from "./pages/ListSpace";
 import QRRedirect from "./pages/QRRedirect";
+import Tickets from "./pages/Tickets";
 
 const queryClient = new QueryClient();
 
@@ -66,12 +69,14 @@ const App = () => (
           <Route path="/digital-inventory" element={<DigitalInventory />} />
           <Route path="/agent-inventory" element={<AgentInventory />} />
           <Route path="/venue/:id" element={<VenueDetail />} />
+          <Route path="/activate/:id" element={<ActivateListing />} />
           <Route path="/venue-registration" element={<VenueRegistration />} />
           <Route path="/campaign-builder" element={<CampaignBuilder />} />
           <Route path="/habit-tracker" element={<HabitTracker />} />
           <Route path="/trading-ai" element={<TradingAI />} />
           <Route path="/install" element={<Install />} />
           <Route path="/list-space" element={<ListSpace />} />
+          <Route path="/tickets" element={<Tickets />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -117,6 +122,11 @@ const App = () => (
           <Route path="/admin/newsletter-dashboard" element={
             <ProtectedAdminRoute>
               <AdminNewsletterDashboard />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/audit-log" element={
+            <ProtectedAdminRoute>
+              <AdminAuditLog />
             </ProtectedAdminRoute>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

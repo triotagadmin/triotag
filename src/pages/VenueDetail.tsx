@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { ArrowLeft, MapPin, DollarSign, Clock, Users, Phone, Mail } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Clock, Users, Phone, Mail, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ContactPublisherDialog } from "@/components/ContactPublisherDialog";
 import { Navigation } from "@/components/Navigation";
+import { User } from "@supabase/supabase-js";
 
 interface VenueDetails {
   id: string;
@@ -32,10 +32,30 @@ const VenueDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [venue, setVenue] = useState<VenueDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check auth status and admin role
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .single();
+        
+        setIsAdmin(roleData?.role === "admin");
+      }
+    };
+    
+    checkAuth();
+    
     if (id) {
       fetchVenueDetails();
     }
@@ -185,26 +205,30 @@ const VenueDetail = () => {
                   </div>
                 )}
 
-                {venue.specifications?.expected_foot_traffic && (
-                  <div className="flex items-start gap-2">
-                    <Users className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <h3 className="font-semibold">Expected Foot Traffic</h3>
-                      <p className="text-muted-foreground">
-                        {venue.specifications.expected_foot_traffic}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
                 {venue.specifications?.allowed_ad_formats && (
                   <div>
                     <h3 className="font-semibold mb-2">Allowed Ad Formats</h3>
                     <div className="flex flex-wrap gap-2">
-                      {venue.specifications.allowed_ad_formats.map((format) => (
+                      {venue.specifications.allowed_ad_formats.map((format: string) => (
                         <Badge key={format} variant="outline">
                           {format}
                         </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {venue.specifications?.ad_units && venue.specifications.ad_units.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold mb-2">Available Ad Units</h3>
+                    <div className="space-y-2">
+                      {venue.specifications.ad_units.map((unit: any, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <Badge variant="outline">{unit.type}</Badge>
+                          <span className="text-sm text-muted-foreground">
+                            Qty: {unit.quantity} | ${unit.pricePerWeek}/week | ${unit.pricePerMonth}/month
+                          </span>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -250,34 +274,44 @@ const VenueDetail = () => {
                   <p className="font-medium">{venue.publisher_profiles?.business_name}</p>
                 </div>
 
-                {venue.specifications?.contact_person && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Contact Person</p>
-                    <p className="font-medium">{venue.specifications.contact_person}</p>
+                {/* Contact info only visible to admins */}
+                {isAdmin ? (
+                  <>
+                    {venue.specifications?.contact_person && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Contact Person</p>
+                        <p className="font-medium">{venue.specifications.contact_person}</p>
+                      </div>
+                    )}
+
+                    {venue.specifications?.contact_number && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <p className="font-medium">{venue.specifications.contact_number}</p>
+                      </div>
+                    )}
+
+                    {venue.publisher_profiles?.contact_email && (
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <p className="font-medium">{venue.publisher_profiles.contact_email}</p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="pt-2 text-sm text-muted-foreground flex items-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    <span>Contact details available after activation</span>
                   </div>
                 )}
 
-                {venue.specifications?.contact_number && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <p className="font-medium">{venue.specifications.contact_number}</p>
-                  </div>
-                )}
-
-                {venue.publisher_profiles?.contact_email && (
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <p className="font-medium">{venue.publisher_profiles.contact_email}</p>
-                  </div>
-                )}
-
-                <ContactPublisherDialog
-                  publisherUserId={venue.publisher_profiles?.user_id || ""}
-                  publisherName={venue.publisher_profiles?.business_name || "Publisher"}
-                  listingId={venue.id}
-                  listingType="venue"
-                  listingTitle={venue.title}
-                />
+                <Button 
+                  className="w-full mt-4" 
+                  onClick={() => navigate(`/activate/${venue.id}`)}
+                >
+                  <Lock className="h-4 w-4 mr-2" />
+                  Activate
+                </Button>
               </CardContent>
             </Card>
           </div>
