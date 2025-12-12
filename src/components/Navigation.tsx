@@ -98,8 +98,8 @@ export const Navigation = () => {
               <Link to="/explore">
                 <Button variant="ghost">Marketplace</Button>
               </Link>
-              <Link to="/publishers">
-                
+              <Link to="/tickets">
+                <Button variant="ghost">Tickets</Button>
               </Link>
               <Link to="/habit-tracker">
                 <Button variant="ghost">Apps</Button>
@@ -110,12 +110,6 @@ export const Navigation = () => {
               <Link to={getDashboardLink()}>
                 <Button variant="ghost">Dashboard</Button>
               </Link>
-              <Link to="/campaign-submit">
-                
-              </Link>
-              <Link to="/list-space">
-                
-              </Link>
               <Button variant="outline" onClick={handleSignOut}>
                 Log Out
               </Button>
@@ -123,8 +117,8 @@ export const Navigation = () => {
               <Link to="/explore">
                 <Button variant="ghost">Marketplace</Button>
               </Link>
-              <Link to="/publishers">
-                
+              <Link to="/tickets">
+                <Button variant="ghost">Tickets</Button>
               </Link>
               <Link to="/habit-tracker">
                 <Button variant="ghost">Apps</Button>
