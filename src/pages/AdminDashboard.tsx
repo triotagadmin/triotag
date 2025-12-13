@@ -519,6 +519,87 @@ export default function AdminDashboard() {
     navigate("/admin");
   };
 
+  // Delete submission handler for admin panel
+  const handleDeleteSubmission = async (submission: Submission) => {
+    if (!confirm(`Are you sure you want to delete "${submission.name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      let error = null;
+      console.log("[Admin Delete] Deleting submission:", submission.type, submission.id);
+
+      switch (submission.type) {
+        case "ad_space":
+          const { error: adSpaceError } = await supabase
+            .from("ad_spaces")
+            .delete()
+            .eq("id", submission.id);
+          error = adSpaceError;
+          break;
+        case "publisher":
+          // For publisher profiles, we can't hard delete, so we mark as rejected
+          const { error: publisherError } = await supabase
+            .from("publisher_profiles")
+            .update({ verification_status: "rejected" })
+            .eq("id", submission.id);
+          error = publisherError;
+          break;
+        case "advertiser":
+          const { error: advertiserError } = await supabase
+            .from("advertiser_profiles")
+            .delete()
+            .eq("id", submission.id);
+          error = advertiserError;
+          break;
+        case "campaign":
+          const { error: campaignError } = await supabase
+            .from("campaigns")
+            .delete()
+            .eq("id", submission.id);
+          error = campaignError;
+          break;
+        case "admin":
+          const { error: adminError } = await supabase
+            .from("admin_profiles")
+            .delete()
+            .eq("id", submission.id);
+          error = adminError;
+          break;
+        case "verification_document":
+          const { error: docError } = await supabase
+            .from("verification_documents")
+            .delete()
+            .eq("id", submission.id);
+          error = docError;
+          break;
+        case "agent_service":
+          const { error: agentError } = await supabase
+            .from("agent_services")
+            .delete()
+            .eq("id", submission.id);
+          error = agentError;
+          break;
+        default:
+          toast.error("Unknown submission type");
+          return;
+      }
+
+      if (error) {
+        console.error("[Admin Delete Error]", error);
+        throw error;
+      }
+
+      console.log("[Admin Delete] Successfully deleted:", submission.id);
+      toast.success("Submission deleted successfully");
+      loadSubmissions();
+      loadMarketplaceListings();
+    } catch (error) {
+      console.error("[Admin Delete Error]", error);
+      toast.error("Failed to delete submission");
+    }
+  };
+
   // Marketplace management functions
   const ITEMS_PER_SLIDE = 6;
   const totalMarketplaceSlides = Math.ceil(marketplaceListings.length / ITEMS_PER_SLIDE);
@@ -802,6 +883,15 @@ export default function AdminDashboard() {
                             </Button>
                           </>
                         )}
+                        {/* Delete button for all submissions */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleDeleteSubmission(submission)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
