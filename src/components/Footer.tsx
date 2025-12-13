@@ -72,11 +72,11 @@ export const Footer = () => {
             to="/auth" 
             className="flex flex-col items-center text-center p-6 bg-background rounded-lg border hover:border-primary transition-colors group"
           >
-            <div className="text-6xl mb-4">☕</div>
             <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
               Turn Your Venue Into Income!
             </h3>
-            <p className="text-sm text-muted-foreground">Micro Ads. Massive Reach.</p>
+            <p className="text-sm text-muted-foreground mb-4">Micro Ads. Massive Reach.</p>
+            <div className="text-6xl">☕</div>
           </Link>
         </div>
 
