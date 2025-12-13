@@ -80,7 +80,7 @@ export const Footer = () => {
         
 
         <div className="grid md:grid-cols-4 gap-8 mb-8">
-          <div>
+          <div className="my-0 py-0 px-0 mx-0">
             <h3 className="font-bold text-lg mb-4">Tiny Sticky Ads</h3>
             <p className="text-sm text-muted-foreground mb-4 mx-0 my-0 px-0 py-0">
               The micro-advertising revolution connecting advertisers with venues, agents, and digital publishers.
