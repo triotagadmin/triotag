@@ -642,6 +642,116 @@ export type Database = {
         }
         Relationships: []
       }
+      ticket_orders: {
+        Row: {
+          buyer_email: string
+          buyer_name: string | null
+          created_at: string
+          id: string
+          order_code: string
+          payment_status: string
+          quantity: number
+          ticket_id: string
+          total_price: number
+        }
+        Insert: {
+          buyer_email: string
+          buyer_name?: string | null
+          created_at?: string
+          id?: string
+          order_code?: string
+          payment_status?: string
+          quantity?: number
+          ticket_id: string
+          total_price: number
+        }
+        Update: {
+          buyer_email?: string
+          buyer_name?: string | null
+          created_at?: string
+          id?: string
+          order_code?: string
+          payment_status?: string
+          quantity?: number
+          ticket_id?: string
+          total_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_orders_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tickets: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          category: string
+          created_at: string
+          description: string | null
+          event_date: string
+          event_time: string | null
+          id: string
+          image_url: string | null
+          location: string
+          owner_id: string
+          owner_type: string
+          price: number
+          quantity_available: number
+          quantity_sold: number
+          status: string
+          title: string
+          updated_at: string
+          venue_name: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          event_date: string
+          event_time?: string | null
+          id?: string
+          image_url?: string | null
+          location: string
+          owner_id: string
+          owner_type: string
+          price?: number
+          quantity_available?: number
+          quantity_sold?: number
+          status?: string
+          title: string
+          updated_at?: string
+          venue_name?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_time?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string
+          owner_id?: string
+          owner_type?: string
+          price?: number
+          quantity_available?: number
+          quantity_sold?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          venue_name?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

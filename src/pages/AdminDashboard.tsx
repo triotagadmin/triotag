@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -75,13 +75,17 @@ export default function AdminDashboard() {
   const [editFormData, setEditFormData] = useState({ title: "", description: "", location: "" });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingListing, setDeletingListing] = useState<MarketplaceListing | null>(null);
+  
+  // Tickets state
+  const [ticketSubmissions, setTicketSubmissions] = useState<any[]>([]);
+  const [ticketSlide, setTicketSlide] = useState(0);
 
   useEffect(() => {
     checkAdminAccess();
     loadSubmissions();
     loadMarketplaceListings();
     loadNotifications();
-    loadNotifications();
+    loadTicketSubmissions();
   }, []);
 
   useEffect(() => {
@@ -348,6 +352,72 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error loading notifications:", error);
     }
+  };
+
+  const loadTicketSubmissions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("tickets")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setTicketSubmissions(data || []);
+    } catch (error) {
+      console.error("Error loading ticket submissions:", error);
+    }
+  };
+
+  const handleTicketAction = async (ticket: any, action: "approve" | "reject") => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { error } = await supabase
+        .from("tickets")
+        .update({
+          status: action === "approve" ? "approved" : "rejected",
+          approved_at: action === "approve" ? new Date().toISOString() : null,
+          approved_by: action === "approve" ? session.user.id : null,
+        })
+        .eq("id", ticket.id);
+
+      if (error) throw error;
+
+      toast.success(`Ticket ${action}d successfully`);
+      loadTicketSubmissions();
+    } catch (error: any) {
+      console.error("Ticket action error:", error);
+      toast.error(`Failed to ${action} ticket`);
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    if (!confirm("Are you sure you want to delete this ticket? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("tickets")
+        .delete()
+        .eq("id", ticketId);
+
+      if (error) throw error;
+
+      toast.success("Ticket deleted successfully");
+      loadTicketSubmissions();
+    } catch (error: any) {
+      console.error("Delete ticket error:", error);
+      toast.error("Failed to delete ticket");
+    }
+  };
+
+  const TICKETS_PER_SLIDE = 6;
+  const totalTicketSlides = Math.max(1, Math.ceil(ticketSubmissions.length / TICKETS_PER_SLIDE));
+  const getCurrentTicketSlide = () => {
+    const start = ticketSlide * TICKETS_PER_SLIDE;
+    return ticketSubmissions.slice(start, start + TICKETS_PER_SLIDE);
   };
 
   const filterSubmissions = () => {
@@ -951,10 +1021,19 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="marketplace" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="marketplace">
               <ShoppingCart className="w-4 h-4 mr-2" />
               Marketplace
+            </TabsTrigger>
+            <TabsTrigger value="tickets">
+              <Ticket className="w-4 h-4 mr-2" />
+              Tickets
+              {ticketSubmissions.filter(t => t.status === "pending").length > 0 && (
+                <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
+                  {ticketSubmissions.filter(t => t.status === "pending").length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="publishers">
               <Building className="w-4 h-4 mr-2" />
@@ -1057,6 +1136,63 @@ export default function AdminDashboard() {
                               Location: {listing.location}
                             </p>
                           )}
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tickets Tab */}
+          <TabsContent value="tickets" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Ticket Submissions</CardTitle>
+                <CardDescription>Manage event ticket submissions from advertisers and publishers</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {totalTicketSlides > 1 && (
+                  <div className="flex items-center justify-center gap-4 mb-6">
+                    <Button variant="outline" size="icon" onClick={() => setTicketSlide(prev => (prev - 1 + totalTicketSlides) % totalTicketSlides)}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="flex gap-2">
+                      {Array.from({ length: totalTicketSlides }).map((_, idx) => (
+                        <button key={idx} onClick={() => setTicketSlide(idx)} className={`w-2 h-2 rounded-full transition-colors ${idx === ticketSlide ? "bg-primary" : "bg-muted-foreground/30"}`} />
+                      ))}
+                    </div>
+                    <Button variant="outline" size="icon" onClick={() => setTicketSlide(prev => (prev + 1) % totalTicketSlides)}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getCurrentTicketSlide().length === 0 ? (
+                    <div className="col-span-full text-center py-8 text-muted-foreground">No ticket submissions found</div>
+                  ) : (
+                    getCurrentTicketSlide().map((ticket: any) => (
+                      <Card key={ticket.id} className="overflow-hidden">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <CardTitle className="text-sm line-clamp-1">{ticket.title}</CardTitle>
+                            {getStatusBadge(ticket.status)}
+                          </div>
+                          <Badge variant="outline" className="text-xs">{ticket.category}</Badge>
+                        </CardHeader>
+                        <CardContent className="pt-0 space-y-2">
+                          <p className="text-xs text-muted-foreground">{new Date(ticket.event_date).toLocaleDateString()} • {ticket.location}</p>
+                          <p className="text-sm font-semibold">${ticket.price} × {ticket.quantity_available} tickets</p>
+                          <div className="flex gap-2 pt-2">
+                            {ticket.status === "pending" && (
+                              <>
+                                <Button size="sm" variant="default" onClick={() => handleTicketAction(ticket, "approve")}><CheckCircle className="w-4 h-4" /></Button>
+                                <Button size="sm" variant="destructive" onClick={() => handleTicketAction(ticket, "reject")}><XCircle className="w-4 h-4" /></Button>
+                              </>
+                            )}
+                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDeleteTicket(ticket.id)}><Trash2 className="w-4 h-4" /></Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))
