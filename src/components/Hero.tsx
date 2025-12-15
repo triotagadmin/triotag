@@ -1,38 +1,101 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import heroBackground from "@/assets/hero-background.jpg";
+import { useEffect, useState } from "react";
+
 export const Hero = () => {
-  return <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  return (
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+      {/* Video Background */}
       <div className="absolute inset-0">
-        <img src={heroBackground} alt="Modern café interior" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-background/60"></div>
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+          poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%23000000' width='1920' height='1080'/%3E%3C/svg%3E"
+        >
+          <source
+            src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-futuristic-devices-99786-large.mp4"
+            type="video/mp4"
+          />
+        </video>
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-background/80"></div>
+        {/* Gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background"></div>
       </div>
-      
+
       <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto text-center space-y-8 border-0 border-chart-1">
-          <h1 className="text-6xl font-bold tracking-tight text-secondary bg-[sidebar-primary-foreground] md:text-[sidebar-primary-foreground] bg-chart-5">
-            Buy and Sell <span className="text-primary">Micro Ad Space</span>
+        <div
+          className={`max-w-4xl mx-auto text-center space-y-8 transition-all duration-1000 ease-out ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground leading-tight">
+            Buy and Sell{" "}
+            <span className="text-primary neon-text-glow animate-text-glow">
+              Micro Ad Space
+            </span>
           </h1>
-          
-          <p className="text-xl max-w-2xl mx-auto bg-[sidebar-primary-foreground] font-mono font-bold md:text-[sidebar-primary-foreground] text-gray-50 bg-teal-950">
-            Connecting advertisers with venues, agencies, and digital publishers in the micro advertising revolution!
+
+          <p
+            className={`text-lg md:text-xl max-w-2xl mx-auto text-muted-foreground transition-all duration-1000 delay-200 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+          >
+            Connecting advertisers with venues, agencies, and digital publishers
+            in the micro advertising revolution.
           </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+
+          <div
+            className={`flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 transition-all duration-1000 delay-400 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+          >
             <Link to="/publishers">
-              <Button size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
+              <Button
+                size="lg"
+                className="text-lg px-8 py-6 bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90"
+              >
                 Advertise Now
               </Button>
             </Link>
             <Link to="/auth">
-              <Button size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-8 py-6 border-primary text-primary bg-transparent hover:bg-primary/10 hover:neon-glow transition-all duration-300"
+              >
                 Become a Publisher
               </Button>
             </Link>
           </div>
         </div>
       </div>
-      
+
+      {/* Bottom gradient fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent"></div>
-    </section>;
+
+      {/* Decorative grid lines */}
+      <div className="absolute inset-0 pointer-events-none opacity-10">
+        <div
+          className="w-full h-full"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, hsl(110 100% 55% / 0.1) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(110 100% 55% / 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: "60px 60px",
+          }}
+        />
+      </div>
+    </section>
+  );
 };

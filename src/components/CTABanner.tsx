@@ -1,30 +1,91 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+
 export const CTABanner = () => {
-  return <section className="py-24 bg-primary text-primary-foreground">
-      <div className="container mx-auto px-6 text-center space-y-8">
-        <h2 className="text-4xl md:text-5xl font-bold max-w-3xl mx-auto">
-          Start advertising from any device!
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="py-24 bg-card border-y border-border relative overflow-hidden"
+    >
+      {/* Background grid pattern */}
+      <div className="absolute inset-0 pointer-events-none opacity-20">
+        <div
+          className="w-full h-full"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, hsl(110 100% 55% / 0.1) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(110 100% 55% / 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px",
+          }}
+        />
+      </div>
+
+      <div className="container mx-auto px-6 text-center space-y-8 relative z-10">
+        <h2
+          className={`text-4xl md:text-5xl font-bold max-w-3xl mx-auto text-foreground transition-all duration-700 ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
+          Start advertising from{" "}
+          <span className="text-primary neon-text-glow">any device</span>!
         </h2>
-        
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-          <div className="text-center">
-            <p className="text-sm mb-2 text-primary-foreground/80">For Advertisers</p>
+
+        <div
+          className={`flex flex-col sm:flex-row items-center justify-center gap-8 transition-all duration-700 delay-200 ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
+          <div className="text-center space-y-3">
+            <p className="text-sm text-muted-foreground uppercase tracking-wider">
+              For Advertisers
+            </p>
             <Link to="/publishers">
-              <Button size="lg" variant="secondary" className="text-lg px-8 py-6 shadow-lg">
+              <Button
+                size="lg"
+                className="text-lg px-8 py-6 neon-glow hover:neon-glow-strong"
+              >
                 Buy Ad Space
               </Button>
             </Link>
           </div>
-          <div className="text-center">
-            <p className="text-sm mb-2 text-primary-foreground/80">For Publishers</p>
+          <div className="text-center space-y-3">
+            <p className="text-sm text-muted-foreground uppercase tracking-wider">
+              For Publishers
+            </p>
             <Link to="/auth">
-              <Button size="lg" variant="secondary" className="text-lg px-8 py-6 shadow-lg">
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-8 py-6"
+              >
                 Sell Ad Space
               </Button>
             </Link>
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
