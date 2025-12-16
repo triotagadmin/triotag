@@ -4,8 +4,13 @@ import { verify } from "https://deno.land/x/djwt@v3.0.0/mod.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const JWT_SECRET = Deno.env.get("JWT_SECRET") || "RadXT9RTrMZvVsSccejHkrsIx3BDMLqRI10t1vKVH0U=";
 const FRONTEND_URL = "https://tinystickyads.com";
+
+// SECURITY: JWT_SECRET must be provided via environment variable - no fallbacks allowed
+const JWT_SECRET = Deno.env.get("JWT_SECRET");
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required. Token operations cannot proceed without a secure secret.");
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
