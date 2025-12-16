@@ -50,22 +50,22 @@ export const PublisherTypes = () => {
   ];
 
   return (
-    <section ref={sectionRef} className="py-24 px-6 bg-background">
+    <section ref={sectionRef} className="py-12 md:py-24 px-4 md:px-6 bg-background">
       <div className="container mx-auto">
         <div
-          className={`text-center mb-16 transition-all duration-700 ${
+          className={`text-center mb-8 md:mb-16 transition-all duration-700 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 text-foreground">
             Publisher <span className="text-primary neon-text-glow">Types</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm md:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
             Three ways to monetize your space or audience
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {publisherTypes.map((type, index) => (
             <Card
               key={type.title}
@@ -76,25 +76,25 @@ export const PublisherTypes = () => {
               }`}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <CardHeader>
-                <div className="w-16 h-16 border border-primary/30 bg-primary/5 flex items-center justify-center mb-4">
-                  <type.icon className="w-8 h-8 text-primary" />
+              <CardHeader className="pb-2 md:pb-4">
+                <div className="w-12 h-12 md:w-16 md:h-16 border border-primary/30 bg-primary/5 flex items-center justify-center mb-2 md:mb-4">
+                  <type.icon className="w-6 h-6 md:w-8 md:h-8 text-primary" />
                 </div>
-                <CardTitle className="text-2xl text-foreground">
+                <CardTitle className="text-lg md:text-2xl text-foreground">
                   {type.title}
                 </CardTitle>
-                <CardDescription className="text-base text-muted-foreground">
+                <CardDescription className="text-xs md:text-base text-muted-foreground">
                   {type.description}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2">
+                <ul className="space-y-1 md:space-y-2">
                   {type.features.map((feature) => (
                     <li
                       key={feature}
-                      className="flex items-center text-sm text-muted-foreground"
+                      className="flex items-center text-xs md:text-sm text-muted-foreground"
                     >
-                      <span className="w-1.5 h-1.5 bg-primary mr-2"></span>
+                      <span className="w-1 h-1 md:w-1.5 md:h-1.5 bg-primary mr-2"></span>
                       {feature}
                     </li>
                   ))}
@@ -105,12 +105,12 @@ export const PublisherTypes = () => {
         </div>
 
         <div
-          className={`text-center mt-12 transition-all duration-700 delay-300 ${
+          className={`text-center mt-8 md:mt-12 transition-all duration-700 delay-300 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <Link to="/auth">
-            <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+          <Link to="/auth" className="block sm:inline-block">
+            <Button size="lg" variant="outline" className="w-full sm:w-auto text-base md:text-lg px-6 md:px-8 py-5 md:py-6">
               Sell Ad Space
             </Button>
           </Link>

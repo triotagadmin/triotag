@@ -3,12 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { Menu, X } from "lucide-react";
 import favicon from "/favicon.gif";
 
 export const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [publisherType, setPublisherType] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,6 +55,7 @@ export const Navigation = () => {
       setUser(null);
       setUserRole(null);
       setPublisherType(null);
+      setMobileMenuOpen(false);
       navigate("/");
     } catch (error) {
       console.error("Sign out error:", error);
@@ -74,65 +77,98 @@ export const Navigation = () => {
     return "/dashboard";
   };
 
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  const NavLinks = ({ mobile = false }: { mobile?: boolean }) => {
+    const linkClass = mobile 
+      ? "w-full text-left py-3 px-4 text-foreground hover:bg-muted/50 transition-colors"
+      : "";
+    
+    return (
+      <>
+        {user ? (
+          <>
+            <Link to="/explore" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Marketplace</Button>
+            </Link>
+            <Link to="/tickets" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Tickets</Button>
+            </Link>
+            <Link to="/habit-tracker" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Apps</Button>
+            </Link>
+            <Link to="/insights" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Insights</Button>
+            </Link>
+            <Link to={getDashboardLink()} onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Dashboard</Button>
+            </Link>
+            <Button variant="outline" size="sm" onClick={handleSignOut} className={mobile ? "w-full mt-2" : ""}>
+              Log Out
+            </Button>
+          </>
+        ) : (
+          <>
+            <Link to="/explore" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Marketplace</Button>
+            </Link>
+            <Link to="/tickets" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Tickets</Button>
+            </Link>
+            <Link to="/habit-tracker" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Apps</Button>
+            </Link>
+            <Link to="/insights" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Insights</Button>
+            </Link>
+            <Link to="/campaign-submit" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Buy</Button>
+            </Link>
+            <Link to="/list-space" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Sell</Button>
+            </Link>
+            <Link to="/auth" onClick={closeMobileMenu}>
+              <Button variant="outline" size="sm" className={mobile ? "w-full mt-2" : ""}>Log In</Button>
+            </Link>
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border">
-      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-        <Link to={user ? "/home" : "/"} className="flex items-center space-x-3 group">
-          <img src={favicon} alt="Tiny Sticky Ads Logo" className="w-8 h-8" />
-          <span className="font-bold text-xl text-foreground group-hover:text-primary transition-colors duration-300">
+      <div className="container mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
+        <Link to={user ? "/home" : "/"} className="flex items-center space-x-2 md:space-x-3 group">
+          <img src={favicon} alt="Tiny Sticky Ads Logo" className="w-6 h-6 md:w-8 md:h-8" />
+          <span className="font-bold text-base md:text-xl text-foreground group-hover:text-primary transition-colors duration-300">
             Tiny Sticky Ads
           </span>
         </Link>
 
-        <div className="flex items-center space-x-2">
-          {user ? (
-            <>
-              <Link to="/explore">
-                <Button variant="ghost" size="sm">Marketplace</Button>
-              </Link>
-              <Link to="/tickets">
-                <Button variant="ghost" size="sm">Tickets</Button>
-              </Link>
-              <Link to="/habit-tracker">
-                <Button variant="ghost" size="sm">Apps</Button>
-              </Link>
-              <Link to="/insights">
-                <Button variant="ghost" size="sm">Insights</Button>
-              </Link>
-              <Link to={getDashboardLink()}>
-                <Button variant="ghost" size="sm">Dashboard</Button>
-              </Link>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                Log Out
-              </Button>
-            </>
-          ) : (
-            <>
-              <Link to="/explore">
-                <Button variant="ghost" size="sm">Marketplace</Button>
-              </Link>
-              <Link to="/tickets">
-                <Button variant="ghost" size="sm">Tickets</Button>
-              </Link>
-              <Link to="/habit-tracker">
-                <Button variant="ghost" size="sm">Apps</Button>
-              </Link>
-              <Link to="/insights">
-                <Button variant="ghost" size="sm">Insights</Button>
-              </Link>
-              <Link to="/campaign-submit">
-                <Button variant="ghost" size="sm">Buy</Button>
-              </Link>
-              <Link to="/list-space">
-                <Button variant="ghost" size="sm">Sell</Button>
-              </Link>
-              <Link to="/auth">
-                <Button variant="outline" size="sm">Log In</Button>
-              </Link>
-            </>
-          )}
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center space-x-2">
+          <NavLinks />
         </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden p-2 text-foreground hover:text-primary transition-colors"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg z-50">
+          <div className="flex flex-col p-4 space-y-1">
+            <NavLinks mobile />
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

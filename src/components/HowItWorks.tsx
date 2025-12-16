@@ -47,22 +47,22 @@ export const HowItWorks = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-24 bg-card border-y border-border">
-      <div className="container mx-auto px-6">
+    <section ref={sectionRef} className="py-12 md:py-24 bg-card border-y border-border">
+      <div className="container mx-auto px-4 md:px-6">
         <div
-          className={`text-center mb-16 transition-all duration-700 ${
+          className={`text-center mb-8 md:mb-16 transition-all duration-700 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 text-foreground">
             How It <span className="text-primary neon-text-glow">Works</span>
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-sm md:text-xl text-muted-foreground">
             Four simple steps to start advertising
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -75,18 +75,18 @@ export const HowItWorks = () => {
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <CardContent className="pt-8 text-center space-y-4">
-                  <div className="w-16 h-16 mx-auto border border-primary/30 flex items-center justify-center relative">
-                    <Icon className="w-8 h-8 text-primary" />
+                <CardContent className="pt-6 md:pt-8 text-center space-y-3 md:space-y-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 mx-auto border border-primary/30 flex items-center justify-center relative">
+                    <Icon className="w-6 h-6 md:w-8 md:h-8 text-primary" />
                     <div className="absolute inset-0 bg-primary/5"></div>
                   </div>
-                  <div className="text-sm font-mono text-primary">
+                  <div className="text-xs md:text-sm font-mono text-primary">
                     0{index + 1}
                   </div>
-                  <h3 className="text-xl font-bold text-foreground">
+                  <h3 className="text-base md:text-xl font-bold text-foreground">
                     {step.title}
                   </h3>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-xs md:text-sm">
                     {step.description}
                   </p>
                 </CardContent>
