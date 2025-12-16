@@ -71,31 +71,31 @@ export const Footer = () => {
 
   return (
     <footer className="bg-card border-t border-border">
-      <div className="container mx-auto px-6 py-16">
+      <div className="container mx-auto px-4 md:px-6 py-8 md:py-16">
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-12">
           {/* Brand Section */}
-          <div className="space-y-4">
-            <h3 className="font-bold text-xl text-primary neon-text-glow">
+          <div className="space-y-4 text-center sm:text-left">
+            <h3 className="font-bold text-lg md:text-xl text-primary neon-text-glow">
               Tiny Sticky Ads
             </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
               The micro-advertising revolution connecting advertisers with
               venues, agents, and digital publishers.
             </p>
           </div>
 
           {/* Advertisers Links */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-foreground uppercase tracking-wider text-sm">
+          <div className="space-y-4 text-center sm:text-left">
+            <h4 className="font-semibold text-foreground uppercase tracking-wider text-xs md:text-sm">
               Advertisers
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2 md:space-y-3">
               {footerLinks.advertisers.map((link) => (
                 <li key={link.label}>
                   <Link
                     to={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                    className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
                   >
                     {link.label}
                   </Link>
@@ -105,16 +105,16 @@ export const Footer = () => {
           </div>
 
           {/* Publishers Links */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-foreground uppercase tracking-wider text-sm">
+          <div className="space-y-4 text-center sm:text-left">
+            <h4 className="font-semibold text-foreground uppercase tracking-wider text-xs md:text-sm">
               Publishers
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2 md:space-y-3">
               {footerLinks.publishers.map((link) => (
                 <li key={link.label}>
                   <Link
                     to={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                    className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
                   >
                     {link.label}
                   </Link>
@@ -124,16 +124,16 @@ export const Footer = () => {
           </div>
 
           {/* Company Links */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-foreground uppercase tracking-wider text-sm">
+          <div className="space-y-4 text-center sm:text-left">
+            <h4 className="font-semibold text-foreground uppercase tracking-wider text-xs md:text-sm">
               Company
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2 md:space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                    className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
                   >
                     {link.label}
                   </a>
@@ -144,15 +144,10 @@ export const Footer = () => {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-border pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            {/* Copyright */}
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Tiny Sticky Ads. All rights reserved.
-            </p>
-
+        <div className="border-t border-border pt-6 md:pt-8">
+          <div className="flex flex-col items-center gap-4 md:gap-6">
             {/* Social Icons */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4">
               {socialLinks.map((social) => {
                 const IconComponent = social.icon;
                 return (
@@ -161,14 +156,19 @@ export const Footer = () => {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 flex items-center justify-center rounded border border-border bg-muted/30 text-muted-foreground hover:text-primary hover:border-primary hover:neon-glow transition-all duration-300"
+                    className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded border border-border bg-muted/30 text-muted-foreground hover:text-primary hover:border-primary hover:neon-glow transition-all duration-300"
                     aria-label={social.label}
                   >
-                    <IconComponent className="w-4 h-4" />
+                    <IconComponent className="w-3 h-3 md:w-4 md:h-4" />
                   </a>
                 );
               })}
             </div>
+
+            {/* Copyright */}
+            <p className="text-xs md:text-sm text-muted-foreground text-center">
+              © {new Date().getFullYear()} Tiny Sticky Ads. All rights reserved.
+            </p>
           </div>
         </div>
       </div>

@@ -59,25 +59,25 @@ export const AdvertiserTypes = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-24 bg-background">
-      <div className="container mx-auto px-6">
+    <section ref={sectionRef} className="py-12 md:py-24 bg-background">
+      <div className="container mx-auto px-4 md:px-6">
         <div
-          className={`max-w-3xl mx-auto text-center mb-16 space-y-4 transition-all duration-700 ${
+          className={`max-w-3xl mx-auto text-center mb-8 md:mb-16 space-y-2 md:space-y-4 transition-all duration-700 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
             Advertise with{" "}
             <span className="text-primary neon-text-glow">Precision</span> &{" "}
             <span className="text-primary neon-text-glow">Impact</span>
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-sm md:text-xl text-muted-foreground px-2">
             Tiny Sticky Ads enables brands to leverage hyper-local micro
             advertising with cross-platform reach.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
           {advertiserTypes.map((type, index) => {
             const Icon = type.icon;
             return (
@@ -90,16 +90,16 @@ export const AdvertiserTypes = () => {
                 }`}
                 style={{ transitionDelay: `${index * 80}ms` }}
               >
-                <CardHeader>
-                  <div className="w-12 h-12 border border-primary/30 bg-primary/5 flex items-center justify-center mb-4">
-                    <Icon className="w-6 h-6 text-primary" />
+                <CardHeader className="pb-2 md:pb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 border border-primary/30 bg-primary/5 flex items-center justify-center mb-2 md:mb-4">
+                    <Icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   </div>
-                  <CardTitle className="text-xl text-foreground">
+                  <CardTitle className="text-base md:text-xl text-foreground">
                     {type.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-muted-foreground">
+                  <CardDescription className="text-xs md:text-sm text-muted-foreground">
                     {type.description}
                   </CardDescription>
                 </CardContent>
@@ -113,8 +113,8 @@ export const AdvertiserTypes = () => {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <Link to="/auth">
-            <Button size="lg" className="text-lg px-8 py-6 neon-glow hover:neon-glow-strong">
+          <Link to="/auth" className="block sm:inline-block">
+            <Button size="lg" className="w-full sm:w-auto text-base md:text-lg px-6 md:px-8 py-5 md:py-6 neon-glow hover:neon-glow-strong">
               Buy Ad Space
             </Button>
           </Link>
