@@ -395,6 +395,13 @@ export type Database = {
             referencedRelation: "advertiser_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "campaigns_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertiser_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       messages: {
@@ -817,6 +824,39 @@ export type Database = {
       }
     }
     Views: {
+      advertiser_profiles_public: {
+        Row: {
+          company_description: string | null
+          company_name: string | null
+          created_at: string | null
+          id: string | null
+          status: Database["public"]["Enums"]["approval_status"] | null
+          updated_at: string | null
+          user_id: string | null
+          website_url: string | null
+        }
+        Insert: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          status?: Database["public"]["Enums"]["approval_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          status?: Database["public"]["Enums"]["approval_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       publisher_profiles_public: {
         Row: {
           agent_role: Database["public"]["Enums"]["agent_role"] | null
