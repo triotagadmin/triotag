@@ -3,8 +3,13 @@ import { Resend } from "https://esm.sh/resend@4.0.0";
 import { create } from "https://deno.land/x/djwt@v3.0.0/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-const JWT_SECRET = Deno.env.get("JWT_SECRET") || "RadXT9RTrMZvVsSccejHkrsIx3BDMLqRI10t1vKVH0U=";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+
+// SECURITY: JWT_SECRET must be provided via environment variable - no fallbacks allowed
+const JWT_SECRET = Deno.env.get("JWT_SECRET");
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required. Token operations cannot proceed without a secure secret.");
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
