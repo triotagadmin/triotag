@@ -75,27 +75,38 @@ const Marketplace = () => {
       // Fetch approved campaigns (Buying - from advertisers)
       const { data: campaignsData } = await supabase
         .from('campaigns')
-        .select(`*, advertiser_profiles(company_name)`)
+        .select('*')
         .eq('status', 'approved')
         .order('created_at', { ascending: false });
+
+      // Fetch advertiser company names from public view (excludes sensitive contact info)
+      const advertiserIds = [...new Set((campaignsData || []).map(c => c.advertiser_id))];
+      const { data: advertiserProfiles } = advertiserIds.length > 0 
+        ? await supabase
+            .from('advertiser_profiles_public')
+            .select('id, company_name')
+            .in('id', advertiserIds)
+        : { data: [] };
+      
+      const advertiserMap = new Map((advertiserProfiles || []).map(a => [a.id, a.company_name]));
 
       // Fetch approved ad spaces (Selling - from venue publishers)
       const { data: venuesData } = await supabase
         .from('ad_spaces')
-        .select(`*, publisher_profiles(business_name, publisher_type)`)
+        .select(`*, publisher_profiles_public(business_name, publisher_type)`)
         .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
       // Fetch approved agent services (Selling - from agent publishers)
       const { data: servicesData } = await supabase
         .from('agent_services')
-        .select(`*, publisher_profiles(business_name, publisher_type)`)
+        .select(`*, publisher_profiles_public(business_name, publisher_type)`)
         .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
       // Fetch approved digital publisher profiles for selling listings
       const { data: digitalPublishers } = await supabase
-        .from('publisher_profiles')
+        .from('publisher_profiles_public')
         .select('*')
         .eq('publisher_type', 'digital')
         .eq('verification_status', 'approved')
@@ -117,7 +128,7 @@ const Marketplace = () => {
           listingType: "buying",
           adUnits: (c.creative_assets as any)?.ad_units || [],
           image: (c.creative_assets as any)?.images?.[0],
-          ownerName: (c.advertiser_profiles as any)?.company_name || "Advertiser",
+          ownerName: advertiserMap.get(c.advertiser_id) || "Advertiser",
           createdAt: c.created_at || ""
         });
       });
@@ -136,7 +147,7 @@ const Marketplace = () => {
           listingType: "selling",
           adUnits: AD_UNITS.venue,
           image: Array.isArray(v.media_urls) ? (v.media_urls as string[])[0] : undefined,
-          ownerName: (v.publisher_profiles as any)?.business_name || "Venue",
+          ownerName: (v.publisher_profiles_public as any)?.business_name || "Venue",
           createdAt: v.created_at || ""
         });
       });
@@ -155,7 +166,7 @@ const Marketplace = () => {
           listingType: "selling",
           adUnits: AD_UNITS.agent,
           image: Array.isArray(s.media_urls) ? (s.media_urls as string[])[0] : undefined,
-          ownerName: (s.publisher_profiles as any)?.business_name || "Agent",
+          ownerName: (s.publisher_profiles_public as any)?.business_name || "Agent",
           createdAt: s.created_at || ""
         });
       });

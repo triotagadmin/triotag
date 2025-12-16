@@ -47,30 +47,32 @@ const ExploreAll = () => {
       // Fetch approved campaigns
       const { data: campaignsData } = await supabase
         .from('campaigns')
-        .select(`
-          *,
-          advertiser_profiles(company_name)
-        `)
+        .select('*')
         .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
-      // Fetch approved venues
+      // Fetch advertiser company names from public view (excludes sensitive contact info)
+      const advertiserIds = [...new Set((campaignsData || []).map(c => c.advertiser_id))];
+      const { data: advertiserProfiles } = advertiserIds.length > 0 
+        ? await supabase
+            .from('advertiser_profiles_public')
+            .select('id, company_name')
+            .in('id', advertiserIds)
+        : { data: [] };
+      
+      const advertiserMap = new Map((advertiserProfiles || []).map(a => [a.id, a.company_name]));
+
+      // Fetch approved venues using public view
       const { data: venuesData } = await supabase
         .from('ad_spaces')
-        .select(`
-          *,
-          publisher_profiles(business_name)
-        `)
+        .select(`*, publisher_profiles_public(business_name)`)
         .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
-      // Fetch approved agent services
+      // Fetch approved agent services using public view
       const { data: servicesData } = await supabase
         .from('agent_services')
-        .select(`
-          *,
-          publisher_profiles(business_name)
-        `)
+        .select(`*, publisher_profiles_public(business_name)`)
         .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
@@ -85,7 +87,7 @@ const ExploreAll = () => {
           budget: c.budget_amount,
           budget_currency: c.budget_currency,
           image: (c.creative_assets as any)?.images?.[0],
-          publisher_name: c.advertiser_profiles?.company_name,
+          publisher_name: advertiserMap.get(c.advertiser_id),
           created_at: c.created_at || ''
         })),
         ...(venuesData || []).map(v => ({
@@ -95,7 +97,7 @@ const ExploreAll = () => {
           description: v.description || '',
           location: v.location || 'N/A',
           image: (v.media_urls as any)?.[0],
-          publisher_name: (v.publisher_profiles as any)?.business_name,
+          publisher_name: (v.publisher_profiles_public as any)?.business_name,
           created_at: v.created_at || ''
         })),
         ...(servicesData || []).map(s => ({
@@ -105,7 +107,7 @@ const ExploreAll = () => {
           description: s.description || '',
           location: s.location || 'N/A',
           image: (s.media_urls as any)?.[0],
-          publisher_name: (s.publisher_profiles as any)?.business_name,
+          publisher_name: (s.publisher_profiles_public as any)?.business_name,
           created_at: s.created_at || ''
         }))
       ];
