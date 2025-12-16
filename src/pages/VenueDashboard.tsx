@@ -324,21 +324,15 @@ const VenueDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Verification Documents */}
+        {/* Verification Status */}
         {profile?.verification_status === "pending" && (
           <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
             <CardHeader>
-              <CardTitle className="text-yellow-800 dark:text-yellow-200">Verification Required</CardTitle>
+              <CardTitle className="text-yellow-800 dark:text-yellow-200">Verification Pending</CardTitle>
               <CardDescription className="text-yellow-700 dark:text-yellow-300">
-                Upload proof of venue authority to get verified
+                Your verification documents are being reviewed. You'll be notified once approved.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Button onClick={() => navigate("/venue/verify")}>
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Verification Documents
-              </Button>
-            </CardContent>
           </Card>
         )}
 

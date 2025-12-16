@@ -11,8 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { ArrowLeft, Upload, X } from "lucide-react";
+import { ArrowLeft, Upload, X, CheckCircle, AlertCircle } from "lucide-react";
 import { AdUnitSelector, AdUnitConfig } from "@/components/AdUnitSelector";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+interface DocumentUpload {
+  type: string;
+  label: string;
+  description: string;
+  file: File | null;
+  uploaded: boolean;
+}
 
 const venueSchema = z.object({
   title: z.string().trim().min(1, "Venue name is required").max(100),
@@ -63,6 +72,45 @@ const VenueRegistration = () => {
   const [amenities, setAmenities] = useState<string[]>([]);
   const [allowedAdFormats, setAllowedAdFormats] = useState<string[]>([]);
   const [selectedAdUnits, setSelectedAdUnits] = useState<AdUnitConfig[]>([]);
+
+  // Verification documents
+  const [verificationDocuments, setVerificationDocuments] = useState<DocumentUpload[]>([
+    {
+      type: "business_license",
+      label: "Business/Venue License",
+      description: "Official business registration or venue operating license",
+      file: null,
+      uploaded: false,
+    },
+    {
+      type: "government_id",
+      label: "Government-Issued ID",
+      description: "Valid ID of business owner (passport, driver's license, national ID)",
+      file: null,
+      uploaded: false,
+    },
+    {
+      type: "proof_of_address",
+      label: "Proof of Address",
+      description: "Utility bill, bank statement, or lease agreement (within 3 months)",
+      file: null,
+      uploaded: false,
+    },
+    {
+      type: "safety_certificate",
+      label: "Safety Certificates",
+      description: "Fire safety, occupancy permit, or health certificate",
+      file: null,
+      uploaded: false,
+    },
+    {
+      type: "tax_documents",
+      label: "Tax/Registration Documents",
+      description: "Tax registration certificate or similar business documentation",
+      file: null,
+      uploaded: false,
+    },
+  ]);
 
   const amenitiesList = [
     "Wi-Fi",
@@ -286,6 +334,44 @@ const VenueRegistration = () => {
     );
   };
 
+  const handleDocumentSelect = (index: number, file: File | null) => {
+    const newDocuments = [...verificationDocuments];
+    newDocuments[index].file = file;
+    setVerificationDocuments(newDocuments);
+  };
+
+  const uploadVerificationDocument = async (doc: DocumentUpload, pubId: string) => {
+    if (!doc.file) return null;
+
+    const fileExt = doc.file.name.split('.').pop();
+    const fileName = `${doc.type}_${Date.now()}.${fileExt}`;
+    const filePath = `${pubId}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('verification-documents')
+      .upload(filePath, doc.file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('verification-documents')
+      .getPublicUrl(filePath);
+
+    // Save document reference
+    const { error: dbError } = await supabase
+      .from('verification_documents')
+      .insert({
+        publisher_id: pubId,
+        document_type: doc.type,
+        file_name: doc.file.name,
+        file_url: publicUrl,
+      });
+
+    if (dbError) throw dbError;
+
+    return publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -306,6 +392,17 @@ const VenueRegistration = () => {
       toast({
         title: "Error",
         description: "Please generate an AI thumbnail for your ad unit before submitting",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // For new registrations, require at least one verification document
+    const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
+    if (!isEditing && filledDocs.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please upload at least one verification document",
         variant: "destructive",
       });
       return;
@@ -393,6 +490,12 @@ const VenueRegistration = () => {
 
         if (error) throw error;
 
+        // Upload any new verification documents (optional during edit)
+        if (filledDocs.length > 0) {
+          const uploadPromises = filledDocs.map(doc => uploadVerificationDocument(doc, publisherId));
+          await Promise.all(uploadPromises);
+        }
+
         toast({
           title: "Success",
           description: "Venue updated successfully",
@@ -408,9 +511,22 @@ const VenueRegistration = () => {
 
         if (error) throw error;
 
+        // Upload verification documents
+        const uploadPromises = filledDocs.map(doc => uploadVerificationDocument(doc, publisherId));
+        await Promise.all(uploadPromises);
+
+        // Update publisher profile verification status
+        await supabase
+          .from('publisher_profiles')
+          .update({ 
+            verification_status: 'pending',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', publisherId);
+
         toast({
           title: "Success",
-          description: "Venue submitted for approval",
+          description: "Venue and verification documents submitted for approval",
         });
       }
 
@@ -760,6 +876,83 @@ const VenueRegistration = () => {
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Verification Documents */}
+              <div className="border-t pt-6">
+                <h3 className="font-semibold text-lg mb-4">
+                  Verification Documents {!isEditing && "*"}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {isEditing 
+                    ? "Upload additional verification documents if needed (optional during edit)"
+                    : "Upload at least one verification document to submit your venue for approval"}
+                </p>
+
+                <Alert className="mb-4 bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800">
+                  <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <AlertDescription className="text-blue-800 dark:text-blue-300">
+                    <strong>Global Compliance:</strong> These requirements work for venues worldwide. Upload equivalent documents based on your country's regulations.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="space-y-4">
+                  {verificationDocuments.map((doc, index) => (
+                    <Card key={doc.type} className={doc.uploaded ? "border-green-200 bg-green-50/50" : ""}>
+                      <CardContent className="pt-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Label className="text-sm font-semibold">
+                                {doc.label}
+                              </Label>
+                              {doc.uploaded && (
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-3">
+                              {doc.description}
+                            </p>
+                            
+                            <div className="flex items-center gap-3">
+                              <label className="flex items-center gap-2 px-3 py-1.5 border rounded-md cursor-pointer hover:bg-muted/50 text-sm">
+                                <Upload className="w-4 h-4" />
+                                <span>
+                                  {doc.file ? doc.file.name : "Choose file"}
+                                </span>
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf,.jpg,.jpeg,.png"
+                                  onChange={(e) => handleDocumentSelect(index, e.target.files?.[0] || null)}
+                                  disabled={loading}
+                                />
+                              </label>
+                              
+                              {doc.file && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDocumentSelect(index, null)}
+                                >
+                                  Remove
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                <Alert className="mt-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Accepted formats: PDF, JPG, PNG. Maximum file size: 10MB per document.
+                  </AlertDescription>
+                </Alert>
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
