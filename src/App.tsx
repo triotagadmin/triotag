@@ -50,6 +50,7 @@ import Install from "./pages/Install";
 import ListSpace from "./pages/ListSpace";
 import QRRedirect from "./pages/QRRedirect";
 import Tickets from "./pages/Tickets";
+import OrderPrints from "./pages/OrderPrints";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/advertiser-dashboard" element={<AdvertiserDashboard />} />
+          <Route path="/order-prints" element={<OrderPrints />} />
           <Route path="/venue" element={<VenueDashboard />} />
           <Route path="/venue-publishers" element={<VenueDashboard />} />
           <Route path="/venue-info" element={<Venue />} />
