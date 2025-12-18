@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.send-newsletter]
 verify_jwt = true
+
+[functions.prodigi]
+verify_jwt = false
