@@ -17,7 +17,8 @@ import {
   Globe,
   Users,
   TrendingUp,
-  Calendar
+  Calendar,
+  Printer
 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 
@@ -184,10 +185,14 @@ const AdvertiserDashboard = () => {
             </Card>
           </div>
 
-          <div className="mt-6 flex gap-4">
+          <div className="mt-6 flex gap-4 flex-wrap">
             <Button onClick={() => navigate("/campaign-builder")} size="lg" className="gap-2">
               <Plus className="h-4 w-4" />
               Create Campaign
+            </Button>
+            <Button onClick={() => navigate("/order-prints")} size="lg" variant="secondary" className="gap-2">
+              <Printer className="h-4 w-4" />
+              Order Print Materials
             </Button>
             <Button onClick={() => navigate("/publishers")} variant="outline" size="lg">
               Browse Publishers
@@ -301,6 +306,28 @@ const AdvertiserDashboard = () => {
 
         {/* Quick Actions Grid */}
         <div className="grid md:grid-cols-2 gap-6">
+          {/* Order Print Materials */}
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => navigate("/order-prints")}
+          >
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Printer className="h-5 w-5" />
+                Order Print Materials
+              </CardTitle>
+              <CardDescription>
+                Create stickers, table tent ads, and more via Prodigi
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">Order professional print ad units</p>
+              <Button variant="outline">
+                Start Order
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Messages */}
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
