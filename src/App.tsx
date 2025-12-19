@@ -21,14 +21,6 @@ import Venue from "./pages/Venue";
 import VenueDashboard from "./pages/VenueDashboard";
 import VenueRegistration from "./pages/VenueRegistration";
 import VenueVerification from "./pages/VenueVerification";
-import DigitalMedia from "./pages/DigitalMedia";
-import DigitalMediaDashboard from "./pages/DigitalMediaDashboard";
-import AgentPublishers from "./pages/AgentPublishers";
-import AgentDashboard from "./pages/AgentDashboard";
-import AgentRegistration from "./pages/AgentRegistration";
-import AgentVerification from "./pages/AgentVerification";
-import DigitalServiceRegistration from "./pages/DigitalServiceRegistration";
-import DigitalVerification from "./pages/DigitalVerification";
 import Verify from "./pages/Verify";
 import Home from "./pages/Home";
 import Insights from "./pages/Insights";
@@ -38,9 +30,6 @@ import VenueInventory from "./pages/VenueInventory";
 import VenueDetail from "./pages/VenueDetail";
 import ActivateListing from "./pages/ActivateListing";
 import NotFound from "./pages/NotFound";
-import DigitalInventory from "./pages/DigitalInventory";
-import AgentInventory from "./pages/AgentInventory";
-import AgentServiceSubmission from "./pages/AgentServiceSubmission";
 import ExploreAll from "./pages/ExploreAll";
 import CampaignSubmission from "./pages/CampaignSubmission";
 import CampaignBuilder from "./pages/CampaignBuilder";
@@ -72,8 +61,6 @@ const App = () => (
           <Route path="/explore" element={<Marketplace />} />
           <Route path="/inventory" element={<VenueInventory />} />
           <Route path="/venue-inventory" element={<VenueInventory />} />
-          <Route path="/digital-inventory" element={<DigitalInventory />} />
-          <Route path="/agent-inventory" element={<AgentInventory />} />
           <Route path="/venue/:id" element={<VenueDetail />} />
           <Route path="/activate/:id" element={<ActivateListing />} />
           <Route path="/venue-registration" element={<VenueRegistration />} />
@@ -94,17 +81,6 @@ const App = () => (
           <Route path="/venue-info" element={<Venue />} />
           <Route path="/venue/register" element={<VenueRegistration />} />
           <Route path="/venue/verify" element={<VenueVerification />} />
-          <Route path="/digital-media" element={<DigitalMediaDashboard />} />
-          <Route path="/digital-publishers" element={<DigitalMediaDashboard />} />
-          <Route path="/digital-media-info" element={<DigitalMedia />} />
-          <Route path="/digital-media/register" element={<DigitalServiceRegistration />} />
-          <Route path="/digital-media/verify" element={<DigitalVerification />} />
-          <Route path="/agent-publishers" element={<AgentDashboard />} />
-          <Route path="/agent-info" element={<AgentPublishers />} />
-          <Route path="/agent/register" element={<AgentRegistration />} />
-          <Route path="/agent/verify" element={<AgentVerification />} />
-          <Route path="/agent-registration" element={<AgentRegistration />} />
-          <Route path="/agent-service-submission" element={<AgentServiceSubmission />} />
           <Route path="/explore-all" element={<ExploreAll />} />
           <Route path="/campaign-submit" element={<CampaignSubmission />} />
           <Route path="/qr/:shortCode" element={<QRRedirect />} />
