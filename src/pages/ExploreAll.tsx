@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, DollarSign, Calendar, ArrowLeft } from "lucide-react";
+import { Search, MapPin, ArrowLeft } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -12,12 +12,10 @@ import { Link } from "react-router-dom";
 
 interface UnifiedListing {
   id: string;
-  type: 'campaign' | 'venue' | 'agent_service';
+  type: 'venue' | 'agent_service';
   title: string;
   description: string;
   location: string;
-  budget?: number;
-  budget_currency?: string;
   image?: string;
   publisher_name?: string;
   created_at: string;
@@ -43,53 +41,23 @@ const ExploreAll = () => {
   const fetchAllListings = async () => {
     try {
       setLoading(true);
-      
-      // Fetch approved campaigns
-      const { data: campaignsData } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false });
 
-      // Fetch advertiser company names from public view (excludes sensitive contact info)
-      const advertiserIds = [...new Set((campaignsData || []).map(c => c.advertiser_id))];
-      const { data: advertiserProfiles } = advertiserIds.length > 0 
-        ? await supabase
-            .from('advertiser_profiles_public')
-            .select('id, company_name')
-            .in('id', advertiserIds)
-        : { data: [] };
-      
-      const advertiserMap = new Map((advertiserProfiles || []).map(a => [a.id, a.company_name]));
-
-      // Fetch approved venues using public view
+      // Fetch approved venues (selling listings)
       const { data: venuesData } = await supabase
         .from('ad_spaces')
         .select(`*, publisher_profiles_public(business_name)`)
         .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
-      // Fetch approved agent services using public view
+      // Fetch approved agent services (selling listings)
       const { data: servicesData } = await supabase
         .from('agent_services')
         .select(`*, publisher_profiles_public(business_name)`)
         .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
-      // Transform all data into unified format
+      // Transform all data into unified format (only selling listings)
       const unifiedListings: UnifiedListing[] = [
-        ...(campaignsData || []).map(c => ({
-          id: c.id,
-          type: 'campaign' as const,
-          title: c.campaign_name,
-          description: c.campaign_description || '',
-          location: c.location || 'N/A',
-          budget: c.budget_amount,
-          budget_currency: c.budget_currency,
-          image: (c.creative_assets as any)?.images?.[0],
-          publisher_name: advertiserMap.get(c.advertiser_id),
-          created_at: c.created_at || ''
-        })),
         ...(venuesData || []).map(v => ({
           id: v.id,
           type: 'venue' as const,
@@ -154,7 +122,6 @@ const ExploreAll = () => {
 
   const getTypeBadge = (type: string) => {
     const badges = {
-      campaign: { label: "Campaign", variant: "default" as const },
       venue: { label: "Venue", variant: "secondary" as const },
       agent_service: { label: "Agent Service", variant: "outline" as const }
     };
@@ -183,7 +150,7 @@ const ExploreAll = () => {
           </Link>
           <h1 className="text-4xl font-bold mb-4">All Approved Listings</h1>
           <p className="text-xl text-muted-foreground">
-            Browse all campaigns, venues, and agent services
+            Browse all venues and agent services
           </p>
         </div>
 
@@ -210,7 +177,6 @@ const ExploreAll = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="campaign">Campaigns</SelectItem>
                   <SelectItem value="venue">Venues</SelectItem>
                   <SelectItem value="agent_service">Agent Services</SelectItem>
                 </SelectContent>
@@ -261,15 +227,6 @@ const ExploreAll = () => {
                     <MapPin className="h-4 w-4" />
                     {listing.location}
                   </div>
-                  {listing.budget && (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <DollarSign className="h-4 w-4" />
-                      {new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: listing.budget_currency || "USD",
-                      }).format(listing.budget)}
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
