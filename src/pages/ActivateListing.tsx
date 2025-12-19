@@ -424,11 +424,6 @@ const ActivateListing = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-3 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground">Selected Product</p>
-                    <p className="font-medium">{PRODIGI_PRODUCTS.find(p => p.sku === selectedProduct)?.name || selectedProduct}</p>
-                  </div>
-
                   <div>
                     <Label>Quantity</Label>
                     <Input
