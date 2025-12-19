@@ -72,24 +72,6 @@ const Marketplace = () => {
     try {
       setLoading(true);
 
-      // Fetch approved campaigns (Buying - from advertisers)
-      const { data: campaignsData } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false });
-
-      // Fetch advertiser company names from public view (excludes sensitive contact info)
-      const advertiserIds = [...new Set((campaignsData || []).map(c => c.advertiser_id))];
-      const { data: advertiserProfiles } = advertiserIds.length > 0 
-        ? await supabase
-            .from('advertiser_profiles_public')
-            .select('id, company_name')
-            .in('id', advertiserIds)
-        : { data: [] };
-      
-      const advertiserMap = new Map((advertiserProfiles || []).map(a => [a.id, a.company_name]));
-
       // Fetch approved ad spaces (Selling - from venue publishers)
       const { data: venuesData } = await supabase
         .from('ad_spaces')
@@ -113,25 +95,6 @@ const Marketplace = () => {
         .order('created_at', { ascending: false });
 
       const allListings: MarketplaceListing[] = [];
-
-      // Process campaigns (Buying)
-      (campaignsData || []).forEach(c => {
-        allListings.push({
-          id: c.id,
-          title: c.campaign_name,
-          description: c.campaign_description || "",
-          budget: c.budget_amount || 0,
-          currency: c.budget_currency || "USD",
-          location: c.location || "Not specified",
-          type: c.campaign_type || "Campaign",
-          category: "advertiser",
-          listingType: "buying",
-          adUnits: (c.creative_assets as any)?.ad_units || [],
-          image: (c.creative_assets as any)?.images?.[0],
-          ownerName: advertiserMap.get(c.advertiser_id) || "Advertiser",
-          createdAt: c.created_at || ""
-        });
-      });
 
       // Process venues (Selling)
       (venuesData || []).forEach(v => {
