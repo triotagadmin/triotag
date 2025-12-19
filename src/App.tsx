@@ -22,7 +22,7 @@ import VenueDashboard from "./pages/VenueDashboard";
 import VenueRegistration from "./pages/VenueRegistration";
 import VenueVerification from "./pages/VenueVerification";
 import Verify from "./pages/Verify";
-import Home from "./pages/Home";
+
 import Insights from "./pages/Insights";
 import BlogPost from "./pages/BlogPost";
 import Marketplace from "./pages/Marketplace";
@@ -55,7 +55,7 @@ const App = () => (
         <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/home" element={<Home />} />
+          
           <Route path="/insights" element={<Insights />} />
           <Route path="/insights/:id" element={<BlogPost />} />
           <Route path="/explore" element={<Marketplace />} />
