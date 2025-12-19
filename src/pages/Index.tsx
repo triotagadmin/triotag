@@ -1,6 +1,7 @@
 import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
+import { PrintOnDemandSection } from "@/components/PrintOnDemandSection";
 import { FeaturedLocations } from "@/components/FeaturedLocations";
 import { FeaturedAgents } from "@/components/FeaturedAgents";
 import { FeaturedDigitalMedia } from "@/components/FeaturedDigitalMedia";
@@ -16,6 +17,7 @@ const Index = () => {
       <Hero />
       <AdvertiserTypes />
       <HowItWorks />
+      <PrintOnDemandSection />
       <FeaturedLocations />
       <FeaturedAgents />
       <FeaturedDigitalMedia />
