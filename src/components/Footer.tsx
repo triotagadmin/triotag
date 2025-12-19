@@ -3,6 +3,12 @@ import { Link } from "react-router-dom";
 import { FaTiktok, FaDiscord } from "react-icons/fa";
 import { BsTwitterX } from "react-icons/bs";
 
+interface FooterLink {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
 export const Footer = () => {
   const socialLinks = [
     {
@@ -53,9 +59,9 @@ export const Footer = () => {
   const footerLinks = {
     company: [
       { label: "About Us", href: "https://sites.google.com/view/stickymedia", external: true },
-      { label: "Contact", href: "#contact" },
-      { label: "Privacy Policy", href: "#privacy" },
-      { label: "Terms of Service", href: "#terms" },
+      { label: "Contact", href: "/contact" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Service", href: "/terms" },
     ],
   };
 
@@ -81,16 +87,25 @@ export const Footer = () => {
               Company
             </h4>
             <ul className="space-y-2 md:space-y-3">
-              {footerLinks.company.map((link) => (
+              {footerLinks.company.map((link: FooterLink) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    target={link.external ? "_blank" : undefined}
-                    rel={link.external ? "noopener noreferrer" : undefined}
-                    className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
-                  >
-                    {link.label}
-                  </a>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={link.href}
+                      className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
