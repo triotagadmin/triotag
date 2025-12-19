@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { MapPin, Globe, Users } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -135,32 +135,6 @@ const Dashboard = () => {
                 <Button className="w-full">Explore Venues</Button>
               </CardContent>
             </Card>
-
-            <Card className="cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate("/digital-media")}>
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                  <Globe className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle className="group-hover:text-primary transition-colors">Digital Media</CardTitle>
-                <CardDescription>Monetize your digital properties and content</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">Explore Digital Media</Button>
-              </CardContent>
-            </Card>
-
-            <Card className="cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate("/agent-publishers")}>
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                  <Users className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle className="group-hover:text-primary transition-colors">Agent Publishers</CardTitle>
-                <CardDescription>Work with freelance guerrilla agents, influencers, models, and artists</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">Explore Agent Publishers</Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
 
@@ -198,7 +172,7 @@ const Dashboard = () => {
             </>
           )}
 
-          {(userType === "venue" || userType === "agent" || userType === "digital") && (
+          {userType === "venue" && (
             <>
               <Card>
                 <CardHeader>

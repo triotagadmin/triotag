@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Users, MapPin, Globe, Zap, Target, BarChart3 } from "lucide-react";
+import { TrendingUp, MapPin, Zap, Target, BarChart3 } from "lucide-react";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -57,7 +57,7 @@ const Home = () => {
                 Discover Perfect Ad Spaces
               </h1>
               <p className="text-xl text-muted-foreground">
-                Connect with verified publishers across venues, digital media, and agent networks
+                Connect with verified venue publishers for high-visibility advertising
               </p>
               <div className="flex gap-4 justify-center">
                 <Button size="lg" onClick={() => navigate("/publishers")}>
@@ -135,11 +135,11 @@ const Home = () => {
                 Find Your Perfect Publisher Match
               </h2>
               <p className="text-lg text-muted-foreground">
-                Choose from three powerful advertising channels
+                Connect with venue publishers for high-visibility advertising
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="max-w-md mx-auto">
               <Card className="cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate("/publishers?type=venue")}>
                 <CardHeader>
                   <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
@@ -157,46 +157,6 @@ const Home = () => {
                     <li>• Real-world engagement</li>
                   </ul>
                   <Button className="w-full mt-4">Explore Venues</Button>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate("/publishers?type=digital")}>
-                <CardHeader>
-                  <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                    <Globe className="w-8 h-8 text-primary" />
-                  </div>
-                  <CardTitle className="text-2xl group-hover:text-primary transition-colors">Digital Media</CardTitle>
-                  <CardDescription className="text-base">
-                    Websites, apps, and digital content with engaged audiences
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• Precise targeting options</li>
-                    <li>• Real-time analytics</li>
-                    <li>• Global reach potential</li>
-                  </ul>
-                  <Button className="w-full mt-4">Explore Digital</Button>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate("/publishers?type=agent")}>
-                <CardHeader>
-                  <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                    <Users className="w-8 h-8 text-primary" />
-                  </div>
-                  <CardTitle className="text-2xl group-hover:text-primary transition-colors">Agent Network</CardTitle>
-                  <CardDescription className="text-base">
-                    Guerrilla agents, influencers, models, and creative artists
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• Authentic brand ambassadors</li>
-                    <li>• Creative campaign execution</li>
-                    <li>• Flexible engagement models</li>
-                  </ul>
-                  <Button className="w-full mt-4">Explore Agents</Button>
                 </CardContent>
               </Card>
             </div>
