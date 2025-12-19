@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Package, Upload, DollarSign, Truck, CheckCircle } from "lucide-react";
+import { Loader2, Package, DollarSign, Truck, CheckCircle } from "lucide-react";
 import { createProdigiQuote, createProdigiOrder, ProdigiQuoteResponse } from "@/lib/prodigi";
+import { AdMockupPreview } from "@/components/AdMockupPreview";
 
 // Prodigi product catalog for ad units
 const PRODIGI_PRODUCTS = [
@@ -61,6 +62,10 @@ const OrderPrints = () => {
   const [loading, setLoading] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
 
+  // Mockup approval state
+  const [designApproved, setDesignApproved] = useState(false);
+  const [approvedAdUnitType, setApprovedAdUnitType] = useState("");
+
   // Form state
   const [selectedProduct, setSelectedProduct] = useState("");
   const [quantity, setQuantity] = useState(100);
@@ -86,6 +91,14 @@ const OrderPrints = () => {
   const [orderLoading, setOrderLoading] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState("");
+
+  // Handle mockup approval
+  const handleMockupApproval = (data: { artworkUrl: string; adUnitType: string; selectedSku: string }) => {
+    setArtworkUrl(data.artworkUrl);
+    setSelectedProduct(data.selectedSku);
+    setApprovedAdUnitType(data.adUnitType);
+    setDesignApproved(true);
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -272,6 +285,8 @@ const OrderPrints = () => {
                   setQuote(null);
                   setSelectedProduct("");
                   setArtworkUrl("");
+                  setDesignApproved(false);
+                  setApprovedAdUnitType("");
                 }}>
                   Place Another Order
                 </Button>
@@ -301,14 +316,35 @@ const OrderPrints = () => {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
+          {/* Mockup Preview Section */}
+          <div className="space-y-6">
+            <AdMockupPreview onApprove={handleMockupApproval} />
+            
+            {designApproved && (
+              <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <p className="text-sm font-medium text-primary">
+                  ✓ Design approved for: {approvedAdUnitType.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Product SKU: {selectedProduct}
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Product Selection & Quote */}
           <div className="space-y-6">
-            <Card>
+            <Card className={!designApproved ? "opacity-50 pointer-events-none" : ""}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
-                  Select Product
+                  {designApproved ? "Configure Order" : "Approve Design First"}
                 </CardTitle>
+                {!designApproved && (
+                  <CardDescription>
+                    Generate and approve a mockup preview before proceeding
+                  </CardDescription>
+                )}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -346,15 +382,23 @@ const OrderPrints = () => {
                 </div>
 
                 <div>
-                  <Label>Artwork URL</Label>
-                  <Input
-                    placeholder="https://example.com/your-artwork.png"
-                    value={artworkUrl}
-                    onChange={(e) => setArtworkUrl(e.target.value)}
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Provide a direct URL to your high-resolution artwork (PNG or JPG)
-                  </p>
+                  <Label>Artwork</Label>
+                  {artworkUrl ? (
+                    <div className="mt-2 p-3 bg-muted rounded-lg">
+                      <img 
+                        src={artworkUrl} 
+                        alt="Approved artwork" 
+                        className="max-h-20 mx-auto rounded object-contain"
+                      />
+                      <p className="text-xs text-muted-foreground text-center mt-2">
+                        Original design (approved)
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Upload and approve a design in the preview panel
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -375,7 +419,7 @@ const OrderPrints = () => {
 
                 <Button 
                   onClick={handleGetQuote} 
-                  disabled={quoteLoading || !selectedProduct || !artworkUrl}
+                  disabled={quoteLoading || !selectedProduct || !artworkUrl || !designApproved}
                   className="w-full"
                 >
                   {quoteLoading ? (
@@ -436,9 +480,11 @@ const OrderPrints = () => {
               </Card>
             )}
           </div>
+        </div>
 
-          {/* Shipping Details & Order */}
-          <div className="space-y-6">
+        {/* Shipping Details & Place Order - Full Width Below */}
+        {designApproved && quote && quote.quotes && quote.quotes.length > 0 && (
+          <div className="mt-8 max-w-2xl mx-auto space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -543,11 +589,11 @@ const OrderPrints = () => {
             </Button>
 
             <p className="text-sm text-muted-foreground text-center">
-              Orders are processed through our print partner Prodigi. 
+              Orders are processed through our print partner. 
               Production typically takes 2-5 business days plus shipping time.
             </p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
