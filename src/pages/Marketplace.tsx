@@ -11,7 +11,6 @@ import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-
 interface MarketplaceListing {
   id: string;
   title: string;
@@ -27,15 +26,15 @@ interface MarketplaceListing {
   ownerName: string;
   createdAt: string;
 }
-
 const AD_UNITS = {
   venue: ["Table tent ads", "Table top sticker", "Window sticker"],
   digital: ["Social media post", "Social media marketing", "Website banner ads", "In-app ads"],
   agent: ["Guerrilla marketing", "Influencer", "Artist", "Agency"]
 };
-
 const Marketplace = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
@@ -45,55 +44,54 @@ const Marketplace = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [listingTypeFilter, setListingTypeFilter] = useState("all");
   const [currentSlide, setCurrentSlide] = useState(0);
-
   const ITEMS_PER_SLIDE = 6;
   const totalSlides = Math.ceil(filteredListings.length / ITEMS_PER_SLIDE);
-
   useEffect(() => {
     // Check auth status
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       setUser(session?.user ?? null);
     });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
     });
-
     fetchAllListings();
-
     return () => subscription.unsubscribe();
   }, []);
-
   useEffect(() => {
     applyFilters();
   }, [listings, searchTerm, categoryFilter, listingTypeFilter]);
-
   const fetchAllListings = async () => {
     try {
       setLoading(true);
 
       // Fetch approved ad spaces (Selling - from venue publishers)
-      const { data: venuesData } = await supabase
-        .from('ad_spaces')
-        .select(`*, publisher_profiles_public(business_name, publisher_type)`)
-        .eq('approval_status', 'approved')
-        .order('created_at', { ascending: false });
+      const {
+        data: venuesData
+      } = await supabase.from('ad_spaces').select(`*, publisher_profiles_public(business_name, publisher_type)`).eq('approval_status', 'approved').order('created_at', {
+        ascending: false
+      });
 
       // Fetch approved agent services (Selling - from agent publishers)
-      const { data: servicesData } = await supabase
-        .from('agent_services')
-        .select(`*, publisher_profiles_public(business_name, publisher_type)`)
-        .eq('approval_status', 'approved')
-        .order('created_at', { ascending: false });
+      const {
+        data: servicesData
+      } = await supabase.from('agent_services').select(`*, publisher_profiles_public(business_name, publisher_type)`).eq('approval_status', 'approved').order('created_at', {
+        ascending: false
+      });
 
       // Fetch approved digital publisher profiles for selling listings
-      const { data: digitalPublishers } = await supabase
-        .from('publisher_profiles_public')
-        .select('*')
-        .eq('publisher_type', 'digital')
-        .eq('verification_status', 'approved')
-        .order('created_at', { ascending: false });
-
+      const {
+        data: digitalPublishers
+      } = await supabase.from('publisher_profiles_public').select('*').eq('publisher_type', 'digital').eq('verification_status', 'approved').order('created_at', {
+        ascending: false
+      });
       const allListings: MarketplaceListing[] = [];
 
       // Process venues (Selling)
@@ -154,10 +152,7 @@ const Marketplace = () => {
       });
 
       // Sort by created date
-      allListings.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-
+      allListings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setListings(allListings);
       setFilteredListings(allListings);
     } catch (error) {
@@ -165,42 +160,31 @@ const Marketplace = () => {
       toast({
         title: "Error",
         description: "Failed to load marketplace listings.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const applyFilters = () => {
     let filtered = listings;
-
     if (searchTerm) {
-      filtered = filtered.filter(
-        (l) =>
-          l.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          l.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          l.location.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter(l => l.title.toLowerCase().includes(searchTerm.toLowerCase()) || l.description.toLowerCase().includes(searchTerm.toLowerCase()) || l.location.toLowerCase().includes(searchTerm.toLowerCase()));
     }
-
     if (categoryFilter !== "all") {
-      filtered = filtered.filter((l) => l.category === categoryFilter);
+      filtered = filtered.filter(l => l.category === categoryFilter);
     }
-
     if (listingTypeFilter !== "all") {
-      filtered = filtered.filter((l) => l.listingType === listingTypeFilter);
+      filtered = filtered.filter(l => l.listingType === listingTypeFilter);
     }
-
     setFilteredListings(filtered);
     setCurrentSlide(0);
   };
-
   const handleListingClick = (listing: MarketplaceListing) => {
     if (!user) {
       toast({
         title: "Authentication Required",
-        description: "Please log in to view listing details and make transactions.",
+        description: "Please log in to view listing details and make transactions."
       });
       navigate("/auth");
       return;
@@ -213,78 +197,73 @@ const Marketplace = () => {
       // For now, show a toast for other listing types
       toast({
         title: "Listing Details",
-        description: `Viewing ${listing.title}. Payment options: Google Pay, Stripe.`,
+        description: `Viewing ${listing.title}. Payment options: Google Pay, Stripe.`
       });
     }
   };
-
   const formatBudget = (amount: number, currency: string) => {
     if (amount === 0) return "Contact for pricing";
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: currency || "USD",
+      currency: currency || "USD"
     }).format(amount);
   };
-
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case "advertiser": return ShoppingCart;
-      case "venue": return Building2;
-      case "digital": return Globe;
-      case "agent": return UserCheck;
-      default: return Tag;
+      case "advertiser":
+        return ShoppingCart;
+      case "venue":
+        return Building2;
+      case "digital":
+        return Globe;
+      case "agent":
+        return UserCheck;
+      default:
+        return Tag;
     }
   };
-
   const getCategoryBadgeColor = (category: string) => {
     switch (category) {
-      case "advertiser": return "bg-blue-500/10 text-blue-600 border-blue-500/20";
-      case "venue": return "bg-green-500/10 text-green-600 border-green-500/20";
-      case "digital": return "bg-purple-500/10 text-purple-600 border-purple-500/20";
-      case "agent": return "bg-orange-500/10 text-orange-600 border-orange-500/20";
-      default: return "";
+      case "advertiser":
+        return "bg-blue-500/10 text-blue-600 border-blue-500/20";
+      case "venue":
+        return "bg-green-500/10 text-green-600 border-green-500/20";
+      case "digital":
+        return "bg-purple-500/10 text-purple-600 border-purple-500/20";
+      case "agent":
+        return "bg-orange-500/10 text-orange-600 border-orange-500/20";
+      default:
+        return "";
     }
   };
-
   const getCurrentSlideListings = () => {
     const start = currentSlide * ITEMS_PER_SLIDE;
     return filteredListings.slice(start, start + ITEMS_PER_SLIDE);
   };
-
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    setCurrentSlide(prev => (prev + 1) % totalSlides);
   };
-
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+    setCurrentSlide(prev => (prev - 1 + totalSlides) % totalSlides);
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
+    return <div className="min-h-screen bg-muted/30 flex items-center justify-center">
         <p className="text-muted-foreground">Loading marketplace...</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-muted/30">
+  return <div className="min-h-screen bg-muted/30">
       <Navigation />
       <div className="container mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Ad Marketplace</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Your central hub for buying and selling advertising services, ad space, media, and ad units
-          </p>
-          {!user && (
-            <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Your central hub for activating micro advertising spaces.</p>
+          {!user && <p className="text-sm text-muted-foreground mt-2">
               <Button variant="link" onClick={() => navigate("/auth")} className="p-0 h-auto">
                 Log in
               </Button>
               {" "}to make transactions
-            </p>
-          )}
+            </p>}
         </div>
 
         {/* Search & Filters */}
@@ -297,12 +276,7 @@ const Marketplace = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search listings..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
+                <Input placeholder="Search listings..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
               </div>
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -344,52 +318,30 @@ const Marketplace = () => {
         </div>
 
         {/* Carousel Navigation */}
-        {totalSlides > 1 && (
-          <div className="flex items-center justify-center gap-4 mb-6">
+        {totalSlides > 1 && <div className="flex items-center justify-center gap-4 mb-6">
             <Button variant="outline" size="icon" onClick={prevSlide}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <div className="flex gap-2">
-              {Array.from({ length: totalSlides }).map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    idx === currentSlide ? "bg-primary" : "bg-muted-foreground/30"
-                  }`}
-                />
-              ))}
+              {Array.from({
+            length: totalSlides
+          }).map((_, idx) => <button key={idx} onClick={() => setCurrentSlide(idx)} className={`w-2 h-2 rounded-full transition-colors ${idx === currentSlide ? "bg-primary" : "bg-muted-foreground/30"}`} />)}
             </div>
             <Button variant="outline" size="icon" onClick={nextSlide}>
               <ChevronRight className="h-4 w-4" />
             </Button>
-          </div>
-        )}
+          </div>}
 
         {/* Listings Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {getCurrentSlideListings().length === 0 ? (
-            <div className="col-span-full text-center py-12">
+          {getCurrentSlideListings().length === 0 ? <div className="col-span-full text-center py-12">
               <p className="text-muted-foreground">No approved listings found matching your criteria</p>
-            </div>
-          ) : (
-            getCurrentSlideListings().map((listing) => {
-              const CategoryIcon = getCategoryIcon(listing.category);
-              return (
-                <Card 
-                  key={`${listing.category}-${listing.id}`} 
-                  className="hover:shadow-lg transition-shadow overflow-hidden cursor-pointer"
-                  onClick={() => handleListingClick(listing)}
-                >
-                  {listing.image && (
-                    <div className="relative h-48 w-full overflow-hidden">
-                      <img
-                        src={listing.image}
-                        alt={listing.title}
-                        className="w-full h-full object-cover transition-transform hover:scale-105"
-                      />
-                    </div>
-                  )}
+            </div> : getCurrentSlideListings().map(listing => {
+          const CategoryIcon = getCategoryIcon(listing.category);
+          return <Card key={`${listing.category}-${listing.id}`} className="hover:shadow-lg transition-shadow overflow-hidden cursor-pointer" onClick={() => handleListingClick(listing)}>
+                  {listing.image && <div className="relative h-48 w-full overflow-hidden">
+                      <img src={listing.image} alt={listing.title} className="w-full h-full object-cover transition-transform hover:scale-105" />
+                    </div>}
                   <CardHeader>
                     <div className="flex items-start justify-between mb-2 gap-2">
                       <div className="flex items-center gap-2">
@@ -400,10 +352,7 @@ const Marketplace = () => {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-2">
-                      <Badge 
-                        variant="secondary"
-                        className="capitalize"
-                      >
+                      <Badge variant="secondary" className="capitalize">
                         {listing.type}
                       </Badge>
                     </div>
@@ -424,23 +373,17 @@ const Marketplace = () => {
                       </span>
                     </div>
 
-                    {listing.adUnits.length > 0 && (
-                      <div className="pt-2 border-t">
+                    {listing.adUnits.length > 0 && <div className="pt-2 border-t">
                         <p className="text-xs text-muted-foreground mb-2">Ad Units</p>
                         <div className="flex flex-wrap gap-1">
-                          {listing.adUnits.slice(0, 3).map((unit) => (
-                            <Badge key={unit} variant="outline" className="text-xs">
+                          {listing.adUnits.slice(0, 3).map(unit => <Badge key={unit} variant="outline" className="text-xs">
                               {unit}
-                            </Badge>
-                          ))}
-                          {listing.adUnits.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
+                            </Badge>)}
+                          {listing.adUnits.length > 3 && <Badge variant="outline" className="text-xs">
                               +{listing.adUnits.length - 3} more
-                            </Badge>
-                          )}
+                            </Badge>}
                         </div>
-                      </div>
-                    )}
+                      </div>}
 
                     <div className="pt-2 border-t">
                       <p className="text-xs text-muted-foreground mb-1">
@@ -453,10 +396,8 @@ const Marketplace = () => {
                       {user ? "View Details" : "Log in to View"}
                     </Button>
                   </CardContent>
-                </Card>
-              );
-            })
-          )}
+                </Card>;
+        })}
         </div>
 
         {/* Legend */}
@@ -505,8 +446,6 @@ const Marketplace = () => {
         </Card>
       </div>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Marketplace;
