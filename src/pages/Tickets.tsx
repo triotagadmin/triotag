@@ -13,7 +13,6 @@ import { useCart } from "@/contexts/CartContext";
 import { TicketCart } from "@/components/TicketCart";
 import { TicketSubmissionDialog } from "@/components/TicketSubmissionDialog";
 import { toast } from "sonner";
-
 interface TicketEvent {
   id: string;
   title: string;
@@ -29,10 +28,11 @@ interface TicketEvent {
   image_url: string | null;
   status: string;
 }
-
 const Tickets = () => {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const {
+    addToCart
+  } = useCart();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [tickets, setTickets] = useState<TicketEvent[]>([]);
@@ -41,35 +41,33 @@ const Tickets = () => {
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
-
   const ITEMS_PER_SLIDE = 3;
-
   useEffect(() => {
     fetchTickets();
     checkUser();
   }, []);
-
   const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: {
+        session
+      }
+    } = await supabase.auth.getSession();
     if (session?.user) {
       setUser(session.user);
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .single();
+      const {
+        data: roleData
+      } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
       setUserRole(roleData?.role || null);
     }
   };
-
   const fetchTickets = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("tickets")
-      .select("*")
-      .eq("status", "approved")
-      .order("event_date", { ascending: true });
-
+    const {
+      data,
+      error
+    } = await supabase.from("tickets").select("*").eq("status", "approved").order("event_date", {
+      ascending: true
+    });
     if (error) {
       console.error("Error fetching tickets:", error);
     } else {
@@ -77,31 +75,22 @@ const Tickets = () => {
     }
     setLoading(false);
   };
-
-  const filteredTickets = tickets.filter((ticket) => {
-    const matchesSearch =
-      ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (ticket.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
-    const matchesCategory =
-      categoryFilter === "all" || ticket.category === categoryFilter;
+  const filteredTickets = tickets.filter(ticket => {
+    const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) || (ticket.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
+    const matchesCategory = categoryFilter === "all" || ticket.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
-
   const totalSlides = Math.max(1, Math.ceil(filteredTickets.length / ITEMS_PER_SLIDE));
-
   const getCurrentSlideTickets = () => {
     const start = currentSlide * ITEMS_PER_SLIDE;
     return filteredTickets.slice(start, start + ITEMS_PER_SLIDE);
   };
-
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    setCurrentSlide(prev => (prev + 1) % totalSlides);
   };
-
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+    setCurrentSlide(prev => (prev - 1 + totalSlides) % totalSlides);
   };
-
   const handleAddToCart = (ticket: TicketEvent) => {
     const available = ticket.quantity_available - ticket.quantity_sold;
     if (available <= 0) {
@@ -115,15 +104,12 @@ const Tickets = () => {
       eventDate: ticket.event_date,
       location: ticket.location,
       image_url: ticket.image_url || undefined,
-      maxQuantity: available,
+      maxQuantity: available
     });
     toast.success("Added to cart!");
   };
-
   const canSubmitTickets = userRole === "advertiser" || userRole === "publisher";
-
-  return (
-    <div className="min-h-screen bg-muted/30">
+  return <div className="min-h-screen bg-muted/30">
       <Navigation />
 
       <div className="container mx-auto px-6 py-12">
@@ -134,7 +120,7 @@ const Tickets = () => {
               Ticket Marketplace
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Buy and sell tickets for events, concerts, conferences, and more
+              Digital tickets for events anywhere in the world.        
             </p>
           </div>
           <TicketCart />
@@ -152,12 +138,7 @@ const Tickets = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search events..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
+                <Input placeholder="Search events..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
               </div>
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -177,83 +158,51 @@ const Tickets = () => {
                 </SelectContent>
               </Select>
 
-              {canSubmitTickets && (
-                <Button onClick={() => setIsSubmitDialogOpen(true)}>
+              {canSubmitTickets && <Button onClick={() => setIsSubmitDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Submit Event
-                </Button>
-              )}
+                </Button>}
             </div>
           </CardContent>
         </Card>
 
         {/* Horizontal Slider */}
-        {loading ? (
-          <div className="text-center py-12">
+        {loading ? <div className="text-center py-12">
             <p className="text-muted-foreground">Loading events...</p>
-          </div>
-        ) : filteredTickets.length === 0 ? (
-          <Card className="py-12">
+          </div> : filteredTickets.length === 0 ? <Card className="py-12">
             <CardContent className="text-center">
               <Ticket className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
                 No events found matching your criteria
               </p>
             </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-6">
+          </Card> : <div className="space-y-6">
             {/* Carousel Navigation */}
-            {totalSlides > 1 && (
-              <div className="flex items-center justify-center gap-4">
+            {totalSlides > 1 && <div className="flex items-center justify-center gap-4">
                 <Button variant="outline" size="icon" onClick={prevSlide}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="flex gap-2">
-                  {Array.from({ length: totalSlides }).map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentSlide(idx)}
-                      className={`w-2 h-2 rounded-full transition-colors ${
-                        idx === currentSlide
-                          ? "bg-primary"
-                          : "bg-muted-foreground/30"
-                      }`}
-                    />
-                  ))}
+                  {Array.from({
+              length: totalSlides
+            }).map((_, idx) => <button key={idx} onClick={() => setCurrentSlide(idx)} className={`w-2 h-2 rounded-full transition-colors ${idx === currentSlide ? "bg-primary" : "bg-muted-foreground/30"}`} />)}
                 </div>
                 <Button variant="outline" size="icon" onClick={nextSlide}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
-              </div>
-            )}
+              </div>}
 
             {/* Events Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getCurrentSlideTickets().map((ticket) => {
-                const available = ticket.quantity_available - ticket.quantity_sold;
-                const isSoldOut = available <= 0;
-
-                return (
-                  <Card
-                    key={ticket.id}
-                    className="hover:shadow-lg transition-shadow overflow-hidden"
-                  >
+              {getCurrentSlideTickets().map(ticket => {
+            const available = ticket.quantity_available - ticket.quantity_sold;
+            const isSoldOut = available <= 0;
+            return <Card key={ticket.id} className="hover:shadow-lg transition-shadow overflow-hidden">
                     <div className="h-48 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center relative">
-                      {ticket.image_url ? (
-                        <img
-                          src={ticket.image_url}
-                          alt={ticket.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Ticket className="h-16 w-16 text-primary/40" />
-                      )}
-                      {isSoldOut && (
-                        <Badge className="absolute top-2 right-2 bg-destructive">
+                      {ticket.image_url ? <img src={ticket.image_url} alt={ticket.title} className="w-full h-full object-cover" /> : <Ticket className="h-16 w-16 text-primary/40" />}
+                      {isSoldOut && <Badge className="absolute top-2 right-2 bg-destructive">
                           Sold Out
-                        </Badge>
-                      )}
+                        </Badge>}
                     </div>
                     <CardHeader>
                       <div className="flex items-start justify-between">
@@ -275,56 +224,36 @@ const Tickets = () => {
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4" />
                         <span>
-                          {ticket.venue_name
-                            ? `${ticket.venue_name}, ${ticket.location}`
-                            : ticket.location}
+                          {ticket.venue_name ? `${ticket.venue_name}, ${ticket.location}` : ticket.location}
                         </span>
                       </div>
                       <div className="flex items-center justify-between pt-2 border-t">
                         <div>
                           <p className="text-2xl font-bold">${ticket.price}</p>
                           <p className="text-xs text-muted-foreground">
-                            {isSoldOut
-                              ? "Sold out"
-                              : `${available} tickets left`}
+                            {isSoldOut ? "Sold out" : `${available} tickets left`}
                           </p>
                         </div>
-                        <Button
-                          onClick={() => handleAddToCart(ticket)}
-                          disabled={isSoldOut}
-                        >
+                        <Button onClick={() => handleAddToCart(ticket)} disabled={isSoldOut}>
                           <ShoppingCart className="h-4 w-4 mr-2" />
                           {isSoldOut ? "Sold Out" : "Add to Cart"}
                         </Button>
                       </div>
                     </CardContent>
-                  </Card>
-                );
-              })}
+                  </Card>;
+          })}
             </div>
 
-            {filteredTickets.length > ITEMS_PER_SLIDE && (
-              <p className="text-center text-sm text-muted-foreground">
+            {filteredTickets.length > ITEMS_PER_SLIDE && <p className="text-center text-sm text-muted-foreground">
                 Showing {getCurrentSlideTickets().length} of{" "}
                 {filteredTickets.length} events
-              </p>
-            )}
-          </div>
-        )}
+              </p>}
+          </div>}
       </div>
 
       <Footer />
 
-      {canSubmitTickets && (
-        <TicketSubmissionDialog
-          open={isSubmitDialogOpen}
-          onOpenChange={setIsSubmitDialogOpen}
-          ownerType={userRole === "advertiser" ? "advertiser" : "publisher"}
-          onSuccess={fetchTickets}
-        />
-      )}
-    </div>
-  );
+      {canSubmitTickets && <TicketSubmissionDialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen} ownerType={userRole === "advertiser" ? "advertiser" : "publisher"} onSuccess={fetchTickets} />}
+    </div>;
 };
-
 export default Tickets;
