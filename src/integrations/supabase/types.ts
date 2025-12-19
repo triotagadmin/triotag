@@ -404,6 +404,181 @@ export type Database = {
           },
         ]
       }
+      event_purchases: {
+        Row: {
+          buyer_email: string
+          buyer_name: string
+          buyer_phone: string | null
+          checked_in_at: string | null
+          created_at: string
+          event_ticket_id: string
+          id: string
+          order_code: string
+          payment_method: string
+          payment_proof_url: string | null
+          payment_status: string
+          qr_code: string | null
+          quantity: number
+          ticket_status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          buyer_email: string
+          buyer_name: string
+          buyer_phone?: string | null
+          checked_in_at?: string | null
+          created_at?: string
+          event_ticket_id: string
+          id?: string
+          order_code?: string
+          payment_method?: string
+          payment_proof_url?: string | null
+          payment_status?: string
+          qr_code?: string | null
+          quantity?: number
+          ticket_status?: string
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          buyer_email?: string
+          buyer_name?: string
+          buyer_phone?: string | null
+          checked_in_at?: string | null
+          created_at?: string
+          event_ticket_id?: string
+          id?: string
+          order_code?: string
+          payment_method?: string
+          payment_proof_url?: string | null
+          payment_status?: string
+          qr_code?: string | null
+          quantity?: number
+          ticket_status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_purchases_event_ticket_id_fkey"
+            columns: ["event_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "event_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_tickets: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          quantity_available: number
+          quantity_sold: number
+          sale_end_date: string | null
+          sale_start_date: string | null
+          ticket_name: string
+          ticket_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          quantity_available?: number
+          quantity_sold?: number
+          sale_end_date?: string | null
+          sale_start_date?: string | null
+          ticket_name: string
+          ticket_price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          quantity_available?: number
+          quantity_sold?: number
+          sale_end_date?: string | null
+          sale_start_date?: string | null
+          ticket_name?: string
+          ticket_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          advertiser_id: string
+          banner_image_url: string | null
+          created_at: string
+          description: string | null
+          event_date: string
+          event_time: string | null
+          id: string
+          location: string
+          organizer_name: string
+          status: string
+          title: string
+          updated_at: string
+          venue_name: string | null
+        }
+        Insert: {
+          advertiser_id: string
+          banner_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          event_date: string
+          event_time?: string | null
+          id?: string
+          location: string
+          organizer_name: string
+          status?: string
+          title: string
+          updated_at?: string
+          venue_name?: string | null
+        }
+        Update: {
+          advertiser_id?: string
+          banner_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_time?: string | null
+          id?: string
+          location?: string
+          organizer_name?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          venue_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertiser_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertiser_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
