@@ -121,12 +121,6 @@ export const Navigation = () => {
             <Link to="/insights" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Insights</Button>
             </Link>
-            <Link to="/campaign-submit" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Buy</Button>
-            </Link>
-            <Link to="/list-space" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Sell</Button>
-            </Link>
             <Link to="/auth" onClick={closeMobileMenu}>
               <Button variant="outline" size="sm" className={mobile ? "w-full mt-2" : ""}>Log In</Button>
             </Link>
