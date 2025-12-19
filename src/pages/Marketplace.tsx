@@ -400,50 +400,6 @@ const Marketplace = () => {
         })}
         </div>
 
-        {/* Legend */}
-        <Card className="mt-12">
-          <CardHeader>
-            <CardTitle>Marketplace Legend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold mb-3">Listing Types</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Badge>Buying</Badge>
-                    <span className="text-sm text-muted-foreground">Advertisers looking for ad space/services</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Selling</Badge>
-                    <span className="text-sm text-muted-foreground">Publishers offering ad space/services</span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-3">Categories</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={getCategoryBadgeColor("advertiser")}>Advertiser</Badge>
-                    <span className="text-sm text-muted-foreground">Brands & businesses buying ad space</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={getCategoryBadgeColor("venue")}>Venue</Badge>
-                    <span className="text-sm text-muted-foreground">Physical locations with ad space</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={getCategoryBadgeColor("digital")}>Digital</Badge>
-                    <span className="text-sm text-muted-foreground">Online advertising services</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={getCategoryBadgeColor("agent")}>Agent</Badge>
-                    <span className="text-sm text-muted-foreground">Marketing & promotion services</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
       <Footer />
     </div>;
