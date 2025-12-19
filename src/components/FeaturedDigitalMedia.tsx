@@ -44,7 +44,7 @@ export const FeaturedDigitalMedia = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-            Featured Digital Media
+            Featured <span className="text-primary neon-text-glow">Digital Media</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Amplify your campaign with trusted digital publishers
