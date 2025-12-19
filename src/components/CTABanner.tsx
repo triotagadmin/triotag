@@ -31,7 +31,7 @@ export const CTABanner = () => {
 
       <div className="container mx-auto px-4 md:px-6 text-center space-y-4 md:space-y-8 relative z-10">
         <h2 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold max-w-3xl mx-auto text-foreground transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          Start advertising from{" "}
+          Start Advertising with{" "}
           <span className="text-primary neon-text-glow">venue ad space </span>!
         </h2>
 
