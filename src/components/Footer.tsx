@@ -51,18 +51,8 @@ export const Footer = () => {
   ];
 
   const footerLinks = {
-    advertisers: [
-      { label: "Register as an Advertiser", href: "/auth" },
-      { label: "Browse Publishers", href: "/publishers" },
-      { label: "Marketplace", href: "/explore" },
-    ],
-    publishers: [
-      { label: "Venue Publisher", href: "/auth" },
-      { label: "Agent Publisher", href: "/auth" },
-      { label: "Digital Publisher", href: "/auth" },
-    ],
     company: [
-      { label: "About Us", href: "#about" },
+      { label: "About Us", href: "https://sites.google.com/view/stickymedia", external: true },
       { label: "Contact", href: "#contact" },
       { label: "Privacy Policy", href: "#privacy" },
       { label: "Terms of Service", href: "#terms" },
@@ -73,7 +63,7 @@ export const Footer = () => {
     <footer className="bg-card border-t border-border">
       <div className="container mx-auto px-4 md:px-6 py-8 md:py-16">
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12 mb-8 md:mb-12">
           {/* Brand Section */}
           <div className="space-y-4 text-center sm:text-left">
             <h3 className="font-bold text-lg md:text-xl text-primary neon-text-glow">
@@ -83,44 +73,6 @@ export const Footer = () => {
               The micro-advertising revolution connecting advertisers with
               venues, agents, and digital publishers.
             </p>
-          </div>
-
-          {/* Advertisers Links */}
-          <div className="space-y-4 text-center sm:text-left">
-            <h4 className="font-semibold text-foreground uppercase tracking-wider text-xs md:text-sm">
-              Advertisers
-            </h4>
-            <ul className="space-y-2 md:space-y-3">
-              {footerLinks.advertisers.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.href}
-                    className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Publishers Links */}
-          <div className="space-y-4 text-center sm:text-left">
-            <h4 className="font-semibold text-foreground uppercase tracking-wider text-xs md:text-sm">
-              Publishers
-            </h4>
-            <ul className="space-y-2 md:space-y-3">
-              {footerLinks.publishers.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.href}
-                    className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
           </div>
 
           {/* Company Links */}
@@ -133,6 +85,8 @@ export const Footer = () => {
                 <li key={link.label}>
                   <a
                     href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
                     className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
                   >
                     {link.label}
