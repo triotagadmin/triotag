@@ -688,8 +688,8 @@ const ActivateListing = () => {
                   size="lg"
                   onClick={handlePayNow}
                 >
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Pay ${activationPrice} Now
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Activate Listing
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
