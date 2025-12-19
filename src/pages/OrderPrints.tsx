@@ -301,7 +301,7 @@ const OrderPrints = () => {
     );
   }
 
-  const selectedProductInfo = PRODIGI_PRODUCTS.find(p => p.sku === selectedProduct);
+  
 
   return (
     <div className="min-h-screen bg-background">
@@ -347,29 +347,6 @@ const OrderPrints = () => {
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label>Product Type</Label>
-                  <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a product..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PRODIGI_PRODUCTS.map((product) => (
-                        <SelectItem key={product.sku} value={product.sku}>
-                          <div>
-                            <span className="font-medium">{product.name}</span>
-                            <span className="text-muted-foreground ml-2">({product.category})</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedProductInfo && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {selectedProductInfo.description}
-                    </p>
-                  )}
-                </div>
 
                 <div>
                   <Label>Quantity</Label>
