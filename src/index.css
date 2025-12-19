@@ -142,7 +142,7 @@
   }
 
   .animate-pulse-glow {
-    animation: pulseGlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulseGlow 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
   .animate-scale-hover {
