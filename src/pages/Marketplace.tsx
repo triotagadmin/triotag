@@ -142,7 +142,7 @@ const Marketplace = () => {
           budget: (v.pricing as any)?.weekly || (v.pricing as any)?.monthly || 0,
           currency: "USD",
           location: v.location || "Not specified",
-          type: "Venue Space",
+          type: (v.specifications as any)?.venue_type || (v.specifications as any)?.type || "Venue",
           category: "venue",
           listingType: "selling",
           adUnits: AD_UNITS.venue,
@@ -438,13 +438,10 @@ const Marketplace = () => {
                     </div>
                     <div className="flex flex-wrap gap-2 mb-2">
                       <Badge 
-                        variant={listing.listingType === "buying" ? "default" : "secondary"}
+                        variant="secondary"
                         className="capitalize"
                       >
-                        {listing.listingType}
-                      </Badge>
-                      <Badge variant="outline" className={`capitalize ${getCategoryBadgeColor(listing.category)}`}>
-                        {listing.category}
+                        {listing.type}
                       </Badge>
                     </div>
                     <CardDescription className="line-clamp-2">
