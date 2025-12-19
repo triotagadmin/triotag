@@ -67,11 +67,11 @@ export const Footer = () => {
 
   return (
     <footer className="bg-card border-t border-border">
-      <div className="container mx-auto px-4 md:px-6 py-8 md:py-16">
+      <div className="container mx-auto px-4 md:px-6 py-4 md:py-8">
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12 mb-8 md:mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
           {/* Brand Section */}
-          <div className="space-y-4 text-center sm:text-left">
+          <div className="space-y-3 text-center sm:text-left">
             <h3 className="font-bold text-lg md:text-xl text-primary neon-text-glow">
               Tiny Sticky Ads
             </h3>
@@ -81,12 +81,12 @@ export const Footer = () => {
             </p>
           </div>
 
-          {/* Company Links */}
-          <div className="space-y-4 text-center sm:text-left">
+          {/* Company Links - Two Columns */}
+          <div className="space-y-3 text-center sm:text-left">
             <h4 className="font-semibold text-foreground uppercase tracking-wider text-xs md:text-sm">
               Company
             </h4>
-            <ul className="space-y-2 md:space-y-3">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
               {footerLinks.company.map((link: FooterLink) => (
                 <li key={link.label}>
                   {link.external ? (
@@ -113,8 +113,8 @@ export const Footer = () => {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-border pt-6 md:pt-8">
-          <div className="flex flex-col items-center gap-4 md:gap-6">
+        <div className="border-t border-border pt-4 md:pt-6">
+          <div className="flex flex-col items-center gap-3 md:gap-4">
             {/* Social Icons */}
             <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4">
               {socialLinks.map((social) => {
