@@ -19,6 +19,7 @@ interface UnifiedListing {
   image?: string;
   publisher_name?: string;
   created_at: string;
+  venue_type?: string; // e.g., "Nightclub", "Barbershop", "Fitness Gym"
 }
 
 const ExploreAll = () => {
@@ -66,7 +67,8 @@ const ExploreAll = () => {
           location: v.location || 'N/A',
           image: (v.media_urls as any)?.[0],
           publisher_name: (v.publisher_profiles_public as any)?.business_name,
-          created_at: v.created_at || ''
+          created_at: v.created_at || '',
+          venue_type: (v.specifications as any)?.venue_type || (v.specifications as any)?.type || 'Venue'
         })),
         ...(servicesData || []).map(s => ({
           id: s.id,
@@ -76,7 +78,8 @@ const ExploreAll = () => {
           location: s.location || 'N/A',
           image: (s.media_urls as any)?.[0],
           publisher_name: (s.publisher_profiles_public as any)?.business_name,
-          created_at: s.created_at || ''
+          created_at: s.created_at || '',
+          venue_type: s.service_type || 'Service'
         }))
       ];
 
@@ -120,13 +123,8 @@ const ExploreAll = () => {
     setFilteredListings(filtered);
   };
 
-  const getTypeBadge = (type: string) => {
-    const badges = {
-      venue: { label: "Venue", variant: "secondary" as const },
-      agent_service: { label: "Agent Service", variant: "outline" as const }
-    };
-    const badge = badges[type as keyof typeof badges];
-    return <Badge variant={badge.variant}>{badge.label}</Badge>;
+  const getTypeBadge = (venueType: string) => {
+    return <Badge variant="secondary">{venueType}</Badge>;
   };
 
   const uniqueLocations = [...new Set(listings.map(l => l.location).filter(Boolean))];
@@ -211,7 +209,7 @@ const ExploreAll = () => {
               )}
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
-                  {getTypeBadge(listing.type)}
+                  {getTypeBadge(listing.venue_type || 'Venue')}
                   {listing.publisher_name && (
                     <Badge variant="outline">{listing.publisher_name}</Badge>
                   )}
