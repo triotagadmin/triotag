@@ -9,7 +9,7 @@ import venueBathroom from "@/assets/venue-bathroom.jpg";
 
 const locations = [
   {
-    name: "Brew & Bean Café",
+    name: "Balay Kalapihan",
     category: "Café",
     image: venueCafe1,
     status: "Available",
