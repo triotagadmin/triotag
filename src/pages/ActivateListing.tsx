@@ -424,20 +424,9 @@ const ActivateListing = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label>Product Type</Label>
-                    <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a product..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRODIGI_PRODUCTS.map((product) => (
-                          <SelectItem key={product.sku} value={product.sku}>
-                            {product.name} ({product.category})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">Selected Product</p>
+                    <p className="font-medium">{PRODIGI_PRODUCTS.find(p => p.sku === selectedProduct)?.name || selectedProduct}</p>
                   </div>
 
                   <div>
