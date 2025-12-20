@@ -958,6 +958,136 @@ export type Database = {
         }
         Relationships: []
       }
+      venue_events: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_date: string
+          event_time: string | null
+          id: string
+          status: string
+          ticket_price: number
+          tickets_sold: number
+          title: string
+          total_tickets: number
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_date: string
+          event_time?: string | null
+          id?: string
+          status?: string
+          ticket_price?: number
+          tickets_sold?: number
+          title: string
+          total_tickets?: number
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_time?: string | null
+          id?: string
+          status?: string
+          ticket_price?: number
+          tickets_sold?: number
+          title?: string
+          total_tickets?: number
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venue_tickets: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          event_id: string
+          id: string
+          scanned_at: string | null
+          scanned_by: string | null
+          status: Database["public"]["Enums"]["venue_ticket_status"]
+          unique_code: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          event_id: string
+          id?: string
+          scanned_at?: string | null
+          scanned_by?: string | null
+          status?: Database["public"]["Enums"]["venue_ticket_status"]
+          unique_code?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          event_id?: string
+          id?: string
+          scanned_at?: string | null
+          scanned_by?: string | null
+          status?: Database["public"]["Enums"]["venue_ticket_status"]
+          unique_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "venue_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venues: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          location: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       verification_documents: {
         Row: {
           document_type: string
@@ -1106,6 +1236,7 @@ export type Database = {
       app_role: "admin" | "publisher" | "advertiser"
       approval_status: "pending" | "approved" | "rejected"
       publisher_type: "venue" | "digital" | "agent"
+      venue_ticket_status: "valid" | "used"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1238,6 +1369,7 @@ export const Constants = {
       app_role: ["admin", "publisher", "advertiser"],
       approval_status: ["pending", "approved", "rejected"],
       publisher_type: ["venue", "digital", "agent"],
+      venue_ticket_status: ["valid", "used"],
     },
   },
 } as const
