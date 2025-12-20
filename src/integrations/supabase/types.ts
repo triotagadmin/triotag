@@ -879,6 +879,7 @@ export type Database = {
           event_time: string | null
           id: string
           image_url: string | null
+          image_urls: string[] | null
           location: string
           owner_id: string
           owner_type: string
@@ -900,6 +901,7 @@ export type Database = {
           event_time?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           location: string
           owner_id: string
           owner_type: string
@@ -921,6 +923,7 @@ export type Database = {
           event_time?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           location?: string
           owner_id?: string
           owner_type?: string
