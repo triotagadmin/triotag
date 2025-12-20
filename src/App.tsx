@@ -49,6 +49,7 @@ import VenueTicketScanner from "./pages/VenueTicketScanner";
 import TicketQRView from "./pages/TicketQRView";
 import TicketValidation from "./pages/TicketValidation";
 import QRTicketCreator from "./pages/QRTicketCreator";
+import ValidateTicket from "./pages/ValidateTicket";
 
 const queryClient = new QueryClient();
 
@@ -100,6 +101,7 @@ const App = () => (
           <Route path="/venue-ticketing/scanner/:eventId" element={<VenueTicketScanner />} />
           <Route path="/ticket/:uniqueCode" element={<TicketQRView />} />
           <Route path="/validate/:uniqueCode" element={<TicketValidation />} />
+          <Route path="/validate" element={<ValidateTicket />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
           <Route path="/admin/verify" element={<AdminApproval />} />
