@@ -744,6 +744,45 @@ export type Database = {
         }
         Relationships: []
       }
+      publisher_tickets: {
+        Row: {
+          created_at: string
+          creator_id: string
+          event_name: string
+          id: string
+          price: number
+          scanned_at: string | null
+          scanned_by_ip: string | null
+          secret_token: string
+          status: Database["public"]["Enums"]["publisher_ticket_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          event_name: string
+          id?: string
+          price?: number
+          scanned_at?: string | null
+          scanned_by_ip?: string | null
+          secret_token?: string
+          status?: Database["public"]["Enums"]["publisher_ticket_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          event_name?: string
+          id?: string
+          price?: number
+          scanned_at?: string | null
+          scanned_by_ip?: string | null
+          secret_token?: string
+          status?: Database["public"]["Enums"]["publisher_ticket_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       qr_code_scans: {
         Row: {
           browser: string | null
@@ -1229,12 +1268,21 @@ export type Database = {
         Returns: boolean
       }
       is_verified_admin: { Args: { _user_id: string }; Returns: boolean }
+      validate_publisher_ticket: {
+        Args: {
+          p_scanner_ip?: string
+          p_secret_token: string
+          p_ticket_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       admin_status: "pending" | "verified" | "rejected"
       agent_role: "guerrilla" | "influencer" | "model" | "artist"
       app_role: "admin" | "publisher" | "advertiser"
       approval_status: "pending" | "approved" | "rejected"
+      publisher_ticket_status: "active" | "used"
       publisher_type: "venue" | "digital" | "agent"
       venue_ticket_status: "valid" | "used"
     }
@@ -1368,6 +1416,7 @@ export const Constants = {
       agent_role: ["guerrilla", "influencer", "model", "artist"],
       app_role: ["admin", "publisher", "advertiser"],
       approval_status: ["pending", "approved", "rejected"],
+      publisher_ticket_status: ["active", "used"],
       publisher_type: ["venue", "digital", "agent"],
       venue_ticket_status: ["valid", "used"],
     },

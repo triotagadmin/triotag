@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +29,12 @@ import {
   Loader2,
   CheckCircle,
   Clock,
-  Users
+  Users,
+  Ticket,
+  DollarSign,
+  Hash,
+  XCircle,
+  Trash2
 } from "lucide-react";
 import {
   Table,
@@ -40,6 +44,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { QRCodeSVG } from "qrcode.react";
+
+interface PublisherTicket {
+  id: string;
+  event_name: string;
+  price: number;
+  secret_token: string;
+  status: 'active' | 'used';
+  scanned_at: string | null;
+  created_at: string;
+}
 
 interface QRCode {
   id: string;
@@ -73,6 +95,13 @@ const QRTicketCreator = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  
+  // Publisher tickets state
+  const [tickets, setTickets] = useState<PublisherTicket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<PublisherTicket | null>(null);
+  const [showQRDialog, setShowQRDialog] = useState(false);
+  
+  // QR Codes state (existing functionality)
   const [qrCodes, setQrCodes] = useState<QRCode[]>([]);
   const [selectedQR, setSelectedQR] = useState<QRCode | null>(null);
   const [scans, setScans] = useState<QRScan[]>([]);
@@ -80,8 +109,15 @@ const QRTicketCreator = () => {
   const [aiInsight, setAiInsight] = useState<string>("");
   const [generatingInsight, setGeneratingInsight] = useState(false);
 
-  // Form state
-  const [formData, setFormData] = useState({
+  // Form state for ticket creation
+  const [ticketForm, setTicketForm] = useState({
+    event_name: "",
+    quantity: "1",
+    price: ""
+  });
+
+  // Form state for QR code creation
+  const [qrForm, setQrForm] = useState({
     name: "",
     destination_url: ""
   });
@@ -96,20 +132,30 @@ const QRTicketCreator = () => {
       navigate("/auth");
       return;
     }
-    fetchQRCodes();
+    fetchData();
   };
 
-  const fetchQRCodes = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch publisher tickets
+      const { data: ticketsData, error: ticketsError } = await supabase
+        .from("publisher_tickets")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (ticketsError) throw ticketsError;
+      setTickets(ticketsData || []);
+
+      // Fetch QR codes
+      const { data: qrData, error: qrError } = await supabase
         .from("qr_codes")
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (qrError) throw qrError;
 
       // Get scan counts for each QR code
-      const qrWithScans = await Promise.all((data || []).map(async (qr) => {
+      const qrWithScans = await Promise.all((qrData || []).map(async (qr) => {
         const { count } = await supabase
           .from("qr_code_scans")
           .select("*", { count: "exact", head: true })
@@ -119,12 +165,118 @@ const QRTicketCreator = () => {
 
       setQrCodes(qrWithScans);
     } catch (error) {
-      console.error("Error fetching QR codes:", error);
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  // Generate tickets
+  const handleCreateTickets = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!ticketForm.event_name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Event name is required.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const quantity = parseInt(ticketForm.quantity) || 1;
+    if (quantity < 1 || quantity > 100) {
+      toast({
+        title: "Validation Error",
+        description: "Quantity must be between 1 and 100.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      // Create multiple tickets
+      const ticketsToInsert = Array.from({ length: quantity }, () => ({
+        creator_id: session.user.id,
+        event_name: ticketForm.event_name.trim(),
+        price: parseFloat(ticketForm.price) || 0
+      }));
+
+      const { error } = await supabase
+        .from("publisher_tickets")
+        .insert(ticketsToInsert);
+
+      if (error) throw error;
+
+      toast({
+        title: "Tickets Generated!",
+        description: `Successfully created ${quantity} ticket(s).`
+      });
+
+      setTicketForm({ event_name: "", quantity: "1", price: "" });
+      fetchData();
+    } catch (error: any) {
+      console.error("Error creating tickets:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create tickets.",
+        variant: "destructive"
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  // View QR for a ticket
+  const handleViewQR = (ticket: PublisherTicket) => {
+    setSelectedTicket(ticket);
+    setShowQRDialog(true);
+  };
+
+  // Delete a ticket
+  const handleDeleteTicket = async (ticketId: string) => {
+    try {
+      const { error } = await supabase
+        .from("publisher_tickets")
+        .delete()
+        .eq("id", ticketId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Deleted",
+        description: "Ticket has been deleted."
+      });
+
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to delete ticket.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Generate validation URL
+  const getValidationUrl = (ticket: PublisherTicket) => {
+    return `${window.location.origin}/validate?id=${ticket.id}&token=${ticket.secret_token}`;
+  };
+
+  // Copy URL to clipboard
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: "Link copied to clipboard."
+    });
+  };
+
+  // Existing QR code functions
   const generateShortCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -137,7 +289,7 @@ const QRTicketCreator = () => {
   const handleCreateQR = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.destination_url.trim()) {
+    if (!qrForm.destination_url.trim()) {
       toast({
         title: "Validation Error",
         description: "Destination URL is required.",
@@ -154,8 +306,8 @@ const QRTicketCreator = () => {
       const { error } = await supabase
         .from("qr_codes")
         .insert({
-          name: formData.name.trim() || null,
-          destination_url: formData.destination_url.trim(),
+          name: qrForm.name.trim() || null,
+          destination_url: qrForm.destination_url.trim(),
           short_code: shortCode,
           created_by: session?.user.id || null
         });
@@ -167,8 +319,8 @@ const QRTicketCreator = () => {
         description: "Your QR code is ready to use."
       });
 
-      setFormData({ name: "", destination_url: "" });
-      fetchQRCodes();
+      setQrForm({ name: "", destination_url: "" });
+      fetchData();
     } catch (error: any) {
       console.error("Error creating QR code:", error);
       toast({
@@ -205,15 +357,12 @@ const QRTicketCreator = () => {
         const dayMap: Record<string, number> = {};
 
         data.forEach(scan => {
-          // Countries
           const country = scan.country || 'Unknown';
           countryMap[country] = (countryMap[country] || 0) + 1;
 
-          // Devices
           const device = scan.device_type || 'Unknown';
           deviceMap[device] = (deviceMap[device] || 0) + 1;
 
-          // Days
           const day = new Date(scan.scanned_at).toLocaleDateString();
           dayMap[day] = (dayMap[day] || 0) + 1;
         });
@@ -251,7 +400,6 @@ const QRTicketCreator = () => {
 
     setGeneratingInsight(true);
     
-    // Simulate AI insight generation (in production, this would call an AI API)
     setTimeout(() => {
       const insights = [
         `Your QR code has received ${analytics.totalScans} scans! The majority of your audience is using ${analytics.deviceBreakdown[0]?.device || 'mobile'} devices.`,
@@ -265,25 +413,24 @@ const QRTicketCreator = () => {
     }, 1500);
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied!",
-      description: "Link copied to clipboard."
-    });
-  };
-
   const getQRCodeImageUrl = (shortCode: string) => {
     const qrUrl = `${window.location.origin}/qr/${shortCode}`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrUrl)}`;
   };
+
+  // Stats
+  const activeTickets = tickets.filter(t => t.status === 'active').length;
+  const usedTickets = tickets.filter(t => t.status === 'used').length;
 
   if (loading) {
     return (
       <div className="min-h-screen bg-muted/30">
         <Navigation />
         <div className="container mx-auto px-6 py-12">
-          <p className="text-center text-muted-foreground">Loading...</p>
+          <div className="flex items-center justify-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
         </div>
       </div>
     );
@@ -307,23 +454,83 @@ const QRTicketCreator = () => {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
             <Sparkles className="h-4 w-4" />
-            <span className="text-sm font-medium">AI-Powered Analytics</span>
+            <span className="text-sm font-medium">Professional Ticket Management</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
             QR Ticket Creator
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Generate trackable QR codes with real-time analytics and AI-powered insights
+            Generate secure, one-time-use tickets with QR codes and real-time validation
           </p>
         </div>
 
-        <Tabs defaultValue="create" className="space-y-8">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
-            <TabsTrigger value="create" className="gap-2">
-              <Plus className="h-4 w-4" />
-              Create
+        {/* Stats Overview */}
+        <div className="grid md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-full bg-primary/10">
+                  <Ticket className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{tickets.length}</p>
+                  <p className="text-sm text-muted-foreground">Total Tickets</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-full bg-green-500/10">
+                  <CheckCircle className="h-6 w-6 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-green-600">{activeTickets}</p>
+                  <p className="text-sm text-muted-foreground">Active</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-full bg-orange-500/10">
+                  <XCircle className="h-6 w-6 text-orange-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-orange-600">{usedTickets}</p>
+                  <p className="text-sm text-muted-foreground">Used</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-full bg-blue-500/10">
+                  <QrCode className="h-6 w-6 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{qrCodes.length}</p>
+                  <p className="text-sm text-muted-foreground">QR Codes</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="tickets" className="space-y-8">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4">
+            <TabsTrigger value="tickets" className="gap-2">
+              <Ticket className="h-4 w-4" />
+              Tickets
             </TabsTrigger>
-            <TabsTrigger value="manage" className="gap-2">
+            <TabsTrigger value="create-qr" className="gap-2">
+              <Plus className="h-4 w-4" />
+              QR Tracker
+            </TabsTrigger>
+            <TabsTrigger value="my-qr" className="gap-2">
               <QrCode className="h-4 w-4" />
               My QR Codes
             </TabsTrigger>
@@ -333,14 +540,190 @@ const QRTicketCreator = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Create Tab */}
-          <TabsContent value="create">
+          {/* Tickets Tab - Main ticket management */}
+          <TabsContent value="tickets">
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Ticket Creation Form */}
+              <Card className="lg:col-span-1 border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Ticket className="h-5 w-5 text-primary" />
+                    Generate Tickets
+                  </CardTitle>
+                  <CardDescription>
+                    Create secure one-time-use tickets for your event
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleCreateTickets} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="event_name">Event Name *</Label>
+                      <Input
+                        id="event_name"
+                        value={ticketForm.event_name}
+                        onChange={(e) => setTicketForm({ ...ticketForm, event_name: e.target.value })}
+                        placeholder="e.g., Summer Music Festival"
+                        maxLength={100}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="quantity">Quantity</Label>
+                        <div className="relative">
+                          <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="quantity"
+                            type="number"
+                            min="1"
+                            max="100"
+                            value={ticketForm.quantity}
+                            onChange={(e) => setTicketForm({ ...ticketForm, quantity: e.target.value })}
+                            className="pl-9"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="price">Price ($)</Label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={ticketForm.price}
+                            onChange={(e) => setTicketForm({ ...ticketForm, price: e.target.value })}
+                            placeholder="0.00"
+                            className="pl-9"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={creating}>
+                      {creating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Generate Tickets
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+
+              {/* Tickets List */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Ticket className="h-5 w-5" />
+                      Generated Tickets
+                    </span>
+                    <Badge variant="outline">{tickets.length} total</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {tickets.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Ticket className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No Tickets Yet</h3>
+                      <p className="text-muted-foreground">
+                        Generate your first batch of tickets using the form
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Event</TableHead>
+                            <TableHead>Price</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Created</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {tickets.slice(0, 20).map((ticket) => (
+                            <TableRow key={ticket.id}>
+                              <TableCell className="font-medium">
+                                {ticket.event_name}
+                              </TableCell>
+                              <TableCell>
+                                ${ticket.price.toFixed(2)}
+                              </TableCell>
+                              <TableCell>
+                                {ticket.status === 'active' ? (
+                                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Active
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-orange-500/10 text-orange-600 border-orange-500/20">
+                                    <XCircle className="h-3 w-3 mr-1" />
+                                    Used
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {new Date(ticket.created_at).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleViewQR(ticket)}
+                                  >
+                                    <QrCode className="h-4 w-4 mr-1" />
+                                    View QR
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => copyToClipboard(getValidationUrl(ticket))}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive hover:text-destructive"
+                                    onClick={() => handleDeleteTicket(ticket.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      {tickets.length > 20 && (
+                        <p className="text-center text-sm text-muted-foreground mt-4">
+                          Showing 20 of {tickets.length} tickets
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* QR Tracker Tab */}
+          <TabsContent value="create-qr">
             <div className="grid lg:grid-cols-2 gap-8">
               <Card className="border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <QrCode className="h-5 w-5 text-primary" />
-                    Create New QR Code
+                    Create Tracking QR Code
                   </CardTitle>
                   <CardDescription>
                     Generate a trackable QR code that links to any URL
@@ -349,12 +732,12 @@ const QRTicketCreator = () => {
                 <CardContent>
                   <form onSubmit={handleCreateQR} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">QR Code Name</Label>
+                      <Label htmlFor="qr_name">QR Code Name</Label>
                       <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="e.g., Summer Festival Ticket"
+                        id="qr_name"
+                        value={qrForm.name}
+                        onChange={(e) => setQrForm({ ...qrForm, name: e.target.value })}
+                        placeholder="e.g., Summer Festival Promo"
                         maxLength={100}
                       />
                     </div>
@@ -363,8 +746,8 @@ const QRTicketCreator = () => {
                       <Input
                         id="url"
                         type="url"
-                        value={formData.destination_url}
-                        onChange={(e) => setFormData({ ...formData, destination_url: e.target.value })}
+                        value={qrForm.destination_url}
+                        onChange={(e) => setQrForm({ ...qrForm, destination_url: e.target.value })}
                         placeholder="https://your-event-page.com"
                       />
                     </div>
@@ -385,7 +768,6 @@ const QRTicketCreator = () => {
                 </CardContent>
               </Card>
 
-              {/* Preview Card */}
               <Card>
                 <CardHeader>
                   <CardTitle>What You'll Get</CardTitle>
@@ -429,8 +811,8 @@ const QRTicketCreator = () => {
             </div>
           </TabsContent>
 
-          {/* Manage Tab */}
-          <TabsContent value="manage">
+          {/* My QR Codes Tab */}
+          <TabsContent value="my-qr">
             {qrCodes.length === 0 ? (
               <Card className="py-12">
                 <CardContent className="text-center">
@@ -473,12 +855,6 @@ const QRTicketCreator = () => {
                           <span className="font-medium">{qr.scan_count}</span>
                           <span className="text-muted-foreground">scans</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">
-                            {new Date(qr.created_at).toLocaleDateString()}
-                          </span>
-                        </div>
                       </div>
                       <div className="flex gap-2 pt-2">
                         <Button
@@ -488,7 +864,7 @@ const QRTicketCreator = () => {
                           onClick={() => copyToClipboard(`${window.location.origin}/qr/${qr.short_code}`)}
                         >
                           <Copy className="h-4 w-4 mr-1" />
-                          Copy Link
+                          Copy
                         </Button>
                         <Button
                           size="sm"
@@ -514,13 +890,12 @@ const QRTicketCreator = () => {
                   <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Select a QR Code</h3>
                   <p className="text-muted-foreground">
-                    Go to "My QR Codes" and click "Analytics" on any QR code to view detailed stats
+                    Go to "My QR Codes" and click "Analytics" on any QR code
                   </p>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-6">
-                {/* Selected QR Info */}
                 <Card>
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -535,7 +910,6 @@ const QRTicketCreator = () => {
                   </CardHeader>
                 </Card>
 
-                {/* Stats Grid */}
                 <div className="grid md:grid-cols-4 gap-4">
                   <Card>
                     <CardContent className="pt-6">
@@ -558,7 +932,7 @@ const QRTicketCreator = () => {
                         </div>
                         <div>
                           <p className="text-2xl font-bold">{analytics?.uniqueDevices || 0}</p>
-                          <p className="text-sm text-muted-foreground">Unique Devices</p>
+                          <p className="text-sm text-muted-foreground">Devices</p>
                         </div>
                       </div>
                     </CardContent>
@@ -593,16 +967,12 @@ const QRTicketCreator = () => {
                   </Card>
                 </div>
 
-                {/* AI Insights */}
                 <Card className="bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-primary/10 border-purple-500/20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Sparkles className="h-5 w-5 text-purple-500" />
                       AI-Powered Insights
                     </CardTitle>
-                    <CardDescription>
-                      Get intelligent analysis of your QR code performance
-                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {aiInsight ? (
@@ -613,7 +983,7 @@ const QRTicketCreator = () => {
                       <Button 
                         onClick={generateAIInsight}
                         disabled={generatingInsight}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                        className="bg-gradient-to-r from-purple-500 to-pink-500"
                       >
                         {generatingInsight ? (
                           <>
@@ -631,7 +1001,6 @@ const QRTicketCreator = () => {
                   </CardContent>
                 </Card>
 
-                {/* Recent Scans Table */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -679,6 +1048,92 @@ const QRTicketCreator = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* QR Code Dialog */}
+      <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="h-5 w-5" />
+              Ticket QR Code
+            </DialogTitle>
+            <DialogDescription>
+              {selectedTicket?.event_name}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTicket && (
+            <div className="space-y-4">
+              <div className="flex justify-center p-4 bg-white rounded-lg">
+                <QRCodeSVG 
+                  value={getValidationUrl(selectedTicket)}
+                  size={250}
+                  level="H"
+                  includeMargin
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Validation URL</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={getValidationUrl(selectedTicket)}
+                    readOnly
+                    className="font-mono text-xs"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard(getValidationUrl(selectedTicket))}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                <div>
+                  <p className="text-sm font-medium">Status</p>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedTicket.status === 'active' ? 'Ready for use' : 'Already scanned'}
+                  </p>
+                </div>
+                {selectedTicket.status === 'active' ? (
+                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Active
+                  </Badge>
+                ) : (
+                  <Badge className="bg-orange-500/10 text-orange-600 border-orange-500/20">
+                    <XCircle className="h-3 w-3 mr-1" />
+                    Used
+                  </Badge>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Price</p>
+                  <p className="font-medium">${selectedTicket.price.toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Created</p>
+                  <p className="font-medium">
+                    {new Date(selectedTicket.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                className="w-full"
+                onClick={() => window.open(getValidationUrl(selectedTicket), '_blank')}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Test Validation
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
