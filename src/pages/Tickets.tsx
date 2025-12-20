@@ -126,6 +126,48 @@ const Tickets = () => {
           <TicketCart />
         </div>
 
+        {/* QR Ticket Sign Up Card */}
+        <Card className="mb-8 relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-background via-background to-primary/5">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-tr-full" />
+          <CardHeader className="relative">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <QrCode className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Create QR Tickets</CardTitle>
+                <CardDescription>
+                  Generate secure, scannable tickets for your events
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="relative">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span>One-time-use validation prevents fraud</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Ticket className="h-4 w-4 text-primary" />
+                  <span>Track scans with real-time analytics</span>
+                </div>
+              </div>
+              <Button 
+                onClick={() => navigate("/qr-ticket-creator")}
+                size="lg"
+                className="relative group overflow-hidden bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <span className="font-semibold">Get Started</span>
+                <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Search & Filters */}
         <Card className="mb-8">
           <CardHeader>
@@ -135,7 +177,7 @@ const Tickets = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search events..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
@@ -157,19 +199,6 @@ const Tickets = () => {
                   <SelectItem value="Networking">Networking</SelectItem>
                 </SelectContent>
               </Select>
-
-              {canSubmitTickets && (
-                <Button 
-                  onClick={() => navigate("/qr-ticket-creator")}
-                  className="relative group overflow-hidden bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                  <QrCode className="h-4 w-4 mr-2" />
-                  <span className="font-semibold">Create QR Ticket</span>
-                  <Sparkles className="h-3 w-3 ml-2 opacity-75" />
-                  <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              )}
             </div>
           </CardContent>
         </Card>
