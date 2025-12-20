@@ -14,7 +14,8 @@ import {
   QrCode,
   Building2,
   Clock,
-  DollarSign
+  DollarSign,
+  Ticket as TicketIcon
 } from "lucide-react";
 import { CreateVenueDialog } from "@/components/venue-ticketing/CreateVenueDialog";
 import { CreateEventDialog } from "@/components/venue-ticketing/CreateEventDialog";
@@ -143,10 +144,16 @@ const VenuePublisherDashboard = () => {
             <h1 className="text-3xl font-bold">Venue Publisher Dashboard</h1>
             <p className="text-muted-foreground">Manage your venues, events, and tickets</p>
           </div>
-          <Button onClick={handleCreateVenue}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Venue
-          </Button>
+          <div className="flex gap-3">
+            <Button onClick={() => navigate("/ticket-market")} variant="secondary">
+              <Ticket className="h-4 w-4 mr-2" />
+              Ticket Creator
+            </Button>
+            <Button onClick={handleCreateVenue}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Venue
+            </Button>
+          </div>
         </div>
 
         {/* Venues Section */}
