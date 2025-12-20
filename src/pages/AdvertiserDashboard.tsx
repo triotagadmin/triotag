@@ -18,7 +18,8 @@ import {
   Users,
   TrendingUp,
   Calendar,
-  Printer
+  Printer,
+  Ticket
 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 
@@ -190,7 +191,11 @@ const AdvertiserDashboard = () => {
               <Plus className="h-4 w-4" />
               Create Campaign
             </Button>
-            <Button onClick={() => navigate("/order-prints")} size="lg" variant="secondary" className="gap-2">
+            <Button onClick={() => navigate("/ticket-market")} size="lg" variant="secondary" className="gap-2">
+              <Ticket className="h-4 w-4" />
+              Ticket Creator
+            </Button>
+            <Button onClick={() => navigate("/order-prints")} size="lg" variant="outline" className="gap-2">
               <Printer className="h-4 w-4" />
               Order Print Materials
             </Button>
