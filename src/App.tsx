@@ -48,7 +48,7 @@ import VenueTicketsList from "./pages/VenueTicketsList";
 import VenueTicketScanner from "./pages/VenueTicketScanner";
 import TicketQRView from "./pages/TicketQRView";
 import TicketValidation from "./pages/TicketValidation";
-import QRTicketCreator from "./pages/QRTicketCreator";
+import TicketMarket from "./pages/TicketMarket";
 import ValidateTicket from "./pages/ValidateTicket";
 
 const queryClient = new QueryClient();
@@ -77,7 +77,7 @@ const App = () => (
           <Route path="/install" element={<Install />} />
           <Route path="/list-space" element={<ListSpace />} />
           <Route path="/tickets" element={<Tickets />} />
-          <Route path="/qr-ticket-creator" element={<QRTicketCreator />} />
+          <Route path="/ticket-market" element={<TicketMarket />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />

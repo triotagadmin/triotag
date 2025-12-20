@@ -156,7 +156,7 @@ const Tickets = () => {
                 </div>
               </div>
               <Button 
-                onClick={() => navigate("/qr-ticket-creator")}
+                onClick={() => navigate("/ticket-market")}
                 size="lg"
                 className="relative group overflow-hidden bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
               >
