@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Calendar, Ticket, Plus, ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
+import { Search, MapPin, Calendar, Ticket, Plus, ChevronLeft, ChevronRight, ShoppingCart, QrCode, Sparkles, ArrowRight } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
@@ -158,10 +158,18 @@ const Tickets = () => {
                 </SelectContent>
               </Select>
 
-              {canSubmitTickets && <Button onClick={() => setIsSubmitDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  CREATE QR TICKET  
-                </Button>}
+              {canSubmitTickets && (
+                <Button 
+                  onClick={() => navigate("/qr-ticket-creator")}
+                  className="relative group overflow-hidden bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <QrCode className="h-4 w-4 mr-2" />
+                  <span className="font-semibold">Create QR Ticket</span>
+                  <Sparkles className="h-3 w-3 ml-2 opacity-75" />
+                  <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
