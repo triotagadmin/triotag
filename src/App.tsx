@@ -43,6 +43,11 @@ import OrderPrints from "./pages/OrderPrints";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import VenuePublisherDashboard from "./pages/VenuePublisherDashboard";
+import VenueTicketsList from "./pages/VenueTicketsList";
+import VenueTicketScanner from "./pages/VenueTicketScanner";
+import TicketQRView from "./pages/TicketQRView";
+import TicketValidation from "./pages/TicketValidation";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +92,12 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
+          {/* Venue Ticketing System */}
+          <Route path="/venue-ticketing" element={<VenuePublisherDashboard />} />
+          <Route path="/venue-ticketing/event/:eventId/tickets" element={<VenueTicketsList />} />
+          <Route path="/venue-ticketing/scanner/:eventId" element={<VenueTicketScanner />} />
+          <Route path="/ticket/:uniqueCode" element={<TicketQRView />} />
+          <Route path="/validate/:uniqueCode" element={<TicketValidation />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
           <Route path="/admin/verify" element={<AdminApproval />} />
