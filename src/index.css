@@ -217,6 +217,17 @@
   }
 }
 
+@keyframes float3d {
+  0%, 100% {
+    transform: perspective(500px) rotateX(10deg) translateY(0);
+    text-shadow: 0 0 40px hsl(110 100% 55% / 0.5), 0 0 80px hsl(110 100% 55% / 0.3);
+  }
+  50% {
+    transform: perspective(500px) rotateX(5deg) translateY(-5px);
+    text-shadow: 0 10px 60px hsl(110 100% 55% / 0.6), 0 20px 100px hsl(110 100% 55% / 0.4);
+  }
+}
+
 @keyframes rotateBorder {
   0% {
     --border-angle: 0deg;

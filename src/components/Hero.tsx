@@ -21,7 +21,20 @@ export const Hero = () => {
             </span>
           </h1>
 
-          <p className={`text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto text-muted-foreground px-2 transition-all duration-1000 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>Connecting Advertisers and Venues using AI Powered Marketplace and Apps.</p>
+          <p 
+            className={`text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto px-2 transition-all duration-1000 delay-200 font-bold tracking-wide ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            style={{
+              background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 50%, hsl(var(--primary)) 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              textShadow: '0 0 40px hsl(var(--primary) / 0.5), 0 0 80px hsl(var(--primary) / 0.3)',
+              transform: 'perspective(500px) rotateX(10deg)',
+              animation: 'float3d 4s ease-in-out infinite',
+            }}
+          >
+            Connecting Advertisers and Venues using AI Powered Marketplace and Apps.
+          </p>
 
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-2 md:pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
             <Link to="/publishers" className="w-full sm:w-auto">
