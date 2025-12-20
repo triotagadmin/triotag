@@ -78,7 +78,7 @@ const App = () => (
           <Route path="/list-space" element={<ListSpace />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/ticket-market" element={<TicketMarket />} />
-          <Route path="/verify" element={<Verify />} />
+          <Route path="/ticket-creator" element={<TicketMarket />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
