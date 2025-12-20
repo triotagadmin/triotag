@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye } from "lucide-react";
+import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket } from "lucide-react";
 
 const VenueDashboard = () => {
   const navigate = useNavigate();
@@ -150,6 +150,23 @@ const VenueDashboard = () => {
   return (
     <div className="min-h-screen bg-muted/30">
       <Navigation />
+
+      {/* Ticket Creator Banner */}
+      <div className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 border-b border-border">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Ticket className="h-5 w-5 text-primary" />
+            <span className="text-sm font-medium">Create and sell event tickets</span>
+          </div>
+          <Button 
+            onClick={() => navigate("/ticket-creator")}
+            className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 text-white"
+          >
+            <Ticket className="h-4 w-4 mr-2" />
+            Ticket Creator
+          </Button>
+        </div>
+      </div>
 
       <div className="container mx-auto px-6 py-12">
         <div className="mb-8 flex items-start justify-between">
