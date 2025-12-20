@@ -11,10 +11,6 @@ export const Hero = () => {
       {/* GIF Background */}
       <div className="absolute inset-0">
         <img src={heroBackground} alt="Hero background" className="w-full h-full object-cover" />
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-background/80"></div>
-        {/* Gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background"></div>
       </div>
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
