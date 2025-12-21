@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       ad_spaces: {
         Row: {
+          activation_fee: number | null
+          annual_subscription_fee: number | null
           approval_status: Database["public"]["Enums"]["approval_status"]
           approved_at: string | null
           approved_by: string | null
@@ -25,6 +27,7 @@ export type Database = {
           id: string
           location: string | null
           media_urls: Json | null
+          monthly_subscription_fee: number | null
           pricing: Json | null
           publisher_id: string
           rejection_reason: string | null
@@ -33,6 +36,8 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          activation_fee?: number | null
+          annual_subscription_fee?: number | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
           approved_by?: string | null
@@ -42,6 +47,7 @@ export type Database = {
           id?: string
           location?: string | null
           media_urls?: Json | null
+          monthly_subscription_fee?: number | null
           pricing?: Json | null
           publisher_id: string
           rejection_reason?: string | null
@@ -50,6 +56,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          activation_fee?: number | null
+          annual_subscription_fee?: number | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
           approved_by?: string | null
@@ -59,6 +67,7 @@ export type Database = {
           id?: string
           location?: string | null
           media_urls?: Json | null
+          monthly_subscription_fee?: number | null
           pricing?: Json | null
           publisher_id?: string
           rejection_reason?: string | null

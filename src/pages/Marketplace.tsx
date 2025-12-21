@@ -25,6 +25,9 @@ interface MarketplaceListing {
   image?: string;
   ownerName: string;
   createdAt: string;
+  monthlySubscriptionFee?: number;
+  annualSubscriptionFee?: number;
+  activationFee?: number;
 }
 const AD_UNITS = {
   venue: ["Table tent ads", "Table top sticker", "Window sticker"],
@@ -109,7 +112,10 @@ const Marketplace = () => {
           adUnits: AD_UNITS.venue,
           image: Array.isArray(v.media_urls) ? (v.media_urls as string[])[0] : undefined,
           ownerName: (v.publisher_profiles_public as any)?.business_name || "Venue",
-          createdAt: v.created_at || ""
+          createdAt: v.created_at || "",
+          monthlySubscriptionFee: (v as any).monthly_subscription_fee || 0,
+          annualSubscriptionFee: (v as any).annual_subscription_fee || 0,
+          activationFee: (v as any).activation_fee || 0,
         });
       });
 
@@ -372,6 +378,14 @@ const Marketplace = () => {
                         {formatBudget(listing.budget, listing.currency)}
                       </span>
                     </div>
+
+                    {listing.category === "venue" && listing.activationFee !== undefined && listing.activationFee > 0 && (
+                      <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                        <span className="font-medium">Activation Fee:</span> ${listing.activationFee} | 
+                        <span className="font-medium"> Monthly:</span> ${listing.monthlySubscriptionFee}/mo | 
+                        <span className="font-medium"> Annual:</span> ${listing.annualSubscriptionFee}/yr
+                      </div>
+                    )}
 
                     {listing.adUnits.length > 0 && <div className="pt-2 border-t">
                         <p className="text-xs text-muted-foreground mb-2">Ad Units</p>
