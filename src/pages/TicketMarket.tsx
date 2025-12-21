@@ -18,6 +18,7 @@ const TicketMarket = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [advertiserProfile, setAdvertiserProfile] = useState<any>(null);
+  const [publisherProfile, setPublisherProfile] = useState<any>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -44,15 +45,28 @@ const TicketMarket = () => {
     setUser(user);
     
     if (user) {
-      const { data: profile } = await supabase
+      // Check for advertiser profile
+      const { data: advProfile } = await supabase
         .from("advertiser_profiles")
         .select("*")
         .eq("user_id", user.id)
         .single();
       
-      setAdvertiserProfile(profile);
-      if (profile?.company_name) {
-        setOrganizerName(profile.company_name);
+      setAdvertiserProfile(advProfile);
+      if (advProfile?.company_name) {
+        setOrganizerName(advProfile.company_name);
+      }
+
+      // Check for publisher profile (venue accounts)
+      const { data: pubProfile } = await supabase
+        .from("publisher_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+      
+      setPublisherProfile(pubProfile);
+      if (pubProfile?.business_name && !advProfile) {
+        setOrganizerName(pubProfile.business_name);
       }
     }
   };
@@ -97,8 +111,9 @@ const TicketMarket = () => {
       return;
     }
 
-    if (!advertiserProfile) {
-      toast.error("Please complete your advertiser profile first");
+    // Allow both advertiser and publisher (venue) accounts to submit
+    if (!advertiserProfile && !publisherProfile) {
+      toast.error("Please complete your profile first");
       navigate("/complete-profile");
       return;
     }
@@ -116,7 +131,49 @@ const TicketMarket = () => {
         bannerImageUrl = await uploadImage(imageFile);
       }
 
-      // Create event with pending status for admin approval
+      // For venue accounts, we need to use the tickets table instead of events
+      // since events requires an advertiser_id
+      if (publisherProfile && !advertiserProfile) {
+        // Use tickets table for venue submissions
+        const { error: ticketError } = await supabase
+          .from("tickets")
+          .insert({
+            owner_id: user.id,
+            owner_type: "publisher",
+            title: eventName,
+            description: eventDescription,
+            event_date: eventDate,
+            event_time: eventTime,
+            location: eventLocation,
+            venue_name: venueName,
+            image_url: bannerImageUrl,
+            price: parseFloat(ticketPrice),
+            quantity_available: parseInt(totalTicketLimit),
+            category: "event",
+            status: "pending"
+          });
+
+        if (ticketError) throw ticketError;
+
+        toast.success("Ticket submitted for admin approval!");
+        
+        // Reset form
+        setEventName("");
+        setEventDescription("");
+        setEventDate("");
+        setEventTime("");
+        setEventLocation("");
+        setVenueName("");
+        setTicketPrice("");
+        setTotalTicketLimit("100");
+        setPurchaseLimitPerUser("5");
+        setImagePreview(null);
+        setImageFile(null);
+        setLoading(false);
+        return;
+      }
+
+      // Create event with pending status for admin approval (for advertisers)
       const { data: eventData, error: eventError } = await supabase
         .from("events")
         .insert({
