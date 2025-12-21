@@ -14,7 +14,6 @@ import { z } from "zod";
 import { ArrowLeft, Upload, X, CheckCircle, AlertCircle } from "lucide-react";
 import { AdUnitSelector, AdUnitConfig } from "@/components/AdUnitSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
 interface DocumentUpload {
   type: string;
   label: string;
@@ -22,7 +21,6 @@ interface DocumentUpload {
   file: File | null;
   uploaded: boolean;
 }
-
 const venueSchema = z.object({
   title: z.string().trim().min(1, "Venue name is required").max(100),
   street: z.string().trim().min(1, "Street address is required").max(200),
@@ -42,12 +40,13 @@ const venueSchema = z.object({
   monthlyPrice: z.string().trim().optional(),
   monthlySubscriptionFee: z.string().trim().min(1, "Monthly subscription fee is required"),
   annualSubscriptionFee: z.string().trim().min(1, "Annual subscription fee is required"),
-  activationFee: z.string().trim().min(1, "Activation fee is required"),
+  activationFee: z.string().trim().min(1, "Activation fee is required")
 });
-
 const VenueRegistration = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [loading, setLoading] = useState(false);
   const [publisherId, setPublisherId] = useState<string | null>(null);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
@@ -80,99 +79,69 @@ const VenueRegistration = () => {
   const [selectedAdUnits, setSelectedAdUnits] = useState<AdUnitConfig[]>([]);
 
   // Verification documents
-  const [verificationDocuments, setVerificationDocuments] = useState<DocumentUpload[]>([
-    {
-      type: "business_license",
-      label: "Business/Venue License",
-      description: "Official business registration or venue operating license",
-      file: null,
-      uploaded: false,
-    },
-    {
-      type: "government_id",
-      label: "Government-Issued ID",
-      description: "Valid ID of business owner (passport, driver's license, national ID)",
-      file: null,
-      uploaded: false,
-    },
-    {
-      type: "proof_of_address",
-      label: "Proof of Address",
-      description: "Utility bill, bank statement, or lease agreement (within 3 months)",
-      file: null,
-      uploaded: false,
-    },
-    {
-      type: "safety_certificate",
-      label: "Safety Certificates",
-      description: "Fire safety, occupancy permit, or health certificate",
-      file: null,
-      uploaded: false,
-    },
-    {
-      type: "tax_documents",
-      label: "Tax/Registration Documents",
-      description: "Tax registration certificate or similar business documentation",
-      file: null,
-      uploaded: false,
-    },
-  ]);
-
-  const amenitiesList = [
-    "Wi-Fi",
-    "Parking",
-    "AV Equipment",
-    "Catering",
-    "Wheelchair Accessible",
-    "Air Conditioning",
-    "Restrooms",
-    "Stage/Platform",
-  ];
-
-  const adFormatsList = [
-    "Poster Display",
-    "Digital Screen",
-    "Table Tents",
-    "Wall Murals",
-    "Floor Graphics",
-    "Window Clings",
-    "Standee/Cutout",
-    "Banner/Flag",
-  ];
-
+  const [verificationDocuments, setVerificationDocuments] = useState<DocumentUpload[]>([{
+    type: "business_license",
+    label: "Business/Venue License",
+    description: "Official business registration or venue operating license",
+    file: null,
+    uploaded: false
+  }, {
+    type: "government_id",
+    label: "Government-Issued ID",
+    description: "Valid ID of business owner (passport, driver's license, national ID)",
+    file: null,
+    uploaded: false
+  }, {
+    type: "proof_of_address",
+    label: "Proof of Address",
+    description: "Utility bill, bank statement, or lease agreement (within 3 months)",
+    file: null,
+    uploaded: false
+  }, {
+    type: "safety_certificate",
+    label: "Safety Certificates",
+    description: "Fire safety, occupancy permit, or health certificate",
+    file: null,
+    uploaded: false
+  }, {
+    type: "tax_documents",
+    label: "Tax/Registration Documents",
+    description: "Tax registration certificate or similar business documentation",
+    file: null,
+    uploaded: false
+  }]);
+  const amenitiesList = ["Wi-Fi", "Parking", "AV Equipment", "Catering", "Wheelchair Accessible", "Air Conditioning", "Restrooms", "Stage/Platform"];
+  const adFormatsList = ["Poster Display", "Digital Screen", "Table Tents", "Wall Murals", "Floor Graphics", "Window Clings", "Standee/Cutout", "Banner/Flag"];
   useEffect(() => {
     const checkAuth = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const editParam = urlParams.get('edit');
-      
       if (editParam) {
         setEditId(editParam);
         setIsEditing(true);
       }
-
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
       }
-
-      const { data: profile, error } = await supabase
-        .from("publisher_profiles")
-        .select("id, contact_email, contact_phone")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-
+      const {
+        data: profile,
+        error
+      } = await supabase.from("publisher_profiles").select("id, contact_email, contact_phone").eq("user_id", session.user.id).maybeSingle();
       if (error) {
         console.error("Error fetching publisher profile:", error);
         toast({
           title: "Error",
           description: "Failed to load profile. Please try again.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
-
       if (profile) {
         setPublisherId(profile.id);
         // Only set contact info if not editing (will be loaded from venue data)
@@ -189,25 +158,20 @@ const VenueRegistration = () => {
         navigate("/complete-profile");
       }
     };
-
     checkAuth();
   }, [navigate, toast]);
-
   const loadVenueData = async (venueId: string, pubId: string) => {
     try {
-      const { data: venue, error } = await supabase
-        .from("ad_spaces")
-        .select("*")
-        .eq("id", venueId)
-        .eq("publisher_id", pubId)
-        .maybeSingle();
-
+      const {
+        data: venue,
+        error
+      } = await supabase.from("ad_spaces").select("*").eq("id", venueId).eq("publisher_id", pubId).maybeSingle();
       if (error) throw error;
       if (!venue) {
         toast({
           title: "Error",
           description: "Venue not found or you don't have permission to edit it.",
-          variant: "destructive",
+          variant: "destructive"
         });
         navigate("/venue-inventory");
         return;
@@ -216,8 +180,7 @@ const VenueRegistration = () => {
       // Populate form fields
       setTitle(venue.title || "");
       setDescription(venue.description || "");
-      setUploadedImages(Array.isArray(venue.media_urls) ? (venue.media_urls as string[]) : []);
-      
+      setUploadedImages(Array.isArray(venue.media_urls) ? venue.media_urls as string[] : []);
       const specs = venue.specifications as any || {};
       setVenueType(specs.venue_type || "");
       setOperatingHours(specs.operating_hours || "");
@@ -228,7 +191,7 @@ const VenueRegistration = () => {
       setContactPhone(specs.contact_number || "");
       setLatitude(specs.latitude || "");
       setLongitude(specs.longitude || "");
-      
+
       // Parse address from location or full_address
       const fullAddress = specs.full_address || venue.location || "";
       const addressParts = fullAddress.split(", ");
@@ -239,7 +202,7 @@ const VenueRegistration = () => {
         setPostalCode(addressParts[3] || "");
         setCountry(addressParts[addressParts.length - 1] || "");
       }
-      
+
       // Load ad units
       if (specs.ad_units && Array.isArray(specs.ad_units)) {
         setSelectedAdUnits(specs.ad_units.map((u: any) => ({
@@ -249,29 +212,26 @@ const VenueRegistration = () => {
           pricePerMonth: u.pricePerMonth || 0,
           specialRules: u.specialRules || "",
           customFormat: u.customFormat,
-          thumbnailUrl: u.thumbnailUrl,
+          thumbnailUrl: u.thumbnailUrl
         })));
       }
-      
       const pricing = venue.pricing as any || {};
       setWeeklyPrice(pricing.weekly?.toString() || "");
       setMonthlyPrice(pricing.monthly?.toString() || "");
-      
+
       // Load fee fields
       setMonthlySubscriptionFee((venue as any).monthly_subscription_fee?.toString() || "");
       setAnnualSubscriptionFee((venue as any).annual_subscription_fee?.toString() || "");
       setActivationFee((venue as any).activation_fee?.toString() || "");
-      
     } catch (error: any) {
       console.error("Error loading venue:", error);
       toast({
         title: "Error",
         description: "Failed to load venue data.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -281,129 +241,104 @@ const VenueRegistration = () => {
       toast({
         title: "Error",
         description: "Maximum 30 photos allowed",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setUploadingImage(true);
-
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
+      const uploadPromises = Array.from(files).map(async file => {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
         const filePath = `${publisherId}/${fileName}`;
-
-        const { error: uploadError, data } = await supabase.storage
-          .from('ad-space-media')
-          .upload(filePath, file);
-
+        const {
+          error: uploadError,
+          data
+        } = await supabase.storage.from('ad-space-media').upload(filePath, file);
         if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('ad-space-media')
-          .getPublicUrl(filePath);
-
+        const {
+          data: {
+            publicUrl
+          }
+        } = supabase.storage.from('ad-space-media').getPublicUrl(filePath);
         return publicUrl;
       });
-
       const urls = await Promise.all(uploadPromises);
       setUploadedImages([...uploadedImages, ...urls]);
-
       toast({
         title: "Success",
-        description: "Images uploaded successfully",
+        description: "Images uploaded successfully"
       });
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setUploadingImage(false);
     }
   };
-
   const removeImage = (url: string) => {
     setUploadedImages(uploadedImages.filter(img => img !== url));
   };
-
   const toggleAmenity = (amenity: string) => {
-    setAmenities(prev => 
-      prev.includes(amenity) 
-        ? prev.filter(a => a !== amenity)
-        : [...prev, amenity]
-    );
+    setAmenities(prev => prev.includes(amenity) ? prev.filter(a => a !== amenity) : [...prev, amenity]);
   };
-
   const toggleAdFormat = (format: string) => {
-    setAllowedAdFormats(prev => 
-      prev.includes(format) 
-        ? prev.filter(f => f !== format)
-        : [...prev, format]
-    );
+    setAllowedAdFormats(prev => prev.includes(format) ? prev.filter(f => f !== format) : [...prev, format]);
   };
-
   const handleDocumentSelect = (index: number, file: File | null) => {
     const newDocuments = [...verificationDocuments];
     newDocuments[index].file = file;
     setVerificationDocuments(newDocuments);
   };
-
   const uploadVerificationDocument = async (doc: DocumentUpload, pubId: string) => {
     if (!doc.file) return null;
-
     const fileExt = doc.file.name.split('.').pop();
     const fileName = `${doc.type}_${Date.now()}.${fileExt}`;
     const filePath = `${pubId}/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('verification-documents')
-      .upload(filePath, doc.file);
-
+    const {
+      error: uploadError
+    } = await supabase.storage.from('verification-documents').upload(filePath, doc.file);
     if (uploadError) throw uploadError;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('verification-documents')
-      .getPublicUrl(filePath);
+    const {
+      data: {
+        publicUrl
+      }
+    } = supabase.storage.from('verification-documents').getPublicUrl(filePath);
 
     // Save document reference
-    const { error: dbError } = await supabase
-      .from('verification_documents')
-      .insert({
-        publisher_id: pubId,
-        document_type: doc.type,
-        file_name: doc.file.name,
-        file_url: publicUrl,
-      });
-
+    const {
+      error: dbError
+    } = await supabase.from('verification_documents').insert({
+      publisher_id: pubId,
+      document_type: doc.type,
+      file_name: doc.file.name,
+      file_url: publicUrl
+    });
     if (dbError) throw dbError;
-
     return publicUrl;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!publisherId) return;
-    
+
     // Require at least one ad unit with generated thumbnail
     if (selectedAdUnits.length === 0) {
       toast({
         title: "Error",
         description: "Please select an ad unit type and generate a thumbnail",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     const hasGeneratedThumbnail = selectedAdUnits.some(unit => unit.thumbnailUrl);
     if (!hasGeneratedThumbnail) {
       toast({
         title: "Error",
         description: "Please generate an AI thumbnail for your ad unit before submitting",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -414,13 +349,11 @@ const VenueRegistration = () => {
       toast({
         title: "Error",
         description: "Please upload at least one verification document",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-    
     setLoading(true);
-
     try {
       const validatedData = venueSchema.parse({
         title,
@@ -441,29 +374,18 @@ const VenueRegistration = () => {
         monthlyPrice: monthlyPrice || undefined,
         monthlySubscriptionFee,
         annualSubscriptionFee,
-        activationFee,
+        activationFee
       });
-
-      const fullAddress = [
-        validatedData.street,
-        validatedData.city,
-        validatedData.state,
-        validatedData.postalCode,
-        validatedData.country
-      ].filter(Boolean).join(", ");
-
+      const fullAddress = [validatedData.street, validatedData.city, validatedData.state, validatedData.postalCode, validatedData.country].filter(Boolean).join(", ");
       const pricingData: any = {};
       if (validatedData.weeklyPrice) pricingData.weekly = parseFloat(validatedData.weeklyPrice);
       if (validatedData.monthlyPrice) pricingData.monthly = parseFloat(validatedData.monthlyPrice);
 
       // Get AI-generated thumbnail as the primary image
       const aiThumbnail = selectedAdUnits.find(unit => unit.thumbnailUrl)?.thumbnailUrl;
-      
-      // Build media_urls with AI thumbnail first, then user-uploaded images
-      const finalMediaUrls = aiThumbnail 
-        ? [aiThumbnail, ...uploadedImages.filter(url => url !== aiThumbnail)]
-        : uploadedImages;
 
+      // Build media_urls with AI thumbnail first, then user-uploaded images
+      const finalMediaUrls = aiThumbnail ? [aiThumbnail, ...uploadedImages.filter(url => url !== aiThumbnail)] : uploadedImages;
       const venueData = {
         publisher_id: publisherId,
         title: validatedData.title,
@@ -487,24 +409,20 @@ const VenueRegistration = () => {
             pricePerMonth: unit.pricePerMonth,
             specialRules: unit.specialRules,
             customFormat: unit.customFormat || null,
-            thumbnailUrl: unit.thumbnailUrl || null,
-          })),
+            thumbnailUrl: unit.thumbnailUrl || null
+          }))
         },
         pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
         media_urls: finalMediaUrls,
         monthly_subscription_fee: parseFloat(validatedData.monthlySubscriptionFee),
         annual_subscription_fee: parseFloat(validatedData.annualSubscriptionFee),
-        activation_fee: parseFloat(validatedData.activationFee),
+        activation_fee: parseFloat(validatedData.activationFee)
       };
-
       if (isEditing && editId) {
         // Update existing venue
-        const { error } = await supabase
-          .from("ad_spaces")
-          .update(venueData)
-          .eq("id", editId)
-          .eq("publisher_id", publisherId);
-
+        const {
+          error
+        } = await supabase.from("ad_spaces").update(venueData).eq("id", editId).eq("publisher_id", publisherId);
         if (error) throw error;
 
         // Upload any new verification documents (optional during edit)
@@ -512,20 +430,18 @@ const VenueRegistration = () => {
           const uploadPromises = filledDocs.map(doc => uploadVerificationDocument(doc, publisherId));
           await Promise.all(uploadPromises);
         }
-
         toast({
           title: "Success",
-          description: "Venue updated successfully",
+          description: "Venue updated successfully"
         });
       } else {
         // Create new venue
-        const { error } = await supabase
-          .from("ad_spaces")
-          .insert([{
-            ...venueData,
-            approval_status: "pending" as const,
-          }]);
-
+        const {
+          error
+        } = await supabase.from("ad_spaces").insert([{
+          ...venueData,
+          approval_status: "pending" as const
+        }]);
         if (error) throw error;
 
         // Upload verification documents
@@ -533,34 +449,27 @@ const VenueRegistration = () => {
         await Promise.all(uploadPromises);
 
         // Update publisher profile verification status
-        await supabase
-          .from('publisher_profiles')
-          .update({ 
-            verification_status: 'pending',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', publisherId);
-
+        await supabase.from('publisher_profiles').update({
+          verification_status: 'pending',
+          updated_at: new Date().toISOString()
+        }).eq('id', publisherId);
         toast({
           title: "Success",
-          description: "Venue and verification documents submitted for approval",
+          description: "Venue and verification documents submitted for approval"
         });
       }
-
       navigate("/venue-inventory");
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to submit venue",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-muted/30">
+  return <div className="min-h-screen bg-muted/30">
       <Navigation />
 
       <div className="container mx-auto px-6 py-12 max-w-4xl">
@@ -570,9 +479,7 @@ const VenueRegistration = () => {
               {isEditing ? "Edit Venue Space" : "Register New Venue Space"}
             </CardTitle>
             <p className="text-muted-foreground mt-2">
-              {isEditing 
-                ? "Update your venue details below" 
-                : "Complete all required fields to submit your venue for approval"}
+              {isEditing ? "Update your venue details below" : "Complete all required fields to submit your venue for approval"}
             </p>
           </CardHeader>
           <CardContent>
@@ -580,13 +487,7 @@ const VenueRegistration = () => {
               {/* Venue Name */}
               <div>
                 <Label htmlFor="title">Venue Name *</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter venue name"
-                  required
-                />
+                <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Enter venue name" required />
               </div>
 
               {/* Venue Type */}
@@ -618,80 +519,42 @@ const VenueRegistration = () => {
                 
                 <div>
                   <Label htmlFor="street">Street Address *</Label>
-                  <Input
-                    id="street"
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    placeholder="123 Main Street"
-                    required
-                  />
+                  <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" required />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="city">City *</Label>
-                    <Input
-                      id="city"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="City"
-                      required
-                    />
+                    <Input id="city" value={city} onChange={e => setCity(e.target.value)} placeholder="City" required />
                   </div>
 
                   <div>
                     <Label htmlFor="state">State/Province</Label>
-                    <Input
-                      id="state"
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                      placeholder="State or Province"
-                    />
+                    <Input id="state" value={state} onChange={e => setState(e.target.value)} placeholder="State or Province" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="postalCode">Postal Code</Label>
-                    <Input
-                      id="postalCode"
-                      value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
-                      placeholder="Postal/ZIP Code"
-                    />
+                    <Input id="postalCode" value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="Postal/ZIP Code" />
                   </div>
 
                   <div>
                     <Label htmlFor="country">Country *</Label>
-                    <Input
-                      id="country"
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      placeholder="Country"
-                      required
-                    />
+                    <Input id="country" value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" required />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="latitude">Latitude (Google Maps)</Label>
-                    <Input
-                      id="latitude"
-                      value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
-                      placeholder="e.g., 40.7128"
-                    />
+                    <Input id="latitude" value={latitude} onChange={e => setLatitude(e.target.value)} placeholder="e.g., 40.7128" />
                   </div>
 
                   <div>
                     <Label htmlFor="longitude">Longitude (Google Maps)</Label>
-                    <Input
-                      id="longitude"
-                      value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
-                      placeholder="e.g., -74.0060"
-                    />
+                    <Input id="longitude" value={longitude} onChange={e => setLongitude(e.target.value)} placeholder="e.g., -74.0060" />
                   </div>
                 </div>
               </div>
@@ -702,36 +565,18 @@ const VenueRegistration = () => {
                 
                 <div>
                   <Label htmlFor="contactPerson">Contact Person *</Label>
-                  <Input
-                    id="contactPerson"
-                    value={contactPerson}
-                    onChange={(e) => setContactPerson(e.target.value)}
-                    placeholder="Full name"
-                    required
-                  />
+                  <Input id="contactPerson" value={contactPerson} onChange={e => setContactPerson(e.target.value)} placeholder="Full name" required />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="contactEmail">Contact Email *</Label>
-                    <Input
-                      id="contactEmail"
-                      type="email"
-                      value={contactEmail}
-                      onChange={(e) => setContactEmail(e.target.value)}
-                      required
-                    />
+                    <Input id="contactEmail" type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} required />
                   </div>
 
                   <div>
                     <Label htmlFor="contactPhone">Contact Number *</Label>
-                    <Input
-                      id="contactPhone"
-                      value={contactPhone}
-                      onChange={(e) => setContactPhone(e.target.value)}
-                      placeholder="+1 234 567 8900"
-                      required
-                    />
+                    <Input id="contactPhone" value={contactPhone} onChange={e => setContactPhone(e.target.value)} placeholder="+1 234 567 8900" required />
                   </div>
                 </div>
               </div>
@@ -739,26 +584,13 @@ const VenueRegistration = () => {
               {/* Operating Hours */}
               <div>
                 <Label htmlFor="operatingHours">Operating Hours *</Label>
-                <Textarea
-                  id="operatingHours"
-                  value={operatingHours}
-                  onChange={(e) => setOperatingHours(e.target.value)}
-                  placeholder="e.g., Monday-Friday: 9 AM - 10 PM, Saturday-Sunday: 10 AM - 11 PM"
-                  rows={3}
-                  required
-                />
+                <Textarea id="operatingHours" value={operatingHours} onChange={e => setOperatingHours(e.target.value)} placeholder="e.g., Monday-Friday: 9 AM - 10 PM, Saturday-Sunday: 10 AM - 11 PM" rows={3} required />
               </div>
 
               {/* Description */}
               <div>
                 <Label htmlFor="description">Venue Description</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe your venue and what makes it unique..."
-                  rows={4}
-                />
+                <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe your venue and what makes it unique..." rows={4} />
               </div>
 
               {/* Photo Upload */}
@@ -775,69 +607,30 @@ const VenueRegistration = () => {
                         {uploadingImage ? "Uploading..." : "Click to upload additional images (optional)"}
                       </span>
                     </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/jpeg,image/png"
-                      multiple
-                      onChange={handleImageUpload}
-                      disabled={uploadingImage || uploadedImages.length >= 30}
-                    />
+                    <input type="file" className="hidden" accept="image/jpeg,image/png" multiple onChange={handleImageUpload} disabled={uploadingImage || uploadedImages.length >= 30} />
                   </label>
                 </div>
                 
-                {uploadedImages.length > 0 && (
-                  <div className="grid grid-cols-3 gap-4 mt-4">
-                    {uploadedImages.map((url, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={url}
-                          alt={`Venue ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-2 right-2 h-6 w-6"
-                          onClick={() => removeImage(url)}
-                        >
+                {uploadedImages.length > 0 && <div className="grid grid-cols-3 gap-4 mt-4">
+                    {uploadedImages.map((url, index) => <div key={index} className="relative">
+                        <img src={url} alt={`Venue ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeImage(url)}>
                           <X className="h-4 w-4" />
                         </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      </div>)}
+                  </div>}
               </div>
 
               {/* Ad Unit Types Selection */}
               <div className="border-t pt-6">
-                <AdUnitSelector
-                  selectedUnits={selectedAdUnits}
-                  onUnitsChange={setSelectedAdUnits}
-                  publisherId={publisherId}
-                />
+                <AdUnitSelector selectedUnits={selectedAdUnits} onUnitsChange={setSelectedAdUnits} publisherId={publisherId} />
               </div>
 
               {/* Allowed Ad Formats */}
               <div>
                 <Label>Allowed Ad Formats (check all that apply) *</Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                  {adFormatsList.map((format) => (
-                    <div key={format} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`format-${format}`}
-                        checked={allowedAdFormats.includes(format)}
-                        onCheckedChange={() => toggleAdFormat(format)}
-                      />
-                      <label
-                        htmlFor={`format-${format}`}
-                        className="text-sm cursor-pointer"
-                      >
-                        {format}
-                      </label>
-                    </div>
-                  ))}
+                  {adFormatsList.map(format => {})}
                 </div>
               </div>
 
@@ -845,21 +638,7 @@ const VenueRegistration = () => {
               <div>
                 <Label>Amenities (optional)</Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                  {amenitiesList.map((amenity) => (
-                    <div key={amenity} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={amenity}
-                        checked={amenities.includes(amenity)}
-                        onCheckedChange={() => toggleAmenity(amenity)}
-                      />
-                      <label
-                        htmlFor={amenity}
-                        className="text-sm cursor-pointer"
-                      >
-                        {amenity}
-                      </label>
-                    </div>
-                  ))}
+                  {amenitiesList.map(amenity => {})}
                 </div>
               </div>
 
@@ -869,68 +648,18 @@ const VenueRegistration = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="weeklyPrice">Price per Week ($)</Label>
-                    <Input
-                      id="weeklyPrice"
-                      type="number"
-                      value={weeklyPrice}
-                      onChange={(e) => setWeeklyPrice(e.target.value)}
-                      placeholder="e.g., 500"
-                      min="0"
-                      step="0.01"
-                    />
+                    
                   </div>
 
                   <div>
                     <Label htmlFor="monthlyPrice">Price per Month ($)</Label>
-                    <Input
-                      id="monthlyPrice"
-                      type="number"
-                      value={monthlyPrice}
-                      onChange={(e) => setMonthlyPrice(e.target.value)}
-                      placeholder="e.g., 1800"
-                      min="0"
-                      step="0.01"
-                    />
+                    
                   </div>
                 </div>
               </div>
 
               {/* Subscription Fees */}
-              <div className="border-t pt-6">
-                <h3 className="font-semibold mb-2">Subscription Fees *</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Set your venue listing subscription fees for advertisers
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="monthlySubscriptionFee">Monthly Subscription Fee ($) *</Label>
-                    <Input
-                      id="monthlySubscriptionFee"
-                      type="number"
-                      value={monthlySubscriptionFee}
-                      onChange={(e) => setMonthlySubscriptionFee(e.target.value)}
-                      placeholder="e.g., 99"
-                      min="0"
-                      step="0.01"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="annualSubscriptionFee">Annual Subscription Fee ($) *</Label>
-                    <Input
-                      id="annualSubscriptionFee"
-                      type="number"
-                      value={annualSubscriptionFee}
-                      onChange={(e) => setAnnualSubscriptionFee(e.target.value)}
-                      placeholder="e.g., 999"
-                      min="0"
-                      step="0.01"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
+              
 
               {/* Activation Fee */}
               <div>
@@ -940,16 +669,7 @@ const VenueRegistration = () => {
                 </p>
                 <div className="max-w-xs">
                   <Label htmlFor="activationFee">Activation Fee ($) *</Label>
-                  <Input
-                    id="activationFee"
-                    type="number"
-                    value={activationFee}
-                    onChange={(e) => setActivationFee(e.target.value)}
-                    placeholder="e.g., 50"
-                    min="0"
-                    step="0.01"
-                    required
-                  />
+                  <Input id="activationFee" type="number" value={activationFee} onChange={e => setActivationFee(e.target.value)} placeholder="e.g., 50" min="0" step="0.01" required />
                 </div>
               </div>
 
@@ -959,9 +679,7 @@ const VenueRegistration = () => {
                   Verification Documents {!isEditing && "*"}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  {isEditing 
-                    ? "Upload additional verification documents if needed (optional during edit)"
-                    : "Upload at least one verification document to submit your venue for approval"}
+                  {isEditing ? "Upload additional verification documents if needed (optional during edit)" : "Upload at least one verification document to submit your venue for approval"}
                 </p>
 
                 <Alert className="mb-4 bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800">
@@ -972,8 +690,7 @@ const VenueRegistration = () => {
                 </Alert>
 
                 <div className="space-y-4">
-                  {verificationDocuments.map((doc, index) => (
-                    <Card key={doc.type} className={doc.uploaded ? "border-green-200 bg-green-50/50" : ""}>
+                  {verificationDocuments.map((doc, index) => <Card key={doc.type} className={doc.uploaded ? "border-green-200 bg-green-50/50" : ""}>
                       <CardContent className="pt-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -981,9 +698,7 @@ const VenueRegistration = () => {
                               <Label className="text-sm font-semibold">
                                 {doc.label}
                               </Label>
-                              {doc.uploaded && (
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                              )}
+                              {doc.uploaded && <CheckCircle className="w-4 h-4 text-green-600" />}
                             </div>
                             <p className="text-xs text-muted-foreground mb-3">
                               {doc.description}
@@ -995,31 +710,17 @@ const VenueRegistration = () => {
                                 <span>
                                   {doc.file ? doc.file.name : "Choose file"}
                                 </span>
-                                <input
-                                  type="file"
-                                  className="hidden"
-                                  accept=".pdf,.jpg,.jpeg,.png"
-                                  onChange={(e) => handleDocumentSelect(index, e.target.files?.[0] || null)}
-                                  disabled={loading}
-                                />
+                                <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={e => handleDocumentSelect(index, e.target.files?.[0] || null)} disabled={loading} />
                               </label>
                               
-                              {doc.file && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDocumentSelect(index, null)}
-                                >
+                              {doc.file && <Button type="button" variant="ghost" size="sm" onClick={() => handleDocumentSelect(index, null)}>
                                   Remove
-                                </Button>
-                              )}
+                                </Button>}
                             </div>
                           </div>
                         </div>
                       </CardContent>
-                    </Card>
-                  ))}
+                    </Card>)}
                 </div>
 
                 <Alert className="mt-4">
@@ -1031,14 +732,12 @@ const VenueRegistration = () => {
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (isEditing ? "Updating..." : "Submitting...") : (isEditing ? "Update Venue" : "Submit for Approval")}
+                {loading ? isEditing ? "Updating..." : "Submitting..." : isEditing ? "Update Venue" : "Submit for Approval"}
               </Button>
             </form>
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default VenueRegistration;
