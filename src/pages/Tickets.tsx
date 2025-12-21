@@ -94,7 +94,7 @@ const Tickets = () => {
         <div className="mb-8 flex items-center justify-between">
           <div className="text-center flex-1">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Marketplace
+              Ticket Market
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Discover and purchase tickets for amazing events
