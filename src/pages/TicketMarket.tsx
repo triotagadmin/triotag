@@ -131,82 +131,31 @@ const TicketMarket = () => {
         bannerImageUrl = await uploadImage(imageFile);
       }
 
-      // For venue accounts, we need to use the tickets table instead of events
-      // since events requires an advertiser_id
-      if (publisherProfile && !advertiserProfile) {
-        // Use tickets table for venue submissions
-        const { error: ticketError } = await supabase
-          .from("tickets")
-          .insert({
-            owner_id: user.id,
-            owner_type: "publisher",
-            title: eventName,
-            description: eventDescription,
-            event_date: eventDate,
-            event_time: eventTime,
-            location: eventLocation,
-            venue_name: venueName,
-            image_url: bannerImageUrl,
-            price: parseFloat(ticketPrice),
-            quantity_available: parseInt(totalTicketLimit),
-            category: "event",
-            status: "pending"
-          });
+      // Determine owner_type based on profile
+      const ownerType = advertiserProfile ? "advertiser" : "publisher";
 
-        if (ticketError) throw ticketError;
-
-        toast.success("Ticket submitted for admin approval!");
-        
-        // Reset form
-        setEventName("");
-        setEventDescription("");
-        setEventDate("");
-        setEventTime("");
-        setEventLocation("");
-        setVenueName("");
-        setTicketPrice("");
-        setTotalTicketLimit("100");
-        setPurchaseLimitPerUser("5");
-        setImagePreview(null);
-        setImageFile(null);
-        setLoading(false);
-        return;
-      }
-
-      // Create event with pending status for admin approval (for advertisers)
-      const { data: eventData, error: eventError } = await supabase
-        .from("events")
+      // All submissions go to tickets table for unified admin approval
+      const { error: ticketError } = await supabase
+        .from("tickets")
         .insert({
-          advertiser_id: advertiserProfile.id,
+          owner_id: user.id,
+          owner_type: ownerType,
           title: eventName,
           description: eventDescription,
           event_date: eventDate,
           event_time: eventTime,
           location: eventLocation,
           venue_name: venueName,
-          banner_image_url: bannerImageUrl,
-          organizer_name: organizerName || advertiserProfile.company_name,
-          status: "pending"
-        })
-        .select()
-        .single();
-
-      if (eventError) throw eventError;
-
-      // Create ticket type
-      const { error: ticketError } = await supabase
-        .from("event_tickets")
-        .insert({
-          event_id: eventData.id,
-          ticket_name: "General Admission",
-          ticket_price: parseFloat(ticketPrice),
+          image_url: bannerImageUrl,
+          price: parseFloat(ticketPrice),
           quantity_available: parseInt(totalTicketLimit),
-          quantity_sold: 0
+          category: "event",
+          status: "pending"
         });
 
       if (ticketError) throw ticketError;
 
-      toast.success("Event submitted for admin approval!");
+      toast.success("Ticket submitted for admin approval!");
       
       // Reset form
       setEventName("");
