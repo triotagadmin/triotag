@@ -492,7 +492,7 @@ const VenueRegistration = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">
-              {isEditing ? "Edit Venue Space" : "Register New Venue Space"}
+              {isEditing ? "Edit Ad Space" : "Register Ad Space"}
             </CardTitle>
             <p className="text-muted-foreground mt-2">
               {isEditing ? "Update your venue details below" : "Complete all required fields to submit your venue for approval"}
