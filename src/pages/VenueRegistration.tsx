@@ -646,7 +646,22 @@ const VenueRegistration = () => {
               <div>
                 <Label>Allowed Ad Formats (check all that apply) *</Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                  {adFormatsList.map(format => {})}
+                  {adFormatsList.map(format => (
+                    <div key={format} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={format}
+                        checked={allowedAdFormats.includes(format)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setAllowedAdFormats([...allowedAdFormats, format]);
+                          } else {
+                            setAllowedAdFormats(allowedAdFormats.filter(f => f !== format));
+                          }
+                        }}
+                      />
+                      <label htmlFor={format} className="text-sm">{format}</label>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -654,7 +669,22 @@ const VenueRegistration = () => {
               <div>
                 <Label>Amenities (optional)</Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                  {amenitiesList.map(amenity => {})}
+                  {amenitiesList.map(amenity => (
+                    <div key={amenity} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={amenity}
+                        checked={amenities.includes(amenity)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setAmenities([...amenities, amenity]);
+                          } else {
+                            setAmenities(amenities.filter(a => a !== amenity));
+                          }
+                        }}
+                      />
+                      <label htmlFor={amenity} className="text-sm">{amenity}</label>
+                    </div>
+                  ))}
                 </div>
               </div>
 

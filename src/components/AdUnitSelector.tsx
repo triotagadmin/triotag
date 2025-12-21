@@ -178,13 +178,7 @@ export const AdUnitSelector = ({
                     })} className="mt-1" />
                           </div>}
 
-                        <div className="grid grid-cols-3 gap-2">
-                          <div>
-                            <Label className="text-xs">Quantity</Label>
-                            <Input type="number" min="1" value={config?.quantity || 1} onChange={e => updateUnit(unitType.id, {
-                        quantity: parseInt(e.target.value) || 1
-                      })} className="mt-1" />
-                          </div>
+                        <div className="grid grid-cols-2 gap-2">
                           <div>
                             <Label className="text-xs">$/Week</Label>
                             <Input type="number" min="0" step="0.01" value={config?.pricePerWeek || ""} onChange={e => updateUnit(unitType.id, {
