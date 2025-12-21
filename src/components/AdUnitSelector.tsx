@@ -32,6 +32,14 @@ const AD_UNIT_TYPES = [
   { id: "mirror_sticker", label: "Mirror Sticker" },
   { id: "table_tent_card", label: "Table Tent Card" },
   { id: "wall_frame_display", label: "Wall Frame Display" },
+  { id: "poster_display", label: "Poster Display" },
+  { id: "digital_screen", label: "Digital Screen" },
+  { id: "table_tents", label: "Table Tents" },
+  { id: "wall_murals", label: "Wall Murals" },
+  { id: "floor_graphics", label: "Floor Graphics" },
+  { id: "window_clings", label: "Window Clings" },
+  { id: "standee_cutout", label: "Standee/Cutout" },
+  { id: "banner_flag", label: "Banner/Flag" },
   { id: "custom_format", label: "Custom Format" },
 ];
 
@@ -42,6 +50,14 @@ const AD_UNIT_PROMPTS: Record<string, string> = {
   mirror_sticker: `Mirror-mounted sticker advertisement placed at eye level on a restroom or gym mirror. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Clean, minimal sticker design with bold typography. Scene: reflection of a restroom, gym, or wash area softly blurred. Focus on the sticker adhered cleanly on the mirror surface with light reflections. Sharp, high-resolution product-style shot.`,
   table_tent_card: `Table tent card micro advertisement placed on a wooden bar or café table. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Clean, modern, minimalistic design with bold typography. Scene: warm ambient lighting inside a bar or café, customers blurred in the background. Focus on the table tent card standing upright near a drink or coffee cup. High-resolution, cinematic, product-style shot.`,
   wall_frame_display: `Framed wall advertisement mounted on a clean interior wall inside a café, salon, gym, or retail store. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Modern framed print design with strong typography. Scene: warm indoor environment with décor elements softly blurred (plants, furniture, lighting). Focus on the framed display hung at eye level. High-resolution, cinematic interior shot with balanced lighting.`,
+  poster_display: `Large poster display advertisement mounted on a wall or standalone frame in a high-traffic venue. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Bold, eye-catching poster design with vibrant colors and modern typography. Scene: well-lit retail or event space with people walking by softly blurred. Focus on the poster displayed prominently. High-resolution, professional marketing shot.`,
+  digital_screen: `Digital screen advertisement displaying dynamic content on an LED or LCD display. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Modern digital design with animated elements suggested. Scene: indoor venue like mall, gym, or restaurant with the digital screen mounted on wall or standing. Bright, vivid colors on screen, ambient lighting around. High-resolution, tech-forward promotional shot.`,
+  table_tents: `Table tent advertisement placed on restaurant or café tables. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Triangular tent card design with clean graphics. Scene: dining table with plates, glasses, and table tent prominently displayed. Warm restaurant ambiance, soft lighting. High-resolution, appetizing promotional shot.`,
+  wall_murals: `Large-scale wall mural advertisement painted or printed on an interior wall. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Artistic, immersive mural design covering a significant wall area. Scene: wide-angle shot of a café, gym, or retail space with the mural as focal point. People interacting with space softly blurred. High-resolution, artistic promotional shot.`,
+  floor_graphics: `Floor graphic advertisement placed on a clean floor surface in high-traffic areas. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Durable, eye-catching floor decal design with directional or promotional messaging. Scene: retail store, mall, or event venue floor with the graphic visible. People walking over it softly blurred. High-resolution, dynamic perspective shot.`,
+  window_clings: `Window cling advertisement applied to a storefront or interior window. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Semi-transparent or opaque window decal design with bold graphics. Scene: storefront window with natural light streaming through, street activity visible outside. Focus on the window cling. High-resolution, retail promotional shot.`,
+  standee_cutout: `Life-size standee or cutout display placed in a venue entrance or high-visibility area. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Full-body promotional cutout design with product or character imagery. Scene: retail entrance, event venue, or lobby with the standee prominently displayed. People walking by blurred. High-resolution, engaging promotional shot.`,
+  banner_flag: `Banner or flag advertisement displayed on a pole or stand. Head Title: Tiny Sticky Ads. Subtitle: Advertise Now. Vertical or horizontal banner design with bold branding. Scene: outdoor event, storefront, or trade show with the banner flying or standing. Movement suggested, dynamic composition. High-resolution, event-style promotional shot.`,
 };
 
 export const AdUnitSelector = ({ selectedUnits, onUnitsChange, publisherId }: AdUnitSelectorProps) => {
