@@ -74,9 +74,25 @@ const VenueRegistration = () => {
   const [monthlySubscriptionFee, setMonthlySubscriptionFee] = useState("");
   const [annualSubscriptionFee, setAnnualSubscriptionFee] = useState("");
   const [activationFee, setActivationFee] = useState("");
+  const [currency, setCurrency] = useState("USD");
   const [amenities, setAmenities] = useState<string[]>([]);
   const [allowedAdFormats, setAllowedAdFormats] = useState<string[]>([]);
   const [selectedAdUnits, setSelectedAdUnits] = useState<AdUnitConfig[]>([]);
+
+  const currencies = [
+    { code: "USD", symbol: "$", name: "US Dollar" },
+    { code: "EUR", symbol: "€", name: "Euro" },
+    { code: "GBP", symbol: "£", name: "British Pound" },
+    { code: "PHP", symbol: "₱", name: "Philippine Peso" },
+    { code: "JPY", symbol: "¥", name: "Japanese Yen" },
+    { code: "AUD", symbol: "A$", name: "Australian Dollar" },
+    { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
+    { code: "SGD", symbol: "S$", name: "Singapore Dollar" },
+    { code: "INR", symbol: "₹", name: "Indian Rupee" },
+    { code: "CNY", symbol: "¥", name: "Chinese Yuan" },
+  ];
+
+  const getCurrencySymbol = () => currencies.find(c => c.code === currency)?.symbol || "$";
 
   // Verification documents
   const [verificationDocuments, setVerificationDocuments] = useState<DocumentUpload[]>([{
@@ -642,17 +658,37 @@ const VenueRegistration = () => {
                 </div>
               </div>
 
+              {/* Currency Selection */}
+              <div>
+                <h3 className="font-semibold mb-4">Currency</h3>
+                <div className="max-w-xs">
+                  <Label htmlFor="currency">Select Currency *</Label>
+                  <Select value={currency} onValueChange={setCurrency}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map((curr) => (
+                        <SelectItem key={curr.code} value={curr.code}>
+                          {curr.symbol} {curr.code} - {curr.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               {/* Pricing */}
               <div>
                 <h3 className="font-semibold mb-4">Pricing</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="weeklyPrice">Price per Week ($)</Label>
+                    <Label htmlFor="weeklyPrice">Price per Week ({getCurrencySymbol()})</Label>
                     
                   </div>
 
                   <div>
-                    <Label htmlFor="monthlyPrice">Price per Month ($)</Label>
+                    <Label htmlFor="monthlyPrice">Price per Month ({getCurrencySymbol()})</Label>
                     
                   </div>
                 </div>
@@ -668,7 +704,7 @@ const VenueRegistration = () => {
                   One-time fee paid by advertisers to activate your venue listing
                 </p>
                 <div className="max-w-xs">
-                  <Label htmlFor="activationFee">Activation Fee ($) *</Label>
+                  <Label htmlFor="activationFee">Activation Fee ({getCurrencySymbol()}) *</Label>
                   <Input id="activationFee" type="number" value={activationFee} onChange={e => setActivationFee(e.target.value)} placeholder="e.g., 50" min="0" step="0.01" required />
                 </div>
               </div>
