@@ -187,7 +187,9 @@ export const AdUnitSelector = ({
                           </div>
                           <div>
                             <Label className="text-xs">$/Month</Label>
-                            
+                            <Input type="number" min="0" step="0.01" value={config?.pricePerMonth || ""} onChange={e => updateUnit(unitType.id, {
+                        pricePerMonth: parseFloat(e.target.value) || 0
+                      })} className="mt-1" placeholder="0" />
                           </div>
                         </div>
 
