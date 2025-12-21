@@ -391,12 +391,12 @@ const TicketMarket = () => {
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating Event...
+                      Submitting Ticket...
                     </>
                   ) : (
                     <>
                       <Ticket className="w-4 h-4 mr-2" />
-                      Save Event
+                      Submit Ticket
                     </>
                   )}
                 </Button>
