@@ -116,7 +116,7 @@ const TicketMarket = () => {
         bannerImageUrl = await uploadImage(imageFile);
       }
 
-      // Create event
+      // Create event with pending status for admin approval
       const { data: eventData, error: eventError } = await supabase
         .from("events")
         .insert({
@@ -129,7 +129,7 @@ const TicketMarket = () => {
           venue_name: venueName,
           banner_image_url: bannerImageUrl,
           organizer_name: organizerName || advertiserProfile.company_name,
-          status: "draft"
+          status: "pending"
         })
         .select()
         .single();
@@ -149,7 +149,7 @@ const TicketMarket = () => {
 
       if (ticketError) throw ticketError;
 
-      toast.success("Event created successfully!");
+      toast.success("Event submitted for admin approval!");
       
       // Reset form
       setEventName("");

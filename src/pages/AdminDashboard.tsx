@@ -79,6 +79,10 @@ export default function AdminDashboard() {
   // Tickets state
   const [ticketSubmissions, setTicketSubmissions] = useState<any[]>([]);
   const [ticketSlide, setTicketSlide] = useState(0);
+  
+  // Event submissions state (from ticket-creator)
+  const [eventSubmissions, setEventSubmissions] = useState<any[]>([]);
+  const [eventSlide, setEventSlide] = useState(0);
 
   useEffect(() => {
     checkAdminAccess();
@@ -86,6 +90,7 @@ export default function AdminDashboard() {
     loadMarketplaceListings();
     loadNotifications();
     loadTicketSubmissions();
+    loadEventSubmissions();
   }, []);
 
   useEffect(() => {
@@ -368,6 +373,71 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadEventSubmissions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("events")
+        .select(`
+          *,
+          advertiser_profiles (company_name, contact_email)
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setEventSubmissions(data || []);
+    } catch (error) {
+      console.error("Error loading event submissions:", error);
+    }
+  };
+
+  const handleEventAction = async (event: any, action: "approve" | "reject") => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const newStatus = action === "approve" ? "published" : "rejected";
+
+      const { error } = await supabase
+        .from("events")
+        .update({
+          status: newStatus,
+        })
+        .eq("id", event.id);
+
+      if (error) throw error;
+
+      toast.success(`Event ${action}d successfully`);
+      loadEventSubmissions();
+    } catch (error: any) {
+      console.error("Event action error:", error);
+      toast.error(`Failed to ${action} event`);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      // First delete associated tickets
+      await supabase.from("event_tickets").delete().eq("event_id", eventId);
+      
+      const { error } = await supabase
+        .from("events")
+        .delete()
+        .eq("id", eventId);
+
+      if (error) throw error;
+
+      toast.success("Event deleted successfully");
+      loadEventSubmissions();
+    } catch (error: any) {
+      console.error("Delete event error:", error);
+      toast.error("Failed to delete event");
+    }
+  };
+
   const handleTicketAction = async (ticket: any, action: "approve" | "reject") => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -418,6 +488,13 @@ export default function AdminDashboard() {
   const getCurrentTicketSlide = () => {
     const start = ticketSlide * TICKETS_PER_SLIDE;
     return ticketSubmissions.slice(start, start + TICKETS_PER_SLIDE);
+  };
+
+  const EVENTS_PER_SLIDE = 6;
+  const totalEventSlides = Math.max(1, Math.ceil(eventSubmissions.length / EVENTS_PER_SLIDE));
+  const getCurrentEventSlide = () => {
+    const start = eventSlide * EVENTS_PER_SLIDE;
+    return eventSubmissions.slice(start, start + EVENTS_PER_SLIDE);
   };
 
   const filterSubmissions = () => {
@@ -1021,10 +1098,19 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="marketplace" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="marketplace">
               <ShoppingCart className="w-4 h-4 mr-2" />
               Marketplace
+            </TabsTrigger>
+            <TabsTrigger value="events">
+              <Ticket className="w-4 h-4 mr-2" />
+              Events
+              {eventSubmissions.filter(e => e.status === "pending").length > 0 && (
+                <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
+                  {eventSubmissions.filter(e => e.status === "pending").length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="tickets">
               <Ticket className="w-4 h-4 mr-2" />
@@ -1136,6 +1222,71 @@ export default function AdminDashboard() {
                               Location: {listing.location}
                             </p>
                           )}
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Events Tab (from ticket-creator) */}
+          <TabsContent value="events" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Event Submissions</CardTitle>
+                <CardDescription>Manage event submissions from the ticket creator. Approve to make visible on /tickets page.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {totalEventSlides > 1 && (
+                  <div className="flex items-center justify-center gap-4 mb-6">
+                    <Button variant="outline" size="icon" onClick={() => setEventSlide(prev => (prev - 1 + totalEventSlides) % totalEventSlides)}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="flex gap-2">
+                      {Array.from({ length: totalEventSlides }).map((_, idx) => (
+                        <button key={idx} onClick={() => setEventSlide(idx)} className={`w-2 h-2 rounded-full transition-colors ${idx === eventSlide ? "bg-primary" : "bg-muted-foreground/30"}`} />
+                      ))}
+                    </div>
+                    <Button variant="outline" size="icon" onClick={() => setEventSlide(prev => (prev + 1) % totalEventSlides)}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getCurrentEventSlide().length === 0 ? (
+                    <div className="col-span-full text-center py-8 text-muted-foreground">No event submissions found</div>
+                  ) : (
+                    getCurrentEventSlide().map((event: any) => (
+                      <Card key={event.id} className="overflow-hidden">
+                        {event.banner_image_url && (
+                          <div className="h-32 overflow-hidden">
+                            <img src={event.banner_image_url} alt={event.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <CardTitle className="text-sm line-clamp-1">{event.title}</CardTitle>
+                            {getStatusBadge(event.status)}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0 space-y-2">
+                          <p className="text-xs text-muted-foreground">{new Date(event.event_date).toLocaleDateString()} {event.event_time && `• ${event.event_time}`}</p>
+                          <p className="text-xs text-muted-foreground">{event.location} {event.venue_name && `• ${event.venue_name}`}</p>
+                          <p className="text-xs text-muted-foreground">By: {event.organizer_name}</p>
+                          {event.advertiser_profiles && (
+                            <p className="text-xs text-muted-foreground">Advertiser: {(event.advertiser_profiles as any).company_name}</p>
+                          )}
+                          <div className="flex gap-2 pt-2">
+                            {event.status === "pending" && (
+                              <>
+                                <Button size="sm" variant="default" onClick={() => handleEventAction(event, "approve")}><CheckCircle className="w-4 h-4" /></Button>
+                                <Button size="sm" variant="destructive" onClick={() => handleEventAction(event, "reject")}><XCircle className="w-4 h-4" /></Button>
+                              </>
+                            )}
+                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDeleteEvent(event.id)}><Trash2 className="w-4 h-4" /></Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))
