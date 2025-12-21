@@ -37,10 +37,7 @@ const venueSchema = z.object({
   operatingHours: z.string().trim().min(1, "Operating hours are required").max(500),
   description: z.string().trim().max(1000).optional(),
   weeklyPrice: z.string().trim().optional(),
-  monthlyPrice: z.string().trim().optional(),
-  monthlySubscriptionFee: z.string().trim().min(1, "Monthly subscription fee is required"),
-  annualSubscriptionFee: z.string().trim().min(1, "Annual subscription fee is required"),
-  activationFee: z.string().trim().min(1, "Activation fee is required")
+  monthlyPrice: z.string().trim().optional()
 });
 const VenueRegistration = () => {
   const navigate = useNavigate();
@@ -71,9 +68,6 @@ const VenueRegistration = () => {
   const [description, setDescription] = useState("");
   const [weeklyPrice, setWeeklyPrice] = useState("");
   const [monthlyPrice, setMonthlyPrice] = useState("");
-  const [monthlySubscriptionFee, setMonthlySubscriptionFee] = useState("");
-  const [annualSubscriptionFee, setAnnualSubscriptionFee] = useState("");
-  const [activationFee, setActivationFee] = useState("");
   const [currency, setCurrency] = useState("USD");
   const [amenities, setAmenities] = useState<string[]>([]);
   const [allowedAdFormats, setAllowedAdFormats] = useState<string[]>([]);
@@ -234,11 +228,6 @@ const VenueRegistration = () => {
       const pricing = venue.pricing as any || {};
       setWeeklyPrice(pricing.weekly?.toString() || "");
       setMonthlyPrice(pricing.monthly?.toString() || "");
-
-      // Load fee fields
-      setMonthlySubscriptionFee((venue as any).monthly_subscription_fee?.toString() || "");
-      setAnnualSubscriptionFee((venue as any).annual_subscription_fee?.toString() || "");
-      setActivationFee((venue as any).activation_fee?.toString() || "");
     } catch (error: any) {
       console.error("Error loading venue:", error);
       toast({
@@ -387,10 +376,7 @@ const VenueRegistration = () => {
         operatingHours,
         description: description || undefined,
         weeklyPrice: weeklyPrice || undefined,
-        monthlyPrice: monthlyPrice || undefined,
-        monthlySubscriptionFee,
-        annualSubscriptionFee,
-        activationFee
+        monthlyPrice: monthlyPrice || undefined
       });
       const fullAddress = [validatedData.street, validatedData.city, validatedData.state, validatedData.postalCode, validatedData.country].filter(Boolean).join(", ");
       const pricingData: any = {};
@@ -429,10 +415,7 @@ const VenueRegistration = () => {
           }))
         },
         pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
-        media_urls: finalMediaUrls,
-        monthly_subscription_fee: parseFloat(validatedData.monthlySubscriptionFee),
-        annual_subscription_fee: parseFloat(validatedData.annualSubscriptionFee),
-        activation_fee: parseFloat(validatedData.activationFee)
+        media_urls: finalMediaUrls
       };
       if (isEditing && editId) {
         // Update existing venue
@@ -682,37 +665,6 @@ const VenueRegistration = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-              </div>
-
-              {/* Pricing */}
-              <div>
-                <h3 className="font-semibold mb-4">Pricing</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="weeklyPrice">Price per Week ({getCurrencySymbol()})</Label>
-                    
-                  </div>
-
-                  <div>
-                    <Label htmlFor="monthlyPrice">Price per Month ({getCurrencySymbol()})</Label>
-                    
-                  </div>
-                </div>
-              </div>
-
-              {/* Subscription Fees */}
-              
-
-              {/* Activation Fee */}
-              <div>
-                <h3 className="font-semibold mb-2">Activation Fee *</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  One-time fee paid by advertisers to activate your venue listing
-                </p>
-                <div className="max-w-xs">
-                  <Label htmlFor="activationFee">Activation Fee ({getCurrencySymbol()}) *</Label>
-                  <Input id="activationFee" type="number" value={activationFee} onChange={e => setActivationFee(e.target.value)} placeholder="e.g., 50" min="0" step="0.01" required />
                 </div>
               </div>
 
