@@ -80,49 +80,50 @@ export const Navigation = () => {
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   const NavLinks = ({ mobile = false }: { mobile?: boolean }) => {
+    const baseLinkClass = "text-white hover:text-primary hover:drop-shadow-[0_0_8px_hsl(var(--primary))] transition-all duration-300";
     const linkClass = mobile 
-      ? "w-full text-left py-3 px-4 text-foreground hover:bg-muted/50 transition-colors"
-      : "";
+      ? `w-full text-left py-3 px-4 ${baseLinkClass}`
+      : baseLinkClass;
     
     return (
       <>
         {user ? (
           <>
             <Link to="/explore" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Marketplace</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Marketplace</Button>
             </Link>
             <Link to="/tickets" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Tickets</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Tickets</Button>
             </Link>
             <Link to="/habit-tracker" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Apps</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
             </Link>
             <Link to="/insights" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Insights</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Insights</Button>
             </Link>
             <Link to={getDashboardLink()} onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Dashboard</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
             </Link>
-            <Button variant="outline" size="sm" onClick={handleSignOut} className={mobile ? "w-full mt-2" : ""}>
+            <Button variant="outline" size="sm" onClick={handleSignOut} className={`${baseLinkClass} ${mobile ? "w-full mt-2" : ""}`}>
               Log Out
             </Button>
           </>
         ) : (
           <>
             <Link to="/explore" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Marketplace</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Marketplace</Button>
             </Link>
             <Link to="/tickets" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Tickets</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Tickets</Button>
             </Link>
             <Link to="/habit-tracker" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Apps</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
             </Link>
             <Link to="/insights" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={mobile ? linkClass : ""}>Insights</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Insights</Button>
             </Link>
             <Link to="/auth" onClick={closeMobileMenu}>
-              <Button variant="outline" size="sm" className={mobile ? "w-full mt-2" : ""}>Log In</Button>
+              <Button variant="outline" size="sm" className={`${baseLinkClass} ${mobile ? "w-full mt-2" : ""}`}>Log In</Button>
             </Link>
           </>
         )}
