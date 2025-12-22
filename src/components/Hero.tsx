@@ -22,11 +22,13 @@ export const Hero = () => {
           </h1>
 
           <p 
-            className={`text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto px-2 transition-all duration-1000 delay-200 font-bold tracking-wide text-white ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            className={`text-base sm:text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto px-2 transition-all duration-1000 delay-200 font-semibold tracking-widest uppercase text-white ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             style={{
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.8), 0 4px 12px rgba(0, 0, 0, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4)',
-              transform: 'perspective(500px) rotateX(10deg)',
+              fontFamily: "'Rajdhani', sans-serif",
+              textShadow: '2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,0.8), 6px 6px 0 rgba(0,0,0,0.6), 8px 8px 15px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)',
+              transform: 'perspective(600px) rotateX(8deg)',
               animation: 'float3d 4s ease-in-out infinite',
+              letterSpacing: '0.15em',
             }}
           >
             Connecting Advertisers and Venues
