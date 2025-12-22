@@ -22,13 +22,9 @@ export const Hero = () => {
           </h1>
 
           <p 
-            className={`text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto px-2 transition-all duration-1000 delay-200 font-bold tracking-wide ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            className={`text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto px-2 transition-all duration-1000 delay-200 font-bold tracking-wide text-white ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             style={{
-              background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 50%, hsl(var(--primary)) 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              textShadow: '0 0 40px hsl(var(--primary) / 0.5), 0 0 80px hsl(var(--primary) / 0.3)',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.8), 0 4px 12px rgba(0, 0, 0, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4)',
               transform: 'perspective(500px) rotateX(10deg)',
               animation: 'float3d 4s ease-in-out infinite',
             }}
