@@ -35,17 +35,12 @@ export const CTABanner = () => {
           <span className="text-primary neon-text-glow">Earn Passive Income</span>
         </h2>
 
-        <p 
-          className={`text-base md:text-lg lg:text-xl max-w-2xl mx-auto transition-all duration-700 delay-100 font-semibold tracking-wide uppercase text-white ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-          style={{
-            fontFamily: "'Rajdhani', sans-serif",
-            textShadow: '2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,0.7), 6px 6px 12px rgba(0,0,0,0.8)',
-            transform: 'perspective(500px) rotateX(5deg)',
-            animation: 'float3d 4s ease-in-out infinite',
-          }}
-        >
-          Register your venue and turn your unused spaces into a steady revenue stream with micro advertising
-        </p>
+        <p className={`text-base md:text-lg lg:text-xl max-w-2xl mx-auto transition-all duration-700 delay-100 font-semibold tracking-wide uppercase text-white ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`} style={{
+        fontFamily: "'Rajdhani', sans-serif",
+        textShadow: '2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,0.7), 6px 6px 12px rgba(0,0,0,0.8)',
+        transform: 'perspective(500px) rotateX(5deg)',
+        animation: 'float3d 4s ease-in-out infinite'
+      }}>BECOME OUR AD PUBLISHER AND TURN YOUR UNUSED SPACES INTO A STEADY REVENUE STREAM WITH MICRO ADVERTISING</p>
 
         <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8 transition-all duration-700 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <Link to="/auth" className="block">
