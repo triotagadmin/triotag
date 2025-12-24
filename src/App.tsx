@@ -50,6 +50,7 @@ import TicketQRView from "./pages/TicketQRView";
 import TicketValidation from "./pages/TicketValidation";
 import TicketMarket from "./pages/TicketMarket";
 import ValidateTicket from "./pages/ValidateTicket";
+import PublisherApprovalDashboard from "./pages/PublisherApprovalDashboard";
 
 const queryClient = new QueryClient();
 
@@ -95,13 +96,15 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
-          {/* Venue Ticketing System */}
+{/* Venue Ticketing System */}
           <Route path="/venue-ticketing" element={<VenuePublisherDashboard />} />
           <Route path="/venue-ticketing/event/:eventId/tickets" element={<VenueTicketsList />} />
           <Route path="/venue-ticketing/scanner/:eventId" element={<VenueTicketScanner />} />
           <Route path="/ticket/:uniqueCode" element={<TicketQRView />} />
           <Route path="/validate/:uniqueCode" element={<TicketValidation />} />
           <Route path="/validate" element={<ValidateTicket />} />
+          {/* Publisher Approval Dashboard */}
+          <Route path="/publisher-dashboard" element={<PublisherApprovalDashboard />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
           <Route path="/admin/verify" element={<AdminApproval />} />
