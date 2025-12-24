@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminBlogSubmission from "./pages/AdminBlogSubmission";
 import AdminNewsletterDashboard from "./pages/AdminNewsletterDashboard";
 import AdminAuditLog from "./pages/AdminAuditLog";
+import AdminOrders from "./pages/AdminOrders";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import CompleteProfile from "./pages/CompleteProfile";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
@@ -131,6 +132,11 @@ const App = () => (
           <Route path="/admin/audit-log" element={
             <ProtectedAdminRoute>
               <AdminAuditLog />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/orders" element={
+            <ProtectedAdminRoute>
+              <AdminOrders />
             </ProtectedAdminRoute>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

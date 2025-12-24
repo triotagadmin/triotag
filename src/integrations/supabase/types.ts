@@ -750,6 +750,68 @@ export type Database = {
         }
         Relationships: []
       }
+      print_orders: {
+        Row: {
+          activation_id: string | null
+          admin_notes: string | null
+          advertiser_id: string
+          created_at: string
+          design_url: string
+          id: string
+          order_status: Database["public"]["Enums"]["print_order_status"]
+          product_name: string
+          product_sku: string
+          product_specs: Json | null
+          quantity: number
+          shipping_address: Json
+          shipping_country: string
+          total_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          activation_id?: string | null
+          admin_notes?: string | null
+          advertiser_id: string
+          created_at?: string
+          design_url: string
+          id?: string
+          order_status?: Database["public"]["Enums"]["print_order_status"]
+          product_name: string
+          product_sku: string
+          product_specs?: Json | null
+          quantity?: number
+          shipping_address: Json
+          shipping_country?: string
+          total_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          activation_id?: string | null
+          admin_notes?: string | null
+          advertiser_id?: string
+          created_at?: string
+          design_url?: string
+          id?: string
+          order_status?: Database["public"]["Enums"]["print_order_status"]
+          product_name?: string
+          product_sku?: string
+          product_specs?: Json | null
+          quantity?: number
+          shipping_address?: Json
+          shipping_country?: string
+          total_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_orders_activation_id_fkey"
+            columns: ["activation_id"]
+            isOneToOne: false
+            referencedRelation: "activations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       publisher_profiles: {
         Row: {
           agent_role: Database["public"]["Enums"]["agent_role"] | null
@@ -1375,6 +1437,11 @@ export type Database = {
       agent_role: "guerrilla" | "influencer" | "model" | "artist"
       app_role: "admin" | "publisher" | "advertiser"
       approval_status: "pending" | "approved" | "rejected"
+      print_order_status:
+        | "pending_admin"
+        | "in_production"
+        | "shipped"
+        | "delivered"
       publisher_ticket_status: "active" | "used"
       publisher_type: "venue" | "digital" | "agent"
       venue_ticket_status: "valid" | "used"
@@ -1526,6 +1593,12 @@ export const Constants = {
       agent_role: ["guerrilla", "influencer", "model", "artist"],
       app_role: ["admin", "publisher", "advertiser"],
       approval_status: ["pending", "approved", "rejected"],
+      print_order_status: [
+        "pending_admin",
+        "in_production",
+        "shipped",
+        "delivered",
+      ],
       publisher_ticket_status: ["active", "used"],
       publisher_type: ["venue", "digital", "agent"],
       venue_ticket_status: ["valid", "used"],
