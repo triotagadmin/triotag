@@ -11,9 +11,11 @@ import { ArrowLeft, MapPin, DollarSign, CreditCard, CheckCircle, Package, Truck,
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { AdMockupPreview } from "@/components/AdMockupPreview";
-import { createProdigiQuote, createProdigiOrder, ProdigiQuoteResponse } from "@/lib/prodigi";
 import { ActivationStepper, type ActivationStep } from "@/components/activation/ActivationStepper";
 import { ScheduleApprovalStep } from "@/components/activation/ScheduleApprovalStep";
+import { ProductCard } from "@/components/print-order/ProductCard";
+import { OrderSuccessCard } from "@/components/print-order/OrderSuccessCard";
+import { PRINT_PRODUCTS, SHIPPING_COUNTRIES, calculateOrderTotal, getProductById } from "@/lib/printProducts";
 import { format } from "date-fns";
 
 interface ListingDetails {
@@ -26,16 +28,6 @@ interface ListingDetails {
   media_urls: any;
   publisher_id: string;
 }
-
-const SHIPPING_COUNTRIES = [
-  { code: "US", name: "United States" },
-  { code: "GB", name: "United Kingdom" },
-  { code: "CA", name: "Canada" },
-  { code: "AU", name: "Australia" },
-  { code: "DE", name: "Germany" },
-  { code: "FR", name: "France" },
-  { code: "PH", name: "Philippines" },
-];
 
 type ActivationType = "sticker" | "table_tent" | "poster" | "flyer" | "banner" | "other";
 
@@ -62,12 +54,10 @@ const ActivateListing = () => {
   const [submittingApproval, setSubmittingApproval] = useState(false);
   const [rejectionReason, setRejectionReason] = useState<string | undefined>();
 
-  // Print order state
-  const [quantity, setQuantity] = useState(100);
-  const [shippingCountry, setShippingCountry] = useState("US");
-  const [quote, setQuote] = useState<ProdigiQuoteResponse | null>(null);
-  const [quoteLoading, setQuoteLoading] = useState(false);
-  const [selectedShipping, setSelectedShipping] = useState("");
+  // Print order state - Manual Admin System
+  const [selectedProductId, setSelectedProductId] = useState<string>("");
+  const [quantity, setQuantity] = useState(1);
+  const [shippingCountry, setShippingCountry] = useState("PH");
 
   // Shipping details
   const [recipientName, setRecipientName] = useState("");
@@ -137,7 +127,7 @@ const ActivateListing = () => {
         setActivationStatus(data.status);
         setArtworkUrl(data.ad_design_url || "");
         setSelectedProduct(data.ad_unit_sku || "");
-        setQuantity(data.quantity || 100);
+        setQuantity(data.quantity || 1);
         setRejectionReason(data.rejection_reason || undefined);
         
         if (data.start_date) setStartDate(new Date(data.start_date));
@@ -288,53 +278,30 @@ const ActivateListing = () => {
     }
   };
 
-  const handleGetQuote = async () => {
-    if (!selectedProduct || !artworkUrl || !shippingCountry) {
+  const handlePlacePrintOrder = async () => {
+    if (!recipientName || !addressLine1 || !city || !postalCode || !selectedProductId) {
       toast({
         title: "Missing information",
-        description: "Please complete the design step first.",
+        description: "Please select a product and fill in all required shipping details.",
         variant: "destructive",
       });
       return;
     }
 
-    setQuoteLoading(true);
-    setQuote(null);
-
-    try {
-      const quoteResponse = await createProdigiQuote({
-        sku: selectedProduct,
-        copies: quantity,
-        artworkUrl,
-        shippingCountry,
-      });
-
-      setQuote(quoteResponse);
-      
-      if (quoteResponse.quotes?.length > 0) {
-        setSelectedShipping(quoteResponse.quotes[0].shipmentMethod);
-      }
-
+    const product = getProductById(selectedProductId);
+    if (!product) {
       toast({
-        title: "Quote received",
-        description: "Review the pricing options below.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Quote failed",
-        description: error.message || "Failed to get quote from Prodigi",
+        title: "Invalid product",
+        description: "Please select a valid product.",
         variant: "destructive",
       });
-    } finally {
-      setQuoteLoading(false);
+      return;
     }
-  };
 
-  const handlePlacePrintOrder = async () => {
-    if (!recipientName || !addressLine1 || !city || !postalCode || !selectedShipping) {
+    if (quantity < product.minQuantity) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all required shipping details.",
+        title: "Minimum quantity required",
+        description: `This product requires a minimum of ${product.minQuantity} units.`,
         variant: "destructive",
       });
       return;
@@ -343,58 +310,67 @@ const ActivateListing = () => {
     setOrderLoading(true);
 
     try {
-      const shippingMethod = selectedShipping.includes("Express") ? "Express" 
-        : selectedShipping.includes("Overnight") ? "Overnight"
-        : selectedShipping.includes("Budget") ? "Budget"
-        : "Standard";
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
 
-      const orderResponse = await createProdigiOrder({
-        recipient: {
-          name: recipientName,
-          address: {
+      const totalPrice = calculateOrderTotal(product, quantity);
+
+      // Create print order in database
+      const { data: printOrder, error: orderError } = await supabase
+        .from("print_orders")
+        .insert({
+          activation_id: activationId,
+          advertiser_id: session.user.id,
+          order_status: "pending_admin",
+          product_sku: product.sku,
+          product_name: product.name,
+          product_specs: product.specs,
+          quantity,
+          design_url: artworkUrl,
+          shipping_address: {
+            recipientName,
             line1: addressLine1,
-            line2: addressLine2 || undefined,
+            line2: addressLine2 || null,
             city,
-            state: state || undefined,
+            state: state || null,
             postalCode,
             country: shippingCountry,
+            email: email || null,
+            phone: phone || null,
           },
-          email: email || undefined,
-          phone: phone || undefined,
-        },
-        sku: selectedProduct,
-        copies: quantity,
-        artworkUrl,
-        shippingMethod,
-        merchantReference: `LISTING-${id}-${Date.now()}`,
-      });
+          shipping_country: shippingCountry,
+          total_price: totalPrice,
+        })
+        .select()
+        .single();
 
-      setOrderId(orderResponse.order.id);
-      setPrintOrderComplete(true);
+      if (orderError) throw orderError;
 
       // Update activation status
       if (activationId) {
         await supabase
           .from("activations")
           .update({
-            status: "payment_pending",
-            print_order_id: orderResponse.order.id,
+            status: "printing",
+            print_order_id: printOrder.id,
             quantity,
           })
           .eq("id", activationId);
       }
 
-      setCurrentStep("payment");
-      setActivationStatus("payment_pending");
+      setOrderId(printOrder.id);
+      setPrintOrderComplete(true);
+      setActivationStatus("printing");
 
       toast({
-        title: "Print order placed!",
-        description: "Now complete the listing activation payment.",
+        title: "Order Submitted!",
+        description: "Our team will review your order and contact you for payment.",
       });
     } catch (error: any) {
+      console.error("Order error:", error);
       toast({
         title: "Order failed",
-        description: error.message || "Failed to place print order",
+        description: error.message || "Failed to place order",
         variant: "destructive",
       });
     } finally {
@@ -406,8 +382,8 @@ const ActivateListing = () => {
     // Mark activation as completed
     if (activationId) {
       try {
-        const selectedQuote = quote?.quotes?.find(q => q.shipmentMethod === selectedShipping);
-        const totalAmount = selectedQuote ? parseFloat(selectedQuote.costSummary.totalCost.amount) : 0;
+        const product = getProductById(selectedProductId);
+        const totalAmount = product ? calculateOrderTotal(product, quantity) : 0;
 
         await supabase
           .from("activations")
@@ -437,6 +413,9 @@ const ActivateListing = () => {
       });
     }
   };
+
+  const selectedPrintProduct = getProductById(selectedProductId);
+  const orderTotal = selectedPrintProduct ? calculateOrderTotal(selectedPrintProduct, quantity) : 0;
 
   if (loading) {
     return (
@@ -623,210 +602,221 @@ const ActivateListing = () => {
         )}
 
         {currentStep === "print-order" && (
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Order Configuration */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5" />
-                    Configure Print Order
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Quantity</Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={quantity}
-                      onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                    />
+          <>
+            {printOrderComplete ? (
+              <OrderSuccessCard
+                orderId={orderId}
+                productName={selectedPrintProduct?.name || "Print Order"}
+                quantity={quantity}
+                onNewOrder={() => {
+                  setPrintOrderComplete(false);
+                  setOrderId("");
+                  setSelectedProductId("");
+                }}
+              />
+            ) : (
+              <div className="space-y-8">
+                {/* Product Selection */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <Package className="h-5 w-5 text-primary" />
+                    Select Print Product
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {PRINT_PRODUCTS.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        selected={selectedProductId === product.id}
+                        onClick={() => {
+                          setSelectedProductId(product.id);
+                          setQuantity(Math.max(quantity, product.minQuantity));
+                        }}
+                      />
+                    ))}
                   </div>
+                </div>
 
-                  <div>
-                    <Label>Shipping Country</Label>
-                    <Select value={shippingCountry} onValueChange={setShippingCountry}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SHIPPING_COUNTRIES.map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {/* Order Configuration */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <DollarSign className="h-5 w-5" />
+                        Order Details
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {artworkUrl && (
+                        <div className="p-3 bg-muted rounded-lg">
+                          <Label className="text-xs text-muted-foreground">Your Design</Label>
+                          <img 
+                            src={artworkUrl} 
+                            alt="Your design" 
+                            className="max-h-24 mt-2 rounded object-contain"
+                          />
+                        </div>
+                      )}
 
-                  <Button 
-                    onClick={handleGetQuote} 
-                    disabled={quoteLoading || !selectedProduct}
-                    className="w-full"
-                  >
-                    {quoteLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Getting Quote...
-                      </>
-                    ) : (
-                      <>
-                        <DollarSign className="h-4 w-4 mr-2" />
-                        Get Quote
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
+                      <div>
+                        <Label>Quantity</Label>
+                        <Input
+                          type="number"
+                          min={selectedPrintProduct?.minQuantity || 1}
+                          value={quantity}
+                          onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                        />
+                        {selectedPrintProduct && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Minimum: {selectedPrintProduct.minQuantity} units
+                          </p>
+                        )}
+                      </div>
 
-              {/* Quote Results */}
-              {quote && quote.quotes && quote.quotes.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <DollarSign className="h-5 w-5" />
-                      Pricing Options
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {quote.quotes.map((q, index) => (
-                      <div
-                        key={index}
-                        className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-                          selectedShipping === q.shipmentMethod
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                        onClick={() => setSelectedShipping(q.shipmentMethod)}
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">{q.shipmentMethod}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Items: {q.costSummary.items.currency} {q.costSummary.items.amount}
-                            </p>
+                      <div>
+                        <Label>Shipping Country</Label>
+                        <Select value={shippingCountry} onValueChange={setShippingCountry}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {SHIPPING_COUNTRIES.map((country) => (
+                              <SelectItem key={country.code} value={country.code}>
+                                {country.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {selectedPrintProduct && (
+                        <div className="pt-4 border-t">
+                          <div className="flex justify-between text-sm mb-2">
+                            <span className="text-muted-foreground">Product</span>
+                            <span>{selectedPrintProduct.name}</span>
                           </div>
-                          <div className="text-right">
-                            <p className="text-xl font-bold">
-                              {q.costSummary.totalCost.currency} {q.costSummary.totalCost.amount}
-                            </p>
+                          <div className="flex justify-between text-sm mb-2">
+                            <span className="text-muted-foreground">Quantity</span>
+                            <span>{quantity} units</span>
                           </div>
+                          <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                            <span>Estimated Total</span>
+                            <span className="text-primary">₱{orderTotal.toLocaleString()}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Final price confirmed after admin review
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Shipping Details */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Truck className="h-5 w-5" />
+                        Shipping Details
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="col-span-2">
+                          <Label>Recipient Name *</Label>
+                          <Input
+                            value={recipientName}
+                            onChange={(e) => setRecipientName(e.target.value)}
+                            placeholder="Full name"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Label>Address Line 1 *</Label>
+                          <Input
+                            value={addressLine1}
+                            onChange={(e) => setAddressLine1(e.target.value)}
+                            placeholder="Street address"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Label>Address Line 2</Label>
+                          <Input
+                            value={addressLine2}
+                            onChange={(e) => setAddressLine2(e.target.value)}
+                            placeholder="Apt, suite, etc. (optional)"
+                          />
+                        </div>
+                        <div>
+                          <Label>City *</Label>
+                          <Input
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label>State/Province</Label>
+                          <Input
+                            value={state}
+                            onChange={(e) => setState(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label>Postal Code *</Label>
+                          <Input
+                            value={postalCode}
+                            onChange={(e) => setPostalCode(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label>Phone</Label>
+                          <Input
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="(optional)"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Label>Email</Label>
+                          <Input
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            type="email"
+                          />
                         </div>
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
 
-            {/* Shipping Details */}
-            <div className="space-y-6">
-              {quote && quote.quotes && quote.quotes.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Truck className="h-5 w-5" />
-                      Shipping Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="col-span-2">
-                        <Label>Recipient Name *</Label>
-                        <Input
-                          value={recipientName}
-                          onChange={(e) => setRecipientName(e.target.value)}
-                          placeholder="Full name"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Label>Address Line 1 *</Label>
-                        <Input
-                          value={addressLine1}
-                          onChange={(e) => setAddressLine1(e.target.value)}
-                          placeholder="Street address"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Label>Address Line 2</Label>
-                        <Input
-                          value={addressLine2}
-                          onChange={(e) => setAddressLine2(e.target.value)}
-                          placeholder="Apt, suite, etc. (optional)"
-                        />
-                      </div>
-                      <div>
-                        <Label>City *</Label>
-                        <Input
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label>State/Province</Label>
-                        <Input
-                          value={state}
-                          onChange={(e) => setState(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label>Postal Code *</Label>
-                        <Input
-                          value={postalCode}
-                          onChange={(e) => setPostalCode(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label>Phone</Label>
-                        <Input
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="(optional)"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Label>Email</Label>
-                        <Input
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          type="email"
-                        />
-                      </div>
-                    </div>
+                      <Button
+                        onClick={handlePlacePrintOrder}
+                        disabled={orderLoading || !selectedProductId || !recipientName || !addressLine1 || !city || !postalCode}
+                        className="w-full"
+                        size="lg"
+                      >
+                        {orderLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Submitting Order...
+                          </>
+                        ) : (
+                          <>
+                            <Package className="h-4 w-4 mr-2" />
+                            Order Now
+                          </>
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
 
-                    <Button
-                      onClick={handlePlacePrintOrder}
-                      disabled={orderLoading || !recipientName || !addressLine1 || !city || !postalCode || !selectedShipping}
-                      className="w-full"
-                      size="lg"
-                    >
-                      {orderLoading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Placing Order...
-                        </>
-                      ) : (
-                        <>
-                          <Package className="h-4 w-4 mr-2" />
-                          Place Print Order & Continue to Payment
-                        </>
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-
-              <Button 
-                variant="outline" 
-                onClick={() => setCurrentStep("schedule-approval")}
-                className="w-full"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Schedule
-              </Button>
-            </div>
-          </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCurrentStep("schedule-approval")}
+                  className="w-full max-w-md mx-auto"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Schedule
+                </Button>
+              </div>
+            )}
+          </>
         )}
 
         {currentStep === "payment" && (
@@ -837,8 +827,8 @@ const ActivateListing = () => {
                   <div className="flex items-center gap-3 text-primary">
                     <CheckCircle className="h-6 w-6" />
                     <div>
-                      <p className="font-semibold">Print Order Placed Successfully</p>
-                      <p className="text-sm text-muted-foreground">Order ID: {orderId}</p>
+                      <p className="font-semibold">Print Order Submitted</p>
+                      <p className="text-sm text-muted-foreground">Order ID: {orderId.slice(0, 8).toUpperCase()}</p>
                     </div>
                   </div>
                 </CardContent>
