@@ -115,7 +115,7 @@ const Marketplace = () => {
           createdAt: v.created_at || "",
           monthlySubscriptionFee: (v as any).monthly_subscription_fee || 0,
           annualSubscriptionFee: (v as any).annual_subscription_fee || 0,
-          activationFee: (v as any).activation_fee || 0,
+          activationFee: (v as any).activation_fee || 0
         });
       });
 
@@ -262,7 +262,7 @@ const Marketplace = () => {
       <div className="container mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Ad Marketplace</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Ad Space Market</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Your central hub for activating micro advertising spaces.</p>
           {!user && <p className="text-sm text-muted-foreground mt-2">
               <Button variant="link" onClick={() => navigate("/auth")} className="p-0 h-auto">
@@ -379,13 +379,11 @@ const Marketplace = () => {
                       </span>
                     </div>
 
-                    {listing.category === "venue" && listing.activationFee !== undefined && listing.activationFee > 0 && (
-                      <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                    {listing.category === "venue" && listing.activationFee !== undefined && listing.activationFee > 0 && <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
                         <span className="font-medium">Activation Fee:</span> ${listing.activationFee} | 
                         <span className="font-medium"> Monthly:</span> ${listing.monthlySubscriptionFee}/mo | 
                         <span className="font-medium"> Annual:</span> ${listing.annualSubscriptionFee}/yr
-                      </div>
-                    )}
+                      </div>}
 
                     {listing.adUnits.length > 0 && <div className="pt-2 border-t">
                         <p className="text-xs text-muted-foreground mb-2">Ad Units</p>
