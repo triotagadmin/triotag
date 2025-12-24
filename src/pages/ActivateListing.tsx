@@ -29,6 +29,13 @@ interface ListingDetails {
   publisher_id: string;
 }
 
+interface PublisherAddress {
+  businessName: string;
+  contactEmail: string;
+  contactPhone: string | null;
+  location: string | null;
+}
+
 type ActivationType = "sticker" | "table_tent" | "poster" | "flyer" | "banner" | "other";
 
 const ActivateListing = () => {
@@ -59,15 +66,8 @@ const ActivateListing = () => {
   const [quantity, setQuantity] = useState(1);
   const [shippingCountry, setShippingCountry] = useState("PH");
 
-  // Shipping details
-  const [recipientName, setRecipientName] = useState("");
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  // Publisher address (shipping destination)
+  const [publisherAddress, setPublisherAddress] = useState<PublisherAddress | null>(null);
 
   // Order state
   const [orderLoading, setOrderLoading] = useState(false);
@@ -92,10 +92,22 @@ const ActivateListing = () => {
       if (error) throw error;
       setListing(data);
 
-      // Get user email for shipping
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.email) {
-        setEmail(session.user.email);
+      // Fetch publisher profile for shipping address
+      if (data?.publisher_id) {
+        const { data: publisherProfile } = await supabase
+          .from("publisher_profiles")
+          .select("business_name, contact_email, contact_phone, location")
+          .eq("id", data.publisher_id)
+          .single();
+
+        if (publisherProfile) {
+          setPublisherAddress({
+            businessName: publisherProfile.business_name,
+            contactEmail: publisherProfile.contact_email,
+            contactPhone: publisherProfile.contact_phone,
+            location: publisherProfile.location,
+          });
+        }
       }
     } catch (error: any) {
       toast({
@@ -279,10 +291,19 @@ const ActivateListing = () => {
   };
 
   const handlePlacePrintOrder = async () => {
-    if (!recipientName || !addressLine1 || !city || !postalCode || !selectedProductId) {
+    if (!selectedProductId) {
       toast({
         title: "Missing information",
-        description: "Please select a product and fill in all required shipping details.",
+        description: "Please select a product.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!publisherAddress) {
+      toast({
+        title: "Missing information",
+        description: "Publisher address not available.",
         variant: "destructive",
       });
       return;
@@ -315,7 +336,7 @@ const ActivateListing = () => {
 
       const totalPrice = calculateOrderTotal(product, quantity);
 
-      // Create print order in database
+      // Create print order in database - shipping to publisher venue
       const { data: printOrder, error: orderError } = await supabase
         .from("print_orders")
         .insert({
@@ -328,15 +349,15 @@ const ActivateListing = () => {
           quantity,
           design_url: artworkUrl,
           shipping_address: {
-            recipientName,
-            line1: addressLine1,
-            line2: addressLine2 || null,
-            city,
-            state: state || null,
-            postalCode,
+            recipientName: publisherAddress.businessName,
+            line1: publisherAddress.location || listing?.location || "",
+            line2: null,
+            city: null,
+            state: null,
+            postalCode: null,
             country: shippingCountry,
-            email: email || null,
-            phone: phone || null,
+            email: publisherAddress.contactEmail,
+            phone: publisherAddress.contactPhone,
           },
           shipping_country: shippingCountry,
           total_price: totalPrice,
@@ -711,82 +732,50 @@ const ActivateListing = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Shipping Details */}
+                  {/* Shipping Details - Publisher Venue Address */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Truck className="h-5 w-5" />
-                        Shipping Details
+                        Shipping Destination
                       </CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        Print materials will be shipped directly to the publisher venue
+                      </p>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="col-span-2">
-                          <Label>Recipient Name *</Label>
-                          <Input
-                            value={recipientName}
-                            onChange={(e) => setRecipientName(e.target.value)}
-                            placeholder="Full name"
-                          />
+                      {publisherAddress ? (
+                        <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Venue Name</Label>
+                            <p className="font-medium">{publisherAddress.businessName}</p>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Address</Label>
+                            <p className="font-medium">{publisherAddress.location || listing?.location || "Not specified"}</p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Contact Email</Label>
+                              <p className="text-sm">{publisherAddress.contactEmail}</p>
+                            </div>
+                            {publisherAddress.contactPhone && (
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Contact Phone</Label>
+                                <p className="text-sm">{publisherAddress.contactPhone}</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="col-span-2">
-                          <Label>Address Line 1 *</Label>
-                          <Input
-                            value={addressLine1}
-                            onChange={(e) => setAddressLine1(e.target.value)}
-                            placeholder="Street address"
-                          />
+                      ) : (
+                        <div className="bg-muted/50 rounded-lg p-4 text-center">
+                          <p className="text-muted-foreground">Loading publisher address...</p>
                         </div>
-                        <div className="col-span-2">
-                          <Label>Address Line 2</Label>
-                          <Input
-                            value={addressLine2}
-                            onChange={(e) => setAddressLine2(e.target.value)}
-                            placeholder="Apt, suite, etc. (optional)"
-                          />
-                        </div>
-                        <div>
-                          <Label>City *</Label>
-                          <Input
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <Label>State/Province</Label>
-                          <Input
-                            value={state}
-                            onChange={(e) => setState(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <Label>Postal Code *</Label>
-                          <Input
-                            value={postalCode}
-                            onChange={(e) => setPostalCode(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <Label>Phone</Label>
-                          <Input
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            placeholder="(optional)"
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <Label>Email</Label>
-                          <Input
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            type="email"
-                          />
-                        </div>
-                      </div>
+                      )}
 
                       <Button
                         onClick={handlePlacePrintOrder}
-                        disabled={orderLoading || !selectedProductId || !recipientName || !addressLine1 || !city || !postalCode}
+                        disabled={orderLoading || !selectedProductId || !publisherAddress}
                         className="w-full"
                         size="lg"
                       >
