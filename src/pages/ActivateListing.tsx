@@ -7,11 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, MapPin, DollarSign, CreditCard, CheckCircle, Package, Truck, Loader2, Palette, ArrowRight } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, CreditCard, CheckCircle, Package, Truck, Loader2, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { AdMockupPreview } from "@/components/AdMockupPreview";
 import { createProdigiQuote, createProdigiOrder, ProdigiQuoteResponse } from "@/lib/prodigi";
+import { ActivationStepper, type ActivationStep } from "@/components/activation/ActivationStepper";
+import { ScheduleApprovalStep } from "@/components/activation/ScheduleApprovalStep";
+import { format } from "date-fns";
 
 interface ListingDetails {
   id: string;
@@ -21,15 +24,8 @@ interface ListingDetails {
   pricing: any;
   specifications: any;
   media_urls: any;
+  publisher_id: string;
 }
-
-const PRODIGI_PRODUCTS = [
-  { sku: "GLOBAL-STI-SQU-2X2", name: "Square Sticker 2x2\"", category: "Sticker Ads" },
-  { sku: "GLOBAL-STI-SQU-4X4", name: "Square Sticker 4x4\"", category: "Sticker Ads" },
-  { sku: "GLOBAL-STI-CIR-2X2", name: "Circle Sticker 2x2\"", category: "Sticker Ads" },
-  { sku: "GLOBAL-STI-CIR-3X3", name: "Circle Sticker 3x3\"", category: "Sticker Ads" },
-  { sku: "GLOBAL-STI-REC-3X4", name: "Rectangle Sticker 3x4\"", category: "Sticker Ads" },
-];
 
 const SHIPPING_COUNTRIES = [
   { code: "US", name: "United States" },
@@ -41,13 +37,15 @@ const SHIPPING_COUNTRIES = [
   { code: "PH", name: "Philippines" },
 ];
 
-type ActivationStep = "design" | "print-order" | "payment";
+type ActivationType = "sticker" | "table_tent" | "poster" | "flyer" | "banner" | "other";
 
 const ActivateListing = () => {
   const { id } = useParams<{ id: string }>();
   const [listing, setListing] = useState<ListingDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState<ActivationStep>("design");
+  const [activationId, setActivationId] = useState<string | null>(null);
+  const [activationStatus, setActivationStatus] = useState<string>("design");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -56,6 +54,13 @@ const ActivateListing = () => {
   const [approvedAdUnitType, setApprovedAdUnitType] = useState("");
   const [artworkUrl, setArtworkUrl] = useState("");
   const [selectedProduct, setSelectedProduct] = useState("");
+  const [activationType, setActivationType] = useState<ActivationType>("other");
+
+  // Schedule state
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
+  const [submittingApproval, setSubmittingApproval] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState<string | undefined>();
 
   // Print order state
   const [quantity, setQuantity] = useState(100);
@@ -82,6 +87,7 @@ const ActivateListing = () => {
   useEffect(() => {
     if (id) {
       fetchListingDetails();
+      checkExistingActivation();
     }
   }, [id]);
 
@@ -89,7 +95,7 @@ const ActivateListing = () => {
     try {
       const { data, error } = await supabase
         .from("ad_spaces")
-        .select("id, title, location, description, pricing, specifications, media_urls")
+        .select("id, title, location, description, pricing, specifications, media_urls, publisher_id")
         .eq("id", id)
         .single();
 
@@ -112,11 +118,174 @@ const ActivateListing = () => {
     }
   };
 
-  const handleMockupApproval = (data: { artworkUrl: string; adUnitType: string; selectedSku: string }) => {
+  const checkExistingActivation = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data, error } = await supabase
+        .from("activations")
+        .select("*")
+        .eq("ad_space_id", id)
+        .eq("advertiser_id", session.user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (data) {
+        setActivationId(data.id);
+        setActivationStatus(data.status);
+        setArtworkUrl(data.ad_design_url || "");
+        setSelectedProduct(data.ad_unit_sku || "");
+        setQuantity(data.quantity || 100);
+        setRejectionReason(data.rejection_reason || undefined);
+        
+        if (data.start_date) setStartDate(new Date(data.start_date));
+        if (data.end_date) setEndDate(new Date(data.end_date));
+        if (data.activation_type) setActivationType(data.activation_type as ActivationType);
+        if (data.print_order_id) {
+          setPrintOrderComplete(true);
+          setOrderId(data.print_order_id);
+        }
+
+        // Determine current step based on status
+        switch (data.status) {
+          case "design":
+            setCurrentStep("design");
+            if (data.ad_design_url) setDesignApproved(true);
+            break;
+          case "pending_approval":
+          case "rejected":
+            setCurrentStep("schedule-approval");
+            setDesignApproved(true);
+            break;
+          case "approved":
+          case "printing":
+            setCurrentStep("print-order");
+            setDesignApproved(true);
+            break;
+          case "payment_pending":
+          case "completed":
+            setCurrentStep("payment");
+            setDesignApproved(true);
+            setPrintOrderComplete(true);
+            break;
+        }
+      }
+    } catch (error) {
+      console.error("Error checking activation:", error);
+    }
+  };
+
+  const getActivationType = (adUnitType: string): ActivationType => {
+    const typeMap: Record<string, ActivationType> = {
+      "sticker": "sticker",
+      "table-tent": "table_tent",
+      "poster": "poster",
+      "flyer": "flyer",
+      "banner": "banner",
+    };
+    return typeMap[adUnitType] || "other";
+  };
+
+  const handleMockupApproval = async (data: { artworkUrl: string; adUnitType: string; selectedSku: string }) => {
     setArtworkUrl(data.artworkUrl);
     setSelectedProduct(data.selectedSku);
     setApprovedAdUnitType(data.adUnitType);
+    const type = getActivationType(data.adUnitType);
+    setActivationType(type);
     setDesignApproved(true);
+
+    // Create or update activation record
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !listing) return;
+
+      // Get publisher user_id from the ad_space's publisher_profile
+      const { data: publisherProfile } = await supabase
+        .from("publisher_profiles")
+        .select("user_id")
+        .eq("id", listing.publisher_id)
+        .single();
+
+      if (!publisherProfile) {
+        toast({
+          title: "Error",
+          description: "Could not find publisher information",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (activationId) {
+        await supabase
+          .from("activations")
+          .update({
+            ad_design_url: data.artworkUrl,
+            ad_unit_sku: data.selectedSku,
+            activation_type: type,
+          })
+          .eq("id", activationId);
+      } else {
+        const { data: newActivation, error } = await supabase
+          .from("activations")
+          .insert({
+            ad_space_id: id,
+            advertiser_id: session.user.id,
+            publisher_id: publisherProfile.user_id,
+            status: "design",
+            ad_design_url: data.artworkUrl,
+            ad_unit_sku: data.selectedSku,
+            activation_type: type,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        if (newActivation) {
+          setActivationId(newActivation.id);
+        }
+      }
+    } catch (error: any) {
+      console.error("Error saving activation:", error);
+    }
+  };
+
+  const handleDatesSelected = (start: Date, end: Date) => {
+    setStartDate(start);
+    setEndDate(end);
+  };
+
+  const handleSubmitForApproval = async () => {
+    if (!startDate || !endDate || !activationId) return;
+
+    setSubmittingApproval(true);
+    try {
+      const { error } = await supabase
+        .from("activations")
+        .update({
+          start_date: format(startDate, "yyyy-MM-dd"),
+          end_date: format(endDate, "yyyy-MM-dd"),
+          status: "pending_approval",
+        })
+        .eq("id", activationId);
+
+      if (error) throw error;
+
+      setActivationStatus("pending_approval");
+      toast({
+        title: "Request Submitted",
+        description: "Your booking request has been sent to the publisher for approval.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit for approval",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmittingApproval(false);
+    }
   };
 
   const handleGetQuote = async () => {
@@ -202,7 +371,21 @@ const ActivateListing = () => {
 
       setOrderId(orderResponse.order.id);
       setPrintOrderComplete(true);
+
+      // Update activation status
+      if (activationId) {
+        await supabase
+          .from("activations")
+          .update({
+            status: "payment_pending",
+            print_order_id: orderResponse.order.id,
+            quantity,
+          })
+          .eq("id", activationId);
+      }
+
       setCurrentStep("payment");
+      setActivationStatus("payment_pending");
 
       toast({
         title: "Print order placed!",
@@ -219,18 +402,41 @@ const ActivateListing = () => {
     }
   };
 
-  const handlePayNow = () => {
-    toast({
-      title: "Payment Gateway",
-      description: "Payment integration coming soon. Contact support for manual activation.",
-    });
-  };
+  const handlePayNow = async () => {
+    // Mark activation as completed
+    if (activationId) {
+      try {
+        const selectedQuote = quote?.quotes?.find(q => q.shipmentMethod === selectedShipping);
+        const totalAmount = selectedQuote ? parseFloat(selectedQuote.costSummary.totalCost.amount) : 0;
 
-  const steps = [
-    { id: "design", label: "Design Ad", icon: Palette },
-    { id: "print-order", label: "Print Order", icon: Package },
-    { id: "payment", label: "Payment", icon: CreditCard },
-  ];
+        await supabase
+          .from("activations")
+          .update({
+            status: "completed",
+            total_amount: totalAmount + (listing?.pricing?.weekly || 99),
+          })
+          .eq("id", activationId);
+
+        setActivationStatus("completed");
+
+        toast({
+          title: "Activation Complete!",
+          description: "Your booking is now confirmed and added to the publisher's calendar.",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to complete activation",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Payment Gateway",
+        description: "Payment integration coming soon. Contact support for manual activation.",
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -267,41 +473,10 @@ const ActivateListing = () => {
         </Button>
 
         {/* Step Indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center gap-4">
-            {steps.map((step, index) => {
-              const StepIcon = step.icon;
-              const isActive = currentStep === step.id;
-              const isCompleted = 
-                (step.id === "design" && (currentStep === "print-order" || currentStep === "payment")) ||
-                (step.id === "print-order" && currentStep === "payment");
-
-              return (
-                <div key={step.id} className="flex items-center">
-                  <div 
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${
-                      isActive 
-                        ? "bg-primary text-primary-foreground" 
-                        : isCompleted 
-                          ? "bg-primary/20 text-primary" 
-                          : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <CheckCircle className="h-5 w-5" />
-                    ) : (
-                      <StepIcon className="h-5 w-5" />
-                    )}
-                    <span className="font-medium hidden sm:inline">{step.label}</span>
-                  </div>
-                  {index < steps.length - 1 && (
-                    <ArrowRight className="h-5 w-5 mx-2 text-muted-foreground" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <ActivationStepper 
+          currentStep={currentStep} 
+          approvalStatus={activationStatus === "pending_approval" ? "pending" : activationStatus === "approved" ? "approved" : undefined}
+        />
 
         {/* Listing Summary */}
         <Card className="mb-8">
@@ -371,9 +546,9 @@ const ActivateListing = () => {
                     <Button 
                       className="w-full" 
                       size="lg"
-                      onClick={() => setCurrentStep("print-order")}
+                      onClick={() => setCurrentStep("schedule-approval")}
                     >
-                      Continue to Print Order
+                      Continue to Schedule & Approval
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </CardContent>
@@ -409,6 +584,41 @@ const ActivateListing = () => {
                 </Card>
               )}
             </div>
+          </div>
+        )}
+
+        {currentStep === "schedule-approval" && (
+          <div className="max-w-2xl mx-auto space-y-6">
+            <ScheduleApprovalStep
+              activationId={activationId || ""}
+              status={activationStatus}
+              startDate={startDate}
+              endDate={endDate}
+              rejectionReason={rejectionReason}
+              onDatesSelected={handleDatesSelected}
+              onSubmitForApproval={handleSubmitForApproval}
+              isSubmitting={submittingApproval}
+            />
+
+            {activationStatus === "approved" && (
+              <Button 
+                className="w-full" 
+                size="lg"
+                onClick={() => setCurrentStep("print-order")}
+              >
+                Continue to Print Order
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentStep("design")}
+              className="w-full"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Design
+            </Button>
           </div>
         )}
 
@@ -609,11 +819,11 @@ const ActivateListing = () => {
 
               <Button 
                 variant="outline" 
-                onClick={() => setCurrentStep("design")}
+                onClick={() => setCurrentStep("schedule-approval")}
                 className="w-full"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Design
+                Back to Schedule
               </Button>
             </div>
           </div>
@@ -682,9 +892,19 @@ const ActivateListing = () => {
                   className="w-full" 
                   size="lg"
                   onClick={handlePayNow}
+                  disabled={activationStatus === "completed"}
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Activate Listing
+                  {activationStatus === "completed" ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Activation Complete
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Activate Listing
+                    </>
+                  )}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
@@ -695,6 +915,7 @@ const ActivateListing = () => {
                   variant="outline" 
                   onClick={() => setCurrentStep("print-order")}
                   className="w-full"
+                  disabled={activationStatus === "completed"}
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Print Order

@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      activations: {
+        Row: {
+          activation_type: Database["public"]["Enums"]["activation_type"] | null
+          ad_design_url: string | null
+          ad_space_id: string
+          ad_unit_sku: string | null
+          advertiser_id: string
+          created_at: string | null
+          end_date: string | null
+          id: string
+          print_order_id: string | null
+          publisher_id: string
+          quantity: number | null
+          rejection_reason: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["activation_status"]
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          activation_type?:
+            | Database["public"]["Enums"]["activation_type"]
+            | null
+          ad_design_url?: string | null
+          ad_space_id: string
+          ad_unit_sku?: string | null
+          advertiser_id: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          print_order_id?: string | null
+          publisher_id: string
+          quantity?: number | null
+          rejection_reason?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["activation_status"]
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          activation_type?:
+            | Database["public"]["Enums"]["activation_type"]
+            | null
+          ad_design_url?: string | null
+          ad_space_id?: string
+          ad_unit_sku?: string | null
+          advertiser_id?: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          print_order_id?: string | null
+          publisher_id?: string
+          quantity?: number | null
+          rejection_reason?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["activation_status"]
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activations_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_spaces: {
         Row: {
           activation_fee: number | null
@@ -1287,6 +1356,21 @@ export type Database = {
       }
     }
     Enums: {
+      activation_status:
+        | "design"
+        | "pending_approval"
+        | "approved"
+        | "printing"
+        | "payment_pending"
+        | "completed"
+        | "rejected"
+      activation_type:
+        | "sticker"
+        | "table_tent"
+        | "poster"
+        | "flyer"
+        | "banner"
+        | "other"
       admin_status: "pending" | "verified" | "rejected"
       agent_role: "guerrilla" | "influencer" | "model" | "artist"
       app_role: "admin" | "publisher" | "advertiser"
@@ -1421,6 +1505,23 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activation_status: [
+        "design",
+        "pending_approval",
+        "approved",
+        "printing",
+        "payment_pending",
+        "completed",
+        "rejected",
+      ],
+      activation_type: [
+        "sticker",
+        "table_tent",
+        "poster",
+        "flyer",
+        "banner",
+        "other",
+      ],
       admin_status: ["pending", "verified", "rejected"],
       agent_role: ["guerrilla", "influencer", "model", "artist"],
       app_role: ["admin", "publisher", "advertiser"],
