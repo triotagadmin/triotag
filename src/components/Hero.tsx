@@ -27,7 +27,7 @@ export const Hero = () => {
           letterSpacing: '0.15em'
         }} className="text-primary">AI-POWERED MICRO ADVERTISING PLATFORM
           <br />
-            using AI Powered Marketplace and Apps.
+            ​
           </p>
 
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-2 md:pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
