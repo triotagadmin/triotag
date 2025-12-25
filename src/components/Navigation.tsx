@@ -110,11 +110,10 @@ export const Navigation = () => {
             </Button>
           </> : <>
             <Link to="/explore" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>VENUES
-          </Button>
+              <Button variant="ghost" size="sm" className={linkClass}>MICRO AD SPACE</Button>
             </Link>
             <Link to="/tickets" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>EVENTS</Button>
+              
             </Link>
             <Link to="/habit-tracker" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
