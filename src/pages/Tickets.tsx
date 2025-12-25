@@ -5,12 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Calendar, Ticket, ShoppingCart } from "lucide-react";
+import { Search, MapPin, Calendar, Ticket, CreditCard } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import { useCart } from "@/contexts/CartContext";
-import { TicketCart } from "@/components/TicketCart";
 import { toast } from "sonner";
+import { TicketCheckoutDialog } from "@/components/TicketCheckoutDialog";
 
 interface ApprovedTicket {
   id: string;
@@ -24,17 +23,19 @@ interface ApprovedTicket {
   image_urls: string[] | null;
   category: string;
   price: number;
+  currency: string;
   quantity_available: number;
   quantity_sold: number;
   status: string;
 }
 
 const Tickets = () => {
-  const { addToCart } = useCart();
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [approvedTickets, setApprovedTickets] = useState<ApprovedTicket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checkoutTicket, setCheckoutTicket] = useState<ApprovedTicket | null>(null);
+  const [checkoutQuantity, setCheckoutQuantity] = useState(1);
 
   useEffect(() => {
     fetchApprovedTickets();
@@ -66,23 +67,24 @@ const Tickets = () => {
     return matchesSearch && matchesLocation;
   });
 
-  const handleAddTicketToCart = (ticket: ApprovedTicket) => {
+  const handleBuyTicket = (ticket: ApprovedTicket) => {
     const available = ticket.quantity_available - ticket.quantity_sold;
     if (available <= 0) {
       toast.error("This ticket is sold out");
       return;
     }
+    setCheckoutTicket(ticket);
+    setCheckoutQuantity(1);
+  };
 
-    addToCart({
-      ticketId: ticket.id,
-      title: ticket.title,
-      price: ticket.price,
-      eventDate: ticket.event_date,
-      location: ticket.location,
-      image_url: ticket.image_url || (ticket.image_urls?.[0]) || undefined,
-      maxQuantity: available
-    });
-    toast.success("Added to cart!");
+  const getCurrencySymbol = (currency: string) => {
+    const symbols: Record<string, string> = {
+      PHP: "₱",
+      USD: "$",
+      EUR: "€",
+      GBP: "£",
+    };
+    return symbols[currency] || currency;
   };
 
   return (
@@ -91,16 +93,13 @@ const Tickets = () => {
 
       <div className="container mx-auto px-6 py-12">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div className="text-center flex-1">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Ticket Market
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Discover and purchase tickets for amazing events
-            </p>
-          </div>
-          <TicketCart />
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Ticket Market
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Discover and purchase tickets for amazing events
+          </p>
         </div>
 
         {/* Search & Filters */}
@@ -164,6 +163,7 @@ const Tickets = () => {
                     const available = ticket.quantity_available - ticket.quantity_sold;
                     const isSoldOut = available <= 0;
                     const imageUrl = ticket.image_url || (ticket.image_urls?.[0]);
+                    const currencySymbol = getCurrencySymbol(ticket.currency || "PHP");
 
                     return (
                       <Card key={ticket.id} className="hover:shadow-lg transition-shadow overflow-hidden flex-shrink-0 w-80 snap-start">
@@ -210,17 +210,17 @@ const Tickets = () => {
                           </div>
                           <div className="flex items-center justify-between pt-2 border-t">
                             <div>
-                              <p className="text-2xl font-bold">₱{ticket.price}</p>
+                              <p className="text-2xl font-bold">{currencySymbol}{ticket.price}</p>
                               <p className="text-xs text-muted-foreground">
                                 {isSoldOut ? "Sold out" : `${available} tickets left`}
                               </p>
                             </div>
                             <Button 
-                              onClick={() => handleAddTicketToCart(ticket)} 
+                              onClick={() => handleBuyTicket(ticket)} 
                               disabled={isSoldOut}
                             >
-                              <ShoppingCart className="h-4 w-4 mr-2" />
-                              {isSoldOut ? "Sold Out" : "Add to Cart"}
+                              <CreditCard className="h-4 w-4 mr-2" />
+                              {isSoldOut ? "Sold Out" : "Buy Now"}
                             </Button>
                           </div>
                         </CardContent>
@@ -235,6 +235,21 @@ const Tickets = () => {
       </div>
 
       <Footer />
+
+      {/* Checkout Dialog */}
+      {checkoutTicket && (
+        <TicketCheckoutDialog
+          open={!!checkoutTicket}
+          onOpenChange={(open) => !open && setCheckoutTicket(null)}
+          ticket={{
+            id: checkoutTicket.id,
+            title: checkoutTicket.title,
+            price: checkoutTicket.price,
+            currency: checkoutTicket.currency,
+          }}
+          quantity={checkoutQuantity}
+        />
+      )}
     </div>
   );
 };

@@ -1047,12 +1047,81 @@ export type Database = {
           },
         ]
       }
+      ticket_sales: {
+        Row: {
+          buyer_email: string
+          buyer_name: string
+          buyer_phone: string | null
+          created_at: string
+          currency: string
+          id: string
+          payment_method: string
+          payment_status: string
+          paymongo_checkout_session_id: string | null
+          paymongo_payment_id: string | null
+          qr_code: string | null
+          quantity: number
+          serial_number: string | null
+          ticket_id: string
+          total_amount: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          buyer_email: string
+          buyer_name: string
+          buyer_phone?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          payment_method?: string
+          payment_status?: string
+          paymongo_checkout_session_id?: string | null
+          paymongo_payment_id?: string | null
+          qr_code?: string | null
+          quantity?: number
+          serial_number?: string | null
+          ticket_id: string
+          total_amount: number
+          unit_price: number
+          updated_at?: string
+        }
+        Update: {
+          buyer_email?: string
+          buyer_name?: string
+          buyer_phone?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          payment_method?: string
+          payment_status?: string
+          paymongo_checkout_session_id?: string | null
+          paymongo_payment_id?: string | null
+          qr_code?: string | null
+          quantity?: number
+          serial_number?: string | null
+          ticket_id?: string
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_sales_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           approved_at: string | null
           approved_by: string | null
           category: string
           created_at: string
+          currency: string
           description: string | null
           event_date: string
           event_time: string | null
@@ -1075,6 +1144,7 @@ export type Database = {
           approved_by?: string | null
           category: string
           created_at?: string
+          currency?: string
           description?: string | null
           event_date: string
           event_time?: string | null
@@ -1097,6 +1167,7 @@ export type Database = {
           approved_by?: string | null
           category?: string
           created_at?: string
+          currency?: string
           description?: string | null
           event_date?: string
           event_time?: string | null
