@@ -262,8 +262,8 @@ const Marketplace = () => {
       <div className="container mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Ad Space Market</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Your central hub for activating micro advertising spaces.</p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Venue Market</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Your central hub for activating venue listings and micro advertising spaces.</p>
           {!user && <p className="text-sm text-muted-foreground mt-2">
               <Button variant="link" onClick={() => navigate("/auth")} className="p-0 h-auto">
                 Log in
