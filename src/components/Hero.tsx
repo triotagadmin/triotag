@@ -25,7 +25,7 @@ export const Hero = () => {
           transform: 'perspective(600px) rotateX(8deg)',
           animation: 'float3d 4s ease-in-out infinite',
           letterSpacing: '0.15em'
-        }}>AI-POWERED E-COMMERCE PLATFORM
+        }}>AI-POWERED ADVERTISING PLATFORM
 FOR VENUES, PROMOS AND EVENTS.
           <br />
             using AI Powered Marketplace and Apps.
