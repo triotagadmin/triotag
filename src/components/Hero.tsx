@@ -25,8 +25,7 @@ export const Hero = () => {
           transform: 'perspective(600px) rotateX(8deg)',
           animation: 'float3d 4s ease-in-out infinite',
           letterSpacing: '0.15em'
-        }}>VENUE, PROMO AND EVENT E-COMMERCE PLATFORM FOR ADVERTISERS USING AI POWERED MARKETPLACES AND APPS.
-          <br />
+        }}>VENUE, PROMO AND EVENT ADVERTISING PLATFORM<br />
             using AI Powered Marketplace and Apps.
           </p>
 
