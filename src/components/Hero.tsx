@@ -26,7 +26,7 @@ export const Hero = () => {
           animation: 'float3d 4s ease-in-out infinite',
           letterSpacing: '0.15em'
         }}>AI-POWERED ADVERTISING PLATFORM
-MICRO AD SPACE LISTINGS
+ MICRO AD SPACE LISTINGS.
           <br />
             using AI Powered Marketplace and Apps.
           </p>
