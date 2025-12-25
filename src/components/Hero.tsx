@@ -16,7 +16,7 @@ export const Hero = () => {
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         <div className={`max-w-4xl mx-auto text-center space-y-4 md:space-y-8 transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-tight">
-            <span className="text-primary neon-text-glow animate-text-glow">Micro Ad a</span>
+            <span className="text-primary neon-text-glow animate-text-glow">​Sticky Markets   </span>
           </h1>
 
           <p className={`text-base sm:text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto px-2 transition-all duration-1000 delay-200 font-semibold tracking-widest uppercase text-white ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`} style={{
