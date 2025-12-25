@@ -30,11 +30,19 @@ const TicketMarket = () => {
   const [eventLocation, setEventLocation] = useState("");
   const [venueName, setVenueName] = useState("");
   const [ticketPrice, setTicketPrice] = useState("");
+  const [ticketCurrency, setTicketCurrency] = useState("PHP");
   const [organizerName, setOrganizerName] = useState("");
 
   // Settings state
   const [totalTicketLimit, setTotalTicketLimit] = useState("100");
   const [purchaseLimitPerUser, setPurchaseLimitPerUser] = useState("5");
+
+  const currencies = [
+    { value: "PHP", label: "Philippine Peso (₱)", symbol: "₱" },
+    { value: "USD", label: "US Dollar ($)", symbol: "$" },
+    { value: "EUR", label: "Euro (€)", symbol: "€" },
+    { value: "GBP", label: "British Pound (£)", symbol: "£" },
+  ];
 
   useEffect(() => {
     checkAuth();
@@ -148,6 +156,7 @@ const TicketMarket = () => {
           venue_name: venueName,
           image_url: bannerImageUrl,
           price: parseFloat(ticketPrice),
+          currency: ticketCurrency,
           quantity_available: parseInt(totalTicketLimit),
           category: "event",
           status: "pending"
@@ -330,19 +339,36 @@ const TicketMarket = () => {
                       </div>
                     </div>
 
-                    {/* Price */}
-                    <div className="space-y-2">
-                      <Label htmlFor="price" className="text-foreground">Ticket Price (PHP) *</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        value={ticketPrice}
-                        onChange={(e) => setTicketPrice(e.target.value)}
-                        placeholder="0.00"
-                        min="0"
-                        step="0.01"
-                        className="bg-muted/50 border-border focus:border-primary"
-                      />
+                    {/* Price & Currency */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="price" className="text-foreground">Ticket Price *</Label>
+                        <Input
+                          id="price"
+                          type="number"
+                          value={ticketPrice}
+                          onChange={(e) => setTicketPrice(e.target.value)}
+                          placeholder="0.00"
+                          min="0"
+                          step="0.01"
+                          className="bg-muted/50 border-border focus:border-primary"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="currency" className="text-foreground">Currency</Label>
+                        <Select value={ticketCurrency} onValueChange={setTicketCurrency}>
+                          <SelectTrigger className="bg-muted/50 border-border">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {currencies.map(c => (
+                              <SelectItem key={c.value} value={c.value}>
+                                {c.symbol} {c.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
                     {/* Organizer */}
