@@ -10,7 +10,7 @@ export const Hero = () => {
   return <section className="relative min-h-[70vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* GIF Background */}
       <div className="absolute inset-0">
-        <img src={heroBackground} alt="Hero background" className="w-full h-full object-cover" />
+        <img alt="Hero background" className="w-full h-full object-cover" src="/lovable-uploads/f8fbfc7d-601c-44d7-9030-9f8e7c1b12c4.png" />
       </div>
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -21,18 +21,13 @@ export const Hero = () => {
             </span>
           </h1>
 
-          <p 
-            className={`text-base sm:text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto px-2 transition-all duration-1000 delay-200 font-semibold tracking-widest uppercase text-white ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-            style={{
-              fontFamily: "'Rajdhani', sans-serif",
-              textShadow: '2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,0.8), 6px 6px 0 rgba(0,0,0,0.6), 8px 8px 15px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)',
-              transform: 'perspective(600px) rotateX(8deg)',
-              animation: 'float3d 4s ease-in-out infinite',
-              letterSpacing: '0.15em',
-            }}
-          >
-            Connecting Advertisers and Venues
-            <br />
+          <p className={`text-base sm:text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto px-2 transition-all duration-1000 delay-200 font-semibold tracking-widest uppercase text-white ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`} style={{
+          fontFamily: "'Rajdhani', sans-serif",
+          textShadow: '2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,0.8), 6px 6px 0 rgba(0,0,0,0.6), 8px 8px 15px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)',
+          transform: 'perspective(600px) rotateX(8deg)',
+          animation: 'float3d 4s ease-in-out infinite',
+          letterSpacing: '0.15em'
+        }}>CONNECTING VENUE, PROMO AND EVENT WITH ADVERTISERS USING AI POWERED MARKETPLACES AND APPS.<br />
             using AI Powered Marketplace and Apps.
           </p>
 
