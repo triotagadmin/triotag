@@ -69,7 +69,7 @@ export const Footer = () => {
             <h3 className="font-bold text-lg md:text-xl text-primary neon-text-glow">
               Tiny Sticky Ads
             </h3>
-            <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">We connect advertisers with micro out-of-home ad spaces.</p>
+            <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">We connect advertisers to micro out-of-home ad spaces.</p>
           </div>
 
           {/* Company Links - Two Columns */}
