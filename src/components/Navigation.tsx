@@ -126,7 +126,7 @@ export const Navigation = () => {
         <Link to={user ? "/home" : "/"} className="flex items-center space-x-2 md:space-x-3 group">
           <img src={favicon} alt="Tiny Sticky Ads Logo" className="w-6 h-6 md:w-8 md:h-8" />
           <span className="font-bold text-base md:text-xl text-foreground group-hover:text-primary transition-colors duration-300">
-            Sticky Media Agency   
+            Tiny Sticky Ads     
           </span>
         </Link>
 
