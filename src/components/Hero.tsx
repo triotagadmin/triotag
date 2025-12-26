@@ -26,7 +26,7 @@ export const Hero = () => {
           animation: 'float3d 4s ease-in-out infinite',
           letterSpacing: '0.15em'
         }} className="text-base text-center bg-transparent text-destructive-foreground font-light">Advertise your products, services, events, announcements, launches,
-and special offers across our AI-powered micro advertising network.
+and special offers across our AI-powered micro advertising network. ​
 ​
           <br />
             ​
