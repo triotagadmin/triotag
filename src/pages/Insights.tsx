@@ -143,9 +143,7 @@ const Insights = () => {
             <Card className="max-w-2xl mx-auto">
               <CardHeader>
                 <CardTitle className="text-2xl">Subscribe to our newsletter </CardTitle>
-                <CardDescription className="text-base">
-                  Subscribe to our newsletter to get the latest micro-advertising trends, case studies, and strategies delivered to your inbox.
-                </CardDescription>
+                <CardDescription className="text-base">Subscribe to our newsletter to get the latest micro-advertising placements, case studies, and strategies delivered to your inbox.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2 max-w-md mx-auto">
