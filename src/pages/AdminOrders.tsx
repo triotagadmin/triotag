@@ -39,7 +39,13 @@ import {
   FileImage,
   MapPin,
   DollarSign,
-  Bell
+  Bell,
+  Download,
+  Building,
+  Phone,
+  Mail,
+  ExternalLink,
+  XCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
@@ -65,6 +71,21 @@ interface PrintOrder {
   updated_at: string;
 }
 
+interface ListingDetails {
+  id: string;
+  title: string;
+  location: string | null;
+  description: string | null;
+}
+
+interface PublisherContact {
+  id: string;
+  business_name: string;
+  contact_email: string;
+  contact_phone: string | null;
+  location: string | null;
+}
+
 const STATUS_CONFIG: Record<PrintOrderStatus, { label: string; color: string; icon: React.ReactNode }> = {
   pending_admin: { label: "Pending Review", color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20", icon: <Clock className="h-4 w-4" /> },
   in_production: { label: "In Production", color: "bg-blue-500/10 text-blue-500 border-blue-500/20", icon: <Package className="h-4 w-4" /> },
@@ -83,6 +104,9 @@ const AdminOrders = () => {
   const [newStatus, setNewStatus] = useState<PrintOrderStatus>("pending_admin");
   const [newPrice, setNewPrice] = useState("");
   const [newOrderCount, setNewOrderCount] = useState(0);
+  const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
+  const [publisherContact, setPublisherContact] = useState<PublisherContact | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -177,12 +201,107 @@ const AdminOrders = () => {
     };
   };
 
-  const openOrderDetails = (order: PrintOrder) => {
+  const openOrderDetails = async (order: PrintOrder) => {
     setSelectedOrder(order);
     setAdminNotes(order.admin_notes || "");
     setNewStatus(order.order_status);
     setNewPrice(order.total_price?.toString() || "");
+    setListingDetails(null);
+    setPublisherContact(null);
     setShowOrderDialog(true);
+
+    // Fetch listing and publisher details if activation_id exists
+    if (order.activation_id) {
+      setLoadingDetails(true);
+      try {
+        // Get activation to find ad_space_id
+        const { data: activation } = await supabase
+          .from("activations")
+          .select("ad_space_id, publisher_id")
+          .eq("id", order.activation_id)
+          .single();
+
+        if (activation?.ad_space_id) {
+          // Fetch listing details
+          const { data: adSpace } = await supabase
+            .from("ad_spaces")
+            .select("id, title, location, description")
+            .eq("id", activation.ad_space_id)
+            .single();
+
+          if (adSpace) {
+            setListingDetails(adSpace);
+          }
+        }
+
+        if (activation?.publisher_id) {
+          // Fetch publisher contact info - using publisher_id which is user_id
+          const { data: publisher } = await supabase
+            .from("publisher_profiles")
+            .select("id, business_name, contact_email, contact_phone, location")
+            .eq("user_id", activation.publisher_id)
+            .single();
+
+          if (publisher) {
+            setPublisherContact(publisher);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching details:", error);
+      } finally {
+        setLoadingDetails(false);
+      }
+    }
+  };
+
+  const handleRejectOrder = async () => {
+    if (!selectedOrder) return;
+    
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from("print_orders")
+        .update({
+          order_status: "pending_admin",
+          admin_notes: adminNotes || "Order rejected by admin",
+        })
+        .eq("id", selectedOrder.id);
+
+      if (error) throw error;
+
+      // Update activation status to rejected
+      if (selectedOrder.activation_id) {
+        await supabase
+          .from("activations")
+          .update({ 
+            status: "rejected",
+            rejection_reason: adminNotes || "Print order rejected by admin"
+          })
+          .eq("id", selectedOrder.activation_id);
+      }
+
+      await fetchOrders();
+      setShowOrderDialog(false);
+
+      toast({
+        title: "Order Rejected",
+        description: "The order has been rejected",
+        variant: "destructive",
+      });
+    } catch (error: any) {
+      console.error("Error rejecting order:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reject order",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDownloadDesign = (url: string) => {
+    window.open(url, "_blank");
   };
 
   const handleUpdateOrder = async () => {
@@ -378,12 +497,22 @@ const AdminOrders = () => {
 
             {selectedOrder && (
               <div className="space-y-6">
-                {/* Design Preview */}
+                {/* Design Preview with Download */}
                 <div className="space-y-2">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <FileImage className="h-4 w-4" />
-                    Design File
-                  </h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <FileImage className="h-4 w-4" />
+                      Design File
+                    </h4>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleDownloadDesign(selectedOrder.design_url)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
                   <div className="bg-muted rounded-lg p-4">
                     <img 
                       src={selectedOrder.design_url} 
@@ -392,6 +521,74 @@ const AdminOrders = () => {
                     />
                   </div>
                 </div>
+
+                {/* Listing Details */}
+                {loadingDetails ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : listingDetails && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <Building className="h-4 w-4" />
+                      Venue Listing
+                    </h4>
+                    <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                      <p className="font-medium text-lg">{listingDetails.title}</p>
+                      {listingDetails.location && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {listingDetails.location}
+                        </p>
+                      )}
+                      {listingDetails.description && (
+                        <p className="text-sm text-muted-foreground">{listingDetails.description}</p>
+                      )}
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="p-0 h-auto"
+                        onClick={() => window.open(`/venue/${listingDetails.id}`, "_blank")}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        View Listing
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Publisher Contact */}
+                {publisherContact && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <Building className="h-4 w-4" />
+                      Publisher Contact
+                    </h4>
+                    <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                      <p className="font-medium">{publisherContact.business_name}</p>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Mail className="h-3 w-3 text-muted-foreground" />
+                        <a href={`mailto:${publisherContact.contact_email}`} className="text-primary hover:underline">
+                          {publisherContact.contact_email}
+                        </a>
+                      </div>
+                      {publisherContact.contact_phone && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className="h-3 w-3 text-muted-foreground" />
+                          <a href={`tel:${publisherContact.contact_phone}`} className="text-primary hover:underline">
+                            {publisherContact.contact_phone}
+                          </a>
+                        </div>
+                      )}
+                      {publisherContact.location && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          {publisherContact.location}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Product Info */}
                 <div className="grid grid-cols-2 gap-4">
@@ -489,24 +686,38 @@ const AdminOrders = () => {
 
                   <div className="flex gap-3">
                     {selectedOrder.order_status === "pending_admin" && (
-                      <Button 
-                        onClick={handleApproveAndInvoice}
-                        disabled={updating || !newPrice}
-                        className="flex-1"
-                      >
-                        {updating ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                        )}
-                        Approve & Invoice
-                      </Button>
+                      <>
+                        <Button 
+                          onClick={handleApproveAndInvoice}
+                          disabled={updating || !newPrice}
+                          className="flex-1"
+                        >
+                          {updating ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                          )}
+                          Approve & Invoice
+                        </Button>
+                        <Button 
+                          variant="destructive"
+                          onClick={handleRejectOrder}
+                          disabled={updating}
+                        >
+                          {updating ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <XCircle className="h-4 w-4 mr-2" />
+                          )}
+                          Reject
+                        </Button>
+                      </>
                     )}
                     <Button 
                       variant="outline"
                       onClick={handleUpdateOrder}
                       disabled={updating}
-                      className="flex-1"
+                      className={selectedOrder.order_status === "pending_admin" ? "" : "flex-1"}
                     >
                       {updating ? (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
