@@ -25,7 +25,7 @@ export const Hero = () => {
           transform: 'perspective(600px) rotateX(8deg)',
           animation: 'float3d 4s ease-in-out infinite',
           letterSpacing: '0.15em'
-        }} className="text-primary">AI-POWERED MICRO ADVERTISING PLATFORM
+        }} className="text-primary text-base font-bold text-center bg-ring">Advertise your products, services, events, announcements, launches, and special offers across our AI-powered micro advertising network. 
           <br />
             ​
           </p>
