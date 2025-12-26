@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket } from "lucide-react";
+import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket, Package } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -1006,14 +1006,22 @@ export default function AdminDashboard() {
               <p className="text-sm text-muted-foreground">Welcome back, {adminName}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="default" onClick={() => navigate("/admin/blog-submission")}>
-              <FileText className="w-4 h-4 mr-2" />
-              Submit Blog
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="default" onClick={() => navigate("/admin/orders")}>
+              <Package className="w-4 h-4 mr-2" />
+              Ad Orders
             </Button>
-            <Button variant="default" onClick={() => navigate("/admin/newsletter-dashboard")}>
+            <Button variant="default" onClick={() => navigate("/admin/ticket-sales")}>
+              <Ticket className="w-4 h-4 mr-2" />
+              Ticket Sales
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/admin/blog-submission")}>
+              <FileText className="w-4 h-4 mr-2" />
+              Blog
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/admin/newsletter-dashboard")}>
               <Bell className="w-4 h-4 mr-2" />
-              Submit News
+              News
             </Button>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
