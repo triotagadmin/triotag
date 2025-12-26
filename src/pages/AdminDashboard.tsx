@@ -1011,10 +1011,6 @@ export default function AdminDashboard() {
               <Package className="w-4 h-4 mr-2" />
               Ad Orders
             </Button>
-            <Button variant="default" onClick={() => navigate("/admin/ticket-sales")}>
-              <Ticket className="w-4 h-4 mr-2" />
-              Ticket Sales
-            </Button>
             <Button variant="outline" onClick={() => navigate("/admin/blog-submission")}>
               <FileText className="w-4 h-4 mr-2" />
               Blog
