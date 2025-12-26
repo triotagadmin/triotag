@@ -52,9 +52,8 @@ export const AdvertiserTypes = () => {
             <span className="text-primary neon-text-glow">Precision</span> &{" "}
             <span className="text-primary neon-text-glow">Impact</span>
           </h2>
-          <p className="text-sm md:text-xl text-muted-foreground px-2">
-            Tiny Sticky Ads enables brands to leverage hyper-local micro
-            advertising with cross-platform reach.
+          <p className="text-sm md:text-xl px-2 text-white">
+            Tiny Sticky Ads specializes in managing and optimizing ad space placements across the globe. Our ad exchange system enables brands to leverage hyper-local micro advertising globally.                                            
           </p>
         </div>
 
