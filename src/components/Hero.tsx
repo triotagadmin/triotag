@@ -27,7 +27,7 @@ export const Hero = () => {
           letterSpacing: '0.15em'
         }} className="text-base text-center bg-transparent neon-text-glow animate-text-glow text-sidebar-foreground font-semibold">Advertise your products, services, events,
 announcements, launches and special offers across our
-AI-powered micro advertising network. ​ ​ ​
+AI-powered micro advertising network. ​ ​ ​ ​
 ​
           <br />
             ​
