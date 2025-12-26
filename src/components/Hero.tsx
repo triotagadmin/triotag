@@ -25,10 +25,9 @@ export const Hero = () => {
           transform: 'perspective(600px) rotateX(8deg)',
           animation: 'float3d 4s ease-in-out infinite',
           letterSpacing: '0.15em'
-        }} className="text-base text-center bg-transparent neon-text-glow animate-text-glow text-sidebar-foreground font-semibold">​Advertise your products, services, events,  
-
-          <br />
-            ​ announcements, launches and special offers 
+        }} className="text-base text-center bg-transparent neon-text-glow animate-text-glow text-sidebar-foreground font-semibold">​Advertise your business across our AI-powered micro advertising network. ​  ​<br />
+            ​
+ 
           </p>
 
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-2 md:pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
