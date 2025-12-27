@@ -416,6 +416,27 @@ const ActivateListing = () => {
 
         setActivationStatus("completed");
 
+        // Send notification to venue publisher
+        if (listing?.publisher_id) {
+          // Get publisher user_id from publisher_profiles
+          const { data: publisherProfile } = await supabase
+            .from("publisher_profiles")
+            .select("user_id, business_name")
+            .eq("id", listing.publisher_id)
+            .single();
+
+          if (publisherProfile?.user_id) {
+            await supabase
+              .from("notifications")
+              .insert({
+                user_id: publisherProfile.user_id,
+                title: "Print Ad Material Confirmed!",
+                message: `Great news! An advertiser has completed payment for "${listing.title}". Tiny Sticky Ads is now handling the Print Ad Material for your venue.`,
+                type: "payment_received",
+              });
+          }
+        }
+
         toast({
           title: "Activation Complete!",
           description: "Your booking is now confirmed and added to the publisher's calendar.",

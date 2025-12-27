@@ -267,10 +267,10 @@ const AdminOrders = () => {
       const { error } = await supabase
         .from("print_orders")
         .update({
-          order_status: "rejected" as any,
+          order_status: "rejected" as "pending_admin",
           admin_notes: adminNotes || "Order rejected by admin",
           rejected_at: new Date().toISOString(),
-        })
+        } as any)
         .eq("id", selectedOrder.id);
 
       if (error) throw error;
@@ -721,6 +721,7 @@ const AdminOrders = () => {
                           <SelectItem value="in_production">In Production</SelectItem>
                           <SelectItem value="shipped">Shipped</SelectItem>
                           <SelectItem value="delivered">Delivered</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
