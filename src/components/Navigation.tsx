@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Menu, X } from "lucide-react";
 import favicon from "/favicon.gif";
+import { NotificationBell } from "@/components/NotificationBell";
 export const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -102,9 +103,11 @@ export const Navigation = () => {
             <Link to={getDashboardLink()} onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
             </Link>
+            {!mobile && <NotificationBell />}
             <Button variant="outline" size="sm" onClick={handleSignOut} className={`${baseLinkClass} ${mobile ? "w-full mt-2" : ""}`}>
               Log Out
             </Button>
+            {mobile && <div className="py-2"><NotificationBell /></div>}
           </> : <>
             <Link to="/explore" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>MICRO AD SPACE</Button>
@@ -123,7 +126,7 @@ export const Navigation = () => {
   };
   return <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border">
       <div className="container mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
-        <Link to={user ? "/home" : "/"} className="flex items-center space-x-2 md:space-x-3 group">
+        <Link to="/" className="flex items-center space-x-2 md:space-x-3 group">
           <img src={favicon} alt="Tiny Sticky Ads Logo" className="w-6 h-6 md:w-8 md:h-8" />
           <span className="font-bold text-base md:text-xl text-foreground group-hover:text-primary transition-colors duration-300">
             Tiny Sticky Ads     

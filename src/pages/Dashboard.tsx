@@ -22,8 +22,8 @@ const Dashboard = () => {
         return;
       }
       
-      // Redirect authenticated users to home page
-      navigate("/home");
+      // Redirect authenticated users to index page
+      navigate("/");
     };
 
     checkUser();
@@ -32,7 +32,7 @@ const Dashboard = () => {
       if (!session) {
         navigate("/auth");
       } else {
-        navigate("/home");
+        navigate("/");
       }
     });
 

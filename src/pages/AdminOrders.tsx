@@ -28,6 +28,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
   Package, 
@@ -45,13 +46,14 @@ import {
   Phone,
   Mail,
   ExternalLink,
-  XCircle
+  XCircle,
+  AlertCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { format } from "date-fns";
 
-type PrintOrderStatus = "pending_admin" | "in_production" | "shipped" | "delivered";
+type PrintOrderStatus = "pending_admin" | "in_production" | "shipped" | "delivered" | "rejected";
 
 interface PrintOrder {
   id: string;
@@ -69,6 +71,8 @@ interface PrintOrder {
   admin_notes: string | null;
   created_at: string;
   updated_at: string;
+  approved_at: string | null;
+  rejected_at: string | null;
 }
 
 interface ListingDetails {
@@ -91,6 +95,7 @@ const STATUS_CONFIG: Record<PrintOrderStatus, { label: string; color: string; ic
   in_production: { label: "In Production", color: "bg-blue-500/10 text-blue-500 border-blue-500/20", icon: <Package className="h-4 w-4" /> },
   shipped: { label: "Shipped", color: "bg-purple-500/10 text-purple-500 border-purple-500/20", icon: <Truck className="h-4 w-4" /> },
   delivered: { label: "Delivered", color: "bg-green-500/10 text-green-500 border-green-500/20", icon: <CheckCircle className="h-4 w-4" /> },
+  rejected: { label: "Rejected", color: "bg-red-500/10 text-red-500 border-red-500/20", icon: <XCircle className="h-4 w-4" /> },
 };
 
 const AdminOrders = () => {
@@ -262,8 +267,9 @@ const AdminOrders = () => {
       const { error } = await supabase
         .from("print_orders")
         .update({
-          order_status: "pending_admin",
+          order_status: "rejected" as any,
           admin_notes: adminNotes || "Order rejected by admin",
+          rejected_at: new Date().toISOString(),
         })
         .eq("id", selectedOrder.id);
 
@@ -285,7 +291,7 @@ const AdminOrders = () => {
 
       toast({
         title: "Order Rejected",
-        description: "The order has been rejected",
+        description: "The order has been rejected and moved to Rejected tab",
         variant: "destructive",
       });
     } catch (error: any) {
@@ -318,6 +324,11 @@ const AdminOrders = () => {
         updates.total_price = parseFloat(newPrice);
       }
 
+      // Set approved_at when approving
+      if (newStatus === "in_production" && selectedOrder.order_status === "pending_admin") {
+        updates.approved_at = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from("print_orders")
         .update(updates)
@@ -325,12 +336,22 @@ const AdminOrders = () => {
 
       if (error) throw error;
 
-      // Update activation status if moving to payment step
+      // Update activation status if moving to payment step and send notification
       if (newStatus === "in_production" && selectedOrder.activation_id) {
         await supabase
           .from("activations")
           .update({ status: "payment_pending" })
           .eq("id", selectedOrder.activation_id);
+
+        // Send notification to advertiser
+        await supabase
+          .from("notifications")
+          .insert({
+            user_id: selectedOrder.advertiser_id,
+            title: "Ad Order Approved!",
+            message: `Your ad order (${selectedOrder.id.slice(0, 8).toUpperCase()}) has been approved. Please proceed to checkout to complete payment for your venue listing.`,
+            type: "order_approved",
+          });
       }
 
       // Refresh orders
@@ -359,7 +380,73 @@ const AdminOrders = () => {
     await handleUpdateOrder();
   };
 
-  const pendingCount = orders.filter(o => o.order_status === "pending_admin").length;
+  const pendingOrders = orders.filter(o => o.order_status === "pending_admin");
+  const approvedOrders = orders.filter(o => ["in_production", "shipped", "delivered"].includes(o.order_status));
+  const rejectedOrders = orders.filter(o => o.order_status === "rejected");
+
+  const renderOrdersTable = (ordersList: PrintOrder[], showApprovedDate = false, showRejectedDate = false) => {
+    if (ordersList.length === 0) {
+      return (
+        <div className="text-center py-12 text-muted-foreground">
+          <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>No orders in this category</p>
+        </div>
+      );
+    }
+
+    return (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Order ID</TableHead>
+            <TableHead>Product</TableHead>
+            <TableHead>Quantity</TableHead>
+            <TableHead>Country</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>{showApprovedDate ? "Approved" : showRejectedDate ? "Rejected" : "Created"}</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {ordersList.map((order) => (
+            <TableRow 
+              key={order.id} 
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => openOrderDetails(order)}
+            >
+              <TableCell className="font-mono text-sm">
+                {order.id.slice(0, 8).toUpperCase()}
+              </TableCell>
+              <TableCell>{order.product_name}</TableCell>
+              <TableCell>{order.quantity}</TableCell>
+              <TableCell>{order.shipping_country}</TableCell>
+              <TableCell>
+                {order.total_price ? `₱${order.total_price.toLocaleString()}` : "—"}
+              </TableCell>
+              <TableCell>
+                <Badge className={STATUS_CONFIG[order.order_status]?.color || "bg-muted"}>
+                  {STATUS_CONFIG[order.order_status]?.label || order.order_status}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-muted-foreground">
+                {showApprovedDate && order.approved_at 
+                  ? format(new Date(order.approved_at), "MMM d, yyyy")
+                  : showRejectedDate && order.rejected_at
+                  ? format(new Date(order.rejected_at), "MMM d, yyyy")
+                  : format(new Date(order.created_at), "MMM d, yyyy")}
+              </TableCell>
+              <TableCell className="text-right">
+                <Button variant="ghost" size="sm">
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
 
   if (!isAdmin) {
     return (
@@ -385,16 +472,16 @@ const AdminOrders = () => {
             </div>
           </div>
 
-          {(pendingCount > 0 || newOrderCount > 0) && (
+          {pendingOrders.length > 0 && (
             <Badge className="bg-primary text-primary-foreground flex items-center gap-2 px-4 py-2">
               <Bell className="h-4 w-4" />
-              {pendingCount} Pending Review
+              {pendingOrders.length} Pending Review
             </Badge>
           )}
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           {Object.entries(STATUS_CONFIG).map(([status, config]) => {
             const count = orders.filter(o => o.order_status === status).length;
             return (
@@ -413,10 +500,10 @@ const AdminOrders = () => {
           })}
         </div>
 
-        {/* Orders Table */}
+        {/* Orders Tabs */}
         <Card>
           <CardHeader>
-            <CardTitle>All Orders</CardTitle>
+            <CardTitle>Orders Management</CardTitle>
             <CardDescription>
               Click on an order to view details and manage status
             </CardDescription>
@@ -426,58 +513,35 @@ const AdminOrders = () => {
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
-            ) : orders.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No orders yet</p>
-              </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead>Country</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {orders.map((order) => (
-                    <TableRow 
-                      key={order.id} 
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => openOrderDetails(order)}
-                    >
-                      <TableCell className="font-mono text-sm">
-                        {order.id.slice(0, 8).toUpperCase()}
-                      </TableCell>
-                      <TableCell>{order.product_name}</TableCell>
-                      <TableCell>{order.quantity}</TableCell>
-                      <TableCell>{order.shipping_country}</TableCell>
-                      <TableCell>
-                        {order.total_price ? `₱${order.total_price.toLocaleString()}` : "—"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={STATUS_CONFIG[order.order_status].color}>
-                          {STATUS_CONFIG[order.order_status].label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {format(new Date(order.created_at), "MMM d, yyyy")}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <Tabs defaultValue="pending" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 mb-4">
+                  <TabsTrigger value="pending" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Pending ({pendingOrders.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="approved" className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    Approved ({approvedOrders.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="rejected" className="flex items-center gap-2">
+                    <XCircle className="h-4 w-4" />
+                    Rejected ({rejectedOrders.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="pending">
+                  {renderOrdersTable(pendingOrders)}
+                </TabsContent>
+
+                <TabsContent value="approved">
+                  {renderOrdersTable(approvedOrders, true, false)}
+                </TabsContent>
+
+                <TabsContent value="rejected">
+                  {renderOrdersTable(rejectedOrders, false, true)}
+                </TabsContent>
+              </Tabs>
             )}
           </CardContent>
         </Card>
