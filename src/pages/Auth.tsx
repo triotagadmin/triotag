@@ -185,7 +185,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "Successfully signed in.",
         });
-        navigate("/home");
+        navigate("/");
       } else if (roles?.role === "publisher") {
         const { data: profile } = await supabase
           .from("publisher_profiles")
@@ -210,13 +210,13 @@ const Auth = () => {
             title: "Welcome back!",
             description: "Successfully signed in.",
           });
-          navigate("/home");
+          navigate("/");
         } else {
           // No profile yet, go to complete profile
           navigate("/complete-profile");
         }
       } else {
-        navigate("/home");
+        navigate("/");
       }
     } catch (error: any) {
       if (error instanceof z.ZodError) {

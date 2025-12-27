@@ -755,6 +755,7 @@ export type Database = {
           activation_id: string | null
           admin_notes: string | null
           advertiser_id: string
+          approved_at: string | null
           created_at: string
           design_url: string
           id: string
@@ -763,6 +764,7 @@ export type Database = {
           product_sku: string
           product_specs: Json | null
           quantity: number
+          rejected_at: string | null
           shipping_address: Json
           shipping_country: string
           total_price: number | null
@@ -772,6 +774,7 @@ export type Database = {
           activation_id?: string | null
           admin_notes?: string | null
           advertiser_id: string
+          approved_at?: string | null
           created_at?: string
           design_url: string
           id?: string
@@ -780,6 +783,7 @@ export type Database = {
           product_sku: string
           product_specs?: Json | null
           quantity?: number
+          rejected_at?: string | null
           shipping_address: Json
           shipping_country?: string
           total_price?: number | null
@@ -789,6 +793,7 @@ export type Database = {
           activation_id?: string | null
           admin_notes?: string | null
           advertiser_id?: string
+          approved_at?: string | null
           created_at?: string
           design_url?: string
           id?: string
@@ -797,6 +802,7 @@ export type Database = {
           product_sku?: string
           product_specs?: Json | null
           quantity?: number
+          rejected_at?: string | null
           shipping_address?: Json
           shipping_country?: string
           total_price?: number | null
