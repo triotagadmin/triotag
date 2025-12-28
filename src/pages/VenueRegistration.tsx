@@ -64,12 +64,12 @@ const VenueRegistration = () => {
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [venueType, setVenueType] = useState("");
+  const [customVenueType, setCustomVenueType] = useState("");
   const [operatingHours, setOperatingHours] = useState("");
   const [description, setDescription] = useState("");
   const [weeklyPrice, setWeeklyPrice] = useState("");
   const [monthlyPrice, setMonthlyPrice] = useState("");
   const [currency, setCurrency] = useState("USD");
-  const [amenities, setAmenities] = useState<string[]>([]);
   const [allowedAdFormats, setAllowedAdFormats] = useState<string[]>([]);
   const [selectedAdUnits, setSelectedAdUnits] = useState<AdUnitConfig[]>([]);
 
@@ -120,8 +120,8 @@ const VenueRegistration = () => {
     file: null,
     uploaded: false
   }]);
-  const amenitiesList = ["Wi-Fi", "Parking", "AV Equipment", "Catering", "Wheelchair Accessible", "Air Conditioning", "Restrooms", "Stage/Platform"];
-  const adFormatsList = ["Poster Display", "Digital Screen", "Table Tents", "Wall Murals", "Floor Graphics", "Window Clings", "Standee/Cutout", "Banner/Flag"];
+  const adFormatsList = ["Poster Display", "Digital Screen", "Table Tents", "Wall Murals", "Floor Graphics", "Window Clings", "Standee/Cutout", "Banner/Flag", "Mural Painting", "Wheat Paste"];
+  
   useEffect(() => {
     const checkAuth = async () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -193,8 +193,10 @@ const VenueRegistration = () => {
       setUploadedImages(Array.isArray(venue.media_urls) ? venue.media_urls as string[] : []);
       const specs = venue.specifications as any || {};
       setVenueType(specs.venue_type || "");
+      if (specs.custom_venue_type) {
+        setCustomVenueType(specs.custom_venue_type);
+      }
       setOperatingHours(specs.operating_hours || "");
-      setAmenities(specs.amenities || []);
       setAllowedAdFormats(specs.allowed_ad_formats || []);
       setContactPerson(specs.contact_person || "");
       setContactEmail(specs.contact_email || "");
@@ -287,9 +289,6 @@ const VenueRegistration = () => {
   const removeImage = (url: string) => {
     setUploadedImages(uploadedImages.filter(img => img !== url));
   };
-  const toggleAmenity = (amenity: string) => {
-    setAmenities(prev => prev.includes(amenity) ? prev.filter(a => a !== amenity) : [...prev, amenity]);
-  };
   const toggleAdFormat = (format: string) => {
     setAllowedAdFormats(prev => prev.includes(format) ? prev.filter(f => f !== format) : [...prev, format]);
   };
@@ -329,20 +328,21 @@ const VenueRegistration = () => {
     e.preventDefault();
     if (!publisherId) return;
 
-    // Require at least one ad unit with generated thumbnail
-    if (selectedAdUnits.length === 0) {
+    // Require at least one photo (instead of AI thumbnail)
+    if (uploadedImages.length === 0) {
       toast({
         title: "Error",
-        description: "Please select an ad unit type and generate a thumbnail",
+        description: "Please upload at least one photo of your venue",
         variant: "destructive"
       });
       return;
     }
-    const hasGeneratedThumbnail = selectedAdUnits.some(unit => unit.thumbnailUrl);
-    if (!hasGeneratedThumbnail) {
+
+    // Require at least one ad unit
+    if (selectedAdUnits.length === 0) {
       toast({
         title: "Error",
-        description: "Please generate an AI thumbnail for your ad unit before submitting",
+        description: "Please select at least one ad unit type",
         variant: "destructive"
       });
       return;
@@ -383,18 +383,20 @@ const VenueRegistration = () => {
       if (validatedData.weeklyPrice) pricingData.weekly = parseFloat(validatedData.weeklyPrice);
       if (validatedData.monthlyPrice) pricingData.monthly = parseFloat(validatedData.monthlyPrice);
 
-      // Get AI-generated thumbnail as the primary image
-      const aiThumbnail = selectedAdUnits.find(unit => unit.thumbnailUrl)?.thumbnailUrl;
-
-      // Build media_urls with AI thumbnail first, then user-uploaded images
-      const finalMediaUrls = aiThumbnail ? [aiThumbnail, ...uploadedImages.filter(url => url !== aiThumbnail)] : uploadedImages;
+      // Use user-uploaded images (first image as main)
+      const finalMediaUrls = uploadedImages;
+      
+      // Determine actual venue type (if "other", use custom value)
+      const actualVenueType = venueType === "other" ? customVenueType : venueType;
+      
       const venueData = {
         publisher_id: publisherId,
         title: validatedData.title,
         location: fullAddress,
         description: validatedData.description,
         specifications: {
-          venue_type: validatedData.venueType,
+          venue_type: actualVenueType,
+          custom_venue_type: venueType === "other" ? customVenueType : null,
           full_address: fullAddress,
           latitude: validatedData.latitude,
           longitude: validatedData.longitude,
@@ -402,7 +404,6 @@ const VenueRegistration = () => {
           contact_email: validatedData.contactEmail,
           contact_number: validatedData.contactPhone,
           operating_hours: validatedData.operatingHours,
-          amenities,
           allowed_ad_formats: allowedAdFormats,
           ad_units: selectedAdUnits.map(unit => ({
             type: unit.type,
@@ -507,9 +508,20 @@ const VenueRegistration = () => {
                     <SelectItem value="hotel">Hotel</SelectItem>
                     <SelectItem value="retail">Retail Store</SelectItem>
                     <SelectItem value="coworking">Co-Working Space</SelectItem>
+                    <SelectItem value="guerrilla">Guerrilla Ad Space</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
+                {venueType === "other" && (
+                  <div className="mt-2">
+                    <Input
+                      placeholder="Specify your venue type"
+                      value={customVenueType}
+                      onChange={(e) => setCustomVenueType(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Address Fields */}
@@ -625,28 +637,6 @@ const VenueRegistration = () => {
                 <AdUnitSelector selectedUnits={selectedAdUnits} onUnitsChange={setSelectedAdUnits} publisherId={publisherId} />
               </div>
 
-              {/* Amenities */}
-              <div>
-                <Label>Amenities (optional)</Label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                  {amenitiesList.map(amenity => (
-                    <div key={amenity} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={amenity}
-                        checked={amenities.includes(amenity)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setAmenities([...amenities, amenity]);
-                          } else {
-                            setAmenities(amenities.filter(a => a !== amenity));
-                          }
-                        }}
-                      />
-                      <label htmlFor={amenity} className="text-sm">{amenity}</label>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
               {/* Currency Selection */}
               <div>
