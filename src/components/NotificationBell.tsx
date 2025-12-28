@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
-import { Bell, Check, ExternalLink } from "lucide-react";
+import { Bell, Check, MoreHorizontal, Trash2, RotateCcw, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface Notification {
   id: string;
@@ -22,11 +24,17 @@ interface Notification {
   created_at: string;
 }
 
-export const NotificationBell = () => {
+interface NotificationBellProps {
+  onReportIssue?: (notificationId: string) => void;
+}
+
+export const NotificationBell = ({ onReportIssue }: NotificationBellProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -85,45 +93,71 @@ export const NotificationBell = () => {
     }
   };
 
-  const markAsRead = async (notificationId: string) => {
-    try {
-      await supabase
-        .from("notifications")
-        .update({ read: true })
-        .eq("id", notificationId);
+  // Mark all as read when dropdown opens
+  const handleDropdownOpen = async (open: boolean) => {
+    setIsOpen(open);
+    if (open && userId) {
+      const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
+      if (unreadIds.length > 0) {
+        try {
+          await supabase
+            .from("notifications")
+            .update({ read: true })
+            .in("id", unreadIds);
 
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === notificationId ? { ...n, read: true } : n
-        )
-      );
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
+          setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        } catch (error) {
+          console.error("Error marking all as read:", error);
+        }
+      }
     }
   };
 
-  const markAllAsRead = async () => {
-    if (!userId) return;
-
+  const markAsUnread = async (notificationId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       await supabase
         .from("notifications")
-        .update({ read: true })
-        .eq("user_id", userId)
-        .eq("read", false);
+        .update({ read: false })
+        .eq("id", notificationId);
 
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setNotifications(prev =>
+        prev.map(n => n.id === notificationId ? { ...n, read: false } : n)
+      );
+      toast({ title: "Marked as unread" });
     } catch (error) {
-      console.error("Error marking all notifications as read:", error);
+      console.error("Error marking as unread:", error);
+    }
+  };
+
+  const deleteNotification = async (notificationId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notificationId);
+
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      toast({ title: "Notification deleted" });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+    }
+  };
+
+  const handleReportIssue = async (notification: Notification, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onReportIssue) {
+      onReportIssue(notification.id);
+    } else {
+      // Navigate to messages with context
+      navigate(`/messages?report=${notification.id}`);
     }
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    markAsRead(notification.id);
-    
     // Navigate based on notification type
     if (notification.type === "order_approved") {
-      // Extract order/activation info from message if needed
       navigate("/advertiser-dashboard");
     } else if (notification.type === "payment_received") {
       navigate("/venue-publishers");
@@ -135,7 +169,7 @@ export const NotificationBell = () => {
   if (!userId) return null;
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={handleDropdownOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
@@ -151,17 +185,6 @@ export const NotificationBell = () => {
       <DropdownMenuContent align="end" className="w-80">
         <div className="flex items-center justify-between p-3 border-b">
           <h4 className="font-semibold">Notifications</h4>
-          {unreadCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs h-auto p-1"
-              onClick={markAllAsRead}
-            >
-              <Check className="h-3 w-3 mr-1" />
-              Mark all read
-            </Button>
-          )}
         </div>
         <ScrollArea className="h-[300px]">
           {loading ? (
@@ -174,33 +197,52 @@ export const NotificationBell = () => {
             </div>
           ) : (
             notifications.map((notification) => (
-              <DropdownMenuItem
+              <div
                 key={notification.id}
-                className={`flex flex-col items-start p-3 cursor-pointer ${
+                className={`flex items-start p-3 cursor-pointer hover:bg-muted/50 border-b last:border-b-0 ${
                   !notification.read ? "bg-primary/5" : ""
                 }`}
                 onClick={() => handleNotificationClick(notification)}
               >
-                <div className="flex items-start gap-2 w-full">
-                  <div
-                    className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                      !notification.read ? "bg-primary" : "bg-transparent"
-                    }`}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
-                      {notification.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(notification.created_at), "MMM d, h:mm a")}
-                    </p>
-                  </div>
-                  <ExternalLink className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                <div
+                  className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 mr-2 ${
+                    !notification.read ? "bg-primary" : "bg-transparent"
+                  }`}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">
+                    {notification.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {notification.message}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {format(new Date(notification.created_at), "MMM d, h:mm a")}
+                  </p>
                 </div>
-              </DropdownMenuItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={(e) => markAsUnread(notification.id, e)}>
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Mark as Unread
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => deleteNotification(notification.id, e)}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={(e) => handleReportIssue(notification, e)}>
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      Report Issue to Admin
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ))
           )}
         </ScrollArea>

@@ -52,6 +52,7 @@ import TicketValidation from "./pages/TicketValidation";
 import TicketMarket from "./pages/TicketMarket";
 import ValidateTicket from "./pages/ValidateTicket";
 import PublisherApprovalDashboard from "./pages/PublisherApprovalDashboard";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,8 @@ const App = () => (
           <Route path="/ticket/:uniqueCode" element={<TicketQRView />} />
           <Route path="/validate/:uniqueCode" element={<TicketValidation />} />
           <Route path="/validate" element={<ValidateTicket />} />
+          {/* Messaging */}
+          <Route path="/messages" element={<Messages />} />
           {/* Publisher Approval Dashboard */}
           <Route path="/publisher-dashboard" element={<PublisherApprovalDashboard />} />
           <Route path="/admin" element={<AdminLogin />} />

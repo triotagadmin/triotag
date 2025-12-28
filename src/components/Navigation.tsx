@@ -6,6 +6,7 @@ import { User } from "@supabase/supabase-js";
 import { Menu, X } from "lucide-react";
 import favicon from "/favicon.gif";
 import { NotificationBell } from "@/components/NotificationBell";
+import { MessengerBell } from "@/components/MessengerBell";
 export const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -103,11 +104,21 @@ export const Navigation = () => {
             <Link to={getDashboardLink()} onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
             </Link>
-            {!mobile && <NotificationBell />}
+            {!mobile && (
+              <>
+                <MessengerBell />
+                <NotificationBell />
+              </>
+            )}
             <Button variant="outline" size="sm" onClick={handleSignOut} className={`${baseLinkClass} ${mobile ? "w-full mt-2" : ""}`}>
               Log Out
             </Button>
-            {mobile && <div className="py-2"><NotificationBell /></div>}
+            {mobile && (
+              <div className="py-2 flex items-center gap-2">
+                <MessengerBell />
+                <NotificationBell />
+              </div>
+            )}
           </> : <>
             <Link to="/explore" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>MICRO AD SPACE</Button>

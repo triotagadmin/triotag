@@ -19,7 +19,9 @@ interface UnifiedListing {
   image?: string;
   publisher_name?: string;
   created_at: string;
-  venue_type?: string; // e.g., "Nightclub", "Barbershop", "Fitness Gym"
+  venue_type?: string;
+  weekly_price?: number;
+  monthly_price?: number;
 }
 
 const ExploreAll = () => {
@@ -68,7 +70,9 @@ const ExploreAll = () => {
           image: (v.media_urls as any)?.[0],
           publisher_name: (v.publisher_profiles_public as any)?.business_name,
           created_at: v.created_at || '',
-          venue_type: (v.specifications as any)?.venue_type || (v.specifications as any)?.type || 'Venue'
+          venue_type: (v.specifications as any)?.venue_type || (v.specifications as any)?.type || 'Venue',
+          weekly_price: (v.pricing as any)?.weekly,
+          monthly_price: (v.pricing as any)?.monthly,
         })),
         ...(servicesData || []).map(s => ({
           id: s.id,
@@ -79,7 +83,9 @@ const ExploreAll = () => {
           image: (s.media_urls as any)?.[0],
           publisher_name: (s.publisher_profiles_public as any)?.business_name,
           created_at: s.created_at || '',
-          venue_type: s.service_type || 'Service'
+          venue_type: s.service_type || 'Service',
+          weekly_price: (s.pricing as any)?.weekly,
+          monthly_price: (s.pricing as any)?.monthly,
         }))
       ];
 
@@ -225,6 +231,20 @@ const ExploreAll = () => {
                     <MapPin className="h-4 w-4" />
                     {listing.location}
                   </div>
+                  {(listing.weekly_price || listing.monthly_price) && (
+                    <div className="pt-2 border-t mt-2 space-y-1">
+                      {listing.weekly_price && (
+                        <p className="text-sm font-medium">
+                          Weekly: <span className="text-primary">${listing.weekly_price}</span>
+                        </p>
+                      )}
+                      {listing.monthly_price && (
+                        <p className="text-sm font-medium">
+                          Monthly: <span className="text-primary">${listing.monthly_price}</span>
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
