@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload, Eye, CheckCircle, Image as ImageIcon } from "lucide-react";
+import { Upload, CheckCircle, X, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 // Ad unit types with their display names and Prodigi SKU mappings
@@ -15,6 +15,8 @@ const AD_UNIT_TYPES = [
   { value: "wall-sticker", label: "Wall Sticker", sku: "GLOBAL-STI-SQU-4X4" },
   { value: "door-sticker", label: "Door Sticker", sku: "GLOBAL-STI-REC-3X4" },
   { value: "tabletop-qr-card", label: "Tabletop QR Card", sku: "GLOBAL-STI-SQU-2X2" },
+  { value: "mural-painting", label: "Mural Painting", sku: "GLOBAL-STI-SQU-4X4" },
+  { value: "wheat-paste", label: "Wheat Paste", sku: "GLOBAL-STI-SQU-4X4" },
 ];
 
 interface AdMockupPreviewProps {
@@ -29,115 +31,112 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [adUnitType, setAdUnitType] = useState("");
-  const [generating, setGenerating] = useState(false);
-  const [mockupImage, setMockupImage] = useState<string | null>(null);
   const [isApproved, setIsApproved] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    // Validate file type
-    if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
+    // Check limit
+    if (uploadedImages.length + files.length > 30) {
       toast({
-        title: "Invalid file type",
-        description: "Please upload a PNG or JPG image.",
+        title: "Too many files",
+        description: "Maximum 30 photos allowed.",
         variant: "destructive",
       });
       return;
     }
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please upload an image smaller than 10MB.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSelectedFile(file);
-    setMockupImage(null);
-    setIsApproved(false);
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setFilePreview(event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleGeneratePreview = async () => {
-    if (!selectedFile || !adUnitType) {
-      toast({
-        title: "Missing information",
-        description: "Please upload a design and select an ad unit type.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setGenerating(true);
-    setMockupImage(null);
-
+    setUploading(true);
+    
     try {
-      // Convert file to base64
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(selectedFile);
-      });
-
-      // Call the edge function
-      const { data, error } = await supabase.functions.invoke("generate-mockup", {
-        body: {
-          adUnitType,
-          imageBase64: base64,
-        },
-      });
-
-      if (error) {
-        throw new Error(error.message || "Failed to generate mockup");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Not authenticated",
+          description: "Please log in to upload files.",
+          variant: "destructive",
+        });
+        return;
       }
 
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      const uploadPromises = Array.from(files).map(async (file) => {
+        // Validate file type
+        if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
+          throw new Error(`Invalid file type: ${file.name}. Please upload PNG or JPG images.`);
+        }
 
-      setMockupImage(data.mockupImage);
-      
+        // Validate file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          throw new Error(`File too large: ${file.name}. Maximum 10MB per file.`);
+        }
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
+        const filePath = `${session.user.id}/activations/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('ad-space-media')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('ad-space-media')
+          .getPublicUrl(filePath);
+
+        return publicUrl;
+      });
+
+      const urls = await Promise.all(uploadPromises);
+      setUploadedImages(prev => [...prev, ...urls]);
+      setIsApproved(false);
+
       toast({
-        title: "Preview generated!",
-        description: "Review your ad mockup below.",
+        title: "Upload successful",
+        description: `${urls.length} image(s) uploaded.`,
       });
     } catch (error: any) {
-      console.error("Error generating mockup:", error);
+      console.error("Upload error:", error);
       toast({
-        title: "Generation failed",
-        description: error.message || "Failed to generate mockup preview.",
+        title: "Upload failed",
+        description: error.message || "Failed to upload images.",
         variant: "destructive",
       });
     } finally {
-      setGenerating(false);
+      setUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
+  const removeImage = (url: string) => {
+    setUploadedImages(prev => prev.filter(img => img !== url));
+    setIsApproved(false);
+  };
+
   const handleApprove = () => {
-    if (!filePreview || !adUnitType) return;
+    if (uploadedImages.length === 0 || !adUnitType) {
+      toast({
+        title: "Missing information",
+        description: "Please upload at least one design photo and select an ad unit type.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const selectedUnit = AD_UNIT_TYPES.find(u => u.value === adUnitType);
     
     setIsApproved(true);
     
-    // Pass the original artwork (not the mockup) to the order flow
+    // Pass the first uploaded image as the main artwork
     onApprove({
-      artworkUrl: filePreview,
+      artworkUrl: uploadedImages[0],
       adUnitType,
       selectedSku: selectedUnit?.sku || "GLOBAL-STI-SQU-4X4",
     });
@@ -154,17 +153,20 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
     <Card className="border-primary/20">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Eye className="h-5 w-5" />
-          AI Mockup Preview
+          <ImageIcon className="h-5 w-5" />
+          Upload Design Photos
         </CardTitle>
         <CardDescription>
-          Upload your design and see a photorealistic preview before ordering
+          Upload your design photos (max 30) and select the ad unit type
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* File Upload */}
         <div className="space-y-2">
-          <Label>Upload Your Design</Label>
+          <Label>Upload Your Design Photos *</Label>
+          <p className="text-sm text-muted-foreground">
+            {uploadedImages.length}/30 photos uploaded
+          </p>
           <div 
             className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
             onClick={() => fileInputRef.current?.click()}
@@ -173,40 +175,57 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
               ref={fileInputRef}
               type="file"
               accept="image/png,image/jpeg,image/jpg"
+              multiple
               onChange={handleFileChange}
               className="hidden"
+              disabled={uploading || uploadedImages.length >= 30}
             />
-            {filePreview ? (
-              <div className="space-y-3">
-                <img 
-                  src={filePreview} 
-                  alt="Uploaded design" 
-                  className="max-h-32 mx-auto rounded-lg object-contain"
-                />
-                <p className="text-sm text-muted-foreground">
-                  {selectedFile?.name}
-                </p>
-                <Button variant="outline" size="sm" type="button">
-                  Change File
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Click to upload PNG or JPG (max 10MB)
-                </p>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                {uploading ? "Uploading..." : "Click to upload PNG or JPG (max 10MB each, up to 30 photos)"}
+              </p>
+            </div>
           </div>
         </div>
 
+        {/* Uploaded Images Grid */}
+        {uploadedImages.length > 0 && (
+          <div className="grid grid-cols-3 gap-3">
+            {uploadedImages.map((url, index) => (
+              <div key={index} className="relative group">
+                <img 
+                  src={url} 
+                  alt={`Design ${index + 1}`} 
+                  className="w-full h-24 object-cover rounded-lg"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeImage(url);
+                  }}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+                {index === 0 && (
+                  <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded">
+                    Main
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Ad Unit Type Selection */}
         <div className="space-y-2">
-          <Label>Ad Unit Type</Label>
+          <Label>Ad Unit Type *</Label>
           <Select value={adUnitType} onValueChange={(value) => {
             setAdUnitType(value);
-            setMockupImage(null);
             setIsApproved(false);
           }}>
             <SelectTrigger>
@@ -227,57 +246,21 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
           )}
         </div>
 
-        {/* Generate Button */}
-        <Button
-          onClick={handleGeneratePreview}
-          disabled={generating || !selectedFile || !adUnitType}
-          className="w-full"
-          size="lg"
-        >
-          {generating ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Generating Preview...
-            </>
-          ) : (
-            <>
-              <ImageIcon className="h-4 w-4 mr-2" />
-              Generate Preview
-            </>
-          )}
-        </Button>
-
-        {/* Mockup Preview */}
-        {mockupImage && (
-          <div className="space-y-4 pt-4 border-t">
-            <Label className="text-lg font-semibold">AI-Generated Mockup</Label>
-            <div className="rounded-lg overflow-hidden border bg-muted">
-              <img 
-                src={mockupImage} 
-                alt="AI Generated Mockup" 
-                className="w-full h-auto"
-              />
-            </div>
-            <p className="text-sm text-muted-foreground text-center">
-              This is a preview only. Your original design will be used for printing.
-            </p>
-            
-            {!isApproved ? (
-              <Button
-                onClick={handleApprove}
-                className="w-full"
-                size="lg"
-                variant="default"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Approve for Print
-              </Button>
-            ) : (
-              <div className="flex items-center justify-center gap-2 p-4 bg-primary/10 rounded-lg text-primary">
-                <CheckCircle className="h-5 w-5" />
-                <span className="font-medium">Design Approved - Complete your order below</span>
-              </div>
-            )}
+        {/* Approve Button */}
+        {!isApproved ? (
+          <Button
+            onClick={handleApprove}
+            disabled={uploadedImages.length === 0 || !adUnitType}
+            className="w-full"
+            size="lg"
+          >
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Approve Design
+          </Button>
+        ) : (
+          <div className="flex items-center justify-center gap-2 p-4 bg-primary/10 rounded-lg text-primary">
+            <CheckCircle className="h-5 w-5" />
+            <span className="font-medium">Design Approved - Complete your order below</span>
           </div>
         )}
       </CardContent>
