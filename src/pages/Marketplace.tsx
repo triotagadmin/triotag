@@ -25,9 +25,8 @@ interface MarketplaceListing {
   image?: string;
   ownerName: string;
   createdAt: string;
-  monthlySubscriptionFee?: number;
-  annualSubscriptionFee?: number;
-  activationFee?: number;
+  weeklyPrice?: number;
+  monthlyPrice?: number;
 }
 const AD_UNITS = {
   venue: ["Table tent ads", "Table top sticker", "Window sticker"],
@@ -99,23 +98,29 @@ const Marketplace = () => {
 
       // Process venues (Selling)
       (venuesData || []).forEach(v => {
+        // Get pricing from ad_units in specifications
+        const specs = v.specifications as any;
+        const adUnits = specs?.ad_units || [];
+        const firstUnit = adUnits[0] || {};
+        const weeklyPrice = firstUnit.pricePerWeek || (v.pricing as any)?.weekly || 0;
+        const monthlyPrice = firstUnit.pricePerMonth || (v.pricing as any)?.monthly || 0;
+
         allListings.push({
           id: v.id,
           title: v.title,
           description: v.description || "",
-          budget: (v.pricing as any)?.weekly || (v.pricing as any)?.monthly || 0,
+          budget: weeklyPrice || monthlyPrice || 0,
           currency: "USD",
           location: v.location || "Not specified",
-          type: (v.specifications as any)?.venue_type || (v.specifications as any)?.type || "Venue",
+          type: specs?.venue_type || specs?.type || "Venue",
           category: "venue",
           listingType: "selling",
           adUnits: AD_UNITS.venue,
           image: Array.isArray(v.media_urls) ? (v.media_urls as string[])[0] : undefined,
           ownerName: (v.publisher_profiles_public as any)?.business_name || "Venue",
           createdAt: v.created_at || "",
-          monthlySubscriptionFee: (v as any).monthly_subscription_fee || 0,
-          annualSubscriptionFee: (v as any).annual_subscription_fee || 0,
-          activationFee: (v as any).activation_fee || 0
+          weeklyPrice,
+          monthlyPrice
         });
       });
 
@@ -379,11 +384,17 @@ const Marketplace = () => {
                       </span>
                     </div>
 
-                    {listing.category === "venue" && listing.activationFee !== undefined && listing.activationFee > 0 && <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
-                        <span className="font-medium">Activation Fee:</span> ${listing.activationFee} | 
-                        <span className="font-medium"> Monthly:</span> ${listing.monthlySubscriptionFee}/mo | 
-                        <span className="font-medium"> Annual:</span> ${listing.annualSubscriptionFee}/yr
-                      </div>}
+                    {listing.category === "venue" && (listing.weeklyPrice || listing.monthlyPrice) ? (
+                      <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                        {listing.weeklyPrice > 0 && (
+                          <span><span className="font-medium">Weekly:</span> ${listing.weeklyPrice}/wk</span>
+                        )}
+                        {listing.weeklyPrice > 0 && listing.monthlyPrice > 0 && " | "}
+                        {listing.monthlyPrice > 0 && (
+                          <span><span className="font-medium">Monthly:</span> ${listing.monthlyPrice}/mo</span>
+                        )}
+                      </div>
+                    ) : null}
 
                     {listing.adUnits.length > 0 && <div className="pt-2 border-t">
                         <p className="text-xs text-muted-foreground mb-2">Ad Units</p>
