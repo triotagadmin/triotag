@@ -501,12 +501,10 @@ const VenueRegistration = () => {
                     <SelectItem value="restaurant">Restaurant</SelectItem>
                     <SelectItem value="cafe">Café</SelectItem>
                     <SelectItem value="gym">Gym/Fitness Center</SelectItem>
-                    <SelectItem value="mall_corridor">Mall Corridor</SelectItem>
                     <SelectItem value="restroom">Restroom Stall</SelectItem>
                     <SelectItem value="salon">Salon/Spa</SelectItem>
                     <SelectItem value="bar">Bar/Lounge</SelectItem>
                     <SelectItem value="hotel">Hotel</SelectItem>
-                    <SelectItem value="retail">Retail Store</SelectItem>
                     <SelectItem value="coworking">Co-Working Space</SelectItem>
                     <SelectItem value="guerrilla">Guerrilla Ad Space</SelectItem>
                     <SelectItem value="other">Other</SelectItem>

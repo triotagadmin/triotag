@@ -577,24 +577,20 @@ const ActivateListing = () => {
               ) : (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Step 1: Design Your Ad</CardTitle>
+                    <CardTitle>Step 1: Upload Your Design</CardTitle>
                     <CardDescription>
-                      Upload your design and generate a preview mockup to see how your ad will look in the venue.
+                      Upload your design photos to proceed with your ad activation.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="space-y-2 text-sm text-muted-foreground">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
-                        Upload your design (PNG or JPG)
+                        Upload your design photos (PNG or JPG, max 30)
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
                         Select ad unit type (sticker, table tent, etc.)
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
-                        Generate AI mockup preview
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
