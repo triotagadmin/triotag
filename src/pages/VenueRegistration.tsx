@@ -14,9 +14,6 @@ import { z } from "zod";
 import { ArrowLeft, Upload, X, CheckCircle, AlertCircle } from "lucide-react";
 import { AdUnitSelector, AdUnitConfig } from "@/components/AdUnitSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { OperatingHoursSelector, OperatingHoursData, formatOperatingHoursToString, isValidOperatingHours } from "@/components/OperatingHoursSelector";
-import type { Json } from "@/integrations/supabase/types";
-
 interface DocumentUpload {
   type: string;
   label: string;
@@ -24,7 +21,6 @@ interface DocumentUpload {
   file: File | null;
   uploaded: boolean;
 }
-
 const venueSchema = z.object({
   title: z.string().trim().min(1, "Venue name is required").max(100),
   street: z.string().trim().min(1, "Street address is required").max(200),
@@ -38,6 +34,7 @@ const venueSchema = z.object({
   contactEmail: z.string().trim().email("Invalid email").max(255),
   contactPhone: z.string().trim().min(1, "Phone is required").max(20),
   venueType: z.string().min(1, "Venue type is required"),
+  operatingHours: z.string().trim().min(1, "Operating hours are required").max(500),
   description: z.string().trim().max(1000).optional(),
   weeklyPrice: z.string().trim().optional(),
   monthlyPrice: z.string().trim().optional()
@@ -68,7 +65,7 @@ const VenueRegistration = () => {
   const [contactPhone, setContactPhone] = useState("");
   const [venueType, setVenueType] = useState("");
   const [customVenueType, setCustomVenueType] = useState("");
-  const [operatingHours, setOperatingHours] = useState<OperatingHoursData | null>(null);
+  const [operatingHours, setOperatingHours] = useState("");
   const [description, setDescription] = useState("");
   const [weeklyPrice, setWeeklyPrice] = useState("");
   const [monthlyPrice, setMonthlyPrice] = useState("");
@@ -199,14 +196,7 @@ const VenueRegistration = () => {
       if (specs.custom_venue_type) {
         setCustomVenueType(specs.custom_venue_type);
       }
-      // Load operating hours - check if it's structured or legacy string
-      const savedHours = specs.operating_hours;
-      if (savedHours && typeof savedHours === 'object') {
-        setOperatingHours(savedHours as OperatingHoursData);
-      } else {
-        // Legacy string format - leave as null, user needs to re-enter
-        setOperatingHours(null);
-      }
+      setOperatingHours(specs.operating_hours || "");
       setAllowedAdFormats(specs.allowed_ad_formats || []);
       setContactPerson(specs.contact_person || "");
       setContactEmail(specs.contact_email || "");
@@ -358,16 +348,6 @@ const VenueRegistration = () => {
       return;
     }
 
-    // Validate operating hours
-    if (!isValidOperatingHours(operatingHours)) {
-      toast({
-        title: "Error",
-        description: "Please set valid operating hours for at least one day",
-        variant: "destructive"
-      });
-      return;
-    }
-
     // For new registrations, require at least one verification document
     const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
     if (!isEditing && filledDocs.length === 0) {
@@ -393,6 +373,7 @@ const VenueRegistration = () => {
         contactEmail,
         contactPhone,
         venueType,
+        operatingHours,
         description: description || undefined,
         weeklyPrice: weeklyPrice || undefined,
         monthlyPrice: monthlyPrice || undefined
@@ -413,7 +394,7 @@ const VenueRegistration = () => {
         title: validatedData.title,
         location: fullAddress,
         description: validatedData.description,
-        specifications: JSON.parse(JSON.stringify({
+        specifications: {
           venue_type: actualVenueType,
           custom_venue_type: venueType === "other" ? customVenueType : null,
           full_address: fullAddress,
@@ -422,8 +403,7 @@ const VenueRegistration = () => {
           contact_person: validatedData.contactPerson,
           contact_email: validatedData.contactEmail,
           contact_number: validatedData.contactPhone,
-          operating_hours: operatingHours,
-          operating_hours_display: formatOperatingHoursToString(operatingHours),
+          operating_hours: validatedData.operatingHours,
           allowed_ad_formats: allowedAdFormats,
           ad_units: selectedAdUnits.map(unit => ({
             type: unit.type,
@@ -434,7 +414,7 @@ const VenueRegistration = () => {
             customFormat: unit.customFormat || null,
             thumbnailUrl: unit.thumbnailUrl || null
           }))
-        })),
+        },
         pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
         media_urls: finalMediaUrls
       };
@@ -611,11 +591,9 @@ const VenueRegistration = () => {
               </div>
 
               {/* Operating Hours */}
-              <div className="border-t pt-6">
-                <OperatingHoursSelector
-                  value={operatingHours}
-                  onChange={setOperatingHours}
-                />
+              <div>
+                <Label htmlFor="operatingHours">Operating Hours *</Label>
+                <Textarea id="operatingHours" value={operatingHours} onChange={e => setOperatingHours(e.target.value)} placeholder="e.g., Monday-Friday: 9 AM - 10 PM, Saturday-Sunday: 10 AM - 11 PM" rows={3} required />
               </div>
 
               {/* Description */}

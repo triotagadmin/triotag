@@ -8,7 +8,7 @@ import { Search, MapPin, ArrowLeft } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface UnifiedListing {
   id: string;
@@ -26,7 +26,6 @@ interface UnifiedListing {
 
 const ExploreAll = () => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [listings, setListings] = useState<UnifiedListing[]>([]);
   const [filteredListings, setFilteredListings] = useState<UnifiedListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -204,20 +203,7 @@ const ExploreAll = () => {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredListings.map((listing) => (
-            <Card 
-              key={listing.id} 
-              className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => {
-                if (listing.type === 'venue') {
-                  navigate(`/venue/${listing.id}`);
-                } else {
-                  toast({
-                    title: "Service Details",
-                    description: `Viewing ${listing.title}`
-                  });
-                }
-              }}
-            >
+            <Card key={listing.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               {listing.image && (
                 <div className="aspect-video bg-muted overflow-hidden">
                   <img
@@ -260,7 +246,6 @@ const ExploreAll = () => {
                     </div>
                   )}
                 </div>
-                <Button className="w-full mt-4">View Details</Button>
               </CardContent>
             </Card>
           ))}

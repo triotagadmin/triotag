@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { ArrowLeft, MapPin, DollarSign, Clock, Phone, Lock } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Clock, Users, Phone, Mail, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { User } from "@supabase/supabase-js";
@@ -20,157 +20,90 @@ interface VenueDetails {
   approval_status: string;
   specifications: any;
   publisher_id: string;
-  publisher_profiles_public?: {
+  publisher_profiles: {
     user_id: string;
     business_name: string;
-  } | null;
+    contact_email: string;
+    contact_phone: string;
+  };
 }
 
 const VenueDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [venue, setVenue] = useState<VenueDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const lastFetchedIdRef = useRef<string | null>(null);
-
-  const isUuid = (value: string) =>
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-
   useEffect(() => {
-    // Guard: missing/invalid IDs should never hit the database.
-    if (!id || !isUuid(id)) {
-      setVenue(null);
-      setError("Invalid venue ID");
-      setLoading(false);
-      return;
-    }
-
-    // Guard: prevent duplicate fetches for the same ID (helps under React StrictMode).
-    if (lastFetchedIdRef.current === id) return;
-    lastFetchedIdRef.current = id;
-
-    let isMounted = true;
-
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Check auth status
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!isMounted) return;
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          const { data: roleData, error: roleError } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", session.user.id)
-            .maybeSingle();
-
-          if (!isMounted) return;
-          if (roleError) {
-            // Non-fatal: just treat as non-admin.
-            console.warn("Failed to load role:", roleError);
-            setIsAdmin(false);
-          } else {
-            setIsAdmin(roleData?.role === "admin");
-          }
-        } else {
-          setIsAdmin(false);
-        }
-
-        // Fetch venue details - use maybeSingle() to avoid throwing on no results
-        // Use publisher_profiles_public view to avoid RLS issues
-        const { data, error: venueError } = await supabase
-          .from("ad_spaces")
-          .select(
-            `
-            *,
-            publisher_profiles_public (
-              user_id,
-              business_name
-            )
-          `
-          )
-          .eq("id", id)
-          .maybeSingle();
-
-        if (!isMounted) return;
-
-        if (venueError) {
-          console.error("Error fetching venue:", venueError);
-          setVenue(null);
-          setError("Failed to load venue details");
-          toast({
-            title: "Error",
-            description: "Failed to load venue details",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        if (!data) {
-          setVenue(null);
-          setError("Venue not found");
-          return;
-        }
-
-        setVenue(data);
-      } catch (err: any) {
-        console.error("Unexpected error:", err);
-        if (!isMounted) return;
-
-        setVenue(null);
-        setError("An unexpected error occurred");
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred",
-          variant: "destructive",
-        });
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+    // Check auth status and admin role
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .single();
+        
+        setIsAdmin(roleData?.role === "admin");
       }
     };
+    
+    checkAuth();
+    
+    if (id) {
+      fetchVenueDetails();
+    }
+  }, [id]);
 
-    fetchData();
+  const fetchVenueDetails = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("ad_spaces")
+        .select(`
+          *,
+          publisher_profiles (
+            user_id,
+            business_name,
+            contact_email,
+            contact_phone
+          )
+        `)
+        .eq("id", id)
+        .single();
 
-    return () => {
-      isMounted = false;
-    };
-  }, [id, toast]);
+      if (error) throw error;
+      setVenue(data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to load venue details",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading venue details...</p>
-        </div>
+        <p className="text-muted-foreground">Loading venue details...</p>
       </div>
     );
   }
 
-  if (error || !venue) {
+  if (!venue) {
     return (
-      <div className="min-h-screen bg-muted/30">
-        <Navigation />
-        <div className="container mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <p className="text-destructive text-lg mb-2">{error || "Venue not found"}</p>
-            <p className="text-muted-foreground mb-6">The venue you're looking for doesn't exist or may have been removed.</p>
-            <Button onClick={() => navigate("/explore")}>Browse Venues</Button>
-          </div>
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Venue not found</p>
+          <Button onClick={() => navigate(-1)}>Go Back</Button>
         </div>
       </div>
     );
@@ -224,7 +157,7 @@ const VenueDetail = () => {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <h1 className="text-3xl font-semibold mb-2">{venue.title}</h1>
+                    <CardTitle className="text-3xl mb-2">{venue.title}</CardTitle>
                     {venue.specifications?.venue_type && (
                       <Badge variant="secondary" className="mb-4">
                         {venue.specifications.venue_type}
@@ -338,7 +271,7 @@ const VenueDetail = () => {
               <CardContent className="space-y-3">
                 <div>
                   <p className="text-sm text-muted-foreground">Business Name</p>
-                  <p className="font-medium">{venue.publisher_profiles_public?.business_name || "Publisher"}</p>
+                  <p className="font-medium">{venue.publisher_profiles?.business_name}</p>
                 </div>
 
                 {/* Contact info only visible to admins */}
@@ -355,6 +288,13 @@ const VenueDetail = () => {
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         <p className="font-medium">{venue.specifications.contact_number}</p>
+                      </div>
+                    )}
+
+                    {venue.publisher_profiles?.contact_email && (
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <p className="font-medium">{venue.publisher_profiles.contact_email}</p>
                       </div>
                     )}
                   </>
