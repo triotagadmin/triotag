@@ -20,12 +20,10 @@ interface VenueDetails {
   approval_status: string;
   specifications: any;
   publisher_id: string;
-  publisher_profiles: {
+  publisher_profiles_public?: {
     user_id: string;
     business_name: string;
-    contact_email: string;
-    contact_phone: string;
-  };
+  } | null;
 }
 
 const VenueDetail = () => {
@@ -69,15 +67,14 @@ const VenueDetail = () => {
         }
 
         // Fetch venue details - use maybeSingle() to avoid throwing on no results
+        // Use publisher_profiles_public view to avoid RLS issues
         const { data, error: venueError } = await supabase
           .from("ad_spaces")
           .select(`
             *,
-            publisher_profiles (
+            publisher_profiles_public (
               user_id,
-              business_name,
-              contact_email,
-              contact_phone
+              business_name
             )
           `)
           .eq("id", id)
@@ -310,7 +307,7 @@ const VenueDetail = () => {
               <CardContent className="space-y-3">
                 <div>
                   <p className="text-sm text-muted-foreground">Business Name</p>
-                  <p className="font-medium">{venue.publisher_profiles?.business_name}</p>
+                  <p className="font-medium">{venue.publisher_profiles_public?.business_name || "Publisher"}</p>
                 </div>
 
                 {/* Contact info only visible to admins */}
@@ -327,13 +324,6 @@ const VenueDetail = () => {
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         <p className="font-medium">{venue.specifications.contact_number}</p>
-                      </div>
-                    )}
-
-                    {venue.publisher_profiles?.contact_email && (
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <p className="font-medium">{venue.publisher_profiles.contact_email}</p>
                       </div>
                     )}
                   </>
