@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { ArrowLeft, MapPin, DollarSign, Clock, Users, Phone, Mail, Lock } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Clock, Phone, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { User } from "@supabase/supabase-js";
@@ -36,47 +36,71 @@ const VenueDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const lastFetchedIdRef = useRef<string | null>(null);
+
+  const isUuid = (value: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+
   useEffect(() => {
-    // Validate ID first
-    if (!id) {
+    // Guard: missing/invalid IDs should never hit the database.
+    if (!id || !isUuid(id)) {
+      setVenue(null);
       setError("Invalid venue ID");
       setLoading(false);
       return;
     }
 
+    // Guard: prevent duplicate fetches for the same ID (helps under React StrictMode).
+    if (lastFetchedIdRef.current === id) return;
+    lastFetchedIdRef.current = id;
+
     let isMounted = true;
 
     const fetchData = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         // Check auth status
-        const { data: { session } } = await supabase.auth.getSession();
-        if (isMounted) {
-          setUser(session?.user ?? null);
-        }
-        
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!isMounted) return;
+        setUser(session?.user ?? null);
+
         if (session?.user) {
-          const { data: roleData } = await supabase
+          const { data: roleData, error: roleError } = await supabase
             .from("user_roles")
             .select("role")
             .eq("user_id", session.user.id)
             .maybeSingle();
-          
-          if (isMounted) {
+
+          if (!isMounted) return;
+          if (roleError) {
+            // Non-fatal: just treat as non-admin.
+            console.warn("Failed to load role:", roleError);
+            setIsAdmin(false);
+          } else {
             setIsAdmin(roleData?.role === "admin");
           }
+        } else {
+          setIsAdmin(false);
         }
 
         // Fetch venue details - use maybeSingle() to avoid throwing on no results
         // Use publisher_profiles_public view to avoid RLS issues
         const { data, error: venueError } = await supabase
           .from("ad_spaces")
-          .select(`
+          .select(
+            `
             *,
             publisher_profiles_public (
               user_id,
               business_name
             )
-          `)
+          `
+          )
           .eq("id", id)
           .maybeSingle();
 
@@ -84,27 +108,34 @@ const VenueDetail = () => {
 
         if (venueError) {
           console.error("Error fetching venue:", venueError);
+          setVenue(null);
           setError("Failed to load venue details");
           toast({
             title: "Error",
             description: "Failed to load venue details",
             variant: "destructive",
           });
-        } else if (!data) {
-          setError("Venue not found");
-        } else {
-          setVenue(data);
+          return;
         }
+
+        if (!data) {
+          setVenue(null);
+          setError("Venue not found");
+          return;
+        }
+
+        setVenue(data);
       } catch (err: any) {
         console.error("Unexpected error:", err);
-        if (isMounted) {
-          setError("An unexpected error occurred");
-          toast({
-            title: "Error",
-            description: "An unexpected error occurred",
-            variant: "destructive",
-          });
-        }
+        if (!isMounted) return;
+
+        setVenue(null);
+        setError("An unexpected error occurred");
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          variant: "destructive",
+        });
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -193,7 +224,7 @@ const VenueDetail = () => {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-3xl mb-2">{venue.title}</CardTitle>
+                    <h1 className="text-3xl font-semibold mb-2">{venue.title}</h1>
                     {venue.specifications?.venue_type && (
                       <Badge variant="secondary" className="mb-4">
                         {venue.specifications.venue_type}
