@@ -32,78 +32,117 @@ const VenueDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [venue, setVenue] = useState<VenueDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check auth status and admin role
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .single();
+    // Validate ID first
+    if (!id) {
+      setError("Invalid venue ID");
+      setLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchData = async () => {
+      try {
+        // Check auth status
+        const { data: { session } } = await supabase.auth.getSession();
+        if (isMounted) {
+          setUser(session?.user ?? null);
+        }
         
-        setIsAdmin(roleData?.role === "admin");
+        if (session?.user) {
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+          
+          if (isMounted) {
+            setIsAdmin(roleData?.role === "admin");
+          }
+        }
+
+        // Fetch venue details - use maybeSingle() to avoid throwing on no results
+        const { data, error: venueError } = await supabase
+          .from("ad_spaces")
+          .select(`
+            *,
+            publisher_profiles (
+              user_id,
+              business_name,
+              contact_email,
+              contact_phone
+            )
+          `)
+          .eq("id", id)
+          .maybeSingle();
+
+        if (!isMounted) return;
+
+        if (venueError) {
+          console.error("Error fetching venue:", venueError);
+          setError("Failed to load venue details");
+          toast({
+            title: "Error",
+            description: "Failed to load venue details",
+            variant: "destructive",
+          });
+        } else if (!data) {
+          setError("Venue not found");
+        } else {
+          setVenue(data);
+        }
+      } catch (err: any) {
+        console.error("Unexpected error:", err);
+        if (isMounted) {
+          setError("An unexpected error occurred");
+          toast({
+            title: "Error",
+            description: "An unexpected error occurred",
+            variant: "destructive",
+          });
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
-    
-    checkAuth();
-    
-    if (id) {
-      fetchVenueDetails();
-    }
-  }, [id]);
 
-  const fetchVenueDetails = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("ad_spaces")
-        .select(`
-          *,
-          publisher_profiles (
-            user_id,
-            business_name,
-            contact_email,
-            contact_phone
-          )
-        `)
-        .eq("id", id)
-        .single();
+    fetchData();
 
-      if (error) throw error;
-      setVenue(data);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to load venue details",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [id, toast]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center">
-        <p className="text-muted-foreground">Loading venue details...</p>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading venue details...</p>
+        </div>
       </div>
     );
   }
 
-  if (!venue) {
+  if (error || !venue) {
     return (
-      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground mb-4">Venue not found</p>
-          <Button onClick={() => navigate(-1)}>Go Back</Button>
+      <div className="min-h-screen bg-muted/30">
+        <Navigation />
+        <div className="container mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <p className="text-destructive text-lg mb-2">{error || "Venue not found"}</p>
+            <p className="text-muted-foreground mb-6">The venue you're looking for doesn't exist or may have been removed.</p>
+            <Button onClick={() => navigate("/explore")}>Browse Venues</Button>
+          </div>
         </div>
       </div>
     );
