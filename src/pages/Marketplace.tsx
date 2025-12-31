@@ -28,12 +28,22 @@ interface MarketplaceListing {
   monthlySubscriptionFee?: number;
   annualSubscriptionFee?: number;
   activationFee?: number;
+  weeklyPrice?: number;
 }
-const AD_UNITS = {
-  venue: ["Table tent ads", "Table top sticker", "Window sticker"],
-  digital: ["Social media post", "Social media marketing", "Website banner ads", "In-app ads"],
-  agent: ["Guerrilla marketing", "Influencer", "Artist", "Agency"]
+const AD_UNIT_TYPE_LABELS: Record<string, string> = {
+  countertop_display: "Countertop Display",
+  table_tent: "Table Tent",
+  window_sticker: "Window Sticker",
+  tabletop_sticker: "Tabletop Sticker",
+  floor_decal: "Floor Decal",
+  wall_poster: "Wall Poster",
+  digital_screen: "Digital Screen",
+  mural_painting: "Mural Painting",
+  wheat_paste: "Wheat Paste",
 };
+
+const DIGITAL_AD_UNITS = ["Social media post", "Social media marketing", "Website banner ads", "In-app ads"];
+const AGENT_AD_UNITS = ["Guerrilla marketing", "Influencer", "Artist", "Agency"];
 const Marketplace = () => {
   const {
     toast
@@ -99,23 +109,32 @@ const Marketplace = () => {
 
       // Process venues (Selling)
       (venuesData || []).forEach(v => {
+        const specs = v.specifications as any;
+        const adUnitsFromDb = specs?.ad_units || [];
+        const adUnitLabels = adUnitsFromDb.map((unit: any) => 
+          AD_UNIT_TYPE_LABELS[unit.type] || unit.type
+        );
+        const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
+        const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
+
         allListings.push({
           id: v.id,
           title: v.title,
           description: v.description || "",
-          budget: (v.pricing as any)?.weekly || (v.pricing as any)?.monthly || 0,
+          budget: weeklyPrice,
           currency: "USD",
           location: v.location || "Not specified",
-          type: (v.specifications as any)?.venue_type || (v.specifications as any)?.type || "Venue",
+          type: specs?.venue_type || specs?.type || "Venue",
           category: "venue",
           listingType: "selling",
-          adUnits: AD_UNITS.venue,
+          adUnits: adUnitLabels.length > 0 ? adUnitLabels : ["No ad units specified"],
           image: Array.isArray(v.media_urls) ? (v.media_urls as string[])[0] : undefined,
           ownerName: (v.publisher_profiles_public as any)?.business_name || "Venue",
           createdAt: v.created_at || "",
-          monthlySubscriptionFee: (v as any).monthly_subscription_fee || 0,
+          monthlySubscriptionFee: monthlyPrice,
           annualSubscriptionFee: (v as any).annual_subscription_fee || 0,
-          activationFee: (v as any).activation_fee || 0
+          activationFee: (v as any).activation_fee || 0,
+          weeklyPrice: weeklyPrice
         });
       });
 
@@ -131,7 +150,7 @@ const Marketplace = () => {
           type: s.service_type || "Agent Service",
           category: "agent",
           listingType: "selling",
-          adUnits: AD_UNITS.agent,
+          adUnits: AGENT_AD_UNITS,
           image: Array.isArray(s.media_urls) ? (s.media_urls as string[])[0] : undefined,
           ownerName: (s.publisher_profiles_public as any)?.business_name || "Agent",
           createdAt: s.created_at || ""
@@ -150,7 +169,7 @@ const Marketplace = () => {
           type: "Digital Media",
           category: "digital",
           listingType: "selling",
-          adUnits: AD_UNITS.digital,
+          adUnits: DIGITAL_AD_UNITS,
           image: undefined,
           ownerName: d.business_name,
           createdAt: d.created_at || ""
@@ -379,10 +398,13 @@ const Marketplace = () => {
                       </span>
                     </div>
 
-                    {listing.category === "venue" && listing.activationFee !== undefined && listing.activationFee > 0 && <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
-                        <span className="font-medium">Activation Fee:</span> ${listing.activationFee} | 
-                        <span className="font-medium"> Monthly:</span> ${listing.monthlySubscriptionFee}/mo | 
-                        <span className="font-medium"> Annual:</span> ${listing.annualSubscriptionFee}/yr
+                    {listing.category === "venue" && (listing.weeklyPrice || listing.monthlySubscriptionFee) && <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 space-y-1">
+                        {listing.weeklyPrice !== undefined && listing.weeklyPrice > 0 && (
+                          <div><span className="font-medium">Weekly:</span> ${listing.weeklyPrice}/week</div>
+                        )}
+                        {listing.monthlySubscriptionFee !== undefined && listing.monthlySubscriptionFee > 0 && (
+                          <div><span className="font-medium">Monthly:</span> ${listing.monthlySubscriptionFee}/month</div>
+                        )}
                       </div>}
 
                     {listing.adUnits.length > 0 && <div className="pt-2 border-t">
