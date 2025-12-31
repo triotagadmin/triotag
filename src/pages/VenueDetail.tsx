@@ -10,6 +10,20 @@ import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { User } from "@supabase/supabase-js";
 
+const AD_UNIT_TYPE_LABELS: Record<string, string> = {
+  countertop_display: "Countertop Display",
+  wall_poster: "Wall Poster",
+  digital_screen: "Digital Screen",
+  table_tent: "Table Tent",
+  floor_decal: "Floor Decal",
+  window_cling: "Window Cling",
+  standee: "Standee",
+  napkin_holder: "Napkin Holder",
+  receipt_ad: "Receipt Ad",
+  mural_painting: "Mural Painting",
+  wheat_paste: "Wheat Paste",
+};
+
 interface VenueDetails {
   id: string;
   title: string;
@@ -224,7 +238,7 @@ const VenueDetail = () => {
                     <div className="space-y-2">
                       {venue.specifications.ad_units.map((unit: any, idx: number) => (
                         <div key={idx} className="flex items-center gap-2">
-                          <Badge variant="outline">{unit.type}</Badge>
+                          <Badge variant="outline">{AD_UNIT_TYPE_LABELS[unit.type] || unit.type}</Badge>
                           <span className="text-sm text-muted-foreground">
                             Qty: {unit.quantity} | ${unit.pricePerWeek}/week | ${unit.pricePerMonth}/month
                           </span>
