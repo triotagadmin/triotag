@@ -39,9 +39,8 @@ const AD_UNIT_TYPE_LABELS: Record<string, string> = {
   wall_poster: "Wall Poster",
   digital_screen: "Digital Screen",
   mural_painting: "Mural Painting",
-  wheat_paste: "Wheat Paste",
+  wheat_paste: "Wheat Paste"
 };
-
 const DIGITAL_AD_UNITS = ["Social media post", "Social media marketing", "Website banner ads", "In-app ads"];
 const AGENT_AD_UNITS = ["Guerrilla marketing", "Influencer", "Artist", "Agency"];
 const Marketplace = () => {
@@ -111,12 +110,9 @@ const Marketplace = () => {
       (venuesData || []).forEach(v => {
         const specs = v.specifications as any;
         const adUnitsFromDb = specs?.ad_units || [];
-        const adUnitLabels = adUnitsFromDb.map((unit: any) => 
-          AD_UNIT_TYPE_LABELS[unit.type] || unit.type
-        );
+        const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
         const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
         const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
-
         allListings.push({
           id: v.id,
           title: v.title,
@@ -391,20 +387,11 @@ const Marketplace = () => {
                       <span>{listing.location}</span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm">
-                      <DollarSign className="h-4 w-4 text-primary" />
-                      <span className="font-semibold">
-                        {formatBudget(listing.budget, listing.currency)}
-                      </span>
-                    </div>
+                    
 
                     {listing.category === "venue" && (listing.weeklyPrice || listing.monthlySubscriptionFee) && <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 space-y-1">
-                        {listing.weeklyPrice !== undefined && listing.weeklyPrice > 0 && (
-                          <div><span className="font-medium">Weekly:</span> ${listing.weeklyPrice}/week</div>
-                        )}
-                        {listing.monthlySubscriptionFee !== undefined && listing.monthlySubscriptionFee > 0 && (
-                          <div><span className="font-medium">Monthly:</span> ${listing.monthlySubscriptionFee}/month</div>
-                        )}
+                        {listing.weeklyPrice !== undefined && listing.weeklyPrice > 0 && <div><span className="font-medium">Weekly:</span> ${listing.weeklyPrice}/week</div>}
+                        {listing.monthlySubscriptionFee !== undefined && listing.monthlySubscriptionFee > 0 && <div><span className="font-medium">Monthly:</span> ${listing.monthlySubscriptionFee}/month</div>}
                       </div>}
 
                     {listing.adUnits.length > 0 && <div className="pt-2 border-t">
