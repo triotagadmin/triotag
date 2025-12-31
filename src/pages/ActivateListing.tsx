@@ -459,6 +459,34 @@ const ActivateListing = () => {
   const selectedPrintProduct = getProductById(selectedProductId);
   const orderTotal = selectedPrintProduct ? calculateOrderTotal(selectedPrintProduct, quantity) : 0;
 
+  // Calculate subscription price based on selected duration
+  const calculateSubscriptionPrice = () => {
+    if (!startDate || !endDate || !listing) return 0;
+    
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffWeeks = Math.ceil(diffDays / 7);
+    
+    // Get pricing from ad_units if available
+    const adUnits = listing.specifications?.ad_units || [];
+    const selectedAdUnit = adUnits.find((unit: any) => 
+      unit.type === approvedAdUnitType || unit.type === activationType
+    ) || adUnits[0];
+    
+    const weeklyRate = selectedAdUnit?.weekly_subscription_fee || listing.pricing?.weekly || 0;
+    const monthlyRate = selectedAdUnit?.monthly_subscription_fee || listing.pricing?.monthly || 0;
+    
+    // Use monthly rate if duration is 4+ weeks, otherwise use weekly
+    if (diffWeeks >= 4) {
+      const months = Math.ceil(diffWeeks / 4);
+      return months * monthlyRate;
+    }
+    
+    return diffWeeks * weeklyRate;
+  };
+
+  const subscriptionPrice = calculateSubscriptionPrice();
+
   if (loading) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center">
@@ -482,7 +510,7 @@ const ActivateListing = () => {
     ? listing.media_urls[0] 
     : null;
 
-  const activationPrice = listing.pricing?.weekly || listing.pricing?.monthly || 99;
+  const activationPrice = subscriptionPrice > 0 ? subscriptionPrice : (listing.pricing?.weekly || listing.pricing?.monthly || 0);
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -525,8 +553,16 @@ const ActivateListing = () => {
                 )}
               </div>
               <div className="text-right">
-                <p className="text-sm text-muted-foreground">Activation Fee</p>
-                <p className="text-2xl font-bold text-primary">${activationPrice}</p>
+                <p className="text-sm text-muted-foreground">
+                  {startDate && endDate ? (
+                    <>Subscription ({Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7))} week{Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7)) !== 1 ? 's' : ''})</>
+                  ) : (
+                    'Subscription Fee'
+                  )}
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  {subscriptionPrice > 0 ? `₱${subscriptionPrice.toLocaleString()}` : 'Select dates'}
+                </p>
               </div>
             </div>
           </CardContent>
