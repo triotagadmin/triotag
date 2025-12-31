@@ -260,19 +260,25 @@ const VenueDetail = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {venue.pricing?.weekly && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Per Week</p>
-                    <p className="text-2xl font-bold">${venue.pricing.weekly}</p>
-                  </div>
-                )}
-                {venue.pricing?.monthly && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Per Month</p>
-                    <p className="text-2xl font-bold">${venue.pricing.monthly}</p>
-                  </div>
-                )}
-                {!venue.pricing?.weekly && !venue.pricing?.monthly && (
+                {venue.specifications?.ad_units && venue.specifications.ad_units.length > 0 ? (
+                  venue.specifications.ad_units.map((unit: any, idx: number) => (
+                    <div key={idx} className="border-b border-border pb-3 last:border-0 last:pb-0">
+                      <p className="font-medium mb-2">{AD_UNIT_TYPE_LABELS[unit.type] || unit.type}</p>
+                      {unit.pricePerWeek && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Weekly</span>
+                          <span className="font-semibold">${unit.pricePerWeek}</span>
+                        </div>
+                      )}
+                      {unit.pricePerMonth && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Monthly</span>
+                          <span className="font-semibold">${unit.pricePerMonth}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
                   <p className="text-muted-foreground">Contact for pricing</p>
                 )}
               </CardContent>
