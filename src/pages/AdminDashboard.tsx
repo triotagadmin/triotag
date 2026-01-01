@@ -1019,10 +1019,6 @@ export default function AdminDashboard() {
               <Bell className="w-4 h-4 mr-2" />
               News
             </Button>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
           </div>
         </div>
       </header>
