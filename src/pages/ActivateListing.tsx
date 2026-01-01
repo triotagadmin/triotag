@@ -60,6 +60,7 @@ const ActivateListing = () => {
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [submittingApproval, setSubmittingApproval] = useState(false);
   const [rejectionReason, setRejectionReason] = useState<string | undefined>();
+  const [approvedTotalAmount, setApprovedTotalAmount] = useState<number>(0);
 
   // Print order state - Manual Admin System
   const [selectedProductId, setSelectedProductId] = useState<string>("");
@@ -141,6 +142,7 @@ const ActivateListing = () => {
         setSelectedProduct(data.ad_unit_sku || "");
         setQuantity(data.quantity || 1);
         setRejectionReason(data.rejection_reason || undefined);
+        setApprovedTotalAmount(data.total_amount || 0);
         
         if (data.start_date) setStartDate(new Date(data.start_date));
         if (data.end_date) setEndDate(new Date(data.end_date));
@@ -561,7 +563,11 @@ const ActivateListing = () => {
                   )}
                 </p>
                 <p className="text-2xl font-bold text-primary">
-                  {subscriptionPrice > 0 ? `₱${subscriptionPrice.toLocaleString()}` : '₱0'}
+                  {approvedTotalAmount > 0 
+                    ? `₱${approvedTotalAmount.toLocaleString()}` 
+                    : subscriptionPrice > 0 
+                      ? `₱${subscriptionPrice.toLocaleString()}` 
+                      : '₱0'}
                 </p>
               </div>
             </div>
