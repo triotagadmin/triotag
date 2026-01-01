@@ -555,13 +555,13 @@ const ActivateListing = () => {
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">
                   {startDate && endDate ? (
-                    <>Subscription ({Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7))} week{Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7)) !== 1 ? 's' : ''})</>
+                    <>Total Booking Fee ({Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7))} week{Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7)) !== 1 ? 's' : ''})</>
                   ) : (
-                    'Subscription Fee'
+                    'Total Booking Fee'
                   )}
                 </p>
                 <p className="text-2xl font-bold text-primary">
-                  {subscriptionPrice > 0 ? `₱${subscriptionPrice.toLocaleString()}` : 'Select dates'}
+                  {subscriptionPrice > 0 ? `₱${subscriptionPrice.toLocaleString()}` : '₱0'}
                 </p>
               </div>
             </div>
