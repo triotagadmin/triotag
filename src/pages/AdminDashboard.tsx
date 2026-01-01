@@ -1025,19 +1025,10 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="marketplace" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="marketplace">
               <ShoppingCart className="w-4 h-4 mr-2" />
               Marketplace
-            </TabsTrigger>
-            <TabsTrigger value="tickets">
-              <Ticket className="w-4 h-4 mr-2" />
-              Tickets
-              {ticketSubmissions.filter(t => t.status === "pending").length > 0 && (
-                <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
-                  {ticketSubmissions.filter(t => t.status === "pending").length}
-                </Badge>
-              )}
             </TabsTrigger>
             <TabsTrigger value="publishers">
               <Building className="w-4 h-4 mr-2" />
@@ -1149,62 +1140,6 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Tickets Tab */}
-          <TabsContent value="tickets" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ticket Submissions</CardTitle>
-                <CardDescription>Manage ticket submissions from /ticket-creator. Approve to make visible on /tickets page.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {totalTicketSlides > 1 && (
-                  <div className="flex items-center justify-center gap-4 mb-6">
-                    <Button variant="outline" size="icon" onClick={() => setTicketSlide(prev => (prev - 1 + totalTicketSlides) % totalTicketSlides)}>
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <div className="flex gap-2">
-                      {Array.from({ length: totalTicketSlides }).map((_, idx) => (
-                        <button key={idx} onClick={() => setTicketSlide(idx)} className={`w-2 h-2 rounded-full transition-colors ${idx === ticketSlide ? "bg-primary" : "bg-muted-foreground/30"}`} />
-                      ))}
-                    </div>
-                    <Button variant="outline" size="icon" onClick={() => setTicketSlide(prev => (prev + 1) % totalTicketSlides)}>
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {getCurrentTicketSlide().length === 0 ? (
-                    <div className="col-span-full text-center py-8 text-muted-foreground">No ticket submissions found</div>
-                  ) : (
-                    getCurrentTicketSlide().map((ticket: any) => (
-                      <Card key={ticket.id} className="overflow-hidden">
-                        <CardHeader className="pb-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <CardTitle className="text-sm line-clamp-1">{ticket.title}</CardTitle>
-                            {getStatusBadge(ticket.status)}
-                          </div>
-                          <Badge variant="outline" className="text-xs">{ticket.category}</Badge>
-                        </CardHeader>
-                        <CardContent className="pt-0 space-y-2">
-                          <p className="text-xs text-muted-foreground">{new Date(ticket.event_date).toLocaleDateString()} • {ticket.location}</p>
-                          <p className="text-sm font-semibold">${ticket.price} × {ticket.quantity_available} tickets</p>
-                          <div className="flex gap-2 pt-2">
-                            {ticket.status === "pending" && (
-                              <>
-                                <Button size="sm" variant="default" onClick={() => handleTicketAction(ticket, "approve")}><CheckCircle className="w-4 h-4" /></Button>
-                                <Button size="sm" variant="destructive" onClick={() => handleTicketAction(ticket, "reject")}><XCircle className="w-4 h-4" /></Button>
-                              </>
-                            )}
-                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDeleteTicket(ticket.id)}><Trash2 className="w-4 h-4" /></Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* Publishers Tab */}
           <TabsContent value="publishers" className="space-y-6">
