@@ -47,7 +47,8 @@ import {
   Mail,
   ExternalLink,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Calendar
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
@@ -90,6 +91,15 @@ interface PublisherContact {
   location: string | null;
 }
 
+interface ActivationDetails {
+  start_date: string | null;
+  end_date: string | null;
+}
+
+interface AdvertiserInfo {
+  email: string;
+}
+
 const STATUS_CONFIG: Record<PrintOrderStatus, { label: string; color: string; icon: React.ReactNode }> = {
   pending_admin: { label: "Pending Review", color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20", icon: <Clock className="h-4 w-4" /> },
   in_production: { label: "In Production", color: "bg-blue-500/10 text-blue-500 border-blue-500/20", icon: <Package className="h-4 w-4" /> },
@@ -111,6 +121,8 @@ const AdminOrders = () => {
   const [newOrderCount, setNewOrderCount] = useState(0);
   const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
   const [publisherContact, setPublisherContact] = useState<PublisherContact | null>(null);
+  const [activationDetails, setActivationDetails] = useState<ActivationDetails | null>(null);
+  const [advertiserInfo, setAdvertiserInfo] = useState<AdvertiserInfo | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   
   const navigate = useNavigate();
@@ -213,49 +225,70 @@ const AdminOrders = () => {
     setNewPrice(order.total_price?.toString() || "");
     setListingDetails(null);
     setPublisherContact(null);
+    setActivationDetails(null);
+    setAdvertiserInfo(null);
     setShowOrderDialog(true);
+    setLoadingDetails(true);
 
-    // Fetch listing and publisher details if activation_id exists
-    if (order.activation_id) {
-      setLoadingDetails(true);
-      try {
-        // Get activation to find ad_space_id
+    try {
+      // Fetch advertiser email
+      const { data: advertiserProfile } = await supabase
+        .from("advertiser_profiles")
+        .select("contact_email")
+        .eq("user_id", order.advertiser_id)
+        .single();
+
+      if (advertiserProfile) {
+        setAdvertiserInfo({ email: advertiserProfile.contact_email });
+      }
+
+      // Fetch listing, publisher, and activation details if activation_id exists
+      if (order.activation_id) {
+        // Get activation to find ad_space_id and booking schedule
         const { data: activation } = await supabase
           .from("activations")
-          .select("ad_space_id, publisher_id")
+          .select("ad_space_id, publisher_id, start_date, end_date")
           .eq("id", order.activation_id)
           .single();
 
-        if (activation?.ad_space_id) {
-          // Fetch listing details
-          const { data: adSpace } = await supabase
-            .from("ad_spaces")
-            .select("id, title, location, description")
-            .eq("id", activation.ad_space_id)
-            .single();
+        if (activation) {
+          // Set booking schedule
+          setActivationDetails({
+            start_date: activation.start_date,
+            end_date: activation.end_date,
+          });
 
-          if (adSpace) {
-            setListingDetails(adSpace);
+          if (activation.ad_space_id) {
+            // Fetch listing details
+            const { data: adSpace } = await supabase
+              .from("ad_spaces")
+              .select("id, title, location, description")
+              .eq("id", activation.ad_space_id)
+              .single();
+
+            if (adSpace) {
+              setListingDetails(adSpace);
+            }
+          }
+
+          if (activation.publisher_id) {
+            // Fetch publisher contact info - using publisher_id which is user_id
+            const { data: publisher } = await supabase
+              .from("publisher_profiles")
+              .select("id, business_name, contact_email, contact_phone, location")
+              .eq("user_id", activation.publisher_id)
+              .single();
+
+            if (publisher) {
+              setPublisherContact(publisher);
+            }
           }
         }
-
-        if (activation?.publisher_id) {
-          // Fetch publisher contact info - using publisher_id which is user_id
-          const { data: publisher } = await supabase
-            .from("publisher_profiles")
-            .select("id, business_name, contact_email, contact_phone, location")
-            .eq("user_id", activation.publisher_id)
-            .single();
-
-          if (publisher) {
-            setPublisherContact(publisher);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching details:", error);
-      } finally {
-        setLoadingDetails(false);
       }
+    } catch (error) {
+      console.error("Error fetching details:", error);
+    } finally {
+      setLoadingDetails(false);
     }
   };
 
@@ -586,7 +619,43 @@ const AdminOrders = () => {
                   </div>
                 </div>
 
-                {/* Listing Details */}
+                {/* Advertiser Email & Booking Schedule */}
+                {loadingDetails ? null : (advertiserInfo || activationDetails) && (
+                  <div className="grid grid-cols-2 gap-4">
+                    {advertiserInfo && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          Requester Email
+                        </h4>
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          <a href={`mailto:${advertiserInfo.email}`} className="text-primary hover:underline">
+                            {advertiserInfo.email}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    {activationDetails && (activationDetails.start_date || activationDetails.end_date) && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          Booking Schedule
+                        </h4>
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          {activationDetails.start_date && activationDetails.end_date ? (
+                            <p>
+                              {format(new Date(activationDetails.start_date), "MMM d, yyyy")} — {format(new Date(activationDetails.end_date), "MMM d, yyyy")}
+                            </p>
+                          ) : activationDetails.start_date ? (
+                            <p>From {format(new Date(activationDetails.start_date), "MMM d, yyyy")}</p>
+                          ) : activationDetails.end_date ? (
+                            <p>Until {format(new Date(activationDetails.end_date), "MMM d, yyyy")}</p>
+                          ) : null}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
                 {loadingDetails ? (
                   <div className="flex items-center justify-center py-4">
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
