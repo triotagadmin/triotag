@@ -75,6 +75,30 @@ const CampaignBuilder = () => {
 
       if (campaignError) throw campaignError;
 
+      // Send email notification
+      try {
+        await supabase.functions.invoke("submit-campaign", {
+          body: {
+            companyName: profile.id,
+            contactName: session.user.email,
+            email: session.user.email,
+            phone: "",
+            campaignName: formData.campaign_name,
+            category: formData.campaign_type,
+            adUnit: "N/A",
+            budget: formData.budget_amount,
+            targetAudience: formData.target_audience || "Not specified",
+            location: formData.location || "Not specified",
+            startDate: formData.start_date,
+            endDate: formData.end_date,
+            description: formData.campaign_description || "No description provided",
+          },
+        });
+      } catch (emailError) {
+        console.error("Failed to send email notification:", emailError);
+        // Don't fail the submission if email fails
+      }
+
       toast({
         title: "Campaign created!",
         description: "Your campaign has been submitted for review.",
