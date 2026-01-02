@@ -5,131 +5,96 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { 
-  BarChart3, 
-  ShoppingCart, 
-  Search, 
-  Mail, 
-  Receipt, 
-  Settings,
-  Plus,
-  MapPin,
-  Globe,
-  Users,
-  TrendingUp,
-  Calendar,
-  Printer,
-  Ticket
-} from "lucide-react";
+import { BarChart3, ShoppingCart, Search, Mail, Receipt, Settings, Plus, MapPin, Globe, Users, TrendingUp, Calendar, Printer, Ticket } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
-
 const AdvertiserDashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
       }
-      
+
       // Verify user has advertiser role
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .single();
-      
+      const {
+        data: roles
+      } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
       if (!roles || roles.role !== "advertiser") {
         navigate("/dashboard");
         return;
       }
-      
       setUser(session.user);
       setLoading(false);
     };
-
     checkUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) {
         navigate("/auth");
       } else {
         setUser(session.user);
       }
     });
-
     return () => subscription.unsubscribe();
   }, [navigate]);
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast({
       title: "Signed out",
-      description: "You have been signed out successfully.",
+      description: "You have been signed out successfully."
     });
     navigate("/");
   };
-
   const handleResendVerification = async () => {
     if (!user?.email) return;
-    
     try {
-      const { error } = await supabase.auth.resend({
+      const {
+        error
+      } = await supabase.auth.resend({
         type: 'signup',
         email: user.email,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/`
         }
       });
-
       if (error) throw error;
-
       toast({
         title: "Verification email sent",
-        description: "Please check your inbox for the verification link.",
+        description: "Please check your inbox for the verification link."
       });
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-muted/30">
+  return <div className="min-h-screen bg-muted/30">
       <Navigation />
 
       {/* Ticket Creator Banner */}
       <div className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 border-b border-border">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Ticket className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium">Create and sell event tickets</span>
-          </div>
-          <Button 
-            onClick={() => navigate("/ticket-creator")}
-            className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 text-white"
-          >
-            <Ticket className="h-4 w-4 mr-2" />
-            Ticket Creator
-          </Button>
-        </div>
+        
       </div>
 
       <div className="container mx-auto px-6 py-12">
@@ -140,8 +105,7 @@ const AdvertiserDashboard = () => {
           <p className="text-muted-foreground">{user?.email}</p>
         </div>
 
-        {user && !user.email_confirmed_at && (
-          <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+        {user && !user.email_confirmed_at && <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
             <CardHeader>
               <CardTitle className="text-yellow-800 dark:text-yellow-200">Email Verification Required</CardTitle>
               <CardDescription className="text-yellow-700 dark:text-yellow-300">
@@ -153,8 +117,7 @@ const AdvertiserDashboard = () => {
                 Resend Verification Email
               </Button>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
         {/* Overview Section */}
         <div className="mb-12">
@@ -208,45 +171,15 @@ const AdvertiserDashboard = () => {
               <Plus className="h-4 w-4" />
               Create Campaign
             </Button>
-            <Button onClick={() => navigate("/order-prints")} size="lg" variant="secondary" className="gap-2">
-              <Printer className="h-4 w-4" />
-              Order Print Materials
-            </Button>
-            <Button onClick={() => navigate("/publishers")} variant="outline" size="lg">
-              Browse Publishers
-            </Button>
+            
+            
           </div>
         </div>
 
         {/* My Campaigns Section */}
         <div className="mb-12">
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <BarChart3 className="h-6 w-6" />
-            My Campaigns
-          </h3>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Campaign Inventory</CardTitle>
-                  <CardDescription>View and manage all your advertising campaigns</CardDescription>
-                </div>
-                <Button onClick={() => navigate("/campaign-builder")}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Campaign
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-4">No campaigns yet</p>
-                <Button onClick={() => navigate("/campaign-builder")}>
-                  Create Your First Campaign
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          
+          
         </div>
 
         {/* My Bookings Section */}
@@ -269,66 +202,12 @@ const AdvertiserDashboard = () => {
         </div>
 
         {/* Browse & Discover Section */}
-        <div className="mb-12">
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Search className="h-6 w-6" />
-            Browse & Discover
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card 
-              className="hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => navigate("/publishers?type=venue")}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Featured Venues
-                </CardTitle>
-                <CardDescription>
-                  Physical locations for your ads
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card 
-              className="hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => navigate("/publishers?type=digital")}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  Digital Media
-                </CardTitle>
-                <CardDescription>
-                  Online platforms and websites
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card 
-              className="hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => navigate("/publishers?type=agent")}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Agent Publishers
-                </CardTitle>
-                <CardDescription>
-                  Influencers, models, and artists
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        </div>
+        
 
         {/* Quick Actions Grid */}
         <div className="grid md:grid-cols-2 gap-6">
           {/* Order Print Materials */}
-          <Card 
-            className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate("/order-prints")}
-          >
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/order-prints")}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Printer className="h-5 w-5" />
@@ -341,7 +220,7 @@ const AdvertiserDashboard = () => {
             <CardContent>
               <p className="text-muted-foreground mb-4">Order professional print ad units</p>
               <Button variant="outline">
-                Start Order
+                ​ORDER  
               </Button>
             </CardContent>
           </Card>
@@ -403,8 +282,6 @@ const AdvertiserDashboard = () => {
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AdvertiserDashboard;
