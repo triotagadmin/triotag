@@ -21,13 +21,30 @@ export type Database = {
           ad_space_id: string
           ad_unit_sku: string | null
           advertiser_id: string
+          brand_category: string | null
+          campaign_manager_email: string | null
+          campaign_manager_name: string | null
+          campaign_manager_phone: string | null
+          campaign_objective: string | null
+          competitive_conflict_declaration: string | null
+          compliance_completed: boolean | null
           created_at: string | null
+          creative_compliance_confirmed: boolean | null
+          emergency_contact: string | null
           end_date: string | null
+          estimated_publisher_payout: number | null
           id: string
+          legal_permissions_urls: string[] | null
+          onsite_installation_contact: string | null
           print_order_id: string | null
           publisher_id: string
           quantity: number | null
           rejection_reason: string | null
+          reporting_frequency: string | null
+          require_installation_photos: boolean | null
+          require_proof_of_play: boolean | null
+          restricted_content: string[] | null
+          sensitive_theme_flag: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["activation_status"]
           total_amount: number | null
@@ -41,13 +58,30 @@ export type Database = {
           ad_space_id: string
           ad_unit_sku?: string | null
           advertiser_id: string
+          brand_category?: string | null
+          campaign_manager_email?: string | null
+          campaign_manager_name?: string | null
+          campaign_manager_phone?: string | null
+          campaign_objective?: string | null
+          competitive_conflict_declaration?: string | null
+          compliance_completed?: boolean | null
           created_at?: string | null
+          creative_compliance_confirmed?: boolean | null
+          emergency_contact?: string | null
           end_date?: string | null
+          estimated_publisher_payout?: number | null
           id?: string
+          legal_permissions_urls?: string[] | null
+          onsite_installation_contact?: string | null
           print_order_id?: string | null
           publisher_id: string
           quantity?: number | null
           rejection_reason?: string | null
+          reporting_frequency?: string | null
+          require_installation_photos?: boolean | null
+          require_proof_of_play?: boolean | null
+          restricted_content?: string[] | null
+          sensitive_theme_flag?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["activation_status"]
           total_amount?: number | null
@@ -61,13 +95,30 @@ export type Database = {
           ad_space_id?: string
           ad_unit_sku?: string | null
           advertiser_id?: string
+          brand_category?: string | null
+          campaign_manager_email?: string | null
+          campaign_manager_name?: string | null
+          campaign_manager_phone?: string | null
+          campaign_objective?: string | null
+          competitive_conflict_declaration?: string | null
+          compliance_completed?: boolean | null
           created_at?: string | null
+          creative_compliance_confirmed?: boolean | null
+          emergency_contact?: string | null
           end_date?: string | null
+          estimated_publisher_payout?: number | null
           id?: string
+          legal_permissions_urls?: string[] | null
+          onsite_installation_contact?: string | null
           print_order_id?: string | null
           publisher_id?: string
           quantity?: number | null
           rejection_reason?: string | null
+          reporting_frequency?: string | null
+          require_installation_photos?: boolean | null
+          require_proof_of_play?: boolean | null
+          restricted_content?: string[] | null
+          sensitive_theme_flag?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["activation_status"]
           total_amount?: number | null

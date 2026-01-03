@@ -1,0 +1,266 @@
+import { useState, useEffect, useMemo } from "react";
+import { format, differenceInDays, differenceInHours } from "date-fns";
+import { CalendarIcon, Clock, Calculator, DollarSign } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { shouldDisableDate, getMinimumBookingDate } from "@/lib/businessDays";
+
+interface BookingSchedulerProps {
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+  onDatesChange: (start: Date | undefined, end: Date | undefined) => void;
+  pricing: any;
+  adUnitType?: string;
+  quantity?: number;
+  onEstimatedPayoutChange?: (payout: number) => void;
+}
+
+export function BookingScheduler({
+  startDate,
+  endDate,
+  onDatesChange,
+  pricing,
+  adUnitType,
+  quantity = 1,
+  onEstimatedPayoutChange,
+}: BookingSchedulerProps) {
+  const minDate = getMinimumBookingDate();
+
+  const handleStartDateSelect = (date: Date | undefined) => {
+    onDatesChange(date, endDate);
+  };
+
+  const handleEndDateSelect = (date: Date | undefined) => {
+    onDatesChange(startDate, date);
+  };
+
+  // Calculate duration
+  const duration = useMemo(() => {
+    if (!startDate || !endDate) return null;
+    
+    const days = differenceInDays(endDate, startDate) + 1;
+    const hours = differenceInHours(endDate, startDate);
+    const weeks = Math.ceil(days / 7);
+    
+    return { days, hours, weeks };
+  }, [startDate, endDate]);
+
+  // Calculate estimated payout
+  const estimatedPayout = useMemo(() => {
+    if (!startDate || !endDate || !pricing) return 0;
+
+    const days = differenceInDays(endDate, startDate) + 1;
+    const weeks = Math.ceil(days / 7);
+
+    // Get pricing from ad_units if available
+    const adUnits = pricing?.ad_units || [];
+    const selectedAdUnit = adUnits.find((unit: any) => unit.type === adUnitType) || adUnits[0];
+
+    const weeklyRate = selectedAdUnit?.weekly_subscription_fee || pricing?.weekly || 0;
+    const monthlyRate = selectedAdUnit?.monthly_subscription_fee || pricing?.monthly || 0;
+    const dailyRate = pricing?.daily || weeklyRate / 7;
+
+    let total = 0;
+
+    // Calculate based on duration
+    if (weeks >= 4) {
+      const months = Math.ceil(weeks / 4);
+      total = months * monthlyRate;
+    } else if (weeks >= 1) {
+      total = weeks * weeklyRate;
+    } else {
+      total = days * dailyRate;
+    }
+
+    // Multiply by quantity if applicable
+    total = total * quantity;
+
+    return total;
+  }, [startDate, endDate, pricing, adUnitType, quantity]);
+
+  // Notify parent of payout changes
+  useEffect(() => {
+    if (onEstimatedPayoutChange) {
+      onEstimatedPayoutChange(estimatedPayout);
+    }
+  }, [estimatedPayout, onEstimatedPayoutChange]);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CalendarIcon className="h-5 w-5 text-primary" />
+          Booking Schedule & Duration
+        </CardTitle>
+        <CardDescription>
+          Select your campaign dates. A 5 business day leeway is required for printing and delivery.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Earliest available date info */}
+        <div className="p-4 bg-muted/50 rounded-lg text-sm text-muted-foreground">
+          <p className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Earliest available date: <span className="font-medium text-foreground">{format(minDate, "PPP")}</span>
+          </p>
+        </div>
+
+        {/* Date pickers */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Start Date & Time</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !startDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {startDate ? format(startDate, "PPP") : "Select start date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={handleStartDateSelect}
+                  disabled={shouldDisableDate}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="space-y-2">
+            <Label>End Date & Time</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !endDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {endDate ? format(endDate, "PPP") : "Select end date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={handleEndDateSelect}
+                  disabled={(date) => shouldDisableDate(date) || (startDate ? date < startDate : false)}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        {/* Duration display */}
+        {duration && (
+          <div className="space-y-4">
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <div className="flex items-center gap-2 mb-3">
+                <Calculator className="h-4 w-4 text-primary" />
+                <span className="font-medium">Total Duration (Auto-calculated)</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary" className="text-lg py-1 px-3">
+                  {duration.days} day{duration.days !== 1 ? 's' : ''}
+                </Badge>
+                {duration.weeks > 0 && (
+                  <Badge variant="secondary" className="text-lg py-1 px-3">
+                    {duration.weeks} week{duration.weeks !== 1 ? 's' : ''}
+                  </Badge>
+                )}
+                <Badge variant="outline" className="text-lg py-1 px-3">
+                  ~{duration.hours.toLocaleString()} hours
+                </Badge>
+              </div>
+            </div>
+
+            {/* Preview of active campaign dates */}
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <Label className="text-sm text-muted-foreground mb-2 block">
+                Preview of Active Campaign Dates
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="default">
+                  {format(startDate!, "MMM d, yyyy")}
+                </Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="default">
+                  {format(endDate!, "MMM d, yyyy")}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Campaign Cost Calculation */}
+        {estimatedPayout > 0 && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-primary" />
+                Campaign Cost Calculation
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Rate</span>
+                  <span>
+                    ₱{(pricing?.weekly || pricing?.ad_units?.[0]?.weekly_subscription_fee || 0).toLocaleString()}/week
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Duration</span>
+                  <span>{duration?.weeks || 0} week{(duration?.weeks || 0) !== 1 ? 's' : ''}</span>
+                </div>
+                {quantity > 1 && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Quantity</span>
+                    <span>{quantity} units</span>
+                  </div>
+                )}
+                <div className="flex justify-between pt-2 border-t font-medium text-base">
+                  <span className="text-muted-foreground">Breakdown</span>
+                  <span>
+                    ₱{(pricing?.weekly || 0).toLocaleString()} × {duration?.weeks || 0} weeks
+                    {quantity > 1 ? ` × ${quantity}` : ''}
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-lg">Estimated Publisher Payout</span>
+                  <span className="text-2xl font-bold text-primary">
+                    ₱{estimatedPayout.toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  This value will be stored with your campaign record
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
