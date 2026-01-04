@@ -47,6 +47,7 @@ const ActivateListing = () => {
   const [currentStep, setCurrentStep] = useState<ActivationStep>("design");
   const [activationId, setActivationId] = useState<string | null>(null);
   const [activationStatus, setActivationStatus] = useState<string>("design");
+  const [isAdvertiser, setIsAdvertiser] = useState<boolean | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -82,6 +83,28 @@ const ActivateListing = () => {
   const [printOrderComplete, setPrintOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState("");
 
+  // Check if user is an advertiser
+  useEffect(() => {
+    const checkAdvertiserAccess = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setIsAdvertiser(false);
+        return;
+      }
+
+      // Check if user has an advertiser profile
+      const { data: advertiserProfile } = await supabase
+        .from("advertiser_profiles")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      setIsAdvertiser(!!advertiserProfile);
+    };
+
+    checkAdvertiserAccess();
+  }, []);
+
   useEffect(() => {
     if (id) {
       fetchListingDetails();
@@ -100,19 +123,19 @@ const ActivateListing = () => {
       if (error) throw error;
       setListing(data);
 
-      // Fetch publisher profile for shipping address
+      // Fetch publisher profile for shipping address using public view
       if (data?.publisher_id) {
         const { data: publisherProfile } = await supabase
-          .from("publisher_profiles")
-          .select("business_name, contact_email, contact_phone, location")
+          .from("publisher_profiles_public")
+          .select("business_name, location, user_id")
           .eq("id", data.publisher_id)
           .single();
 
         if (publisherProfile) {
           setPublisherAddress({
-            businessName: publisherProfile.business_name,
-            contactEmail: publisherProfile.contact_email,
-            contactPhone: publisherProfile.contact_phone,
+            businessName: publisherProfile.business_name || "",
+            contactEmail: "", // Not exposed in public view
+            contactPhone: null,
             location: publisherProfile.location,
           });
         }
@@ -233,17 +256,17 @@ const ActivateListing = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session || !listing) return;
 
-      // Get publisher user_id from the ad_space's publisher_profile
+      // Get publisher user_id from the public view
       const { data: publisherProfile } = await supabase
-        .from("publisher_profiles")
+        .from("publisher_profiles_public")
         .select("user_id")
         .eq("id", listing.publisher_id)
         .single();
 
-      if (!publisherProfile) {
+      if (!publisherProfile?.user_id) {
         toast({
           title: "Error",
-          description: "Could not find publisher information",
+          description: "Could not find publisher information. Please try again.",
           variant: "destructive",
         });
         return;
@@ -563,10 +586,42 @@ const ActivateListing = () => {
   // Check if schedule is complete for proceeding
   const scheduleComplete = startDate && endDate;
 
-  if (loading) {
+  if (loading || isAdvertiser === null) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  // Restrict access to advertisers only
+  if (!isAdvertiser) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <Navigation />
+        <div className="container mx-auto px-6 py-12 max-w-2xl">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-destructive">Access Restricted</CardTitle>
+              <CardDescription>
+                Only advertiser accounts can activate listings. Publishers cannot activate their own or other listings.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                If you're an advertiser, please make sure you're logged in with your advertiser account.
+              </p>
+              <div className="flex gap-3">
+                <Button onClick={() => navigate("/auth")} variant="default">
+                  Sign In as Advertiser
+                </Button>
+                <Button onClick={() => navigate(-1)} variant="outline">
+                  Go Back
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -1040,17 +1095,17 @@ const ActivateListing = () => {
                   Complete Activation
                 </CardTitle>
                 <CardDescription>
-                  Pay the activation fee to unlock full access to this advertising space
+                  Pay the subscription fee to unlock full access to this advertising space
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-lg font-semibold">Activation Fee</span>
-                    <span className="text-2xl font-bold text-primary">${activationPrice}</span>
+                    <span className="text-lg font-semibold">Subscription Fee</span>
+                    <span className="text-2xl font-bold text-primary">₱{activationPrice.toLocaleString()}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    One-time payment to unlock full contact details and booking access.
+                    Based on your selected booking duration.
                   </p>
                 </div>
 
