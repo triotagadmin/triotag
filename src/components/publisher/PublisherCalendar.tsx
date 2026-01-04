@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { format, isSameDay, isWithinInterval, parseISO, startOfDay, endOfDay } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,12 +40,18 @@ const statusColors: Record<string, { bg: string; text: string; border: string }>
 };
 
 export function PublisherCalendar({ activations }: PublisherCalendarProps) {
-  const completedActivations = activations.filter(a => a.status === "completed");
+  // Show approved, printing, payment_pending, and completed activations on calendar to prevent double bookings
+  const approvedActivations = activations.filter(a => 
+    a.status === "approved" || 
+    a.status === "printing" || 
+    a.status === "payment_pending" || 
+    a.status === "completed"
+  );
 
   const bookedDates = useMemo(() => {
     const dates: Map<string, Activation[]> = new Map();
     
-    completedActivations.forEach(activation => {
+    approvedActivations.forEach(activation => {
       if (activation.start_date && activation.end_date) {
         const start = parseISO(activation.start_date);
         const end = parseISO(activation.end_date);
@@ -62,12 +68,7 @@ export function PublisherCalendar({ activations }: PublisherCalendarProps) {
     });
     
     return dates;
-  }, [completedActivations]);
-
-  const getActivationsForDate = (date: Date): Activation[] => {
-    const key = format(date, "yyyy-MM-dd");
-    return bookedDates.get(key) || [];
-  };
+  }, [approvedActivations]);
 
   const modifiers = useMemo(() => {
     const booked: Date[] = [];
@@ -87,7 +88,7 @@ export function PublisherCalendar({ activations }: PublisherCalendarProps) {
         <CardHeader>
           <CardTitle>Booking Calendar</CardTitle>
           <CardDescription>
-            View all confirmed bookings for your ad spaces
+            View all approved bookings for your ad spaces
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -138,9 +139,9 @@ export function PublisherCalendar({ activations }: PublisherCalendarProps) {
             ))}
           </div>
 
-          {completedActivations.length === 0 && (
+          {approvedActivations.length === 0 && (
             <div className="pt-4 border-t text-center text-muted-foreground text-sm">
-              No completed bookings yet
+              No approved bookings yet
             </div>
           )}
         </CardContent>
@@ -149,20 +150,21 @@ export function PublisherCalendar({ activations }: PublisherCalendarProps) {
       {/* Upcoming Bookings List */}
       <Card className="lg:col-span-3">
         <CardHeader>
-          <CardTitle>Upcoming Bookings</CardTitle>
+          <CardTitle>Approved Bookings</CardTitle>
           <CardDescription>
-            All confirmed bookings for your venues
+            All approved bookings for your venues (shown on calendar to prevent double bookings)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {completedActivations.length === 0 ? (
+          {approvedActivations.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <p>No confirmed bookings yet. Bookings will appear here once advertisers complete their payment.</p>
+              <p>No approved bookings yet. Bookings will appear here once you approve advertiser requests.</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {completedActivations.map((activation) => {
+              {approvedActivations.map((activation) => {
                 const typeColor = typeColors[activation.activation_type || "other"] || typeColors.other;
+                const statusColor = statusColors[activation.status] || statusColors.approved;
                 
                 return (
                   <div
@@ -177,8 +179,8 @@ export function PublisherCalendar({ activations }: PublisherCalendarProps) {
                       <p className="font-medium text-sm">
                         {activation.ad_spaces?.title || "Ad Space"}
                       </p>
-                      <Badge variant="outline" className={cn("text-xs", typeColor.text)}>
-                        {activation.activation_type?.replace("_", " ") || "Other"}
+                      <Badge variant="outline" className={cn("text-xs", statusColor.text)}>
+                        {activation.status.replace("_", " ")}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
