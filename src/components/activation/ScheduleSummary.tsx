@@ -45,10 +45,10 @@ export function ScheduleSummary({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CalendarDays className="h-5 w-5 text-primary" />
-          Booking Schedule (Read-only)
+          Advertiser Compliance & Campaign Details
         </CardTitle>
         <CardDescription>
-          Schedule was configured during the Design Ad process
+          Campaign schedule submitted for publisher approval
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
