@@ -1,7 +1,7 @@
 import { format, differenceInDays } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, DollarSign, AlertTriangle } from "lucide-react";
+import { Clock, DollarSign, AlertTriangle, FileText } from "lucide-react";
 
 interface ScheduleSummaryProps {
   startDate: Date | undefined;
@@ -22,15 +22,15 @@ export function ScheduleSummary({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
-            Booking Schedule Missing
+            Campaign Details Missing
           </CardTitle>
           <CardDescription>
-            Booking schedule must be completed during the Design Ad process.
+            Campaign schedule must be completed during the Design Ad process.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Please go back to the Design step and complete the booking schedule before proceeding with publisher approval.
+            Please go back to the Design step and complete the booking schedule before submitting for publisher approval.
           </p>
         </CardContent>
       </Card>
@@ -44,11 +44,11 @@ export function ScheduleSummary({
     <Card className="border-primary/30">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-primary" />
+          <FileText className="h-5 w-5 text-primary" />
           Advertiser Compliance & Campaign Details
         </CardTitle>
         <CardDescription>
-          Campaign schedule submitted for publisher approval
+          Complete the form below to submit your booking for publisher approval
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
