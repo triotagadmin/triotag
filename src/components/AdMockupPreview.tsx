@@ -2,9 +2,10 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, CheckCircle, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 // Ad unit types with their display names and Prodigi SKU mappings
@@ -34,7 +35,7 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [adUnitType, setAdUnitType] = useState("");
-  const [isApproved, setIsApproved] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -93,7 +94,7 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
 
       const urls = await Promise.all(uploadPromises);
       setUploadedImages(prev => [...prev, ...urls]);
-      setIsApproved(false);
+      setIsConfirmed(false);
 
       toast({
         title: "Upload successful",
@@ -117,10 +118,10 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
 
   const removeImage = (url: string) => {
     setUploadedImages(prev => prev.filter(img => img !== url));
-    setIsApproved(false);
+    setIsConfirmed(false);
   };
 
-  const handleApprove = () => {
+  const handleConfirmDesign = () => {
     if (uploadedImages.length === 0 || !adUnitType) {
       toast({
         title: "Missing information",
@@ -132,7 +133,7 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
 
     const selectedUnit = AD_UNIT_TYPES.find(u => u.value === adUnitType);
     
-    setIsApproved(true);
+    setIsConfirmed(true);
     
     // Pass the first uploaded image as the main artwork
     onApprove({
@@ -142,8 +143,8 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
     });
 
     toast({
-      title: "Design approved!",
-      description: "Proceed to complete your print order below.",
+      title: "Design confirmed!",
+      description: "Now select your booking dates and submit your ad request.",
     });
   };
 
@@ -226,7 +227,7 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
           <Label>Ad Unit Type *</Label>
           <Select value={adUnitType} onValueChange={(value) => {
             setAdUnitType(value);
-            setIsApproved(false);
+            setIsConfirmed(false);
           }}>
             <SelectTrigger>
               <SelectValue placeholder="Select ad unit type..." />
@@ -246,21 +247,19 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
           )}
         </div>
 
-        {/* Approve Button */}
-        {!isApproved ? (
+        {/* Confirm Button */}
+        {!isConfirmed ? (
           <Button
-            onClick={handleApprove}
+            onClick={handleConfirmDesign}
             disabled={uploadedImages.length === 0 || !adUnitType}
             className="w-full"
             size="lg"
           >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            Approve Design
+            Confirm Design Selection
           </Button>
         ) : (
           <div className="flex items-center justify-center gap-2 p-4 bg-primary/10 rounded-lg text-primary">
-            <CheckCircle className="h-5 w-5" />
-            <span className="font-medium">Design Approved - Complete your order below</span>
+            <span className="font-medium">Design confirmed - Select booking dates below</span>
           </div>
         )}
       </CardContent>

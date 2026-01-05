@@ -7,14 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, MapPin, DollarSign, CreditCard, CheckCircle, Package, Truck, Loader2, ArrowRight } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, CreditCard, CheckCircle, Package, Truck, Loader2, ArrowRight, Send, Clock, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { AdMockupPreview } from "@/components/AdMockupPreview";
 import { ActivationStepper, type ActivationStep } from "@/components/activation/ActivationStepper";
 import { BookingScheduler } from "@/components/activation/BookingScheduler";
-import { ScheduleSummary } from "@/components/activation/ScheduleSummary";
-import { AdvertiserComplianceForm, type ComplianceData } from "@/components/activation/AdvertiserComplianceForm";
 import { ProductCard } from "@/components/print-order/ProductCard";
 import { OrderSuccessCard } from "@/components/print-order/OrderSuccessCard";
 import { PRINT_PRODUCTS, SHIPPING_COUNTRIES, calculateOrderTotal, getProductById } from "@/lib/printProducts";
@@ -62,13 +60,9 @@ const ActivateListing = () => {
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [estimatedPublisherPayout, setEstimatedPublisherPayout] = useState(0);
-  const [submittingApproval, setSubmittingApproval] = useState(false);
+  const [submittingRequest, setSubmittingRequest] = useState(false);
   const [rejectionReason, setRejectionReason] = useState<string | undefined>();
   const [approvedTotalAmount, setApprovedTotalAmount] = useState<number>(0);
-
-  // Compliance state
-  const [complianceData, setComplianceData] = useState<Partial<ComplianceData>>({});
-  const [complianceCompleted, setComplianceCompleted] = useState(false);
 
   // Print order state - Manual Admin System
   const [selectedProductId, setSelectedProductId] = useState<string>("");
@@ -174,26 +168,6 @@ const ActivateListing = () => {
         setRejectionReason(data.rejection_reason || undefined);
         setApprovedTotalAmount(data.total_amount || 0);
         setEstimatedPublisherPayout(data.estimated_publisher_payout || 0);
-        setComplianceCompleted(data.compliance_completed || false);
-        
-        // Load compliance data
-        setComplianceData({
-          campaignObjective: data.campaign_objective || "",
-          brandCategory: data.brand_category || "",
-          competitiveConflictDeclaration: data.competitive_conflict_declaration || "",
-          creativeComplianceConfirmed: data.creative_compliance_confirmed || false,
-          restrictedContent: data.restricted_content || [],
-          legalPermissionsUrls: data.legal_permissions_urls || [],
-          sensitiveThemeFlag: data.sensitive_theme_flag || "none",
-          campaignManagerName: data.campaign_manager_name || "",
-          campaignManagerEmail: data.campaign_manager_email || "",
-          campaignManagerPhone: data.campaign_manager_phone || "",
-          onsiteInstallationContact: data.onsite_installation_contact || "",
-          emergencyContact: data.emergency_contact || "",
-          requireInstallationPhotos: data.require_installation_photos || false,
-          requireProofOfPlay: data.require_proof_of_play || false,
-          reportingFrequency: data.reporting_frequency || "end-of-campaign",
-        });
         
         if (data.start_date) setStartDate(new Date(data.start_date));
         if (data.end_date) setEndDate(new Date(data.end_date));
@@ -206,12 +180,13 @@ const ActivateListing = () => {
         // Determine current step based on status
         switch (data.status) {
           case "design":
+          case "pending_submission":
             setCurrentStep("design");
             if (data.ad_design_url) setDesignApproved(true);
             break;
-          case "pending_approval":
+          case "under_review":
           case "rejected":
-            setCurrentStep("schedule-approval");
+            setCurrentStep("design");
             setDesignApproved(true);
             break;
           case "approved":
@@ -345,44 +320,71 @@ const ActivateListing = () => {
     }
   };
 
-  const handleComplianceComplete = async (data: ComplianceData) => {
-    setComplianceData(data);
-    setComplianceCompleted(true);
-
-    // Now submit for approval
-    if (!startDate || !endDate || !activationId) {
+  // Submit Ad Request to Publisher
+  const handleSubmitAdRequest = async () => {
+    if (!startDate || !endDate || !activationId || !artworkUrl) {
       toast({
         title: "Error",
-        description: "Please complete the booking schedule first.",
+        description: "Please complete all required fields (design, dates) before submitting.",
         variant: "destructive",
       });
       return;
     }
 
-    setSubmittingApproval(true);
+    if (estimatedPublisherPayout <= 0) {
+      toast({
+        title: "Error",
+        description: "Cannot submit without a valid booking price. Please select dates.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmittingRequest(true);
     try {
       const { error } = await supabase
         .from("activations")
         .update({
-          status: "pending_approval",
+          status: "pending_submission",
+          submitted_at: new Date().toISOString(),
+          estimated_publisher_payout: estimatedPublisherPayout,
+          quantity,
         })
         .eq("id", activationId);
 
       if (error) throw error;
 
-      setActivationStatus("pending_approval");
+      // Send notification to publisher
+      if (listing?.publisher_id) {
+        const { data: publisherProfile } = await supabase
+          .from("publisher_profiles_public")
+          .select("user_id")
+          .eq("id", listing.publisher_id)
+          .single();
+
+        if (publisherProfile?.user_id) {
+          await supabase.from("notifications").insert({
+            user_id: publisherProfile.user_id,
+            title: "New Ad Request Received!",
+            message: `An advertiser has submitted an ad request for "${listing.title}". Please review and respond.`,
+            type: "ad_request_received",
+          });
+        }
+      }
+
+      setActivationStatus("pending_submission");
       toast({
-        title: "Request Submitted",
-        description: "Your booking request has been sent to the publisher for approval.",
+        title: "Ad Request Submitted!",
+        description: "Your ad request has been sent to the publisher for review.",
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to submit for approval",
+        description: error.message || "Failed to submit ad request",
         variant: "destructive",
       });
     } finally {
-      setSubmittingApproval(false);
+      setSubmittingRequest(false);
     }
   };
 
@@ -506,7 +508,7 @@ const ActivateListing = () => {
           .from("activations")
           .update({
             status: "completed",
-            total_amount: totalAmount + (listing?.pricing?.weekly || 99),
+            total_amount: totalAmount + estimatedPublisherPayout,
           })
           .eq("id", activationId);
 
@@ -569,8 +571,8 @@ const ActivateListing = () => {
       unit.type === approvedAdUnitType || unit.type === activationType
     ) || adUnits[0];
     
-    const weeklyRate = selectedAdUnit?.weekly_subscription_fee || listing.pricing?.weekly || 0;
-    const monthlyRate = selectedAdUnit?.monthly_subscription_fee || listing.pricing?.monthly || 0;
+    const weeklyRate = selectedAdUnit?.pricePerWeek || listing.pricing?.weekly || 0;
+    const monthlyRate = selectedAdUnit?.pricePerMonth || listing.pricing?.monthly || 0;
     
     // Use monthly rate if duration is 4+ weeks, otherwise use weekly
     if (diffWeeks >= 4) {
@@ -583,8 +585,13 @@ const ActivateListing = () => {
 
   const subscriptionPrice = calculateSubscriptionPrice();
 
-  // Check if schedule is complete for proceeding
-  const scheduleComplete = startDate && endDate;
+  // Check if schedule and design are complete for submitting
+  const canSubmitAdRequest = designApproved && startDate && endDate && subscriptionPrice > 0;
+
+  // Check if waiting for publisher response
+  const isWaitingForPublisher = ["pending_submission", "under_review"].includes(activationStatus);
+  const isApprovedByPublisher = activationStatus === "approved";
+  const isRejectedByPublisher = activationStatus === "rejected";
 
   if (loading || isAdvertiser === null) {
     return (
@@ -641,7 +648,7 @@ const ActivateListing = () => {
     ? listing.media_urls[0] 
     : null;
 
-  const activationPrice = subscriptionPrice > 0 ? subscriptionPrice : (listing.pricing?.weekly || listing.pricing?.monthly || 0);
+  const activationPrice = subscriptionPrice > 0 ? subscriptionPrice : estimatedPublisherPayout;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -652,13 +659,13 @@ const ActivateListing = () => {
           Back
         </Button>
 
-        {/* Step Indicator */}
+        {/* Step Indicator - Now 3 steps: Design Ad → Print Order → Payment */}
         <ActivationStepper 
           currentStep={currentStep} 
-          approvalStatus={activationStatus === "pending_approval" ? "pending" : activationStatus === "approved" ? "approved" : undefined}
+          approvalStatus={isWaitingForPublisher ? "pending" : isApprovedByPublisher ? "approved" : undefined}
         />
 
-        {/* Listing Summary */}
+        {/* Listing Summary with Price */}
         <Card className="mb-8">
           <CardContent className="pt-6">
             <div className="flex flex-col sm:flex-row gap-4 items-start">
@@ -692,13 +699,9 @@ const ActivateListing = () => {
                   )}
                 </p>
                 <p className="text-2xl font-bold text-primary">
-                  {approvedTotalAmount > 0 
-                    ? `₱${approvedTotalAmount.toLocaleString()}` 
-                    : estimatedPublisherPayout > 0
-                      ? `₱${estimatedPublisherPayout.toLocaleString()}`
-                      : subscriptionPrice > 0 
-                        ? `₱${subscriptionPrice.toLocaleString()}` 
-                        : '₱0'}
+                  {activationPrice > 0 
+                    ? `₱${activationPrice.toLocaleString()}` 
+                    : '₱0'}
                 </p>
               </div>
             </div>
@@ -708,180 +711,185 @@ const ActivateListing = () => {
         {/* Step Content */}
         {currentStep === "design" && (
           <div className="space-y-8">
-            <div className="grid lg:grid-cols-2 gap-8">
-              <AdMockupPreview onApprove={handleMockupApproval} />
-              
-              <div className="space-y-6">
-                {designApproved ? (
-                  <Card className="border-primary">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-primary">
-                        <CheckCircle className="h-5 w-5" />
-                        Design Approved
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="p-4 bg-primary/10 rounded-lg">
-                        <p className="text-sm font-medium">
-                          Ad Unit: {approvedAdUnitType.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Product SKU: {selectedProduct}
-                        </p>
-                      </div>
-                      {artworkUrl && (
-                        <div className="p-3 bg-muted rounded-lg">
-                          <img 
-                            src={artworkUrl} 
-                            alt="Approved artwork" 
-                            className="max-h-32 mx-auto rounded object-contain"
-                          />
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Step 1: Upload Your Design</CardTitle>
-                      <CardDescription>
-                        Upload your design photos to proceed with your ad activation.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <ul className="space-y-2 text-sm text-muted-foreground">
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
-                          Upload your design photos (PNG or JPG, max 30)
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
-                          Select ad unit type (sticker, table tent, etc.)
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
-                          Approve design to continue
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
-
-            {/* Booking Scheduler - Now in Design Step */}
-            {designApproved && (
-              <>
-                <BookingScheduler
-                  startDate={startDate}
-                  endDate={endDate}
-                  onDatesChange={handleDatesChange}
-                  pricing={listing.pricing}
-                  adUnitType={approvedAdUnitType || activationType}
-                  quantity={quantity}
-                  onEstimatedPayoutChange={handleEstimatedPayoutChange}
-                />
-
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  onClick={() => setCurrentStep("schedule-approval")}
-                  disabled={!scheduleComplete}
-                >
-                  {scheduleComplete ? (
-                    <>
-                      Continue to Publisher Approval
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </>
-                  ) : (
-                    "Please select booking dates to continue"
-                  )}
-                </Button>
-              </>
-            )}
-          </div>
-        )}
-
-        {currentStep === "schedule-approval" && (
-          <div className="max-w-3xl mx-auto space-y-6">
-            {/* Schedule Summary - Read-only */}
-            <ScheduleSummary
-              startDate={startDate}
-              endDate={endDate}
-              estimatedPayout={estimatedPublisherPayout}
-              showError={!scheduleComplete}
-            />
-
-            {/* Show status cards for pending/approved/rejected */}
-            {activationStatus === "pending_approval" && (
+            {/* Show status messages for waiting/rejected states */}
+            {isWaitingForPublisher && (
               <Card className="border-yellow-500/30 bg-yellow-500/5">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-yellow-500">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Waiting for Publisher Approval
+                  <CardTitle className="flex items-center gap-2 text-yellow-600">
+                    <Clock className="h-5 w-5 animate-pulse" />
+                    Waiting for Publisher Review
                   </CardTitle>
                   <CardDescription>
-                    Your booking request has been sent to the venue publisher. You'll be notified once they respond.
+                    Your ad request has been submitted. The publisher will review and respond shortly.
                   </CardDescription>
                 </CardHeader>
               </Card>
             )}
 
-            {activationStatus === "approved" && (
-              <>
-                <Card className="border-primary">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-primary">
-                      <CheckCircle className="h-5 w-5" />
-                      Booking Approved!
-                    </CardTitle>
-                    <CardDescription>
-                      The publisher has approved your booking. Proceed to place your print order.
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  onClick={() => setCurrentStep("print-order")}
-                >
-                  Continue to Print Order
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </>
+            {isRejectedByPublisher && (
+              <Card className="border-destructive/30 bg-destructive/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-destructive">
+                    <XCircle className="h-5 w-5" />
+                    Ad Request Rejected
+                  </CardTitle>
+                  <CardDescription>
+                    {rejectionReason || "The publisher has rejected your ad request. You can modify and resubmit."}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
             )}
 
-            {/* Compliance Form - Show when schedule is complete and not yet approved */}
-            {scheduleComplete && activationStatus !== "pending_approval" && activationStatus !== "approved" && activationId && (
-              <>
-                <Card className="border-primary/30">
-                  <CardHeader>
-                    <CardTitle>Publisher Approval — Advertiser Compliance & Campaign Details</CardTitle>
-                    <CardDescription>
-                      Complete this section before your booking can be submitted for publisher approval.
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-
-                <AdvertiserComplianceForm
-                  activationId={activationId}
-                  initialData={complianceData}
-                  onComplete={handleComplianceComplete}
-                  onBack={() => setCurrentStep("design")}
-                />
-              </>
+            {isApprovedByPublisher && (
+              <Card className="border-primary bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-primary">
+                    <CheckCircle className="h-5 w-5" />
+                    Ad Request Approved!
+                  </CardTitle>
+                  <CardDescription>
+                    Your ad request has been approved. Proceed to place your print order.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    className="w-full" 
+                    size="lg"
+                    onClick={() => setCurrentStep("print-order")}
+                  >
+                    Continue to Print Order
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
             )}
 
-            {/* Back button when in pending/approved state */}
-            {(activationStatus === "pending_approval" || activationStatus === "approved") && (
-              <Button 
-                variant="outline" 
-                onClick={() => setCurrentStep("design")}
-                className="w-full"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Design
-              </Button>
+            {/* Design Upload and Booking - only show if not yet approved */}
+            {!isApprovedByPublisher && (
+              <>
+                <div className="grid lg:grid-cols-2 gap-8">
+                  <AdMockupPreview onApprove={handleMockupApproval} />
+                  
+                  <div className="space-y-6">
+                    {designApproved ? (
+                      <Card className="border-primary">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2 text-primary">
+                            <CheckCircle className="h-5 w-5" />
+                            Design Ready
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="p-4 bg-primary/10 rounded-lg">
+                            <p className="text-sm font-medium">
+                              Ad Unit: {approvedAdUnitType.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Product SKU: {selectedProduct}
+                            </p>
+                          </div>
+                          {artworkUrl && (
+                            <div className="p-3 bg-muted rounded-lg">
+                              <img 
+                                src={artworkUrl} 
+                                alt="Your artwork" 
+                                className="max-h-32 mx-auto rounded object-contain"
+                              />
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Step 1: Upload Your Design</CardTitle>
+                          <CardDescription>
+                            Upload your design photos to proceed with your ad activation.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
+                              Upload your design photos (PNG or JPG, max 30)
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
+                              Select ad unit type (sticker, table tent, etc.)
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
+                              Select quantity needed
+                            </li>
+                          </ul>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </div>
+
+                {/* Booking Scheduler */}
+                {designApproved && !isWaitingForPublisher && (
+                  <>
+                    <BookingScheduler
+                      startDate={startDate}
+                      endDate={endDate}
+                      onDatesChange={handleDatesChange}
+                      pricing={listing.pricing}
+                      adUnitType={approvedAdUnitType || activationType}
+                      quantity={quantity}
+                      onEstimatedPayoutChange={handleEstimatedPayoutChange}
+                    />
+
+                    {/* Quantity Selection */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Quantity</CardTitle>
+                        <CardDescription>How many units do you need?</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="max-w-xs">
+                          <Input
+                            type="number"
+                            min={1}
+                            value={quantity}
+                            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Submit Ad Request Button */}
+                    <Button 
+                      className="w-full" 
+                      size="lg"
+                      onClick={handleSubmitAdRequest}
+                      disabled={!canSubmitAdRequest || submittingRequest}
+                    >
+                      {submittingRequest ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Submitting Ad Request...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Submit Ad Request - ₱{subscriptionPrice.toLocaleString()}
+                        </>
+                      )}
+                    </Button>
+
+                    {!canSubmitAdRequest && (
+                      <p className="text-sm text-center text-muted-foreground">
+                        {!designApproved && "Please upload and confirm your design. "}
+                        {!startDate && "Please select a start date. "}
+                        {!endDate && "Please select an end date. "}
+                        {subscriptionPrice <= 0 && "Booking price could not be calculated."}
+                      </p>
+                    )}
+                  </>
+                )}
+              </>
             )}
           </div>
         )}
@@ -1018,18 +1026,6 @@ const ActivateListing = () => {
                             <Label className="text-xs text-muted-foreground">Address</Label>
                             <p className="font-medium">{publisherAddress.location || listing?.location || "Not specified"}</p>
                           </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label className="text-xs text-muted-foreground">Contact Email</Label>
-                              <p className="text-sm">{publisherAddress.contactEmail}</p>
-                            </div>
-                            {publisherAddress.contactPhone && (
-                              <div>
-                                <Label className="text-xs text-muted-foreground">Contact Phone</Label>
-                                <p className="text-sm">{publisherAddress.contactPhone}</p>
-                              </div>
-                            )}
-                          </div>
                         </div>
                       ) : (
                         <div className="bg-muted/50 rounded-lg p-4 text-center">
@@ -1061,11 +1057,11 @@ const ActivateListing = () => {
 
                 <Button 
                   variant="outline" 
-                  onClick={() => setCurrentStep("schedule-approval")}
+                  onClick={() => setCurrentStep("design")}
                   className="w-full max-w-md mx-auto"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Schedule
+                  Back to Design
                 </Button>
               </div>
             )}

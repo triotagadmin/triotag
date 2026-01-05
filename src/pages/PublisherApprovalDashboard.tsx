@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Calendar, ClipboardCheck } from "lucide-react";
+import { Loader2, Calendar, ClipboardCheck, Package } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/Navigation";
 import { ApprovalQueue } from "@/components/publisher/ApprovalQueue";
 import { PublisherCalendar } from "@/components/publisher/PublisherCalendar";
+import { AdRequestsQueue } from "@/components/publisher/AdRequestsQueue";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,9 +18,13 @@ interface Activation {
   status: string;
   activation_type: string | null;
   ad_design_url: string | null;
+  ad_unit_sku: string | null;
   start_date: string | null;
   end_date: string | null;
+  estimated_publisher_payout: number | null;
+  quantity: number | null;
   created_at: string;
+  submitted_at: string | null;
   ad_spaces: {
     title: string;
     location: string | null;
@@ -88,9 +93,13 @@ export default function PublisherApprovalDashboard() {
           status,
           activation_type,
           ad_design_url,
+          ad_unit_sku,
           start_date,
           end_date,
+          estimated_publisher_payout,
+          quantity,
           created_at,
+          submitted_at,
           ad_spaces (
             title,
             location
@@ -147,6 +156,9 @@ export default function PublisherApprovalDashboard() {
 
   const pendingCount = activations.filter(a => a.status === "pending_approval").length;
   const completedCount = activations.filter(a => a.status === "completed").length;
+  const adRequestsCount = activations.filter(a => 
+    ["pending_submission", "under_review", "design"].includes(a.status) && a.ad_design_url
+  ).length;
 
   if (loading) {
     return (
@@ -163,12 +175,24 @@ export default function PublisherApprovalDashboard() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Publisher Dashboard</h1>
           <p className="text-muted-foreground mt-1">
-            Manage booking requests and view your venue calendar
+            Manage ad requests, bookings, and view your venue calendar
           </p>
         </div>
 
-        <Tabs defaultValue="approvals" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+        <Tabs defaultValue="ad-requests" className="space-y-6">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
+            <TabsTrigger value="ad-requests" className="relative">
+              <Package className="h-4 w-4 mr-2" />
+              Ad Requests
+              {adRequestsCount > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                >
+                  {adRequestsCount}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="approvals" className="relative">
               <ClipboardCheck className="h-4 w-4 mr-2" />
               Approval Queue
@@ -194,6 +218,13 @@ export default function PublisherApprovalDashboard() {
               )}
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="ad-requests">
+            <AdRequestsQueue 
+              requests={activations} 
+              onStatusChange={handleStatusChange}
+            />
+          </TabsContent>
 
           <TabsContent value="approvals">
             <ApprovalQueue 

@@ -9,6 +9,7 @@ import { ArrowLeft, MapPin, DollarSign, Clock, Users, Phone, Mail, Lock } from "
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { User } from "@supabase/supabase-js";
+import { OOHAdvertisingDetails } from "@/components/venue/OOHAdvertisingDetails";
 const AD_UNIT_TYPE_LABELS: Record<string, string> = {
   countertop_display: "Countertop Display",
   wall_poster: "Wall Poster",
@@ -205,6 +206,11 @@ const VenueDetail = () => {
                   </div>}
               </CardContent>
             </Card>
+
+            {/* OOH Advertising Details Section - from Step 2 of Venue Registration */}
+            {venue.specifications?.ooh_details && (
+              <OOHAdvertisingDetails oohDetails={venue.specifications.ooh_details} />
+            )}
           </div>
 
           <div className="space-y-6">
