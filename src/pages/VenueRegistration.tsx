@@ -146,8 +146,18 @@ const VenueRegistration = () => {
 
   const getCurrencySymbol = () => currencies.find(c => c.code === currency)?.symbol || "$";
 
-  // Verification documents
-  const [verificationDocuments, setVerificationDocuments] = useState<DocumentUpload[]>([{
+  // Verification documents with existing file tracking
+  interface DocumentUploadState {
+    type: string;
+    label: string;
+    description: string;
+    file: File | null;
+    uploaded: boolean;
+    existingUrl?: string;
+    existingFileName?: string;
+  }
+
+  const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([{
     type: "business_license",
     label: "Business/Venue License",
     description: "Official business registration or venue operating license",
@@ -324,6 +334,27 @@ const VenueRegistration = () => {
       const pricing = venue.pricing as any || {};
       setWeeklyPrice(pricing.weekly?.toString() || "");
       setMonthlyPrice(pricing.monthly?.toString() || "");
+
+      // Load existing verification documents
+      const { data: existingDocs } = await supabase
+        .from("verification_documents")
+        .select("*")
+        .eq("publisher_id", pubId);
+
+      if (existingDocs && existingDocs.length > 0) {
+        setVerificationDocuments(prev => prev.map(doc => {
+          const existingDoc = existingDocs.find(d => d.document_type === doc.type);
+          if (existingDoc) {
+            return {
+              ...doc,
+              uploaded: true,
+              existingUrl: existingDoc.file_url,
+              existingFileName: existingDoc.file_name
+            };
+          }
+          return doc;
+        }));
+      }
     } catch (error: any) {
       console.error("Error loading venue:", error);
       toast({
@@ -863,7 +894,7 @@ const VenueRegistration = () => {
 
                   <div className="space-y-4">
                     {verificationDocuments.map((doc, index) => (
-                      <Card key={doc.type} className={doc.uploaded ? "border-green-200 bg-green-50/50" : ""}>
+                      <Card key={doc.type} className={doc.uploaded || doc.existingUrl ? "border-green-200 bg-green-50/50" : ""}>
                         <CardContent className="pt-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -871,17 +902,34 @@ const VenueRegistration = () => {
                                 <Label className="text-sm font-semibold">
                                   {doc.label}
                                 </Label>
-                                {doc.uploaded && <CheckCircle className="w-4 h-4 text-green-600" />}
+                                {(doc.uploaded || doc.existingUrl) && <CheckCircle className="w-4 h-4 text-green-600" />}
                               </div>
                               <p className="text-xs text-muted-foreground mb-3">
                                 {doc.description}
                               </p>
                               
+                              {/* Show existing document if available */}
+                              {doc.existingUrl && !doc.file && (
+                                <div className="flex items-center gap-2 mb-3 p-2 bg-muted rounded-md">
+                                  <span className="text-sm text-muted-foreground truncate flex-1">
+                                    {doc.existingFileName || "Uploaded document"}
+                                  </span>
+                                  <a 
+                                    href={doc.existingUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-primary text-sm hover:underline"
+                                  >
+                                    View
+                                  </a>
+                                </div>
+                              )}
+                              
                               <div className="flex items-center gap-3">
                                 <label className="flex items-center gap-2 px-3 py-1.5 border rounded-md cursor-pointer hover:bg-muted/50 text-sm">
                                   <Upload className="w-4 h-4" />
                                   <span>
-                                    {doc.file ? doc.file.name : "Choose file"}
+                                    {doc.file ? doc.file.name : doc.existingUrl ? "Replace file" : "Choose file"}
                                   </span>
                                   <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={e => handleDocumentSelect(index, e.target.files?.[0] || null)} disabled={loading} />
                                 </label>

@@ -1,6 +1,6 @@
-import { CheckCircle, Palette, CalendarDays, Package, CreditCard, ArrowRight } from "lucide-react";
+import { CheckCircle, Palette, Package, CreditCard, ArrowRight } from "lucide-react";
 
-export type ActivationStep = "design" | "schedule-approval" | "print-order" | "payment";
+export type ActivationStep = "design" | "print-order" | "payment";
 
 interface ActivationStepperProps {
   currentStep: ActivationStep;
@@ -9,7 +9,6 @@ interface ActivationStepperProps {
 
 const steps = [
   { id: "design" as const, label: "Design Ad", icon: Palette },
-  { id: "schedule-approval" as const, label: "Publisher Approval", icon: CalendarDays },
   { id: "print-order" as const, label: "Print Order", icon: Package },
   { id: "payment" as const, label: "Payment", icon: CreditCard },
 ];
@@ -25,19 +24,16 @@ export function ActivationStepper({ currentStep, approvalStatus }: ActivationSte
           const StepIcon = step.icon;
           const isActive = currentStep === step.id;
           const isCompleted = index < currentIndex;
-          const isPending = step.id === "schedule-approval" && approvalStatus === "pending" && currentStep === "schedule-approval";
 
           return (
             <div key={step.id} className="flex items-center">
               <div
                 className={`flex items-center gap-2 px-3 py-2 md:px-4 rounded-full transition-colors ${
-                  isPending
-                    ? "bg-yellow-500/20 text-yellow-500 border border-yellow-500/30"
-                    : isActive
-                      ? "bg-primary text-primary-foreground"
-                      : isCompleted
-                        ? "bg-primary/20 text-primary"
-                        : "bg-muted text-muted-foreground"
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : isCompleted
+                      ? "bg-primary/20 text-primary"
+                      : "bg-muted text-muted-foreground"
                 }`}
               >
                 {isCompleted ? (

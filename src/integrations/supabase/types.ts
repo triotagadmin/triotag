@@ -44,9 +44,12 @@ export type Database = {
           require_installation_photos: boolean | null
           require_proof_of_play: boolean | null
           restricted_content: string[] | null
+          reviewed_at: string | null
+          reviewer_id: string | null
           sensitive_theme_flag: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["activation_status"]
+          submitted_at: string | null
           total_amount: number | null
           updated_at: string | null
         }
@@ -81,9 +84,12 @@ export type Database = {
           require_installation_photos?: boolean | null
           require_proof_of_play?: boolean | null
           restricted_content?: string[] | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
           sensitive_theme_flag?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["activation_status"]
+          submitted_at?: string | null
           total_amount?: number | null
           updated_at?: string | null
         }
@@ -118,9 +124,12 @@ export type Database = {
           require_installation_photos?: boolean | null
           require_proof_of_play?: boolean | null
           restricted_content?: string[] | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
           sensitive_theme_flag?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["activation_status"]
+          submitted_at?: string | null
           total_amount?: number | null
           updated_at?: string | null
         }
@@ -1661,6 +1670,8 @@ export type Database = {
         | "payment_pending"
         | "completed"
         | "rejected"
+        | "pending_submission"
+        | "under_review"
       activation_type:
         | "sticker"
         | "table_tent"
@@ -1815,6 +1826,8 @@ export const Constants = {
         "payment_pending",
         "completed",
         "rejected",
+        "pending_submission",
+        "under_review",
       ],
       activation_type: [
         "sticker",
