@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
@@ -20,11 +21,47 @@ const AD_UNIT_TYPES = [
   { value: "wheat-paste", label: "Wheat Paste", sku: "GLOBAL-STI-SQU-4X4" },
 ];
 
+const BRAND_CATEGORIES = [
+  "Food & Beverage",
+  "Retail & Shopping",
+  "Technology",
+  "Health & Wellness",
+  "Entertainment",
+  "Finance & Banking",
+  "Travel & Tourism",
+  "Education",
+  "Real Estate",
+  "Automotive",
+  "Fashion & Beauty",
+  "Sports & Fitness",
+  "Other",
+];
+
+const CAMPAIGN_OBJECTIVES = [
+  "Brand Awareness",
+  "Product Launch",
+  "Store/Location Promotion",
+  "Event Promotion",
+  "Seasonal Campaign",
+  "Customer Acquisition",
+  "Loyalty/Retention",
+  "Other",
+];
+
+interface CampaignDetails {
+  campaignName: string;
+  brandCategory: string;
+  campaignObjective: string;
+  targetAudience: string;
+  creativeNotes: string;
+}
+
 interface AdMockupPreviewProps {
   onApprove: (data: { 
     artworkUrl: string; 
     adUnitType: string; 
     selectedSku: string;
+    campaignDetails?: CampaignDetails;
   }) => void;
 }
 
@@ -36,6 +73,13 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
   const [uploading, setUploading] = useState(false);
   const [adUnitType, setAdUnitType] = useState("");
   const [isConfirmed, setIsConfirmed] = useState(false);
+
+  // Campaign details state
+  const [campaignName, setCampaignName] = useState("");
+  const [brandCategory, setBrandCategory] = useState("");
+  const [campaignObjective, setCampaignObjective] = useState("");
+  const [targetAudience, setTargetAudience] = useState("");
+  const [creativeNotes, setCreativeNotes] = useState("");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -135,15 +179,22 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
     
     setIsConfirmed(true);
     
-    // Pass the first uploaded image as the main artwork
+    // Pass the first uploaded image as the main artwork along with campaign details
     onApprove({
       artworkUrl: uploadedImages[0],
       adUnitType,
       selectedSku: selectedUnit?.sku || "GLOBAL-STI-SQU-4X4",
+      campaignDetails: {
+        campaignName,
+        brandCategory,
+        campaignObjective,
+        targetAudience,
+        creativeNotes,
+      },
     });
 
     toast({
-      title: "Design confirmed!",
+      title: "Booking details confirmed!",
       description: "Now select your booking dates and submit your ad request.",
     });
   };
@@ -155,16 +206,87 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ImageIcon className="h-5 w-5" />
-          Upload Design Photos
+          Book Ad Space
         </CardTitle>
         <CardDescription>
-          Upload your design photos (max 30) and select the ad unit type
+          Upload your creative and provide campaign details
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Campaign Details Section */}
+        <div className="space-y-4 pb-4 border-b">
+          <h4 className="font-medium text-sm text-muted-foreground">Campaign Details</h4>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Campaign Name</Label>
+              <Input
+                placeholder="e.g., Summer Sale 2026"
+                value={campaignName}
+                onChange={(e) => {
+                  setCampaignName(e.target.value);
+                  setIsConfirmed(false);
+                }}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Brand Category</Label>
+              <Select value={brandCategory} onValueChange={(value) => {
+                setBrandCategory(value);
+                setIsConfirmed(false);
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {BRAND_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Campaign Objective</Label>
+              <Select value={campaignObjective} onValueChange={(value) => {
+                setCampaignObjective(value);
+                setIsConfirmed(false);
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select objective..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {CAMPAIGN_OBJECTIVES.map((obj) => (
+                    <SelectItem key={obj} value={obj}>
+                      {obj}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Target Audience (optional)</Label>
+              <Input
+                placeholder="e.g., Young professionals, 25-35"
+                value={targetAudience}
+                onChange={(e) => {
+                  setTargetAudience(e.target.value);
+                  setIsConfirmed(false);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* File Upload */}
         <div className="space-y-2">
-          <Label>Upload Your Design Photos *</Label>
+          <Label>Upload Your Creative *</Label>
           <p className="text-sm text-muted-foreground">
             {uploadedImages.length}/30 photos uploaded
           </p>
@@ -222,6 +344,20 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
           </div>
         )}
 
+        {/* Creative Notes */}
+        <div className="space-y-2">
+          <Label>Creative Notes (optional)</Label>
+          <Textarea
+            placeholder="Any special instructions or notes about your creative..."
+            value={creativeNotes}
+            onChange={(e) => {
+              setCreativeNotes(e.target.value);
+              setIsConfirmed(false);
+            }}
+            rows={2}
+          />
+        </div>
+
         {/* Ad Unit Type Selection */}
         <div className="space-y-2">
           <Label>Ad Unit Type *</Label>
@@ -255,11 +391,11 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
             className="w-full"
             size="lg"
           >
-            Confirm Design Selection
+            Confirm Booking Details
           </Button>
         ) : (
           <div className="flex items-center justify-center gap-2 p-4 bg-primary/10 rounded-lg text-primary">
-            <span className="font-medium">Design confirmed - Select booking dates below</span>
+            <span className="font-medium">Booking details confirmed - Select dates below</span>
           </div>
         )}
       </CardContent>

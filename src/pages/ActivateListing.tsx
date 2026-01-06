@@ -218,7 +218,18 @@ const ActivateListing = () => {
     return typeMap[adUnitType] || "other";
   };
 
-  const handleMockupApproval = async (data: { artworkUrl: string; adUnitType: string; selectedSku: string }) => {
+  const handleMockupApproval = async (data: { 
+    artworkUrl: string; 
+    adUnitType: string; 
+    selectedSku: string; 
+    campaignDetails?: {
+      campaignName: string;
+      brandCategory: string;
+      campaignObjective: string;
+      targetAudience: string;
+      creativeNotes: string;
+    };
+  }) => {
     setArtworkUrl(data.artworkUrl);
     setSelectedProduct(data.selectedSku);
     setApprovedAdUnitType(data.adUnitType);
@@ -247,14 +258,18 @@ const ActivateListing = () => {
         return;
       }
 
+      const activationData = {
+        ad_design_url: data.artworkUrl,
+        ad_unit_sku: data.selectedSku,
+        activation_type: type,
+        campaign_objective: data.campaignDetails?.campaignObjective || null,
+        brand_category: data.campaignDetails?.brandCategory || null,
+      };
+
       if (activationId) {
         await supabase
           .from("activations")
-          .update({
-            ad_design_url: data.artworkUrl,
-            ad_unit_sku: data.selectedSku,
-            activation_type: type,
-          })
+          .update(activationData)
           .eq("id", activationId);
       } else {
         const { data: newActivation, error } = await supabase
@@ -264,9 +279,7 @@ const ActivateListing = () => {
             advertiser_id: session.user.id,
             publisher_id: publisherProfile.user_id,
             status: "design",
-            ad_design_url: data.artworkUrl,
-            ad_unit_sku: data.selectedSku,
-            activation_type: type,
+            ...activationData,
           })
           .select()
           .single();
@@ -659,7 +672,7 @@ const ActivateListing = () => {
           Back
         </Button>
 
-        {/* Step Indicator - Now 3 steps: Design Ad → Print Order → Payment */}
+        {/* Step Indicator - Now 3 steps: Book Ad Space → Print Order → Payment */}
         <ActivationStepper 
           currentStep={currentStep} 
           approvalStatus={isWaitingForPublisher ? "pending" : isApprovedByPublisher ? "approved" : undefined}
@@ -802,24 +815,28 @@ const ActivateListing = () => {
                     ) : (
                       <Card>
                         <CardHeader>
-                          <CardTitle>Step 1: Upload Your Design</CardTitle>
+                          <CardTitle>Step 1: Book Ad Space</CardTitle>
                           <CardDescription>
-                            Upload your design photos to proceed with your ad activation.
+                            Enter your campaign details, upload creative, and select ad unit type.
                           </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <ul className="space-y-2 text-sm text-muted-foreground">
                             <li className="flex items-center gap-2">
                               <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
-                              Upload your design photos (PNG or JPG, max 30)
+                              Provide campaign details (name, objective, category)
                             </li>
                             <li className="flex items-center gap-2">
                               <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
-                              Select ad unit type (sticker, table tent, etc.)
+                              Upload your creative (PNG or JPG, max 30)
                             </li>
                             <li className="flex items-center gap-2">
                               <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
-                              Select quantity needed
+                              Select ad unit type and quantity
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-muted-foreground/50" />
+                              Choose booking schedule and dates
                             </li>
                           </ul>
                         </CardContent>
