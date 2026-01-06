@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, Calendar, ClipboardCheck, Package } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/Navigation";
 import { ApprovalQueue } from "@/components/publisher/ApprovalQueue";
 import { PublisherCalendar } from "@/components/publisher/PublisherCalendar";
@@ -172,11 +173,17 @@ export default function PublisherApprovalDashboard() {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container mx-auto px-6 py-12 max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Publisher Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage ad requests, bookings, and view your venue calendar
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Publisher Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage ad requests, bookings, and view your venue calendar
+            </p>
+          </div>
+          <Button onClick={() => navigate("/publisher/ad-requests")} variant="outline">
+            <Package className="h-4 w-4 mr-2" />
+            View All Ad Requests
+          </Button>
         </div>
 
         <Tabs defaultValue="ad-requests" className="space-y-6">

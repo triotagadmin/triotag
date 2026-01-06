@@ -1,4 +1,4 @@
-import { CheckCircle, Palette, Package, CreditCard, ArrowRight } from "lucide-react";
+import { CheckCircle, ShoppingCart, Package, CreditCard, ArrowRight } from "lucide-react";
 
 export type ActivationStep = "design" | "print-order" | "payment";
 
@@ -8,7 +8,7 @@ interface ActivationStepperProps {
 }
 
 const steps = [
-  { id: "design" as const, label: "Design Ad", icon: Palette },
+  { id: "design" as const, label: "Book Ad Space", icon: ShoppingCart },
   { id: "print-order" as const, label: "Print Order", icon: Package },
   { id: "payment" as const, label: "Payment", icon: CreditCard },
 ];
