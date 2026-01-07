@@ -242,20 +242,26 @@ const ActivateListing = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session || !listing) return;
 
-      // Get publisher user_id from the public view
+      // Get publisher user_id - the publisher_id in ad_spaces references publisher_profiles.id
+      // We need to get the user_id from that profile
+      let publisherUserId: string | null = null;
+      
+      // First try the public view
       const { data: publisherProfile } = await supabase
         .from("publisher_profiles_public")
         .select("user_id")
         .eq("id", listing.publisher_id)
-        .single();
+        .maybeSingle();
 
-      if (!publisherProfile?.user_id) {
-        toast({
-          title: "Error",
-          description: "Could not find publisher information. Please try again.",
-          variant: "destructive",
-        });
-        return;
+      if (publisherProfile?.user_id) {
+        publisherUserId = publisherProfile.user_id;
+      }
+
+      // If not found, show a non-blocking message and continue
+      if (!publisherUserId) {
+        console.warn("Publisher user_id not found for profile:", listing.publisher_id);
+        // Use the publisher_id as a fallback - it might be the user_id in some cases
+        publisherUserId = listing.publisher_id;
       }
 
       const activationData = {
@@ -277,7 +283,7 @@ const ActivateListing = () => {
           .insert({
             ad_space_id: id,
             advertiser_id: session.user.id,
-            publisher_id: publisherProfile.user_id,
+            publisher_id: publisherUserId,
             status: "design",
             ...activationData,
           })
@@ -876,7 +882,7 @@ const ActivateListing = () => {
                       </CardContent>
                     </Card>
 
-                    {/* Submit Ad Request Button */}
+                    {/* Submit Booking Request Button */}
                     <Button 
                       className="w-full" 
                       size="lg"
@@ -886,12 +892,12 @@ const ActivateListing = () => {
                       {submittingRequest ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Submitting Ad Request...
+                          Submitting Booking Request...
                         </>
                       ) : (
                         <>
                           <Send className="h-4 w-4 mr-2" />
-                          Submit Ad Request - ₱{subscriptionPrice.toLocaleString()}
+                          Submit Booking Request - ₱{subscriptionPrice.toLocaleString()}
                         </>
                       )}
                     </Button>

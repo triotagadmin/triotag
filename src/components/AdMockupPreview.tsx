@@ -166,10 +166,19 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
   };
 
   const handleConfirmDesign = () => {
-    if (uploadedImages.length === 0 || !adUnitType) {
+    if (uploadedImages.length === 0) {
       toast({
-        title: "Missing information",
-        description: "Please upload at least one design photo and select an ad unit type.",
+        title: "Missing creative",
+        description: "Please upload at least one design photo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!adUnitType) {
+      toast({
+        title: "Missing ad unit",
+        description: "Please select an ad unit type.",
         variant: "destructive",
       });
       return;
@@ -191,11 +200,6 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
         targetAudience,
         creativeNotes,
       },
-    });
-
-    toast({
-      title: "Booking details confirmed!",
-      description: "Now select your booking dates and submit your ad request.",
     });
   };
 
@@ -383,19 +387,21 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
           )}
         </div>
 
-        {/* Confirm Button */}
-        {!isConfirmed ? (
+        {/* Confirm Button - only show when not yet confirmed */}
+        {!isConfirmed && (
           <Button
             onClick={handleConfirmDesign}
             disabled={uploadedImages.length === 0 || !adUnitType}
             className="w-full"
             size="lg"
           >
-            Confirm Booking Details
+            Continue to Schedule
           </Button>
-        ) : (
+        )}
+        
+        {isConfirmed && (
           <div className="flex items-center justify-center gap-2 p-4 bg-primary/10 rounded-lg text-primary">
-            <span className="font-medium">Booking details confirmed - Select dates below</span>
+            <span className="font-medium">✓ Details saved - Select dates below and submit</span>
           </div>
         )}
       </CardContent>
