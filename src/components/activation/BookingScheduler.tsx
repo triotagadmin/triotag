@@ -50,30 +50,51 @@ export function BookingScheduler({
     return { days, hours, weeks };
   }, [startDate, endDate]);
 
-  // Calculate estimated payout
+  // Calculate estimated payout based on ad unit pricing and duration
   const estimatedPayout = useMemo(() => {
-    if (!startDate || !endDate || !pricing) return 0;
+    if (!startDate || !endDate) return 0;
 
     const days = differenceInDays(endDate, startDate) + 1;
     const weeks = Math.ceil(days / 7);
 
-    // Get pricing from ad_units if available
+    // Get pricing from multiple possible sources
+    // 1. Check pricing.ad_units array (new format)
+    // 2. Check pricing directly for weekly/monthly (legacy format)
     const adUnits = pricing?.ad_units || [];
     const selectedAdUnit = adUnits.find((unit: any) => unit.type === adUnitType) || adUnits[0];
 
-    const weeklyRate = selectedAdUnit?.weekly_subscription_fee || pricing?.weekly || 0;
-    const monthlyRate = selectedAdUnit?.monthly_subscription_fee || pricing?.monthly || 0;
-    const dailyRate = pricing?.daily || weeklyRate / 7;
+    // Weekly rate: check ad unit first, then pricing object
+    const weeklyRate = 
+      selectedAdUnit?.pricePerWeek || 
+      selectedAdUnit?.weekly_subscription_fee || 
+      pricing?.weekly || 
+      pricing?.pricePerWeek || 
+      0;
+    
+    // Monthly rate: check ad unit first, then pricing object  
+    const monthlyRate = 
+      selectedAdUnit?.pricePerMonth || 
+      selectedAdUnit?.monthly_subscription_fee || 
+      pricing?.monthly || 
+      pricing?.pricePerMonth || 
+      0;
+    
+    // Daily rate fallback
+    const dailyRate = pricing?.daily || (weeklyRate > 0 ? weeklyRate / 7 : 0);
+
+    // If no valid rates found, return 0
+    if (weeklyRate === 0 && monthlyRate === 0 && dailyRate === 0) return 0;
 
     let total = 0;
 
-    // Calculate based on duration
-    if (weeks >= 4) {
-      const months = Math.ceil(weeks / 4);
-      total = months * monthlyRate;
-    } else if (weeks >= 1) {
+    // Pricing logic: months apply first, remaining weeks billed at weekly rate
+    if (weeks >= 4 && monthlyRate > 0) {
+      const fullMonths = Math.floor(weeks / 4);
+      const remainingWeeks = weeks % 4;
+      total = (fullMonths * monthlyRate) + (remainingWeeks * weeklyRate);
+    } else if (weeks >= 1 && weeklyRate > 0) {
       total = weeks * weeklyRate;
-    } else {
+    } else if (dailyRate > 0) {
       total = days * dailyRate;
     }
 

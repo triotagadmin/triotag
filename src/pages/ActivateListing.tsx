@@ -339,6 +339,42 @@ const ActivateListing = () => {
     }
   };
 
+  // Helper function to calculate booking price inline
+  const calculateBookingPrice = () => {
+    if (!startDate || !endDate || !listing) return 0;
+    
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const diffWeeks = Math.ceil(diffDays / 7);
+    
+    const adUnits = listing.specifications?.ad_units || listing.pricing?.ad_units || [];
+    const selectedAdUnit = adUnits.find((unit: any) => 
+      unit.type === approvedAdUnitType || unit.type === activationType
+    ) || adUnits[0];
+    
+    const weeklyRate = 
+      selectedAdUnit?.pricePerWeek || 
+      selectedAdUnit?.weekly_subscription_fee ||
+      listing.pricing?.weekly || 
+      listing.pricing?.pricePerWeek || 
+      0;
+    
+    const monthlyRate = 
+      selectedAdUnit?.pricePerMonth || 
+      selectedAdUnit?.monthly_subscription_fee ||
+      listing.pricing?.monthly || 
+      listing.pricing?.pricePerMonth || 
+      0;
+    
+    if (diffWeeks >= 4 && monthlyRate > 0) {
+      const fullMonths = Math.floor(diffWeeks / 4);
+      const remainingWeeks = diffWeeks % 4;
+      return (fullMonths * monthlyRate) + (remainingWeeks * weeklyRate);
+    }
+    
+    return diffWeeks * weeklyRate;
+  };
+
   // Submit Ad Request to Publisher
   const handleSubmitAdRequest = async () => {
     if (!startDate || !endDate || !activationId || !artworkUrl) {
@@ -350,23 +386,27 @@ const ActivateListing = () => {
       return;
     }
 
-    if (estimatedPublisherPayout <= 0) {
+    // Use estimatedPublisherPayout as primary, fall back to calculated price
+    const bookingPrice = estimatedPublisherPayout > 0 ? estimatedPublisherPayout : calculateBookingPrice();
+    
+    if (bookingPrice <= 0) {
       toast({
         title: "Error",
-        description: "Cannot submit without a valid booking price. Please select dates.",
+        description: "Cannot submit without a valid booking price. Please ensure dates are selected and the listing has pricing configured.",
         variant: "destructive",
       });
       return;
     }
 
     setSubmittingRequest(true);
+    
     try {
       const { error } = await supabase
         .from("activations")
         .update({
           status: "pending_submission",
           submitted_at: new Date().toISOString(),
-          estimated_publisher_payout: estimatedPublisherPayout,
+          estimated_publisher_payout: bookingPrice,
           quantity,
         })
         .eq("id", activationId);
@@ -581,31 +621,54 @@ const ActivateListing = () => {
     if (!startDate || !endDate || !listing) return 0;
     
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Include both start and end dates
     const diffWeeks = Math.ceil(diffDays / 7);
     
-    // Get pricing from ad_units if available
-    const adUnits = listing.specifications?.ad_units || [];
+    // Get pricing from multiple sources:
+    // 1. listing.specifications.ad_units (ad unit specific pricing)
+    // 2. listing.pricing.ad_units (alternative location)
+    // 3. listing.pricing (legacy direct pricing)
+    const adUnits = listing.specifications?.ad_units || listing.pricing?.ad_units || [];
     const selectedAdUnit = adUnits.find((unit: any) => 
       unit.type === approvedAdUnitType || unit.type === activationType
     ) || adUnits[0];
     
-    const weeklyRate = selectedAdUnit?.pricePerWeek || listing.pricing?.weekly || 0;
-    const monthlyRate = selectedAdUnit?.pricePerMonth || listing.pricing?.monthly || 0;
+    // Get weekly rate from multiple possible fields
+    const weeklyRate = 
+      selectedAdUnit?.pricePerWeek || 
+      selectedAdUnit?.weekly_subscription_fee ||
+      listing.pricing?.weekly || 
+      listing.pricing?.pricePerWeek || 
+      0;
     
-    // Use monthly rate if duration is 4+ weeks, otherwise use weekly
-    if (diffWeeks >= 4) {
-      const months = Math.ceil(diffWeeks / 4);
-      return months * monthlyRate;
+    // Get monthly rate from multiple possible fields
+    const monthlyRate = 
+      selectedAdUnit?.pricePerMonth || 
+      selectedAdUnit?.monthly_subscription_fee ||
+      listing.pricing?.monthly || 
+      listing.pricing?.pricePerMonth || 
+      0;
+    
+    // Pricing logic: months apply first, remaining weeks billed at weekly rate
+    if (diffWeeks >= 4 && monthlyRate > 0) {
+      const fullMonths = Math.floor(diffWeeks / 4);
+      const remainingWeeks = diffWeeks % 4;
+      return (fullMonths * monthlyRate) + (remainingWeeks * weeklyRate);
     }
     
-    return diffWeeks * weeklyRate;
+    if (weeklyRate > 0) {
+      return diffWeeks * weeklyRate;
+    }
+    
+    return 0;
   };
 
   const subscriptionPrice = calculateSubscriptionPrice();
 
   // Check if schedule and design are complete for submitting
-  const canSubmitAdRequest = designApproved && startDate && endDate && subscriptionPrice > 0;
+  // Allow submission if either subscriptionPrice or estimatedPublisherPayout is valid
+  const hasValidPrice = subscriptionPrice > 0 || estimatedPublisherPayout > 0;
+  const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice;
 
   // Check if waiting for publisher response
   const isWaitingForPublisher = ["pending_submission", "under_review"].includes(activationStatus);
@@ -858,7 +921,10 @@ const ActivateListing = () => {
                       startDate={startDate}
                       endDate={endDate}
                       onDatesChange={handleDatesChange}
-                      pricing={listing.pricing}
+                      pricing={{
+                        ...listing.pricing,
+                        ad_units: listing.specifications?.ad_units || listing.pricing?.ad_units || [],
+                      }}
                       adUnitType={approvedAdUnitType || activationType}
                       quantity={quantity}
                       onEstimatedPayoutChange={handleEstimatedPayoutChange}
