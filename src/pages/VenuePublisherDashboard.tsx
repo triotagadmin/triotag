@@ -23,6 +23,7 @@ import { CreateVenueDialog } from "@/components/venue-ticketing/CreateVenueDialo
 import { CreateEventDialog } from "@/components/venue-ticketing/CreateEventDialog";
 import { GenerateTicketsDialog } from "@/components/venue-ticketing/GenerateTicketsDialog";
 import { AdRequestsQueue } from "@/components/publisher/AdRequestsQueue";
+import { PublisherCalendar } from "@/components/publisher/PublisherCalendar";
 
 interface Venue {
   id: string;
@@ -233,7 +234,7 @@ const VenuePublisherDashboard = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="booking-requests" className="space-y-6">
-          <TabsList className="grid w-full max-w-lg grid-cols-3">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4">
             <TabsTrigger value="booking-requests" className="relative">
               <ClipboardList className="h-4 w-4 mr-2" />
               Booking Requests
@@ -245,6 +246,10 @@ const VenuePublisherDashboard = () => {
                   {activations.filter(a => ["pending_submission", "under_review", "design"].includes(a.status) && a.ad_design_url).length}
                 </Badge>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="calendar">
+              <Calendar className="h-4 w-4 mr-2" />
+              Calendar
             </TabsTrigger>
             <TabsTrigger value="venues">
               <Building2 className="h-4 w-4 mr-2" />
@@ -262,6 +267,11 @@ const VenuePublisherDashboard = () => {
               requests={activations} 
               onStatusChange={handleStatusChange}
             />
+          </TabsContent>
+
+          {/* Calendar Tab */}
+          <TabsContent value="calendar">
+            <PublisherCalendar activations={activations} />
           </TabsContent>
 
           {/* Venues Tab */}

@@ -220,8 +220,6 @@ const ActivateListing = () => {
 
   const handleMockupApproval = async (data: { 
     artworkUrl: string; 
-    adUnitType: string; 
-    selectedSku: string; 
     campaignDetails?: {
       campaignName: string;
       brandCategory: string;
@@ -231,9 +229,14 @@ const ActivateListing = () => {
     };
   }) => {
     setArtworkUrl(data.artworkUrl);
-    setSelectedProduct(data.selectedSku);
-    setApprovedAdUnitType(data.adUnitType);
-    const type = getActivationType(data.adUnitType);
+    
+    // Get ad unit type from listing (publisher defined)
+    const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
+    const firstAdUnit = listingAdUnits[0];
+    const adUnitType = firstAdUnit?.type || "sticker";
+    
+    setApprovedAdUnitType(adUnitType);
+    const type = getActivationType(adUnitType);
     setActivationType(type);
     setDesignApproved(true);
 
@@ -242,11 +245,9 @@ const ActivateListing = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session || !listing) return;
 
-      // Get publisher user_id - the publisher_id in ad_spaces references publisher_profiles.id
-      // We need to get the user_id from that profile
+      // Get publisher user_id
       let publisherUserId: string | null = null;
       
-      // First try the public view
       const { data: publisherProfile } = await supabase
         .from("publisher_profiles_public")
         .select("user_id")
@@ -257,16 +258,12 @@ const ActivateListing = () => {
         publisherUserId = publisherProfile.user_id;
       }
 
-      // If not found, show a non-blocking message and continue
       if (!publisherUserId) {
-        console.warn("Publisher user_id not found for profile:", listing.publisher_id);
-        // Use the publisher_id as a fallback - it might be the user_id in some cases
         publisherUserId = listing.publisher_id;
       }
 
       const activationData = {
         ad_design_url: data.artworkUrl,
-        ad_unit_sku: data.selectedSku,
         activation_type: type,
         campaign_objective: data.campaignDetails?.campaignObjective || null,
         brand_category: data.campaignDetails?.brandCategory || null,
@@ -998,26 +995,53 @@ const ActivateListing = () => {
               />
             ) : (
               <div className="space-y-8">
-                {/* Product Selection */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Package className="h-5 w-5 text-primary" />
-                    Select Print Product
-                  </h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {PRINT_PRODUCTS.map((product) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                        selected={selectedProductId === product.id}
-                        onClick={() => {
-                          setSelectedProductId(product.id);
-                          setQuantity(Math.max(quantity, product.minQuantity));
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
+                {/* Auto-detected Print Product from Listing */}
+                <Card className="border-primary">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Package className="h-5 w-5 text-primary" />
+                      Print Product (Auto-Detected)
+                    </CardTitle>
+                    <CardDescription>
+                      Based on the ad unit type defined by the publisher for this listing
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {(() => {
+                      // Auto-detect product based on listing's ad unit
+                      const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
+                      const firstAdUnit = listingAdUnits[0];
+                      const adUnitType = firstAdUnit?.type || activationType || "sticker";
+                      const detectedProduct = PRINT_PRODUCTS.find(p => 
+                        p.id.includes(adUnitType.replace("_", "-")) || 
+                        (adUnitType.includes("sticker") && p.id.includes("sticker")) ||
+                        (adUnitType.includes("tent") && p.id === "table-tent")
+                      ) || PRINT_PRODUCTS[0];
+                      
+                      // Set the product if not already set
+                      if (!selectedProductId && detectedProduct) {
+                        setTimeout(() => setSelectedProductId(detectedProduct.id), 0);
+                      }
+                      
+                      return (
+                        <div className="flex items-start gap-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-lg">{detectedProduct.name}</h4>
+                            <p className="text-sm text-muted-foreground mb-2">{detectedProduct.description}</p>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div><span className="text-muted-foreground">Size:</span> {detectedProduct.specs.size}</div>
+                              <div><span className="text-muted-foreground">Material:</span> {detectedProduct.specs.material}</div>
+                            </div>
+                            <div className="mt-3 pt-3 border-t">
+                              <span className="text-2xl font-bold text-primary">${detectedProduct.pricePerUnit}</span>
+                              <span className="text-muted-foreground"> / unit</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
 
                 <div className="grid lg:grid-cols-2 gap-8">
                   {/* Order Configuration */}

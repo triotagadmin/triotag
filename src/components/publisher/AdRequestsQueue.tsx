@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, XCircle, Eye, Calendar, Package, Clock, User, Image } from "lucide-react";
-import { format } from "date-fns";
+import { CheckCircle, XCircle, Eye, Calendar, Package, Clock, Image, Ban, AlertCircle } from "lucide-react";
+import { format, differenceInHours } from "date-fns";
 
 interface AdRequest {
   id: string;
@@ -25,6 +25,8 @@ interface AdRequest {
   quantity: number | null;
   created_at: string;
   submitted_at: string | null;
+  brand_category?: string | null;
+  campaign_objective?: string | null;
   ad_spaces: {
     title: string;
     location: string | null;
@@ -37,20 +39,29 @@ interface AdRequestsQueueProps {
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  pending_submission: { label: "Pending Submission", color: "bg-gray-500" },
+  pending_submission: { label: "Pending Review", color: "bg-yellow-500" },
   under_review: { label: "Under Review", color: "bg-blue-500" },
   approved: { label: "Approved", color: "bg-green-500" },
   rejected: { label: "Rejected", color: "bg-red-500" },
-  design: { label: "Design", color: "bg-purple-500" },
+  design: { label: "Draft", color: "bg-gray-500" },
 };
 
 export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueueProps) => {
   const [selectedRequest, setSelectedRequest] = useState<AdRequest | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [processing, setProcessing] = useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const { toast } = useToast();
+
+  // Check if a request can be cancelled (within 24 hours of approval)
+  const canCancelRequest = (request: AdRequest) => {
+    if (request.status !== "approved") return false;
+    const submittedAt = request.submitted_at || request.created_at;
+    const hoursSinceSubmission = differenceInHours(new Date(), new Date(submittedAt));
+    return hoursSinceSubmission <= 24;
+  };
 
   const handleViewRequest = async (request: AdRequest) => {
     setSelectedRequest(request);
@@ -124,6 +135,11 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
     setRejectDialogOpen(true);
   };
 
+  const openCancelDialog = () => {
+    setPreviewDialogOpen(false);
+    setCancelDialogOpen(true);
+  };
+
   const handleReject = async () => {
     if (!selectedRequest || !rejectionReason.trim()) {
       toast({
@@ -178,19 +194,62 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
     }
   };
 
-  // Filter to show pending requests
-  const pendingRequests = requests.filter(r => 
-    ["pending_submission", "under_review", "design"].includes(r.status) && r.ad_design_url
-  );
+  const handleCancel = async () => {
+    if (!selectedRequest) return;
+    setProcessing(true);
 
-  if (pendingRequests.length === 0) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { error } = await supabase
+        .from("activations")
+        .update({
+          status: "rejected",
+          rejection_reason: "Cancelled by publisher within 24 hours of approval",
+          reviewer_id: session?.user?.id,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq("id", selectedRequest.id);
+
+      if (error) throw error;
+
+      // Send notification to advertiser
+      await supabase.from("notifications").insert({
+        user_id: selectedRequest.advertiser_id,
+        title: "Ad Request Cancelled",
+        message: `Your ad request for "${selectedRequest.ad_spaces?.title}" has been cancelled by the publisher.`,
+        type: "ad_request_cancelled",
+      });
+
+      toast({
+        title: "Request Cancelled",
+        description: "The booking request has been cancelled.",
+      });
+
+      setCancelDialogOpen(false);
+      setSelectedRequest(null);
+      onStatusChange();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel request",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // Filter to show all requests with ad design
+  const allRequests = requests.filter(r => r.ad_design_url);
+
+  if (allRequests.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
           <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No Pending Ad Requests</h3>
+          <h3 className="text-lg font-semibold mb-2">No Booking Requests</h3>
           <p className="text-muted-foreground">
-            Ad requests from advertisers will appear here for your review.
+            Booking requests from advertisers will appear here for your review.
           </p>
         </CardContent>
       </Card>
@@ -200,8 +259,9 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
   return (
     <>
       <div className="space-y-4">
-        {pendingRequests.map((request) => {
+        {allRequests.map((request) => {
           const statusInfo = statusLabels[request.status] || { label: request.status, color: "bg-gray-500" };
+          const canCancel = canCancelRequest(request);
           
           return (
             <Card key={request.id} className="hover:border-primary/50 transition-colors">
@@ -263,8 +323,22 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
                       className="flex-1"
                     >
                       <Eye className="h-4 w-4 mr-1" />
-                      Review
+                      View Details
                     </Button>
+                    {canCancel && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedRequest(request);
+                          setCancelDialogOpen(true);
+                        }}
+                        className="flex-1 text-destructive hover:text-destructive"
+                      >
+                        <Ban className="h-4 w-4 mr-1" />
+                        Cancel
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -275,17 +349,17 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
 
       {/* Preview Dialog */}
       <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Ad Request Details</DialogTitle>
+            <DialogTitle>Booking Request Details</DialogTitle>
             <DialogDescription>
-              Review the advertiser's submission and decide whether to approve or reject.
+              Review the advertiser's campaign submission and take action.
             </DialogDescription>
           </DialogHeader>
 
           {selectedRequest && (
-            <div className="space-y-4">
-              {/* Design Preview */}
+            <div className="space-y-6">
+              {/* Ad Creative Preview */}
               {selectedRequest.ad_design_url && (
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
@@ -302,15 +376,23 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
                 </div>
               )}
 
-              {/* Details Grid */}
+              {/* Campaign & Booking Details Grid */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <Label className="text-muted-foreground">Venue</Label>
+                  <Label className="text-muted-foreground">Venue / Listing</Label>
                   <p className="font-medium">{selectedRequest.ad_spaces?.title}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Location</Label>
+                  <p className="font-medium">{selectedRequest.ad_spaces?.location || "N/A"}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Ad Unit Type</Label>
                   <p className="font-medium">{selectedRequest.activation_type?.replace("_", " ") || "N/A"}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Quantity</Label>
+                  <p className="font-medium">{selectedRequest.quantity || 1} units</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Booking Period</Label>
@@ -324,36 +406,68 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
                   <Label className="text-muted-foreground">Duration</Label>
                   <p className="font-medium">
                     {selectedRequest.start_date && selectedRequest.end_date
-                      ? `${Math.ceil((new Date(selectedRequest.end_date).getTime() - new Date(selectedRequest.start_date).getTime()) / (1000 * 60 * 60 * 24))} days`
+                      ? `${Math.ceil((new Date(selectedRequest.end_date).getTime() - new Date(selectedRequest.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1} days`
                       : "N/A"}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Quantity</Label>
-                  <p className="font-medium">{selectedRequest.quantity || 1} units</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Booking Fee</Label>
-                  <p className="font-medium text-primary">
+                  <Label className="text-muted-foreground">Booking Fee / Payout</Label>
+                  <p className="font-medium text-primary text-lg">
                     ₱{(selectedRequest.estimated_publisher_payout || 0).toLocaleString()}
                   </p>
                 </div>
+                <div>
+                  <Label className="text-muted-foreground">Submitted</Label>
+                  <p className="font-medium">
+                    {format(new Date(selectedRequest.submitted_at || selectedRequest.created_at), "PPP")}
+                  </p>
+                </div>
+                {selectedRequest.brand_category && (
+                  <div>
+                    <Label className="text-muted-foreground">Brand Category</Label>
+                    <p className="font-medium">{selectedRequest.brand_category}</p>
+                  </div>
+                )}
+                {selectedRequest.campaign_objective && (
+                  <div>
+                    <Label className="text-muted-foreground">Campaign Objective</Label>
+                    <p className="font-medium">{selectedRequest.campaign_objective}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Status Badge */}
+              <div className="flex items-center gap-2 pt-2 border-t">
+                <Label className="text-muted-foreground">Current Status:</Label>
+                <Badge className={statusLabels[selectedRequest.status]?.color || "bg-gray-500"}>
+                  {statusLabels[selectedRequest.status]?.label || selectedRequest.status}
+                </Badge>
               </div>
             </div>
           )}
 
-          <DialogFooter className="flex gap-2">
+          <DialogFooter className="flex gap-2 flex-wrap">
             <Button variant="outline" onClick={() => setPreviewDialogOpen(false)}>
               Close
             </Button>
-            <Button variant="destructive" onClick={openRejectDialog} disabled={processing}>
-              <XCircle className="h-4 w-4 mr-1" />
-              Reject
-            </Button>
-            <Button onClick={handleApprove} disabled={processing}>
-              <CheckCircle className="h-4 w-4 mr-1" />
-              Approve
-            </Button>
+            {selectedRequest && ["pending_submission", "under_review", "design"].includes(selectedRequest.status) && (
+              <>
+                <Button variant="destructive" onClick={openRejectDialog} disabled={processing}>
+                  <XCircle className="h-4 w-4 mr-1" />
+                  Reject
+                </Button>
+                <Button onClick={handleApprove} disabled={processing}>
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Approve
+                </Button>
+              </>
+            )}
+            {selectedRequest && canCancelRequest(selectedRequest) && (
+              <Button variant="outline" className="text-destructive" onClick={openCancelDialog} disabled={processing}>
+                <Ban className="h-4 w-4 mr-1" />
+                Cancel Booking
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -362,7 +476,7 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Ad Request</DialogTitle>
+            <DialogTitle>Reject Booking Request</DialogTitle>
             <DialogDescription>
               Please provide a reason for rejecting this request. The advertiser will be notified.
             </DialogDescription>
@@ -375,7 +489,7 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
                 id="rejection-reason"
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Explain why you're rejecting this ad request..."
+                placeholder="Explain why you're rejecting this booking request..."
                 rows={4}
               />
             </div>
@@ -391,6 +505,45 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
               disabled={processing || !rejectionReason.trim()}
             >
               {processing ? "Rejecting..." : "Confirm Rejection"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              Cancel Approved Booking
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this approved booking? This action can only be done within 24 hours of approval.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedRequest && (
+            <div className="p-4 bg-muted rounded-lg space-y-2 text-sm">
+              <p><strong>Venue:</strong> {selectedRequest.ad_spaces?.title}</p>
+              <p><strong>Booking Period:</strong> {selectedRequest.start_date && selectedRequest.end_date
+                ? `${format(new Date(selectedRequest.start_date), "MMM d")} - ${format(new Date(selectedRequest.end_date), "MMM d, yyyy")}`
+                : "N/A"}
+              </p>
+              <p><strong>Payout:</strong> ₱{(selectedRequest.estimated_publisher_payout || 0).toLocaleString()}</p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
+              Keep Booking
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={processing}
+            >
+              {processing ? "Cancelling..." : "Yes, Cancel Booking"}
             </Button>
           </DialogFooter>
         </DialogContent>
