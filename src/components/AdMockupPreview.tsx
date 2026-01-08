@@ -9,18 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Ad unit types with their display names and Prodigi SKU mappings
-const AD_UNIT_TYPES = [
-  { value: "window-sticker", label: "Window Sticker", sku: "GLOBAL-STI-SQU-4X4" },
-  { value: "table-tent", label: "Table Tent", sku: "GLOBAL-STI-REC-3X4" },
-  { value: "countertop-stand", label: "Countertop Stand", sku: "GLOBAL-STI-SQU-4X4" },
-  { value: "wall-sticker", label: "Wall Sticker", sku: "GLOBAL-STI-SQU-4X4" },
-  { value: "door-sticker", label: "Door Sticker", sku: "GLOBAL-STI-REC-3X4" },
-  { value: "tabletop-qr-card", label: "Tabletop QR Card", sku: "GLOBAL-STI-SQU-2X2" },
-  { value: "mural-painting", label: "Mural Painting", sku: "GLOBAL-STI-SQU-4X4" },
-  { value: "wheat-paste", label: "Wheat Paste", sku: "GLOBAL-STI-SQU-4X4" },
-];
-
 const BRAND_CATEGORIES = [
   "Food & Beverage",
   "Retail & Shopping",
@@ -48,7 +36,7 @@ const CAMPAIGN_OBJECTIVES = [
   "Other",
 ];
 
-interface CampaignDetails {
+export interface CampaignDetails {
   campaignName: string;
   brandCategory: string;
   campaignObjective: string;
@@ -59,8 +47,6 @@ interface CampaignDetails {
 interface AdMockupPreviewProps {
   onApprove: (data: { 
     artworkUrl: string; 
-    adUnitType: string; 
-    selectedSku: string;
     campaignDetails?: CampaignDetails;
   }) => void;
 }
@@ -71,7 +57,6 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
   
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [adUnitType, setAdUnitType] = useState("");
   const [isConfirmed, setIsConfirmed] = useState(false);
 
   // Campaign details state
@@ -174,25 +159,12 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
       });
       return;
     }
-
-    if (!adUnitType) {
-      toast({
-        title: "Missing ad unit",
-        description: "Please select an ad unit type.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const selectedUnit = AD_UNIT_TYPES.find(u => u.value === adUnitType);
     
     setIsConfirmed(true);
     
     // Pass the first uploaded image as the main artwork along with campaign details
     onApprove({
       artworkUrl: uploadedImages[0],
-      adUnitType,
-      selectedSku: selectedUnit?.sku || "GLOBAL-STI-SQU-4X4",
       campaignDetails: {
         campaignName,
         brandCategory,
@@ -202,8 +174,6 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
       },
     });
   };
-
-  const selectedUnitInfo = AD_UNIT_TYPES.find(u => u.value === adUnitType);
 
   return (
     <Card className="border-primary/20">
@@ -292,7 +262,7 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
         <div className="space-y-2">
           <Label>Upload Your Creative *</Label>
           <p className="text-sm text-muted-foreground">
-            {uploadedImages.length}/30 photos uploaded
+            {uploadedImages.length}/30 photos uploaded (minimum 1 required)
           </p>
           <div 
             className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
@@ -362,36 +332,11 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
           />
         </div>
 
-        {/* Ad Unit Type Selection */}
-        <div className="space-y-2">
-          <Label>Ad Unit Type *</Label>
-          <Select value={adUnitType} onValueChange={(value) => {
-            setAdUnitType(value);
-            setIsConfirmed(false);
-          }}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select ad unit type..." />
-            </SelectTrigger>
-            <SelectContent>
-              {AD_UNIT_TYPES.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {selectedUnitInfo && (
-            <p className="text-sm text-muted-foreground">
-              Maps to product: {selectedUnitInfo.sku}
-            </p>
-          )}
-        </div>
-
         {/* Confirm Button - only show when not yet confirmed */}
         {!isConfirmed && (
           <Button
             onClick={handleConfirmDesign}
-            disabled={uploadedImages.length === 0 || !adUnitType}
+            disabled={uploadedImages.length === 0}
             className="w-full"
             size="lg"
           >

@@ -1,5 +1,5 @@
 // Print Product Specifications - Manual Admin Order System
-// This replaces the Prodigi API integration
+// Updated with new ad unit prices
 
 export interface PrintProduct {
   id: string;
@@ -22,41 +22,55 @@ export interface PrintProduct {
 
 export const PRINT_PRODUCTS: PrintProduct[] = [
   {
-    id: "retractable-banner-33x80",
-    name: "Retractable Banner Stand",
-    sku: "RB-33X80-PREMIUM",
-    description: "Premium retractable banner with aluminum stand. Perfect for high-traffic venue entrances and trade shows.",
+    id: "concrete-sticker",
+    name: "Concrete Sticker",
+    sku: "CS-A4-VINYL",
+    description: "High-quality vinyl sticker designed for concrete surfaces. Weather-resistant and durable.",
     specs: {
-      material: "15oz Scrim Vinyl",
-      size: "33\" x 80\" (Standard)",
-      finish: "Matte Anti-Glare",
-      weight: "6 lbs with stand"
-    },
-    leadTime: "48 hours",
-    regions: ["Philippines", "Asia Pacific"],
-    basePrice: 85,
-    pricePerUnit: 85,
-    minQuantity: 1,
-  },
-  {
-    id: "gallery-board-24x36",
-    name: "Gallery Board",
-    sku: "GB-24X36-FOAM",
-    description: "Lightweight foam board perfect for indoor displays and gallery presentations.",
-    specs: {
-      material: "5mm Foam Core",
-      size: "24\" x 36\"",
-      finish: "Gloss Laminate",
-      weight: "1.2 lbs"
+      material: "Premium Vinyl",
+      size: "8.3\" x 11.7\" (A4)",
+      finish: "Matte",
     },
     leadTime: "24 hours",
-    regions: ["Philippines", "Asia Pacific"],
-    basePrice: 45,
-    pricePerUnit: 35,
+    regions: ["Philippines", "Asia Pacific", "Global"],
+    basePrice: 6,
+    pricePerUnit: 6,
     minQuantity: 1,
   },
   {
-    id: "table-tent-4x6",
+    id: "wood-sticker",
+    name: "Wood Sticker",
+    sku: "WS-A4-VINYL",
+    description: "Premium vinyl sticker optimized for wood surfaces. Long-lasting adhesive.",
+    specs: {
+      material: "Premium Vinyl",
+      size: "8.3\" x 11.7\" (A4)",
+      finish: "Gloss",
+    },
+    leadTime: "24 hours",
+    regions: ["Philippines", "Asia Pacific", "Global"],
+    basePrice: 6,
+    pricePerUnit: 6,
+    minQuantity: 1,
+  },
+  {
+    id: "glass-sticker",
+    name: "Glass Sticker",
+    sku: "GS-A4-VINYL",
+    description: "Clear vinyl sticker perfect for glass windows and surfaces. High visibility.",
+    specs: {
+      material: "Premium Vinyl",
+      size: "8.3\" x 11.7\" (A4)",
+      finish: "Gloss",
+    },
+    leadTime: "24 hours",
+    regions: ["Philippines", "Asia Pacific", "Global"],
+    basePrice: 6,
+    pricePerUnit: 6,
+    minQuantity: 1,
+  },
+  {
+    id: "table-tent",
     name: "Table Tent",
     sku: "TT-4X6-CARD",
     description: "Sturdy table tent for restaurant and cafe table displays.",
@@ -66,41 +80,9 @@ export const PRINT_PRODUCTS: PrintProduct[] = [
       finish: "Gloss UV Coating",
     },
     leadTime: "24 hours",
-    regions: ["Philippines", "Asia Pacific"],
-    basePrice: 25,
-    pricePerUnit: 2.5,
-    minQuantity: 10,
-  },
-  {
-    id: "window-sticker-a4",
-    name: "Window Sticker",
-    sku: "WS-A4-VINYL",
-    description: "High-quality vinyl sticker for window displays.",
-    specs: {
-      material: "Premium Vinyl",
-      size: "A4 (8.3\" x 11.7\")",
-      finish: "Gloss",
-    },
-    leadTime: "24 hours",
-    regions: ["Philippines", "Asia Pacific"],
-    basePrice: 15,
-    pricePerUnit: 3,
-    minQuantity: 5,
-  },
-  {
-    id: "poster-18x24",
-    name: "Poster Print",
-    sku: "PP-18X24-SATIN",
-    description: "Professional satin finish poster for indoor displays.",
-    specs: {
-      material: "200gsm Satin Paper",
-      size: "18\" x 24\"",
-      finish: "Satin",
-    },
-    leadTime: "24 hours",
-    regions: ["Philippines", "Asia Pacific"],
-    basePrice: 20,
-    pricePerUnit: 8,
+    regions: ["Philippines", "Asia Pacific", "Global"],
+    basePrice: 12,
+    pricePerUnit: 12,
     minQuantity: 1,
   },
 ];
@@ -117,8 +99,7 @@ export const SHIPPING_COUNTRIES = [
 
 export function calculateOrderTotal(product: PrintProduct, quantity: number): number {
   if (quantity <= 0) return 0;
-  // Base price for first unit, then pricePerUnit for additional
-  return product.basePrice + (Math.max(0, quantity - 1) * product.pricePerUnit);
+  return product.pricePerUnit * quantity;
 }
 
 export function getProductById(id: string): PrintProduct | undefined {
@@ -127,4 +108,22 @@ export function getProductById(id: string): PrintProduct | undefined {
 
 export function getProductBySku(sku: string): PrintProduct | undefined {
   return PRINT_PRODUCTS.find(p => p.sku === sku);
+}
+
+// Map ad unit types from listing to print products
+export function getProductByAdUnitType(adUnitType: string): PrintProduct | undefined {
+  const typeMap: Record<string, string> = {
+    "window-sticker": "glass-sticker",
+    "glass-sticker": "glass-sticker",
+    "wall-sticker": "concrete-sticker",
+    "concrete-sticker": "concrete-sticker",
+    "wood-sticker": "wood-sticker",
+    "door-sticker": "wood-sticker",
+    "table-tent": "table-tent",
+    "tabletop-qr-card": "table-tent",
+    "sticker": "concrete-sticker",
+  };
+  
+  const productId = typeMap[adUnitType.toLowerCase()] || "concrete-sticker";
+  return getProductById(productId);
 }
