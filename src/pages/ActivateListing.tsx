@@ -245,7 +245,7 @@ const ActivateListing = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session || !listing) return;
 
-      // Get publisher user_id - MUST be the auth user_id, not the profile ID
+      // Get publisher user_id
       let publisherUserId: string | null = null;
       
       const { data: publisherProfile } = await supabase
@@ -259,13 +259,7 @@ const ActivateListing = () => {
       }
 
       if (!publisherUserId) {
-        console.error("Could not find publisher user_id for profile:", listing.publisher_id);
-        toast({
-          title: "Error",
-          description: "Could not find publisher information. Please try again.",
-          variant: "destructive",
-        });
-        return;
+        publisherUserId = listing.publisher_id;
       }
 
       const activationData = {

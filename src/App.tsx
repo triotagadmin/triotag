@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -51,7 +51,7 @@ import TicketQRView from "./pages/TicketQRView";
 import TicketValidation from "./pages/TicketValidation";
 import TicketMarket from "./pages/TicketMarket";
 import ValidateTicket from "./pages/ValidateTicket";
-
+import PublisherApprovalDashboard from "./pages/PublisherApprovalDashboard";
 import PublisherAdRequests from "./pages/publisher/PublisherAdRequests";
 import PublisherAdRequestDetail from "./pages/publisher/PublisherAdRequestDetail";
 import Messages from "./pages/Messages";
@@ -90,7 +90,7 @@ const App = () => (
           <Route path="/advertiser-dashboard" element={<AdvertiserDashboard />} />
           <Route path="/order-prints" element={<OrderPrints />} />
           <Route path="/venue" element={<VenueDashboard />} />
-          <Route path="/venue-publishers" element={<VenuePublisherDashboard />} />
+          <Route path="/venue-publishers" element={<VenueDashboard />} />
           <Route path="/venue-info" element={<Venue />} />
           <Route path="/venue/register" element={<VenueRegistration />} />
           <Route path="/venue/verify" element={<VenueVerification />} />
@@ -100,7 +100,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
-          {/* Venue Ticketing System */}
+{/* Venue Ticketing System */}
           <Route path="/venue-ticketing" element={<VenuePublisherDashboard />} />
           <Route path="/venue-ticketing/event/:eventId/tickets" element={<VenueTicketsList />} />
           <Route path="/venue-ticketing/scanner/:eventId" element={<VenueTicketScanner />} />
@@ -109,14 +109,18 @@ const App = () => (
           <Route path="/validate" element={<ValidateTicket />} />
           {/* Messaging */}
           <Route path="/messages" element={<Messages />} />
-          {/* Publisher routes */}
+          {/* Publisher Approval Dashboard */}
+          <Route path="/publisher-dashboard" element={<PublisherApprovalDashboard />} />
           <Route path="/publisher/ad-requests" element={<PublisherAdRequests />} />
           <Route path="/publisher/ad-requests/:id" element={<PublisherAdRequestDetail />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/register" element={<AdminRegister />} />
           <Route path="/admin/verify" element={<AdminApproval />} />
-          {/* Redirect from old admin route to canonical route */}
-          <Route path="/admin-dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/admin-dashboard" element={
+            <ProtectedAdminRoute>
+              <AdminDashboard />
+            </ProtectedAdminRoute>
+          } />
           <Route path="/admin/dashboard" element={
             <ProtectedAdminRoute>
               <AdminDashboard />

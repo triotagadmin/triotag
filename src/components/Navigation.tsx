@@ -76,8 +76,9 @@ export const Navigation = () => {
     if (userRole === "admin") return "/admin/dashboard";
     if (userRole === "advertiser") return "/advertiser-dashboard";
     if (userRole === "publisher") {
-      // All publisher types use /venue-publishers as main dashboard
-      return "/venue-publishers";
+      if (publisherType === "venue") return "/venue-publishers";
+      if (publisherType === "digital") return "/digital-publishers";
+      if (publisherType === "agent") return "/agent-publishers";
     }
     return "/dashboard";
   };
