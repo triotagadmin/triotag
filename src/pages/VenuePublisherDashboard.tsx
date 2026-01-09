@@ -22,7 +22,6 @@ import {
 import { CreateVenueDialog } from "@/components/venue-ticketing/CreateVenueDialog";
 import { CreateEventDialog } from "@/components/venue-ticketing/CreateEventDialog";
 import { GenerateTicketsDialog } from "@/components/venue-ticketing/GenerateTicketsDialog";
-import { AdRequestsQueue } from "@/components/publisher/AdRequestsQueue";
 import { PublisherCalendar } from "@/components/publisher/PublisherCalendar";
 
 interface Venue {
@@ -232,21 +231,73 @@ const VenuePublisherDashboard = () => {
           </Button>
         </div>
 
+        {/* Ad Requests Quick Access Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5 text-primary" />
+                  Ad Requests
+                  {activations.filter(a => ["pending_submission", "under_review", "design"].includes(a.status) && a.ad_design_url).length > 0 && (
+                    <Badge variant="destructive">
+                      {activations.filter(a => ["pending_submission", "under_review", "design"].includes(a.status) && a.ad_design_url).length} New
+                    </Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>Review and manage advertiser booking submissions</CardDescription>
+              </div>
+              <Button onClick={() => navigate("/publisher/ad-requests")}>
+                <Package className="h-4 w-4 mr-2" />
+                View All Ad Requests
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {activations.length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">No ad requests yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {activations.slice(0, 3).map((activation) => (
+                  <div key={activation.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {activation.ad_design_url && (
+                        <img 
+                          src={activation.ad_design_url} 
+                          alt="Ad Preview" 
+                          className="w-12 h-12 rounded object-cover"
+                        />
+                      )}
+                      <div>
+                        <p className="font-medium">{activation.ad_spaces?.title || "Unknown Listing"}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {activation.start_date ? new Date(activation.start_date).toLocaleDateString() : "No date"} 
+                          {activation.end_date && ` - ${new Date(activation.end_date).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant={
+                      activation.status === "approved" ? "default" : 
+                      activation.status === "rejected" ? "destructive" : 
+                      "secondary"
+                    }>
+                      {activation.status.replace(/_/g, " ")}
+                    </Badge>
+                  </div>
+                ))}
+                {activations.length > 3 && (
+                  <p className="text-sm text-muted-foreground text-center pt-2">
+                    +{activations.length - 3} more requests
+                  </p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Tabs */}
-        <Tabs defaultValue="booking-requests" className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4">
-            <TabsTrigger value="booking-requests" className="relative">
-              <ClipboardList className="h-4 w-4 mr-2" />
-              Booking Requests
-              {activations.filter(a => ["pending_submission", "under_review", "design"].includes(a.status) && a.ad_design_url).length > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                >
-                  {activations.filter(a => ["pending_submission", "under_review", "design"].includes(a.status) && a.ad_design_url).length}
-                </Badge>
-              )}
-            </TabsTrigger>
+        <Tabs defaultValue="calendar" className="space-y-6">
+          <TabsList className="grid w-full max-w-xl grid-cols-3">
             <TabsTrigger value="calendar">
               <Calendar className="h-4 w-4 mr-2" />
               Calendar
@@ -260,14 +311,6 @@ const VenuePublisherDashboard = () => {
               Events
             </TabsTrigger>
           </TabsList>
-
-          {/* Booking Requests Tab */}
-          <TabsContent value="booking-requests">
-            <AdRequestsQueue 
-              requests={activations} 
-              onStatusChange={handleStatusChange}
-            />
-          </TabsContent>
 
           {/* Calendar Tab */}
           <TabsContent value="calendar">
