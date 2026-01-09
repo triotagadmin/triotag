@@ -62,6 +62,8 @@ interface Activation {
   quantity: number | null;
   created_at: string;
   submitted_at: string | null;
+  brand_category?: string | null;
+  campaign_objective?: string | null;
   ad_spaces: {
     title: string;
     location: string | null;
@@ -120,33 +122,76 @@ const VenuePublisherDashboard = () => {
       setEvents(eventsData || []);
 
       // Fetch booking requests (activations) for this publisher
-      const { data: activationsData, error: activationsError } = await supabase
-        .from("activations")
-        .select(`
-          id,
-          ad_space_id,
-          advertiser_id,
-          publisher_id,
-          status,
-          activation_type,
-          ad_design_url,
-          ad_unit_sku,
-          start_date,
-          end_date,
-          estimated_publisher_payout,
-          quantity,
-          created_at,
-          submitted_at,
-          ad_spaces (
-            title,
-            location
-          )
-        `)
-        .eq("publisher_id", currentUserId)
-        .order("created_at", { ascending: false });
+      // First get the publisher profile to find the profile ID
+      const { data: publisherProfile } = await supabase
+        .from("publisher_profiles")
+        .select("id")
+        .eq("user_id", currentUserId)
+        .maybeSingle();
 
-      if (activationsError) throw activationsError;
-      setActivations(activationsData || []);
+      if (publisherProfile) {
+        // Query by both user_id and profile_id to catch all activations
+        const { data: activationsData, error: activationsError } = await supabase
+          .from("activations")
+          .select(`
+            id,
+            ad_space_id,
+            advertiser_id,
+            publisher_id,
+            status,
+            activation_type,
+            ad_design_url,
+            ad_unit_sku,
+            start_date,
+            end_date,
+            estimated_publisher_payout,
+            quantity,
+            created_at,
+            submitted_at,
+            brand_category,
+            campaign_objective,
+            ad_spaces (
+              title,
+              location
+            )
+          `)
+          .or(`publisher_id.eq.${currentUserId},publisher_id.eq.${publisherProfile.id}`)
+          .order("created_at", { ascending: false });
+
+        if (activationsError) throw activationsError;
+        setActivations(activationsData || []);
+      } else {
+        // Fallback: query only by user_id
+        const { data: activationsData, error: activationsError } = await supabase
+          .from("activations")
+          .select(`
+            id,
+            ad_space_id,
+            advertiser_id,
+            publisher_id,
+            status,
+            activation_type,
+            ad_design_url,
+            ad_unit_sku,
+            start_date,
+            end_date,
+            estimated_publisher_payout,
+            quantity,
+            created_at,
+            submitted_at,
+            brand_category,
+            campaign_objective,
+            ad_spaces (
+              title,
+              location
+            )
+          `)
+          .eq("publisher_id", currentUserId)
+          .order("created_at", { ascending: false });
+
+        if (activationsError) throw activationsError;
+        setActivations(activationsData || []);
+      }
     } catch (error: any) {
       console.error("Error fetching data:", error);
       toast({
