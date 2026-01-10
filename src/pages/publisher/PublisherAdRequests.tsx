@@ -78,7 +78,7 @@ export default function PublisherAdRequests() {
         return;
       }
 
-      // Check if user is a publisher
+      // Check if user is a publisher and get their profile id
       const { data: profile } = await supabase
         .from("publisher_profiles")
         .select("id, publisher_type")
@@ -96,7 +96,8 @@ export default function PublisherAdRequests() {
       }
 
       setIsPublisher(true);
-      await fetchRequests(session.user.id);
+      // Pass the publisher profile id (not user id) for querying activations
+      await fetchRequests(profile.id);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -108,7 +109,7 @@ export default function PublisherAdRequests() {
     }
   };
 
-  const fetchRequests = async (userId: string) => {
+  const fetchRequests = async (publisherProfileId: string) => {
     try {
       const { data, error } = await supabase
         .from("activations")
@@ -134,7 +135,7 @@ export default function PublisherAdRequests() {
             location
           )
         `)
-        .eq("publisher_id", userId)
+        .eq("publisher_id", publisherProfileId)
         .order("submitted_at", { ascending: false, nullsFirst: false });
 
       if (error) throw error;
@@ -169,7 +170,15 @@ export default function PublisherAdRequests() {
         async () => {
           const { data: { session } } = await supabase.auth.getSession();
           if (session) {
-            await fetchRequests(session.user.id);
+            // Get publisher profile id first
+            const { data: profile } = await supabase
+              .from("publisher_profiles")
+              .select("id")
+              .eq("user_id", session.user.id)
+              .maybeSingle();
+            if (profile) {
+              await fetchRequests(profile.id);
+            }
           }
         }
       )

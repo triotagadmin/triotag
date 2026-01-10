@@ -245,22 +245,8 @@ const ActivateListing = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session || !listing) return;
 
-      // Get publisher user_id
-      let publisherUserId: string | null = null;
-      
-      const { data: publisherProfile } = await supabase
-        .from("publisher_profiles_public")
-        .select("user_id")
-        .eq("id", listing.publisher_id)
-        .maybeSingle();
-
-      if (publisherProfile?.user_id) {
-        publisherUserId = publisherProfile.user_id;
-      }
-
-      if (!publisherUserId) {
-        publisherUserId = listing.publisher_id;
-      }
+      // Use publisher_profile_id directly (not user_id) for consistent querying
+      const publisherProfileId = listing.publisher_id;
 
       const activationData = {
         ad_design_url: data.artworkUrl,
@@ -280,7 +266,7 @@ const ActivateListing = () => {
           .insert({
             ad_space_id: id,
             advertiser_id: session.user.id,
-            publisher_id: publisherUserId,
+            publisher_id: publisherProfileId,
             status: "design",
             ...activationData,
           })
@@ -410,21 +396,19 @@ const ActivateListing = () => {
 
       if (error) throw error;
 
-      // Send notification to publisher
+      // Send notification to publisher via backend edge function
       if (listing?.publisher_id) {
-        const { data: publisherProfile } = await supabase
-          .from("publisher_profiles_public")
-          .select("user_id")
-          .eq("id", listing.publisher_id)
-          .single();
-
-        if (publisherProfile?.user_id) {
-          await supabase.from("notifications").insert({
-            user_id: publisherProfile.user_id,
-            title: "New Ad Request Received!",
-            message: `An advertiser has submitted an ad request for "${listing.title}". Please review and respond.`,
-            type: "ad_request_received",
+        try {
+          await supabase.functions.invoke("notify-ad-request", {
+            body: {
+              publisherProfileId: listing.publisher_id,
+              listingTitle: listing.title,
+              activationId: activationId,
+            },
           });
+        } catch (notifyError) {
+          console.error("Failed to send notification:", notifyError);
+          // Don't block submission if notification fails
         }
       }
 
