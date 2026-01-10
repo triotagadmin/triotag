@@ -97,6 +97,15 @@ const VenuePublisherDashboard = () => {
 
   const fetchData = async (currentUserId: string) => {
     try {
+      // First get the publisher profile id for this user
+      const { data: publisherProfile } = await supabase
+        .from("publisher_profiles")
+        .select("id")
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+
+      const publisherProfileId = publisherProfile?.id;
+
       // Fetch venues
       const { data: venuesData, error: venuesError } = await supabase
         .from("venues")
@@ -118,34 +127,36 @@ const VenuePublisherDashboard = () => {
       if (eventsError) throw eventsError;
       setEvents(eventsData || []);
 
-      // Fetch booking requests (activations) for this publisher
-      const { data: activationsData, error: activationsError } = await supabase
-        .from("activations")
-        .select(`
-          id,
-          ad_space_id,
-          advertiser_id,
-          publisher_id,
-          status,
-          activation_type,
-          ad_design_url,
-          ad_unit_sku,
-          start_date,
-          end_date,
-          estimated_publisher_payout,
-          quantity,
-          created_at,
-          submitted_at,
-          ad_spaces (
-            title,
-            location
-          )
-        `)
-        .eq("publisher_id", currentUserId)
-        .order("created_at", { ascending: false });
+      // Fetch booking requests (activations) for this publisher using profile id
+      if (publisherProfileId) {
+        const { data: activationsData, error: activationsError } = await supabase
+          .from("activations")
+          .select(`
+            id,
+            ad_space_id,
+            advertiser_id,
+            publisher_id,
+            status,
+            activation_type,
+            ad_design_url,
+            ad_unit_sku,
+            start_date,
+            end_date,
+            estimated_publisher_payout,
+            quantity,
+            created_at,
+            submitted_at,
+            ad_spaces (
+              title,
+              location
+            )
+          `)
+          .eq("publisher_id", publisherProfileId)
+          .order("created_at", { ascending: false });
 
-      if (activationsError) throw activationsError;
-      setActivations(activationsData || []);
+        if (activationsError) throw activationsError;
+        setActivations(activationsData || []);
+      }
     } catch (error: any) {
       console.error("Error fetching data:", error);
       toast({
@@ -201,20 +212,34 @@ const VenuePublisherDashboard = () => {
     <div className="min-h-screen bg-muted/30">
       <Navigation />
       
-      {/* Ticket Creator Banner */}
+      {/* Ticket Creator & Ad Requests Banner */}
       <div className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 border-b border-border">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Ticket className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium">Create and sell event tickets</span>
           </div>
-          <Button 
-            onClick={() => navigate("/ticket-creator")}
-            className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 text-white"
-          >
-            <Ticket className="h-4 w-4 mr-2" />
-            Ticket Creator
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => navigate("/publisher/ad-requests")}
+              className="relative overflow-hidden bg-primary text-primary-foreground animate-pulse-glow neon-glow"
+            >
+              <Package className="h-4 w-4 mr-2" />
+              AD REQUEST
+              {activations.filter(a => ["pending_submission", "under_review"].includes(a.status) && a.ad_design_url).length > 0 && (
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {activations.filter(a => ["pending_submission", "under_review"].includes(a.status) && a.ad_design_url).length}
+                </Badge>
+              )}
+            </Button>
+            <Button 
+              onClick={() => navigate("/ticket-creator")}
+              className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 text-white"
+            >
+              <Ticket className="h-4 w-4 mr-2" />
+              Ticket Creator
+            </Button>
+          </div>
         </div>
       </div>
 

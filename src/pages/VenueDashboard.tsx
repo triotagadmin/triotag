@@ -80,10 +80,11 @@ const VenueDashboard = () => {
 
       setAdSpaces(spacesData || []);
 
+      // Query activations by publisher profile id (not user id)
       const { data: activationsData } = await supabase
         .from("activations")
         .select(`id, ad_space_id, advertiser_id, publisher_id, status, activation_type, ad_design_url, start_date, end_date, created_at, ad_spaces (title, location)`)
-        .eq("publisher_id", session.user.id)
+        .eq("publisher_id", profileData.id)
         .order("created_at", { ascending: false });
 
       setActivations(activationsData || []);
@@ -96,12 +97,21 @@ const VenueDashboard = () => {
   const handleActivationStatusChange = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      const { data: activationsData } = await supabase
-        .from("activations")
-        .select(`id, ad_space_id, advertiser_id, publisher_id, status, activation_type, ad_design_url, start_date, end_date, created_at, ad_spaces (title, location)`)
-        .eq("publisher_id", session.user.id)
-        .order("created_at", { ascending: false });
-      setActivations(activationsData || []);
+      // Get profile id first
+      const { data: profileData } = await supabase
+        .from("publisher_profiles")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (profileData) {
+        const { data: activationsData } = await supabase
+          .from("activations")
+          .select(`id, ad_space_id, advertiser_id, publisher_id, status, activation_type, ad_design_url, start_date, end_date, created_at, ad_spaces (title, location)`)
+          .eq("publisher_id", profileData.id)
+          .order("created_at", { ascending: false });
+        setActivations(activationsData || []);
+      }
     }
   };
 

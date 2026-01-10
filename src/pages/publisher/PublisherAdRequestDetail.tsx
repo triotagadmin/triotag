@@ -103,7 +103,24 @@ export default function PublisherAdRequestDetail() {
         return;
       }
 
-      // Fetch the request
+      // Get the publisher profile id first
+      const { data: profile } = await supabase
+        .from("publisher_profiles")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        toast({
+          title: "Access Denied",
+          description: "Publisher profile not found.",
+          variant: "destructive",
+        });
+        navigate("/publisher/ad-requests");
+        return;
+      }
+
+      // Fetch the request using publisher profile id
       const { data, error } = await supabase
         .from("activations")
         .select(`
@@ -135,7 +152,7 @@ export default function PublisherAdRequestDetail() {
           )
         `)
         .eq("id", id)
-        .eq("publisher_id", session.user.id)
+        .eq("publisher_id", profile.id)
         .single();
 
       if (error) throw error;
