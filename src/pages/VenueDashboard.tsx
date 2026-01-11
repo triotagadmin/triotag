@@ -147,8 +147,8 @@ const VenueDashboard = () => {
             <Ticket className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium">Create and sell event tickets</span>
           </div>
-          <Button onClick={() => navigate("/ticket-creator")} className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 text-white">
-            <Ticket className="h-4 w-4 mr-2" />Ticket Creator
+          <Button onClick={() => navigate("/publisher/ad-requests")} className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 text-white">
+            <Ticket className="h-4 w-4 mr-2" />Ad Request
           </Button>
         </div>
       </div>
