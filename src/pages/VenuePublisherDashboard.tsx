@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
-import { 
+import {
   Plus,
   MapPin,
   Calendar,
@@ -17,7 +17,7 @@ import {
   Clock,
   DollarSign,
   Package,
-  ClipboardList
+  ClipboardList,
 } from "lucide-react";
 import { CreateVenueDialog } from "@/components/venue-ticketing/CreateVenueDialog";
 import { CreateEventDialog } from "@/components/venue-ticketing/CreateEventDialog";
@@ -80,6 +80,7 @@ const VenuePublisherDashboard = () => {
   const [showEventDialog, setShowEventDialog] = useState(false);
   const [showTicketsDialog, setShowTicketsDialog] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isVenuePublisher, setIsVenuePublisher] = useState(false);
 
   useEffect(() => {
     checkAuthAndFetch();
@@ -97,14 +98,15 @@ const VenuePublisherDashboard = () => {
 
   const fetchData = async (currentUserId: string) => {
     try {
-      // First get the publisher profile id for this user
+      // First get the publisher profile id + type for this user
       const { data: publisherProfile } = await supabase
         .from("publisher_profiles")
-        .select("id")
+        .select("id, publisher_type")
         .eq("user_id", currentUserId)
         .maybeSingle();
 
       const publisherProfileId = publisherProfile?.id;
+      setIsVenuePublisher(publisherProfile?.publisher_type === "venue");
 
       // Fetch venues
       const { data: venuesData, error: venuesError } = await supabase
@@ -211,8 +213,35 @@ const VenuePublisherDashboard = () => {
   return (
     <div className="min-h-screen bg-muted/30">
       <Navigation />
-      
-      {/* Ticket Creator & Ad Requests Banner */}
+
+      {/* AD REQUEST anchor button (venue publishers only) */}
+      {isVenuePublisher && (
+        <div className="border-b border-border bg-card/40">
+          <div className="container mx-auto px-6 py-4 flex items-center justify-center">
+            <Button
+              asChild
+              variant="cyber"
+              size="lg"
+              className="relative overflow-hidden animate-pulse-glow neon-glow-strong"
+            >
+              <Link to="/publisher/ad-requests" aria-label="Go to Ad Requests">
+                <Package className="h-4 w-4" />
+                AD REQUEST
+                {activations.filter((a) => ["pending_submission", "under_review"].includes(a.status)).length > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                  >
+                    {activations.filter((a) => ["pending_submission", "under_review"].includes(a.status)).length}
+                  </Badge>
+                )}
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Ticket Creator Banner */}
       <div className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 border-b border-border">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -220,19 +249,7 @@ const VenuePublisherDashboard = () => {
             <span className="text-sm font-medium">Create and sell event tickets</span>
           </div>
           <div className="flex items-center gap-3">
-            <Button 
-              onClick={() => navigate("/publisher/ad-requests")}
-              className="relative overflow-hidden bg-primary text-primary-foreground animate-pulse-glow neon-glow"
-            >
-              <Package className="h-4 w-4 mr-2" />
-              AD REQUEST
-              {activations.filter(a => ["pending_submission", "under_review"].includes(a.status) && a.ad_design_url).length > 0 && (
-                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                  {activations.filter(a => ["pending_submission", "under_review"].includes(a.status) && a.ad_design_url).length}
-                </Badge>
-              )}
-            </Button>
-            <Button 
+            <Button
               onClick={() => navigate("/ticket-creator")}
               className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 text-white"
             >

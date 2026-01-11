@@ -360,7 +360,7 @@ const ActivateListing = () => {
 
   // Submit Ad Request to Publisher
   const handleSubmitAdRequest = async () => {
-    if (!startDate || !endDate || !activationId || !artworkUrl) {
+    if (!startDate || !endDate || !listing || !artworkUrl) {
       toast({
         title: "Error",
         description: "Please complete all required fields (design, dates) before submitting.",
@@ -371,45 +371,79 @@ const ActivateListing = () => {
 
     // Use estimatedPublisherPayout as primary, fall back to calculated price
     const bookingPrice = estimatedPublisherPayout > 0 ? estimatedPublisherPayout : calculateBookingPrice();
-    
+
     if (bookingPrice <= 0) {
       toast({
         title: "Error",
-        description: "Cannot submit without a valid booking price. Please ensure dates are selected and the listing has pricing configured.",
+        description:
+          "Cannot submit without a valid booking price. Please ensure dates are selected and the listing has pricing configured.",
         variant: "destructive",
       });
       return;
     }
 
     setSubmittingRequest(true);
-    
+
     try {
-      const { error } = await supabase
-        .from("activations")
-        .update({
-          status: "pending_submission",
-          submitted_at: new Date().toISOString(),
-          estimated_publisher_payout: bookingPrice,
-          quantity,
-        })
-        .eq("id", activationId);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
 
-      if (error) throw error;
+      // Always persist an activation record on submission (even if one wasn't created earlier)
+      let persistedActivationId = activationId;
 
-      // Send notification to publisher via backend edge function
-      if (listing?.publisher_id) {
-        try {
-          await supabase.functions.invoke("notify-ad-request", {
-            body: {
-              publisherProfileId: listing.publisher_id,
-              listingTitle: listing.title,
-              activationId: activationId,
-            },
-          });
-        } catch (notifyError) {
-          console.error("Failed to send notification:", notifyError);
-          // Don't block submission if notification fails
-        }
+      if (!persistedActivationId) {
+        const { data: newActivation, error: insertError } = await supabase
+          .from("activations")
+          .insert({
+            ad_space_id: id,
+            advertiser_id: session.user.id,
+            publisher_id: listing.publisher_id, // publisher_profile_id (canonical)
+            status: "pending_submission",
+            submitted_at: new Date().toISOString(),
+            start_date: format(startDate, "yyyy-MM-dd"),
+            end_date: format(endDate, "yyyy-MM-dd"),
+            estimated_publisher_payout: bookingPrice,
+            quantity,
+            ad_design_url: artworkUrl,
+            activation_type: activationType,
+          })
+          .select("id")
+          .single();
+
+        if (insertError) throw insertError;
+
+        persistedActivationId = newActivation.id;
+        setActivationId(persistedActivationId);
+      } else {
+        const { error: updateError } = await supabase
+          .from("activations")
+          .update({
+            status: "pending_submission",
+            submitted_at: new Date().toISOString(),
+            estimated_publisher_payout: bookingPrice,
+            quantity,
+            start_date: format(startDate, "yyyy-MM-dd"),
+            end_date: format(endDate, "yyyy-MM-dd"),
+            ad_design_url: artworkUrl,
+            activation_type: activationType,
+            publisher_id: listing.publisher_id, // keep consistent if older rows used a different value
+          })
+          .eq("id", persistedActivationId);
+
+        if (updateError) throw updateError;
+      }
+
+      // Send notification to publisher via backend function (non-blocking)
+      try {
+        await supabase.functions.invoke("notify-ad-request", {
+          body: {
+            publisherProfileId: listing.publisher_id,
+            listingTitle: listing.title,
+            activationId: persistedActivationId,
+          },
+        });
+      } catch (notifyError) {
+        console.error("Failed to send notification:", notifyError);
       }
 
       setActivationStatus("pending_submission");
