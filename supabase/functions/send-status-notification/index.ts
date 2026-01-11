@@ -52,6 +52,31 @@ serve(async (req) => {
       notificationType = "info_request";
     }
 
+    // Dedupe safeguard: avoid sending multiple notifications for the same status update
+    const dedupeSince = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    const { data: existingNotifications, error: existingError } = await supabase
+      .from("notifications")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("type", notificationType)
+      .eq("title", notificationTitle)
+      .gte("created_at", dedupeSince)
+      .limit(1);
+
+    if (existingError) {
+      console.error("Dedupe lookup error:", existingError);
+    }
+
+    if (existingNotifications && existingNotifications.length > 0) {
+      return new Response(
+        JSON.stringify({ success: true, deduped: true }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
     // Send email
     const emailResponse = await resend.emails.send({
       from: "TinyStickyAds <onboarding@resend.dev>",
