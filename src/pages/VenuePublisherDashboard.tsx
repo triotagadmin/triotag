@@ -17,12 +17,10 @@ import {
   Clock,
   DollarSign,
   Package,
-  ClipboardList,
 } from "lucide-react";
 import { CreateVenueDialog } from "@/components/venue-ticketing/CreateVenueDialog";
 import { CreateEventDialog } from "@/components/venue-ticketing/CreateEventDialog";
 import { GenerateTicketsDialog } from "@/components/venue-ticketing/GenerateTicketsDialog";
-import { PublisherCalendar } from "@/components/publisher/PublisherCalendar";
 
 interface Venue {
   id: string;
@@ -46,34 +44,12 @@ interface VenueEvent {
   venues?: Venue;
 }
 
-interface Activation {
-  id: string;
-  ad_space_id: string;
-  advertiser_id: string;
-  publisher_id: string;
-  status: string;
-  activation_type: string | null;
-  ad_design_url: string | null;
-  ad_unit_sku: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  estimated_publisher_payout: number | null;
-  quantity: number | null;
-  created_at: string;
-  submitted_at: string | null;
-  ad_spaces: {
-    title: string;
-    location: string | null;
-  } | null;
-}
-
 const VenuePublisherDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [events, setEvents] = useState<VenueEvent[]>([]);
-  const [activations, setActivations] = useState<Activation[]>([]);
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<VenueEvent | null>(null);
   const [showVenueDialog, setShowVenueDialog] = useState(false);
@@ -98,14 +74,13 @@ const VenuePublisherDashboard = () => {
 
   const fetchData = async (currentUserId: string) => {
     try {
-      // First get the publisher profile id + type for this user
+      // Get publisher profile type for this user
       const { data: publisherProfile } = await supabase
         .from("publisher_profiles")
         .select("id, publisher_type")
         .eq("user_id", currentUserId)
         .maybeSingle();
 
-      const publisherProfileId = publisherProfile?.id;
       setIsVenuePublisher(publisherProfile?.publisher_type === "venue");
 
       // Fetch venues
@@ -128,37 +103,6 @@ const VenuePublisherDashboard = () => {
 
       if (eventsError) throw eventsError;
       setEvents(eventsData || []);
-
-      // Fetch booking requests (activations) for this publisher using profile id
-      if (publisherProfileId) {
-        const { data: activationsData, error: activationsError } = await supabase
-          .from("activations")
-          .select(`
-            id,
-            ad_space_id,
-            advertiser_id,
-            publisher_id,
-            status,
-            activation_type,
-            ad_design_url,
-            ad_unit_sku,
-            start_date,
-            end_date,
-            estimated_publisher_payout,
-            quantity,
-            created_at,
-            submitted_at,
-            ad_spaces (
-              title,
-              location
-            )
-          `)
-          .eq("publisher_id", publisherProfileId)
-          .order("created_at", { ascending: false });
-
-        if (activationsError) throw activationsError;
-        setActivations(activationsData || []);
-      }
     } catch (error: any) {
       console.error("Error fetching data:", error);
       toast({
@@ -168,12 +112,6 @@ const VenuePublisherDashboard = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleStatusChange = async () => {
-    if (userId) {
-      await fetchData(userId);
     }
   };
 
@@ -227,14 +165,6 @@ const VenuePublisherDashboard = () => {
               <Link to="/publisher/ad-requests" aria-label="Go to Ad Requests">
                 <Package className="h-4 w-4" />
                 AD REQUEST
-                {activations.filter((a) => ["pending_submission", "under_review"].includes(a.status)).length > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                  >
-                    {activations.filter((a) => ["pending_submission", "under_review"].includes(a.status)).length}
-                  </Badge>
-                )}
               </Link>
             </Button>
           </div>
@@ -265,7 +195,7 @@ const VenuePublisherDashboard = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold">Venue Publisher Dashboard</h1>
-            <p className="text-muted-foreground">Manage your venues, events, tickets, and booking requests</p>
+            <p className="text-muted-foreground">Manage your venues, events, and tickets</p>
           </div>
           <Button onClick={handleCreateVenue}>
             <Plus className="h-4 w-4 mr-2" />
@@ -273,19 +203,14 @@ const VenuePublisherDashboard = () => {
           </Button>
         </div>
 
-        {/* Ad Requests Quick Access Section */}
+        {/* Quick Access to Ad Requests */}
         <Card className="mb-8">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  <ClipboardList className="h-5 w-5 text-primary" />
+                  <Package className="h-5 w-5 text-primary" />
                   Ad Requests
-                  {activations.filter(a => ["pending_submission", "under_review", "design"].includes(a.status) && a.ad_design_url).length > 0 && (
-                    <Badge variant="destructive">
-                      {activations.filter(a => ["pending_submission", "under_review", "design"].includes(a.status) && a.ad_design_url).length} New
-                    </Badge>
-                  )}
                 </CardTitle>
                 <CardDescription>Review and manage advertiser booking submissions</CardDescription>
               </div>
@@ -296,54 +221,15 @@ const VenuePublisherDashboard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {activations.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">No ad requests yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {activations.slice(0, 3).map((activation) => (
-                  <div key={activation.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {activation.ad_design_url && (
-                        <img 
-                          src={activation.ad_design_url} 
-                          alt="Ad Preview" 
-                          className="w-12 h-12 rounded object-cover"
-                        />
-                      )}
-                      <div>
-                        <p className="font-medium">{activation.ad_spaces?.title || "Unknown Listing"}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {activation.start_date ? new Date(activation.start_date).toLocaleDateString() : "No date"} 
-                          {activation.end_date && ` - ${new Date(activation.end_date).toLocaleDateString()}`}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge variant={
-                      activation.status === "approved" ? "default" : 
-                      activation.status === "rejected" ? "destructive" : 
-                      "secondary"
-                    }>
-                      {activation.status.replace(/_/g, " ")}
-                    </Badge>
-                  </div>
-                ))}
-                {activations.length > 3 && (
-                  <p className="text-sm text-muted-foreground text-center pt-2">
-                    +{activations.length - 3} more requests
-                  </p>
-                )}
-              </div>
-            )}
+            <p className="text-muted-foreground text-center py-4">
+              All ad requests are managed on the dedicated Ad Requests page.
+            </p>
           </CardContent>
         </Card>
 
-        {/* Tabs */}
-        <Tabs defaultValue="calendar" className="space-y-6">
-          <TabsList className="grid w-full max-w-xl grid-cols-3">
-            <TabsTrigger value="calendar">
-              <Calendar className="h-4 w-4 mr-2" />
-              Calendar
-            </TabsTrigger>
+        {/* Tabs for Venues and Events */}
+        <Tabs defaultValue="venues" className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="venues">
               <Building2 className="h-4 w-4 mr-2" />
               Venues
@@ -353,11 +239,6 @@ const VenuePublisherDashboard = () => {
               Events
             </TabsTrigger>
           </TabsList>
-
-          {/* Calendar Tab */}
-          <TabsContent value="calendar">
-            <PublisherCalendar activations={activations} />
-          </TabsContent>
 
           {/* Venues Tab */}
           <TabsContent value="venues">
