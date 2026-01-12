@@ -140,9 +140,9 @@ export default function PublisherAdRequests() {
 
       if (error) throw error;
 
-      // Filter to show only requests with designs submitted
+      // Filter to show only requests that have been submitted (exclude draft "design" status without submission)
       const validRequests = (data || []).filter(
-        (r) => r.ad_design_url && ["pending_submission", "under_review", "approved", "rejected", "design"].includes(r.status)
+        (r) => r.ad_design_url && ["pending_submission", "under_review", "approved", "rejected"].includes(r.status)
       );
       setRequests(validRequests);
     } catch (error: any) {
