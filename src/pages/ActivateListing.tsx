@@ -17,6 +17,7 @@ import { ProductCard } from "@/components/print-order/ProductCard";
 import { OrderSuccessCard } from "@/components/print-order/OrderSuccessCard";
 import { PRINT_PRODUCTS, SHIPPING_COUNTRIES, calculateOrderTotal, getProductById } from "@/lib/printProducts";
 import { format } from "date-fns";
+import { getCurrencySymbol, formatPrice, getCurrencyName } from "@/hooks/useCurrencyConversion";
 
 interface ListingDetails {
   id: string;
@@ -38,23 +39,7 @@ interface PublisherAddress {
 
 type ActivationType = "sticker" | "table_tent" | "poster" | "flyer" | "banner" | "other";
 
-const CURRENCIES = [
-  { code: "USD", symbol: "$", name: "US Dollar" },
-  { code: "EUR", symbol: "€", name: "Euro" },
-  { code: "GBP", symbol: "£", name: "British Pound" },
-  { code: "PHP", symbol: "₱", name: "Philippine Peso" },
-  { code: "JPY", symbol: "¥", name: "Japanese Yen" },
-  { code: "AUD", symbol: "A$", name: "Australian Dollar" },
-  { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
-  { code: "SGD", symbol: "S$", name: "Singapore Dollar" },
-  { code: "INR", symbol: "₹", name: "Indian Rupee" },
-  { code: "CNY", symbol: "¥", name: "Chinese Yuan" },
-];
-
-const getCurrencySymbol = (currencyCode?: string): string => {
-  if (!currencyCode) return "$";
-  return CURRENCIES.find(c => c.code === currencyCode)?.symbol || "$";
-};
+// Currency configuration is imported from useCurrencyConversion hook
 
 const ActivateListing = () => {
   const { id } = useParams<{ id: string }>();
@@ -814,9 +799,7 @@ const ActivateListing = () => {
                   )}
                 </p>
                 <p className="text-2xl font-bold text-primary">
-                  {activationPrice > 0 
-                    ? `${getCurrencySymbol(listing?.specifications?.currency)}${activationPrice.toLocaleString()}` 
-                    : `${getCurrencySymbol(listing?.specifications?.currency)}0`}
+                  {formatPrice(activationPrice, listing?.specifications?.currency || "USD")}
                 </p>
               </div>
             </div>
@@ -996,7 +979,7 @@ const ActivateListing = () => {
                       ) : (
                         <>
                           <Send className="h-4 w-4 mr-2" />
-                          Submit Booking Request - {getCurrencySymbol(listing?.specifications?.currency)}{subscriptionPrice.toLocaleString()}
+                          Submit Booking Request - {formatPrice(subscriptionPrice, listing?.specifications?.currency || "USD")}
                         </>
                       )}
                     </Button>
@@ -1143,7 +1126,7 @@ const ActivateListing = () => {
                           </div>
                           <div className="flex justify-between text-lg font-bold pt-2 border-t">
                             <span>Estimated Total</span>
-                            <span className="text-primary">{getCurrencySymbol(listing?.specifications?.currency)}{orderTotal.toLocaleString()}</span>
+                            <span className="text-primary">{formatPrice(orderTotal, listing?.specifications?.currency || "USD")}</span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-2">
                             Final price confirmed after admin review
@@ -1247,7 +1230,7 @@ const ActivateListing = () => {
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-lg font-semibold">Subscription Fee</span>
-                    <span className="text-2xl font-bold text-primary">{getCurrencySymbol(listing?.specifications?.currency)}{activationPrice.toLocaleString()}</span>
+                    <span className="text-2xl font-bold text-primary">{formatPrice(activationPrice, listing?.specifications?.currency || "USD")}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Based on your selected booking duration.
