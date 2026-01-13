@@ -278,6 +278,7 @@ const VenueRegistration = () => {
       setContactPhone(specs.contact_number || "");
       setLatitude(specs.latitude || "");
       setLongitude(specs.longitude || "");
+      setCurrency(specs.currency || "USD");
 
       // Parse address from location or full_address
       const fullAddress = specs.full_address || venue.location || "";
@@ -575,6 +576,7 @@ const VenueRegistration = () => {
           contact_number: validatedData.contactPhone,
           operating_hours: validatedData.operatingHours,
           allowed_ad_formats: allowedAdFormats,
+          currency: currency,
           ad_units: selectedAdUnits.map(unit => ({
             type: unit.type,
             quantity: unit.quantity,
