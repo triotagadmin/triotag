@@ -197,11 +197,17 @@ const VenueDetail = () => {
 
                 {venue.specifications?.ad_units && venue.specifications.ad_units.length > 0 && <div>
                     <h3 className="font-semibold mb-2">Available Ad Units</h3>
-                    <div className="space-y-2">
-                      {venue.specifications.ad_units.map((unit: any, idx: number) => <div key={idx} className="flex items-center gap-2">
-                          <Badge variant="outline">{AD_UNIT_TYPE_LABELS[unit.type] || unit.type}</Badge>
-                          
-                        </div>)}
+                    <div className="flex flex-wrap gap-2">
+                      {venue.specifications.ad_units.map((unit: any, idx: number) => (
+                        <Button
+                          key={idx}
+                          variant="cyber"
+                          size="sm"
+                          className="text-xs h-7 px-3"
+                        >
+                          {AD_UNIT_TYPE_LABELS[unit.type] || unit.type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                        </Button>
+                      ))}
                     </div>
                   </div>}
               </CardContent>
