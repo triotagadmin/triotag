@@ -397,12 +397,26 @@ const Marketplace = () => {
                     {listing.adUnits.length > 0 && <div className="pt-2 border-t">
                         <p className="text-xs text-muted-foreground mb-2">Ad Units</p>
                         <div className="flex flex-wrap gap-1">
-                          {listing.adUnits.slice(0, 3).map(unit => <Badge key={unit} variant="outline" className="text-xs">
-                              {unit}
-                            </Badge>)}
-                          {listing.adUnits.length > 3 && <Badge variant="outline" className="text-xs">
+                          {listing.adUnits.slice(0, 3).map(unit => {
+                            const formatAdUnitName = (sku: string) => {
+                              return sku
+                                .replace(/_/g, ' ')
+                                .replace(/\b\w/g, c => c.toUpperCase());
+                            };
+                            return (
+                              <Button
+                                key={unit}
+                                variant="cyber"
+                                size="sm"
+                                className="text-xs h-7 px-3"
+                              >
+                                {formatAdUnitName(unit)}
+                              </Button>
+                            );
+                          })}
+                          {listing.adUnits.length > 3 && <Button variant="outline" size="sm" className="text-xs h-7 px-3 border-primary/50 text-primary">
                               +{listing.adUnits.length - 3} more
-                            </Badge>}
+                            </Button>}
                         </div>
                       </div>}
 
