@@ -120,22 +120,15 @@ const ActivateListing = () => {
       if (error) throw error;
       setListing(data);
 
-      // Fetch publisher profile for shipping address using public view
-      if (data?.publisher_id) {
-        const { data: publisherProfile } = await supabase
-          .from("publisher_profiles_public")
-          .select("business_name, location, user_id")
-          .eq("id", data.publisher_id)
-          .single();
-
-        if (publisherProfile) {
-          setPublisherAddress({
-            businessName: publisherProfile.business_name || "",
-            contactEmail: "", // Not exposed in public view
-            contactPhone: null,
-            location: publisherProfile.location,
-          });
-        }
+      // Use the address from the listing's specifications (entered during venue registration)
+      if (data) {
+        const specs = data.specifications as Record<string, any> || {};
+        setPublisherAddress({
+          businessName: data.title || "",
+          contactEmail: specs.contact_email || "",
+          contactPhone: specs.contact_number || null,
+          location: specs.full_address || data.location || null,
+        });
       }
     } catch (error: any) {
       toast({
