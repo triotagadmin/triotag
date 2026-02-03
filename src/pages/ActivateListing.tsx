@@ -109,6 +109,24 @@ const ActivateListing = () => {
     }
   }, [id]);
 
+  // Auto-detect and set the print product based on listing's ad unit type
+  useEffect(() => {
+    if (listing && !selectedProductId) {
+      const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
+      const firstAdUnit = listingAdUnits[0];
+      const adUnitType = firstAdUnit?.type || activationType || "sticker";
+      const detectedProduct = PRINT_PRODUCTS.find(p => 
+        p.id.includes(adUnitType.replace("_", "-")) || 
+        (adUnitType.includes("sticker") && p.id.includes("sticker")) ||
+        (adUnitType.includes("tent") && p.id === "table-tent")
+      ) || PRINT_PRODUCTS[0];
+      
+      if (detectedProduct) {
+        setSelectedProductId(detectedProduct.id);
+      }
+    }
+  }, [listing, activationType, selectedProductId]);
+
   const fetchListingDetails = async () => {
     try {
       const { data, error } = await supabase
@@ -547,13 +565,42 @@ const ActivateListing = () => {
           .eq("id", activationId);
       }
 
+      // Send message to admin inbox as order request
+      const { data: adminRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin")
+        .limit(1);
+
+      if (adminRoles && adminRoles.length > 0) {
+        const adminUserId = adminRoles[0].user_id;
+        await supabase
+          .from("messages")
+          .insert({
+            sender_id: session.user.id,
+            recipient_id: adminUserId,
+            subject: `New Print Order Request - ${product.name}`,
+            content: `New print order request submitted:\n\n` +
+              `**Listing:** ${listing?.title || "N/A"}\n` +
+              `**Product:** ${product.name}\n` +
+              `**Quantity:** ${quantity} units\n` +
+              `**Total Price:** $${totalPrice.toFixed(2)}\n` +
+              `**Shipping To:** ${publisherAddress.businessName}\n` +
+              `**Address:** ${publisherAddress.location || listing?.location || "Not specified"}\n\n` +
+              `**Design URL:** ${artworkUrl}\n\n` +
+              `Please review and approve this order in the Admin Orders page.`,
+            listing_id: listing?.id || null,
+            listing_type: "ad_space",
+          });
+      }
+
       setOrderId(printOrder.id);
       setPrintOrderComplete(true);
       setActivationStatus("printing");
 
       toast({
         title: "Order Submitted!",
-        description: "Our team will review your order and contact you for payment.",
+        description: "Order request sent to admin. You'll receive a message when it's approved.",
       });
     } catch (error: any) {
       console.error("Order error:", error);
@@ -1020,20 +1067,8 @@ const ActivateListing = () => {
                   </CardHeader>
                   <CardContent>
                     {(() => {
-                      // Auto-detect product based on listing's ad unit
-                      const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
-                      const firstAdUnit = listingAdUnits[0];
-                      const adUnitType = firstAdUnit?.type || activationType || "sticker";
-                      const detectedProduct = PRINT_PRODUCTS.find(p => 
-                        p.id.includes(adUnitType.replace("_", "-")) || 
-                        (adUnitType.includes("sticker") && p.id.includes("sticker")) ||
-                        (adUnitType.includes("tent") && p.id === "table-tent")
-                      ) || PRINT_PRODUCTS[0];
-                      
-                      // Set the product if not already set
-                      if (!selectedProductId && detectedProduct) {
-                        setTimeout(() => setSelectedProductId(detectedProduct.id), 0);
-                      }
+                      // Use the already-detected product from state or fallback
+                      const detectedProduct = selectedPrintProduct || PRINT_PRODUCTS[0];
                       
                       return (
                         <div className="flex items-start gap-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
