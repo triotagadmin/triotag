@@ -1042,16 +1042,73 @@ const ActivateListing = () => {
         {currentStep === "print-order" && (
           <>
             {printOrderComplete ? (
-              <OrderSuccessCard
-                orderId={orderId}
-                productName={selectedPrintProduct?.name || "Print Order"}
-                quantity={quantity}
-                onNewOrder={() => {
-                  setPrintOrderComplete(false);
-                  setOrderId("");
-                  setSelectedProductId("");
-                }}
-              />
+              <div className="max-w-xl mx-auto">
+                <Card className="border-yellow-500/50 bg-yellow-500/5">
+                  <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                      <Clock className="h-8 w-8 text-yellow-500" />
+                    </div>
+                    <CardTitle className="text-2xl">Order Submitted for Review</CardTitle>
+                    <CardDescription className="text-base">
+                      Your print order is being reviewed by our admin team. You'll be notified once it's approved.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Order ID</span>
+                        <span className="font-mono font-medium">{orderId.slice(0, 8).toUpperCase()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Product</span>
+                        <span className="font-medium">{selectedPrintProduct?.name || "Print Order"}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Quantity</span>
+                        <span className="font-medium">{quantity} units</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Status</span>
+                        <span className="font-medium text-yellow-500">Pending Admin Approval</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <Package className="h-5 w-5 text-primary mt-0.5" />
+                        <div>
+                          <p className="font-medium text-sm">What happens next?</p>
+                          <ol className="text-sm text-muted-foreground mt-2 space-y-1 list-decimal list-inside">
+                            <li>Admin reviews your design file</li>
+                            <li>You receive approval notification</li>
+                            <li>Proceed to Payment (Step 3)</li>
+                            <li>Production begins after payment</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      <Button
+                        onClick={() => setCurrentStep("payment")}
+                        className="w-full"
+                        size="lg"
+                      >
+                        Proceed to Payment
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate("/advertiser-dashboard")}
+                        className="w-full"
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Return to Dashboard
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             ) : (
               <div className="space-y-8">
                 {/* Auto-detected Print Product from Listing */}
@@ -1230,97 +1287,108 @@ const ActivateListing = () => {
 
         {currentStep === "payment" && (
           <div className="max-w-2xl mx-auto">
-            {printOrderComplete && (
-              <Card className="mb-6 border-primary">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 text-primary">
-                    <CheckCircle className="h-6 w-6" />
-                    <div>
-                      <p className="font-semibold">Print Order Submitted</p>
-                      <p className="text-sm text-muted-foreground">Order ID: {orderId.slice(0, 8).toUpperCase()}</p>
+            {activationStatus === "completed" ? (
+              <OrderSuccessCard
+                orderId={orderId || activationId || "N/A"}
+                productName={selectedPrintProduct?.name || "Print Order"}
+                quantity={quantity}
+                onNewOrder={() => navigate("/explore")}
+              />
+            ) : (
+              <>
+                {printOrderComplete && (
+                  <Card className="mb-6 border-primary">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-3 text-primary">
+                        <CheckCircle className="h-6 w-6" />
+                        <div>
+                          <p className="font-semibold">Print Order Submitted</p>
+                          <p className="text-sm text-muted-foreground">Order ID: {orderId.slice(0, 8).toUpperCase()}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard className="h-5 w-5" />
+                      Complete Activation
+                    </CardTitle>
+                    <CardDescription>
+                      Pay the subscription fee to unlock full access to this advertising space
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-lg font-semibold">Subscription Fee</span>
+                        <span className="text-2xl font-bold text-primary">{formatPrice(activationPrice, listing?.specifications?.currency || "USD")}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Based on your selected booking duration.
+                      </p>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+
+                    <div className="space-y-3">
+                      <h4 className="font-semibold">What you'll get:</h4>
+                      <ul className="space-y-2">
+                        <li className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Full contact information
+                        </li>
+                        <li className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Direct messaging with publisher
+                        </li>
+                        <li className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Priority booking access
+                        </li>
+                        <li className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Campaign analytics access
+                        </li>
+                      </ul>
+                    </div>
+
+                    <Button 
+                      className="w-full" 
+                      size="lg"
+                      onClick={handlePayNow}
+                      disabled={activationStatus === "completed"}
+                    >
+                      {activationStatus === "completed" ? (
+                        <>
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Activation Complete
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Activate Listing
+                        </>
+                      )}
+                    </Button>
+
+                    <p className="text-xs text-center text-muted-foreground">
+                      Secure payment powered by Stripe, PayPal & GCash
+                    </p>
+
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setCurrentStep("print-order")}
+                      className="w-full"
+                      disabled={activationStatus === "completed"}
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back to Print Order
+                    </Button>
+                  </CardContent>
+                </Card>
+              </>
             )}
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Complete Activation
-                </CardTitle>
-                <CardDescription>
-                  Pay the subscription fee to unlock full access to this advertising space
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-lg font-semibold">Subscription Fee</span>
-                    <span className="text-2xl font-bold text-primary">{formatPrice(activationPrice, listing?.specifications?.currency || "USD")}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Based on your selected booking duration.
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <h4 className="font-semibold">What you'll get:</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      Full contact information
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      Direct messaging with publisher
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      Priority booking access
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      Campaign analytics access
-                    </li>
-                  </ul>
-                </div>
-
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  onClick={handlePayNow}
-                  disabled={activationStatus === "completed"}
-                >
-                  {activationStatus === "completed" ? (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Activation Complete
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Activate Listing
-                    </>
-                  )}
-                </Button>
-
-                <p className="text-xs text-center text-muted-foreground">
-                  Secure payment powered by Stripe, PayPal & GCash
-                </p>
-
-                <Button 
-                  variant="outline" 
-                  onClick={() => setCurrentStep("print-order")}
-                  className="w-full"
-                  disabled={activationStatus === "completed"}
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Print Order
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         )}
       </div>
