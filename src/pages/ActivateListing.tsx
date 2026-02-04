@@ -15,6 +15,7 @@ import { ActivationStepper, type ActivationStep } from "@/components/activation/
 import { BookingScheduler } from "@/components/activation/BookingScheduler";
 import { ProductCard } from "@/components/print-order/ProductCard";
 import { OrderSuccessCard } from "@/components/print-order/OrderSuccessCard";
+import { PaymentGateway } from "@/components/activation/PaymentGateway";
 import { PRINT_PRODUCTS, SHIPPING_COUNTRIES, calculateOrderTotal, getProductById } from "@/lib/printProducts";
 import { format } from "date-fns";
 import { getCurrencySymbol, formatPrice, getCurrencyName } from "@/hooks/useCurrencyConversion";
@@ -1310,83 +1311,16 @@ const ActivateListing = () => {
                   </Card>
                 )}
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CreditCard className="h-5 w-5" />
-                      Complete Activation
-                    </CardTitle>
-                    <CardDescription>
-                      Pay the subscription fee to unlock full access to this advertising space
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-lg font-semibold">Subscription Fee</span>
-                        <span className="text-2xl font-bold text-primary">{formatPrice(activationPrice, listing?.specifications?.currency || "USD")}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Based on your selected booking duration.
-                      </p>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-semibold">What you'll get:</h4>
-                      <ul className="space-y-2">
-                        <li className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          Full contact information
-                        </li>
-                        <li className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          Direct messaging with publisher
-                        </li>
-                        <li className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          Priority booking access
-                        </li>
-                        <li className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          Campaign analytics access
-                        </li>
-                      </ul>
-                    </div>
-
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      onClick={handlePayNow}
-                      disabled={activationStatus === "completed"}
-                    >
-                      {activationStatus === "completed" ? (
-                        <>
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Activation Complete
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Activate Listing
-                        </>
-                      )}
-                    </Button>
-
-                    <p className="text-xs text-center text-muted-foreground">
-                      Secure payment powered by Stripe, PayPal & GCash
-                    </p>
-
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setCurrentStep("print-order")}
-                      className="w-full"
-                      disabled={activationStatus === "completed"}
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Back to Print Order
-                    </Button>
-                  </CardContent>
-                </Card>
+                <PaymentGateway
+                  amount={activationPrice + orderTotal}
+                  currency={listing?.specifications?.currency || "PHP"}
+                  orderId={orderId || activationId || ""}
+                  activationId={activationId || id || ""}
+                  listingTitle={listing?.title || "Ad Space"}
+                  onPaymentSuccess={handlePayNow}
+                  onBack={() => setCurrentStep("print-order")}
+                  disabled={activationStatus === "completed"}
+                />
               </>
             )}
           </div>
