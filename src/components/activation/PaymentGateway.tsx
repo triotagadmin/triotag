@@ -1,17 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CreditCard, Smartphone, Loader2, CheckCircle, Shield, Lock } from "lucide-react";
+import { CreditCard, Smartphone, Loader2, CheckCircle, Shield, Lock, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PaymentGatewayProps {
-  amount: number;
-  currency: string;
-  orderId: string;
   activationId: string;
   listingTitle: string;
   onPaymentSuccess: () => void;
@@ -39,9 +36,6 @@ const PAYMENT_METHODS = [
 ];
 
 export const PaymentGateway = ({
-  amount,
-  currency,
-  orderId,
   activationId,
   listingTitle,
   onPaymentSuccess,
@@ -50,21 +44,106 @@ export const PaymentGateway = ({
 }: PaymentGatewayProps) => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("visa");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [bookingAmount, setBookingAmount] = useState(0);
+  const [currency, setCurrency] = useState("PHP");
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
-  
-  // Card details state
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvc, setCardCvc] = useState("");
-  
-  // GCash state
-  const [gcashNumber, setGcashNumber] = useState("");
-  
+
   const { toast } = useToast();
 
-  const formatPrice = (price: number, curr: string) => {
+  // Fetch booking amount from database
+  useEffect(() => {
+    const fetchBookingDetails = async () => {
+      if (!activationId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const { data: activation, error } = await supabase
+          .from("activations")
+          .select(`
+            *,
+            ad_spaces (
+              title,
+              specifications,
+              pricing
+            )
+          `)
+          .eq("id", activationId)
+          .single();
+
+        if (error) throw error;
+
+        // Calculate amount from activation data
+        let amount = activation.total_amount || activation.estimated_publisher_payout || 0;
+
+        // If no total_amount, calculate from dates and pricing
+        if (amount <= 0 && activation.start_date && activation.end_date) {
+          const startDate = new Date(activation.start_date);
+          const endDate = new Date(activation.end_date);
+          const diffDays = Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+          const diffWeeks = Math.ceil(diffDays / 7);
+
+          const adSpace = activation.ad_spaces as Record<string, unknown>;
+          const specs = adSpace?.specifications as Record<string, unknown>;
+          const pricing = adSpace?.pricing as Record<string, unknown>;
+          const adUnits = (specs?.ad_units || pricing?.ad_units || []) as Array<Record<string, unknown>>;
+          const selectedAdUnit = adUnits[0];
+
+          const weeklyRate = (selectedAdUnit?.pricePerWeek || pricing?.weekly || 0) as number;
+          const monthlyRate = (selectedAdUnit?.pricePerMonth || pricing?.monthly || 0) as number;
+
+          if (diffWeeks >= 4 && monthlyRate > 0) {
+            const fullMonths = Math.floor(diffWeeks / 4);
+            const remainingWeeks = diffWeeks % 4;
+            amount = (fullMonths * monthlyRate) + (remainingWeeks * weeklyRate);
+          } else {
+            amount = diffWeeks * weeklyRate;
+          }
+        }
+
+        // Add print order total if exists
+        if (activation.print_order_id) {
+          const { data: printOrder } = await supabase
+            .from("print_orders")
+            .select("total_price")
+            .eq("id", activation.print_order_id)
+            .single();
+
+          if (printOrder?.total_price) {
+            amount += printOrder.total_price;
+          }
+        }
+
+        setBookingAmount(amount);
+        
+        const specs = (activation.ad_spaces as Record<string, unknown>)?.specifications as Record<string, unknown>;
+        setCurrency((specs?.currency as string) || "PHP");
+
+        // Pre-fill user email if logged in
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          setBuyerEmail(session.user.email);
+        }
+      } catch (error) {
+        console.error("Error fetching booking details:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load booking details",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBookingDetails();
+  }, [activationId, toast]);
+
+  const formatPrice = (price: number, curr: string = currency) => {
     const symbols: Record<string, string> = {
       PHP: "₱",
       USD: "$",
@@ -73,26 +152,7 @@ export const PaymentGateway = ({
     return `${symbols[curr] || curr} ${price.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
   };
 
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    const matches = v.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || "";
-    const parts = [];
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-    return parts.length ? parts.join(" ") : value;
-  };
-
-  const formatExpiry = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    if (v.length >= 2) {
-      return v.substring(0, 2) + "/" + v.substring(2, 4);
-    }
-    return v;
-  };
-
-  const handlePayment = async () => {
+  const handleProceedToCheckout = async () => {
     if (!buyerName || !buyerEmail) {
       toast({
         title: "Missing Information",
@@ -102,46 +162,18 @@ export const PaymentGateway = ({
       return;
     }
 
-    if (selectedMethod === "visa" && (!cardNumber || !cardExpiry || !cardCvc)) {
-      toast({
-        title: "Missing Card Details",
-        description: "Please enter your card number, expiry date, and CVC.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (selectedMethod === "gcash" && !gcashNumber) {
-      toast({
-        title: "Missing GCash Number",
-        description: "Please enter your GCash mobile number.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsProcessing(true);
 
     try {
-      // Call PayMongo checkout edge function
-      const { data, error } = await supabase.functions.invoke("paymongo-checkout", {
+      // Call secure activation checkout edge function
+      const { data, error } = await supabase.functions.invoke("activation-checkout", {
         body: {
-          amount: amount * 100, // Convert to centavos
-          currency: currency || "PHP",
-          description: `Ad Space Activation - ${listingTitle}`,
-          metadata: {
-            activation_id: activationId,
-            order_id: orderId,
-            type: "activation_payment",
-          },
-          buyer: {
-            name: buyerName,
-            email: buyerEmail,
-            phone: selectedMethod === "gcash" ? gcashNumber : (buyerPhone || undefined),
-          },
-          payment_method_types: selectedMethod === "visa" ? ["card"] : ["gcash"],
-          success_url: `${window.location.origin}/activate/${activationId}?payment=success`,
-          cancel_url: `${window.location.origin}/activate/${activationId}?payment=cancelled`,
+          activationId,
+          buyerName,
+          buyerEmail,
+          buyerPhone: buyerPhone || undefined,
+          successUrl: `${window.location.origin}/payment-success`,
+          cancelUrl: `${window.location.origin}/activate/${activationId}?payment=cancelled`,
         },
       });
 
@@ -149,32 +181,42 @@ export const PaymentGateway = ({
         throw error;
       }
 
-      if (data?.checkout_url) {
-        // Redirect to PayMongo checkout
-        window.location.href = data.checkout_url;
-      } else {
-        // For demo/dev mode, simulate success
+      if (data?.checkoutUrl) {
         toast({
-          title: "Payment Processing",
-          description: "Redirecting to payment gateway...",
+          title: "Redirecting to Secure Checkout",
+          description: "You will be redirected to complete your payment...",
         });
-        
-        // Simulate payment success after delay (dev mode)
-        setTimeout(() => {
-          onPaymentSuccess();
-        }, 2000);
+
+        // Redirect to PayMongo checkout
+        window.location.href = data.checkoutUrl;
+      } else {
+        throw new Error("Failed to create checkout session");
       }
     } catch (error: any) {
-      console.error("Payment error:", error);
+      console.error("Checkout error:", error);
       toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process payment. Please try again.",
+        title: "Checkout Failed",
+        description: error.message || "Failed to create checkout session. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsProcessing(false);
+    } finally {
+      // Don't reset isProcessing here since we're redirecting
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading booking details...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -193,13 +235,13 @@ export const PaymentGateway = ({
               <span className="font-medium">{listingTitle}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Order ID</span>
-              <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{orderId.slice(0, 8).toUpperCase()}</span>
+              <span className="text-muted-foreground">Booking ID</span>
+              <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{activationId.slice(0, 8).toUpperCase()}</span>
             </div>
             <div className="border-t border-primary/20 pt-3 mt-3">
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-lg">Total Amount</span>
-                <span className="text-2xl font-bold text-primary">{formatPrice(amount, currency)}</span>
+                <span className="text-2xl font-bold text-primary">{formatPrice(bookingAmount)}</span>
               </div>
             </div>
           </div>
@@ -250,7 +292,7 @@ export const PaymentGateway = ({
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mb-3">{method.description}</p>
-                  
+
                   {/* Payment Logos */}
                   <div className="flex items-center gap-2 mt-auto">
                     {method.id === "visa" && (
@@ -280,20 +322,13 @@ export const PaymentGateway = ({
         </CardContent>
       </Card>
 
-      {/* Payment Details Form */}
+      {/* Billing Information */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">
-            {selectedMethod === "visa" ? "Card Details" : "GCash Details"}
-          </CardTitle>
-          <CardDescription>
-            {selectedMethod === "visa" 
-              ? "Enter your card information securely" 
-              : "Enter your GCash registered mobile number"}
-          </CardDescription>
+          <CardTitle className="text-lg">Billing Information</CardTitle>
+          <CardDescription>Enter your details to receive payment confirmation</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Billing Info */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="buyerName">Full Name *</Label>
@@ -317,99 +352,50 @@ export const PaymentGateway = ({
               />
             </div>
           </div>
-
-          {selectedMethod === "visa" ? (
-            <>
-              {/* Card Number */}
-              <div className="space-y-2">
-                <Label htmlFor="cardNumber">Card Number *</Label>
-                <div className="relative">
-                  <Input
-                    id="cardNumber"
-                    placeholder="4242 4242 4242 4242"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-                    maxLength={19}
-                    disabled={isProcessing}
-                    className="pr-20"
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                    <div className="bg-[#1A1F71] text-white text-[8px] font-bold px-1.5 py-0.5 rounded italic">
-                      VISA
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Expiry & CVC */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cardExpiry">Expiry Date *</Label>
-                  <Input
-                    id="cardExpiry"
-                    placeholder="MM/YY"
-                    value={cardExpiry}
-                    onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
-                    maxLength={5}
-                    disabled={isProcessing}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cardCvc">CVC *</Label>
-                  <Input
-                    id="cardCvc"
-                    placeholder="123"
-                    value={cardCvc}
-                    onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                    maxLength={4}
-                    type="password"
-                    disabled={isProcessing}
-                  />
-                </div>
-              </div>
-            </>
-          ) : (
-            /* GCash Mobile Number */
-            <div className="space-y-2">
-              <Label htmlFor="gcashNumber">GCash Mobile Number *</Label>
-              <div className="relative">
-                <Input
-                  id="gcashNumber"
-                  placeholder="09XX XXX XXXX"
-                  value={gcashNumber}
-                  onChange={(e) => setGcashNumber(e.target.value.replace(/\D/g, "").slice(0, 11))}
-                  maxLength={11}
-                  disabled={isProcessing}
-                  className="pl-14"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">
-                  +63
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                You will receive a payment request on your GCash app
-              </p>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="buyerPhone">Phone Number (Optional)</Label>
+            <Input
+              id="buyerPhone"
+              type="tel"
+              placeholder="09XX XXX XXXX"
+              value={buyerPhone}
+              onChange={(e) => setBuyerPhone(e.target.value)}
+              disabled={isProcessing}
+            />
+          </div>
         </CardContent>
       </Card>
 
-      {/* Pay Button */}
+      {/* Secure Notice */}
+      <div className="bg-muted/50 rounded-lg p-4 border">
+        <div className="flex items-start gap-3">
+          <Shield className="h-5 w-5 text-primary mt-0.5" />
+          <div>
+            <p className="font-medium text-sm">Secure Checkout</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              You will be redirected to PayMongo's secure checkout page to complete your payment. 
+              Your card details are never stored on our servers.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Proceed to Checkout Button */}
       <Button
-        onClick={handlePayment}
-        disabled={isProcessing || disabled || !buyerName || !buyerEmail}
+        onClick={handleProceedToCheckout}
+        disabled={isProcessing || disabled || !buyerName || !buyerEmail || bookingAmount <= 0}
         className="w-full h-14 text-lg font-semibold"
         size="lg"
       >
         {isProcessing ? (
           <>
             <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            Processing Payment...
+            Redirecting to Secure Checkout...
           </>
         ) : (
           <>
-            <Lock className="h-5 w-5 mr-2" />
-            Pay {formatPrice(amount, currency)}
+            <ExternalLink className="h-5 w-5 mr-2" />
+            Proceed to Secure Checkout - {formatPrice(bookingAmount)}
           </>
         )}
       </Button>

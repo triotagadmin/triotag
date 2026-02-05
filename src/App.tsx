@@ -52,6 +52,8 @@ import TicketValidation from "./pages/TicketValidation";
 import TicketMarket from "./pages/TicketMarket";
 import ValidateTicket from "./pages/ValidateTicket";
 
+ import PaymentSuccess from "./pages/PaymentSuccess";
+ 
 import PublisherAdRequests from "./pages/publisher/PublisherAdRequests";
 import PublisherAdRequestDetail from "./pages/publisher/PublisherAdRequestDetail";
 import Messages from "./pages/Messages";
@@ -75,6 +77,7 @@ const App = () => (
           <Route path="/venue-inventory" element={<VenueInventory />} />
           <Route path="/venue/:id" element={<VenueDetail />} />
           <Route path="/activate/:id" element={<ActivateListing />} />
+           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/venue-registration" element={<VenueRegistration />} />
           <Route path="/campaign-builder" element={<CampaignBuilder />} />
           <Route path="/habit-tracker" element={<HabitTracker />} />
