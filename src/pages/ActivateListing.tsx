@@ -1312,9 +1312,6 @@ const ActivateListing = () => {
                 )}
 
                 <PaymentGateway
-                  amount={activationPrice + orderTotal}
-                  currency={listing?.specifications?.currency || "PHP"}
-                  orderId={orderId || activationId || ""}
                   activationId={activationId || id || ""}
                   listingTitle={listing?.title || "Ad Space"}
                   onPaymentSuccess={handlePayNow}
