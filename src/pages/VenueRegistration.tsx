@@ -622,14 +622,6 @@ const VenueRegistration = () => {
         const uploadPromises = filledDocs.map(doc => uploadVerificationDocument(doc, publisherId));
         await Promise.all(uploadPromises);
 
-        await supabase
-          .from('publisher_profiles')
-          .update({
-            verification_status: 'pending',
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', publisherId);
-
         toast({
           title: "Success",
           description: "Venue and verification documents submitted for approval"
