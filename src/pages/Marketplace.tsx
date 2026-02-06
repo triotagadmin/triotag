@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, DollarSign, ChevronLeft, ChevronRight, Building2, Globe, UserCheck, ShoppingCart, Tag } from "lucide-react";
+import { Search, MapPin, DollarSign, ChevronLeft, ChevronRight, Building2, Globe, UserCheck, ShoppingCart, Tag, X, Loader2 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
+import { LocationSearchModal } from "@/components/marketplace/LocationSearchModal";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +57,9 @@ const Marketplace = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [listingTypeFilter, setListingTypeFilter] = useState("all");
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationSearching, setLocationSearching] = useState(false);
   const ITEMS_PER_SLIDE = 6;
   const totalSlides = Math.ceil(filteredListings.length / ITEMS_PER_SLIDE);
   useEffect(() => {
@@ -80,6 +84,83 @@ const Marketplace = () => {
   useEffect(() => {
     applyFilters();
   }, [listings, searchTerm, categoryFilter, listingTypeFilter]);
+
+  const handleLocationSearch = async (lat: number, lng: number) => {
+    setLocationCoords({ lat, lng });
+    setLocationSearching(true);
+    try {
+      const { data, error } = await supabase.rpc("search_nearby_listings", {
+        user_lat: lat,
+        user_lng: lng,
+        radius_km: 50,
+      });
+
+      if (error) throw error;
+
+      const locationListings: MarketplaceListing[] = (data || []).map((item: any) => {
+        const specs = item.specifications || {};
+        const adUnitsFromDb = specs?.ad_units || [];
+        const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
+        const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
+        const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
+
+        if (item.category === "venue") {
+          return {
+            id: item.id,
+            title: item.title,
+            description: item.description || "",
+            budget: weeklyPrice,
+            currency: "USD",
+            location: item.location || "Not specified",
+            type: specs?.venue_type || specs?.type || "Venue",
+            category: "venue" as const,
+            listingType: "selling" as const,
+            adUnits: adUnitLabels.length > 0 ? adUnitLabels : ["No ad units specified"],
+            image: Array.isArray(item.media_urls) ? item.media_urls[0] : undefined,
+            ownerName: item.publisher_business_name || "Venue",
+            createdAt: item.created_at || "",
+            monthlySubscriptionFee: monthlyPrice || item.monthly_subscription_fee || 0,
+            annualSubscriptionFee: item.annual_subscription_fee || 0,
+            activationFee: item.activation_fee || 0,
+            weeklyPrice: weeklyPrice,
+          };
+        }
+
+        return {
+          id: item.id,
+          title: item.title,
+          description: item.description || "",
+          budget: (item.pricing as any)?.hourly || (item.pricing as any)?.daily || 0,
+          currency: "USD",
+          location: item.location || "Not specified",
+          type: item.service_type || "Agent Service",
+          category: "agent" as const,
+          listingType: "selling" as const,
+          adUnits: AGENT_AD_UNITS,
+          image: Array.isArray(item.media_urls) ? item.media_urls[0] : undefined,
+          ownerName: item.publisher_business_name || "Agent",
+          createdAt: item.created_at || "",
+        };
+      });
+
+      setFilteredListings(locationListings);
+      setCurrentSlide(0);
+    } catch (error) {
+      console.error("Location search error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to search listings by location.",
+        variant: "destructive",
+      });
+    } finally {
+      setLocationSearching(false);
+    }
+  };
+
+  const clearLocationFilter = () => {
+    setLocationCoords(null);
+    applyFilters();
+  };
   const fetchAllListings = async () => {
     try {
       setLoading(true);
@@ -188,6 +269,10 @@ const Marketplace = () => {
     }
   };
   const applyFilters = () => {
+    // If location filter is active, don't override with standard filters
+    // Location results are set directly by handleLocationSearch
+    if (locationCoords) return;
+    
     let filtered = listings;
     if (searchTerm) {
       filtered = filtered.filter(l => l.title.toLowerCase().includes(searchTerm.toLowerCase()) || l.description.toLowerCase().includes(searchTerm.toLowerCase()) || l.location.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -293,14 +378,14 @@ const Marketplace = () => {
             <CardTitle>Search & Filter</CardTitle>
             <CardDescription>Find the perfect advertising opportunity</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+           <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search listings..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
+                <Input placeholder="Search listings..." value={searchTerm} onChange={e => { setSearchTerm(e.target.value); if (locationCoords) clearLocationFilter(); }} className="pl-9" />
               </div>
 
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); if (locationCoords) clearLocationFilter(); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
@@ -313,7 +398,7 @@ const Marketplace = () => {
                 </SelectContent>
               </Select>
 
-              <Select value={listingTypeFilter} onValueChange={setListingTypeFilter}>
+              <Select value={listingTypeFilter} onValueChange={(v) => { setListingTypeFilter(v); if (locationCoords) clearLocationFilter(); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Listing Type" />
                 </SelectTrigger>
@@ -323,14 +408,48 @@ const Marketplace = () => {
                   <SelectItem value="selling">Selling</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Button
+                variant={locationCoords ? "default" : "outline"}
+                onClick={() => setLocationModalOpen(true)}
+                className="w-full"
+              >
+                <MapPin className="h-4 w-4 mr-2" />
+                Search by Location
+              </Button>
             </div>
+
+            {locationCoords && (
+              <div className="flex items-center gap-2 mt-4 p-2 rounded-lg bg-primary/10 border border-primary/20">
+                <MapPin className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-sm text-primary">
+                  Showing results within 50 km of ({locationCoords.lat.toFixed(4)}, {locationCoords.lng.toFixed(4)})
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearLocationFilter}
+                  className="ml-auto h-6 w-6 p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* Location Search Loading */}
+        {locationSearching && (
+          <div className="flex items-center justify-center py-8 mb-6">
+            <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+            <p className="text-muted-foreground">Searching nearby listings...</p>
+          </div>
+        )}
 
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-muted-foreground">
-            Showing {filteredListings.length} approved listings
+            Showing {filteredListings.length} {locationCoords ? "nearby" : "approved"} listings
             {totalSlides > 1 && ` • Slide ${currentSlide + 1} of ${totalSlides}`}
           </p>
           <Button variant="outline" onClick={() => navigate("/explore-all")}>
@@ -356,7 +475,7 @@ const Marketplace = () => {
         {/* Listings Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {getCurrentSlideListings().length === 0 ? <div className="col-span-full text-center py-12">
-              <p className="text-muted-foreground">No approved listings found matching your criteria</p>
+              <p className="text-muted-foreground">{locationCoords ? "No listings found within 50 km of this location" : "No approved listings found matching your criteria"}</p>
             </div> : getCurrentSlideListings().map(listing => {
           const CategoryIcon = getCategoryIcon(listing.category);
           return <Card key={`${listing.category}-${listing.id}`} className="hover:shadow-lg transition-shadow overflow-hidden cursor-pointer" onClick={() => handleListingClick(listing)}>
@@ -436,6 +555,12 @@ const Marketplace = () => {
         </div>
 
       </div>
+      <LocationSearchModal
+        open={locationModalOpen}
+        onOpenChange={setLocationModalOpen}
+        onSearch={handleLocationSearch}
+        radiusKm={50}
+      />
       <Footer />
     </div>;
 };
