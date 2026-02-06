@@ -154,7 +154,9 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          latitude: number | null
           location: string | null
+          longitude: number | null
           media_urls: Json | null
           monthly_subscription_fee: number | null
           pricing: Json | null
@@ -174,7 +176,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
           pricing?: Json | null
@@ -194,7 +198,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
           pricing?: Json | null
@@ -353,7 +359,9 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          latitude: number | null
           location: string | null
+          longitude: number | null
           media_urls: Json | null
           pricing: Json | null
           publisher_id: string
@@ -371,7 +379,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           media_urls?: Json | null
           pricing?: Json | null
           publisher_id: string
@@ -389,7 +399,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           media_urls?: Json | null
           pricing?: Json | null
           publisher_id?: string
@@ -1652,6 +1664,28 @@ export type Database = {
         Returns: boolean
       }
       is_verified_admin: { Args: { _user_id: string }; Returns: boolean }
+      search_nearby_listings: {
+        Args: { radius_km?: number; user_lat: number; user_lng: number }
+        Returns: {
+          activation_fee: number
+          annual_subscription_fee: number
+          category: string
+          created_at: string
+          description: string
+          distance_km: number
+          id: string
+          latitude: number
+          location: string
+          longitude: number
+          media_urls: Json
+          monthly_subscription_fee: number
+          pricing: Json
+          publisher_business_name: string
+          service_type: string
+          specifications: Json
+          title: string
+        }[]
+      }
       validate_publisher_ticket: {
         Args: {
           p_scanner_ip?: string
