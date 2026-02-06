@@ -125,12 +125,6 @@ export default function AdminDashboard() {
 
   const loadSubmissions = async () => {
     try {
-      // Load publisher profiles
-      const { data: publishers } = await supabase
-        .from("publisher_profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
-
       // Load admin profiles
       const { data: admins } = await supabase
         .from("admin_profiles")
@@ -184,18 +178,6 @@ export default function AdminDashboard() {
         .order("uploaded_at", { ascending: false });
 
       const allSubmissions: Submission[] = [
-        ...(publishers || []).map((p) => ({
-          id: p.id,
-          type: "publisher" as const,
-          name: p.business_name,
-          email: p.contact_email,
-          publisherType: p.publisher_type,
-          status: p.verification_status,
-          createdAt: p.created_at,
-          location: p.location,
-          userId: p.user_id,
-          details: p,
-        })),
         ...(admins || []).map((a) => ({
           id: a.id,
           type: "admin" as const,
@@ -486,16 +468,7 @@ export default function AdminDashboard() {
       // Update status in appropriate table based on type
       let error = null;
 
-      if (selectedSubmission.type === "publisher") {
-        const { error: updateError } = await supabase
-          .from("publisher_profiles")
-          .update({
-            ...updateData,
-            verification_status: newStatus,
-          })
-          .eq("id", selectedSubmission.id);
-        error = updateError;
-      } else if (selectedSubmission.type === "admin") {
+      if (selectedSubmission.type === "admin") {
         const { error: updateError } = await supabase
           .from("admin_profiles")
           .update({
@@ -610,14 +583,6 @@ export default function AdminDashboard() {
             .delete()
             .eq("id", submission.id);
           error = adSpaceError;
-          break;
-        case "publisher":
-          // For publisher profiles, we can't hard delete, so we mark as rejected
-          const { error: publisherError } = await supabase
-            .from("publisher_profiles")
-            .update({ verification_status: "rejected" })
-            .eq("id", submission.id);
-          error = publisherError;
           break;
         case "advertiser":
           const { error: advertiserError } = await supabase
@@ -830,10 +795,9 @@ export default function AdminDashboard() {
   };
 
   const getTypeBadge = (type: string, publisherType?: string) => {
-    const displayType = type === "publisher" && publisherType ? publisherType : type;
     return (
       <Badge variant="outline" className="capitalize">
-        {displayType.replace("_", " ")}
+        {type.replace("_", " ")}
       </Badge>
     );
   };
