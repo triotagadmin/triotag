@@ -88,6 +88,7 @@ const App = () => (
           <Route path="/ticket-market" element={<TicketMarket />} />
           <Route path="/ticket-creator" element={<TicketMarket />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/verify" element={<Verify />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/advertiser-dashboard" element={<AdvertiserDashboard />} />
