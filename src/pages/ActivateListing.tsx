@@ -993,7 +993,47 @@ const ActivateListing = () => {
                         <CardTitle>Quantity</CardTitle>
                         <CardDescription>How many units do you need?</CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="space-y-4">
+                        {(() => {
+                          const adUnits = listing.specifications?.ad_units || listing.pricing?.ad_units || [];
+                          const selectedAdUnit = adUnits.find((unit: any) =>
+                            unit.type === approvedAdUnitType || unit.type === activationType
+                          ) || adUnits[0];
+                          const formatAdUnitName = (type: string) =>
+                            type?.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) || "N/A";
+                          const currency = listing.specifications?.currency || "USD";
+
+                          if (selectedAdUnit) {
+                            return (
+                              <div className="rounded-lg border bg-muted/40 p-3 space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className="capitalize">
+                                    {formatAdUnitName(selectedAdUnit.type)}
+                                  </Badge>
+                                </div>
+                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
+                                  {selectedAdUnit.pricePerWeek > 0 && (
+                                    <span>
+                                      <span className="font-medium text-foreground">
+                                        {formatPrice(selectedAdUnit.pricePerWeek, currency)}
+                                      </span>{" "}
+                                      / week
+                                    </span>
+                                  )}
+                                  {selectedAdUnit.pricePerMonth > 0 && (
+                                    <span>
+                                      <span className="font-medium text-foreground">
+                                        {formatPrice(selectedAdUnit.pricePerMonth, currency)}
+                                      </span>{" "}
+                                      / month
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                         <div className="max-w-xs">
                           <Input
                             type="number"
