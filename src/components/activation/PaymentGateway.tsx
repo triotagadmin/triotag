@@ -32,6 +32,7 @@ const PAYMENT_METHODS = [
     description: "Pay instantly with your GCash e-wallet",
     icon: Smartphone,
     logos: ["GCash"],
+    comingSoon: true,
   },
 ];
 
@@ -270,13 +271,20 @@ export const PaymentGateway = ({
               return (
                 <div
                   key={method.id}
-                  className={`relative flex flex-col rounded-xl border-2 p-4 cursor-pointer transition-all ${
-                    isSelected
-                      ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
-                      : "border-border hover:border-primary/50 hover:bg-muted/50"
+                  className={`relative flex flex-col rounded-xl border-2 p-4 transition-all ${
+                    (method as any).comingSoon
+                      ? "border-border opacity-60 cursor-not-allowed"
+                      : isSelected
+                        ? "border-primary bg-primary/5 shadow-lg shadow-primary/10 cursor-pointer"
+                        : "border-border hover:border-primary/50 hover:bg-muted/50 cursor-pointer"
                   }`}
-                  onClick={() => !isProcessing && setSelectedMethod(method.id)}
+                  onClick={() => !isProcessing && !(method as any).comingSoon && setSelectedMethod(method.id)}
                 >
+                  {(method as any).comingSoon && (
+                    <div className="absolute top-2 right-2 bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary/30 uppercase tracking-wider">
+                      Coming Soon
+                    </div>
+                  )}
                   <div className="flex items-center gap-3 mb-3">
                     <RadioGroupItem value={method.id} id={method.id} className="sr-only" />
                     <div className={`p-2.5 rounded-xl ${isSelected ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
