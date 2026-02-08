@@ -38,6 +38,28 @@ export function ApprovalQueue({ activations, onStatusChange }: ApprovalQueueProp
   const [processing, setProcessing] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const sendAdvertiserNotification = async (activation: Activation, type: "booking_approved" | "booking_rejected", title: string, message: string) => {
+    try {
+      // Look up the advertiser's user_id from advertiser_profiles
+      const { data: advertiserProfile } = await supabase
+        .from("advertiser_profiles")
+        .select("user_id")
+        .eq("id", activation.advertiser_id)
+        .single();
+
+      if (advertiserProfile?.user_id) {
+        await supabase.from("notifications").insert({
+          user_id: advertiserProfile.user_id,
+          title,
+          message,
+          type,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to send advertiser notification:", err);
+    }
+  };
+
   const handleApprove = async (activation: Activation) => {
     setProcessing(activation.id);
     try {
@@ -47,6 +69,14 @@ export function ApprovalQueue({ activations, onStatusChange }: ApprovalQueueProp
         .eq("id", activation.id);
 
       if (error) throw error;
+
+      const spaceName = activation.ad_spaces?.title || "Ad Space";
+      await sendAdvertiserNotification(
+        activation,
+        "booking_approved",
+        "Booking Approved! 🎉",
+        `Your booking for "${spaceName}" has been approved by the publisher. You can now proceed with your print order.`
+      );
 
       toast({
         title: "Booking Approved",
@@ -78,6 +108,15 @@ export function ApprovalQueue({ activations, onStatusChange }: ApprovalQueueProp
         .eq("id", selectedActivation.id);
 
       if (error) throw error;
+
+      const spaceName = selectedActivation.ad_spaces?.title || "Ad Space";
+      const reason = rejectionReason || "No reason provided";
+      await sendAdvertiserNotification(
+        selectedActivation,
+        "booking_rejected",
+        "Booking Request Rejected",
+        `Your booking for "${spaceName}" was declined. Reason: ${reason}. You can modify your dates and resubmit.`
+      );
 
       toast({
         title: "Booking Rejected",
