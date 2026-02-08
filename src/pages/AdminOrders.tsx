@@ -343,13 +343,15 @@ const AdminOrders = () => {
     window.open(url, "_blank");
   };
 
-  const handleUpdateOrder = async () => {
+  const handleUpdateOrder = async (statusOverride?: PrintOrderStatus) => {
     if (!selectedOrder) return;
+
+    const effectiveStatus = statusOverride || newStatus;
 
     setUpdating(true);
     try {
       const updates: any = {
-        order_status: newStatus,
+        order_status: effectiveStatus,
         admin_notes: adminNotes,
       };
 
@@ -358,7 +360,7 @@ const AdminOrders = () => {
       }
 
       // Set approved_at when approving
-      if (newStatus === "in_production" && selectedOrder.order_status === "pending_admin") {
+      if (effectiveStatus === "in_production" && selectedOrder.order_status === "pending_admin") {
         updates.approved_at = new Date().toISOString();
       }
 
@@ -370,7 +372,7 @@ const AdminOrders = () => {
       if (error) throw error;
 
       // Update activation status if moving to payment step and send notification
-      if (newStatus === "in_production" && selectedOrder.activation_id) {
+      if (effectiveStatus === "in_production" && selectedOrder.activation_id) {
         await supabase
           .from("activations")
           .update({ status: "payment_pending" })
@@ -387,13 +389,13 @@ const AdminOrders = () => {
           });
       }
 
-      // Refresh orders
+      // Refresh orders immediately
       await fetchOrders();
       setShowOrderDialog(false);
 
       toast({
         title: "Order Updated",
-        description: `Order status changed to ${STATUS_CONFIG[newStatus].label}`,
+        description: `Order status changed to ${STATUS_CONFIG[effectiveStatus].label}`,
       });
     } catch (error: any) {
       console.error("Error updating order:", error);
@@ -410,7 +412,7 @@ const AdminOrders = () => {
   const handleApproveAndInvoice = async () => {
     if (!selectedOrder) return;
     setNewStatus("in_production");
-    await handleUpdateOrder();
+    await handleUpdateOrder("in_production");
   };
 
   const pendingOrders = orders.filter(o => o.order_status === "pending_admin");
@@ -849,7 +851,7 @@ const AdminOrders = () => {
                     )}
                     <Button 
                       variant="outline"
-                      onClick={handleUpdateOrder}
+                      onClick={() => handleUpdateOrder()}
                       disabled={updating}
                       className={selectedOrder.order_status === "pending_admin" ? "" : "flex-1"}
                     >
