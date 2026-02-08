@@ -165,6 +165,8 @@ export const NotificationBell = ({ onReportIssue }: NotificationBellProps) => {
       navigate("/publisher/ad-requests");
     } else if (notification.type === "ad_request_approved" || notification.type === "ad_request_rejected") {
       navigate("/advertiser-dashboard");
+    } else if (notification.type === "new_print_order") {
+      navigate("/admin/orders");
     }
   };
 
