@@ -188,16 +188,18 @@ const VenueDetail = () => {
 
                 {venue.specifications?.allowed_ad_formats && <div>
                     <h3 className="font-semibold mb-2">Allowed Ad Formats</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {venue.specifications.allowed_ad_formats.map((format: string) => <Badge key={format} variant="outline">
+                    <div className="flex flex-wrap gap-2 justify-start">
+                      {venue.specifications.allowed_ad_formats.map((format: string) => (
+                        <Button key={format} variant="cyber" size="sm" className="text-xs h-7 px-3">
                           {format}
-                        </Badge>)}
+                        </Button>
+                      ))}
                     </div>
                   </div>}
 
                 {venue.specifications?.ad_units && venue.specifications.ad_units.length > 0 && <div>
                     <h3 className="font-semibold mb-2">Available Ad Units</h3>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 justify-start">
                       {venue.specifications.ad_units.map((unit: any, idx: number) => (
                         <Button
                           key={idx}
