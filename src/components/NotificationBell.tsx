@@ -156,22 +156,27 @@ export const NotificationBell = ({ onReportIssue }: NotificationBellProps) => {
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    // Navigate based on notification type
-    if (notification.type === "order_approved") {
-      navigate("/advertiser-dashboard");
-    } else if (notification.type === "payment_received") {
-      navigate("/venue-publishers");
-    } else if (notification.type === "ad_request_received") {
-      navigate("/publisher/ad-requests");
-    } else if (notification.type === "ad_request_approved" || notification.type === "ad_request_rejected") {
-      navigate("/advertiser-dashboard");
-    } else if (notification.type === "new_print_order") {
-      navigate("/admin/orders");
-    } else if (notification.type === "booking_approved" || notification.type === "booking_rejected") {
-      navigate("/advertiser-dashboard");
-    } else if (notification.type === "payment_required" || notification.type === "payment_reminder") {
-      navigate("/advertiser-dashboard");
-    }
+    // Close dropdown first, then navigate after a tick
+    setIsOpen(false);
+    
+    setTimeout(() => {
+      // Navigate based on notification type
+      if (notification.type === "order_approved") {
+        navigate("/advertiser-dashboard");
+      } else if (notification.type === "payment_received") {
+        navigate("/venue-publishers");
+      } else if (notification.type === "ad_request_received") {
+        navigate("/publisher/ad-requests");
+      } else if (notification.type === "ad_request_approved" || notification.type === "ad_request_rejected") {
+        navigate("/advertiser-dashboard");
+      } else if (notification.type === "new_print_order") {
+        navigate("/admin/orders");
+      } else if (notification.type === "booking_approved" || notification.type === "booking_rejected") {
+        navigate("/advertiser-dashboard");
+      } else if (notification.type === "payment_required" || notification.type === "payment_reminder") {
+        navigate("/advertiser-dashboard");
+      }
+    }, 100);
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
