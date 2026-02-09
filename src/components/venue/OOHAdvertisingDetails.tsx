@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Megaphone, MapPin, Users, Monitor, Volume2 } from "lucide-react";
 
 interface OOHDetails {
@@ -74,51 +74,59 @@ export const OOHAdvertisingDetails = ({ oohDetails }: OOHAdvertisingDetailsProps
             </h4>
             <div className="grid gap-3 text-sm">
               {oohDetails.exactLocationNotes && (
-                <div>
-                  <span className="text-muted-foreground">Location Notes:</span>
-                  <p className="mt-1">{oohDetails.exactLocationNotes}</p>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Location Notes:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.exactLocationNotes}
+                  </Button>
                 </div>
               )}
               {oohDetails.placementTypes && oohDetails.placementTypes.length > 0 && (
-                <div>
-                  <span className="text-muted-foreground">Placement Types:</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Placement Types:</span>
+                  <div className="flex flex-wrap gap-1">
                     {oohDetails.placementTypes.map((type) => (
-                      <Badge key={type} variant="outline" className="text-xs">
+                      <Button key={type} variant="cyber" size="sm" className="text-xs h-7 px-3">
                         {type}
-                      </Badge>
+                      </Button>
                     ))}
                   </div>
                 </div>
               )}
               {oohDetails.visibility && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Visibility:</span>
-                  <span>{oohDetails.visibility}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Visibility:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.visibility}
+                  </Button>
                 </div>
               )}
               {oohDetails.facingDirection && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Facing Direction:</span>
-                  <span>{oohDetails.facingDirection}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Facing Direction:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.facingDirection}
+                  </Button>
                 </div>
               )}
               {oohDetails.surroundingEnvironment && oohDetails.surroundingEnvironment.length > 0 && (
-                <div>
-                  <span className="text-muted-foreground">Environment:</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Environment:</span>
+                  <div className="flex flex-wrap gap-1">
                     {oohDetails.surroundingEnvironment.map((env) => (
-                      <Badge key={env} variant="secondary" className="text-xs">
+                      <Button key={env} variant="cyber" size="sm" className="text-xs h-7 px-3">
                         {env}
-                      </Badge>
+                      </Button>
                     ))}
                   </div>
                 </div>
               )}
               {oohDetails.distanceFromObstructions && (
-                <div>
-                  <span className="text-muted-foreground">Distance from Obstructions:</span>
-                  <p className="mt-1">{oohDetails.distanceFromObstructions}</p>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Distance from Obstructions:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.distanceFromObstructions}
+                  </Button>
                 </div>
               )}
             </div>
@@ -134,41 +142,47 @@ export const OOHAdvertisingDetails = ({ oohDetails }: OOHAdvertisingDetailsProps
             </h4>
             <div className="grid gap-3 text-sm">
               {oohDetails.estimatedTraffic && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Estimated Traffic:</span>
-                  <span className="font-medium">
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Estimated Traffic:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
                     {Number(oohDetails.estimatedTraffic).toLocaleString()} {trafficUnitLabels[oohDetails.trafficUnit || "per_day"]}
-                  </span>
+                  </Button>
                 </div>
               )}
               {oohDetails.primaryDemographic && (
-                <div>
-                  <span className="text-muted-foreground">Primary Demographic:</span>
-                  <p className="mt-1">{oohDetails.primaryDemographic}</p>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Primary Demographic:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.primaryDemographic}
+                  </Button>
                 </div>
               )}
               {oohDetails.audienceBehavior && oohDetails.audienceBehavior.length > 0 && (
-                <div>
-                  <span className="text-muted-foreground">Audience Behavior:</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Audience Behavior:</span>
+                  <div className="flex flex-wrap gap-1">
                     {oohDetails.audienceBehavior.map((behavior) => (
-                      <Badge key={behavior} variant="outline" className="text-xs">
+                      <Button key={behavior} variant="cyber" size="sm" className="text-xs h-7 px-3">
                         {behavior}
-                      </Badge>
+                      </Button>
                     ))}
                   </div>
                 </div>
               )}
               {oohDetails.peakViewingHours && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Peak Viewing Hours:</span>
-                  <span>{oohDetails.peakViewingHours}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Peak Viewing Hours:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.peakViewingHours}
+                  </Button>
                 </div>
               )}
               {oohDetails.measurementSource && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Measurement Source:</span>
-                  <span>{oohDetails.measurementSource}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Measurement Source:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.measurementSource}
+                  </Button>
                 </div>
               )}
             </div>
@@ -184,50 +198,61 @@ export const OOHAdvertisingDetails = ({ oohDetails }: OOHAdvertisingDetailsProps
             </h4>
             <div className="grid gap-3 text-sm">
               {oohDetails.mediaType && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Media Type:</span>
-                  <span>{oohDetails.mediaType}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Media Type:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.mediaType}
+                  </Button>
                 </div>
               )}
               {oohDetails.sizeWidth && oohDetails.sizeHeight && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Dimensions:</span>
-                  <span>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Dimensions:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
                     {oohDetails.sizeWidth} x {oohDetails.sizeHeight} {oohDetails.sizeUnit || "inches"}
-                  </span>
+                  </Button>
                 </div>
               )}
               {oohDetails.resolution && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Resolution:</span>
-                  <span>{oohDetails.resolution}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Resolution:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.resolution}
+                  </Button>
                 </div>
               )}
               {oohDetails.fileFormatRequirements && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">File Format:</span>
-                  <span>{oohDetails.fileFormatRequirements}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">File Format:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.fileFormatRequirements}
+                  </Button>
                 </div>
               )}
               {oohDetails.illumination && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Illumination:</span>
-                  <span>{oohDetails.illumination}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Illumination:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.illumination}
+                  </Button>
                 </div>
               )}
               {oohDetails.hasAudio && (
-                <div className="flex items-center gap-2">
-                  <Volume2 className="h-4 w-4 text-primary" />
-                  <span>Audio Enabled</span>
-                  {oohDetails.audioNotes && (
-                    <span className="text-muted-foreground">- {oohDetails.audioNotes}</span>
-                  )}
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1 flex items-center gap-1">
+                    <Volume2 className="h-4 w-4 text-primary" /> Audio:
+                  </span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    Enabled{oohDetails.audioNotes ? ` - ${oohDetails.audioNotes}` : ""}
+                  </Button>
                 </div>
               )}
               {oohDetails.structuralSafetyNotes && (
-                <div>
-                  <span className="text-muted-foreground">Safety Notes:</span>
-                  <p className="mt-1">{oohDetails.structuralSafetyNotes}</p>
+                <div className="flex flex-col items-start">
+                  <span className="text-muted-foreground mb-1">Safety Notes:</span>
+                  <Button variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    {oohDetails.structuralSafetyNotes}
+                  </Button>
                 </div>
               )}
             </div>
