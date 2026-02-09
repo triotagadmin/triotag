@@ -185,36 +185,25 @@ const VenueDetail = () => {
                 {venue.specifications?.allowed_ad_formats && <div>
                     <h3 className="font-semibold mb-2">Allowed Ad Formats</h3>
                     <div className="flex flex-wrap gap-2 justify-start">
-                      {venue.specifications.allowed_ad_formats.map((format: string) => (
-                        <Button key={format} variant="cyber" size="sm" className="text-xs h-7 px-3">
+                      {venue.specifications.allowed_ad_formats.map((format: string) => <Button key={format} variant="cyber" size="sm" className="text-xs h-7 px-3">
                           {format}
-                        </Button>
-                      ))}
+                        </Button>)}
                     </div>
                   </div>}
 
                 {venue.specifications?.ad_units && venue.specifications.ad_units.length > 0 && <div>
                     <h3 className="font-semibold mb-2">Available Ad Units</h3>
                     <div className="flex flex-wrap gap-2 justify-start">
-                      {venue.specifications.ad_units.map((unit: any, idx: number) => (
-                        <Button
-                          key={idx}
-                          variant="cyber"
-                          size="sm"
-                          className="text-xs h-7 px-3"
-                        >
+                      {venue.specifications.ad_units.map((unit: any, idx: number) => <Button key={idx} variant="cyber" size="sm" className="text-xs h-7 px-3">
                           {AD_UNIT_TYPE_LABELS[unit.type] || unit.type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
-                        </Button>
-                      ))}
+                        </Button>)}
                     </div>
                   </div>}
               </CardContent>
             </Card>
 
             {/* OOH Advertising Details Section - from Step 2 of Venue Registration */}
-            {venue.specifications?.ooh_details && (
-              <OOHAdvertisingDetails oohDetails={venue.specifications.ooh_details} />
-            )}
+            {venue.specifications?.ooh_details && <OOHAdvertisingDetails oohDetails={venue.specifications.ooh_details} />}
           </div>
 
           <div className="space-y-6">
@@ -242,7 +231,7 @@ const VenueDetail = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Publisher Information</CardTitle>
+                <CardTitle>Contact Publisher</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
