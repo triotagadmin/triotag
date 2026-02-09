@@ -7,10 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Pencil, Check, X } from "lucide-react";
+import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X } from "lucide-react";
 const VenueDashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [adSpaces, setAdSpaces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,22 +22,22 @@ const VenueDashboard = () => {
   const [newName, setNewName] = useState("");
   const ITEMS_PER_SLIDE = 3;
   const totalSlides = Math.max(1, Math.ceil(adSpaces.length / ITEMS_PER_SLIDE));
-
   useEffect(() => {
     const fetchData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
       }
       setUser(session.user);
-
-      const { data: profileData, error: profileError } = await supabase
-        .from("publisher_profiles")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-
+      const {
+        data: profileData,
+        error: profileError
+      } = await supabase.from("publisher_profiles").select("*").eq("user_id", session.user.id).maybeSingle();
       if (profileError) {
         toast({
           title: "Error",
@@ -45,7 +47,6 @@ const VenueDashboard = () => {
         setLoading(false);
         return;
       }
-
       if (!profileData) {
         toast({
           title: "Profile Required",
@@ -54,21 +55,17 @@ const VenueDashboard = () => {
         navigate("/complete-profile");
         return;
       }
-
       setProfile(profileData);
-
-      const { data: spacesData } = await supabase
-        .from("ad_spaces")
-        .select("*")
-        .eq("publisher_id", profileData.id)
-        .order("created_at", { ascending: false });
-
+      const {
+        data: spacesData
+      } = await supabase.from("ad_spaces").select("*").eq("publisher_id", profileData.id).order("created_at", {
+        ascending: false
+      });
       setAdSpaces(spacesData || []);
       setLoading(false);
     };
     fetchData();
   }, [navigate, toast]);
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
@@ -84,7 +81,6 @@ const VenueDashboard = () => {
   const getCurrentSlideSpaces = () => adSpaces.slice(currentSlide * ITEMS_PER_SLIDE, (currentSlide + 1) * ITEMS_PER_SLIDE);
   const nextSlide = () => setCurrentSlide(prev => (prev + 1) % totalSlides);
   const prevSlide = () => setCurrentSlide(prev => (prev - 1 + totalSlides) % totalSlides);
-
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>;
   }
@@ -109,59 +105,60 @@ const VenueDashboard = () => {
         <div className="mb-8">
           <h2 className="text-4xl font-bold mb-2">Venue Dashboard</h2>
           <div className="flex items-center gap-2 mt-1">
-            {editingName ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="max-w-xs"
-                  autoFocus
-                />
+            {editingName ? <div className="flex items-center gap-2">
+                <Input value={newName} onChange={e => setNewName(e.target.value)} className="max-w-xs" autoFocus />
                 <Button size="icon" variant="ghost" onClick={async () => {
-                  if (!newName.trim() || !profile) return;
-                  const { error } = await supabase
-                    .from("publisher_profiles")
-                    .update({ business_name: newName.trim() })
-                    .eq("id", profile.id);
-                  if (error) {
-                    toast({ title: "Error", description: error.message, variant: "destructive" });
-                  } else {
-                    setProfile({ ...profile, business_name: newName.trim() });
-                    toast({ title: "Updated", description: "Business name updated." });
-                  }
-                  setEditingName(false);
-                }}>
+              if (!newName.trim() || !profile) return;
+              const {
+                error
+              } = await supabase.from("publisher_profiles").update({
+                business_name: newName.trim()
+              }).eq("id", profile.id);
+              if (error) {
+                toast({
+                  title: "Error",
+                  description: error.message,
+                  variant: "destructive"
+                });
+              } else {
+                setProfile({
+                  ...profile,
+                  business_name: newName.trim()
+                });
+                toast({
+                  title: "Updated",
+                  description: "Business name updated."
+                });
+              }
+              setEditingName(false);
+            }}>
                   <Check className="h-4 w-4" />
                 </Button>
                 <Button size="icon" variant="ghost" onClick={() => setEditingName(false)}>
                   <X className="h-4 w-4" />
                 </Button>
-              </div>
-            ) : (
-              <>
+              </div> : <>
                 <p className="text-xl text-muted-foreground">{profile?.business_name}</p>
-                <Button size="icon" variant="ghost" onClick={() => { setNewName(profile?.business_name || ""); setEditingName(true); }}>
-                  <Pencil className="h-4 w-4" />
+                <Button size="icon" variant="ghost" onClick={() => {
+              setNewName(profile?.business_name || "");
+              setEditingName(true);
+            }}>
+                  
                 </Button>
-              </>
-            )}
+              </>}
           </div>
           <div className="flex items-center gap-3 mt-2">
             {getStatusBadge(profile?.verification_status)}
-            {profile?.location && (
-              <span className="text-sm text-muted-foreground">• {profile.location}</span>
-            )}
+            {profile?.location && <span className="text-sm text-muted-foreground">• {profile.location}</span>}
           </div>
         </div>
         <div className="space-y-6">
-          {!user?.email_confirmed_at && (
-            <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+          {!user?.email_confirmed_at && <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
               <CardHeader>
                 <CardTitle className="text-yellow-800 dark:text-yellow-200">Email Verification Required</CardTitle>
                 <CardDescription className="text-yellow-700 dark:text-yellow-300">Please verify your email address.</CardDescription>
               </CardHeader>
-            </Card>
-          )}
+            </Card>}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
@@ -216,41 +213,29 @@ const VenueDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {adSpaces.length === 0 ? (
-                <div className="text-center py-12">
+              {adSpaces.length === 0 ? <div className="text-center py-12">
                   <MapPin className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No ad spaces yet</h3>
                   <Button onClick={() => navigate("/venue/register")}>Add Your First Space</Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {totalSlides > 1 && (
-                    <div className="flex items-center justify-center gap-4 mb-4">
+                </div> : <div className="space-y-4">
+                  {totalSlides > 1 && <div className="flex items-center justify-center gap-4 mb-4">
                       <Button variant="outline" size="icon" onClick={prevSlide}>
                         <ChevronLeft className="h-4 w-4" />
                       </Button>
                       <div className="flex gap-2">
-                        {Array.from({ length: totalSlides }).map((_, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setCurrentSlide(idx)}
-                            className={`w-2 h-2 rounded-full ${idx === currentSlide ? "bg-primary" : "bg-muted-foreground/30"}`}
-                          />
-                        ))}
+                        {Array.from({
+                    length: totalSlides
+                  }).map((_, idx) => <button key={idx} onClick={() => setCurrentSlide(idx)} className={`w-2 h-2 rounded-full ${idx === currentSlide ? "bg-primary" : "bg-muted-foreground/30"}`} />)}
                       </div>
                       <Button variant="outline" size="icon" onClick={nextSlide}>
                         <ChevronRight className="h-4 w-4" />
                       </Button>
-                    </div>
-                  )}
+                    </div>}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {getCurrentSlideSpaces().map(space => (
-                      <Card key={space.id} className="overflow-hidden">
-                        {Array.isArray(space.media_urls) && space.media_urls[0] && (
-                          <div className="h-32 overflow-hidden">
+                    {getCurrentSlideSpaces().map(space => <Card key={space.id} className="overflow-hidden">
+                        {Array.isArray(space.media_urls) && space.media_urls[0] && <div className="h-32 overflow-hidden">
                             <img src={space.media_urls[0]} alt={space.title} className="w-full h-full object-cover" />
-                          </div>
-                        )}
+                          </div>}
                         <div className="p-4">
                           <h4 className="font-semibold truncate">{space.title}</h4>
                           <p className="text-sm text-muted-foreground truncate">{space.location}</p>
@@ -267,11 +252,9 @@ const VenueDashboard = () => {
                             </Button>
                           </div>
                         </div>
-                      </Card>
-                    ))}
+                      </Card>)}
                   </div>
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
         </div>
