@@ -263,7 +263,7 @@ const VenueDetail = () => {
                       </div>}
                   </> : <div className="pt-2 text-sm text-muted-foreground flex items-center gap-2">
                     <Lock className="h-4 w-4" />
-                    <span>Contact details available after activation</span>
+                    <span>Activate this listing to unlock full contact details & start advertising</span>
                   </div>}
 
                 <Button className="w-full mt-4" onClick={() => navigate(`/activate/${venue.id}`)}>
