@@ -104,18 +104,29 @@ const HabitTracker = () => {
         return;
       }
 
-      // Check if user account is verified (publisher or advertiser)
-      const {
-        data: publisherProfile
-      } = await supabase.from('publisher_profiles').select('verified, verification_status').eq('user_id', user.id).maybeSingle();
-      const {
-        data: advertiserProfile
-      } = await supabase.from('advertiser_profiles').select('verified, status').eq('user_id', user.id).maybeSingle();
-      const isVerified = publisherProfile?.verified === true || publisherProfile?.verification_status === 'approved' || advertiserProfile?.verified === true || advertiserProfile?.status === 'approved';
-      if (!isVerified) {
+      // Check if user is a verified advertiser or admin (publishers excluded)
+      const { data: advertiserProfile } = await supabase
+        .from('advertiser_profiles')
+        .select('verified, status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const { data: userRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      const isAllowed =
+        advertiserProfile?.verified === true ||
+        advertiserProfile?.status === 'approved' ||
+        !!userRole;
+
+      if (!isAllowed) {
         toast({
-          title: "Verification Required",
-          description: "QR code generation is only available for verified accounts. Please complete your verification first.",
+          title: "Access Restricted",
+          description: "QR code generation is only available for verified advertiser and admin accounts.",
           variant: "destructive"
         });
         setLoadingQR(false);
