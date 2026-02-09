@@ -31,7 +31,7 @@ export const Hero = () => {
           </p>
 
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-2 md:pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-            <Link to="/publishers" className="w-full sm:w-auto">
+            <Link to="/auth" className="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto text-base md:text-lg px-6 md:px-8 py-5 md:py-6 bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90">
                 Advertise Now
               </Button>
