@@ -263,7 +263,7 @@ const VenueDetail = () => {
                       </div>}
                   </> : <div className="pt-2 text-sm text-muted-foreground flex items-center gap-2">
                     <Lock className="h-4 w-4" />
-                    <span>Activate this listing to unlock full contact details & start advertising</span>
+                    <span>Ready to advertise here? Activate this micro OOH ad space now!</span>
                   </div>}
 
                 <Button className="w-full mt-4" onClick={() => navigate(`/activate/${venue.id}`)}>
