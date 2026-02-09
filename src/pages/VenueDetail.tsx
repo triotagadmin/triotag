@@ -215,16 +215,15 @@ const VenueDetail = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {venue.specifications?.ad_units && venue.specifications.ad_units.length > 0 ? venue.specifications.ad_units.map((unit: any, idx: number) => <div key={idx} className="border-b border-border pb-3 last:border-0 last:pb-0">
-                      
-                      {unit.pricePerWeek && <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Weekly</span>
-                          <span className="font-semibold">${unit.pricePerWeek}</span>
-                        </div>}
-                      {unit.pricePerMonth && <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Monthly</span>
-                          <span className="font-semibold">${unit.pricePerMonth}</span>
-                        </div>}
+                {venue.specifications?.ad_units && venue.specifications.ad_units.length > 0 ? venue.specifications.ad_units.map((unit: any, idx: number) => <div key={idx} className="border-b border-border pb-3 last:border-0 last:pb-0 space-y-2">
+                      {unit.pricePerWeek && <Button variant="cyber" size="sm" className="w-full justify-between animate-pulse-glow">
+                          <span>Weekly</span>
+                          <span className="font-bold">${unit.pricePerWeek}</span>
+                        </Button>}
+                      {unit.pricePerMonth && <Button variant="cyber" size="sm" className="w-full justify-between animate-pulse-glow">
+                          <span>Monthly</span>
+                          <span className="font-bold">${unit.pricePerMonth}</span>
+                        </Button>}
                     </div>) : <p className="text-muted-foreground">Contact for pricing</p>}
               </CardContent>
             </Card>
