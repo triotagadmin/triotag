@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X } from "lucide-react";
+import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const {
@@ -20,6 +21,7 @@ const VenueDashboard = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState("");
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const ITEMS_PER_SLIDE = 3;
   const totalSlides = Math.max(1, Math.ceil(adSpaces.length / ITEMS_PER_SLIDE));
   useEffect(() => {
@@ -138,8 +140,13 @@ const VenueDashboard = () => {
                   <X className="h-4 w-4" />
                 </Button>
               </div> : <>
-                <p className="text-xl text-muted-foreground">{profile?.business_name}</p>
-                
+                <button
+                  type="button"
+                  className="text-xl text-primary underline-offset-4 hover:underline cursor-pointer bg-transparent border-none p-0"
+                  onClick={() => setProfileDialogOpen(true)}
+                >
+                  {profile?.business_name}
+                </button>
               </>}
           </div>
           <div className="flex items-center gap-3 mt-2">
@@ -254,6 +261,48 @@ const VenueDashboard = () => {
           </Card>
         </div>
       </div>
+
+      <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              Publisher Profile
+            </DialogTitle>
+            <DialogDescription>Your business profile information</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Business Name</p>
+              <p className="text-base font-semibold">{profile?.business_name}</p>
+            </div>
+            {profile?.location && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Location</p>
+                <p className="text-base">{profile.location}</p>
+              </div>
+            )}
+            {profile?.description && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Description</p>
+                <p className="text-base">{profile.description}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Publisher Type</p>
+              <p className="text-base capitalize">{profile?.publisher_type}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Verification Status</p>
+              <div className="mt-1">{getStatusBadge(profile?.verification_status)}</div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Member Since</p>
+              <p className="text-base">{profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : "—"}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 };
 export default VenueDashboard;
