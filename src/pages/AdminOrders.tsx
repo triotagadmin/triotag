@@ -371,22 +371,30 @@ const AdminOrders = () => {
 
       if (error) throw error;
 
-      // Update activation status if moving to payment step and send notification
+      // Update activation status if moving to payment step and send notification + email
       if (effectiveStatus === "in_production" && selectedOrder.activation_id) {
         await supabase
           .from("activations")
           .update({ status: "payment_pending" })
           .eq("id", selectedOrder.activation_id);
 
-        // Send notification to advertiser
-        await supabase
-          .from("notifications")
-          .insert({
-            user_id: selectedOrder.advertiser_id,
-            title: "Ad Order Approved!",
-            message: `Your ad order (${selectedOrder.id.slice(0, 8).toUpperCase()}) has been approved. Please proceed to checkout to complete payment for your venue listing.`,
-            type: "order_approved",
+        // Send payment required notification + email via edge function
+        try {
+          await supabase.functions.invoke("send-payment-reminder", {
+            body: {
+              orderId: selectedOrder.id,
+              advertiserId: selectedOrder.advertiser_id,
+              advertiserEmail: advertiserInfo?.email || "",
+              advertiserName: "",
+              orderProductName: selectedOrder.product_name,
+              orderIdShort: selectedOrder.id.slice(0, 8).toUpperCase(),
+              totalPrice: newPrice ? parseFloat(newPrice) : selectedOrder.total_price,
+              isInitial: true,
+            },
           });
+        } catch (emailError) {
+          console.error("Failed to send payment notification email:", emailError);
+        }
       }
 
       // Refresh orders immediately
