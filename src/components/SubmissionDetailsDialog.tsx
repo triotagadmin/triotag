@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
@@ -118,26 +122,7 @@ export default function SubmissionDetailsDialog({
 
     if (submission.type === "verification_document") {
       return (
-        <div className="space-y-4">
-          <DetailRow label="Document Type" value={details.document_type?.replace("_", " ")} />
-          <DetailRow label="File Name" value={details.file_name} />
-          <DetailRow label="Publisher" value={details.publisher_profiles?.business_name} />
-          <DetailRow label="Contact Email" value={details.publisher_profiles?.contact_email} />
-          <DetailRow label="Verification Status" value={details.publisher_profiles?.verification_status} />
-          <DetailRow label="Uploaded At" value={new Date(details.uploaded_at).toLocaleString()} />
-          {details.file_url && (
-            <div className="pt-4">
-              <a 
-                href={details.file_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-primary hover:underline font-medium"
-              >
-                View Document →
-              </a>
-            </div>
-          )}
-        </div>
+        <VerificationDocumentDetails details={details} />
       );
     }
 
@@ -182,6 +167,88 @@ function DetailRow({ label, value }: { label: string; value: any }) {
     <div className="grid grid-cols-3 gap-4">
       <span className="font-medium text-muted-foreground">{label}:</span>
       <span className="col-span-2">{value}</span>
+    </div>
+  );
+}
+
+function VerificationDocumentDetails({ details }: { details: any }) {
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [loadingUrl, setLoadingUrl] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const extractStoragePath = (fileUrl: string): string => {
+    // If it's already a plain path (e.g. "publisherId/filename.ext"), use as-is
+    if (!fileUrl.startsWith("http")) return fileUrl;
+    // Extract path from full public URL pattern: .../object/public/verification-documents/PATH
+    const match = fileUrl.match(/verification-documents\/(.+)$/);
+    return match ? match[1] : fileUrl;
+  };
+
+  const handleViewDocument = async () => {
+    if (!details.file_url) return;
+    setLoadingUrl(true);
+    setError(null);
+    try {
+      const storagePath = extractStoragePath(details.file_url);
+      const { data, error: signError } = await supabase.storage
+        .from("verification-documents")
+        .createSignedUrl(storagePath, 3600);
+      if (signError) throw signError;
+      if (data?.signedUrl) {
+        setSignedUrl(data.signedUrl);
+      }
+    } catch (err: any) {
+      console.error("Failed to generate signed URL:", err);
+      setError("Failed to load document. Please try again.");
+    } finally {
+      setLoadingUrl(false);
+    }
+  };
+
+  const isImage = (fileName: string) => /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+
+  return (
+    <div className="space-y-4">
+      <DetailRow label="Document Type" value={details.document_type?.replace("_", " ")} />
+      <DetailRow label="File Name" value={details.file_name} />
+      <DetailRow label="Publisher" value={details.publisher_profiles?.business_name} />
+      <DetailRow label="Contact Email" value={details.publisher_profiles?.contact_email} />
+      <DetailRow label="Verification Status" value={details.publisher_profiles?.verification_status} />
+      <DetailRow label="Uploaded At" value={new Date(details.uploaded_at).toLocaleString()} />
+      
+      {details.file_url && !signedUrl && (
+        <div className="pt-4">
+          <Button onClick={handleViewDocument} disabled={loadingUrl} variant="outline" size="sm">
+            {loadingUrl ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              "View Document →"
+            )}
+          </Button>
+          {error && <p className="text-sm text-destructive mt-2">{error}</p>}
+        </div>
+      )}
+
+      {signedUrl && (
+        <div className="pt-4 space-y-3">
+          {isImage(details.file_name || details.file_url) ? (
+            <div className="border rounded-lg overflow-hidden">
+              <img src={signedUrl} alt={details.file_name} className="max-w-full max-h-[400px] object-contain mx-auto" />
+            </div>
+          ) : null}
+          <a
+            href={signedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline font-medium text-sm inline-block"
+          >
+            Open in new tab →
+          </a>
+        </div>
+      )}
     </div>
   );
 }

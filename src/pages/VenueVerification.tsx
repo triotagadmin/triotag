@@ -107,23 +107,19 @@ const VenueVerification = () => {
 
     if (uploadError) throw uploadError;
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('verification-documents')
-      .getPublicUrl(filePath);
-
-    // Save document reference
+    // Save document reference with storage path (not public URL since bucket is private)
     const { error: dbError } = await supabase
       .from('verification_documents')
       .insert({
         publisher_id: publisherId,
         document_type: doc.type,
         file_name: doc.file.name,
-        file_url: publicUrl,
+        file_url: filePath,
       });
 
     if (dbError) throw dbError;
 
-    return publicUrl;
+    return filePath;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
