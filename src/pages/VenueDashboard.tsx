@@ -139,12 +139,7 @@ const VenueDashboard = () => {
                 </Button>
               </div> : <>
                 <p className="text-xl text-muted-foreground">{profile?.business_name}</p>
-                <Button size="icon" variant="ghost" onClick={() => {
-              setNewName(profile?.business_name || "");
-              setEditingName(true);
-            }}>
-                  
-                </Button>
+                
               </>}
           </div>
           <div className="flex items-center gap-3 mt-2">
