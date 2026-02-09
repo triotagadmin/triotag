@@ -16,6 +16,7 @@ import { BookingScheduler } from "@/components/activation/BookingScheduler";
 import { ProductCard } from "@/components/print-order/ProductCard";
 import { OrderSuccessCard } from "@/components/print-order/OrderSuccessCard";
 import { PaymentGateway } from "@/components/activation/PaymentGateway";
+import { PrintOrderPaymentGate } from "@/components/activation/PrintOrderPaymentGate";
 import { PRINT_PRODUCTS, SHIPPING_COUNTRIES, calculateOrderTotal, getProductById } from "@/lib/printProducts";
 import { format } from "date-fns";
 import { getCurrencySymbol, formatPrice, getCurrencyName } from "@/hooks/useCurrencyConversion";
@@ -1129,24 +1130,11 @@ const ActivateListing = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-3">
-                      <Button
-                        onClick={() => setCurrentStep("payment")}
-                        className="w-full"
-                        size="lg"
-                      >
-                        Proceed to Payment
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => navigate("/advertiser-dashboard")}
-                        className="w-full"
-                      >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Return to Dashboard
-                      </Button>
-                    </div>
+                    <PrintOrderPaymentGate
+                      orderId={orderId}
+                      onProceedToPayment={() => setCurrentStep("payment")}
+                      onBackToDashboard={() => navigate("/advertiser-dashboard")}
+                    />
                   </CardContent>
                 </Card>
               </div>

@@ -76,15 +76,22 @@ const Marketplace = () => {
       const { data, error } = await supabase.rpc("search_nearby_listings", {
         user_lat: lat,
         user_lng: lng,
-        radius_km: 50,
+        radius_km: 10,
       });
 
       if (error) throw error;
 
       const locationListings: MarketplaceListing[] = (data || [])
-        .filter((item: any) => item.category === "venue")
         .map((item: any) => {
-          const specs = item.specifications || {};
+          // media_urls may come as JSON string from RPC, parse if needed
+          let parsedMediaUrls = item.media_urls;
+          if (typeof parsedMediaUrls === "string") {
+            try { parsedMediaUrls = JSON.parse(parsedMediaUrls); } catch { parsedMediaUrls = []; }
+          }
+
+          const specs = typeof item.specifications === "string" 
+            ? (() => { try { return JSON.parse(item.specifications); } catch { return {}; } })()
+            : (item.specifications || {});
           const adUnitsFromDb = specs?.ad_units || [];
           const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
           const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
@@ -95,10 +102,10 @@ const Marketplace = () => {
             title: item.title,
             description: item.description || "",
             location: item.location || "Not specified",
-            type: specs?.venue_type || specs?.type || "Venue",
-            adUnits: adUnitLabels.length > 0 ? adUnitLabels : ["No ad units specified"],
-            image: Array.isArray(item.media_urls) ? item.media_urls[0] : undefined,
-            ownerName: item.publisher_business_name || "Venue",
+            type: item.category === "agent" ? (item.service_type || "Agent Service") : (specs?.venue_type || specs?.type || "Venue"),
+            adUnits: adUnitLabels.length > 0 ? adUnitLabels : item.category === "agent" ? [item.service_type || "Service"] : ["No ad units specified"],
+            image: Array.isArray(parsedMediaUrls) ? parsedMediaUrls[0] : undefined,
+            ownerName: item.publisher_business_name || (item.category === "agent" ? "Agent" : "Venue"),
             createdAt: item.created_at || "",
             monthlySubscriptionFee: monthlyPrice || item.monthly_subscription_fee || 0,
             weeklyPrice: weeklyPrice,
@@ -275,7 +282,7 @@ const Marketplace = () => {
               <div className="flex items-center gap-2 mt-4 p-2 rounded-lg bg-primary/10 border border-primary/20">
                 <MapPin className="h-4 w-4 text-primary shrink-0" />
                 <span className="text-sm text-primary">
-                  Showing results within 50 km of ({locationCoords.lat.toFixed(4)},{" "}
+                  Showing results within 10 km of ({locationCoords.lat.toFixed(4)},{" "}
                   {locationCoords.lng.toFixed(4)})
                 </span>
                 <Button
@@ -339,7 +346,7 @@ const Marketplace = () => {
             <div className="col-span-full text-center py-12">
               <p className="text-muted-foreground">
                 {locationCoords
-                  ? "No ad spaces found within 50 km of this location"
+                  ? "No ad spaces found within 10 km of this location"
                   : "No approved ad spaces found matching your criteria"}
               </p>
             </div>
@@ -443,7 +450,7 @@ const Marketplace = () => {
         open={locationModalOpen}
         onOpenChange={setLocationModalOpen}
         onSearch={handleLocationSearch}
-        radiusKm={50}
+        radiusKm={10}
       />
       <Footer />
     </div>

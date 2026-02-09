@@ -7,7 +7,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MapPin, Crosshair, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { MapPin, Crosshair, Loader2, Search } from "lucide-react";
 
 interface LocationSearchModalProps {
   open: boolean;
@@ -22,10 +23,12 @@ export const LocationSearchModal = ({
   open,
   onOpenChange,
   onSearch,
-  radiusKm = 50,
+  radiusKm = 10,
 }: LocationSearchModalProps) => {
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [geocoding, setGeocoding] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -137,6 +140,33 @@ export const LocationSearchModal = ({
     }
   };
 
+  const handleGeocode = async () => {
+    if (!searchText.trim()) return;
+    setGeocoding(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchText)}&limit=1`,
+        { headers: { "Accept-Language": "en" } }
+      );
+      const results = await response.json();
+      if (results && results.length > 0) {
+        const lat = parseFloat(results[0].lat);
+        const lng = parseFloat(results[0].lon);
+        const L = await import("leaflet");
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.setView([lat, lng], 12);
+          updateMarkerAndCircle(mapInstanceRef.current, L, lat, lng);
+        }
+      } else {
+        // No results found
+      }
+    } catch (err) {
+      console.error("Geocoding error:", err);
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
@@ -151,6 +181,19 @@ export const LocationSearchModal = ({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Text search bar */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="Search by city or address..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleGeocode()}
+            />
+            <Button onClick={handleGeocode} disabled={geocoding || !searchText.trim()} size="sm">
+              {geocoding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            </Button>
+          </div>
+
           <Button
             variant="outline"
             size="sm"
