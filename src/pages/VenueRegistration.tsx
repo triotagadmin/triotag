@@ -556,11 +556,27 @@ const VenueRegistration = () => {
       const finalMediaUrls = uploadedImages;
       const actualVenueType = venueType === "other" ? customVenueType : venueType;
 
+      // Parse numeric lat/lng from user input (handles formats like "14.6190° N", "14.6190", etc.)
+      const parseCoord = (val: string | undefined): number | null => {
+        if (!val) return null;
+        const cleaned = val.replace(/[°NSEW\s]/gi, '').trim();
+        const num = parseFloat(cleaned);
+        if (isNaN(num)) return null;
+        // If original contained S or W, negate
+        if (/[SW]/i.test(val)) return -num;
+        return num;
+      };
+
+      const numericLat = parseCoord(validatedData.latitude);
+      const numericLng = parseCoord(validatedData.longitude);
+
       const venueData = {
         publisher_id: publisherId,
         title: validatedData.title,
         location: fullAddress,
         description: validatedData.description,
+        latitude: numericLat,
+        longitude: numericLng,
         specifications: {
           venue_type: actualVenueType,
           custom_venue_type: venueType === "other" ? customVenueType : null,
