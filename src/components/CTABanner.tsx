@@ -43,7 +43,7 @@ export const CTABanner = () => {
       }}>BECOME OUR AD PUBLISHER AND TURN YOUR UNUSED SPACES INTO A STEADY REVENUE STREAM WITH MICRO ADVERTISING</p>
 
         <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8 transition-all duration-700 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          <Link to="/auth" className="block">
+          <Link to="/list-space" className="block">
             <Button size="lg" className="w-full sm:w-auto text-base md:text-lg px-8 md:px-10 py-5 md:py-6 neon-glow hover:neon-glow-strong">
               Register Your Space
             </Button>
