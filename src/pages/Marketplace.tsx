@@ -163,7 +163,12 @@ const Marketplace = () => {
         };
       });
 
-      allListings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const PINNED_LISTING_ID = "4f9e8cf4-7df9-437a-8fe2-251957b5cafe";
+      allListings.sort((a, b) => {
+        if (a.id === PINNED_LISTING_ID) return -1;
+        if (b.id === PINNED_LISTING_ID) return 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
       setListings(allListings);
       setFilteredListings(allListings);
     } catch (error) {
