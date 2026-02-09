@@ -148,9 +148,6 @@ const VenueDashboard = () => {
           </div>
           <div className="flex items-center gap-3 mt-2">
             {getStatusBadge(profile?.verification_status)}
-            {profile?.contact_email && (
-              <span className="text-sm text-muted-foreground">{profile.contact_email}</span>
-            )}
             {profile?.location && (
               <span className="text-sm text-muted-foreground">• {profile.location}</span>
             )}

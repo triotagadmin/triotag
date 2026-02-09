@@ -36,8 +36,6 @@ interface VenueDetails {
   publisher_profiles: {
     user_id: string;
     business_name: string;
-    contact_email: string;
-    contact_phone: string;
   };
 }
 const VenueDetail = () => {
@@ -84,9 +82,7 @@ const VenueDetail = () => {
           *,
           publisher_profiles (
             user_id,
-            business_name,
-            contact_email,
-            contact_phone
+            business_name
           )
         `).eq("id", id).single();
       if (error) throw error;
@@ -264,11 +260,6 @@ const VenueDetail = () => {
                     {venue.specifications?.contact_number && <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         <p className="font-medium">{venue.specifications.contact_number}</p>
-                      </div>}
-
-                    {venue.publisher_profiles?.contact_email && <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <p className="font-medium">{venue.publisher_profiles.contact_email}</p>
                       </div>}
                   </> : <div className="pt-2 text-sm text-muted-foreground flex items-center gap-2">
                     <Lock className="h-4 w-4" />
