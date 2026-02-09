@@ -212,8 +212,8 @@ const AdvertiserDashboard = () => {
               ) : (
                 <div className="space-y-4">
                   {bookings.map((booking) => (
-                    <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="space-y-1">
+                    <div key={booking.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
+                      <div className="space-y-1 min-w-0 flex-1">
                         <p className="font-medium">{(booking.ad_spaces as any)?.title || "Ad Space"}</p>
                         <p className="text-sm text-muted-foreground">
                           {(booking.ad_spaces as any)?.location || "—"}
@@ -224,12 +224,17 @@ const AdvertiserDashboard = () => {
                           </p>
                         )}
                       </div>
-                      <Badge variant={
-                        booking.status === "approved" || booking.status === "completed" ? "default" :
-                        booking.status === "rejected" ? "destructive" : "secondary"
-                      }>
-                        {booking.status.replace(/_/g, " ")}
-                      </Badge>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant={
+                          booking.status === "approved" || booking.status === "completed" ? "default" :
+                          booking.status === "rejected" ? "destructive" : "secondary"
+                        }>
+                          {booking.status.replace(/_/g, " ")}
+                        </Badge>
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/activate/${booking.ad_space_id}`)}>
+                          View Details
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
