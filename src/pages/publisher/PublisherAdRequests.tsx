@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -56,6 +57,10 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
   approved: { label: "Approved", color: "bg-green-500/10 text-green-500 border-green-500/20", icon: <CheckCircle className="h-4 w-4" /> },
   rejected: { label: "Rejected", color: "bg-red-500/10 text-red-500 border-red-500/20", icon: <XCircle className="h-4 w-4" /> },
   design: { label: "Draft", color: "bg-gray-500/10 text-gray-500 border-gray-500/20", icon: <Package className="h-4 w-4" /> },
+  pending_approval: { label: "Pending Approval", color: "bg-orange-500/10 text-orange-500 border-orange-500/20", icon: <Clock className="h-4 w-4" /> },
+  printing: { label: "Printing", color: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20", icon: <Package className="h-4 w-4" /> },
+  payment_pending: { label: "Payment Pending", color: "bg-amber-500/10 text-amber-500 border-amber-500/20", icon: <Clock className="h-4 w-4" /> },
+  completed: { label: "Completed", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", icon: <CheckCircle className="h-4 w-4" /> },
 };
 
 export default function PublisherAdRequests() {
@@ -140,9 +145,9 @@ export default function PublisherAdRequests() {
 
       if (error) throw error;
 
-      // Filter to show only requests that have been submitted (exclude draft "design" status without submission)
+      // Show all requests that have been submitted (have a design URL)
       const validRequests = (data || []).filter(
-        (r) => r.ad_design_url && ["pending_submission", "under_review", "approved", "rejected"].includes(r.status)
+        (r) => r.status !== "design" || r.ad_design_url
       );
       setRequests(validRequests);
     } catch (error: any) {
@@ -189,9 +194,10 @@ export default function PublisherAdRequests() {
     };
   }, [isPublisher]);
 
-  const pendingCount = requests.filter((r) => ["pending_submission", "under_review"].includes(r.status)).length;
+  const pendingCount = requests.filter((r) => ["pending_submission", "under_review", "pending_approval", "payment_pending", "printing"].includes(r.status)).length;
   const approvedCount = requests.filter((r) => r.status === "approved").length;
   const rejectedCount = requests.filter((r) => r.status === "rejected").length;
+  const completedCount = requests.filter((r) => r.status === "completed").length;
 
   if (loading) {
     return (
@@ -261,104 +267,123 @@ export default function PublisherAdRequests() {
           </Card>
         </div>
 
-        {/* Requests Table */}
-        <Card>
-          <CardContent className="pt-6">
-            {requests.length === 0 ? (
-              <div className="text-center py-12">
-                <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Ad Requests Yet</h3>
-                <p className="text-muted-foreground">
-                  Ad requests from advertisers will appear here for your review.
-                </p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Venue</TableHead>
-                    <TableHead>Ad Unit</TableHead>
-                    <TableHead>Schedule</TableHead>
-                    <TableHead>Booking Fee</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Submitted</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {requests.map((request) => {
-                    const statusInfo = statusConfig[request.status] || statusConfig.design;
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="all">All ({requests.length})</TabsTrigger>
+            <TabsTrigger value="pending">Pending ({pendingCount})</TabsTrigger>
+            <TabsTrigger value="approved">Approved ({approvedCount})</TabsTrigger>
+            <TabsTrigger value="completed">Completed ({completedCount})</TabsTrigger>
+            <TabsTrigger value="rejected">Rejected ({rejectedCount})</TabsTrigger>
+          </TabsList>
 
-                    return (
-                      <TableRow
-                        key={request.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => navigate(`/publisher/ad-requests/${request.id}`)}
-                      >
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            {request.ad_design_url && (
-                              <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 bg-muted">
-                                <img
-                                  src={request.ad_design_url}
-                                  alt="Creative"
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            )}
-                            <div>
-                              <p className="font-medium">{request.ad_spaces?.title || "Unknown"}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {request.ad_spaces?.location}
-                              </p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="capitalize">
-                            {request.activation_type?.replace("_", " ") || "N/A"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          {request.start_date && request.end_date ? (
-                            <div className="flex items-center gap-1 text-sm">
-                              <Calendar className="h-3 w-3" />
-                              {format(new Date(request.start_date), "MMM d")} -{" "}
-                              {format(new Date(request.end_date), "MMM d")}
-                            </div>
-                          ) : (
-                            "—"
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-medium text-primary">
-                            ₱{(request.estimated_publisher_payout || 0).toLocaleString()}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={statusInfo.color}>
-                            {statusInfo.icon}
-                            <span className="ml-1">{statusInfo.label}</span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {request.submitted_at
-                            ? format(new Date(request.submitted_at), "MMM d, yyyy")
-                            : format(new Date(request.created_at), "MMM d, yyyy")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+          {["all", "pending", "approved", "completed", "rejected"].map((tab) => {
+            const filtered = tab === "all" ? requests
+              : tab === "pending" ? requests.filter((r) => ["pending_submission", "under_review", "pending_approval", "payment_pending", "printing"].includes(r.status))
+              : tab === "completed" ? requests.filter((r) => r.status === "completed")
+              : requests.filter((r) => r.status === tab);
+
+            return (
+              <TabsContent key={tab} value={tab}>
+                <Card>
+                  <CardContent className="pt-6">
+                    {filtered.length === 0 ? (
+                      <div className="text-center py-12">
+                        <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">No Requests</h3>
+                        <p className="text-muted-foreground">
+                          No ad requests in this category.
+                        </p>
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Venue</TableHead>
+                            <TableHead>Ad Unit</TableHead>
+                            <TableHead>Schedule</TableHead>
+                            <TableHead>Booking Fee</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Submitted</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filtered.map((request) => {
+                            const statusInfo = statusConfig[request.status] || statusConfig.design;
+                            return (
+                              <TableRow
+                                key={request.id}
+                                className="cursor-pointer hover:bg-muted/50"
+                                onClick={() => navigate(`/publisher/ad-requests/${request.id}`)}
+                              >
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    {request.ad_design_url && (
+                                      <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 bg-muted">
+                                        <img
+                                          src={request.ad_design_url}
+                                          alt="Creative"
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    )}
+                                    <div>
+                                      <p className="font-medium">{request.ad_spaces?.title || "Unknown"}</p>
+                                      <p className="text-xs text-muted-foreground">
+                                        {request.ad_spaces?.location}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <span className="capitalize">
+                                    {request.activation_type?.replace("_", " ") || "N/A"}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  {request.start_date && request.end_date ? (
+                                    <div className="flex items-center gap-1 text-sm">
+                                      <Calendar className="h-3 w-3" />
+                                      {format(new Date(request.start_date), "MMM d")} -{" "}
+                                      {format(new Date(request.end_date), "MMM d")}
+                                    </div>
+                                  ) : (
+                                    "—"
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  <span className="font-medium text-primary">
+                                    ₱{(request.estimated_publisher_payout || 0).toLocaleString()}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className={statusInfo.color}>
+                                    {statusInfo.icon}
+                                    <span className="ml-1">{statusInfo.label}</span>
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-muted-foreground">
+                                  {request.submitted_at
+                                    ? format(new Date(request.submitted_at), "MMM d, yyyy")
+                                    : format(new Date(request.created_at), "MMM d, yyyy")}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button variant="ghost" size="sm">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            );
+          })}
+        </Tabs>
       </div>
     </div>
   );
