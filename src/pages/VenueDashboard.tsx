@@ -5,8 +5,9 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket } from "lucide-react";
+import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Pencil, Check, X } from "lucide-react";
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -15,6 +16,8 @@ const VenueDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState("");
   const ITEMS_PER_SLIDE = 3;
   const totalSlides = Math.max(1, Math.ceil(adSpaces.length / ITEMS_PER_SLIDE));
 
@@ -105,11 +108,54 @@ const VenueDashboard = () => {
       <div className="container mx-auto px-6 py-12">
         <div className="mb-8">
           <h2 className="text-4xl font-bold mb-2">Venue Dashboard</h2>
-          <p className="text-xl text-muted-foreground">{profile?.business_name}</p>
-          <div className="mt-2">{getStatusBadge(profile?.verification_status)}</div>
+          <div className="flex items-center gap-2 mt-1">
+            {editingName ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="max-w-xs"
+                  autoFocus
+                />
+                <Button size="icon" variant="ghost" onClick={async () => {
+                  if (!newName.trim() || !profile) return;
+                  const { error } = await supabase
+                    .from("publisher_profiles")
+                    .update({ business_name: newName.trim() })
+                    .eq("id", profile.id);
+                  if (error) {
+                    toast({ title: "Error", description: error.message, variant: "destructive" });
+                  } else {
+                    setProfile({ ...profile, business_name: newName.trim() });
+                    toast({ title: "Updated", description: "Business name updated." });
+                  }
+                  setEditingName(false);
+                }}>
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" onClick={() => setEditingName(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <>
+                <p className="text-xl text-muted-foreground">{profile?.business_name}</p>
+                <Button size="icon" variant="ghost" onClick={() => { setNewName(profile?.business_name || ""); setEditingName(true); }}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-3 mt-2">
+            {getStatusBadge(profile?.verification_status)}
+            {profile?.contact_email && (
+              <span className="text-sm text-muted-foreground">{profile.contact_email}</span>
+            )}
+            {profile?.location && (
+              <span className="text-sm text-muted-foreground">• {profile.location}</span>
+            )}
+          </div>
         </div>
-
-        {/* Overview Content */}
         <div className="space-y-6">
           {!user?.email_confirmed_at && (
             <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
