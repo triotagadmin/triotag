@@ -36,7 +36,7 @@ export const Hero = () => {
                 Advertise Now
               </Button>
             </Link>
-            <Link to="/auth" className="w-full sm:w-auto">
+            <Link to="/list-space" className="w-full sm:w-auto">
               <Button size="lg" variant="outline" className="w-full sm:w-auto text-base md:text-lg px-6 md:px-8 py-5 md:py-6 border-primary text-primary bg-transparent hover:bg-primary/10 hover:neon-glow transition-all duration-300">
                 Become a Publisher
               </Button>
