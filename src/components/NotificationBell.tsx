@@ -169,6 +169,8 @@ export const NotificationBell = ({ onReportIssue }: NotificationBellProps) => {
       navigate("/admin/orders");
     } else if (notification.type === "booking_approved" || notification.type === "booking_rejected") {
       navigate("/advertiser-dashboard");
+    } else if (notification.type === "payment_required" || notification.type === "payment_reminder") {
+      navigate("/advertiser-dashboard");
     }
   };
 
