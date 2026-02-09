@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
+import { Badge } from "@/components/ui/badge";
 import { BarChart3, ShoppingCart, Search, Mail, Receipt, Settings, Plus, MapPin, Globe, Users, TrendingUp, Calendar, Printer, Ticket } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
+import { format } from "date-fns";
 const AdvertiserDashboard = () => {
   const navigate = useNavigate();
   const {
@@ -14,6 +16,7 @@ const AdvertiserDashboard = () => {
   } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState<any[]>([]);
   useEffect(() => {
     const checkUser = async () => {
       const {
@@ -36,6 +39,14 @@ const AdvertiserDashboard = () => {
       }
       setUser(session.user);
       setLoading(false);
+
+      // Fetch bookings
+      const { data: activations } = await supabase
+        .from("activations")
+        .select("*, ad_spaces(title, location)")
+        .eq("advertiser_id", session.user.id)
+        .order("created_at", { ascending: false });
+      if (activations) setBookings(activations);
     };
     checkUser();
     const {
@@ -190,13 +201,39 @@ const AdvertiserDashboard = () => {
           </h3>
           <Card>
             <CardContent className="pt-6">
-              <div className="text-center py-12">
-                <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-4">No bookings yet</p>
-                <Button onClick={() => navigate("/publishers")}>
-                  Browse Ad Spaces
-                </Button>
-              </div>
+              {bookings.length === 0 ? (
+                <div className="text-center py-12">
+                  <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground mb-4">No bookings yet</p>
+                  <Button onClick={() => navigate("/publishers")}>
+                    Browse Ad Spaces
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {bookings.map((booking) => (
+                    <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="space-y-1">
+                        <p className="font-medium">{(booking.ad_spaces as any)?.title || "Ad Space"}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {(booking.ad_spaces as any)?.location || "—"}
+                        </p>
+                        {booking.start_date && booking.end_date && (
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(booking.start_date), "MMM d, yyyy")} → {format(new Date(booking.end_date), "MMM d, yyyy")}
+                          </p>
+                        )}
+                      </div>
+                      <Badge variant={
+                        booking.status === "approved" || booking.status === "completed" ? "default" :
+                        booking.status === "rejected" ? "destructive" : "secondary"
+                      }>
+                        {booking.status.replace(/_/g, " ")}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
