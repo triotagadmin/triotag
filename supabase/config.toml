@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.listing-checkout]
 verify_jwt = false
+
+[functions.venue-registration-checkout]
+verify_jwt = false
