@@ -6,7 +6,7 @@ const steps = [
   {
     icon: MapPin,
     title: "Register as Advertiser",
-    description: "Browse venues, agents, and digital publishers worldwide",
+    description: "Browse micro advertising space worldwide.",
   },
   {
     icon: Calendar,
