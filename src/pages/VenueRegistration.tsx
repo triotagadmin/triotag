@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { ArrowLeft, ArrowRight, Upload, X, CheckCircle, AlertCircle, Building2, Megaphone } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, X, CheckCircle, AlertCircle, Building2, Megaphone, CreditCard, Shield, Loader2 } from "lucide-react";
 import { AdUnitSelector, AdUnitConfig } from "@/components/AdUnitSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -79,8 +79,10 @@ const VenueRegistration = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   
-  // Step management
+  // Step management (1: Venue Details, 2: OOH Details, 3: Payment)
   const [currentStep, setCurrentStep] = useState(1);
 
   // Form fields - Step 1
@@ -201,8 +203,16 @@ const VenueRegistration = () => {
   const illuminationOptions = ["Backlit", "Frontlit", "LED", "Non-illuminated", "Natural light only", "Neon", "Digital display"];
 
   useEffect(() => {
+    // Check for payment return
+    const urlParams = new URLSearchParams(window.location.search);
+    const venueRegistered = urlParams.get('venue_registered');
+    if (venueRegistered) {
+      setShowConfirmation(true);
+      window.history.replaceState({}, "", "/venue-registration");
+      return;
+    }
+
     const checkAuth = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
       const editParam = urlParams.get('edit');
       if (editParam) {
         setEditId(editParam);
@@ -523,131 +533,175 @@ const VenueRegistration = () => {
     }
   };
 
+  const handleProceedToPayment = () => {
+    // For new registrations, go to payment step
+    setCurrentStep(3);
+    window.scrollTo(0, 0);
+  };
+
+  const buildVenueData = () => {
+    const validatedData = venueSchema.parse({
+      title, street, city,
+      state: state || undefined,
+      postalCode: postalCode || undefined,
+      country,
+      latitude: latitude || undefined,
+      longitude: longitude || undefined,
+      contactPerson, contactEmail, contactPhone,
+      venueType, operatingHours,
+      description: description || undefined,
+      weeklyPrice: weeklyPrice || undefined,
+      monthlyPrice: monthlyPrice || undefined
+    });
+
+    const fullAddress = [validatedData.street, validatedData.city, validatedData.state, validatedData.postalCode, validatedData.country].filter(Boolean).join(", ");
+    const pricingData: any = {};
+    if (validatedData.weeklyPrice) pricingData.weekly = parseFloat(validatedData.weeklyPrice);
+    if (validatedData.monthlyPrice) pricingData.monthly = parseFloat(validatedData.monthlyPrice);
+    const actualVenueType = venueType === "other" ? customVenueType : venueType;
+
+    const parseCoord = (val: string | undefined): number | null => {
+      if (!val) return null;
+      const cleaned = val.replace(/[°NSEW\s]/gi, '').trim();
+      const num = parseFloat(cleaned);
+      if (isNaN(num)) return null;
+      if (/[SW]/i.test(val)) return -num;
+      return num;
+    };
+
+    const numericLat = parseCoord(validatedData.latitude);
+    const numericLng = parseCoord(validatedData.longitude);
+
+    return {
+      publisher_id: publisherId,
+      title: validatedData.title,
+      location: fullAddress,
+      description: validatedData.description,
+      latitude: numericLat,
+      longitude: numericLng,
+      specifications: {
+        venue_type: actualVenueType,
+        custom_venue_type: venueType === "other" ? customVenueType : null,
+        full_address: fullAddress,
+        latitude: validatedData.latitude,
+        longitude: validatedData.longitude,
+        contact_person: validatedData.contactPerson,
+        contact_email: validatedData.contactEmail,
+        contact_number: validatedData.contactPhone,
+        operating_hours: validatedData.operatingHours,
+        allowed_ad_formats: allowedAdFormats,
+        currency: currency,
+        ad_units: selectedAdUnits.map(unit => ({
+          type: unit.type,
+          quantity: unit.quantity,
+          pricePerWeek: unit.pricePerWeek,
+          pricePerMonth: unit.pricePerMonth,
+          specialRules: unit.specialRules,
+          customFormat: unit.customFormat || null,
+          thumbnailUrl: unit.thumbnailUrl || null
+        })),
+        ooh_details: oohDetails
+      },
+      pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
+      media_urls: uploadedImages
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!publisherId) return;
 
+    // For new registrations, go to payment step instead of submitting directly
+    if (!isEditing) {
+      handleProceedToPayment();
+      return;
+    }
+
+    // Editing flow - submit directly (already paid)
     setLoading(true);
     try {
-      const validatedData = venueSchema.parse({
-        title,
-        street,
-        city,
-        state: state || undefined,
-        postalCode: postalCode || undefined,
-        country,
-        latitude: latitude || undefined,
-        longitude: longitude || undefined,
-        contactPerson,
-        contactEmail,
-        contactPhone,
-        venueType,
-        operatingHours,
-        description: description || undefined,
-        weeklyPrice: weeklyPrice || undefined,
-        monthlyPrice: monthlyPrice || undefined
-      });
-
-      const fullAddress = [validatedData.street, validatedData.city, validatedData.state, validatedData.postalCode, validatedData.country].filter(Boolean).join(", ");
-      const pricingData: any = {};
-      if (validatedData.weeklyPrice) pricingData.weekly = parseFloat(validatedData.weeklyPrice);
-      if (validatedData.monthlyPrice) pricingData.monthly = parseFloat(validatedData.monthlyPrice);
-
-      const finalMediaUrls = uploadedImages;
-      const actualVenueType = venueType === "other" ? customVenueType : venueType;
-
-      // Parse numeric lat/lng from user input (handles formats like "14.6190° N", "14.6190", etc.)
-      const parseCoord = (val: string | undefined): number | null => {
-        if (!val) return null;
-        const cleaned = val.replace(/[°NSEW\s]/gi, '').trim();
-        const num = parseFloat(cleaned);
-        if (isNaN(num)) return null;
-        // If original contained S or W, negate
-        if (/[SW]/i.test(val)) return -num;
-        return num;
-      };
-
-      const numericLat = parseCoord(validatedData.latitude);
-      const numericLng = parseCoord(validatedData.longitude);
-
-      const venueData = {
-        publisher_id: publisherId,
-        title: validatedData.title,
-        location: fullAddress,
-        description: validatedData.description,
-        latitude: numericLat,
-        longitude: numericLng,
-        specifications: {
-          venue_type: actualVenueType,
-          custom_venue_type: venueType === "other" ? customVenueType : null,
-          full_address: fullAddress,
-          latitude: validatedData.latitude,
-          longitude: validatedData.longitude,
-          contact_person: validatedData.contactPerson,
-          contact_email: validatedData.contactEmail,
-          contact_number: validatedData.contactPhone,
-          operating_hours: validatedData.operatingHours,
-          allowed_ad_formats: allowedAdFormats,
-          currency: currency,
-          ad_units: selectedAdUnits.map(unit => ({
-            type: unit.type,
-            quantity: unit.quantity,
-            pricePerWeek: unit.pricePerWeek,
-            pricePerMonth: unit.pricePerMonth,
-            specialRules: unit.specialRules,
-            customFormat: unit.customFormat || null,
-            thumbnailUrl: unit.thumbnailUrl || null
-          })),
-          ooh_details: oohDetails
-        },
-        pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
-        media_urls: finalMediaUrls
-      };
-
+      const venueData = buildVenueData();
       const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
 
-      if (isEditing && editId) {
-        const { error } = await supabase
-          .from("ad_spaces")
-          .update(venueData)
-          .eq("id", editId)
-          .eq("publisher_id", publisherId);
-        if (error) throw error;
+      const { error } = await supabase
+        .from("ad_spaces")
+        .update(venueData)
+        .eq("id", editId!)
+        .eq("publisher_id", publisherId);
+      if (error) throw error;
 
-        if (filledDocs.length > 0) {
-          const uploadPromises = filledDocs.map(doc => uploadVerificationDocument(doc, publisherId));
-          await Promise.all(uploadPromises);
-        }
-        toast({
-          title: "Success",
-          description: "Venue updated successfully"
-        });
-      } else {
-        const { error } = await supabase
-          .from("ad_spaces")
-          .insert([{
-            ...venueData,
-            approval_status: "pending" as const
-          }]);
-        if (error) throw error;
-
+      if (filledDocs.length > 0) {
         const uploadPromises = filledDocs.map(doc => uploadVerificationDocument(doc, publisherId));
         await Promise.all(uploadPromises);
-
-        toast({
-          title: "Success",
-          description: "Venue and verification documents submitted for approval"
-        });
       }
+      toast({
+        title: "Success",
+        description: "Venue updated successfully"
+      });
       navigate("/venue-inventory");
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to submit venue",
+        description: error.message || "Failed to update venue",
         variant: "destructive"
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePayAndSubmit = async () => {
+    if (!publisherId) return;
+    setPaymentProcessing(true);
+    try {
+      const venueData = buildVenueData();
+
+      // Upload verification docs to storage first, collect metadata
+      const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
+      const uploadedDocMeta: any[] = [];
+
+      for (const doc of filledDocs) {
+        if (!doc.file) continue;
+        const fileExt = doc.file.name.split('.').pop();
+        const fileName = `${doc.type}_${Date.now()}.${fileExt}`;
+        const filePath = `${publisherId}/${fileName}`;
+        const { error: uploadError } = await supabase.storage
+          .from('verification-documents')
+          .upload(filePath, doc.file);
+        if (uploadError) throw uploadError;
+        uploadedDocMeta.push({
+          document_type: doc.type,
+          file_name: doc.file.name,
+          file_url: filePath,
+        });
+      }
+
+      const currentUrl = window.location.origin;
+      const { data, error } = await supabase.functions.invoke("venue-registration-checkout", {
+        body: {
+          venueData,
+          verificationDocs: uploadedDocMeta,
+          successUrl: `${currentUrl}/venue-registration`,
+          cancelUrl: `${currentUrl}/venue-registration`,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (error: any) {
+      console.error("Payment error:", error);
+      toast({
+        title: "Payment Error",
+        description: error.message || "Failed to initiate payment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPaymentProcessing(false);
     }
   };
 
@@ -686,17 +740,91 @@ const VenueRegistration = () => {
             <p className={`text-sm font-medium ${currentStep >= 2 ? "text-foreground" : "text-muted-foreground"}`}>
               Step 2
             </p>
-            <p className="text-xs text-muted-foreground">OOH Advertising Details</p>
+            <p className="text-xs text-muted-foreground">OOH Details</p>
           </div>
         </div>
+
+        {!isEditing && (
+          <>
+            {/* Connector */}
+            <div className={`w-16 h-1 rounded transition-colors ${
+              currentStep >= 3 ? "bg-primary" : "bg-muted"
+            }`} />
+
+            {/* Step 3 */}
+            <div className="flex items-center gap-2">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
+                currentStep >= 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              }`}>
+                <CreditCard className="w-5 h-5" />
+              </div>
+              <div className="hidden sm:block">
+                <p className={`text-sm font-medium ${currentStep >= 3 ? "text-foreground" : "text-muted-foreground"}`}>
+                  Step 3
+                </p>
+                <p className="text-xs text-muted-foreground">Payment</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
+
+  // Confirmation screen
+  if (showConfirmation) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <Navigation />
+        <div className="container mx-auto px-6 py-12">
+          <div className="max-w-lg mx-auto text-center">
+            <Card>
+              <CardContent className="pt-8 pb-8 space-y-4">
+                <CheckCircle className="h-16 w-16 text-primary mx-auto" />
+                <h2 className="text-2xl font-bold">Registration Submitted!</h2>
+                <p className="text-muted-foreground">
+                  Your venue registration has been submitted and is now <strong>Pending Review</strong>.
+                  We'll review your submission and notify you once it's approved.
+                </p>
+                <div className="bg-muted/50 rounded-md p-4 mt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Status: <span className="font-semibold text-primary">Pending Review</span>
+                  </p>
+                </div>
+                <Button onClick={() => navigate("/venue-inventory")} className="mt-4">
+                  Go to My Venues
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-muted/30">
       <Navigation />
       <div className="container mx-auto px-6 py-12 max-w-4xl">
+        {/* Pricing Notice */}
+        {!isEditing && (
+          <Card className="mb-6 border-primary/40 bg-primary/5">
+            <CardContent className="flex flex-col sm:flex-row items-center justify-between py-4 gap-3">
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-6 w-6 text-primary shrink-0" />
+                <div>
+                  <p className="font-semibold text-lg">$10 per venue registration</p>
+                  <p className="text-sm text-muted-foreground">One-time fee · Secure payment · Admin review included</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Shield className="h-4 w-4" />
+                <span>Secure checkout</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">
@@ -1274,10 +1402,92 @@ const VenueRegistration = () => {
                     Back to Venue Details
                   </Button>
                   <Button type="submit" className="flex-1" disabled={loading}>
-                    {loading ? isEditing ? "Updating..." : "Submitting..." : isEditing ? "Update Venue" : "Submit Registration"}
+                    {loading ? (isEditing ? "Updating..." : "Submitting...") : isEditing ? "Update Venue" : "Continue to Payment — $10"}
                   </Button>
                 </div>
               </form>
+            )}
+
+            {currentStep === 3 && !isEditing && (
+              <div className="space-y-6">
+                {/* Pricing Banner */}
+                <Card className="border-primary/40 bg-primary/5">
+                  <CardContent className="flex flex-col sm:flex-row items-center justify-between py-4 gap-3">
+                    <div className="flex items-center gap-3">
+                      <CreditCard className="h-6 w-6 text-primary shrink-0" />
+                      <div>
+                        <p className="font-semibold text-lg">$10 per venue registration</p>
+                        <p className="text-sm text-muted-foreground">One-time fee · Secure payment · Admin review included</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Shield className="h-4 w-4" />
+                      <span>Secure checkout</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Summary */}
+                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                  <h4 className="font-semibold">Registration Summary</h4>
+                  <div className="grid grid-cols-2 gap-y-1 text-sm">
+                    <span className="text-muted-foreground">Venue:</span>
+                    <span>{title}</span>
+                    <span className="text-muted-foreground">Type:</span>
+                    <span className="capitalize">{venueType === "other" ? customVenueType : venueType}</span>
+                    <span className="text-muted-foreground">Location:</span>
+                    <span>{[street, city, country].filter(Boolean).join(", ")}</span>
+                    <span className="text-muted-foreground">Contact:</span>
+                    <span>{contactPerson}</span>
+                    <span className="text-muted-foreground">Ad Units:</span>
+                    <span>{selectedAdUnits.length} type(s) selected</span>
+                    <span className="text-muted-foreground">Photos:</span>
+                    <span>{uploadedImages.length} uploaded</span>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="border rounded-lg p-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold">Venue Registration Fee</p>
+                    <p className="text-sm text-muted-foreground">One-time payment</p>
+                  </div>
+                  <p className="text-2xl font-bold text-primary">$10</p>
+                </div>
+
+                {/* Trust Indicators */}
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Shield className="h-4 w-4" />
+                    <span>Secure payment</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <CreditCard className="h-4 w-4" />
+                    <span>One-time fee</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Admin review included</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button variant="outline" onClick={() => { setCurrentStep(2); window.scrollTo(0, 0); }} className="sm:w-auto w-full">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Edit
+                  </Button>
+                  <Button onClick={handlePayAndSubmit} size="lg" className="flex-1" disabled={paymentProcessing}>
+                    {paymentProcessing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      "Pay $10 & Submit Registration"
+                    )}
+                  </Button>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
