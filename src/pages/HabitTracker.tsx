@@ -312,7 +312,7 @@ Based on your scan patterns, consider:
                               <p className="text-xs text-muted-foreground">Code: {qr.short_code}</p>
                               <div className="flex gap-4 mt-1 text-sm">
                                 <span>{qr.totalScans} scans</span>
-                                <span>{qr.uniqueScans} unique</span>
+                                
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
