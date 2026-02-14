@@ -3,12 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, QrCode, Bot, Download, RefreshCw, ScanLine } from "lucide-react";
+import { Plus, QrCode, Bot, Download, RefreshCw, ScanLine, MapPin, ChevronDown, ChevronUp, Monitor, Smartphone, Tablet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { QRTrackerTab } from "@/components/QRTrackerTab";
+interface ScanData {
+  ip_hash: string | null;
+  city: string | null;
+  country: string | null;
+  device_type: string | null;
+  browser: string | null;
+  operating_system: string | null;
+  scanned_at: string | null;
+}
 interface QRCodeData {
   id: string;
   short_code: string;
@@ -17,6 +26,7 @@ interface QRCodeData {
   created_at: string;
   totalScans: number;
   uniqueScans: number;
+  scans: ScanData[];
 }
 const HabitTracker = () => {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
@@ -31,6 +41,7 @@ const HabitTracker = () => {
   const [generatedQRs, setGeneratedQRs] = useState<QRCodeData[]>([]);
   const [loadingQR, setLoadingQR] = useState(false);
   const [selectedQR, setSelectedQR] = useState<QRCodeData | null>(null);
+  const [expandedQR, setExpandedQR] = useState<string | null>(null);
 
   // AI Analytics State
   const [aiResponse, setAiResponse] = useState("");
@@ -61,13 +72,14 @@ const HabitTracker = () => {
             head: true
           }).eq('qr_code_id', qr.id);
           const {
-            data: uniqueData
-          } = await supabase.from('qr_code_scans').select('ip_hash').eq('qr_code_id', qr.id);
-          const uniqueScans = new Set(uniqueData?.map(s => s.ip_hash)).size;
+            data: scanData
+          } = await supabase.from('qr_code_scans').select('ip_hash, city, country, device_type, browser, operating_system, scanned_at').eq('qr_code_id', qr.id).order('scanned_at', { ascending: false });
+          const uniqueScans = new Set(scanData?.map(s => s.ip_hash)).size;
           return {
             ...qr,
             totalScans: totalScans || 0,
-            uniqueScans
+            uniqueScans,
+            scans: scanData || []
           };
         }));
         setGeneratedQRs(qrsWithStats);
@@ -290,21 +302,58 @@ Based on your scan patterns, consider:
                     <CardTitle>Your QR Codes</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {generatedQRs.map(qr => <div key={qr.id} className="p-4 border rounded-lg flex items-center gap-4">
-                          <img src={getQRImageUrl(qr.short_code)} alt="QR Code" className="w-16 h-16 border rounded" />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{qr.name || "Unnamed QR"}</p>
-                            <a href={qr.destination_url.startsWith('http') ? qr.destination_url : `https://${qr.destination_url}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline truncate block">{qr.destination_url}</a>
-                            <p className="text-xs text-muted-foreground">Code: {qr.short_code}</p>
-                            <div className="flex gap-4 mt-1 text-sm">
-                              <span>{qr.totalScans} scans</span>
-                              <span>{qr.uniqueScans} unique</span>
+                    <div className="grid grid-cols-1 gap-4">
+                      {generatedQRs.map(qr => <div key={qr.id} className="border rounded-lg overflow-hidden">
+                          <div className="p-4 flex items-center gap-4">
+                            <img src={getQRImageUrl(qr.short_code)} alt="QR Code" className="w-16 h-16 border rounded" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{qr.name || "Unnamed QR"}</p>
+                              <a href={qr.destination_url.startsWith('http') ? qr.destination_url : `https://${qr.destination_url}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline truncate block">{qr.destination_url}</a>
+                              <p className="text-xs text-muted-foreground">Code: {qr.short_code}</p>
+                              <div className="flex gap-4 mt-1 text-sm">
+                                <span>{qr.totalScans} scans</span>
+                                <span>{qr.uniqueScans} unique</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a href={getQRImageUrl(qr.short_code)} download={`${qr.short_code}.png`} className="p-2 hover:bg-muted rounded">
+                                <Download className="w-4 h-4" />
+                              </a>
+                              {qr.scans.length > 0 && (
+                                <button onClick={() => setExpandedQR(expandedQR === qr.id ? null : qr.id)} className="p-2 hover:bg-muted rounded">
+                                  {expandedQR === qr.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                </button>
+                              )}
                             </div>
                           </div>
-                          <a href={getQRImageUrl(qr.short_code)} download={`${qr.short_code}.png`} className="p-2 hover:bg-muted rounded">
-                            <Download className="w-4 h-4" />
-                          </a>
+                          {expandedQR === qr.id && qr.scans.length > 0 && (
+                            <div className="border-t bg-muted/30 p-4">
+                              <p className="text-sm font-medium mb-3">Scan History</p>
+                              <div className="space-y-2 max-h-60 overflow-y-auto">
+                                {qr.scans.map((scan, idx) => (
+                                  <div key={idx} className="flex items-start gap-3 text-xs p-2 bg-background rounded border">
+                                    <div className="mt-0.5">
+                                      {scan.device_type === 'mobile' ? <Smartphone className="w-3.5 h-3.5 text-muted-foreground" /> : scan.device_type === 'tablet' ? <Tablet className="w-3.5 h-3.5 text-muted-foreground" /> : <Monitor className="w-3.5 h-3.5 text-muted-foreground" />}
+                                    </div>
+                                    <div className="flex-1 min-w-0 space-y-0.5">
+                                      <div className="flex items-center gap-1.5">
+                                        <MapPin className="w-3 h-3 text-primary" />
+                                        <span className="font-medium">
+                                          {scan.city && scan.country ? `${scan.city}, ${scan.country}` : scan.country || scan.city || 'Unknown location'}
+                                        </span>
+                                      </div>
+                                      <p className="text-muted-foreground">
+                                        {scan.browser || 'Unknown'} · {scan.operating_system || 'Unknown'} · {scan.device_type || 'Unknown'}
+                                      </p>
+                                      <p className="text-muted-foreground">
+                                        {scan.scanned_at ? new Date(scan.scanned_at).toLocaleString() : 'Unknown time'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>)}
                     </div>
                   </CardContent>
