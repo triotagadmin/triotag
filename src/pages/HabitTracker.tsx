@@ -294,7 +294,8 @@ Based on your scan patterns, consider:
                       {generatedQRs.map(qr => <div key={qr.id} className="p-4 border rounded-lg flex items-center gap-4">
                           <img src={getQRImageUrl(qr.short_code)} alt="QR Code" className="w-16 h-16 border rounded" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{qr.name}</p>
+                            <p className="font-medium truncate">{qr.name || "Unnamed QR"}</p>
+                            <a href={qr.destination_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline truncate block">{qr.destination_url}</a>
                             <p className="text-xs text-muted-foreground">Code: {qr.short_code}</p>
                             <div className="flex gap-4 mt-1 text-sm">
                               <span>{qr.totalScans} scans</span>
