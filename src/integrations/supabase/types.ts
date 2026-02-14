@@ -836,6 +836,60 @@ export type Database = {
           },
         ]
       }
+      listing_submissions: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          listing_status: string
+          location_name: string
+          notes: string | null
+          payment_status: string
+          paymongo_checkout_session_id: string | null
+          photo_url: string | null
+          size: string
+          space_type: string
+          submitter_email: string | null
+          submitter_name: string | null
+          submitter_phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          listing_status?: string
+          location_name: string
+          notes?: string | null
+          payment_status?: string
+          paymongo_checkout_session_id?: string | null
+          photo_url?: string | null
+          size?: string
+          space_type: string
+          submitter_email?: string | null
+          submitter_name?: string | null
+          submitter_phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          listing_status?: string
+          location_name?: string
+          notes?: string | null
+          payment_status?: string
+          paymongo_checkout_session_id?: string | null
+          photo_url?: string | null
+          size?: string
+          space_type?: string
+          submitter_email?: string | null
+          submitter_name?: string | null
+          submitter_phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string

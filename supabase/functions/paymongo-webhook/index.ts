@@ -48,50 +48,55 @@ serve(async (req) => {
         });
       }
 
-      // Update the ticket sale record
-      const { data: saleData, error: updateError } = await supabase
-        .from("ticket_sales")
-        .update({
-          payment_status: "paid",
-          paymongo_payment_id: paymentId,
-          qr_code: `QR-${checkoutSessionId.substring(0, 8).toUpperCase()}`,
-        })
-        .eq("paymongo_checkout_session_id", checkoutSessionId)
-        .select()
-        .single();
+      // Check if this is a listing submission payment
+      if (metadata?.type === "listing_submission") {
+        const listingId = metadata.listing_id;
+        console.log("Processing listing payment for:", listingId);
 
-      if (updateError) {
-        console.error("Failed to update ticket sale:", updateError);
+        const { error: listingUpdateError } = await supabase
+          .from("listing_submissions")
+          .update({ payment_status: "paid" })
+          .eq("id", listingId);
+
+        if (listingUpdateError) {
+          console.error("Failed to update listing payment:", listingUpdateError);
+        } else {
+          console.log("Listing payment marked as paid:", listingId);
+        }
       } else {
-        console.log("Updated ticket sale:", saleData);
+        // Update the ticket sale record
+        const { data: saleData, error: updateError } = await supabase
+          .from("ticket_sales")
+          .update({
+            payment_status: "paid",
+            paymongo_payment_id: paymentId,
+            qr_code: `QR-${checkoutSessionId.substring(0, 8).toUpperCase()}`,
+          })
+          .eq("paymongo_checkout_session_id", checkoutSessionId)
+          .select()
+          .single();
 
-        // Update the ticket quantity_sold
-        if (saleData) {
-          const { error: ticketUpdateError } = await supabase
-            .from("tickets")
-            .update({
-              quantity_sold: supabase.rpc("increment_sold", { 
-                ticket_id: saleData.ticket_id, 
-                qty: saleData.quantity 
-              }),
-            })
-            .eq("id", saleData.ticket_id);
+        if (updateError) {
+          console.error("Failed to update ticket sale:", updateError);
+        } else {
+          console.log("Updated ticket sale:", saleData);
 
-          // Alternative approach if RPC doesn't exist
-          const { data: ticketData } = await supabase
-            .from("tickets")
-            .select("quantity_sold")
-            .eq("id", saleData.ticket_id)
-            .single();
-
-          if (ticketData) {
-            await supabase
+          if (saleData) {
+            const { data: ticketData } = await supabase
               .from("tickets")
-              .update({ quantity_sold: ticketData.quantity_sold + saleData.quantity })
-              .eq("id", saleData.ticket_id);
-          }
+              .select("quantity_sold")
+              .eq("id", saleData.ticket_id)
+              .single();
 
-          console.log("Updated ticket quantity sold");
+            if (ticketData) {
+              await supabase
+                .from("tickets")
+                .update({ quantity_sold: ticketData.quantity_sold + saleData.quantity })
+                .eq("id", saleData.ticket_id);
+            }
+
+            console.log("Updated ticket quantity sold");
+          }
         }
       }
     }
