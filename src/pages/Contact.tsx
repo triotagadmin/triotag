@@ -92,7 +92,7 @@ const Contact = () => {
                   <div>
                     <h3 className="font-semibold text-foreground">Phone</h3>
                     <p className="text-sm text-muted-foreground">
-                      +1 (555) 123-4567
+                      +639456640894
                     </p>
                   </div>
                 </CardContent>
