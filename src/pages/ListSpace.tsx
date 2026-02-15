@@ -21,6 +21,7 @@ const ListSpace = () => {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const lastSubmitRef = useRef<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [locationName, setLocationName] = useState("");
@@ -104,6 +105,13 @@ const ListSpace = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
+    // Rate limit: 30 seconds between submissions
+    const now = Date.now();
+    if (now - lastSubmitRef.current < 30000) {
+      toast({ title: "Please wait", description: "Please wait before submitting again.", variant: "destructive" });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke("submit-listing-free", {
@@ -120,8 +128,11 @@ const ListSpace = () => {
         },
       });
 
-      if (error) throw error;
+      if (error || !data?.success) {
+        throw new Error(error?.message || data?.error || "Failed to submit listing");
+      }
 
+      lastSubmitRef.current = now;
       setSubmitted(true);
     } catch (error: any) {
       console.error("Submission error:", error);
