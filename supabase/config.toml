@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.submit-listing-free]
 verify_jwt = false
+
+[functions.send-contact-email]
+verify_jwt = false
