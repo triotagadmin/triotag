@@ -342,7 +342,7 @@ const AdvertiserDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" onClick={() => toast({ title: "Coming Soon", description: "Settings management is under development." })}>
+              <Button variant="outline" onClick={() => navigate("/advertiser-settings")}>
                 Manage Settings
               </Button>
             </CardContent>

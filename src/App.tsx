@@ -18,6 +18,7 @@ import AdminOrders from "./pages/AdminOrders";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import CompleteProfile from "./pages/CompleteProfile";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
+import AdvertiserSettings from "./pages/AdvertiserSettings";
 import Venue from "./pages/Venue";
 import VenueDashboard from "./pages/VenueDashboard";
 import VenueRegistration from "./pages/VenueRegistration";
@@ -92,6 +93,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/advertiser-dashboard" element={<AdvertiserDashboard />} />
+          <Route path="/advertiser-settings" element={<AdvertiserSettings />} />
           <Route path="/order-prints" element={<OrderPrints />} />
           <Route path="/venue" element={<VenueDashboard />} />
           <Route path="/venue-publishers" element={<VenueDashboard />} />
