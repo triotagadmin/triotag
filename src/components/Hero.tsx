@@ -7,7 +7,7 @@ export const Hero = () => {
   useEffect(() => {
     setIsVisible(true);
   }, []);
-  return <section className="relative min-h-[70vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden">
+  return <section className="relative min-h-[60vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* GIF Background */}
       <div className="absolute inset-0">
         <img alt="Hero background" className="w-full h-full object-cover" src="/lovable-uploads/3d27b193-56c3-487b-88f4-4277c4f12752.jpg" />
