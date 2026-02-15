@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Upload, CheckCircle, Shield, CreditCard, ImageIcon } from "lucide-react";
+import { Loader2, CheckCircle, ImageIcon } from "lucide-react";
 
 const SPACE_TYPES = ["Wall", "Counter", "Glass", "Table", "Door", "Ceiling", "Floor", "Other"];
 const SIZES = [
@@ -16,16 +16,13 @@ const SIZES = [
   { value: "small", label: "Small Format", description: "A4 to A3 poster size" },
 ];
 
-type Step = "form" | "payment" | "confirmation";
-
 const ListSpace = () => {
   const { toast } = useToast();
-  const [step, setStep] = useState<Step>("form");
+  const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Form state
   const [locationName, setLocationName] = useState("");
   const [address, setAddress] = useState("");
   const [spaceType, setSpaceType] = useState("");
@@ -36,16 +33,6 @@ const ListSpace = () => {
   const [submitterName, setSubmitterName] = useState("");
   const [submitterEmail, setSubmitterEmail] = useState("");
   const [submitterPhone, setSubmitterPhone] = useState("");
-
-  // Check for successful payment return
-  const urlParams = new URLSearchParams(window.location.search);
-  const listingIdFromUrl = urlParams.get("listing_id");
-
-  useEffect(() => {
-    if (listingIdFromUrl && step !== "confirmation") {
-      setStep("confirmation");
-    }
-  }, [listingIdFromUrl]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -114,16 +101,12 @@ const ListSpace = () => {
     return true;
   };
 
-  const handleProceedToPayment = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
-    setStep("payment");
-  };
 
-  const handlePayAndSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const currentUrl = window.location.origin;
-      const { data, error } = await supabase.functions.invoke("listing-checkout", {
+      const { data, error } = await supabase.functions.invoke("submit-listing-free", {
         body: {
           locationName: locationName.trim(),
           address: address.trim(),
@@ -134,23 +117,17 @@ const ListSpace = () => {
           submitterName: submitterName.trim(),
           submitterEmail: submitterEmail.trim(),
           submitterPhone: submitterPhone.trim() || null,
-          successUrl: `${currentUrl}/list-space`,
-          cancelUrl: `${currentUrl}/list-space`,
         },
       });
 
       if (error) throw error;
 
-      if (data?.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      } else {
-        throw new Error("No checkout URL returned");
-      }
+      setSubmitted(true);
     } catch (error: any) {
-      console.error("Payment error:", error);
+      console.error("Submission error:", error);
       toast({
-        title: "Payment Error",
-        description: error.message || "Failed to initiate payment. Please try again.",
+        title: "Submission Error",
+        description: error.message || "Failed to submit listing. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -158,8 +135,7 @@ const ListSpace = () => {
     }
   };
 
-  // Confirmation screen
-  if (step === "confirmation" || listingIdFromUrl) {
+  if (submitted) {
     return (
       <div className="min-h-screen bg-muted/30">
         <Navigation />
@@ -170,17 +146,10 @@ const ListSpace = () => {
                 <CheckCircle className="h-16 w-16 text-primary mx-auto" />
                 <h2 className="text-2xl font-bold">Listing Submitted!</h2>
                 <p className="text-muted-foreground">
-                  Your ad space listing has been submitted and is now <strong>Pending Review</strong>.
-                  We'll review your submission and notify you once it's approved.
+                  Your ad space listing has been submitted successfully. We'll review your submission and get back to you soon.
                 </p>
-                <div className="bg-muted/50 rounded-md p-4 mt-4">
-                  <p className="text-sm text-muted-foreground">
-                    Status: <span className="font-semibold text-primary">Pending Review</span>
-                  </p>
-                </div>
                 <Button onClick={() => {
-                  window.history.replaceState({}, "", "/list-space");
-                  setStep("form");
+                  setSubmitted(false);
                   setLocationName("");
                   setAddress("");
                   setSpaceType("");
@@ -214,275 +183,126 @@ const ListSpace = () => {
             </p>
           </div>
 
-          {/* Pricing Banner */}
-          <Card className="mb-6 border-primary/40 bg-primary/5">
-            <CardContent className="flex flex-col sm:flex-row items-center justify-between py-4 gap-3">
-              <div className="flex items-center gap-3">
-                <CreditCard className="h-6 w-6 text-primary shrink-0" />
-                <div>
-                  <p className="font-semibold text-lg">$10 per listing</p>
-                  <p className="text-sm text-muted-foreground">One-time fee · Secure payment · Admin review included</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Listing Details</CardTitle>
+              <CardDescription>Describe the ad space you want to list</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Location Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="locationName">Location Name *</Label>
+                  <Input id="locationName" placeholder="e.g., Joe's Coffee Shop, Main Street Mall" value={locationName} onChange={(e) => setLocationName(e.target.value)} />
                 </div>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Shield className="h-4 w-4" />
-                <span>Secure checkout</span>
+
+                {/* Address */}
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address / General Area *</Label>
+                  <Input id="address" placeholder="e.g., 123 Main St, Manila or Downtown Area" value={address} onChange={(e) => setAddress(e.target.value)} />
+                </div>
+
+                {/* Space Type */}
+                <div className="space-y-3">
+                  <Label>Space Type *</Label>
+                  <RadioGroup value={spaceType} onValueChange={setSpaceType}>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {SPACE_TYPES.map((type) => (
+                        <div key={type}>
+                          <RadioGroupItem value={type} id={`type-${type}`} className="peer sr-only" />
+                          <Label htmlFor={`type-${type}`} className="flex items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 text-sm hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                            {type}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {/* Photo Upload */}
+                <div className="space-y-2">
+                  <Label>Photo (Optional)</Label>
+                  <div className="border-2 border-dashed border-muted rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
+                    {photoPreview ? (
+                      <div className="space-y-2">
+                        <img src={photoPreview} alt="Preview" className="max-h-40 mx-auto rounded-md object-cover" />
+                        <p className="text-sm text-muted-foreground">Click to change photo</p>
+                      </div>
+                    ) : isUploading ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Uploading...</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Click to upload a photo of the space</p>
+                        <p className="text-xs text-muted-foreground">Max 5MB · JPG, PNG, WebP</p>
+                      </div>
+                    )}
+                  </div>
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                </div>
+
+                {/* Size */}
+                <div className="space-y-3">
+                  <Label>Size *</Label>
+                  <RadioGroup value={size} onValueChange={setSize}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {SIZES.map((s) => (
+                        <div key={s.value}>
+                          <RadioGroupItem value={s.value} id={`size-${s.value}`} className="peer sr-only" />
+                          <Label htmlFor={`size-${s.value}`} className="flex flex-col rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                            <span className="font-semibold">{s.label}</span>
+                            <span className="text-sm text-muted-foreground">{s.description}</span>
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {/* Notes */}
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Additional Notes (Optional)</Label>
+                  <Textarea id="notes" placeholder="Describe the visibility, foot traffic, or any special details..." rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} />
+                </div>
+
+                {/* Contact Info */}
+                <div className="border-t pt-6 space-y-4">
+                  <h3 className="font-semibold text-lg">Your Contact Information</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="submitterName">Your Name *</Label>
+                      <Input id="submitterName" placeholder="Full name" value={submitterName} onChange={(e) => setSubmitterName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="submitterEmail">Email *</Label>
+                      <Input id="submitterEmail" type="email" placeholder="your@email.com" value={submitterEmail} onChange={(e) => setSubmitterEmail(e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="submitterPhone">Phone (Optional)</Label>
+                    <Input id="submitterPhone" type="tel" placeholder="(555) 123-4567" value={submitterPhone} onChange={(e) => setSubmitterPhone(e.target.value)} />
+                  </div>
+                </div>
+
+                <Button onClick={handleSubmit} size="lg" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Listing"
+                  )}
+                </Button>
               </div>
             </CardContent>
           </Card>
 
-          {/* Step Indicator */}
-          <div className="flex items-center gap-2 mb-6">
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${step === "form" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-              <span>1</span> Listing Details
-            </div>
-            <div className="h-px w-8 bg-border" />
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${step === "payment" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-              <span>2</span> Payment
-            </div>
-          </div>
-
-          {step === "form" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Listing Details</CardTitle>
-                <CardDescription>
-                  Describe the ad space you want to list
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Location Name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="locationName">Location Name *</Label>
-                    <Input
-                      id="locationName"
-                      placeholder="e.g., Joe's Coffee Shop, Main Street Mall"
-                      value={locationName}
-                      onChange={(e) => setLocationName(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Address */}
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Address / General Area *</Label>
-                    <Input
-                      id="address"
-                      placeholder="e.g., 123 Main St, Manila or Downtown Area"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Space Type */}
-                  <div className="space-y-3">
-                    <Label>Space Type *</Label>
-                    <RadioGroup value={spaceType} onValueChange={setSpaceType}>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {SPACE_TYPES.map((type) => (
-                          <div key={type}>
-                            <RadioGroupItem value={type} id={`type-${type}`} className="peer sr-only" />
-                            <Label
-                              htmlFor={`type-${type}`}
-                              className="flex items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 text-sm hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                            >
-                              {type}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  {/* Photo Upload */}
-                  <div className="space-y-2">
-                    <Label>Photo (Optional)</Label>
-                    <div
-                      className="border-2 border-dashed border-muted rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      {photoPreview ? (
-                        <div className="space-y-2">
-                          <img src={photoPreview} alt="Preview" className="max-h-40 mx-auto rounded-md object-cover" />
-                          <p className="text-sm text-muted-foreground">Click to change photo</p>
-                        </div>
-                      ) : isUploading ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                          <p className="text-sm text-muted-foreground">Uploading...</p>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center gap-2">
-                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                          <p className="text-sm text-muted-foreground">Click to upload a photo of the space</p>
-                          <p className="text-xs text-muted-foreground">Max 5MB · JPG, PNG, WebP</p>
-                        </div>
-                      )}
-                    </div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handlePhotoUpload}
-                    />
-                  </div>
-
-                  {/* Size */}
-                  <div className="space-y-3">
-                    <Label>Size *</Label>
-                    <RadioGroup value={size} onValueChange={setSize}>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {SIZES.map((s) => (
-                          <div key={s.value}>
-                            <RadioGroupItem value={s.value} id={`size-${s.value}`} className="peer sr-only" />
-                            <Label
-                              htmlFor={`size-${s.value}`}
-                              className="flex flex-col rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                            >
-                              <span className="font-semibold">{s.label}</span>
-                              <span className="text-sm text-muted-foreground">{s.description}</span>
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  {/* Notes */}
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">Additional Notes (Optional)</Label>
-                    <Textarea
-                      id="notes"
-                      placeholder="Describe the visibility, foot traffic, or any special details..."
-                      rows={4}
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Contact Info */}
-                  <div className="border-t pt-6 space-y-4">
-                    <h3 className="font-semibold text-lg">Your Contact Information</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="submitterName">Your Name *</Label>
-                        <Input
-                          id="submitterName"
-                          placeholder="Full name"
-                          value={submitterName}
-                          onChange={(e) => setSubmitterName(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="submitterEmail">Email *</Label>
-                        <Input
-                          id="submitterEmail"
-                          type="email"
-                          placeholder="your@email.com"
-                          value={submitterEmail}
-                          onChange={(e) => setSubmitterEmail(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="submitterPhone">Phone (Optional)</Label>
-                      <Input
-                        id="submitterPhone"
-                        type="tel"
-                        placeholder="(555) 123-4567"
-                        value={submitterPhone}
-                        onChange={(e) => setSubmitterPhone(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <Button onClick={handleProceedToPayment} size="lg" className="w-full">
-                    Continue to Payment — $10
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {step === "payment" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Confirm & Pay</CardTitle>
-                <CardDescription>
-                  Review your listing details and complete payment
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Summary */}
-                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                  <h4 className="font-semibold">Listing Summary</h4>
-                  <div className="grid grid-cols-2 gap-y-1 text-sm">
-                    <span className="text-muted-foreground">Location:</span>
-                    <span>{locationName}</span>
-                    <span className="text-muted-foreground">Address:</span>
-                    <span>{address}</span>
-                    <span className="text-muted-foreground">Space Type:</span>
-                    <span>{spaceType}</span>
-                    <span className="text-muted-foreground">Size:</span>
-                    <span className="capitalize">{size === "tiny" ? "Tiny" : "Small Format"}</span>
-                    <span className="text-muted-foreground">Contact:</span>
-                    <span>{submitterName}</span>
-                  </div>
-                  {photoPreview && (
-                    <img src={photoPreview} alt="Space" className="mt-2 max-h-32 rounded-md object-cover" />
-                  )}
-                </div>
-
-                {/* Price */}
-                <div className="border rounded-lg p-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">Ad Space Listing Fee</p>
-                    <p className="text-sm text-muted-foreground">One-time payment</p>
-                  </div>
-                  <p className="text-2xl font-bold text-primary">$10</p>
-                </div>
-
-                {/* Trust Indicators */}
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Shield className="h-4 w-4" />
-                    <span>Secure payment</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <CreditCard className="h-4 w-4" />
-                    <span>One-time fee</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Admin review included</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button variant="outline" onClick={() => setStep("form")} className="sm:w-auto w-full">
-                    Back to Edit
-                  </Button>
-                  <Button onClick={handlePayAndSubmit} size="lg" className="flex-1" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      "Pay $10 & Submit Listing"
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           <div className="mt-8 text-center text-sm text-muted-foreground">
-            <p>
-              By submitting this form, you agree to our terms of service and privacy policy.
-              Each payment covers exactly one listing submission.
-            </p>
+            <p>By submitting this form, you agree to our terms of service and privacy policy.</p>
           </div>
         </div>
       </div>
