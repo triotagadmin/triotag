@@ -38,7 +38,7 @@ serve(async (req) => {
     const sizeLabel = submission.size === "tiny" ? "Tiny (Business card to A5)" : "Small Format (A4 to A3)";
 
     const emailResponse = await resend.emails.send({
-      from: "Tiny Sticky Ads <noreply@tinystickyads.com>",
+      from: "Tiny Sticky Ads <onboarding@resend.dev>",
       to: ["tinystickyads@gmail.com"],
       subject: `New Listing Submission: ${submission.locationName}`,
       html: `
