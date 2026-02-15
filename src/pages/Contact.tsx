@@ -64,10 +64,10 @@ const Contact = () => {
                   <div>
                     <h3 className="font-semibold text-foreground">Email</h3>
                     <a
-                      href="mailto:contact@tinysticky.ads"
+                      href="mailto:tinystickyads@gmail.com"
                       className="text-sm text-muted-foreground hover:text-primary transition-colors">
 
-                      contact@tinysticky.ads
+                      tinystickyads@gmail.com
                     </a>
                   </div>
                 </CardContent>
