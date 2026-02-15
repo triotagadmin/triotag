@@ -55,7 +55,7 @@ export const AdvertiserTypes = () => {
           <p className="text-sm md:text-xl px-2 text-white">Tiny Sticky Ads specializes in managing and optimizing micro ad space placements across the globe. Our ad exchange system enables brands to leverage hyper-local marketing globally.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-8 md:mb-12">
           {advertiserTypes.map((type, index) => {
           const Icon = type.icon;
           return <Card key={index} className={`border border-border bg-card hover:border-primary/50 transition-all duration-500 animate-scale-hover ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`} style={{

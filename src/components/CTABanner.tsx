@@ -44,7 +44,7 @@ export const CTABanner = () => {
 
         <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8 transition-all duration-700 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <Link to="/list-space" className="block">
-            <Button size="lg" className="w-full sm:w-auto text-base md:text-lg px-8 md:px-10 py-5 md:py-6 neon-glow hover:neon-glow-strong">
+            <Button size="lg" className="w-full sm:w-auto text-sm md:text-lg px-6 md:px-10 py-4 md:py-6 min-h-[44px] neon-glow hover:neon-glow-strong">
               Register Your Space
             </Button>
           </Link>
