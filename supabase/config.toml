@@ -53,3 +53,6 @@ verify_jwt = false
 
 [functions.venue-registration-checkout]
 verify_jwt = false
+
+[functions.submit-listing-free]
+verify_jwt = false
