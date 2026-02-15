@@ -15,7 +15,7 @@ export const Hero = () => {
       {/* Mobile: full image visible */}
       <div className="relative w-full md:hidden">
         <img alt="Hero background" className="w-full h-auto object-contain" src="/lovable-uploads/3d27b193-56c3-487b-88f4-4277c4f12752.jpg" />
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
           <div className={`w-full px-4 text-center space-y-3 transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
             <h1 className="text-3xl font-bold tracking-tight text-foreground leading-tight">
               <span className="text-primary neon-text-glow animate-text-glow">Accelerate your sales growth.</span>
@@ -73,7 +73,7 @@ export const Hero = () => {
       </div>
 
       {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 md:h-32 bg-gradient-to-t from-background to-transparent"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-16 md:h-32 bg-gradient-to-t from-background to-transparent pointer-events-none"></div>
 
       {/* Decorative grid lines */}
       <div className="absolute inset-0 pointer-events-none opacity-10">
