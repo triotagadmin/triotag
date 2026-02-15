@@ -62,7 +62,7 @@ export const HowItWorks = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -75,18 +75,18 @@ export const HowItWorks = () => {
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <CardContent className="pt-6 md:pt-8 text-center space-y-3 md:space-y-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 mx-auto border border-primary/30 flex items-center justify-center relative">
-                    <Icon className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+                <CardContent className="pt-4 md:pt-8 text-center space-y-2 md:space-y-4 px-2 md:px-6">
+                  <div className="w-10 h-10 md:w-16 md:h-16 mx-auto border border-primary/30 flex items-center justify-center relative">
+                    <Icon className="w-5 h-5 md:w-8 md:h-8 text-primary" />
                     <div className="absolute inset-0 bg-primary/5"></div>
                   </div>
-                  <div className="text-xs md:text-sm font-mono text-primary">
+                  <div className="text-[10px] md:text-sm font-mono text-primary">
                     0{index + 1}
                   </div>
-                  <h3 className="text-base md:text-xl font-bold text-foreground">
+                  <h3 className="text-xs md:text-xl font-bold text-foreground leading-tight">
                     {step.title}
                   </h3>
-                  <p className="text-muted-foreground text-xs md:text-sm">
+                  <p className="text-muted-foreground text-[10px] md:text-sm leading-snug">
                     {step.description}
                   </p>
                 </CardContent>
