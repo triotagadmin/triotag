@@ -28,13 +28,13 @@ export const Hero = () => {
               Advertise your business across our micro advertising network.
             </p>
             <div className={`grid grid-cols-2 gap-2 pt-2 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-              <Link to="/auth">
-                <Button size="lg" className="w-full text-xs px-3 py-3 min-h-[44px] bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90">
+              <Link to="/auth" className="block">
+                <Button size="sm" className="w-full text-[10px] px-2 py-2 h-10 min-h-[44px] bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90">
                   Advertise Now
                 </Button>
               </Link>
-              <Link to="/list-space">
-                <Button size="lg" variant="outline" className="w-full text-xs px-3 py-3 min-h-[44px] border-primary text-primary bg-transparent hover:bg-primary/10 hover:neon-glow transition-all duration-300">
+              <Link to="/list-space" className="block">
+                <Button size="sm" variant="outline" className="w-full text-[10px] px-2 py-2 h-10 min-h-[44px] border-primary text-primary bg-transparent hover:bg-primary/10 hover:neon-glow transition-all duration-300">
                   Become a Publisher
                 </Button>
               </Link>
