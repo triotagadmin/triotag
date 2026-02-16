@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, MapPin, DollarSign, CreditCard, CheckCircle, Package, Truck, Loader2, ArrowRight, Send, Clock, XCircle } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, CreditCard, CheckCircle, Package, Truck, Loader2, ArrowRight, Send, Clock, XCircle, Upload, Printer } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { AdMockupPreview } from "@/components/AdMockupPreview";
@@ -76,6 +77,12 @@ const ActivateListing = () => {
 
   // Publisher address (shipping destination)
   const [publisherAddress, setPublisherAddress] = useState<PublisherAddress | null>(null);
+
+  // Print handler selection
+  const [printHandler, setPrintHandler] = useState<"platform" | "self" | "">("");
+  const [selfPrintFileUrl, setSelfPrintFileUrl] = useState("");
+  const [selfPrintUploading, setSelfPrintUploading] = useState(false);
+  const [selfPrintAcknowledged, setSelfPrintAcknowledged] = useState(false);
 
   // Order state
   const [orderLoading, setOrderLoading] = useState(false);
@@ -522,9 +529,10 @@ const ActivateListing = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const totalPrice = calculateOrderTotal(product, quantity);
+      const totalPrice = printHandler === "platform" ? calculateOrderTotal(product, quantity) : 0;
+      const isSelfPrint = printHandler === "self";
 
-      // Create print order in database - shipping to publisher venue
+      // Create print order in database
       const { data: printOrder, error: orderError } = await supabase
         .from("print_orders")
         .insert({
@@ -533,21 +541,25 @@ const ActivateListing = () => {
           order_status: "pending_admin",
           product_sku: product.sku,
           product_name: product.name,
-          product_specs: product.specs,
+          product_specs: {
+            ...product.specs,
+            print_handler: printHandler,
+            self_print_file_url: isSelfPrint ? selfPrintFileUrl : null,
+          },
           quantity,
-          design_url: artworkUrl,
-          shipping_address: {
-            recipientName: publisherAddress.businessName,
-            line1: publisherAddress.location || listing?.location || "",
+          design_url: isSelfPrint ? selfPrintFileUrl : artworkUrl,
+          shipping_address: isSelfPrint ? { selfPrint: true } : {
+            recipientName: publisherAddress?.businessName || "",
+            line1: publisherAddress?.location || listing?.location || "",
             line2: null,
             city: null,
             state: null,
             postalCode: null,
             country: shippingCountry,
-            email: publisherAddress.contactEmail,
-            phone: publisherAddress.contactPhone,
+            email: publisherAddress?.contactEmail || "",
+            phone: publisherAddress?.contactPhone || "",
           },
-          shipping_country: shippingCountry,
+          shipping_country: isSelfPrint ? "N/A" : shippingCountry,
           total_price: totalPrice,
         })
         .select()
@@ -555,7 +567,7 @@ const ActivateListing = () => {
 
       if (orderError) throw orderError;
 
-      // Update activation status
+      // Update activation status to pending_print_approval
       if (activationId) {
         await supabase
           .from("activations")
@@ -567,7 +579,7 @@ const ActivateListing = () => {
           .eq("id", activationId);
       }
 
-      // Send message to admin inbox as order request
+      // Send message to admin inbox
       const { data: adminRoles } = await supabase
         .from("user_roles")
         .select("user_id")
@@ -576,20 +588,24 @@ const ActivateListing = () => {
 
       if (adminRoles && adminRoles.length > 0) {
         const adminUserId = adminRoles[0].user_id;
+        const handlerLabel = isSelfPrint ? "Advertiser Self-Print" : "Tiny Sticky Ads Printing";
         await supabase
           .from("messages")
           .insert({
             sender_id: session.user.id,
             recipient_id: adminUserId,
-            subject: `New Print Order Request - ${product.name}`,
+            subject: `Print Order Request - ${product.name} (${handlerLabel})`,
             content: `New print order request submitted:\n\n` +
               `**Listing:** ${listing?.title || "N/A"}\n` +
               `**Product:** ${product.name}\n` +
+              `**Print Handler:** ${handlerLabel}\n` +
               `**Quantity:** ${quantity} units\n` +
-              `**Total Price:** $${totalPrice.toFixed(2)}\n` +
-              `**Shipping To:** ${publisherAddress.businessName}\n` +
-              `**Address:** ${publisherAddress.location || listing?.location || "Not specified"}\n\n` +
-              `**Design URL:** ${artworkUrl}\n\n` +
+              (isSelfPrint
+                ? `**Self-Print File:** ${selfPrintFileUrl}\n`
+                : `**Total Price:** $${totalPrice.toFixed(2)}\n` +
+                  `**Shipping To:** ${publisherAddress?.businessName}\n` +
+                  `**Address:** ${publisherAddress?.location || listing?.location || "Not specified"}\n`) +
+              `\n**Design URL:** ${artworkUrl}\n\n` +
               `Please review and approve this order in the Admin Orders page.`,
             listing_id: listing?.id || null,
             listing_type: "ad_space",
@@ -602,7 +618,7 @@ const ActivateListing = () => {
 
       toast({
         title: "Order Submitted!",
-        description: "Order request sent to admin. You'll receive a message when it's approved.",
+        description: "Your print order is pending admin approval. You'll be notified when reviewed.",
       });
     } catch (error: any) {
       console.error("Order error:", error);
@@ -613,6 +629,42 @@ const ActivateListing = () => {
       });
     } finally {
       setOrderLoading(false);
+    }
+  };
+
+  const handleSelfPrintFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ["image/png", "application/pdf"];
+    if (!validTypes.includes(file.type)) {
+      toast({ title: "Invalid file", description: "Please upload a PNG or PDF file.", variant: "destructive" });
+      return;
+    }
+
+    setSelfPrintUploading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const ext = file.name.split(".").pop();
+      const filePath = `${session.user.id}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("ad-space-media")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("ad-space-media")
+        .getPublicUrl(filePath);
+
+      setSelfPrintFileUrl(urlData.publicUrl);
+      toast({ title: "File uploaded", description: "Your print-ready file has been uploaded." });
+    } catch (error: any) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } finally {
+      setSelfPrintUploading(false);
     }
   };
 
@@ -1140,169 +1192,252 @@ const ActivateListing = () => {
               </div>
             ) : (
               <div className="space-y-8">
-                {/* Auto-detected Print Product from Listing */}
-                <Card className="border-primary">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Package className="h-5 w-5 text-primary" />
-                      Print Product (Auto-Detected)
-                    </CardTitle>
-                    <CardDescription>
-                      Based on the ad unit type defined by the publisher for this listing
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {(() => {
-                      // Use the already-detected product from state or fallback
-                      const detectedProduct = selectedPrintProduct || PRINT_PRODUCTS[0];
-                      
-                      return (
-                        <div className="flex items-start gap-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-lg">{detectedProduct.name}</h4>
-                            <p className="text-sm text-muted-foreground mb-2">{detectedProduct.description}</p>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div><span className="text-muted-foreground">Size:</span> {detectedProduct.specs.size}</div>
-                              <div><span className="text-muted-foreground">Material:</span> {detectedProduct.specs.material}</div>
-                            </div>
-                            <div className="mt-3 pt-3 border-t">
-                              <span className="text-2xl font-bold text-primary">${detectedProduct.pricePerUnit}</span>
-                              <span className="text-muted-foreground"> / unit</span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </CardContent>
-                </Card>
+                {/* Print Handler Selection */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">Who will handle printing?</h3>
+                  <p className="text-sm text-muted-foreground mb-4">All print materials require approval before use.</p>
 
-                <div className="grid lg:grid-cols-2 gap-8">
-                  {/* Order Configuration */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <DollarSign className="h-5 w-5" />
-                        Order Details
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {artworkUrl && (
-                        <div className="p-3 bg-muted rounded-lg">
-                          <Label className="text-xs text-muted-foreground">Your Design</Label>
-                          <img 
-                            src={artworkUrl} 
-                            alt="Your design" 
-                            className="max-h-24 mt-2 rounded object-contain"
-                          />
-                        </div>
-                      )}
-
-                      <div>
-                        <Label>Quantity</Label>
-                        <Input
-                          type="number"
-                          min={selectedPrintProduct?.minQuantity || 1}
-                          value={quantity}
-                          onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                        />
-                        {selectedPrintProduct && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Minimum: {selectedPrintProduct.minQuantity} units
-                          </p>
-                        )}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {/* Option 1: Platform handles printing */}
+                    <button
+                      type="button"
+                      onClick={() => setPrintHandler("platform")}
+                      className={`text-left rounded-lg border-2 p-5 transition-all ${
+                        printHandler === "platform"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Printer className="h-5 w-5 text-primary" />
+                        <span className="font-semibold">Tiny Sticky Ads Handles Printing</span>
                       </div>
-
-                      <div>
-                        <Label>Shipping Country</Label>
-                        <Select value={shippingCountry} onValueChange={setShippingCountry}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {SHIPPING_COUNTRIES.map((country) => (
-                              <SelectItem key={country.code} value={country.code}>
-                                {country.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {selectedPrintProduct && (
-                        <div className="pt-4 border-t">
-                          <div className="flex justify-between text-sm mb-2">
-                            <span className="text-muted-foreground">Product</span>
-                            <span>{selectedPrintProduct.name}</span>
-                          </div>
-                          <div className="flex justify-between text-sm mb-2">
-                            <span className="text-muted-foreground">Quantity</span>
-                            <span>{quantity} units</span>
-                          </div>
-                          <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                            <span>Estimated Total</span>
-                            <span className="text-primary">{formatPrice(orderTotal, listing?.specifications?.currency || "USD")}</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Final price confirmed after admin review
-                          </p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Shipping Details - Publisher Venue Address */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Truck className="h-5 w-5" />
-                        Shipping Destination
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        Print materials will be shipped directly to the publisher venue
+                      <p className="text-sm text-muted-foreground mb-3">
+                        We print the materials for you based on approved specifications.
                       </p>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {publisherAddress ? (
-                        <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Venue Name</Label>
-                            <p className="font-medium">{publisherAddress.businessName}</p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Address</Label>
-                            <p className="font-medium">{publisherAddress.location || listing?.location || "Not specified"}</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="bg-muted/50 rounded-lg p-4 text-center">
-                          <p className="text-muted-foreground">Loading publisher address...</p>
+                      {selectedPrintProduct && (
+                        <div className="rounded-md bg-muted/60 px-3 py-2 text-sm">
+                          <span className="text-muted-foreground">Est. cost: </span>
+                          <span className="font-semibold text-primary">
+                            {formatPrice(calculateOrderTotal(selectedPrintProduct, quantity), listing?.specifications?.currency || "USD")}
+                          </span>
+                          <span className="text-muted-foreground"> ({quantity} units)</span>
                         </div>
                       )}
+                      <p className="text-xs text-muted-foreground mt-2 italic">
+                        Printing will only begin after admin approval.
+                      </p>
+                    </button>
 
-                      <Button
-                        onClick={handlePlacePrintOrder}
-                        disabled={orderLoading || !selectedProductId || !publisherAddress}
-                        className="w-full"
-                        size="lg"
-                      >
-                        {orderLoading ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Submitting Order...
-                          </>
-                        ) : (
-                          <>
-                            <Package className="h-4 w-4 mr-2" />
-                            Order Now
-                          </>
-                        )}
-                      </Button>
-                    </CardContent>
-                  </Card>
+                    {/* Option 2: Self-print */}
+                    <button
+                      type="button"
+                      onClick={() => setPrintHandler("self")}
+                      className={`text-left rounded-lg border-2 p-5 transition-all ${
+                        printHandler === "self"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Upload className="h-5 w-5 text-primary" />
+                        <span className="font-semibold">I Will Handle Printing</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        You will print the materials yourself following the exact approved specifications.
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2 italic">
+                        Your artwork must be approved before printing and placement.
+                      </p>
+                    </button>
+                  </div>
                 </div>
 
-                <Button 
-                  variant="outline" 
+                {/* Platform-print details */}
+                {printHandler === "platform" && (
+                  <div className="grid lg:grid-cols-2 gap-8">
+                    {/* Auto-detected Print Product */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Package className="h-5 w-5 text-primary" />
+                          Print Product
+                        </CardTitle>
+                        <CardDescription>Auto-detected from listing ad unit type</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {selectedPrintProduct && (
+                          <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                            <h4 className="font-semibold text-lg">{selectedPrintProduct.name}</h4>
+                            <p className="text-sm text-muted-foreground mb-2">{selectedPrintProduct.description}</p>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div><span className="text-muted-foreground">Size:</span> {selectedPrintProduct.specs.size}</div>
+                              <div><span className="text-muted-foreground">Material:</span> {selectedPrintProduct.specs.material}</div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div>
+                          <Label>Quantity</Label>
+                          <Input
+                            type="number"
+                            min={selectedPrintProduct?.minQuantity || 1}
+                            value={quantity}
+                            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                          />
+                          {selectedPrintProduct && (
+                            <p className="text-xs text-muted-foreground mt-1">Min: {selectedPrintProduct.minQuantity} units</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <Label>Shipping Country</Label>
+                          <Select value={shippingCountry} onValueChange={setShippingCountry}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {SHIPPING_COUNTRIES.map((c) => (
+                                <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {selectedPrintProduct && (
+                          <div className="pt-4 border-t space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Product</span>
+                              <span>{selectedPrintProduct.name}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Quantity</span>
+                              <span>{quantity} units</span>
+                            </div>
+                            <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                              <span>Estimated Total</span>
+                              <span className="text-primary">{formatPrice(orderTotal, listing?.specifications?.currency || "USD")}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">Final price confirmed after admin review</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Shipping destination */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Truck className="h-5 w-5" />
+                          Shipping Destination
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">Shipped directly to the publisher venue</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {publisherAddress ? (
+                          <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Venue Name</Label>
+                              <p className="font-medium">{publisherAddress.businessName}</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Address</Label>
+                              <p className="font-medium">{publisherAddress.location || listing?.location || "Not specified"}</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-muted/50 rounded-lg p-4 text-center">
+                            <p className="text-muted-foreground">Loading publisher address...</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Self-print details */}
+                {printHandler === "self" && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Upload className="h-5 w-5" />
+                        Upload Print-Ready File
+                      </CardTitle>
+                      <CardDescription>
+                        Upload your final print-ready artwork (PNG or PDF). This will be reviewed by our team before you proceed.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label>Print-Ready File (PNG or PDF) *</Label>
+                        <Input
+                          type="file"
+                          accept=".png,.pdf,image/png,application/pdf"
+                          onChange={handleSelfPrintFileUpload}
+                          disabled={selfPrintUploading}
+                          className="mt-1"
+                        />
+                        {selfPrintUploading && (
+                          <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                            <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
+                          </div>
+                        )}
+                        {selfPrintFileUrl && (
+                          <p className="text-sm text-primary mt-2 flex items-center gap-1">
+                            <CheckCircle className="h-4 w-4" /> File uploaded successfully
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex items-start gap-2">
+                        <Checkbox
+                          id="self-print-ack"
+                          checked={selfPrintAcknowledged}
+                          onCheckedChange={(checked) => setSelfPrintAcknowledged(checked === true)}
+                        />
+                        <label htmlFor="self-print-ack" className="text-sm leading-snug cursor-pointer">
+                          I understand that my graphic must be approved before printing and placement.
+                        </label>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Status badge + Submit */}
+                {printHandler && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-center">
+                      <Badge variant="secondary" className="text-sm px-3 py-1">
+                        <Clock className="h-3.5 w-3.5 mr-1.5" />
+                        Status: Pending Approval
+                      </Badge>
+                    </div>
+                    <Button
+                      onClick={handlePlacePrintOrder}
+                      disabled={
+                        orderLoading ||
+                        !selectedProductId ||
+                        (printHandler === "platform" && !publisherAddress) ||
+                        (printHandler === "self" && (!selfPrintFileUrl || !selfPrintAcknowledged))
+                      }
+                      className="w-full"
+                      size="lg"
+                    >
+                      {orderLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Submitting for Approval...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Submit Print Order for Approval
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                <Button
+                  variant="outline"
                   onClick={() => setCurrentStep("design")}
                   className="w-full max-w-md mx-auto"
                 >
