@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { ArrowLeft, ArrowRight, Upload, X, CheckCircle, AlertCircle, Building2, Megaphone, CreditCard, Shield, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, X, CheckCircle, AlertCircle, Building2, Megaphone, Loader2 } from "lucide-react";
 import { AdUnitSelector, AdUnitConfig } from "@/components/AdUnitSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -24,7 +24,6 @@ interface DocumentUpload {
   uploaded: boolean;
 }
 
-// OOH Advertising Details interface - using index signature for JSON compatibility
 interface OOHDetails {
   [key: string]: string | string[] | boolean;
   exactLocationNotes: string;
@@ -79,10 +78,10 @@ const VenueRegistration = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  
-  // Step management (1: Venue Details, 2: OOH Details, 3: Payment)
+  const submittedRef = useRef(false);
+
+  // Step management (1: Venue Details, 2: OOH Details)
   const [currentStep, setCurrentStep] = useState(1);
 
   // Form fields - Step 1
@@ -146,9 +145,6 @@ const VenueRegistration = () => {
     { code: "CNY", symbol: "¥", name: "Chinese Yuan" },
   ];
 
-  const getCurrencySymbol = () => currencies.find(c => c.code === currency)?.symbol || "$";
-
-  // Verification documents with existing file tracking
   interface DocumentUploadState {
     type: string;
     label: string;
@@ -191,8 +187,6 @@ const VenueRegistration = () => {
     uploaded: false
   }]);
 
-  const adFormatsList = ["Poster Display", "Digital Screen", "Table Tents", "Wall Murals", "Floor Graphics", "Window Clings", "Standee/Cutout", "Banner/Flag", "Mural Painting", "Wheat Paste"];
-
   // OOH dropdown options
   const placementTypeOptions = ["Wall-mounted", "Free-standing", "Rooftop", "Street-level", "Elevated", "Indoor", "Outdoor", "Transit shelter", "Kiosk", "Mobile/Vehicle"];
   const visibilityOptions = ["Excellent (unobstructed)", "Good (minor obstructions)", "Moderate (partial visibility)", "Limited"];
@@ -203,16 +197,8 @@ const VenueRegistration = () => {
   const illuminationOptions = ["Backlit", "Frontlit", "LED", "Non-illuminated", "Natural light only", "Neon", "Digital display"];
 
   useEffect(() => {
-    // Check for payment return
-    const urlParams = new URLSearchParams(window.location.search);
-    const venueRegistered = urlParams.get('venue_registered');
-    if (venueRegistered) {
-      setShowConfirmation(true);
-      window.history.replaceState({}, "", "/venue-registration");
-      return;
-    }
-
     const checkAuth = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
       const editParam = urlParams.get('edit');
       if (editParam) {
         setEditId(editParam);
@@ -263,24 +249,17 @@ const VenueRegistration = () => {
         .maybeSingle();
       if (error) throw error;
       if (!venue) {
-        toast({
-          title: "Error",
-          description: "Venue not found or you don't have permission to edit it.",
-          variant: "destructive"
-        });
+        toast({ title: "Error", description: "Venue not found or you don't have permission to edit it.", variant: "destructive" });
         navigate("/venue-inventory");
         return;
       }
 
-      // Populate form fields
       setTitle(venue.title || "");
       setDescription(venue.description || "");
       setUploadedImages(Array.isArray(venue.media_urls) ? venue.media_urls as string[] : []);
       const specs = venue.specifications as any || {};
       setVenueType(specs.venue_type || "");
-      if (specs.custom_venue_type) {
-        setCustomVenueType(specs.custom_venue_type);
-      }
+      if (specs.custom_venue_type) setCustomVenueType(specs.custom_venue_type);
       setOperatingHours(specs.operating_hours || "");
       setAllowedAdFormats(specs.allowed_ad_formats || []);
       setContactPerson(specs.contact_person || "");
@@ -290,7 +269,6 @@ const VenueRegistration = () => {
       setLongitude(specs.longitude || "");
       setCurrency(specs.currency || "USD");
 
-      // Parse address from location or full_address
       const fullAddress = specs.full_address || venue.location || "";
       const addressParts = fullAddress.split(", ");
       if (addressParts.length >= 2) {
@@ -301,20 +279,14 @@ const VenueRegistration = () => {
         setCountry(addressParts[addressParts.length - 1] || "");
       }
 
-      // Load ad units
       if (specs.ad_units && Array.isArray(specs.ad_units)) {
         setSelectedAdUnits(specs.ad_units.map((u: any) => ({
-          type: u.type,
-          quantity: u.quantity || 1,
-          pricePerWeek: u.pricePerWeek || 0,
-          pricePerMonth: u.pricePerMonth || 0,
-          specialRules: u.specialRules || "",
-          customFormat: u.customFormat,
-          thumbnailUrl: u.thumbnailUrl
+          type: u.type, quantity: u.quantity || 1, pricePerWeek: u.pricePerWeek || 0,
+          pricePerMonth: u.pricePerMonth || 0, specialRules: u.specialRules || "",
+          customFormat: u.customFormat, thumbnailUrl: u.thumbnailUrl
         })));
       }
 
-      // Load OOH details if they exist
       if (specs.ooh_details) {
         setOohDetails({
           exactLocationNotes: specs.ooh_details.exactLocationNotes || "",
@@ -346,7 +318,6 @@ const VenueRegistration = () => {
       setWeeklyPrice(pricing.weekly?.toString() || "");
       setMonthlyPrice(pricing.monthly?.toString() || "");
 
-      // Load existing verification documents
       const { data: existingDocs } = await supabase
         .from("verification_documents")
         .select("*")
@@ -356,36 +327,22 @@ const VenueRegistration = () => {
         setVerificationDocuments(prev => prev.map(doc => {
           const existingDoc = existingDocs.find(d => d.document_type === doc.type);
           if (existingDoc) {
-            return {
-              ...doc,
-              uploaded: true,
-              existingUrl: existingDoc.file_url,
-              existingFileName: existingDoc.file_name
-            };
+            return { ...doc, uploaded: true, existingUrl: existingDoc.file_url, existingFileName: existingDoc.file_name };
           }
           return doc;
         }));
       }
     } catch (error: any) {
       console.error("Error loading venue:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load venue data.",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "Failed to load venue data.", variant: "destructive" });
     }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
     if (uploadedImages.length + files.length > 30) {
-      toast({
-        title: "Error",
-        description: "Maximum 30 photos allowed",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "Maximum 30 photos allowed", variant: "destructive" });
       return;
     }
     setUploadingImage(true);
@@ -394,27 +351,16 @@ const VenueRegistration = () => {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
         const filePath = `${publisherId}/${fileName}`;
-        const { error: uploadError, data } = await supabase.storage
-          .from('ad-space-media')
-          .upload(filePath, file);
+        const { error: uploadError } = await supabase.storage.from('ad-space-media').upload(filePath, file);
         if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage
-          .from('ad-space-media')
-          .getPublicUrl(filePath);
+        const { data: { publicUrl } } = supabase.storage.from('ad-space-media').getPublicUrl(filePath);
         return publicUrl;
       });
       const urls = await Promise.all(uploadPromises);
       setUploadedImages([...uploadedImages, ...urls]);
-      toast({
-        title: "Success",
-        description: "Images uploaded successfully"
-      });
+      toast({ title: "Success", description: "Images uploaded successfully" });
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
       setUploadingImage(false);
     }
@@ -422,10 +368,6 @@ const VenueRegistration = () => {
 
   const removeImage = (url: string) => {
     setUploadedImages(uploadedImages.filter(img => img !== url));
-  };
-
-  const toggleAdFormat = (format: string) => {
-    setAllowedAdFormats(prev => prev.includes(format) ? prev.filter(f => f !== format) : [...prev, format]);
   };
 
   const handleDocumentSelect = (index: number, file: File | null) => {
@@ -439,72 +381,29 @@ const VenueRegistration = () => {
     const fileExt = doc.file.name.split('.').pop();
     const fileName = `${doc.type}_${Date.now()}.${fileExt}`;
     const filePath = `${pubId}/${fileName}`;
-    const { error: uploadError } = await supabase.storage
-      .from('verification-documents')
-      .upload(filePath, doc.file);
+    const { error: uploadError } = await supabase.storage.from('verification-documents').upload(filePath, doc.file);
     if (uploadError) throw uploadError;
-    const { error: dbError } = await supabase
-      .from('verification_documents')
-      .insert({
-        publisher_id: pubId,
-        document_type: doc.type,
-        file_name: doc.file.name,
-        file_url: filePath
-      });
+    const { error: dbError } = await supabase.from('verification_documents').insert({
+      publisher_id: pubId, document_type: doc.type, file_name: doc.file.name, file_url: filePath
+    });
     if (dbError) throw dbError;
     return filePath;
   };
 
   const validateStep1 = () => {
-    if (!title.trim()) {
-      toast({ title: "Error", description: "Venue name is required", variant: "destructive" });
-      return false;
-    }
-    if (!venueType) {
-      toast({ title: "Error", description: "Venue type is required", variant: "destructive" });
-      return false;
-    }
-    if (!street.trim()) {
-      toast({ title: "Error", description: "Street address is required", variant: "destructive" });
-      return false;
-    }
-    if (!city.trim()) {
-      toast({ title: "Error", description: "City is required", variant: "destructive" });
-      return false;
-    }
-    if (!country.trim()) {
-      toast({ title: "Error", description: "Country is required", variant: "destructive" });
-      return false;
-    }
-    if (!contactPerson.trim()) {
-      toast({ title: "Error", description: "Contact person is required", variant: "destructive" });
-      return false;
-    }
-    if (!contactEmail.trim()) {
-      toast({ title: "Error", description: "Contact email is required", variant: "destructive" });
-      return false;
-    }
-    if (!contactPhone.trim()) {
-      toast({ title: "Error", description: "Contact phone is required", variant: "destructive" });
-      return false;
-    }
-    if (!operatingHours.trim()) {
-      toast({ title: "Error", description: "Operating hours are required", variant: "destructive" });
-      return false;
-    }
-    if (uploadedImages.length === 0) {
-      toast({ title: "Error", description: "Please upload at least one photo of your venue", variant: "destructive" });
-      return false;
-    }
-    if (selectedAdUnits.length === 0) {
-      toast({ title: "Error", description: "Please select at least one ad unit type", variant: "destructive" });
-      return false;
-    }
+    if (!title.trim()) { toast({ title: "Error", description: "Venue name is required", variant: "destructive" }); return false; }
+    if (!venueType) { toast({ title: "Error", description: "Venue type is required", variant: "destructive" }); return false; }
+    if (!street.trim()) { toast({ title: "Error", description: "Street address is required", variant: "destructive" }); return false; }
+    if (!city.trim()) { toast({ title: "Error", description: "City is required", variant: "destructive" }); return false; }
+    if (!country.trim()) { toast({ title: "Error", description: "Country is required", variant: "destructive" }); return false; }
+    if (!contactPerson.trim()) { toast({ title: "Error", description: "Contact person is required", variant: "destructive" }); return false; }
+    if (!contactEmail.trim()) { toast({ title: "Error", description: "Contact email is required", variant: "destructive" }); return false; }
+    if (!contactPhone.trim()) { toast({ title: "Error", description: "Contact phone is required", variant: "destructive" }); return false; }
+    if (!operatingHours.trim()) { toast({ title: "Error", description: "Operating hours are required", variant: "destructive" }); return false; }
+    if (uploadedImages.length === 0) { toast({ title: "Error", description: "Please upload at least one photo of your venue", variant: "destructive" }); return false; }
+    if (selectedAdUnits.length === 0) { toast({ title: "Error", description: "Please select at least one ad unit type", variant: "destructive" }); return false; }
     const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
-    if (!isEditing && filledDocs.length === 0) {
-      toast({ title: "Error", description: "Please upload at least one verification document", variant: "destructive" });
-      return false;
-    }
+    if (!isEditing && filledDocs.length === 0) { toast({ title: "Error", description: "Please upload at least one verification document", variant: "destructive" }); return false; }
     return true;
   };
 
@@ -533,25 +432,14 @@ const VenueRegistration = () => {
     }
   };
 
-  const handleProceedToPayment = () => {
-    // For new registrations, go to payment step
-    setCurrentStep(3);
-    window.scrollTo(0, 0);
-  };
-
   const buildVenueData = () => {
     const validatedData = venueSchema.parse({
       title, street, city,
-      state: state || undefined,
-      postalCode: postalCode || undefined,
-      country,
-      latitude: latitude || undefined,
-      longitude: longitude || undefined,
-      contactPerson, contactEmail, contactPhone,
-      venueType, operatingHours,
+      state: state || undefined, postalCode: postalCode || undefined, country,
+      latitude: latitude || undefined, longitude: longitude || undefined,
+      contactPerson, contactEmail, contactPhone, venueType, operatingHours,
       description: description || undefined,
-      weeklyPrice: weeklyPrice || undefined,
-      monthlyPrice: monthlyPrice || undefined
+      weeklyPrice: weeklyPrice || undefined, monthlyPrice: monthlyPrice || undefined
     });
 
     const fullAddress = [validatedData.street, validatedData.city, validatedData.state, validatedData.postalCode, validatedData.country].filter(Boolean).join(", ");
@@ -569,16 +457,13 @@ const VenueRegistration = () => {
       return num;
     };
 
-    const numericLat = parseCoord(validatedData.latitude);
-    const numericLng = parseCoord(validatedData.longitude);
-
     return {
       publisher_id: publisherId,
       title: validatedData.title,
       location: fullAddress,
       description: validatedData.description,
-      latitude: numericLat,
-      longitude: numericLng,
+      latitude: parseCoord(validatedData.latitude),
+      longitude: parseCoord(validatedData.longitude),
       specifications: {
         venue_type: actualVenueType,
         custom_venue_type: venueType === "other" ? customVenueType : null,
@@ -592,13 +477,9 @@ const VenueRegistration = () => {
         allowed_ad_formats: allowedAdFormats,
         currency: currency,
         ad_units: selectedAdUnits.map(unit => ({
-          type: unit.type,
-          quantity: unit.quantity,
-          pricePerWeek: unit.pricePerWeek,
-          pricePerMonth: unit.pricePerMonth,
-          specialRules: unit.specialRules,
-          customFormat: unit.customFormat || null,
-          thumbnailUrl: unit.thumbnailUrl || null
+          type: unit.type, quantity: unit.quantity, pricePerWeek: unit.pricePerWeek,
+          pricePerMonth: unit.pricePerMonth, specialRules: unit.specialRules,
+          customFormat: unit.customFormat || null, thumbnailUrl: unit.thumbnailUrl || null
         })),
         ooh_details: oohDetails
       },
@@ -611,105 +492,64 @@ const VenueRegistration = () => {
     e.preventDefault();
     if (!publisherId) return;
 
-    // For new registrations, go to payment step instead of submitting directly
-    if (!isEditing) {
-      handleProceedToPayment();
-      return;
-    }
+    // Prevent duplicate submissions
+    if (submittedRef.current) return;
+    submittedRef.current = true;
 
-    // Editing flow - submit directly (already paid)
     setLoading(true);
     try {
       const venueData = buildVenueData();
       const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
 
-      const { error } = await supabase
-        .from("ad_spaces")
-        .update(venueData)
-        .eq("id", editId!)
-        .eq("publisher_id", publisherId);
-      if (error) throw error;
+      if (isEditing) {
+        const { error } = await supabase
+          .from("ad_spaces")
+          .update(venueData)
+          .eq("id", editId!)
+          .eq("publisher_id", publisherId);
+        if (error) throw error;
 
-      if (filledDocs.length > 0) {
-        const uploadPromises = filledDocs.map(doc => uploadVerificationDocument(doc, publisherId));
-        await Promise.all(uploadPromises);
+        if (filledDocs.length > 0) {
+          await Promise.all(filledDocs.map(doc => uploadVerificationDocument(doc, publisherId)));
+        }
+        toast({ title: "Success", description: "Venue updated successfully" });
+        navigate("/venue-inventory");
+      } else {
+        // Upload verification docs first
+        for (const doc of filledDocs) {
+          if (!doc.file) continue;
+          const fileExt = doc.file.name.split('.').pop();
+          const fileName = `${doc.type}_${Date.now()}.${fileExt}`;
+          const filePath = `${publisherId}/${fileName}`;
+          const { error: uploadError } = await supabase.storage.from('verification-documents').upload(filePath, doc.file);
+          if (uploadError) throw uploadError;
+          await supabase.from('verification_documents').insert({
+            publisher_id: publisherId, document_type: doc.type, file_name: doc.file.name, file_url: filePath
+          });
+        }
+
+        // Insert ad space with pending status
+        const { error: insertError } = await supabase
+          .from("ad_spaces")
+          .insert([{ ...venueData, approval_status: "pending" as const }]);
+        if (insertError) throw insertError;
+
+        setShowConfirmation(true);
+        window.scrollTo(0, 0);
       }
-      toast({
-        title: "Success",
-        description: "Venue updated successfully"
-      });
-      navigate("/venue-inventory");
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update venue",
-        variant: "destructive"
-      });
+      submittedRef.current = false;
+      console.error("Submission error:", error);
+      toast({ title: "Error", description: error.message || "Failed to submit venue", variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePayAndSubmit = async () => {
-    if (!publisherId) return;
-    setPaymentProcessing(true);
-    try {
-      const venueData = buildVenueData();
-
-      // Upload verification docs to storage first, collect metadata
-      const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
-      const uploadedDocMeta: any[] = [];
-
-      for (const doc of filledDocs) {
-        if (!doc.file) continue;
-        const fileExt = doc.file.name.split('.').pop();
-        const fileName = `${doc.type}_${Date.now()}.${fileExt}`;
-        const filePath = `${publisherId}/${fileName}`;
-        const { error: uploadError } = await supabase.storage
-          .from('verification-documents')
-          .upload(filePath, doc.file);
-        if (uploadError) throw uploadError;
-        uploadedDocMeta.push({
-          document_type: doc.type,
-          file_name: doc.file.name,
-          file_url: filePath,
-        });
-      }
-
-      const currentUrl = window.location.origin;
-      const { data, error } = await supabase.functions.invoke("venue-registration-checkout", {
-        body: {
-          venueData,
-          verificationDocs: uploadedDocMeta,
-          successUrl: `${currentUrl}/venue-registration`,
-          cancelUrl: `${currentUrl}/venue-registration`,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      } else {
-        throw new Error("No checkout URL returned");
-      }
-    } catch (error: any) {
-      console.error("Payment error:", error);
-      toast({
-        title: "Payment Error",
-        description: error.message || "Failed to initiate payment. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setPaymentProcessing(false);
-    }
-  };
-
-  // Step Indicator Component
+  // Step Indicator
   const StepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
       <div className="flex items-center gap-4">
-        {/* Step 1 */}
         <div className="flex items-center gap-2">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
             currentStep >= 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
@@ -717,19 +557,13 @@ const VenueRegistration = () => {
             <Building2 className="w-5 h-5" />
           </div>
           <div className="hidden sm:block">
-            <p className={`text-sm font-medium ${currentStep >= 1 ? "text-foreground" : "text-muted-foreground"}`}>
-              Step 1
-            </p>
+            <p className={`text-sm font-medium ${currentStep >= 1 ? "text-foreground" : "text-muted-foreground"}`}>Step 1</p>
             <p className="text-xs text-muted-foreground">Venue Details</p>
           </div>
         </div>
 
-        {/* Connector */}
-        <div className={`w-16 h-1 rounded transition-colors ${
-          currentStep >= 2 ? "bg-primary" : "bg-muted"
-        }`} />
+        <div className={`w-16 h-1 rounded transition-colors ${currentStep >= 2 ? "bg-primary" : "bg-muted"}`} />
 
-        {/* Step 2 */}
         <div className="flex items-center gap-2">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
             currentStep >= 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
@@ -737,36 +571,10 @@ const VenueRegistration = () => {
             <Megaphone className="w-5 h-5" />
           </div>
           <div className="hidden sm:block">
-            <p className={`text-sm font-medium ${currentStep >= 2 ? "text-foreground" : "text-muted-foreground"}`}>
-              Step 2
-            </p>
+            <p className={`text-sm font-medium ${currentStep >= 2 ? "text-foreground" : "text-muted-foreground"}`}>Step 2</p>
             <p className="text-xs text-muted-foreground">OOH Details</p>
           </div>
         </div>
-
-        {!isEditing && (
-          <>
-            {/* Connector */}
-            <div className={`w-16 h-1 rounded transition-colors ${
-              currentStep >= 3 ? "bg-primary" : "bg-muted"
-            }`} />
-
-            {/* Step 3 */}
-            <div className="flex items-center gap-2">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
-                currentStep >= 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-              }`}>
-                <CreditCard className="w-5 h-5" />
-              </div>
-              <div className="hidden sm:block">
-                <p className={`text-sm font-medium ${currentStep >= 3 ? "text-foreground" : "text-muted-foreground"}`}>
-                  Step 3
-                </p>
-                <p className="text-xs text-muted-foreground">Payment</p>
-              </div>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );
@@ -806,32 +614,15 @@ const VenueRegistration = () => {
     <div className="min-h-screen bg-muted/30">
       <Navigation />
       <div className="container mx-auto px-6 py-12 max-w-4xl">
-        {/* Pricing Notice */}
-        {!isEditing && (
-          <Card className="mb-6 border-primary/40 bg-primary/5">
-            <CardContent className="flex flex-col sm:flex-row items-center justify-between py-4 gap-3">
-              <div className="flex items-center gap-3">
-                <CreditCard className="h-6 w-6 text-primary shrink-0" />
-                <div>
-                  <p className="font-semibold text-lg">$10 per venue registration</p>
-                  <p className="text-sm text-muted-foreground">One-time fee · Secure payment · Admin review included</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Shield className="h-4 w-4" />
-                <span>Secure checkout</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">
-              {isEditing ? "Edit Ad Space" : "Register Ad Space"}
+              {isEditing ? "Edit Ad Space" : "Register Your Ad Space"}
             </CardTitle>
             <p className="text-muted-foreground mt-2">
-              {isEditing ? "Update your venue details below" : "Complete all required fields to submit your venue for approval"}
+              {isEditing
+                ? "Update your venue details below"
+                : "Complete all required fields to submit your venue for review. Registration is free."}
             </p>
           </CardHeader>
           <CardContent>
@@ -849,9 +640,7 @@ const VenueRegistration = () => {
                 <div>
                   <Label htmlFor="venueType">Venue Type *</Label>
                   <Select value={venueType} onValueChange={setVenueType} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select venue type" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select venue type" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="restaurant">Restaurant</SelectItem>
                       <SelectItem value="cafe">Café</SelectItem>
@@ -867,12 +656,7 @@ const VenueRegistration = () => {
                   </Select>
                   {venueType === "other" && (
                     <div className="mt-2">
-                      <Input
-                        placeholder="Specify your venue type"
-                        value={customVenueType}
-                        onChange={(e) => setCustomVenueType(e.target.value)}
-                        required
-                      />
+                      <Input placeholder="Specify your venue type" value={customVenueType} onChange={(e) => setCustomVenueType(e.target.value)} required />
                     </div>
                   )}
                 </div>
@@ -880,12 +664,10 @@ const VenueRegistration = () => {
                 {/* Address Fields */}
                 <div className="space-y-4">
                   <h3 className="font-semibold">Full Address</h3>
-                  
                   <div>
                     <Label htmlFor="street">Street Address *</Label>
                     <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" required />
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="city">City *</Label>
@@ -896,7 +678,6 @@ const VenueRegistration = () => {
                       <Input id="state" value={state} onChange={e => setState(e.target.value)} placeholder="State or Province" />
                     </div>
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="postalCode">Postal Code</Label>
@@ -907,7 +688,6 @@ const VenueRegistration = () => {
                       <Input id="country" value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" required />
                     </div>
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="latitude">Latitude (Google Maps)</Label>
@@ -923,12 +703,10 @@ const VenueRegistration = () => {
                 {/* Contact Info */}
                 <div className="space-y-4">
                   <h3 className="font-semibold">Contact Information</h3>
-                  
                   <div>
                     <Label htmlFor="contactPerson">Contact Person *</Label>
                     <Input id="contactPerson" value={contactPerson} onChange={e => setContactPerson(e.target.value)} placeholder="Full name" required />
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="contactEmail">Contact Email *</Label>
@@ -956,9 +734,7 @@ const VenueRegistration = () => {
                 {/* Photo Upload */}
                 <div>
                   <Label>Upload Additional Photos (Optional, Max 30, JPEG/PNG)</Label>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {uploadedImages.length}/30 photos uploaded. The AI-generated thumbnail will be the main preview image.
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-2">{uploadedImages.length}/30 photos uploaded.</p>
                   <div className="mt-2">
                     <label className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
                       <div className="flex flex-col items-center">
@@ -970,7 +746,6 @@ const VenueRegistration = () => {
                       <input type="file" className="hidden" accept="image/jpeg,image/png" multiple onChange={handleImageUpload} disabled={uploadingImage || uploadedImages.length >= 30} />
                     </label>
                   </div>
-                  
                   {uploadedImages.length > 0 && (
                     <div className="grid grid-cols-3 gap-4 mt-4">
                       {uploadedImages.map((url, index) => (
@@ -996,14 +771,10 @@ const VenueRegistration = () => {
                   <div className="max-w-xs">
                     <Label htmlFor="currency">Select Currency *</Label>
                     <Select value={currency} onValueChange={setCurrency}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select currency" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Select currency" /></SelectTrigger>
                       <SelectContent>
                         {currencies.map((curr) => (
-                          <SelectItem key={curr.code} value={curr.code}>
-                            {curr.symbol} {curr.code} - {curr.name}
-                          </SelectItem>
+                          <SelectItem key={curr.code} value={curr.code}>{curr.symbol} {curr.code} - {curr.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -1033,45 +804,24 @@ const VenueRegistration = () => {
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <Label className="text-sm font-semibold">
-                                  {doc.label}
-                                </Label>
+                                <Label className="text-sm font-semibold">{doc.label}</Label>
                                 {(doc.uploaded || doc.existingUrl) && <CheckCircle className="w-4 h-4 text-green-600" />}
                               </div>
-                              <p className="text-xs text-muted-foreground mb-3">
-                                {doc.description}
-                              </p>
-                              
-                              {/* Show existing document if available */}
+                              <p className="text-xs text-muted-foreground mb-3">{doc.description}</p>
                               {doc.existingUrl && !doc.file && (
                                 <div className="flex items-center gap-2 mb-3 p-2 bg-muted rounded-md">
-                                  <span className="text-sm text-muted-foreground truncate flex-1">
-                                    {doc.existingFileName || "Uploaded document"}
-                                  </span>
-                                  <a 
-                                    href={doc.existingUrl} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-primary text-sm hover:underline"
-                                  >
-                                    View
-                                  </a>
+                                  <span className="text-sm text-muted-foreground truncate flex-1">{doc.existingFileName || "Uploaded document"}</span>
+                                  <a href={doc.existingUrl} target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">View</a>
                                 </div>
                               )}
-                              
                               <div className="flex items-center gap-3">
                                 <label className="flex items-center gap-2 px-3 py-1.5 border rounded-md cursor-pointer hover:bg-muted/50 text-sm">
                                   <Upload className="w-4 h-4" />
-                                  <span>
-                                    {doc.file ? doc.file.name : doc.existingUrl ? "Replace file" : "Choose file"}
-                                  </span>
+                                  <span>{doc.file ? doc.file.name : doc.existingUrl ? "Replace file" : "Choose file"}</span>
                                   <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={e => handleDocumentSelect(index, e.target.files?.[0] || null)} disabled={loading} />
                                 </label>
-                                
                                 {doc.file && (
-                                  <Button type="button" variant="ghost" size="sm" onClick={() => handleDocumentSelect(index, null)}>
-                                    Remove
-                                  </Button>
+                                  <Button type="button" variant="ghost" size="sm" onClick={() => handleDocumentSelect(index, null)}>Remove</Button>
                                 )}
                               </div>
                             </div>
@@ -1083,9 +833,7 @@ const VenueRegistration = () => {
 
                   <Alert className="mt-4">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      Accepted formats: PDF, JPG, PNG. Maximum file size: 10MB per document.
-                    </AlertDescription>
+                    <AlertDescription>Accepted formats: PDF, JPG, PNG. Maximum file size: 10MB per document.</AlertDescription>
                   </Alert>
                 </div>
 
@@ -1104,112 +852,65 @@ const VenueRegistration = () => {
                 {/* OOH Location & Placement */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg border-b pb-2">OOH Location & Placement</h3>
-                  
                   <div>
                     <Label htmlFor="exactLocationNotes">Exact Location Notes</Label>
-                    <Textarea
-                      id="exactLocationNotes"
-                      value={oohDetails.exactLocationNotes}
-                      onChange={e => updateOohField("exactLocationNotes", e.target.value)}
-                      placeholder="e.g., North wall of building, visible from Main Street intersection..."
-                      rows={3}
-                    />
+                    <Textarea id="exactLocationNotes" value={oohDetails.exactLocationNotes} onChange={e => updateOohField("exactLocationNotes", e.target.value)} placeholder="e.g., North wall of building, visible from Main Street intersection..." rows={3} />
                   </div>
-
                   <div>
                     <Label>Placement Type</Label>
                     <p className="text-sm text-muted-foreground mb-2">Select all that apply</p>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                       {placementTypeOptions.map(option => (
                         <div key={option} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`placement-${option}`}
-                            checked={oohDetails.placementTypes.includes(option)}
-                            onCheckedChange={() => toggleOohMultiSelect("placementTypes", option)}
-                          />
-                          <Label htmlFor={`placement-${option}`} className="text-sm font-normal cursor-pointer">
-                            {option}
-                          </Label>
+                          <Checkbox id={`placement-${option}`} checked={oohDetails.placementTypes.includes(option)} onCheckedChange={() => toggleOohMultiSelect("placementTypes", option)} />
+                          <Label htmlFor={`placement-${option}`} className="text-sm font-normal cursor-pointer">{option}</Label>
                         </div>
                       ))}
                     </div>
                   </div>
-
                   <div>
                     <Label>Visibility</Label>
                     <Select value={oohDetails.visibility} onValueChange={v => updateOohField("visibility", v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select visibility level" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Select visibility level" /></SelectTrigger>
                       <SelectContent>
-                        {visibilityOptions.map(option => (
-                          <SelectItem key={option} value={option}>{option}</SelectItem>
-                        ))}
+                        {visibilityOptions.map(option => (<SelectItem key={option} value={option}>{option}</SelectItem>))}
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div>
                     <Label htmlFor="facingDirection">Facing Direction / Traffic Flow</Label>
-                    <Input
-                      id="facingDirection"
-                      value={oohDetails.facingDirection}
-                      onChange={e => updateOohField("facingDirection", e.target.value)}
-                      placeholder="e.g., Facing northbound traffic, visible from highway exit..."
-                    />
+                    <Input id="facingDirection" value={oohDetails.facingDirection} onChange={e => updateOohField("facingDirection", e.target.value)} placeholder="e.g., Facing northbound traffic, visible from highway exit..." />
                   </div>
-
                   <div>
                     <Label>Surrounding Environment</Label>
                     <p className="text-sm text-muted-foreground mb-2">Select all that apply</p>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                       {surroundingEnvironmentOptions.map(option => (
                         <div key={option} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`env-${option}`}
-                            checked={oohDetails.surroundingEnvironment.includes(option)}
-                            onCheckedChange={() => toggleOohMultiSelect("surroundingEnvironment", option)}
-                          />
-                          <Label htmlFor={`env-${option}`} className="text-sm font-normal cursor-pointer">
-                            {option}
-                          </Label>
+                          <Checkbox id={`env-${option}`} checked={oohDetails.surroundingEnvironment.includes(option)} onCheckedChange={() => toggleOohMultiSelect("surroundingEnvironment", option)} />
+                          <Label htmlFor={`env-${option}`} className="text-sm font-normal cursor-pointer">{option}</Label>
                         </div>
                       ))}
                     </div>
                   </div>
-
                   <div>
                     <Label htmlFor="distanceFromObstructions">Distance From Obstructions / Other Ads</Label>
-                    <Input
-                      id="distanceFromObstructions"
-                      value={oohDetails.distanceFromObstructions}
-                      onChange={e => updateOohField("distanceFromObstructions", e.target.value)}
-                      placeholder="e.g., No competing ads within 500 meters, clear sightlines..."
-                    />
+                    <Input id="distanceFromObstructions" value={oohDetails.distanceFromObstructions} onChange={e => updateOohField("distanceFromObstructions", e.target.value)} placeholder="e.g., No competing ads within 500 meters, clear sightlines..." />
                   </div>
                 </div>
 
                 {/* Audience & Reach */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg border-b pb-2">Audience & Reach</h3>
-                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="estimatedTraffic">Estimated Traffic</Label>
-                      <Input
-                        id="estimatedTraffic"
-                        type="number"
-                        value={oohDetails.estimatedTraffic}
-                        onChange={e => updateOohField("estimatedTraffic", e.target.value)}
-                        placeholder="e.g., 50000"
-                      />
+                      <Input id="estimatedTraffic" type="number" value={oohDetails.estimatedTraffic} onChange={e => updateOohField("estimatedTraffic", e.target.value)} placeholder="e.g., 50000" />
                     </div>
                     <div>
                       <Label>Traffic Unit</Label>
                       <Select value={oohDetails.trafficUnit} onValueChange={v => updateOohField("trafficUnit", v)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select unit" />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Select unit" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="per_day">Per Day</SelectItem>
                           <SelectItem value="per_week">Per Week</SelectItem>
@@ -1218,56 +919,32 @@ const VenueRegistration = () => {
                       </Select>
                     </div>
                   </div>
-
                   <div>
                     <Label htmlFor="primaryDemographic">Primary Demographic Profile</Label>
-                    <Input
-                      id="primaryDemographic"
-                      value={oohDetails.primaryDemographic}
-                      onChange={e => updateOohField("primaryDemographic", e.target.value)}
-                      placeholder="e.g., Young professionals aged 25-40, families, students..."
-                    />
+                    <Input id="primaryDemographic" value={oohDetails.primaryDemographic} onChange={e => updateOohField("primaryDemographic", e.target.value)} placeholder="e.g., Young professionals aged 25-40, families, students..." />
                   </div>
-
                   <div>
                     <Label>Audience Behavior / Purpose</Label>
                     <p className="text-sm text-muted-foreground mb-2">Select all that apply</p>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                       {audienceBehaviorOptions.map(option => (
                         <div key={option} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`behavior-${option}`}
-                            checked={oohDetails.audienceBehavior.includes(option)}
-                            onCheckedChange={() => toggleOohMultiSelect("audienceBehavior", option)}
-                          />
-                          <Label htmlFor={`behavior-${option}`} className="text-sm font-normal cursor-pointer">
-                            {option}
-                          </Label>
+                          <Checkbox id={`behavior-${option}`} checked={oohDetails.audienceBehavior.includes(option)} onCheckedChange={() => toggleOohMultiSelect("audienceBehavior", option)} />
+                          <Label htmlFor={`behavior-${option}`} className="text-sm font-normal cursor-pointer">{option}</Label>
                         </div>
                       ))}
                     </div>
                   </div>
-
                   <div>
                     <Label htmlFor="peakViewingHours">Peak Viewing Hours</Label>
-                    <Input
-                      id="peakViewingHours"
-                      value={oohDetails.peakViewingHours}
-                      onChange={e => updateOohField("peakViewingHours", e.target.value)}
-                      placeholder="e.g., 7-9 AM, 5-7 PM (rush hours)"
-                    />
+                    <Input id="peakViewingHours" value={oohDetails.peakViewingHours} onChange={e => updateOohField("peakViewingHours", e.target.value)} placeholder="e.g., 7-9 AM, 5-7 PM (rush hours)" />
                   </div>
-
                   <div>
                     <Label>Measurement Source</Label>
                     <Select value={oohDetails.measurementSource} onValueChange={v => updateOohField("measurementSource", v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select measurement source" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Select measurement source" /></SelectTrigger>
                       <SelectContent>
-                        {measurementSourceOptions.map(option => (
-                          <SelectItem key={option} value={option}>{option}</SelectItem>
-                        ))}
+                        {measurementSourceOptions.map(option => (<SelectItem key={option} value={option}>{option}</SelectItem>))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -1276,50 +953,30 @@ const VenueRegistration = () => {
                 {/* Format & Technical Specs */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg border-b pb-2">Format & Technical Specs</h3>
-                  
                   <div>
                     <Label>Media Type</Label>
                     <Select value={oohDetails.mediaType} onValueChange={v => updateOohField("mediaType", v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select media type" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Select media type" /></SelectTrigger>
                       <SelectContent>
-                        {mediaTypeOptions.map(option => (
-                          <SelectItem key={option} value={option}>{option}</SelectItem>
-                        ))}
+                        {mediaTypeOptions.map(option => (<SelectItem key={option} value={option}>{option}</SelectItem>))}
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div>
                     <Label>Size / Dimensions</Label>
                     <div className="grid grid-cols-3 gap-4 mt-2">
                       <div>
                         <Label htmlFor="sizeWidth" className="text-xs text-muted-foreground">Width</Label>
-                        <Input
-                          id="sizeWidth"
-                          type="number"
-                          value={oohDetails.sizeWidth}
-                          onChange={e => updateOohField("sizeWidth", e.target.value)}
-                          placeholder="Width"
-                        />
+                        <Input id="sizeWidth" type="number" value={oohDetails.sizeWidth} onChange={e => updateOohField("sizeWidth", e.target.value)} placeholder="Width" />
                       </div>
                       <div>
                         <Label htmlFor="sizeHeight" className="text-xs text-muted-foreground">Height</Label>
-                        <Input
-                          id="sizeHeight"
-                          type="number"
-                          value={oohDetails.sizeHeight}
-                          onChange={e => updateOohField("sizeHeight", e.target.value)}
-                          placeholder="Height"
-                        />
+                        <Input id="sizeHeight" type="number" value={oohDetails.sizeHeight} onChange={e => updateOohField("sizeHeight", e.target.value)} placeholder="Height" />
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Unit</Label>
                         <Select value={oohDetails.sizeUnit} onValueChange={v => updateOohField("sizeUnit", v)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Unit" />
-                          </SelectTrigger>
+                          <SelectTrigger><SelectValue placeholder="Unit" /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="inches">Inches</SelectItem>
                             <SelectItem value="feet">Feet</SelectItem>
@@ -1330,70 +987,47 @@ const VenueRegistration = () => {
                       </div>
                     </div>
                   </div>
-
                   <div>
                     <Label htmlFor="resolution">Resolution (Digital Only)</Label>
-                    <Input
-                      id="resolution"
-                      value={oohDetails.resolution}
-                      onChange={e => updateOohField("resolution", e.target.value)}
-                      placeholder="e.g., 1920x1080, 4K, etc."
-                    />
+                    <Input id="resolution" value={oohDetails.resolution} onChange={e => updateOohField("resolution", e.target.value)} placeholder="e.g., 1920x1080, 4K, etc." />
                   </div>
-
                   <div>
                     <Label htmlFor="fileFormatRequirements">File Format Requirements</Label>
-                    <Input
-                      id="fileFormatRequirements"
-                      value={oohDetails.fileFormatRequirements}
-                      onChange={e => updateOohField("fileFormatRequirements", e.target.value)}
-                      placeholder="e.g., JPEG, PNG, MP4, max 50MB..."
-                    />
+                    <Input id="fileFormatRequirements" value={oohDetails.fileFormatRequirements} onChange={e => updateOohField("fileFormatRequirements", e.target.value)} placeholder="e.g., JPEG, PNG, MP4, max 50MB..." />
                   </div>
-
                   <div>
                     <Label>Illumination / Lighting</Label>
                     <Select value={oohDetails.illumination} onValueChange={v => updateOohField("illumination", v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select illumination type" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Select illumination type" /></SelectTrigger>
                       <SelectContent>
-                        {illuminationOptions.map(option => (
-                          <SelectItem key={option} value={option}>{option}</SelectItem>
-                        ))}
+                        {illuminationOptions.map(option => (<SelectItem key={option} value={option}>{option}</SelectItem>))}
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="hasAudio">Audio Capability</Label>
-                      <Switch
-                        id="hasAudio"
-                        checked={oohDetails.hasAudio}
-                        onCheckedChange={checked => updateOohField("hasAudio", checked)}
-                      />
+                      <Switch id="hasAudio" checked={oohDetails.hasAudio} onCheckedChange={checked => updateOohField("hasAudio", checked)} />
                     </div>
                     {oohDetails.hasAudio && (
-                      <Input
-                        value={oohDetails.audioNotes}
-                        onChange={e => updateOohField("audioNotes", e.target.value)}
-                        placeholder="Audio notes (e.g., speaker specs, volume limits, hours allowed...)"
-                      />
+                      <Input value={oohDetails.audioNotes} onChange={e => updateOohField("audioNotes", e.target.value)} placeholder="Audio notes (e.g., speaker specs, volume limits, hours allowed...)" />
                     )}
                   </div>
-
                   <div>
                     <Label htmlFor="structuralSafetyNotes">Structural / Safety Notes</Label>
-                    <Textarea
-                      id="structuralSafetyNotes"
-                      value={oohDetails.structuralSafetyNotes}
-                      onChange={e => updateOohField("structuralSafetyNotes", e.target.value)}
-                      placeholder="e.g., Weight limits, installation requirements, permits needed, safety certifications..."
-                      rows={4}
-                    />
+                    <Textarea id="structuralSafetyNotes" value={oohDetails.structuralSafetyNotes} onChange={e => updateOohField("structuralSafetyNotes", e.target.value)} placeholder="e.g., Weight limits, installation requirements, permits needed, safety certifications..." rows={4} />
                   </div>
                 </div>
+
+                {/* Submit info */}
+                {!isEditing && (
+                  <Alert className="bg-muted/50">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Your submission will be reviewed by our team. You'll be notified once it's approved.
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 {/* Navigation Buttons */}
                 <div className="pt-6 border-t flex flex-col sm:flex-row gap-4">
@@ -1402,92 +1036,12 @@ const VenueRegistration = () => {
                     Back to Venue Details
                   </Button>
                   <Button type="submit" className="flex-1" disabled={loading}>
-                    {loading ? (isEditing ? "Updating..." : "Submitting...") : isEditing ? "Update Venue" : "Continue to Payment — $10"}
+                    {loading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{isEditing ? "Updating..." : "Submitting..."}</>
+                    ) : isEditing ? "Update Venue" : "Register Your Ad Space"}
                   </Button>
                 </div>
               </form>
-            )}
-
-            {currentStep === 3 && !isEditing && (
-              <div className="space-y-6">
-                {/* Pricing Banner */}
-                <Card className="border-primary/40 bg-primary/5">
-                  <CardContent className="flex flex-col sm:flex-row items-center justify-between py-4 gap-3">
-                    <div className="flex items-center gap-3">
-                      <CreditCard className="h-6 w-6 text-primary shrink-0" />
-                      <div>
-                        <p className="font-semibold text-lg">$10 per venue registration</p>
-                        <p className="text-sm text-muted-foreground">One-time fee · Secure payment · Admin review included</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Shield className="h-4 w-4" />
-                      <span>Secure checkout</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Summary */}
-                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                  <h4 className="font-semibold">Registration Summary</h4>
-                  <div className="grid grid-cols-2 gap-y-1 text-sm">
-                    <span className="text-muted-foreground">Venue:</span>
-                    <span>{title}</span>
-                    <span className="text-muted-foreground">Type:</span>
-                    <span className="capitalize">{venueType === "other" ? customVenueType : venueType}</span>
-                    <span className="text-muted-foreground">Location:</span>
-                    <span>{[street, city, country].filter(Boolean).join(", ")}</span>
-                    <span className="text-muted-foreground">Contact:</span>
-                    <span>{contactPerson}</span>
-                    <span className="text-muted-foreground">Ad Units:</span>
-                    <span>{selectedAdUnits.length} type(s) selected</span>
-                    <span className="text-muted-foreground">Photos:</span>
-                    <span>{uploadedImages.length} uploaded</span>
-                  </div>
-                </div>
-
-                {/* Price */}
-                <div className="border rounded-lg p-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">Venue Registration Fee</p>
-                    <p className="text-sm text-muted-foreground">One-time payment</p>
-                  </div>
-                  <p className="text-2xl font-bold text-primary">$10</p>
-                </div>
-
-                {/* Trust Indicators */}
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Shield className="h-4 w-4" />
-                    <span>Secure payment</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <CreditCard className="h-4 w-4" />
-                    <span>One-time fee</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Admin review included</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button variant="outline" onClick={() => { setCurrentStep(2); window.scrollTo(0, 0); }} className="sm:w-auto w-full">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Edit
-                  </Button>
-                  <Button onClick={handlePayAndSubmit} size="lg" className="flex-1" disabled={paymentProcessing}>
-                    {paymentProcessing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      "Pay $10 & Submit Registration"
-                    )}
-                  </Button>
-                </div>
-              </div>
             )}
           </CardContent>
         </Card>
