@@ -107,6 +107,14 @@ export const AdUnitSelector = ({
                     })} className="mt-1" />
                           </div>}
 
+                        <div>
+                          <Label className="text-xs">Ad Units Available (Quantity) *</Label>
+                          <Input type="number" min="1" step="1" value={config?.quantity || ""} onChange={e => updateUnit(unitType.id, {
+                        quantity: parseInt(e.target.value, 10) || 1
+                      })} className="mt-1" placeholder="1" />
+                          <p className="text-xs text-muted-foreground mt-1">Number of ad placements available at this venue</p>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <Label className="text-xs">$/Week</Label>
