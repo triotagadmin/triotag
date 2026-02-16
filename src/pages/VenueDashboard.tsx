@@ -209,9 +209,14 @@ const VenueDashboard = () => {
                   <CardTitle>Manage Venue Ad Spaces</CardTitle>
                   <CardDescription>Add, edit, and manage your advertising spaces</CardDescription>
                 </div>
-                <Button onClick={() => navigate("/venue-inventory")}>
-                  <Upload className="w-4 h-4 mr-2" />View Full Inventory
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={() => navigate("/venue-registration")}>
+                    Register New Ad Space
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate("/venue-inventory")}>
+                    <Upload className="w-4 h-4 mr-2" />View Full Inventory
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
