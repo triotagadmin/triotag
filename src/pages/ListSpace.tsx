@@ -35,6 +35,7 @@ const ListSpace = () => {
   const [submitterName, setSubmitterName] = useState("");
   const [submitterEmail, setSubmitterEmail] = useState("");
   const [submitterPhone, setSubmitterPhone] = useState("");
+  const [quantity, setQuantity] = useState(1);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -272,6 +273,19 @@ const ListSpace = () => {
                       ))}
                     </div>
                   </RadioGroup>
+
+                  {/* Quantity */}
+                  <div className="space-y-2 mt-3">
+                    <Label htmlFor="quantity">Quantity *</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      min={1}
+                      placeholder="How many units?"
+                      value={quantity}
+                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    />
+                  </div>
                 </div>
 
                 {/* Notes */}
