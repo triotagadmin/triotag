@@ -14,7 +14,7 @@ const SPACE_TYPES = ["Wall", "Counter", "Glass", "Table", "Door", "Ceiling", "Fl
 const SIZES = [
   { value: "tiny", label: "Tiny", description: "Business card to A5 size" },
   { value: "small", label: "Small Format", description: "A4 to A3 poster size" },
-  { value: "custom", label: "Custom Size", description: "Specify your own dimensions" },
+  { value: "custom", label: "Custom Size", description: "Click to specify your own dimensions" },
 ];
 
 const ListSpace = () => {
@@ -36,6 +36,7 @@ const ListSpace = () => {
   const [submitterEmail, setSubmitterEmail] = useState("");
   const [submitterPhone, setSubmitterPhone] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [customSize, setCustomSize] = useState("");
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -273,6 +274,20 @@ const ListSpace = () => {
                       ))}
                     </div>
                   </RadioGroup>
+
+                  {/* Custom Size Input */}
+                  {size === "custom" && (
+                    <div className="space-y-2 mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <Label htmlFor="customSize">Custom Dimensions *</Label>
+                      <Input
+                        id="customSize"
+                        type="text"
+                        placeholder={'e.g., 24" x 36"'}
+                        value={customSize}
+                        onChange={(e) => setCustomSize(e.target.value)}
+                      />
+                    </div>
+                  )}
 
                   {/* Quantity */}
                   <div className="space-y-2 mt-3">
