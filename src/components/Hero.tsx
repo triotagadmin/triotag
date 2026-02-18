@@ -21,10 +21,10 @@ export const Hero = () => {
               <span className="text-primary neon-text-glow animate-text-glow">Accelerate your sales growth.</span>
             </h1>
             <p style={{
-              fontFamily: "'Rajdhani', sans-serif",
-              textShadow: '2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,0.8), 6px 6px 0 rgba(0,0,0,0.6), 8px 8px 15px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)',
-              letterSpacing: '0.1em'
-            }} className="text-sm text-center bg-transparent neon-text-glow animate-text-glow text-sidebar-foreground font-semibold">
+            fontFamily: "'Rajdhani', sans-serif",
+            textShadow: '2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,0.8), 6px 6px 0 rgba(0,0,0,0.6), 8px 8px 15px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)',
+            letterSpacing: '0.1em'
+          }} className="text-sm text-center bg-transparent neon-text-glow animate-text-glow text-sidebar-foreground font-semibold">
               Advertise your business across our micro advertising network.
             </p>
             <div className={`grid grid-cols-2 gap-2 pt-2 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
@@ -56,7 +56,7 @@ export const Hero = () => {
           transform: 'perspective(600px) rotateX(8deg)',
           animation: 'float3d 4s ease-in-out infinite',
           letterSpacing: '0.15em'
-        }} className="text-base text-center bg-transparent neon-text-glow animate-text-glow text-sidebar-foreground font-semibold">​Advertise your business across our micro advertising network. ​</p>
+        }} className="text-base text-center bg-transparent neon-text-glow animate-text-glow font-semibold text-emerald-950">​Advertise your business across our micro advertising network. ​</p>
 
           <div className={`flex flex-row items-center justify-center gap-4 pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
             <Link to="/auth">
