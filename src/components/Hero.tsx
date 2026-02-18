@@ -67,7 +67,7 @@ export const Hero = () => {
             <Link to="/list-space">
               <Button size="lg" variant="outline" className="relative overflow-hidden text-lg px-8 py-6 min-h-[44px] border-primary bg-primary hover:bg-primary/90 hover:neon-glow transition-all duration-300 animate-pulse-glow">
                 <span className="absolute inset-0 overflow-hidden rounded-[inherit]"><span className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent" /></span>
-                <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 font-bold animate-text-glow" style={{ textShadow: '0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,215,0,0.5), 0 0 30px rgba(255,215,0,0.3)' }}>Register Ad Space</span>
+                <span className="relative z-10 text-primary-foreground font-bold">Register Ad Space</span>
               </Button>
             </Link>
           </div>
