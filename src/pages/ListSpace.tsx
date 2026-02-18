@@ -14,6 +14,7 @@ const SPACE_TYPES = ["Wall", "Counter", "Glass", "Table", "Door", "Ceiling", "Fl
 const SIZES = [
   { value: "tiny", label: "Tiny", description: "Business card to A5 size" },
   { value: "small", label: "Small Format", description: "A4 to A3 poster size" },
+  { value: "custom", label: "Custom Size", description: "Specify your own dimensions" },
 ];
 
 const ListSpace = () => {
