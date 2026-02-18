@@ -56,7 +56,7 @@ export const Hero = () => {
           transform: 'perspective(600px) rotateX(8deg)',
           animation: 'float3d 4s ease-in-out infinite',
           letterSpacing: '0.15em'
-        }} className="text-base text-center bg-transparent neon-text-glow animate-text-glow font-semibold text-primary">​Advertise your business across our micro advertising network. ​</p>
+        }} className="text-base text-center bg-transparent neon-text-glow animate-text-glow font-semibold text-emerald-950">​Advertise your business or provide ads space across our micro advertising network. ​</p>
 
           <div className={`flex flex-row items-center justify-center gap-4 pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
             <Link to="/auth">
