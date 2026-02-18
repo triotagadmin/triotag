@@ -60,8 +60,9 @@ export const Hero = () => {
 
           <div className={`flex flex-row items-center justify-center gap-4 pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
             <Link to="/auth">
-              <Button size="lg" className="text-lg px-8 py-6 min-h-[44px] bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90">
-                Advertise Now
+              <Button size="lg" className="relative overflow-hidden text-lg px-8 py-6 min-h-[44px] bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90 animate-pulse-glow">
+                <span className="absolute inset-0 overflow-hidden rounded-[inherit]"><span className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-foreground/20 to-transparent" /></span>
+                <span className="relative z-10">Advertise Now</span>
               </Button>
             </Link>
             <Link to="/list-space">
