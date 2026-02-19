@@ -98,7 +98,7 @@ const Marketplace = () => {
           const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
           const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
           const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
-          const currency = adUnitsFromDb[0]?.currency || "USD";
+          const currency = adUnitsFromDb[0]?.currency || specs?.currency || "USD";
 
           return {
             id: item.id,
@@ -151,7 +151,7 @@ const Marketplace = () => {
         const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
         const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
         const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
-        const currency = adUnitsFromDb[0]?.currency || "USD";
+        const currency = adUnitsFromDb[0]?.currency || specs?.currency || "USD";
 
         return {
           id: v.id,
