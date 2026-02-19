@@ -479,7 +479,8 @@ const VenueRegistration = () => {
         ad_units: selectedAdUnits.map(unit => ({
           type: unit.type, quantity: unit.quantity, pricePerWeek: unit.pricePerWeek,
           pricePerMonth: unit.pricePerMonth, specialRules: unit.specialRules,
-          customFormat: unit.customFormat || null, thumbnailUrl: unit.thumbnailUrl || null
+          customFormat: unit.customFormat || null, thumbnailUrl: unit.thumbnailUrl || null,
+          size: unit.size || null, currency: unit.currency || "USD"
         })),
         ooh_details: oohDetails
       },
