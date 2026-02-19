@@ -52,9 +52,8 @@ export const Hero = () => {
 
           <p style={{
           fontFamily: "'Rajdhani', sans-serif",
-          textShadow: '2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,0.8), 6px 6px 0 rgba(0,0,0,0.6), 8px 8px 15px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)',
           transform: 'perspective(600px) rotateX(8deg)',
-          animation: 'float3d 4s ease-in-out infinite',
+          animation: 'float3d 4s ease-in-out infinite, shadowPulse 3s ease-in-out infinite',
           letterSpacing: '0.15em'
         }} className="text-base text-center bg-transparent neon-text-glow animate-text-glow font-semibold text-primary">​Advertise your business or provide ads space  across our micro advertising network. ​</p>
 

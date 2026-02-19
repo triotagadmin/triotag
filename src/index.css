@@ -228,6 +228,15 @@
   }
 }
 
+@keyframes shadowPulse {
+  0%, 100% {
+    text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,0.8), 6px 6px 0 rgba(0,0,0,0.6), 8px 8px 15px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5);
+  }
+  50% {
+    text-shadow: 3px 3px 0 #000, 6px 6px 0 rgba(0,0,0,0.7), 10px 10px 0 rgba(0,0,0,0.5), 14px 14px 25px rgba(0,0,0,0.8), 0 0 50px rgba(0,0,0,0.6);
+  }
+}
+
 @keyframes rotateBorder {
   0% {
     --border-angle: 0deg;
