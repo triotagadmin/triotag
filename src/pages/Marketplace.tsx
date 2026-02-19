@@ -40,6 +40,19 @@ const AD_UNIT_TYPE_LABELS: Record<string, string> = {
   wheat_paste: "Wheat Paste",
 };
 
+const VENUE_TYPE_LABELS: Record<string, string> = {
+  restaurant: "Restaurant",
+  cafe: "Café",
+  gym: "Gym/Fitness Center",
+  restroom: "Restroom Stall",
+  salon: "Salon/Spa",
+  bar: "Bar/Lounge",
+  hotel: "Hotel",
+  coworking: "Co-Working Space",
+  guerrilla: "Guerrilla Ad Space",
+  other: "Other",
+};
+
 const Marketplace = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -105,7 +118,7 @@ const Marketplace = () => {
             title: item.title,
             description: item.description || "",
             location: item.location || "Not specified",
-            type: item.category === "agent" ? (item.service_type || "Agent Service") : (specs?.venue_type || specs?.type || "Venue"),
+            type: item.category === "agent" ? (item.service_type || "Agent Service") : (VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue"),
             adUnits: adUnitLabels.length > 0 ? adUnitLabels : item.category === "agent" ? [item.service_type || "Service"] : ["No ad units specified"],
             image: Array.isArray(parsedMediaUrls) ? parsedMediaUrls[0] : undefined,
             ownerName: item.publisher_business_name || (item.category === "agent" ? "Agent" : "Venue"),
@@ -158,7 +171,7 @@ const Marketplace = () => {
           title: v.title,
           description: v.description || "",
           location: v.location || "Not specified",
-          type: specs?.venue_type || specs?.type || "Venue",
+          type: VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue",
           adUnits: adUnitLabels.length > 0 ? adUnitLabels : ["No ad units specified"],
           image: Array.isArray(v.media_urls) ? (v.media_urls as string[])[0] : undefined,
           ownerName: (v.publisher_profiles_public as any)?.business_name || "Venue",
