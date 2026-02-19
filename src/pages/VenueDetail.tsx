@@ -230,7 +230,7 @@ const VenueDetail = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Contact Publisher</CardTitle>
+                <CardTitle>Contact:</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
