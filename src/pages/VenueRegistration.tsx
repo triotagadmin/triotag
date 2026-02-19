@@ -765,21 +765,6 @@ const VenueRegistration = () => {
                   <AdUnitSelector selectedUnits={selectedAdUnits} onUnitsChange={setSelectedAdUnits} publisherId={publisherId} />
                 </div>
 
-                {/* Currency Selection */}
-                <div>
-                  <h3 className="font-semibold mb-4">Currency</h3>
-                  <div className="max-w-xs">
-                    <Label htmlFor="currency">Select Currency *</Label>
-                    <Select value={currency} onValueChange={setCurrency}>
-                      <SelectTrigger><SelectValue placeholder="Select currency" /></SelectTrigger>
-                      <SelectContent>
-                        {currencies.map((curr) => (
-                          <SelectItem key={curr.code} value={curr.code}>{curr.symbol} {curr.code} - {curr.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
 
                 {/* Verification Documents */}
                 <div className="border-t pt-6">
