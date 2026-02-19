@@ -10,6 +10,7 @@ import { LocationSearchModal } from "@/components/marketplace/LocationSearchModa
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getCurrencySymbol } from "@/hooks/useCurrencyConversion";
 import { User } from "@supabase/supabase-js";
 
 interface MarketplaceListing {
@@ -24,6 +25,7 @@ interface MarketplaceListing {
   createdAt: string;
   monthlySubscriptionFee?: number;
   weeklyPrice?: number;
+  currency?: string;
 }
 
 const AD_UNIT_TYPE_LABELS: Record<string, string> = {
@@ -96,6 +98,7 @@ const Marketplace = () => {
           const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
           const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
           const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
+          const currency = adUnitsFromDb[0]?.currency || "USD";
 
           return {
             id: item.id,
@@ -109,6 +112,7 @@ const Marketplace = () => {
             createdAt: item.created_at || "",
             monthlySubscriptionFee: monthlyPrice || item.monthly_subscription_fee || 0,
             weeklyPrice: weeklyPrice,
+            currency: currency,
           };
         });
 
@@ -147,6 +151,7 @@ const Marketplace = () => {
         const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
         const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
         const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
+        const currency = adUnitsFromDb[0]?.currency || "USD";
 
         return {
           id: v.id,
@@ -160,6 +165,7 @@ const Marketplace = () => {
           createdAt: v.created_at || "",
           monthlySubscriptionFee: monthlyPrice,
           weeklyPrice: weeklyPrice,
+          currency: currency,
         };
       });
 
@@ -397,13 +403,13 @@ const Marketplace = () => {
                     <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 space-y-1">
                       {listing.weeklyPrice !== undefined && listing.weeklyPrice > 0 && (
                         <div>
-                          <span className="font-medium">Weekly:</span> ${listing.weeklyPrice}/week
+                          <span className="font-medium">Weekly:</span> {getCurrencySymbol(listing.currency)}{listing.weeklyPrice}/week
                         </div>
                       )}
                       {listing.monthlySubscriptionFee !== undefined &&
                         listing.monthlySubscriptionFee > 0 && (
                           <div>
-                            <span className="font-medium">Monthly:</span> $
+                            <span className="font-medium">Monthly:</span> {getCurrencySymbol(listing.currency)}
                             {listing.monthlySubscriptionFee}/month
                           </div>
                         )}
