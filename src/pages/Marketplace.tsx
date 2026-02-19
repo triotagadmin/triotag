@@ -444,7 +444,7 @@ const Marketplace = () => {
                   )}
 
                   <div className="pt-2 border-t">
-                    <p className="text-xs text-muted-foreground mb-1">Publisher</p>
+                    <p className="text-xs text-muted-foreground mb-1">Agent</p>
                     <p className="text-sm font-medium">{listing.ownerName}</p>
                   </div>
 
