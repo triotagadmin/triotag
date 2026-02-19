@@ -21,6 +21,19 @@ const AD_UNIT_TYPE_LABELS: Record<string, string> = {
   wheat_paste: "Wheat Paste",
 };
 
+const VENUE_TYPE_LABELS: Record<string, string> = {
+  restaurant: "Restaurant",
+  cafe: "Café",
+  gym: "Gym/Fitness Center",
+  restroom: "Restroom Stall",
+  salon: "Salon/Spa",
+  bar: "Bar/Lounge",
+  hotel: "Hotel",
+  coworking: "Co-Working Space",
+  guerrilla: "Guerrilla Ad Space",
+  other: "Other",
+};
+
 interface FeaturedListing {
   id: string;
   title: string;
@@ -108,7 +121,7 @@ export const FeaturedLocations = () => {
             }));
             const mediaUrls = Array.isArray(item.media_urls) ? item.media_urls : [];
             const image = (mediaUrls[0] as string) || venueCafe1;
-            const venueType = specs?.venue_type || specs?.custom_venue_type || "Venue";
+            const venueType = VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.custom_venue_type || "Venue";
 
             return {
               id: item.id,
