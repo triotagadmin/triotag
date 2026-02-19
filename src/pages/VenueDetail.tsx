@@ -234,7 +234,7 @@ const VenueDetail = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <p className="text-sm text-muted-foreground">Business Name</p>
+                  <p className="text-sm text-muted-foreground">Advertising Agent</p>
                   <p className="font-medium">{venue.publisher_profiles?.business_name}</p>
                 </div>
 
