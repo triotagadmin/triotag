@@ -2,6 +2,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CURRENCIES, getCurrencySymbol } from "@/hooks/useCurrencyConversion";
 
 export interface AdUnitConfig {
   type: string;
@@ -11,6 +13,8 @@ export interface AdUnitConfig {
   specialRules: string;
   customFormat?: string;
   thumbnailUrl?: string;
+  size?: string;
+  currency?: string;
 }
 
 interface AdUnitSelectorProps {
@@ -68,7 +72,9 @@ export const AdUnitSelector = ({
         pricePerWeek: 0,
         pricePerMonth: 0,
         specialRules: "",
-        customFormat: typeId === "custom_format" ? "" : undefined
+        customFormat: typeId === "custom_format" ? "" : undefined,
+        size: "",
+        currency: "USD"
       }]);
     }
   };
@@ -108,6 +114,27 @@ export const AdUnitSelector = ({
                           </div>}
 
                         <div>
+                          <Label className="text-xs">Size *</Label>
+                          <Input placeholder='e.g., 2x2 inches, A4, 24" x 36"' value={config?.size || ""} onChange={e => updateUnit(unitType.id, {
+                        size: e.target.value
+                      })} className="mt-1" />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Currency</Label>
+                          <Select value={config?.currency || "USD"} onValueChange={val => updateUnit(unitType.id, { currency: val })}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select currency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CURRENCIES.map(c => (
+                                <SelectItem key={c.code} value={c.code}>{c.symbol} {c.code} — {c.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
                           <Label className="text-xs">Ad Units Available (Quantity) *</Label>
                           <Input type="number" min="1" step="1" value={config?.quantity || ""} onChange={e => updateUnit(unitType.id, {
                         quantity: parseInt(e.target.value, 10) || 1
@@ -117,13 +144,13 @@ export const AdUnitSelector = ({
 
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <Label className="text-xs">$/Week</Label>
+                            <Label className="text-xs">{getCurrencySymbol(config?.currency)}/Week</Label>
                             <Input type="number" min="0" step="0.01" value={config?.pricePerWeek || ""} onChange={e => updateUnit(unitType.id, {
                         pricePerWeek: parseFloat(e.target.value) || 0
                       })} className="mt-1" placeholder="0" />
                           </div>
                           <div>
-                            <Label className="text-xs">$/Month</Label>
+                            <Label className="text-xs">{getCurrencySymbol(config?.currency)}/Month</Label>
                             <Input type="number" min="0" step="0.01" value={config?.pricePerMonth || ""} onChange={e => updateUnit(unitType.id, {
                         pricePerMonth: parseFloat(e.target.value) || 0
                       })} className="mt-1" placeholder="0" />
