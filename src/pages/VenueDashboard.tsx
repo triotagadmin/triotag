@@ -81,13 +81,13 @@ const VenueDashboard = () => {
     }
   };
   const getCurrentSlideSpaces = () => adSpaces.slice(currentSlide * ITEMS_PER_SLIDE, (currentSlide + 1) * ITEMS_PER_SLIDE);
-  const nextSlide = () => setCurrentSlide(prev => (prev + 1) % totalSlides);
-  const prevSlide = () => setCurrentSlide(prev => (prev - 1 + totalSlides) % totalSlides);
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>;
   }
-  const activeSpaces = adSpaces.filter(s => s.approval_status === "approved" && s.availability_status === "available").length;
-  const pendingSpaces = adSpaces.filter(s => s.approval_status === "pending").length;
+  const activeSpaces = adSpaces.filter((s) => s.approval_status === "approved" && s.availability_status === "available").length;
+  const pendingSpaces = adSpaces.filter((s) => s.approval_status === "pending").length;
   return <div className="min-h-screen bg-muted/30">
       <Navigation />
 
@@ -105,10 +105,10 @@ const VenueDashboard = () => {
 
       <div className="container mx-auto px-6 py-12">
         <div className="mb-8">
-          <h2 className="text-4xl font-bold mb-2">Venue Dashboard</h2>
+          <h2 className="text-4xl font-bold mb-2">Agent Dashboard</h2>
           <div className="flex items-center gap-2 mt-1">
             {editingName ? <div className="flex items-center gap-2">
-                <Input value={newName} onChange={e => setNewName(e.target.value)} className="max-w-xs" autoFocus />
+                <Input value={newName} onChange={(e) => setNewName(e.target.value)} className="max-w-xs" autoFocus />
                 <Button size="icon" variant="ghost" onClick={async () => {
               if (!newName.trim() || !profile) return;
               const {
@@ -141,10 +141,10 @@ const VenueDashboard = () => {
                 </Button>
               </div> : <>
                 <button
-                  type="button"
-                  className="text-xl text-primary underline-offset-4 hover:underline cursor-pointer bg-transparent border-none p-0"
-                  onClick={() => setProfileDialogOpen(true)}
-                >
+              type="button"
+              className="text-xl text-primary underline-offset-4 hover:underline cursor-pointer bg-transparent border-none p-0"
+              onClick={() => setProfileDialogOpen(true)}>
+
                   {profile?.business_name}
                 </button>
               </>}
@@ -239,7 +239,7 @@ const VenueDashboard = () => {
                       </Button>
                     </div>}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {getCurrentSlideSpaces().map(space => <Card key={space.id} className="overflow-hidden">
+                    {getCurrentSlideSpaces().map((space) => <Card key={space.id} className="overflow-hidden">
                         {Array.isArray(space.media_urls) && space.media_urls[0] && <div className="h-32 overflow-hidden">
                             <img src={space.media_urls[0]} alt={space.title} className="w-full h-full object-cover" />
                           </div>}
@@ -281,18 +281,18 @@ const VenueDashboard = () => {
               <p className="text-sm font-medium text-muted-foreground">Business Name</p>
               <p className="text-base font-semibold">{profile?.business_name}</p>
             </div>
-            {profile?.location && (
-              <div>
+            {profile?.location &&
+          <div>
                 <p className="text-sm font-medium text-muted-foreground">Location</p>
                 <p className="text-base">{profile.location}</p>
               </div>
-            )}
-            {profile?.description && (
-              <div>
+          }
+            {profile?.description &&
+          <div>
                 <p className="text-sm font-medium text-muted-foreground">Description</p>
                 <p className="text-base">{profile.description}</p>
               </div>
-            )}
+          }
             <div>
               <p className="text-sm font-medium text-muted-foreground">Publisher Type</p>
               <p className="text-base capitalize">{profile?.publisher_type}</p>
