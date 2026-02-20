@@ -21,7 +21,7 @@ const steps = [
   {
     icon: TrendingUp,
     title: "Track Results",
-    description: "Real-time analytics and proof of placement",
+    description: "Real-time QR Code analytics and proof of placement",
   },
 ];
 
