@@ -69,7 +69,7 @@ export const Footer = () => {
             <h3 className="font-bold text-lg md:text-xl text-primary neon-text-glow">
               Tiny Sticky Ads
             </h3>
-            <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">We connect businesses to micro out-of-home ad spaces.</p>
+            <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">We connect businesses to ambient and place-based ad spaces.</p>
           </div>
 
           {/* Company Links - Two Columns */}
@@ -94,7 +94,7 @@ export const Footer = () => {
           <div className="flex flex-col items-center gap-3 md:gap-4">
             {/* Social Icons */}
             <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4">
-              {socialLinks.map(social => {
+              {socialLinks.map((social) => {
               const IconComponent = social.icon;
               return <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded border border-border bg-muted/30 text-muted-foreground hover:text-primary hover:border-primary hover:neon-glow transition-all duration-300" aria-label={social.label}>
                     <IconComponent className="w-3 h-3 md:w-4 md:h-4" />
