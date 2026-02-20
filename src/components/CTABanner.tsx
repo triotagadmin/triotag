@@ -52,7 +52,7 @@ export const CTABanner = () => {
             animation: "float3d 4s ease-in-out infinite"
           }}>
 
-          TURN UNUSED SPACES INTO A STEADY REVENUE STREAM! REGISTER TODAY!{" "}
+          ONBOARD AD SPACE OWNERS AND GET 5% COMMISSION FEE!{" "}
         </p>
 
         <div
