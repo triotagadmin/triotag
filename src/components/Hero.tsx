@@ -47,7 +47,7 @@ export const Hero = () => {
       <div className="container mx-auto px-4 md:px-6 relative z-10 hidden md:block">
         <div className={`max-w-4xl mx-auto text-center space-y-4 md:space-y-8 transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-tight">
-            <span className="text-primary neon-text-glow animate-text-glow">Accelerate your sales growth.</span>
+            <span className="text-primary neon-text-glow animate-text-glow">The Central Hub for Ambient Advertising</span>
           </h1>
 
           <p style={{
