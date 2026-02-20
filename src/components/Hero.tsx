@@ -50,13 +50,6 @@ export const Hero = () => {
             <span className="text-primary neon-text-glow animate-text-glow">The Central Hub for Ambient Advertising</span>
           </h1>
 
-          <p style={{
-          fontFamily: "'Rajdhani', sans-serif",
-          transform: 'perspective(600px) rotateX(8deg)',
-          animation: 'float3d 4s ease-in-out infinite',
-          letterSpacing: '0.15em',
-          textShadow: '0 0 10px rgba(138,43,226,0.8), 0 0 20px rgba(138,43,226,0.5), 0 0 30px rgba(138,43,226,0.3), 0 4px 15px rgba(0,0,0,1), 0 8px 40px rgba(0,0,0,1), 0 14px 70px rgba(0,0,0,0.8), 0 0 100px rgba(0,0,0,0.7), -20px 0 80px rgba(0,0,0,0.5), 20px 0 80px rgba(0,0,0,0.5)'
-        }} className="text-base text-center bg-transparent font-bold text-primary">​Advertise your business or provide ads space  across our micro advertising network. ​</p>
 
           <div className={`flex flex-row items-center justify-center gap-4 pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
             <Link to="/auth">
