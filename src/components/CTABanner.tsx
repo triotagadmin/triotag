@@ -52,7 +52,7 @@ export const CTABanner = () => {
             animation: "float3d 4s ease-in-out infinite"
           }}>
 
-          ONBOARD AD SPACE OWNERS AND GET 5% COMMISSION FEE!{" "}
+          ONBOARD AD SPACE OWNERS AND GET 10% COMMISSION FEE FROM EVERY SUCCESSFUL CAMPAIGN!{" "}
         </p>
 
         <div
