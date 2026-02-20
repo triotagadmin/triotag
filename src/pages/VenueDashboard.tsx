@@ -207,7 +207,7 @@ const VenueDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Manage Ad Spaces</CardTitle>
-                  <CardDescription>Add, edit, and manage your advertising spaces</CardDescription>
+                  <CardDescription>Add, edit, and manage your inventory</CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <Button onClick={() => navigate("/venue-registration")}>
