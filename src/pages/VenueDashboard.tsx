@@ -206,7 +206,7 @@ const VenueDashboard = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Manage Venue Ad Spaces</CardTitle>
+                  <CardTitle>Manage Ad Spaces</CardTitle>
                   <CardDescription>Add, edit, and manage your advertising spaces</CardDescription>
                 </div>
                 <div className="flex gap-2">
