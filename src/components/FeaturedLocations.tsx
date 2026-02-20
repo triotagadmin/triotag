@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrencySymbol } from "@/hooks/useCurrencyConversion";
 import venueCafe1 from "@/assets/venue-cafe-1.jpg";
 import venueMetroStation from "@/assets/venue-metro-station.jpg";
 import venueBathroom from "@/assets/venue-bathroom.jpg";
@@ -40,7 +41,8 @@ interface FeaturedListing {
   category: string;
   image: string;
   status: string;
-  adUnits: { type: string; label: string; pricePerWeek?: number; pricePerMonth?: number }[];
+  adUnits: { type: string; label: string; pricePerWeek?: number; pricePerMonth?: number; currency?: string }[];
+  currency: string;
   fromDb: boolean;
 }
 
@@ -52,6 +54,7 @@ const fallbackLocations: FeaturedListing[] = [
     image: venueCafe1,
     status: "Available",
     adUnits: [],
+    currency: "USD",
     fromDb: false,
   },
   {
@@ -61,6 +64,7 @@ const fallbackLocations: FeaturedListing[] = [
     image: venueMetroStation,
     status: "Booked",
     adUnits: [],
+    currency: "USD",
     fromDb: false,
   },
   {
@@ -70,6 +74,7 @@ const fallbackLocations: FeaturedListing[] = [
     image: venueBathroom,
     status: "Available",
     adUnits: [],
+    currency: "USD",
     fromDb: false,
   },
 ];
@@ -118,7 +123,9 @@ export const FeaturedLocations = () => {
               label: AD_UNIT_TYPE_LABELS[unit.type] || unit.type?.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
               pricePerWeek: unit.pricePerWeek || 0,
               pricePerMonth: unit.pricePerMonth || 0,
+              currency: unit.currency || specs?.currency || "USD",
             }));
+            const adUnitCurrency = adUnitsRaw[0]?.currency || specs?.currency || "USD";
             const mediaUrls = Array.isArray(item.media_urls) ? item.media_urls : [];
             const image = (mediaUrls[0] as string) || venueCafe1;
             const venueType = VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.custom_venue_type || "Venue";
@@ -130,6 +137,7 @@ export const FeaturedLocations = () => {
               image,
               status: item.availability_status === "booked" ? "Booked" : "Available",
               adUnits,
+              currency: adUnitCurrency,
               fromDb: true,
             };
           });
@@ -229,10 +237,10 @@ export const FeaturedLocations = () => {
                             </Badge>
                             <div className="flex gap-2 text-muted-foreground">
                               {unit.pricePerWeek > 0 && (
-                                <span>${unit.pricePerWeek}/wk</span>
+                                <span>{getCurrencySymbol(unit.currency || location.currency)}{unit.pricePerWeek}/wk</span>
                               )}
                               {unit.pricePerMonth > 0 && (
-                                <span>${unit.pricePerMonth}/mo</span>
+                                <span>{getCurrencySymbol(unit.currency || location.currency)}{unit.pricePerMonth}/mo</span>
                               )}
                             </div>
                           </div>
