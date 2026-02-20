@@ -52,7 +52,7 @@ export const AdvertiserTypes = () => {
             <span className="text-primary neon-text-glow">Precision</span> &{" "}
             <span className="text-primary neon-text-glow">Impact</span>
           </h2>
-          <p className="text-sm md:text-xl px-2 text-white">Tiny Sticky Ads specializes in managing and optimizing micro ad space placements across the globe. Our ad exchange system enables brands to leverage hyper-local marketing globally.</p>
+          <p className="text-sm md:text-xl px-2 text-white">Tiny Sticky Ads specializes in managing and optimizing ambient ad space placements across the globe. Our ad exchange system enables brands to leverage hyper-local marketing globally.</p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-8 md:mb-12">
