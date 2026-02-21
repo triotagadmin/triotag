@@ -159,7 +159,7 @@ const VenueDashboard = () => {
               </CardHeader>
             </Card>}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
             <Card>
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
@@ -235,7 +235,7 @@ const VenueDashboard = () => {
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                     {getCurrentSlideSpaces().map((space) => <Card key={space.id} className="overflow-hidden">
                         {Array.isArray(space.media_urls) && space.media_urls[0] && <div className="h-32 overflow-hidden">
                             <img src={space.media_urls[0]} alt={space.title} className="w-full h-full object-cover" />

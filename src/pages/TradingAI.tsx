@@ -172,7 +172,7 @@ const TradingAI = () => {
                 <p className="text-muted-foreground mb-6 max-w-md">
                   Ask me anything about trading philosophy, risk management, strategy development, or market psychology.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
+                <div className="grid grid-cols-2 gap-3 w-full max-w-2xl">
                   {quickQuestions.map((question, index) => (
                     <Button
                       key={index}

@@ -122,7 +122,7 @@ const Dashboard = () => {
 
         <div className="mb-8">
           <h3 className="text-xl font-bold mb-4">Publisher Options</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
             <Card className="cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate("/venue")}>
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
@@ -138,7 +138,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
           {userType === "advertiser" && (
             <>
               <Card>
