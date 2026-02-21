@@ -1740,6 +1740,10 @@ export type Database = {
           title: string
         }[]
       }
+      set_own_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: undefined
+      }
       validate_publisher_ticket: {
         Args: {
           p_scanner_ip?: string
