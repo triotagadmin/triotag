@@ -336,7 +336,7 @@ const CampaignBuilder = () => {
               Cancel
             </Button>
             <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? "Creating Campaign..." : "Create Campaign"}
+              {loading ? "Sending Campaign..." : "Send Campaign"}
             </Button>
           </div>
         </form>
