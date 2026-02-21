@@ -23,8 +23,8 @@ export const Hero = () => {
         <img alt="Hero background" className="w-full h-auto object-contain" src="/lovable-uploads/3d27b193-56c3-487b-88f4-4277c4f12752.jpg" />
         <div className="absolute inset-0 z-20 flex items-center justify-center">
           <div className={`w-full px-4 text-center space-y-2 transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground leading-tight">
-              <span className="text-primary neon-text-glow animate-text-glow">{HERO_HEADLINE}</span>
+            <h1 className="hero-title text-3xl font-bold tracking-tight text-foreground leading-tight">
+              <span className="hero-span text-primary neon-text-glow animate-text-glow">{HERO_HEADLINE}</span>
             </h1>
             <div className={`grid grid-cols-2 gap-2 pt-1 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               <Link to={HERO_CTA_PRIMARY.link} className="block">
@@ -46,8 +46,8 @@ export const Hero = () => {
 
       <div className="container mx-auto px-4 md:px-6 relative z-10 hidden md:block">
         <div className={`max-w-4xl mx-auto text-center space-y-4 md:space-y-8 transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-tight">
-            <span className="text-primary neon-text-glow animate-text-glow">{HERO_HEADLINE}</span>
+          <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-tight">
+            <span className="hero-span text-primary neon-text-glow animate-text-glow">{HERO_HEADLINE}</span>
           </h1>
 
 
