@@ -37,7 +37,7 @@ const AD_UNIT_TYPE_LABELS: Record<string, string> = {
   wall_poster: "Wall Poster",
   digital_screen: "Digital Screen",
   mural_painting: "Mural Painting",
-  wheat_paste: "Wheat Paste",
+  wheat_paste: "Wheat Paste"
 };
 
 const VENUE_TYPE_LABELS: Record<string, string> = {
@@ -50,7 +50,7 @@ const VENUE_TYPE_LABELS: Record<string, string> = {
   hotel: "Hotel",
   coworking: "Co-Working Space",
   guerrilla: "Guerrilla Ad Space",
-  other: "Other",
+  other: "Other"
 };
 
 const Marketplace = () => {
@@ -63,7 +63,7 @@ const Marketplace = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
-  const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationCoords, setLocationCoords] = useState<{lat: number;lng: number;} | null>(null);
   const [locationSearching, setLocationSearching] = useState(false);
 
   const ITEMS_PER_SLIDE = 6;
@@ -91,43 +91,43 @@ const Marketplace = () => {
       const { data, error } = await supabase.rpc("search_nearby_listings", {
         user_lat: lat,
         user_lng: lng,
-        radius_km: 10,
+        radius_km: 10
       });
 
       if (error) throw error;
 
-      const locationListings: MarketplaceListing[] = (data || [])
-        .map((item: any) => {
-          // media_urls may come as JSON string from RPC, parse if needed
-          let parsedMediaUrls = item.media_urls;
-          if (typeof parsedMediaUrls === "string") {
-            try { parsedMediaUrls = JSON.parse(parsedMediaUrls); } catch { parsedMediaUrls = []; }
-          }
+      const locationListings: MarketplaceListing[] = (data || []).
+      map((item: any) => {
+        // media_urls may come as JSON string from RPC, parse if needed
+        let parsedMediaUrls = item.media_urls;
+        if (typeof parsedMediaUrls === "string") {
+          try {parsedMediaUrls = JSON.parse(parsedMediaUrls);} catch {parsedMediaUrls = [];}
+        }
 
-          const specs = typeof item.specifications === "string" 
-            ? (() => { try { return JSON.parse(item.specifications); } catch { return {}; } })()
-            : (item.specifications || {});
-          const adUnitsFromDb = specs?.ad_units || [];
-          const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
-          const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
-          const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
-          const currency = adUnitsFromDb[0]?.currency || specs?.currency || "USD";
+        const specs = typeof item.specifications === "string" ?
+        (() => {try {return JSON.parse(item.specifications);} catch {return {};}})() :
+        item.specifications || {};
+        const adUnitsFromDb = specs?.ad_units || [];
+        const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
+        const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
+        const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
+        const currency = adUnitsFromDb[0]?.currency || specs?.currency || "USD";
 
-          return {
-            id: item.id,
-            title: item.title,
-            description: item.description || "",
-            location: item.location || "Not specified",
-            type: item.category === "agent" ? (item.service_type || "Agent Service") : (VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue"),
-            adUnits: adUnitLabels.length > 0 ? adUnitLabels : item.category === "agent" ? [item.service_type || "Service"] : ["No ad units specified"],
-            image: Array.isArray(parsedMediaUrls) ? parsedMediaUrls[0] : undefined,
-            ownerName: item.publisher_business_name || (item.category === "agent" ? "Agent" : "Venue"),
-            createdAt: item.created_at || "",
-            monthlySubscriptionFee: monthlyPrice || item.monthly_subscription_fee || 0,
-            weeklyPrice: weeklyPrice,
-            currency: currency,
-          };
-        });
+        return {
+          id: item.id,
+          title: item.title,
+          description: item.description || "",
+          location: item.location || "Not specified",
+          type: item.category === "agent" ? item.service_type || "Agent Service" : VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue",
+          adUnits: adUnitLabels.length > 0 ? adUnitLabels : item.category === "agent" ? [item.service_type || "Service"] : ["No ad units specified"],
+          image: Array.isArray(parsedMediaUrls) ? parsedMediaUrls[0] : undefined,
+          ownerName: item.publisher_business_name || (item.category === "agent" ? "Agent" : "Venue"),
+          createdAt: item.created_at || "",
+          monthlySubscriptionFee: monthlyPrice || item.monthly_subscription_fee || 0,
+          weeklyPrice: weeklyPrice,
+          currency: currency
+        };
+      });
 
       setFilteredListings(locationListings);
       setCurrentSlide(0);
@@ -136,7 +136,7 @@ const Marketplace = () => {
       toast({
         title: "Error",
         description: "Failed to search listings by location.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLocationSearching(false);
@@ -152,11 +152,11 @@ const Marketplace = () => {
     try {
       setLoading(true);
 
-      const { data: venuesData } = await supabase
-        .from("ad_spaces")
-        .select(`*, publisher_profiles_public(business_name, publisher_type)`)
-        .eq("approval_status", "approved")
-        .order("created_at", { ascending: false });
+      const { data: venuesData } = await supabase.
+      from("ad_spaces").
+      select(`*, publisher_profiles_public(business_name, publisher_type)`).
+      eq("approval_status", "approved").
+      order("created_at", { ascending: false });
 
       const allListings: MarketplaceListing[] = (venuesData || []).map((v) => {
         const specs = v.specifications as any;
@@ -178,7 +178,7 @@ const Marketplace = () => {
           createdAt: v.created_at || "",
           monthlySubscriptionFee: monthlyPrice,
           weeklyPrice: weeklyPrice,
-          currency: currency,
+          currency: currency
         };
       });
 
@@ -195,7 +195,7 @@ const Marketplace = () => {
       toast({
         title: "Error",
         description: "Failed to load marketplace listings.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
@@ -209,9 +209,9 @@ const Marketplace = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (l) =>
-          l.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          l.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          l.location.toLowerCase().includes(searchTerm.toLowerCase())
+        l.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        l.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        l.location.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     setFilteredListings(filtered);
@@ -222,7 +222,7 @@ const Marketplace = () => {
     if (!user) {
       toast({
         title: "Authentication Required",
-        description: "Please log in to view listing details and make transactions.",
+        description: "Please log in to view listing details and make transactions."
       });
       navigate("/auth");
       return;
@@ -247,8 +247,8 @@ const Marketplace = () => {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center">
         <p className="text-muted-foreground">Loading marketplace...</p>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -257,18 +257,18 @@ const Marketplace = () => {
       <div className="container mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Micro Ad Space</h1>
+          
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Your central hub for activating micro advertising spaces.
+            Your central hub for activating advertising spaces.
           </p>
-          {!user && (
-            <p className="text-sm text-muted-foreground mt-2">
+          {!user &&
+          <p className="text-sm text-muted-foreground mt-2">
               <Button variant="link" onClick={() => navigate("/auth")} className="p-0 h-auto">
                 Log in
               </Button>{" "}
               to make transactions
             </p>
-          )}
+          }
         </div>
 
         {/* Search & Filters */}
@@ -288,47 +288,47 @@ const Marketplace = () => {
                     setSearchTerm(e.target.value);
                     if (locationCoords) clearLocationFilter();
                   }}
-                  className="pl-9"
-                />
+                  className="pl-9" />
+
               </div>
 
               <Button
                 variant={locationCoords ? "default" : "outline"}
                 onClick={() => setLocationModalOpen(true)}
-                className="w-full"
-              >
+                className="w-full">
+
                 <MapPin className="h-4 w-4 mr-2" />
                 Search by Location
               </Button>
             </div>
 
-            {locationCoords && (
-              <div className="flex items-center gap-2 mt-4 p-2 rounded-lg bg-primary/10 border border-primary/20">
+            {locationCoords &&
+            <div className="flex items-center gap-2 mt-4 p-2 rounded-lg bg-primary/10 border border-primary/20">
                 <MapPin className="h-4 w-4 text-primary shrink-0" />
                 <span className="text-sm text-primary">
                   Showing results within 10 km of ({locationCoords.lat.toFixed(4)},{" "}
                   {locationCoords.lng.toFixed(4)})
                 </span>
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearLocationFilter}
-                  className="ml-auto h-6 w-6 p-0"
-                >
+                variant="ghost"
+                size="sm"
+                onClick={clearLocationFilter}
+                className="ml-auto h-6 w-6 p-0">
+
                   <X className="h-3 w-3" />
                 </Button>
               </div>
-            )}
+            }
           </CardContent>
         </Card>
 
         {/* Location Search Loading */}
-        {locationSearching && (
-          <div className="flex items-center justify-center py-8 mb-6">
+        {locationSearching &&
+        <div className="flex items-center justify-center py-8 mb-6">
             <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
             <p className="text-muted-foreground">Searching nearby ad spaces...</p>
           </div>
-        )}
+        }
 
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
@@ -342,54 +342,54 @@ const Marketplace = () => {
         </div>
 
         {/* Carousel Navigation */}
-        {totalSlides > 1 && (
-          <div className="flex items-center justify-center gap-4 mb-6">
+        {totalSlides > 1 &&
+        <div className="flex items-center justify-center gap-4 mb-6">
             <Button variant="outline" size="icon" onClick={prevSlide}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <div className="flex gap-2">
-              {Array.from({ length: totalSlides }).map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    idx === currentSlide ? "bg-primary" : "bg-muted-foreground/30"
-                  }`}
-                />
-              ))}
+              {Array.from({ length: totalSlides }).map((_, idx) =>
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              className={`w-2 h-2 rounded-full transition-colors ${
+              idx === currentSlide ? "bg-primary" : "bg-muted-foreground/30"}`
+              } />
+
+            )}
             </div>
             <Button variant="outline" size="icon" onClick={nextSlide}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-        )}
+        }
 
         {/* Listings Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {getCurrentSlideListings().length === 0 ? (
-            <div className="col-span-full text-center py-12">
+          {getCurrentSlideListings().length === 0 ?
+          <div className="col-span-full text-center py-12">
               <p className="text-muted-foreground">
-                {locationCoords
-                  ? "No ad spaces found within 10 km of this location"
-                  : "No approved ad spaces found matching your criteria"}
+                {locationCoords ?
+              "No ad spaces found within 10 km of this location" :
+              "No approved ad spaces found matching your criteria"}
               </p>
-            </div>
-          ) : (
-            getCurrentSlideListings().map((listing) => (
-              <Card
-                key={listing.id}
-                className="hover:shadow-lg transition-shadow overflow-hidden cursor-pointer"
-                onClick={() => handleListingClick(listing)}
-              >
-                {listing.image && (
-                  <div className="relative h-48 w-full overflow-hidden">
+            </div> :
+
+          getCurrentSlideListings().map((listing) =>
+          <Card
+            key={listing.id}
+            className="hover:shadow-lg transition-shadow overflow-hidden cursor-pointer"
+            onClick={() => handleListingClick(listing)}>
+
+                {listing.image &&
+            <div className="relative h-48 w-full overflow-hidden">
                     <img
-                      src={listing.image}
-                      alt={listing.title}
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                    />
+                src={listing.image}
+                alt={listing.title}
+                className="w-full h-full object-cover transition-transform hover:scale-105" />
+
                   </div>
-                )}
+            }
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2 gap-2">
                     <div className="flex items-center gap-2">
@@ -412,49 +412,49 @@ const Marketplace = () => {
                     <span>{listing.location}</span>
                   </div>
 
-                  {(listing.weeklyPrice || listing.monthlySubscriptionFee) && (
-                    <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 space-y-1">
-                      {listing.weeklyPrice !== undefined && listing.weeklyPrice > 0 && (
-                        <div>
+                  {(listing.weeklyPrice || listing.monthlySubscriptionFee) &&
+              <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 space-y-1">
+                      {listing.weeklyPrice !== undefined && listing.weeklyPrice > 0 &&
+                <div>
                           <span className="font-medium">Weekly:</span> {getCurrencySymbol(listing.currency)}{listing.weeklyPrice}/week
                         </div>
-                      )}
+                }
                       {listing.monthlySubscriptionFee !== undefined &&
-                        listing.monthlySubscriptionFee > 0 && (
-                          <div>
+                listing.monthlySubscriptionFee > 0 &&
+                <div>
                             <span className="font-medium">Monthly:</span> {getCurrencySymbol(listing.currency)}
                             {listing.monthlySubscriptionFee}/month
                           </div>
-                        )}
+                }
                     </div>
-                  )}
+              }
 
-                  {listing.adUnits.length > 0 && (
-                    <div className="pt-2 border-t">
+                  {listing.adUnits.length > 0 &&
+              <div className="pt-2 border-t">
                       <p className="text-xs text-muted-foreground mb-2">Ad Units</p>
                       <div className="flex flex-wrap gap-1">
                         {listing.adUnits.slice(0, 3).map((unit) => {
-                          const formatAdUnitName = (sku: string) => {
-                            return sku.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-                          };
-                          return (
-                            <Button key={unit} variant="cyber" size="sm" className="text-xs h-7 px-3">
+                    const formatAdUnitName = (sku: string) => {
+                      return sku.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                    };
+                    return (
+                      <Button key={unit} variant="cyber" size="sm" className="text-xs h-7 px-3">
                               {formatAdUnitName(unit)}
-                            </Button>
-                          );
-                        })}
-                        {listing.adUnits.length > 3 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-xs h-7 px-3 border-primary/50 text-primary"
-                          >
+                            </Button>);
+
+                  })}
+                        {listing.adUnits.length > 3 &&
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7 px-3 border-primary/50 text-primary">
+
                             +{listing.adUnits.length - 3} more
                           </Button>
-                        )}
+                  }
                       </div>
                     </div>
-                  )}
+              }
 
                   <div className="pt-2 border-t">
                     <p className="text-xs text-muted-foreground mb-1">Agent</p>
@@ -466,19 +466,19 @@ const Marketplace = () => {
                   </Button>
                 </CardContent>
               </Card>
-            ))
-          )}
+          )
+          }
         </div>
       </div>
       <LocationSearchModal
         open={locationModalOpen}
         onOpenChange={setLocationModalOpen}
         onSearch={handleLocationSearch}
-        radiusKm={10}
-      />
+        radiusKm={10} />
+
       <Footer />
-    </div>
-  );
+    </div>);
+
 };
 
 export default Marketplace;
