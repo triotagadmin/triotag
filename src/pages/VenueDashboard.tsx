@@ -54,7 +54,7 @@ const VenueDashboard = () => {
           title: "Profile Required",
           description: "Please complete your profile setup."
         });
-        navigate("/complete-profile");
+        navigate("/venue-publishers");
         return;
       }
       setProfile(profileData);

@@ -233,7 +233,7 @@ const VenueRegistration = () => {
           await loadVenueData(editParam, profile.id);
         }
       } else {
-        navigate("/complete-profile");
+        navigate("/auth");
       }
     };
     checkAuth();
