@@ -458,7 +458,7 @@ const Marketplace = () => {
 
                   <div className="pt-2 border-t">
                     
-                    <p className="text-sm font-medium">{listing.ownerName}</p>
+                    
                   </div>
 
                   <Button className="w-full mt-4">
