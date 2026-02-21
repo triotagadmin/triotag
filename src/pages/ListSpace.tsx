@@ -212,7 +212,7 @@ const ListSpace = () => {
 
                 {/* Address */}
                 <div className="space-y-2">
-                  <Label htmlFor="address">Address / General Area *</Label>
+                  <Label htmlFor="address">Physical Address</Label>
                   <Input id="address" placeholder="e.g., 123 Main St, Manila or Downtown Area" value={address} onChange={(e) => setAddress(e.target.value)} />
                 </div>
 
