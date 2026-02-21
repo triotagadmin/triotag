@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
-import { Calendar, DollarSign, MapPin, Users, Sparkles } from "lucide-react";
+import { Calendar, DollarSign, MapPin, Users, Sparkles, Tag } from "lucide-react";
+import { PRINT_PRODUCTS } from "@/lib/printProducts";
 
 const CampaignBuilder = () => {
   const navigate = useNavigate();
@@ -25,7 +26,11 @@ const CampaignBuilder = () => {
     start_date: "",
     end_date: "",
     target_audience: "",
+    ad_unit_type: "",
   });
+
+  const selectedProduct = PRINT_PRODUCTS.find(p => p.id === formData.ad_unit_type);
+  const adUnitPrice = selectedProduct?.pricePerUnit ?? null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,10 +43,9 @@ const CampaignBuilder = () => {
         return;
       }
 
-      // Get advertiser profile
       const { data: profile, error: profileError } = await supabase
         .from("advertiser_profiles")
-        .select("id")
+        .select("id, company_name, contact_name, contact_phone")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
@@ -56,7 +60,6 @@ const CampaignBuilder = () => {
         return;
       }
 
-      // Create campaign
       const { error: campaignError } = await supabase
         .from("campaigns")
         .insert({
@@ -70,23 +73,26 @@ const CampaignBuilder = () => {
           start_date: formData.start_date,
           end_date: formData.end_date,
           target_audience: formData.target_audience,
+          ad_unit_type: formData.ad_unit_type,
+          ad_unit_price: adUnitPrice,
           status: "pending",
         });
 
       if (campaignError) throw campaignError;
 
-      // Send email notification
       try {
         await supabase.functions.invoke("submit-campaign", {
           body: {
-            companyName: profile.id,
-            contactName: session.user.email,
+            companyName: profile.company_name || profile.id,
+            contactName: profile.contact_name || session.user.email,
             email: session.user.email,
-            phone: "",
+            phone: profile.contact_phone || "",
             campaignName: formData.campaign_name,
             category: formData.campaign_type,
-            adUnit: "N/A",
+            adUnit: selectedProduct?.name || "N/A",
+            adUnitPrice: adUnitPrice != null ? `$${adUnitPrice}` : "N/A",
             budget: formData.budget_amount,
+            budgetCurrency: formData.budget_currency,
             targetAudience: formData.target_audience || "Not specified",
             location: formData.location || "Not specified",
             startDate: formData.start_date,
@@ -96,7 +102,6 @@ const CampaignBuilder = () => {
         });
       } catch (emailError) {
         console.error("Failed to send email notification:", emailError);
-        // Don't fail the submission if email fails
       }
 
       toast({
@@ -182,6 +187,47 @@ const CampaignBuilder = () => {
                     <SelectItem value="ongoing">Ongoing Campaign</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Ad Unit Type & Price */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="ad_unit_type" className="flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    Ad Unit Type *
+                  </Label>
+                  <Select
+                    value={formData.ad_unit_type}
+                    onValueChange={(value) => setFormData({ ...formData, ad_unit_type: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select ad unit type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRINT_PRODUCTS.map((product) => (
+                        <SelectItem key={product.id} value={product.id}>
+                          {product.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Current Price per Unit</Label>
+                  <div className="flex items-center h-10 px-3 rounded-md border border-input bg-muted/50 text-sm">
+                    {adUnitPrice != null ? (
+                      <span className="font-semibold text-foreground">${adUnitPrice.toFixed(2)}</span>
+                    ) : (
+                      <span className="text-muted-foreground">Select an ad unit</span>
+                    )}
+                  </div>
+                  {selectedProduct && (
+                    <p className="text-xs text-muted-foreground">
+                      {selectedProduct.specs.size} · {selectedProduct.specs.material}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Location */}

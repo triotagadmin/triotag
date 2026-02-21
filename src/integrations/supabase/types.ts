@@ -475,6 +475,8 @@ export type Database = {
       }
       campaigns: {
         Row: {
+          ad_unit_price: number | null
+          ad_unit_type: string | null
           advertiser_id: string
           approved_at: string | null
           approved_by: string | null
@@ -496,6 +498,8 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ad_unit_price?: number | null
+          ad_unit_type?: string | null
           advertiser_id: string
           approved_at?: string | null
           approved_by?: string | null
@@ -517,6 +521,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ad_unit_price?: number | null
+          ad_unit_type?: string | null
           advertiser_id?: string
           approved_at?: string | null
           approved_by?: string | null
