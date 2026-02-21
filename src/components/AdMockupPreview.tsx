@@ -63,6 +63,8 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
   const [campaignName, setCampaignName] = useState("");
   const [brandCategory, setBrandCategory] = useState("");
   const [campaignObjective, setCampaignObjective] = useState("");
+  const [customBrandCategory, setCustomBrandCategory] = useState("");
+  const [customCampaignObjective, setCustomCampaignObjective] = useState("");
   const [targetAudience, setTargetAudience] = useState("");
   const [creativeNotes, setCreativeNotes] = useState("");
 
@@ -167,8 +169,8 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
       artworkUrl: uploadedImages[0],
       campaignDetails: {
         campaignName,
-        brandCategory,
-        campaignObjective,
+        brandCategory: brandCategory === "Other" ? customBrandCategory : brandCategory,
+        campaignObjective: campaignObjective === "Other" ? customCampaignObjective : campaignObjective,
         targetAudience,
         creativeNotes,
       },
@@ -221,6 +223,16 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
                   ))}
                 </SelectContent>
               </Select>
+              {brandCategory === "Other" && (
+                <Input
+                  placeholder="Please specify your category..."
+                  value={customBrandCategory}
+                  onChange={(e) => {
+                    setCustomBrandCategory(e.target.value);
+                    setIsConfirmed(false);
+                  }}
+                />
+              )}
             </div>
           </div>
 
@@ -242,6 +254,16 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
                   ))}
                 </SelectContent>
               </Select>
+              {campaignObjective === "Other" && (
+                <Input
+                  placeholder="Please specify your objective..."
+                  value={customCampaignObjective}
+                  onChange={(e) => {
+                    setCustomCampaignObjective(e.target.value);
+                    setIsConfirmed(false);
+                  }}
+                />
+              )}
             </div>
             
             <div className="space-y-2">
