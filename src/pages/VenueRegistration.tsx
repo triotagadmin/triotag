@@ -283,7 +283,8 @@ const VenueRegistration = () => {
         setSelectedAdUnits(specs.ad_units.map((u: any) => ({
           type: u.type, quantity: u.quantity || 1, pricePerWeek: u.pricePerWeek || 0,
           pricePerMonth: u.pricePerMonth || 0, specialRules: u.specialRules || "",
-          customFormat: u.customFormat, thumbnailUrl: u.thumbnailUrl
+          customFormat: u.customFormat, thumbnailUrl: u.thumbnailUrl,
+          size: u.size || "", currency: u.currency || specs.currency || "USD"
         })));
       }
 
