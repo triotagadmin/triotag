@@ -42,6 +42,8 @@ const HabitTracker = () => {
   const [loadingQR, setLoadingQR] = useState(false);
   const [selectedQR, setSelectedQR] = useState<QRCodeData | null>(null);
   const [expandedQR, setExpandedQR] = useState<string | null>(null);
+  const [userQRCount, setUserQRCount] = useState(0);
+  const QR_LIMIT = 10;
 
   // AI Analytics State
   const [aiResponse, setAiResponse] = useState("");
@@ -83,6 +85,7 @@ const HabitTracker = () => {
           };
         }));
         setGeneratedQRs(qrsWithStats);
+        setUserQRCount(qrsWithStats.length);
       }
     } catch (error) {
       console.error('Error fetching QR codes:', error);
@@ -93,6 +96,14 @@ const HabitTracker = () => {
       toast({
         title: "Error",
         description: "Please enter a URL",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (userQRCount >= QR_LIMIT) {
+      toast({
+        title: "Limit Reached",
+        description: "You've reached the 10 QR code limit for your account.",
         variant: "destructive"
       });
       return;
@@ -144,6 +155,24 @@ const HabitTracker = () => {
         setLoadingQR(false);
         return;
       }
+
+      // Server-side limit check
+      const { count: currentCount } = await supabase
+        .from('qr_codes')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', user.id);
+
+      if ((currentCount || 0) >= QR_LIMIT) {
+        setUserQRCount(currentCount || 0);
+        toast({
+          title: "Limit Reached",
+          description: "You've reached the 10 QR code limit for your account.",
+          variant: "destructive"
+        });
+        setLoadingQR(false);
+        return;
+      }
+
       const shortCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       const {
         data,
@@ -286,12 +315,24 @@ Based on your scan patterns, consider:
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    <Input placeholder="Enter destination URL..." value={qrUrl} onChange={(e) => setQrUrl(e.target.value)} />
-                    <Input placeholder="QR Code name (optional)" value={qrName} onChange={(e) => setQrName(e.target.value)} />
-                    <Button onClick={generateQRCode} disabled={loadingQR} className="w-full bg-gradient-to-r from-primary to-accent">
-                      <QrCode className="w-4 h-4 mr-2" />
-                      {loadingQR ? "Generating..." : "Generate QR Code"}
-                    </Button>
+                    <Input placeholder="Enter destination URL..." value={qrUrl} onChange={(e) => setQrUrl(e.target.value)} disabled={userQRCount >= QR_LIMIT} />
+                    <Input placeholder="QR Code name (optional)" value={qrName} onChange={(e) => setQrName(e.target.value)} disabled={userQRCount >= QR_LIMIT} />
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>{userQRCount} / {QR_LIMIT} QR codes used</span>
+                      {userQRCount >= QR_LIMIT && (
+                        <span className="text-destructive font-medium">Limit reached</span>
+                      )}
+                    </div>
+                    {userQRCount >= QR_LIMIT ? (
+                      <p className="text-sm text-destructive text-center p-3 border border-destructive/30 rounded-lg bg-destructive/5">
+                        You've reached the 10 QR code limit for your account.
+                      </p>
+                    ) : (
+                      <Button onClick={generateQRCode} disabled={loadingQR} className="w-full bg-gradient-to-r from-primary to-accent">
+                        <QrCode className="w-4 h-4 mr-2" />
+                        {loadingQR ? "Generating..." : "Generate QR Code"}
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
