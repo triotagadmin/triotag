@@ -108,7 +108,7 @@ const Insights = () => {
                         {post.read_time}
                       </span>
                     </div>
-                    <CardTitle className="text-2xl group-hover:text-primary transition-colors">
+                    <CardTitle className="text-2xl group-hover:text-primary transition-colors md:text-2xl text-xs">
                       {post.title}
                     </CardTitle>
                     <CardDescription className="text-base mt-2">

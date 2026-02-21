@@ -36,7 +36,7 @@ export const Hero = () => {
               <Link to={HERO_CTA_SECONDARY.link} className="block">
                 <Button size="sm" variant="outline" className="relative overflow-hidden w-full text-[8px] px-2 py-1 h-6 min-h-[24px] border-primary bg-primary hover:bg-primary/90 hover:neon-glow transition-all duration-300 animate-pulse-glow">
                   <span className="absolute inset-0 overflow-hidden rounded-[inherit]"><span className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent" /></span>
-                  <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 font-bold" style={{ textShadow: '0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,215,0,0.5)' }}>{HERO_CTA_SECONDARY.text}</span>
+                  <span className="relative z-10 text-primary-foreground font-bold">{HERO_CTA_SECONDARY.text}</span>
                 </Button>
               </Link>
             </div>
