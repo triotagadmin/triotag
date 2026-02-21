@@ -77,9 +77,20 @@ const Auth = () => {
           .maybeSingle();
 
         if (existingRole) {
-          // Existing user - route based on role
-          routeByRole(existingRole.role);
-          return;
+          // Check if this is a brand-new Google user whose trigger-created role
+          // doesn't match their intended selection (trigger defaults to advertiser)
+          const intendedRole = storedUserType === "venue" ? "publisher" : storedUserType;
+          if (existingRole.role !== intendedRole) {
+            // Update the role to match user's selection
+            await supabase
+              .from("user_roles")
+              .update({ role: intendedRole as any })
+              .eq("user_id", userId);
+          } else {
+            // Returning user with matching role - just route
+            routeByRole(existingRole.role);
+            return;
+          }
         }
 
         // New Google user - create role and profile
