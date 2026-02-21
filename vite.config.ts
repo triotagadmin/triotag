@@ -17,15 +17,15 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'icon-192x192.png', 'icon-512x512.png'],
       manifest: {
-        name: 'AI Adstreem - Choose Your Own Ads',
-        short_name: 'AI Adstreem',
+        name: 'Tiny Sticky Ads - Micro Advertising',
+        short_name: 'Tiny Sticky Ads',
         description: 'Track your ad campaigns and choose the ads you want to see',
-        theme_color: '#1e40af',
-        background_color: '#0f172a',
+        theme_color: '#39FF14',
+        background_color: '#000000',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
-        start_url: '/habit-tracker',
+        start_url: '/',
         icons: [
           {
             src: 'icon-192x192.png',
@@ -43,16 +43,19 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,gif}'],
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.lovableproject\.com\/.*/i,
-            handler: 'CacheFirst',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'lovable-cache',
+              networkTimeoutSeconds: 5,
               expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
               },
               cacheableResponse: {
                 statuses: [0, 200]
