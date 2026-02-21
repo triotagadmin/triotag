@@ -22,18 +22,19 @@ export const Hero = () => {
       <div className="relative w-full md:hidden">
         <img alt="Hero background" className="w-full h-auto object-contain" src="/lovable-uploads/3d27b193-56c3-487b-88f4-4277c4f12752.jpg" />
         <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className={`w-full px-4 text-center space-y-3 transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+          <div className={`w-full px-4 text-center space-y-2 transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
             <h1 className="text-3xl font-bold tracking-tight text-foreground leading-tight">
               <span className="text-primary neon-text-glow animate-text-glow">{HERO_HEADLINE}</span>
             </h1>
-            <div className={`grid grid-cols-2 gap-2 pt-2 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+            <div className={`grid grid-cols-2 gap-2 pt-1 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               <Link to={HERO_CTA_PRIMARY.link} className="block">
-                <Button size="sm" className="w-full text-[10px] px-2 py-2 h-10 min-h-[44px] bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90">
-                  {HERO_CTA_PRIMARY.text}
+                <Button size="sm" className="relative overflow-hidden w-full text-[8px] px-2 py-1 h-6 min-h-[24px] bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90 animate-pulse-glow">
+                  <span className="absolute inset-0 overflow-hidden rounded-[inherit]"><span className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-blue-400/40 to-transparent" /></span>
+                  <span className="relative z-10">{HERO_CTA_PRIMARY.text}</span>
                 </Button>
               </Link>
               <Link to={HERO_CTA_SECONDARY.link} className="block">
-                <Button size="sm" variant="outline" className="relative overflow-hidden w-full text-[10px] px-2 py-2 h-10 min-h-[44px] border-primary bg-primary hover:bg-primary/90 hover:neon-glow transition-all duration-300 animate-pulse-glow">
+                <Button size="sm" variant="outline" className="relative overflow-hidden w-full text-[8px] px-2 py-1 h-6 min-h-[24px] border-primary bg-primary hover:bg-primary/90 hover:neon-glow transition-all duration-300 animate-pulse-glow">
                   <span className="absolute inset-0 overflow-hidden rounded-[inherit]"><span className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent" /></span>
                   <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 font-bold" style={{ textShadow: '0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,215,0,0.5)' }}>{HERO_CTA_SECONDARY.text}</span>
                 </Button>
