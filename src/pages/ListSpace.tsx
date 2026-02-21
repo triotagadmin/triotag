@@ -28,6 +28,7 @@ const ListSpace = () => {
   const [locationName, setLocationName] = useState("");
   const [address, setAddress] = useState("");
   const [spaceType, setSpaceType] = useState("");
+  const [customSpaceType, setCustomSpaceType] = useState("");
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [size, setSize] = useState("tiny");
@@ -121,7 +122,7 @@ const ListSpace = () => {
         body: {
           locationName: locationName.trim(),
           address: address.trim(),
-          spaceType,
+          spaceType: spaceType === "Other" ? customSpaceType : spaceType,
           photoUrl,
           size,
           notes: notes.trim() || null,
@@ -167,6 +168,7 @@ const ListSpace = () => {
                   setLocationName("");
                   setAddress("");
                   setSpaceType("");
+                  setCustomSpaceType("");
                   setPhotoUrl(null);
                   setPhotoPreview(null);
                   setSize("tiny");
@@ -231,6 +233,13 @@ const ListSpace = () => {
                       ))}
                     </div>
                   </RadioGroup>
+                  {spaceType === "Other" && (
+                    <Input
+                      placeholder="Please specify the space type..."
+                      value={customSpaceType}
+                      onChange={(e) => setCustomSpaceType(e.target.value)}
+                    />
+                  )}
                 </div>
 
                 {/* Photo Upload */}
