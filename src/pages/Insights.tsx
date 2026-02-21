@@ -78,9 +78,9 @@ const Insights = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto text-center space-y-4">
             <Badge className="mb-4">Industry Insights</Badge>
-            <h1 className="text-5xl md:text-6xl font-bold">
-              Micro-Advertising Insights
-            </h1>
+            <h1 className="text-5xl md:text-6xl font-bold">Advertising Insights
+
+          </h1>
             <p className="text-xl text-muted-foreground">
               Discover trends, strategies, and success stories in the micro-advertising revolution
             </p>
@@ -96,7 +96,7 @@ const Insights = () => {
             </div> : blogPosts.length === 0 ? <div className="text-center py-12">
               <p className="text-muted-foreground">No blog posts available yet.</p>
             </div> : <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {blogPosts.map(post => <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-all group">
+              {blogPosts.map((post) => <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-all group">
                   {post.image_url && <div className="aspect-video overflow-hidden">
                       <img src={post.image_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>}
