@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,118 @@ const Auth = () => {
   const [userType, setUserType] = useState<string>("advertiser");
   const [showResendVerification, setShowResendVerification] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
+  const [activeTab, setActiveTab] = useState("signin");
+
+  // Handle post-OAuth redirect: detect session, create profile if needed, route to dashboard
+  useEffect(() => {
+    const handleOAuthRedirect = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const storedUserType = localStorage.getItem("google_signup_user_type");
+      if (!storedUserType) return; // Not a Google signup flow we initiated
+
+      localStorage.removeItem("google_signup_user_type");
+      setLoading(true);
+
+      try {
+        const userId = session.user.id;
+        const userEmail = session.user.email || "";
+
+        // Check if user_roles already exist (returning user)
+        const { data: existingRole } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (existingRole) {
+          // Existing user - route based on role
+          routeByRole(existingRole.role);
+          return;
+        }
+
+        // New Google user - create role and profile
+        const mappedRole = storedUserType === "venue" ? "publisher" : storedUserType;
+
+        // The trigger handle_new_user_role should handle this, but ensure it exists
+        // Create the appropriate profile and mark as verified
+        if (storedUserType === "advertiser") {
+          const { data: existingProfile } = await supabase
+            .from("advertiser_profiles")
+            .select("id")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+          if (!existingProfile) {
+            await supabase.from("advertiser_profiles").insert({
+              user_id: userId,
+              company_name: session.user.user_metadata?.full_name || "",
+              contact_name: session.user.user_metadata?.full_name || "",
+              contact_email: userEmail,
+              verified: true,
+            });
+          } else {
+            await supabase
+              .from("advertiser_profiles")
+              .update({ verified: true })
+              .eq("user_id", userId);
+          }
+        } else if (storedUserType === "venue") {
+          const { data: existingProfile } = await supabase
+            .from("publisher_profiles")
+            .select("id")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+          if (!existingProfile) {
+            await supabase.from("publisher_profiles").insert({
+              user_id: userId,
+              publisher_type: "agent",
+              business_name: session.user.user_metadata?.full_name || "Pending",
+              contact_email: userEmail,
+              verified: true,
+              verification_status: "pending",
+            });
+          } else {
+            await supabase
+              .from("publisher_profiles")
+              .update({ verified: true })
+              .eq("user_id", userId);
+          }
+        }
+
+        toast({
+          title: "Welcome!",
+          description: "Your account has been created successfully.",
+        });
+        routeByRole(mappedRole);
+      } catch (error: any) {
+        console.error("OAuth post-redirect error:", error);
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const routeByRole = (role: string) => {
+      if (role === "admin") {
+        navigate("/admin/dashboard");
+      } else if (role === "advertiser") {
+        navigate("/advertiser-dashboard");
+      } else if (role === "publisher") {
+        navigate("/venue");
+      } else {
+        navigate("/");
+      }
+    };
+
+    handleOAuthRedirect();
+  }, [navigate, toast]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -302,10 +414,14 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
+      // Store the selected user type for post-OAuth redirect handling
+      localStorage.setItem("google_signup_user_type", userType);
+
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: window.location.origin + "/auth",
       });
       if (result.error) {
+        localStorage.removeItem("google_signup_user_type");
         toast({
           title: "Google Sign-In Failed",
           description: result.error.message,
@@ -313,6 +429,7 @@ const Auth = () => {
         });
       }
     } catch (error: any) {
+      localStorage.removeItem("google_signup_user_type");
       toast({
         title: "Error",
         description: error.message,
@@ -323,8 +440,8 @@ const Auth = () => {
     }
   };
 
-  const GoogleButton = () => (
-    <div className="space-y-4">
+  const GoogleButton = ({ label = "Sign in with Google" }: { label?: string }) => (
+    <div className="space-y-4 mt-4">
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <Separator className="w-full" />
@@ -346,7 +463,7 @@ const Auth = () => {
           <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
           <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
         </svg>
-        Sign in with Google
+        {label}
       </Button>
     </div>
   );
@@ -359,7 +476,7 @@ const Auth = () => {
           <CardDescription>Sign in or create an account to get started</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs defaultValue="signin" className="w-full" onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -392,7 +509,7 @@ const Auth = () => {
                   {loading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
-              <GoogleButton />
+              <GoogleButton label="Sign in with Google" />
             </TabsContent>
 
             <TabsContent value="signup">
@@ -434,7 +551,7 @@ const Auth = () => {
                   {loading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>
-              <GoogleButton />
+              <GoogleButton label="Sign up with Google" />
             </TabsContent>
           </Tabs>
           
