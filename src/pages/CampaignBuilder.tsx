@@ -27,6 +27,7 @@ const CampaignBuilder = () => {
     end_date: "",
     target_audience: "",
     ad_unit_type: "",
+    contact_number: "",
   });
 
   const selectedProduct = PRINT_PRODUCTS.find(p => p.id === formData.ad_unit_type);
@@ -87,6 +88,7 @@ const CampaignBuilder = () => {
             contactName: profile.contact_name || session.user.email,
             email: session.user.email,
             phone: profile.contact_phone || "",
+            contactNumber: formData.contact_number,
             campaignName: formData.campaign_name,
             category: formData.campaign_type,
             adUnit: selectedProduct?.name || "N/A",
@@ -144,6 +146,19 @@ const CampaignBuilder = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Contact Number */}
+              <div className="space-y-2">
+                <Label htmlFor="contact_number">Contact Number *</Label>
+                <Input
+                  id="contact_number"
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  value={formData.contact_number}
+                  onChange={(e) => setFormData({ ...formData, contact_number: e.target.value })}
+                  required
+                />
+              </div>
+
               {/* Campaign Name */}
               <div className="space-y-2">
                 <Label htmlFor="campaign_name">Campaign Name *</Label>
