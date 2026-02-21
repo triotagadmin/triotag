@@ -50,11 +50,8 @@ const VenueDashboard = () => {
         return;
       }
       if (!profileData) {
-        toast({
-          title: "Profile Required",
-          description: "Please complete your profile setup."
-        });
-        navigate("/venue-publishers");
+        // Profile not yet created (e.g. race condition after signup) — just show empty state
+        setLoading(false);
         return;
       }
       setProfile(profileData);
