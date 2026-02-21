@@ -418,7 +418,7 @@ const Messages = () => {
           <h1 className="text-2xl font-bold">Messages</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 h-[calc(100vh-200px)]">
           {/* Conversations List */}
           <Card className="md:col-span-1">
             <CardHeader className="pb-2">

@@ -670,7 +670,7 @@ const VenueRegistration = () => {
                     <Label htmlFor="street">Street Address *</Label>
                     <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" required />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div>
                       <Label htmlFor="city">City *</Label>
                       <Input id="city" value={city} onChange={e => setCity(e.target.value)} placeholder="City" required />
@@ -680,7 +680,7 @@ const VenueRegistration = () => {
                       <Input id="state" value={state} onChange={e => setState(e.target.value)} placeholder="State or Province" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div>
                       <Label htmlFor="postalCode">Postal Code</Label>
                       <Input id="postalCode" value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="Postal/ZIP Code" />
@@ -690,7 +690,7 @@ const VenueRegistration = () => {
                       <Input id="country" value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" required />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div>
                       <Label htmlFor="latitude">Latitude (Google Maps)</Label>
                       <Input id="latitude" value={latitude} onChange={e => setLatitude(e.target.value)} placeholder="e.g., 40.7128" />
@@ -709,7 +709,7 @@ const VenueRegistration = () => {
                     <Label htmlFor="contactPerson">Contact Person *</Label>
                     <Input id="contactPerson" value={contactPerson} onChange={e => setContactPerson(e.target.value)} placeholder="Full name" required />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div>
                       <Label htmlFor="contactEmail">Contact Email *</Label>
                       <Input id="contactEmail" type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} required />

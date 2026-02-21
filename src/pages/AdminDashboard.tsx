@@ -805,7 +805,7 @@ export default function AdminDashboard() {
   const renderSubmissionsPanel = (submissions: Submission[], title: string, description: string) => (
     <>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Total</CardDescription>
@@ -1056,7 +1056,7 @@ export default function AdminDashboard() {
                 </p>
 
                 {/* Horizontal Listings Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                   {getCurrentMarketplaceItems().length === 0 ? (
                     <div className="col-span-full text-center py-8 text-muted-foreground">
                       No marketplace listings found

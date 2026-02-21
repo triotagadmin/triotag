@@ -95,7 +95,7 @@ const Insights = () => {
               <p className="text-muted-foreground">Loading blog posts...</p>
             </div> : blogPosts.length === 0 ? <div className="text-center py-12">
               <p className="text-muted-foreground">No blog posts available yet.</p>
-            </div> : <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            </div> : <div className="grid grid-cols-2 gap-3 md:gap-8 max-w-6xl mx-auto">
               {blogPosts.map((post) => <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-all group">
                   {post.image_url && <div className="aspect-video overflow-hidden">
                       <img src={post.image_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />

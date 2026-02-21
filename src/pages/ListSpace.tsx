@@ -271,7 +271,7 @@ const ListSpace = () => {
                 <div className="space-y-3">
                   <Label>Size *</Label>
                   <RadioGroup value={size} onValueChange={setSize}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       {SIZES.map((s) => (
                         <div key={s.value}>
                           <RadioGroupItem value={s.value} id={`size-${s.value}`} className="peer sr-only" />
@@ -321,7 +321,7 @@ const ListSpace = () => {
                 {/* Contact Info */}
                 <div className="border-t pt-6 space-y-4">
                   <h3 className="font-semibold text-lg">Your Contact Information</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="submitterName">Your Name *</Label>
                       <Input id="submitterName" placeholder="Full name" value={submitterName} onChange={(e) => setSubmitterName(e.target.value)} />

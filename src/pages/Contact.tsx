@@ -85,7 +85,7 @@ const Contact = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-8">
             {/* Contact Info Cards */}
             <div className="space-y-4">
               <Card className="bg-card border-border">
