@@ -64,7 +64,7 @@ const HabitTracker = () => {
         ascending: false
       }).limit(10);
       if (qrCodes) {
-        const qrsWithStats = await Promise.all(qrCodes.map(async qr => {
+        const qrsWithStats = await Promise.all(qrCodes.map(async (qr) => {
           const {
             count: totalScans
           } = await supabase.from('qr_code_scans').select('*', {
@@ -74,7 +74,7 @@ const HabitTracker = () => {
           const {
             data: scanData
           } = await supabase.from('qr_code_scans').select('ip_hash, city, country, device_type, browser, operating_system, scanned_at').eq('qr_code_id', qr.id).order('scanned_at', { ascending: false });
-          const uniqueScans = new Set(scanData?.map(s => s.ip_hash)).size;
+          const uniqueScans = new Set(scanData?.map((s) => s.ip_hash)).size;
           return {
             ...qr,
             totalScans: totalScans || 0,
@@ -117,23 +117,23 @@ const HabitTracker = () => {
       }
 
       // Check if user is a verified advertiser or admin (publishers excluded)
-      const { data: advertiserProfile } = await supabase
-        .from('advertiser_profiles')
-        .select('verified, status')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const { data: advertiserProfile } = await supabase.
+      from('advertiser_profiles').
+      select('verified, status').
+      eq('user_id', user.id).
+      maybeSingle();
 
-      const { data: userRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
+      const { data: userRole } = await supabase.
+      from('user_roles').
+      select('role').
+      eq('user_id', user.id).
+      eq('role', 'admin').
+      maybeSingle();
 
       const isAllowed =
-        advertiserProfile?.verified === true ||
-        advertiserProfile?.status === 'approved' ||
-        !!userRole;
+      advertiserProfile?.verified === true ||
+      advertiserProfile?.status === 'approved' ||
+      !!userRole;
 
       if (!isAllowed) {
         toast({
@@ -252,7 +252,7 @@ Based on your scan patterns, consider:
       <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-accent/30 py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Apps</h1>
+            
             <p className="text-muted-foreground">Generate, track, and analyze your QR codes</p>
           </div>
 
@@ -286,8 +286,8 @@ Based on your scan patterns, consider:
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    <Input placeholder="Enter destination URL..." value={qrUrl} onChange={e => setQrUrl(e.target.value)} />
-                    <Input placeholder="QR Code name (optional)" value={qrName} onChange={e => setQrName(e.target.value)} />
+                    <Input placeholder="Enter destination URL..." value={qrUrl} onChange={(e) => setQrUrl(e.target.value)} />
+                    <Input placeholder="QR Code name (optional)" value={qrName} onChange={(e) => setQrName(e.target.value)} />
                     <Button onClick={generateQRCode} disabled={loadingQR} className="w-full bg-gradient-to-r from-primary to-accent">
                       <QrCode className="w-4 h-4 mr-2" />
                       {loadingQR ? "Generating..." : "Generate QR Code"}
@@ -303,7 +303,7 @@ Based on your scan patterns, consider:
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 gap-4">
-                      {generatedQRs.map(qr => <div key={qr.id} className="border rounded-lg overflow-hidden">
+                      {generatedQRs.map((qr) => <div key={qr.id} className="border rounded-lg overflow-hidden">
                           <div className="p-4 flex items-center gap-4">
                             <img src={getQRImageUrl(qr.short_code)} alt="QR Code" className="w-16 h-16 border rounded" />
                             <div className="flex-1 min-w-0">
@@ -319,19 +319,19 @@ Based on your scan patterns, consider:
                               <a href={getQRImageUrl(qr.short_code)} download={`${qr.short_code}.png`} className="p-2 hover:bg-muted rounded">
                                 <Download className="w-4 h-4" />
                               </a>
-                              {qr.scans.length > 0 && (
-                                <button onClick={() => setExpandedQR(expandedQR === qr.id ? null : qr.id)} className="p-2 hover:bg-muted rounded">
+                              {qr.scans.length > 0 &&
+                        <button onClick={() => setExpandedQR(expandedQR === qr.id ? null : qr.id)} className="p-2 hover:bg-muted rounded">
                                   {expandedQR === qr.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                 </button>
-                              )}
+                        }
                             </div>
                           </div>
-                          {expandedQR === qr.id && qr.scans.length > 0 && (
-                            <div className="border-t bg-muted/30 p-4">
+                          {expandedQR === qr.id && qr.scans.length > 0 &&
+                    <div className="border-t bg-muted/30 p-4">
                               <p className="text-sm font-medium mb-3">Scan History</p>
                               <div className="space-y-2 max-h-60 overflow-y-auto">
-                                {qr.scans.map((scan, idx) => (
-                                  <div key={idx} className="flex items-start gap-3 text-xs p-2 bg-background rounded border">
+                                {qr.scans.map((scan, idx) =>
+                        <div key={idx} className="flex items-start gap-3 text-xs p-2 bg-background rounded border">
                                     <div className="mt-0.5">
                                       {scan.device_type === 'mobile' ? <Smartphone className="w-3.5 h-3.5 text-muted-foreground" /> : scan.device_type === 'tablet' ? <Tablet className="w-3.5 h-3.5 text-muted-foreground" /> : <Monitor className="w-3.5 h-3.5 text-muted-foreground" />}
                                     </div>
@@ -350,10 +350,10 @@ Based on your scan patterns, consider:
                                       </p>
                                     </div>
                                   </div>
-                                ))}
+                        )}
                               </div>
                             </div>
-                          )}
+                    }
                         </div>)}
                     </div>
                   </CardContent>
