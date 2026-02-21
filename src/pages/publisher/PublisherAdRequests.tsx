@@ -13,6 +13,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Navigation } from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -26,6 +36,7 @@ import {
   CheckCircle,
   XCircle,
   Search,
+  Ban,
 } from "lucide-react";
 
 interface AdRequest {
@@ -61,12 +72,15 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
   printing: { label: "Printing", color: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20", icon: <Package className="h-4 w-4" /> },
   payment_pending: { label: "Payment Pending", color: "bg-amber-500/10 text-amber-500 border-amber-500/20", icon: <Clock className="h-4 w-4" /> },
   completed: { label: "Completed", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", icon: <CheckCircle className="h-4 w-4" /> },
+  cancelled: { label: "Cancelled", color: "bg-gray-500/10 text-gray-500 border-gray-500/20", icon: <Ban className="h-4 w-4" /> },
 };
 
 export default function PublisherAdRequests() {
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<AdRequest[]>([]);
   const [isPublisher, setIsPublisher] = useState(false);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [publisherProfileId, setPublisherProfileId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -101,7 +115,7 @@ export default function PublisherAdRequests() {
       }
 
       setIsPublisher(true);
-      // Pass the publisher profile id (not user id) for querying activations
+      setPublisherProfileId(profile.id);
       await fetchRequests(profile.id);
     } catch (error: any) {
       toast({
@@ -156,6 +170,34 @@ export default function PublisherAdRequests() {
         description: error.message || "Failed to load ad requests",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleCancelRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from("activations")
+        .update({ status: "cancelled" as any })
+        .eq("id", requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Request Cancelled",
+        description: "The ad request has been cancelled.",
+      });
+
+      if (publisherProfileId) {
+        await fetchRequests(publisherProfileId);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel request",
+        variant: "destructive",
+      });
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -368,9 +410,21 @@ export default function PublisherAdRequests() {
                                     : format(new Date(request.created_at), "MMM d, yyyy")}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <Button variant="ghost" size="sm">
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
+                                  <div className="flex items-center justify-end gap-1">
+                                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/publisher/ad-requests/${request.id}`); }}>
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                    {!["cancelled", "completed", "rejected"].includes(request.status) && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        onClick={(e) => { e.stopPropagation(); setCancellingId(request.id); }}
+                                      >
+                                        <Ban className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             );
@@ -385,6 +439,26 @@ export default function PublisherAdRequests() {
           })}
         </Tabs>
       </div>
+
+      <AlertDialog open={!!cancellingId} onOpenChange={(open) => !open && setCancellingId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Ad Request</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this ad request? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Request</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => cancellingId && handleCancelRequest(cancellingId)}
+            >
+              Cancel Request
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

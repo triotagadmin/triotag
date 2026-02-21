@@ -1764,6 +1764,7 @@ export type Database = {
         | "rejected"
         | "pending_submission"
         | "under_review"
+        | "cancelled"
       activation_type:
         | "sticker"
         | "table_tent"
@@ -1920,6 +1921,7 @@ export const Constants = {
         "rejected",
         "pending_submission",
         "under_review",
+        "cancelled",
       ],
       activation_type: [
         "sticker",
