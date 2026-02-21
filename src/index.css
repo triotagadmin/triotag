@@ -113,6 +113,14 @@
       line-height: 1.3;
     }
 
+    h1.hero-title {
+      font-size: 18px !important;
+    }
+
+    h1.hero-title .hero-span {
+      font-size: 12px !important;
+    }
+
     h2 {
       font-size: 12px !important;
       line-height: 1.3;
