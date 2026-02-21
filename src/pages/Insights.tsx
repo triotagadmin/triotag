@@ -81,9 +81,9 @@ const Insights = () => {
             <h1 className="text-5xl md:text-6xl font-bold">Advertising Insights
 
           </h1>
-            <p className="text-xl text-muted-foreground">
-              Discover trends, strategies, and success stories in the micro-advertising revolution
-            </p>
+            <p className="text-xl text-muted-foreground">Discover trends, strategies, and success stories in the ambient and place-based advertising revolution
+
+          </p>
           </div>
         </div>
       </section>
