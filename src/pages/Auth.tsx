@@ -76,21 +76,16 @@ const Auth = () => {
           .eq("user_id", userId)
           .maybeSingle();
 
+        const intendedRole = storedUserType === "venue" ? "publisher" : storedUserType;
+
         if (existingRole) {
-          // Check if this is a brand-new Google user whose trigger-created role
-          // doesn't match their intended selection (trigger defaults to advertiser)
-          const intendedRole = storedUserType === "venue" ? "publisher" : storedUserType;
-          if (existingRole.role !== intendedRole) {
-            // Update the role to match user's selection
-            await supabase
-              .from("user_roles")
-              .update({ role: intendedRole as any })
-              .eq("user_id", userId);
-          } else {
-            // Returning user with matching role - just route
+          if (existingRole.role === intendedRole) {
+            // Returning user with correct role - just route
             routeByRole(existingRole.role);
             return;
           }
+          // New Google user whose trigger defaulted to wrong role - fix it
+          await supabase.rpc("set_own_role", { _role: intendedRole as "admin" | "advertiser" | "publisher" });
         }
 
         // New Google user - create role and profile
