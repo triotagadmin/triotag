@@ -55,7 +55,7 @@ export const HowItWorks = () => {
           }`}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 text-foreground">
-            How It <span className="text-primary neon-text-glow">Works</span>
+            How It Works
           </h2>
           <p className="text-sm md:text-xl text-muted-foreground">
             Four simple steps to start advertising

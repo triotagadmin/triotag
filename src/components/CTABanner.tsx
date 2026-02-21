@@ -40,7 +40,7 @@ export const CTABanner = () => {
         <h2
           className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold max-w-3xl mx-auto text-foreground transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
 
-          Sign up as our Agent and <span className="text-primary neon-text-glow">Earn Extra Income</span>
+          Sign up as our Agent and Earn Extra Income
         </h2>
 
         <p

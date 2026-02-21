@@ -48,9 +48,7 @@ export const AdvertiserTypes = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className={`max-w-3xl mx-auto text-center mb-8 md:mb-16 space-y-2 md:space-y-4 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-            Advertise with{" "}
-            <span className="text-primary neon-text-glow">Precision</span> &{" "}
-            <span className="text-primary neon-text-glow">Impact</span>
+            Advertise with Precision & Impact
           </h2>
           <p className="text-sm md:text-xl px-2 text-white">Tiny Sticky Ads specializes in managing and optimizing ambient ad space placements across the globe. Our ad exchange system enables brands to leverage hyper-local marketing globally.</p>
         </div>
