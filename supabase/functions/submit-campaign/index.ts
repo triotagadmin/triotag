@@ -16,7 +16,9 @@ interface CampaignSubmission {
   campaignName: string;
   category: string;
   adUnit: string;
+  adUnitPrice: string;
   budget: string;
+  budgetCurrency: string;
   targetAudience: string;
   location: string;
   startDate: string;
@@ -36,27 +38,28 @@ const handler = async (req: Request): Promise<Response> => {
       <h2>New Campaign Submission</h2>
       
       <h3>Company Information</h3>
-      <ul>
-        <li><strong>Company Name:</strong> ${submission.companyName}</li>
-        <li><strong>Contact Name:</strong> ${submission.contactName}</li>
-        <li><strong>Email:</strong> ${submission.email}</li>
-        <li><strong>Phone:</strong> ${submission.phone}</li>
-      </ul>
+      <table style="border-collapse:collapse;width:100%;max-width:600px;">
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Company Name</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.companyName}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Contact Name</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.contactName}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Email</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.email}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Phone</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.phone || 'Not provided'}</td></tr>
+      </table>
       
       <h3>Campaign Details</h3>
-      <ul>
-        <li><strong>Campaign Name:</strong> ${submission.campaignName}</li>
-        <li><strong>Category:</strong> ${submission.category}</li>
-        <li><strong>Ad Unit:</strong> ${submission.adUnit}</li>
-        <li><strong>Budget:</strong> $${submission.budget}</li>
-        <li><strong>Target Location:</strong> ${submission.location}</li>
-        <li><strong>Target Audience:</strong> ${submission.targetAudience}</li>
-        <li><strong>Start Date:</strong> ${submission.startDate}</li>
-        <li><strong>End Date:</strong> ${submission.endDate}</li>
-      </ul>
+      <table style="border-collapse:collapse;width:100%;max-width:600px;">
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Campaign Name</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.campaignName}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Campaign Type</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.category}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Ad Unit Type</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.adUnit}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Ad Unit Price</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.adUnitPrice}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Budget</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.budget} ${submission.budgetCurrency || 'USD'}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Target Location</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.location}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Target Audience</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.targetAudience}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Start Date</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.startDate}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">End Date</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.endDate}</td></tr>
+      </table>
       
       <h3>Campaign Description</h3>
-      <p>${submission.description}</p>
+      <p style="background:#f9f9f9;padding:12px;border-radius:4px;">${submission.description}</p>
     `;
 
     const emailResponse = await fetch("https://api.resend.com/emails", {
@@ -66,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Tiny Sticky Ads <noreply@tinystickyads.com>",
+        from: "Tiny Sticky Ads <onboarding@resend.dev>",
         to: ["tinystickyads@gmail.com"],
         subject: `New Campaign Submission: ${submission.campaignName}`,
         html: emailHtml,
