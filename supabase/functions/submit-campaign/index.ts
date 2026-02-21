@@ -13,6 +13,7 @@ interface CampaignSubmission {
   contactName: string;
   email: string;
   phone: string;
+  contactNumber: string;
   campaignName: string;
   category: string;
   adUnit: string;
@@ -43,6 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
         <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Contact Name</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.contactName}</td></tr>
         <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Email</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.email}</td></tr>
         <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Phone</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.phone || 'Not provided'}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold;">Contact Number</td><td style="padding:6px 12px;border:1px solid #ddd;">${submission.contactNumber}</td></tr>
       </table>
       
       <h3>Campaign Details</h3>
