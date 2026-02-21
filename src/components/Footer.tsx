@@ -1,7 +1,6 @@
-import { Facebook, Instagram, Linkedin, Mail, Youtube } from "lucide-react";
+import { Facebook, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
-import { FaTiktok, FaDiscord } from "react-icons/fa";
-import { BsTwitterX } from "react-icons/bs";
+import { FaTiktok } from "react-icons/fa";
 interface FooterLink {
   label: string;
   href: string;
@@ -17,32 +16,14 @@ export const Footer = () => {
     href: "https://instagram.com",
     label: "Instagram"
   }, {
-    icon: BsTwitterX,
-    href: "https://x.com",
-    label: "X (Twitter)",
-    isReactIcon: true
-  }, {
-    icon: Youtube,
-    href: "https://youtube.com",
-    label: "YouTube"
-  }, {
     icon: FaTiktok,
     href: "https://tiktok.com",
     label: "TikTok",
     isReactIcon: true
   }, {
-    icon: FaDiscord,
-    href: "https://discord.com",
-    label: "Discord",
-    isReactIcon: true
-  }, {
     icon: Linkedin,
     href: "https://linkedin.com",
     label: "LinkedIn"
-  }, {
-    icon: Mail,
-    href: "mailto:contact@tinysticky.ads",
-    label: "Email"
   }];
   const footerLinks = {
     company: [{
