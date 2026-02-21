@@ -94,9 +94,9 @@ export const PrintOnDemandSection = () => {
           </div>
           
           <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-display font-bold mb-4 md:mb-6">
-            <span className="text-foreground">Print on Demand</span>
+            Print on Demand
             <br />
-            <span className="text-primary neon-text-glow">API Integration</span>
+            API Integration
           </h2>
           
           <p className="text-sm md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">

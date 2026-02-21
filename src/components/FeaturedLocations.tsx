@@ -168,7 +168,7 @@ export const FeaturedLocations = () => {
           }`}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 text-foreground">
-            Featured <span className="text-primary neon-text-glow">Venues</span>
+            Featured Venues
           </h2>
           <p className="text-sm md:text-xl text-muted-foreground">
             Premium micro ad spaces in high-traffic areas
