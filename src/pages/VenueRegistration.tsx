@@ -840,7 +840,7 @@ const VenueRegistration = () => {
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg border-b pb-2">OOH Location & Placement</h3>
                   <div>
-                    <Label htmlFor="exactLocationNotes">Exact Location Notes</Label>
+                    <Label htmlFor="exactLocationNotes">Exact Placement Notes</Label>
                     <Textarea id="exactLocationNotes" value={oohDetails.exactLocationNotes} onChange={e => updateOohField("exactLocationNotes", e.target.value)} placeholder="e.g., North wall of building, visible from Main Street intersection..." rows={3} />
                   </div>
                   <div>
