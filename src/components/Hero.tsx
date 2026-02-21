@@ -5,6 +5,8 @@ import heroBackground from "@/assets/hero-background.gif";
 
 // Single source of truth for hero content
 const HERO_HEADLINE = "The Central Hub for Place-Based Advertisements.";
+const HERO_CTA_PRIMARY = { text: "Advertise Now", link: "/auth" };
+const HERO_CTA_SECONDARY = { text: "Register Ad Space", link: "/list-space" };
 
 export const Hero = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -25,15 +27,15 @@ export const Hero = () => {
               <span className="text-primary neon-text-glow animate-text-glow">{HERO_HEADLINE}</span>
             </h1>
             <div className={`grid grid-cols-2 gap-2 pt-2 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-              <Link to="/auth" className="block">
+              <Link to={HERO_CTA_PRIMARY.link} className="block">
                 <Button size="sm" className="w-full text-[10px] px-2 py-2 h-10 min-h-[44px] bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90">
-                  Advertise Now
+                  {HERO_CTA_PRIMARY.text}
                 </Button>
               </Link>
-              <Link to="/list-space" className="block">
+              <Link to={HERO_CTA_SECONDARY.link} className="block">
                 <Button size="sm" variant="outline" className="relative overflow-hidden w-full text-[10px] px-2 py-2 h-10 min-h-[44px] border-primary bg-primary hover:bg-primary/90 hover:neon-glow transition-all duration-300 animate-pulse-glow">
                   <span className="absolute inset-0 overflow-hidden rounded-[inherit]"><span className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent" /></span>
-                  <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 font-bold" style={{ textShadow: '0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,215,0,0.5)' }}>Register Ad Space</span>
+                  <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 font-bold" style={{ textShadow: '0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,215,0,0.5)' }}>{HERO_CTA_SECONDARY.text}</span>
                 </Button>
               </Link>
             </div>
@@ -49,16 +51,16 @@ export const Hero = () => {
 
 
           <div className={`flex flex-row items-center justify-center gap-4 pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-            <Link to="/auth">
+            <Link to={HERO_CTA_PRIMARY.link}>
               <Button size="lg" className="relative overflow-hidden text-lg px-8 py-6 min-h-[44px] bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90 animate-pulse-glow">
                 <span className="absolute inset-0 overflow-hidden rounded-[inherit]"><span className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-blue-400/40 to-transparent" /></span>
-                <span className="relative z-10">Advertise Now</span>
+                <span className="relative z-10">{HERO_CTA_PRIMARY.text}</span>
               </Button>
             </Link>
-            <Link to="/list-space">
+            <Link to={HERO_CTA_SECONDARY.link}>
               <Button size="lg" variant="outline" className="relative overflow-hidden text-lg px-8 py-6 min-h-[44px] border-primary bg-primary hover:bg-primary/90 hover:neon-glow transition-all duration-300 animate-pulse-glow">
                 <span className="absolute inset-0 overflow-hidden rounded-[inherit]"><span className="absolute inset-0 animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent" /></span>
-                <span className="relative z-10 text-primary-foreground font-bold">Register Ad Space</span>
+                <span className="relative z-10 text-primary-foreground font-bold">{HERO_CTA_SECONDARY.text}</span>
               </Button>
             </Link>
           </div>
