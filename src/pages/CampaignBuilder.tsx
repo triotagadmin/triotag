@@ -52,7 +52,7 @@ const CampaignBuilder = () => {
           description: "Please complete your advertiser profile first.",
           variant: "destructive",
         });
-        navigate("/complete-profile");
+        navigate("/advertiser-dashboard");
         return;
       }
 

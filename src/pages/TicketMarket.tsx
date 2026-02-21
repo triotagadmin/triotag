@@ -123,7 +123,7 @@ const TicketMarket = () => {
     // Allow both advertiser and publisher (venue) accounts to submit
     if (!advertiserProfile && !publisherProfile) {
       toast.error("Please complete your profile first");
-      navigate("/complete-profile");
+      navigate("/auth");
       return;
     }
 

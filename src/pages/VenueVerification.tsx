@@ -81,7 +81,7 @@ const VenueVerification = () => {
         setPublisherId(profile.id);
         setVerificationStatus(profile.verification_status);
       } else {
-        navigate("/complete-profile");
+        navigate("/auth");
       }
     };
 

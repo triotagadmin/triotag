@@ -125,7 +125,7 @@ const Auth = () => {
             await supabase.from("publisher_profiles").insert({
               user_id: userId,
               publisher_type: "agent",
-              business_name: session.user.user_metadata?.full_name || "Pending",
+              business_name: session.user.user_metadata?.full_name || session.user.email || "Agent",
               contact_email: userEmail,
               verified: true,
               verification_status: "pending",
@@ -161,7 +161,7 @@ const Auth = () => {
       } else if (role === "advertiser") {
         navigate("/advertiser-dashboard");
       } else if (role === "publisher") {
-        navigate("/venue");
+        navigate("/venue-publishers");
       } else {
         navigate("/");
       }
@@ -339,8 +339,7 @@ const Auth = () => {
           });
           navigate("/");
         } else {
-          // No profile yet, go to complete profile
-          navigate("/complete-profile");
+          navigate("/");
         }
       } else {
         navigate("/");
