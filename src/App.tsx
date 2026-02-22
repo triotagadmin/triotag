@@ -40,6 +40,9 @@ import TradingAI from "./pages/TradingAI";
 import Install from "./pages/Install";
 import ListSpace from "./pages/ListSpace";
 import Services from "./pages/Services";
+import QuickAdSprint from "./pages/QuickAdSprint";
+import FullCampaignBuild from "./pages/FullCampaignBuild";
+import OngoingAdRetainer from "./pages/OngoingAdRetainer";
 import QRRedirect from "./pages/QRRedirect";
 import Tickets from "./pages/Tickets";
 import OrderPrints from "./pages/OrderPrints";
@@ -87,6 +90,9 @@ const App = () => (
           <Route path="/install" element={<Install />} />
           <Route path="/list-space" element={<ListSpace />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/services/quick-ad-sprint" element={<QuickAdSprint />} />
+          <Route path="/services/full-campaign-build" element={<FullCampaignBuild />} />
+          <Route path="/services/ongoing-ad-retainer" element={<OngoingAdRetainer />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/ticket-market" element={<TicketMarket />} />
           <Route path="/ticket-creator" element={<TicketMarket />} />

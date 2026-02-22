@@ -34,6 +34,7 @@ const packages = [
       { label: "Campaign Management", detail: "Placement in chosen locations + basic performance report" },
     ],
     cta: "Start a Sprint →",
+    link: "/services/quick-ad-sprint",
   },
   {
     title: "Full Campaign Build",
@@ -45,6 +46,7 @@ const packages = [
       { label: "Campaign Management", detail: "Full placement, tracking via QR codes/digital links, analytics reporting; 30-day post-campaign support for optimization" },
     ],
     cta: "Start a Campaign →",
+    link: "/services/full-campaign-build",
   },
   {
     title: "Ongoing Ad Retainer",
@@ -56,6 +58,7 @@ const packages = [
       { label: "Campaign Management", detail: "Ongoing placement, detailed performance tracking, and quarterly strategy reviews; Priority support and flexible campaign adjustments" },
     ],
     cta: "Start A Retainer →",
+    link: "/services/ongoing-ad-retainer",
   },
 ];
 
@@ -118,7 +121,7 @@ const Services = () => {
                       </div>
                     ))}
                   </div>
-                  <Link to="/contact">
+                  <Link to={pkg.link}>
                     <Button size="sm" className="w-full text-[9px] md:text-sm h-6 md:h-9 mt-2">
                       {pkg.cta}
                     </Button>
