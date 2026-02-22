@@ -55,7 +55,7 @@ const packages = [
       { label: "Creative Development", detail: "Regular creative refreshes (3–4 per month)" },
       { label: "Campaign Management", detail: "Ongoing placement, detailed performance tracking, and quarterly strategy reviews; Priority support and flexible campaign adjustments" },
     ],
-    cta: "Explore Retainer →",
+    cta: "Start A Retainer →",
   },
 ];
 
