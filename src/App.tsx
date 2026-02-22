@@ -39,6 +39,7 @@ import HabitTracker from "./pages/HabitTracker";
 import TradingAI from "./pages/TradingAI";
 import Install from "./pages/Install";
 import ListSpace from "./pages/ListSpace";
+import Services from "./pages/Services";
 import QRRedirect from "./pages/QRRedirect";
 import Tickets from "./pages/Tickets";
 import OrderPrints from "./pages/OrderPrints";
@@ -85,6 +86,7 @@ const App = () => (
           <Route path="/trading-ai" element={<TradingAI />} />
           <Route path="/install" element={<Install />} />
           <Route path="/list-space" element={<ListSpace />} />
+          <Route path="/services" element={<Services />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/ticket-market" element={<TicketMarket />} />
           <Route path="/ticket-creator" element={<TicketMarket />} />
