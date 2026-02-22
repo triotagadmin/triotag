@@ -1,13 +1,9 @@
-import { Store, ShoppingBag, Calendar, Building, Users, Megaphone } from "lucide-react";
+import { ShoppingBag, Calendar, Building, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 const advertiserTypes = [{
-  title: "E-Commerce Products",
-  description: "Boost foot traffic and engagement with QR code stickers in your neighborhood.",
-  icon: Store
-}, {
   title: "Retail & E-commerce",
   description: "Drive online conversions by connecting offline placements to digital campaigns.",
   icon: ShoppingBag
@@ -23,10 +19,6 @@ const advertiserTypes = [{
   title: "Service Providers",
   description: "Connect with local customers through strategic placement in high-traffic areas.",
   icon: Users
-}, {
-  title: "Product Launches",
-  description: "Generate buzz and awareness for new products with targeted campaigns.",
-  icon: Megaphone
 }];
 export const AdvertiserTypes = () => {
   const [isVisible, setIsVisible] = useState(false);
