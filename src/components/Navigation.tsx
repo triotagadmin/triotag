@@ -95,6 +95,9 @@ export const Navigation = () => {
             <Link to="/explore" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Marketplace</Button>
             </Link>
+            <Link to="/services" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
+            </Link>
             <Link to="/habit-tracker" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
             </Link>
@@ -122,6 +125,9 @@ export const Navigation = () => {
           </> : <>
             <Link to="/explore" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>MARKETPLACE</Button>
+            </Link>
+            <Link to="/services" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
             </Link>
             <Link to="/habit-tracker" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
