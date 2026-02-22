@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 const advertiserTypes = [{
-  title: "Local Businesses",
+  title: "E-Commerce Products",
   description: "Boost foot traffic and engagement with QR code stickers in your neighborhood.",
   icon: Store
 }, {
