@@ -7,8 +7,8 @@ import { Printer, Palette, Truck, Zap, Globe, Shield } from "lucide-react";
 const features = [
   {
     icon: Palette,
-    title: "Design Integration",
-    description: "Seamlessly design your ad materials with our intuitive mockup builder or submit your designs directly to our platform."
+    title: "Design Development",
+    description: "Our skilled graphic artists craft your ad materials, or you can submit your own designs directly to our platform."
   },
   {
     icon: Printer,
