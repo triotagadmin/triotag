@@ -1,4 +1,4 @@
-import { ShoppingBag, Calendar, Building, Users } from "lucide-react";
+import { ShoppingBag, Calendar, Building, Users, Music, Heart } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -19,6 +19,14 @@ const advertiserTypes = [{
   title: "Service Providers",
   description: "Connect with local customers through strategic placement in high-traffic areas.",
   icon: Users
+}, {
+  title: "Artists, Creators & Entertainment Brands",
+  description: "Build buzz for music drops, films, podcasts, YouTube channels, or indie creators using street-level visibility.",
+  icon: Music
+}, {
+  title: "NGOs, Advocacy Groups & Public Campaigns",
+  description: "Spread awareness for causes, voter education, health drives, or community initiatives at the grassroots level.",
+  icon: Heart
 }];
 export const AdvertiserTypes = () => {
   const [isVisible, setIsVisible] = useState(false);
