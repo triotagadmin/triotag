@@ -85,6 +85,8 @@ const VenueDashboard = () => {
   }
   const activeSpaces = adSpaces.filter((s) => s.approval_status === "approved" && s.availability_status === "available").length;
   const pendingSpaces = adSpaces.filter((s) => s.approval_status === "pending").length;
+  const isApprovedAgent = profile?.publisher_type === "agent" ? profile?.verification_status === "approved" : true;
+  const isPendingAgent = profile?.publisher_type === "agent" && profile?.verification_status === "pending";
   return <div className="min-h-screen bg-muted/30">
       <Navigation />
 
@@ -159,6 +161,15 @@ const VenueDashboard = () => {
               </CardHeader>
             </Card>}
 
+          {isPendingAgent && <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950/20">
+              <CardHeader>
+                <CardTitle className="text-orange-800 dark:text-orange-200">Account Under Review</CardTitle>
+                <CardDescription className="text-orange-700 dark:text-orange-300">
+                  Your account is under review. You cannot post listings until approved by an administrator.
+                </CardDescription>
+              </CardHeader>
+            </Card>}
+
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
             <Card>
               <CardHeader>
@@ -207,7 +218,7 @@ const VenueDashboard = () => {
                   <CardDescription>Add, edit, and manage your inventory</CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={() => navigate("/venue-registration")}>
+                  <Button onClick={() => navigate("/venue-registration")} disabled={!isApprovedAgent}>
                     Register New Ad Space
                   </Button>
                   <Button variant="outline" onClick={() => navigate("/venue-inventory")}>
@@ -219,8 +230,8 @@ const VenueDashboard = () => {
             <CardContent>
               {adSpaces.length === 0 ? <div className="text-center py-12">
                   <MapPin className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No ad spaces yet</h3>
-                  <Button onClick={() => navigate("/venue/register")}>Add Your First Space</Button>
+                  <h3 className="text-lg font-semibold mb-2">{isPendingAgent ? "Your account is not approved to post listings." : "No ad spaces yet"}</h3>
+                  <Button onClick={() => navigate("/venue/register")} disabled={!isApprovedAgent}>Add Your First Space</Button>
                 </div> : <div className="space-y-4">
                   {totalSlides > 1 && <div className="flex items-center justify-center gap-4 mb-4">
                       <Button variant="outline" size="icon" onClick={prevSlide}>

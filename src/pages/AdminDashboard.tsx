@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket, Package } from "lucide-react";
+import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket, Package, UserCheck } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,6 +80,10 @@ export default function AdminDashboard() {
   const [ticketSubmissions, setTicketSubmissions] = useState<any[]>([]);
   const [ticketSlide, setTicketSlide] = useState(0);
   
+  // Agents state
+  const [agentProfiles, setAgentProfiles] = useState<any[]>([]);
+  const [agentActionLoading, setAgentActionLoading] = useState<string | null>(null);
+  
 
   useEffect(() => {
     checkAdminAccess();
@@ -87,6 +91,7 @@ export default function AdminDashboard() {
     loadMarketplaceListings();
     loadNotifications();
     loadTicketSubmissions();
+    loadAgentProfiles();
   }, []);
 
   useEffect(() => {
@@ -351,6 +356,82 @@ export default function AdminDashboard() {
     }
   };
 
+
+  const loadAgentProfiles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("publisher_profiles")
+        .select("*")
+        .eq("publisher_type", "agent")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setAgentProfiles(data || []);
+    } catch (error) {
+      console.error("Error loading agent profiles:", error);
+    }
+  };
+
+  const handleAgentApprove = async (agent: any) => {
+    setAgentActionLoading(agent.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { error } = await supabase
+        .from("publisher_profiles")
+        .update({
+          verification_status: "approved",
+          approved_at: new Date().toISOString(),
+          approved_by: session.user.id,
+        })
+        .eq("id", agent.id);
+
+      if (error) throw error;
+
+      // Send notification to agent
+      await supabase.from("notifications").insert({
+        user_id: agent.user_id,
+        title: "Account Approved",
+        message: "Your agent account has been approved! You can now post listings.",
+        type: "agent_approval",
+      });
+
+      console.log(`[Admin] Approved agent: ${agent.contact_email} (${agent.id})`);
+      toast.success(`Agent "${agent.business_name}" approved`);
+      loadAgentProfiles();
+    } catch (error) {
+      console.error("Error approving agent:", error);
+      toast.error("Failed to approve agent");
+    } finally {
+      setAgentActionLoading(null);
+    }
+  };
+
+  const handleAgentReject = async (agent: any) => {
+    if (!confirm(`Are you sure you want to PERMANENTLY DELETE agent "${agent.business_name}" (${agent.contact_email})? This will remove their account, auth credentials, and all associated data. This cannot be undone.`)) {
+      return;
+    }
+    setAgentActionLoading(agent.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-agent", {
+        body: { agentProfileId: agent.id },
+      });
+
+      if (error) throw error;
+
+      console.log(`[Admin] Rejected and deleted agent: ${agent.contact_email} (${agent.id})`);
+      toast.success(`Agent "${agent.business_name}" has been permanently deleted`);
+      loadAgentProfiles();
+      loadSubmissions();
+      loadMarketplaceListings();
+    } catch (error: any) {
+      console.error("Error rejecting agent:", error);
+      toast.error("Failed to reject agent: " + (error?.message || "Unknown error"));
+    } finally {
+      setAgentActionLoading(null);
+    }
+  };
 
 
   const handleTicketAction = async (ticket: any, action: "approve" | "reject") => {
@@ -1002,9 +1083,9 @@ export default function AdminDashboard() {
               <Monitor className="w-4 h-4 mr-2" />
               Advertisers
             </TabsTrigger>
-            <TabsTrigger value="campaigns">
-              <FileText className="w-4 h-4 mr-2" />
-              Campaigns
+            <TabsTrigger value="agents">
+              <UserCheck className="w-4 h-4 mr-2" />
+              Agents
             </TabsTrigger>
             <TabsTrigger value="documents">
               <UserCircle className="w-4 h-4 mr-2" />
@@ -1115,9 +1196,106 @@ export default function AdminDashboard() {
             {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "advertiser"), "Advertiser Submissions", "Manage advertiser profile submissions")}
           </TabsContent>
 
-          {/* Campaigns Tab */}
-          <TabsContent value="campaigns" className="space-y-6">
-            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "campaign"), "Campaign Submissions", "Manage advertiser campaign submissions")}
+          {/* Agents Tab */}
+          <TabsContent value="agents" className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardDescription>Total Agents</CardDescription>
+                  <CardTitle className="text-3xl">{agentProfiles.length}</CardTitle>
+                </CardHeader>
+                <CardContent><Users className="w-4 h-4 text-muted-foreground" /></CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardDescription>Pending</CardDescription>
+                  <CardTitle className="text-3xl text-yellow-600">
+                    {agentProfiles.filter(a => a.verification_status === "pending").length}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent><Clock className="w-4 h-4 text-muted-foreground" /></CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardDescription>Approved</CardDescription>
+                  <CardTitle className="text-3xl text-green-600">
+                    {agentProfiles.filter(a => a.verification_status === "approved").length}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent><CheckCircle className="w-4 h-4 text-muted-foreground" /></CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Agent Accounts</CardTitle>
+                <CardDescription>Approve or reject agent accounts. Rejected agents are permanently deleted.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Agent Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date Applied</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {agentProfiles.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                          No agent accounts found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      agentProfiles.map((agent) => (
+                        <TableRow key={agent.id}>
+                          <TableCell className="font-medium">{agent.business_name}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">{agent.contact_email}</TableCell>
+                          <TableCell>{getStatusBadge(agent.verification_status)}</TableCell>
+                          <TableCell className="text-sm">
+                            {new Date(agent.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex justify-end gap-2">
+                              {agent.verification_status === "pending" && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    disabled={agentActionLoading === agent.id}
+                                    onClick={() => handleAgentApprove(agent)}
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    disabled={agentActionLoading === agent.id}
+                                    onClick={() => handleAgentReject(agent)}
+                                  >
+                                    <XCircle className="w-4 h-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                              {agent.verification_status === "approved" && (
+                                <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+                                  <CheckCircle className="w-3 h-3 mr-1" />Active
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Verification Documents Tab */}
