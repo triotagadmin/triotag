@@ -362,7 +362,6 @@ export default function AdminDashboard() {
       const { data, error } = await supabase
         .from("publisher_profiles")
         .select("*")
-        .eq("publisher_type", "agent")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
