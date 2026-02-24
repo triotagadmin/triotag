@@ -27,7 +27,7 @@ interface VerifiedAccount {
   id: string;
   email: string;
   name: string;
-  type: "advertiser" | "venue" | "digital" | "agent";
+  type: "advertiser" | "venue";
 }
 
 const TOPICS = [
@@ -52,7 +52,7 @@ export default function AdminNewsletterDashboard() {
   const [message, setMessage] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [sendToAll, setSendToAll] = useState(true);
-  const [selectedAccountTypes, setSelectedAccountTypes] = useState<string[]>(["advertiser", "venue", "digital", "agent"]);
+  const [selectedAccountTypes, setSelectedAccountTypes] = useState<string[]>(["advertiser", "venue"]);
 
   useEffect(() => {
     loadData();
@@ -91,7 +91,7 @@ export default function AdminNewsletterDashboard() {
           id: p.id,
           email: p.contact_email,
           name: p.business_name,
-          type: p.publisher_type as "venue" | "digital" | "agent"
+          type: p.publisher_type as "venue"
         }))
       ];
 
@@ -192,8 +192,6 @@ export default function AdminNewsletterDashboard() {
     switch (type) {
       case "advertiser": return "bg-blue-500/10 text-blue-600 border-blue-500/20";
       case "venue": return "bg-green-500/10 text-green-600 border-green-500/20";
-      case "digital": return "bg-purple-500/10 text-purple-600 border-purple-500/20";
-      case "agent": return "bg-orange-500/10 text-orange-600 border-orange-500/20";
       default: return "";
     }
   };
@@ -282,7 +280,7 @@ export default function AdminNewsletterDashboard() {
 
                 {!sendToAll && activeTab === "verified" && (
                   <div className="grid grid-cols-2 gap-2 p-3 bg-muted/50 rounded-lg">
-                    {["advertiser", "venue", "digital", "agent"].map((type) => (
+                    {["advertiser", "venue"].map((type) => (
                       <div key={type} className="flex items-center space-x-2">
                         <Checkbox
                           id={`type-${type}`}

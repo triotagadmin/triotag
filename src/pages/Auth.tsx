@@ -124,7 +124,7 @@ const Auth = () => {
           if (!existingProfile) {
             await supabase.from("publisher_profiles").insert({
               user_id: userId,
-              publisher_type: "agent",
+              publisher_type: "venue",
               business_name: session.user.user_metadata?.full_name || session.user.email || "Agent",
               contact_email: userEmail,
               verified: true,
