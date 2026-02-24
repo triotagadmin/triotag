@@ -85,8 +85,8 @@ const VenueDashboard = () => {
   }
   const activeSpaces = adSpaces.filter((s) => s.approval_status === "approved" && s.availability_status === "available").length;
   const pendingSpaces = adSpaces.filter((s) => s.approval_status === "pending").length;
-  const isApprovedAgent = profile?.publisher_type === "agent" ? profile?.verification_status === "approved" : true;
-  const isPendingAgent = profile?.publisher_type === "agent" && profile?.verification_status === "pending";
+  const isApprovedAgent = profile?.verification_status === "approved";
+  const isPendingAgent = profile?.verification_status === "pending";
   return <div className="min-h-screen bg-muted/30">
       <Navigation />
 

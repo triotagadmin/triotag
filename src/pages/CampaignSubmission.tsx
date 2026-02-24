@@ -207,9 +207,7 @@ const CampaignSubmission = () => {
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="venue">Venue</SelectItem>
-                              <SelectItem value="digital">Digital</SelectItem>
-                              <SelectItem value="agent">Agent</SelectItem>
+                              <SelectItem value="venue">Agent</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

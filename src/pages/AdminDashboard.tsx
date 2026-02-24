@@ -42,7 +42,7 @@ interface MarketplaceListing {
   id: string;
   title: string;
   description: string;
-  category: "campaign" | "venue" | "digital" | "agent";
+  category: "campaign" | "venue";
   status: string;
   location?: string;
   createdAt: string;
@@ -258,19 +258,6 @@ export default function AdminDashboard() {
         .select(`*, publisher_profiles(business_name)`)
         .order("created_at", { ascending: false });
 
-      // Load agent services
-      const { data: agentServices } = await supabase
-        .from("agent_services")
-        .select(`*, publisher_profiles(business_name)`)
-        .order("created_at", { ascending: false });
-
-      // Load digital publishers
-      const { data: digitalPublishers } = await supabase
-        .from("publisher_profiles")
-        .select("*")
-        .eq("publisher_type", "digital")
-        .order("created_at", { ascending: false });
-
       const allListings: MarketplaceListing[] = [
         ...(campaigns || []).map(c => ({
           id: c.id,
@@ -291,30 +278,8 @@ export default function AdminDashboard() {
           status: v.approval_status,
           location: v.location,
           createdAt: v.created_at || "",
-          ownerName: (v.publisher_profiles as any)?.business_name || "Venue",
+          ownerName: (v.publisher_profiles as any)?.business_name || "Agent",
           table: "ad_spaces"
-        })),
-        ...(agentServices || []).map(s => ({
-          id: s.id,
-          title: s.title,
-          description: s.description || "",
-          category: "agent" as const,
-          status: s.approval_status,
-          location: s.location,
-          createdAt: s.created_at || "",
-          ownerName: (s.publisher_profiles as any)?.business_name || "Agent",
-          table: "agent_services"
-        })),
-        ...(digitalPublishers || []).map(d => ({
-          id: d.id,
-          title: d.business_name,
-          description: d.description || "",
-          category: "digital" as const,
-          status: d.verification_status,
-          location: d.location,
-          createdAt: d.created_at || "",
-          ownerName: d.business_name,
-          table: "publisher_profiles"
         }))
       ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
@@ -732,8 +697,6 @@ export default function AdminDashboard() {
     switch (category) {
       case "campaign": return "bg-blue-500/10 text-blue-600 border-blue-500/20";
       case "venue": return "bg-green-500/10 text-green-600 border-green-500/20";
-      case "digital": return "bg-purple-500/10 text-purple-600 border-purple-500/20";
-      case "agent": return "bg-orange-500/10 text-orange-600 border-orange-500/20";
       default: return "";
     }
   };
