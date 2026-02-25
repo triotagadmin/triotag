@@ -63,6 +63,11 @@ import PublisherAdRequests from "./pages/publisher/PublisherAdRequests";
 import PublisherAdRequestDetail from "./pages/publisher/PublisherAdRequestDetail";
 import Messages from "./pages/Messages";
 
+import HireTalent from "./pages/HireTalent";
+import TalentProfileSubmission from "./pages/TalentProfileSubmission";
+import TalentDashboard from "./pages/TalentDashboard";
+import BookTalent from "./pages/BookTalent";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -123,6 +128,11 @@ const App = () => (
           <Route path="/validate" element={<ValidateTicket />} />
           {/* Messaging */}
           <Route path="/messages" element={<Messages />} />
+          {/* Talent Marketplace */}
+          <Route path="/hire-talent" element={<HireTalent />} />
+          <Route path="/talent-profile" element={<TalentProfileSubmission />} />
+          <Route path="/talent-dashboard" element={<TalentDashboard />} />
+          <Route path="/book-talent/:talentId" element={<BookTalent />} />
           {/* Publisher Ad Requests */}
           <Route path="/publisher/ad-requests" element={<PublisherAdRequests />} />
           <Route path="/publisher/ad-requests/:id" element={<PublisherAdRequestDetail />} />

@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket, Package, UserCheck } from "lucide-react";
+import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket, Package, UserCheck, Star } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -84,6 +84,12 @@ export default function AdminDashboard() {
   const [agentProfiles, setAgentProfiles] = useState<any[]>([]);
   const [agentActionLoading, setAgentActionLoading] = useState<string | null>(null);
   
+  // Talent state
+  const [talentProfiles, setTalentProfiles] = useState<any[]>([]);
+  const [talentActionLoading, setTalentActionLoading] = useState<string | null>(null);
+  const [talentRejectNote, setTalentRejectNote] = useState("");
+  const [talentRejectId, setTalentRejectId] = useState<string | null>(null);
+  
 
   useEffect(() => {
     checkAdminAccess();
@@ -92,6 +98,7 @@ export default function AdminDashboard() {
     loadNotifications();
     loadTicketSubmissions();
     loadAgentProfiles();
+    loadTalentProfiles();
   }, []);
 
   useEffect(() => {
@@ -318,6 +325,87 @@ export default function AdminDashboard() {
       setTicketSubmissions(data || []);
     } catch (error) {
       console.error("Error loading ticket submissions:", error);
+    }
+  };
+
+  const loadTalentProfiles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("talent_profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setTalentProfiles(data || []);
+    } catch (error) {
+      console.error("Error loading talent profiles:", error);
+    }
+  };
+
+  const handleTalentApprove = async (talent: any) => {
+    setTalentActionLoading(talent.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { error } = await supabase
+        .from("talent_profiles")
+        .update({
+          status: "approved",
+          approved_at: new Date().toISOString(),
+          approved_by: session.user.id,
+          rejection_reason: null,
+        })
+        .eq("id", talent.id);
+      if (error) throw error;
+
+      await supabase.from("notifications").insert({
+        user_id: talent.user_id,
+        title: "Talent Profile Approved",
+        message: "Your talent profile has been approved! You are now listed in the Hire Talent marketplace.",
+        type: "talent_approval",
+      });
+
+      toast.success(`Talent "${talent.full_name}" approved`);
+      loadTalentProfiles();
+    } catch (error) {
+      console.error("Error approving talent:", error);
+      toast.error("Failed to approve talent");
+    } finally {
+      setTalentActionLoading(null);
+    }
+  };
+
+  const handleTalentReject = async (talentId: string, reason: string) => {
+    setTalentActionLoading(talentId);
+    try {
+      const talent = talentProfiles.find(t => t.id === talentId);
+      const { error } = await supabase
+        .from("talent_profiles")
+        .update({
+          status: "rejected",
+          rejection_reason: reason || "Your profile did not meet our requirements.",
+        })
+        .eq("id", talentId);
+      if (error) throw error;
+
+      if (talent) {
+        await supabase.from("notifications").insert({
+          user_id: talent.user_id,
+          title: "Talent Profile Rejected",
+          message: `Your talent profile was rejected. Reason: ${reason || "Did not meet requirements."}. You can edit and resubmit.`,
+          type: "talent_rejection",
+        });
+      }
+
+      toast.success("Talent profile rejected");
+      setTalentRejectId(null);
+      setTalentRejectNote("");
+      loadTalentProfiles();
+    } catch (error) {
+      console.error("Error rejecting talent:", error);
+      toast.error("Failed to reject talent");
+    } finally {
+      setTalentActionLoading(null);
     }
   };
 
@@ -1032,7 +1120,7 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="marketplace" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="marketplace">
               <ShoppingCart className="w-4 h-4 mr-2" />
               Marketplace
@@ -1048,6 +1136,15 @@ export default function AdminDashboard() {
             <TabsTrigger value="agents">
               <UserCheck className="w-4 h-4 mr-2" />
               Agents
+            </TabsTrigger>
+            <TabsTrigger value="talent">
+              <Star className="w-4 h-4 mr-2" />
+              Talent
+              {talentProfiles.filter(t => t.status === "pending").length > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                  {talentProfiles.filter(t => t.status === "pending").length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="documents">
               <UserCircle className="w-4 h-4 mr-2" />
@@ -1254,6 +1351,77 @@ export default function AdminDashboard() {
                         </TableRow>
                       ))
                     )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Talent Tab */}
+          <TabsContent value="talent" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Talent Submissions</CardTitle>
+                <CardDescription>Approve or reject talent profiles for the Hire Talent marketplace</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Skill</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {talentProfiles.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-8">No talent submissions</TableCell>
+                      </TableRow>
+                    ) : talentProfiles.map((t) => (
+                      <TableRow key={t.id}>
+                        <TableCell className="font-medium">{t.full_name}</TableCell>
+                        <TableCell><Badge variant="outline" className="capitalize">{t.skill_type}</Badge></TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{t.location}</TableCell>
+                        <TableCell>{getStatusBadge(t.status)}</TableCell>
+                        <TableCell className="text-sm">{new Date(t.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <div className="flex justify-end gap-2">
+                            {t.status === "pending" && (
+                              <>
+                                <Button size="sm" onClick={() => handleTalentApprove(t)} disabled={talentActionLoading === t.id}>
+                                  <CheckCircle className="w-4 h-4" />
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => setTalentRejectId(t.id)} disabled={talentActionLoading === t.id}>
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                          {talentRejectId === t.id && (
+                            <div className="mt-2 space-y-2">
+                              <Textarea
+                                placeholder="Rejection reason..."
+                                value={talentRejectNote}
+                                onChange={(e) => setTalentRejectNote(e.target.value)}
+                                rows={2}
+                              />
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="destructive" onClick={() => handleTalentReject(t.id, talentRejectNote)}>
+                                  Confirm Reject
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={() => { setTalentRejectId(null); setTalentRejectNote(""); }}>
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>

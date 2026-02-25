@@ -75,9 +75,8 @@ export const Navigation = () => {
   const getDashboardLink = () => {
     if (userRole === "admin") return "/admin/dashboard";
     if (userRole === "advertiser") return "/advertiser-dashboard";
-    if (userRole === "publisher") {
-      return "/venue-publishers";
-    }
+    if (userRole === "publisher") return "/venue-publishers";
+    if (userRole === "talent") return "/talent-dashboard";
     return "/dashboard";
   };
   const closeMobileMenu = () => setMobileMenuOpen(false);
@@ -92,6 +91,9 @@ export const Navigation = () => {
         {user ? <>
             <Link to="/explore" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
+            </Link>
+            <Link to="/hire-talent" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
             </Link>
             {userRole !== "publisher" && (
               <Link to="/services" onClick={closeMobileMenu}>
@@ -125,6 +127,9 @@ export const Navigation = () => {
           </> : <>
             <Link to="/explore" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
+            </Link>
+            <Link to="/hire-talent" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
             </Link>
             <Link to="/services" onClick={closeMobileMenu}>
               
