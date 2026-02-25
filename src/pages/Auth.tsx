@@ -162,6 +162,8 @@ const Auth = () => {
         navigate("/advertiser-dashboard");
       } else if (role === "publisher") {
         navigate("/venue-publishers");
+      } else if (role === "talent") {
+        navigate("/talent-profile");
       } else {
         navigate("/");
       }
@@ -341,6 +343,12 @@ const Auth = () => {
         } else {
           navigate("/");
         }
+      } else if (roles?.role === "talent") {
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in.",
+        });
+        navigate("/talent-profile");
       } else {
         navigate("/");
       }
@@ -538,6 +546,7 @@ const Auth = () => {
                     <SelectContent>
                       <SelectItem value="advertiser">Advertiser</SelectItem>
                       <SelectItem value="venue">Agent</SelectItem>
+                      <SelectItem value="talent">Talent</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -1248,6 +1248,155 @@ export type Database = {
         }
         Relationships: []
       }
+      talent_bookings: {
+        Row: {
+          advertiser_id: string
+          campaign_type: string | null
+          created_at: string
+          duration: string | null
+          end_date: string | null
+          id: string
+          notes: string | null
+          proof_urls: Json | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["booking_status"]
+          talent_id: string
+          updated_at: string
+        }
+        Insert: {
+          advertiser_id: string
+          campaign_type?: string | null
+          created_at?: string
+          duration?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          proof_urls?: Json | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
+          talent_id: string
+          updated_at?: string
+        }
+        Update: {
+          advertiser_id?: string
+          campaign_type?: string | null
+          created_at?: string
+          duration?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          proof_urls?: Json | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
+          talent_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_bookings_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "talent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_profiles: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          availability: string | null
+          bio: string | null
+          created_at: string
+          full_name: string
+          id: string
+          location: string
+          portfolio_urls: Json | null
+          rejection_reason: string | null
+          skill_type: Database["public"]["Enums"]["skill_type"]
+          status: Database["public"]["Enums"]["talent_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          availability?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          location: string
+          portfolio_urls?: Json | null
+          rejection_reason?: string | null
+          skill_type: Database["public"]["Enums"]["skill_type"]
+          status?: Database["public"]["Enums"]["talent_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          availability?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          location?: string
+          portfolio_urls?: Json | null
+          rejection_reason?: string | null
+          skill_type?: Database["public"]["Enums"]["skill_type"]
+          status?: Database["public"]["Enums"]["talent_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      talent_reviews: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          rating: number
+          review_text: string | null
+          reviewer_id: string
+          talent_id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          rating: number
+          review_text?: string | null
+          reviewer_id: string
+          talent_id: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          review_text?: string | null
+          reviewer_id?: string
+          talent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "talent_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_reviews_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "talent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_orders: {
         Row: {
           buyer_email: string
@@ -1780,8 +1929,14 @@ export type Database = {
         | "other"
       admin_status: "pending" | "verified" | "rejected"
       agent_role: "guerrilla" | "influencer" | "model" | "artist"
-      app_role: "admin" | "publisher" | "advertiser"
+      app_role: "admin" | "publisher" | "advertiser" | "talent"
       approval_status: "pending" | "approved" | "rejected"
+      booking_status:
+        | "pending"
+        | "accepted"
+        | "declined"
+        | "completed"
+        | "cancelled"
       print_order_status:
         | "pending_admin"
         | "in_production"
@@ -1789,6 +1944,8 @@ export type Database = {
         | "delivered"
       publisher_ticket_status: "active" | "used"
       publisher_type: "venue" | "digital" | "agent"
+      skill_type: "promoter" | "artist" | "creator"
+      talent_status: "pending" | "approved" | "rejected"
       venue_ticket_status: "valid" | "used"
     }
     CompositeTypes: {
@@ -1939,8 +2096,15 @@ export const Constants = {
       ],
       admin_status: ["pending", "verified", "rejected"],
       agent_role: ["guerrilla", "influencer", "model", "artist"],
-      app_role: ["admin", "publisher", "advertiser"],
+      app_role: ["admin", "publisher", "advertiser", "talent"],
       approval_status: ["pending", "approved", "rejected"],
+      booking_status: [
+        "pending",
+        "accepted",
+        "declined",
+        "completed",
+        "cancelled",
+      ],
       print_order_status: [
         "pending_admin",
         "in_production",
@@ -1949,6 +2113,8 @@ export const Constants = {
       ],
       publisher_ticket_status: ["active", "used"],
       publisher_type: ["venue", "digital", "agent"],
+      skill_type: ["promoter", "artist", "creator"],
+      talent_status: ["pending", "approved", "rejected"],
       venue_ticket_status: ["valid", "used"],
     },
   },
