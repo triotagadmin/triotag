@@ -91,7 +91,7 @@ export const Navigation = () => {
     return <>
         {user ? <>
             <Link to="/explore" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>Inventory</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
             </Link>
             {userRole !== "publisher" && (
               <Link to="/services" onClick={closeMobileMenu}>
@@ -124,7 +124,7 @@ export const Navigation = () => {
         }
           </> : <>
             <Link to="/explore" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>INVENTORY</Button>
+              <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
             </Link>
             <Link to="/services" onClick={closeMobileMenu}>
               
