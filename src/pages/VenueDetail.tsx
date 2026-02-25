@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { User } from "@supabase/supabase-js";
 import { OOHAdvertisingDetails } from "@/components/venue/OOHAdvertisingDetails";
+import ShareButtons from "@/components/ShareButtons";
 const AD_UNIT_TYPE_LABELS: Record<string, string> = {
   countertop_display: "Countertop Display",
   wall_poster: "Wall Poster",
@@ -97,6 +98,32 @@ const VenueDetail = () => {
       setLoading(false);
     }
   };
+
+  const images = venue ? (Array.isArray(venue.media_urls) ? venue.media_urls : []) : [];
+  const listingUrl = `${window.location.origin}/venue/${id}`;
+
+  // Set OG meta tags dynamically
+  useEffect(() => {
+    if (!venue) return;
+    const setMeta = (property: string, content: string) => {
+      let el = document.querySelector(`meta[property="${property}"]`) || document.querySelector(`meta[name="${property}"]`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(property.startsWith("og:") ? "property" : "name", property);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    };
+    document.title = `${venue.title} – Tiny Sticky Ads`;
+    setMeta("og:title", venue.title);
+    setMeta("og:description", venue.description || "Check out this ad space on Tiny Sticky Ads!");
+    setMeta("og:url", listingUrl);
+    setMeta("og:image", images[0] || "");
+    setMeta("twitter:title", venue.title);
+    setMeta("twitter:description", venue.description || "Check out this ad space on Tiny Sticky Ads!");
+    setMeta("twitter:image", images[0] || "");
+  }, [venue]);
+
   if (loading) {
     return <div className="min-h-screen bg-muted/30 flex items-center justify-center">
         <p className="text-muted-foreground">Loading venue details...</p>
@@ -110,14 +137,17 @@ const VenueDetail = () => {
         </div>
       </div>;
   }
-  const images = Array.isArray(venue.media_urls) ? venue.media_urls : [];
+
   return <div className="min-h-screen bg-muted/30">
       <Navigation />
       <div className="container mx-auto px-6 py-12">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="ghost" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <ShareButtons url={listingUrl} title={venue.title} description={venue.description} />
+        </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
           <div className="lg:col-span-2 space-y-6">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, ChevronLeft, ChevronRight, Building2, X, Loader2 } from "lucide-react";
+import ShareButtons from "@/components/ShareButtons";
 import { Navigation } from "@/components/Navigation";
 import { LocationSearchModal } from "@/components/marketplace/LocationSearchModal";
 import { Footer } from "@/components/Footer";
@@ -461,9 +462,16 @@ const Marketplace = () => {
                     
                   </div>
 
-                  <Button className="w-full mt-4">
-                    {user ? "View Details" : "Log in to View"}
-                  </Button>
+                  <div className="flex items-center gap-2 mt-4">
+                    <Button className="flex-1">
+                      {user ? "View Details" : "Log in to View"}
+                    </Button>
+                    <ShareButtons
+                      url={`${window.location.origin}/venue/${listing.id}`}
+                      title={listing.title}
+                      description={listing.description}
+                    />
+                  </div>
                 </CardContent>
               </Card>
           )
