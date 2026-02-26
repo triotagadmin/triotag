@@ -155,7 +155,7 @@ const Auth = () => {
       }
     };
 
-    const routeByRole = (role: string) => {
+    const routeByRole = async (role: string) => {
       if (role === "admin") {
         navigate("/admin/dashboard");
       } else if (role === "advertiser") {
@@ -163,7 +163,22 @@ const Auth = () => {
       } else if (role === "publisher") {
         navigate("/venue-publishers");
       } else if (role === "talent") {
-        navigate("/talent-profile");
+        // Check talent profile status
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: tp } = await supabase
+            .from("talent_profiles")
+            .select("status")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+          if (tp?.status === "approved") {
+            navigate("/talent-dashboard");
+          } else {
+            navigate("/talent-profile");
+          }
+        } else {
+          navigate("/talent-profile");
+        }
       } else {
         navigate("/");
       }
@@ -344,11 +359,23 @@ const Auth = () => {
           navigate("/");
         }
       } else if (roles?.role === "talent") {
+        // Check talent profile status to route correctly
+        const { data: talentProfile } = await supabase
+          .from("talent_profiles")
+          .select("status")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
         toast({
           title: "Welcome back!",
           description: "Successfully signed in.",
         });
-        navigate("/talent-profile");
+
+        if (talentProfile?.status === "approved") {
+          navigate("/talent-dashboard");
+        } else {
+          navigate("/talent-profile");
+        }
       } else {
         navigate("/");
       }
