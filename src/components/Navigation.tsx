@@ -89,28 +89,28 @@ export const Navigation = () => {
     const linkClass = mobile ? `w-full text-left py-3 px-4 ${baseLinkClass}` : baseLinkClass;
     return <>
         {user ? <>
-            {userRole === "talent" ? (
-              <>
+            {userRole === "talent" ?
+        <>
                 <Link to="/hire-talent" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
                 </Link>
                 <Link to={getDashboardLink()} onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
                 </Link>
-              </>
-            ) : (
-              <>
+              </> :
+
+        <>
                 <Link to="/explore" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
                 </Link>
                 <Link to="/hire-talent" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
                 </Link>
-                {userRole === "advertiser" && (
-                  <Link to="/services" onClick={closeMobileMenu}>
-                    <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
+                {userRole === "advertiser" &&
+          <Link to="/services" onClick={closeMobileMenu}>
+                    
                   </Link>
-                )}
+          }
                 <Link to="/habit-tracker" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
                 </Link>
@@ -121,7 +121,7 @@ export const Navigation = () => {
                   <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
                 </Link>
               </>
-            )}
+        }
             {!mobile &&
         <>
                 <MessengerBell />
