@@ -106,7 +106,7 @@ export const Navigation = () => {
                 <Link to="/hire-talent" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
                 </Link>
-                {userRole !== "publisher" && (
+                {userRole === "advertiser" && (
                   <Link to="/services" onClick={closeMobileMenu}>
                     <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
                   </Link>
@@ -143,9 +143,6 @@ export const Navigation = () => {
             </Link>
             <Link to="/hire-talent" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
-            </Link>
-            <Link to="/services" onClick={closeMobileMenu}>
-              
             </Link>
             <Link to="/habit-tracker" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
