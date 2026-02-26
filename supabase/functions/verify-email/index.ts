@@ -130,6 +130,12 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       console.log(`[Verify Email Success] Advertiser verified successfully`);
+    } else if (userType === "talent") {
+      // Talent accounts don't have a separate verified flag on their profile.
+      // We just need to confirm the email is valid. The talent_profiles table
+      // uses a status enum (pending/approved/rejected) managed by admins.
+      // Mark verification as successful so the user can proceed to login.
+      console.log(`[Verify Email Success] Talent email verified successfully for user: ${userId}`);
     } else {
       // Publisher (venue, digital, agent)
       const { data: profile, error: fetchError } = await supabase
