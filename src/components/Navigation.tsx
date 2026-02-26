@@ -89,26 +89,39 @@ export const Navigation = () => {
     const linkClass = mobile ? `w-full text-left py-3 px-4 ${baseLinkClass}` : baseLinkClass;
     return <>
         {user ? <>
-            <Link to="/explore" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
-            </Link>
-            <Link to="/hire-talent" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
-            </Link>
-            {userRole !== "publisher" && (
-              <Link to="/services" onClick={closeMobileMenu}>
-                <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
-              </Link>
+            {userRole === "talent" ? (
+              <>
+                <Link to="/hire-talent" onClick={closeMobileMenu}>
+                  <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
+                </Link>
+                <Link to={getDashboardLink()} onClick={closeMobileMenu}>
+                  <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/explore" onClick={closeMobileMenu}>
+                  <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
+                </Link>
+                <Link to="/hire-talent" onClick={closeMobileMenu}>
+                  <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
+                </Link>
+                {userRole !== "publisher" && (
+                  <Link to="/services" onClick={closeMobileMenu}>
+                    <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
+                  </Link>
+                )}
+                <Link to="/habit-tracker" onClick={closeMobileMenu}>
+                  <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
+                </Link>
+                <Link to="/insights" onClick={closeMobileMenu}>
+                  <Button variant="ghost" size="sm" className={linkClass}>Insights</Button>
+                </Link>
+                <Link to={getDashboardLink()} onClick={closeMobileMenu}>
+                  <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
+                </Link>
+              </>
             )}
-            <Link to="/habit-tracker" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
-            </Link>
-            <Link to="/insights" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>Insights</Button>
-            </Link>
-            <Link to={getDashboardLink()} onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
-            </Link>
             {!mobile &&
         <>
                 <MessengerBell />
