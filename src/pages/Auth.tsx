@@ -136,6 +136,13 @@ const Auth = () => {
               .update({ verified: true })
               .eq("user_id", userId);
           }
+        } else if (storedUserType === "talent") {
+          // Ensure the role is set to talent (trigger may have defaulted to advertiser)
+          if (!existingRole || existingRole.role !== "talent") {
+            await supabase.rpc("set_own_role", { _role: "talent" });
+          }
+          // Talent profiles are created via the /talent-profile onboarding form
+          // No automatic profile creation here — routeByRole will redirect to /talent-profile
         }
 
         toast({
