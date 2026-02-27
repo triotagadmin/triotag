@@ -100,7 +100,8 @@ const VenueDetail = () => {
   };
 
   const images = venue ? (Array.isArray(venue.media_urls) ? venue.media_urls : []) : [];
-  const listingUrl = `${window.location.origin}/venue/${id}`;
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const listingUrl = `${supabaseUrl}/functions/v1/og-share?id=${id}`;
 
   // Set OG meta tags dynamically
   useEffect(() => {
