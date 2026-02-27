@@ -1419,7 +1419,7 @@ const ActivateListing = () => {
                 printHandler === "self" && (!selfPrintFileUrl || !selfPrintAcknowledged)
                 }
                 className="w-full"
-                size="lg">SUBMIT FOR APPROVAL
+                size="lg">SUBMIT FOR APPROVALS
 
                 {orderLoading ?
                 <>
