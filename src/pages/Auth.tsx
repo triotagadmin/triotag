@@ -580,7 +580,6 @@ const Auth = () => {
                     <SelectContent>
                       <SelectItem value="advertiser">Advertiser</SelectItem>
                       <SelectItem value="venue">Agent</SelectItem>
-                      <SelectItem value="talent">Talent</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
