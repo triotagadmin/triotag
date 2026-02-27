@@ -45,7 +45,7 @@ type ActivationType = "sticker" | "table_tent" | "poster" | "flyer" | "banner" |
 // Currency configuration is imported from useCurrencyConversion hook
 
 const ActivateListing = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{id: string;}>();
   const [listing, setListing] = useState<ListingDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState<ActivationStep>("design");
@@ -99,11 +99,11 @@ const ActivateListing = () => {
       }
 
       // Check if user has an advertiser profile
-      const { data: advertiserProfile } = await supabase
-        .from("advertiser_profiles")
-        .select("id")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+      const { data: advertiserProfile } = await supabase.
+      from("advertiser_profiles").
+      select("id").
+      eq("user_id", session.user.id).
+      maybeSingle();
 
       setIsAdvertiser(!!advertiserProfile);
     };
@@ -124,12 +124,12 @@ const ActivateListing = () => {
       const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
       const firstAdUnit = listingAdUnits[0];
       const adUnitType = firstAdUnit?.type || activationType || "sticker";
-      const detectedProduct = PRINT_PRODUCTS.find(p => 
-        p.id.includes(adUnitType.replace("_", "-")) || 
-        (adUnitType.includes("sticker") && p.id.includes("sticker")) ||
-        (adUnitType.includes("tent") && p.id === "table-tent")
+      const detectedProduct = PRINT_PRODUCTS.find((p) =>
+      p.id.includes(adUnitType.replace("_", "-")) ||
+      adUnitType.includes("sticker") && p.id.includes("sticker") ||
+      adUnitType.includes("tent") && p.id === "table-tent"
       ) || PRINT_PRODUCTS[0];
-      
+
       if (detectedProduct) {
         setSelectedProductId(detectedProduct.id);
       }
@@ -138,11 +138,11 @@ const ActivateListing = () => {
 
   const fetchListingDetails = async () => {
     try {
-      const { data, error } = await supabase
-        .from("ad_spaces")
-        .select("id, title, location, description, pricing, specifications, media_urls, publisher_id")
-        .eq("id", id)
-        .single();
+      const { data, error } = await supabase.
+      from("ad_spaces").
+      select("id, title, location, description, pricing, specifications, media_urls, publisher_id").
+      eq("id", id).
+      single();
 
       if (error) throw error;
       setListing(data);
@@ -154,14 +154,14 @@ const ActivateListing = () => {
           businessName: data.title || "",
           contactEmail: specs.contact_email || "",
           contactPhone: specs.contact_number || null,
-          location: specs.full_address || data.location || null,
+          location: specs.full_address || data.location || null
         });
       }
     } catch (error: any) {
       toast({
         title: "Error",
         description: "Failed to load listing details",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
@@ -173,14 +173,14 @@ const ActivateListing = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const { data, error } = await supabase
-        .from("activations")
-        .select("*")
-        .eq("ad_space_id", id)
-        .eq("advertiser_id", session.user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const { data, error } = await supabase.
+      from("activations").
+      select("*").
+      eq("ad_space_id", id).
+      eq("advertiser_id", session.user.id).
+      order("created_at", { ascending: false }).
+      limit(1).
+      maybeSingle();
 
       if (data) {
         setActivationId(data.id);
@@ -191,7 +191,7 @@ const ActivateListing = () => {
         setRejectionReason(data.rejection_reason || undefined);
         setApprovedTotalAmount(data.total_amount || 0);
         setEstimatedPublisherPayout(data.estimated_publisher_payout || 0);
-        
+
         if (data.start_date) setStartDate(new Date(data.start_date));
         if (data.end_date) setEndDate(new Date(data.end_date));
         if (data.activation_type) setActivationType(data.activation_type as ActivationType);
@@ -236,13 +236,13 @@ const ActivateListing = () => {
       "table-tent": "table_tent",
       "poster": "poster",
       "flyer": "flyer",
-      "banner": "banner",
+      "banner": "banner"
     };
     return typeMap[adUnitType] || "other";
   };
 
-  const handleMockupApproval = async (data: { 
-    artworkUrl: string; 
+  const handleMockupApproval = async (data: {
+    artworkUrl: string;
     campaignDetails?: {
       campaignName: string;
       brandCategory: string;
@@ -252,12 +252,12 @@ const ActivateListing = () => {
     };
   }) => {
     setArtworkUrl(data.artworkUrl);
-    
+
     // Get ad unit type from listing (publisher defined)
     const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
     const firstAdUnit = listingAdUnits[0];
     const adUnitType = firstAdUnit?.type || "sticker";
-    
+
     setApprovedAdUnitType(adUnitType);
     const type = getActivationType(adUnitType);
     setActivationType(type);
@@ -275,26 +275,26 @@ const ActivateListing = () => {
         ad_design_url: data.artworkUrl,
         activation_type: type,
         campaign_objective: data.campaignDetails?.campaignObjective || null,
-        brand_category: data.campaignDetails?.brandCategory || null,
+        brand_category: data.campaignDetails?.brandCategory || null
       };
 
       if (activationId) {
-        await supabase
-          .from("activations")
-          .update(activationData)
-          .eq("id", activationId);
+        await supabase.
+        from("activations").
+        update(activationData).
+        eq("id", activationId);
       } else {
-        const { data: newActivation, error } = await supabase
-          .from("activations")
-          .insert({
-            ad_space_id: id,
-            advertiser_id: session.user.id,
-            publisher_id: publisherProfileId,
-            status: "design",
-            ...activationData,
-          })
-          .select()
-          .single();
+        const { data: newActivation, error } = await supabase.
+        from("activations").
+        insert({
+          ad_space_id: id,
+          advertiser_id: session.user.id,
+          publisher_id: publisherProfileId,
+          status: "design",
+          ...activationData
+        }).
+        select().
+        single();
 
         if (error) throw error;
         if (newActivation) {
@@ -313,14 +313,14 @@ const ActivateListing = () => {
     // Save dates to activation record
     if (activationId && start && end) {
       try {
-        await supabase
-          .from("activations")
-          .update({
-            start_date: format(start, "yyyy-MM-dd"),
-            end_date: format(end, "yyyy-MM-dd"),
-            estimated_publisher_payout: estimatedPublisherPayout,
-          })
-          .eq("id", activationId);
+        await supabase.
+        from("activations").
+        update({
+          start_date: format(start, "yyyy-MM-dd"),
+          end_date: format(end, "yyyy-MM-dd"),
+          estimated_publisher_payout: estimatedPublisherPayout
+        }).
+        eq("id", activationId);
       } catch (error) {
         console.error("Error saving dates:", error);
       }
@@ -333,12 +333,12 @@ const ActivateListing = () => {
     // Save payout to activation record
     if (activationId) {
       try {
-        await supabase
-          .from("activations")
-          .update({
-            estimated_publisher_payout: payout,
-          })
-          .eq("id", activationId);
+        await supabase.
+        from("activations").
+        update({
+          estimated_publisher_payout: payout
+        }).
+        eq("id", activationId);
       } catch (error) {
         console.error("Error saving payout:", error);
       }
@@ -348,36 +348,36 @@ const ActivateListing = () => {
   // Helper function to calculate booking price inline
   const calculateBookingPrice = () => {
     if (!startDate || !endDate || !listing) return 0;
-    
+
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
     const diffWeeks = Math.ceil(diffDays / 7);
-    
+
     const adUnits = listing.specifications?.ad_units || listing.pricing?.ad_units || [];
-    const selectedAdUnit = adUnits.find((unit: any) => 
-      unit.type === approvedAdUnitType || unit.type === activationType
+    const selectedAdUnit = adUnits.find((unit: any) =>
+    unit.type === approvedAdUnitType || unit.type === activationType
     ) || adUnits[0];
-    
-    const weeklyRate = 
-      selectedAdUnit?.pricePerWeek || 
-      selectedAdUnit?.weekly_subscription_fee ||
-      listing.pricing?.weekly || 
-      listing.pricing?.pricePerWeek || 
-      0;
-    
-    const monthlyRate = 
-      selectedAdUnit?.pricePerMonth || 
-      selectedAdUnit?.monthly_subscription_fee ||
-      listing.pricing?.monthly || 
-      listing.pricing?.pricePerMonth || 
-      0;
-    
+
+    const weeklyRate =
+    selectedAdUnit?.pricePerWeek ||
+    selectedAdUnit?.weekly_subscription_fee ||
+    listing.pricing?.weekly ||
+    listing.pricing?.pricePerWeek ||
+    0;
+
+    const monthlyRate =
+    selectedAdUnit?.pricePerMonth ||
+    selectedAdUnit?.monthly_subscription_fee ||
+    listing.pricing?.monthly ||
+    listing.pricing?.pricePerMonth ||
+    0;
+
     if (diffWeeks >= 4 && monthlyRate > 0) {
       const fullMonths = Math.floor(diffWeeks / 4);
       const remainingWeeks = diffWeeks % 4;
-      return (fullMonths * monthlyRate) + (remainingWeeks * weeklyRate);
+      return fullMonths * monthlyRate + remainingWeeks * weeklyRate;
     }
-    
+
     return diffWeeks * weeklyRate;
   };
 
@@ -387,7 +387,7 @@ const ActivateListing = () => {
       toast({
         title: "Error",
         description: "Please complete all required fields (design, dates) before submitting.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -399,8 +399,8 @@ const ActivateListing = () => {
       toast({
         title: "Error",
         description:
-          "Cannot submit without a valid booking price. Please ensure dates are selected and the listing has pricing configured.",
-        variant: "destructive",
+        "Cannot submit without a valid booking price. Please ensure dates are selected and the listing has pricing configured.",
+        variant: "destructive"
       });
       return;
     }
@@ -415,43 +415,43 @@ const ActivateListing = () => {
       let persistedActivationId = activationId;
 
       if (!persistedActivationId) {
-        const { data: newActivation, error: insertError } = await supabase
-          .from("activations")
-          .insert({
-            ad_space_id: id,
-            advertiser_id: session.user.id,
-            publisher_id: listing.publisher_id, // publisher_profile_id (canonical)
-            status: "pending_submission",
-            submitted_at: new Date().toISOString(),
-            start_date: format(startDate, "yyyy-MM-dd"),
-            end_date: format(endDate, "yyyy-MM-dd"),
-            estimated_publisher_payout: bookingPrice,
-            quantity,
-            ad_design_url: artworkUrl,
-            activation_type: activationType,
-          })
-          .select("id")
-          .single();
+        const { data: newActivation, error: insertError } = await supabase.
+        from("activations").
+        insert({
+          ad_space_id: id,
+          advertiser_id: session.user.id,
+          publisher_id: listing.publisher_id, // publisher_profile_id (canonical)
+          status: "pending_submission",
+          submitted_at: new Date().toISOString(),
+          start_date: format(startDate, "yyyy-MM-dd"),
+          end_date: format(endDate, "yyyy-MM-dd"),
+          estimated_publisher_payout: bookingPrice,
+          quantity,
+          ad_design_url: artworkUrl,
+          activation_type: activationType
+        }).
+        select("id").
+        single();
 
         if (insertError) throw insertError;
 
         persistedActivationId = newActivation.id;
         setActivationId(persistedActivationId);
       } else {
-        const { error: updateError } = await supabase
-          .from("activations")
-          .update({
-            status: "pending_submission",
-            submitted_at: new Date().toISOString(),
-            estimated_publisher_payout: bookingPrice,
-            quantity,
-            start_date: format(startDate, "yyyy-MM-dd"),
-            end_date: format(endDate, "yyyy-MM-dd"),
-            ad_design_url: artworkUrl,
-            activation_type: activationType,
-            publisher_id: listing.publisher_id, // keep consistent if older rows used a different value
-          })
-          .eq("id", persistedActivationId);
+        const { error: updateError } = await supabase.
+        from("activations").
+        update({
+          status: "pending_submission",
+          submitted_at: new Date().toISOString(),
+          estimated_publisher_payout: bookingPrice,
+          quantity,
+          start_date: format(startDate, "yyyy-MM-dd"),
+          end_date: format(endDate, "yyyy-MM-dd"),
+          ad_design_url: artworkUrl,
+          activation_type: activationType,
+          publisher_id: listing.publisher_id // keep consistent if older rows used a different value
+        }).
+        eq("id", persistedActivationId);
 
         if (updateError) throw updateError;
       }
@@ -462,8 +462,8 @@ const ActivateListing = () => {
           body: {
             publisherProfileId: listing.publisher_id,
             listingTitle: listing.title,
-            activationId: persistedActivationId,
-          },
+            activationId: persistedActivationId
+          }
         });
       } catch (notifyError) {
         console.error("Failed to send notification:", notifyError);
@@ -472,13 +472,13 @@ const ActivateListing = () => {
       setActivationStatus("pending_submission");
       toast({
         title: "Ad Request Submitted!",
-        description: "Your ad request has been sent to the publisher for review.",
+        description: "Your ad request has been sent to the publisher for review."
       });
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to submit ad request",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setSubmittingRequest(false);
@@ -490,7 +490,7 @@ const ActivateListing = () => {
       toast({
         title: "Missing information",
         description: "Please select a product.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -499,7 +499,7 @@ const ActivateListing = () => {
       toast({
         title: "Missing information",
         description: "Publisher address not available.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -509,7 +509,7 @@ const ActivateListing = () => {
       toast({
         title: "Invalid product",
         description: "Please select a valid product.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -518,7 +518,7 @@ const ActivateListing = () => {
       toast({
         title: "Minimum quantity required",
         description: `This product requires a minimum of ${product.minQuantity} units.`,
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -533,83 +533,83 @@ const ActivateListing = () => {
       const isSelfPrint = printHandler === "self";
 
       // Create print order in database
-      const { data: printOrder, error: orderError } = await supabase
-        .from("print_orders")
-        .insert({
-          activation_id: activationId,
-          advertiser_id: session.user.id,
-          order_status: "pending_admin",
-          product_sku: product.sku,
-          product_name: product.name,
-          product_specs: {
-            ...product.specs,
-            print_handler: printHandler,
-            self_print_file_url: isSelfPrint ? selfPrintFileUrl : null,
-          },
-          quantity,
-          design_url: isSelfPrint ? selfPrintFileUrl : artworkUrl,
-          shipping_address: isSelfPrint ? { selfPrint: true } : {
-            recipientName: publisherAddress?.businessName || "",
-            line1: publisherAddress?.location || listing?.location || "",
-            line2: null,
-            city: null,
-            state: null,
-            postalCode: null,
-            country: shippingCountry,
-            email: publisherAddress?.contactEmail || "",
-            phone: publisherAddress?.contactPhone || "",
-          },
-          shipping_country: isSelfPrint ? "N/A" : shippingCountry,
-          total_price: totalPrice,
-        })
-        .select()
-        .single();
+      const { data: printOrder, error: orderError } = await supabase.
+      from("print_orders").
+      insert({
+        activation_id: activationId,
+        advertiser_id: session.user.id,
+        order_status: "pending_admin",
+        product_sku: product.sku,
+        product_name: product.name,
+        product_specs: {
+          ...product.specs,
+          print_handler: printHandler,
+          self_print_file_url: isSelfPrint ? selfPrintFileUrl : null
+        },
+        quantity,
+        design_url: isSelfPrint ? selfPrintFileUrl : artworkUrl,
+        shipping_address: isSelfPrint ? { selfPrint: true } : {
+          recipientName: publisherAddress?.businessName || "",
+          line1: publisherAddress?.location || listing?.location || "",
+          line2: null,
+          city: null,
+          state: null,
+          postalCode: null,
+          country: shippingCountry,
+          email: publisherAddress?.contactEmail || "",
+          phone: publisherAddress?.contactPhone || ""
+        },
+        shipping_country: isSelfPrint ? "N/A" : shippingCountry,
+        total_price: totalPrice
+      }).
+      select().
+      single();
 
       if (orderError) throw orderError;
 
       // Update activation status to pending_print_approval
       if (activationId) {
-        await supabase
-          .from("activations")
-          .update({
-            status: "printing",
-            print_order_id: printOrder.id,
-            quantity,
-          })
-          .eq("id", activationId);
+        await supabase.
+        from("activations").
+        update({
+          status: "printing",
+          print_order_id: printOrder.id,
+          quantity
+        }).
+        eq("id", activationId);
       }
 
       // Send message to admin inbox
-      const { data: adminRoles } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "admin")
-        .limit(1);
+      const { data: adminRoles } = await supabase.
+      from("user_roles").
+      select("user_id").
+      eq("role", "admin").
+      limit(1);
 
       if (adminRoles && adminRoles.length > 0) {
         const adminUserId = adminRoles[0].user_id;
         const handlerLabel = isSelfPrint ? "Advertiser Self-Print" : "Tiny Sticky Ads Printing";
-        await supabase
-          .from("messages")
-          .insert({
-            sender_id: session.user.id,
-            recipient_id: adminUserId,
-            subject: `Print Order Request - ${product.name} (${handlerLabel})`,
-            content: `New print order request submitted:\n\n` +
-              `**Listing:** ${listing?.title || "N/A"}\n` +
-              `**Product:** ${product.name}\n` +
-              `**Print Handler:** ${handlerLabel}\n` +
-              `**Quantity:** ${quantity} units\n` +
-              (isSelfPrint
-                ? `**Self-Print File:** ${selfPrintFileUrl}\n`
-                : `**Total Price:** $${totalPrice.toFixed(2)}\n` +
-                  `**Shipping To:** ${publisherAddress?.businessName}\n` +
-                  `**Address:** ${publisherAddress?.location || listing?.location || "Not specified"}\n`) +
-              `\n**Design URL:** ${artworkUrl}\n\n` +
-              `Please review and approve this order in the Admin Orders page.`,
-            listing_id: listing?.id || null,
-            listing_type: "ad_space",
-          });
+        await supabase.
+        from("messages").
+        insert({
+          sender_id: session.user.id,
+          recipient_id: adminUserId,
+          subject: `Print Order Request - ${product.name} (${handlerLabel})`,
+          content: `New print order request submitted:\n\n` +
+          `**Listing:** ${listing?.title || "N/A"}\n` +
+          `**Product:** ${product.name}\n` +
+          `**Print Handler:** ${handlerLabel}\n` +
+          `**Quantity:** ${quantity} units\n` + (
+          isSelfPrint ?
+          `**Self-Print File:** ${selfPrintFileUrl}\n` :
+          `**Total Price:** $${totalPrice.toFixed(2)}\n` +
+          `**Shipping To:** ${publisherAddress?.businessName}\n` +
+          `**Address:** ${publisherAddress?.location || listing?.location || "Not specified"}\n`) +
+          `\n**Design URL:** ${artworkUrl}\n\n` +
+          `Please review and approve this order in the Admin Orders page.`,
+          listing_id: listing?.id || null,
+          listing_type: "ad_space"
+        });
       }
 
       setOrderId(printOrder.id);
@@ -618,14 +618,14 @@ const ActivateListing = () => {
 
       toast({
         title: "Order Submitted!",
-        description: "Your print order is pending admin approval. You'll be notified when reviewed.",
+        description: "Your print order is pending admin approval. You'll be notified when reviewed."
       });
     } catch (error: any) {
       console.error("Order error:", error);
       toast({
         title: "Order failed",
         description: error.message || "Failed to place order",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setOrderLoading(false);
@@ -649,15 +649,15 @@ const ActivateListing = () => {
 
       const ext = file.name.split(".").pop();
       const filePath = `${session.user.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("ad-space-media")
-        .upload(filePath, file);
+      const { error: uploadError } = await supabase.storage.
+      from("ad-space-media").
+      upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("ad-space-media")
-        .getPublicUrl(filePath);
+      const { data: urlData } = supabase.storage.
+      from("ad-space-media").
+      getPublicUrl(filePath);
 
       setSelfPrintFileUrl(urlData.publicUrl);
       toast({ title: "File uploaded", description: "Your print-ready file has been uploaded." });
@@ -675,52 +675,52 @@ const ActivateListing = () => {
         const product = getProductById(selectedProductId);
         const totalAmount = product ? calculateOrderTotal(product, quantity) : 0;
 
-        await supabase
-          .from("activations")
-          .update({
-            status: "completed",
-            total_amount: totalAmount + estimatedPublisherPayout,
-          })
-          .eq("id", activationId);
+        await supabase.
+        from("activations").
+        update({
+          status: "completed",
+          total_amount: totalAmount + estimatedPublisherPayout
+        }).
+        eq("id", activationId);
 
         setActivationStatus("completed");
 
         // Send notification to venue publisher
         if (listing?.publisher_id) {
           // Get publisher user_id from publisher_profiles
-          const { data: publisherProfile } = await supabase
-            .from("publisher_profiles")
-            .select("user_id, business_name")
-            .eq("id", listing.publisher_id)
-            .single();
+          const { data: publisherProfile } = await supabase.
+          from("publisher_profiles").
+          select("user_id, business_name").
+          eq("id", listing.publisher_id).
+          single();
 
           if (publisherProfile?.user_id) {
-            await supabase
-              .from("notifications")
-              .insert({
-                user_id: publisherProfile.user_id,
-                title: "Print Ad Material Confirmed!",
-                message: `Great news! An advertiser has completed payment for "${listing.title}". Tiny Sticky Ads is now handling the Print Ad Material for your venue.`,
-                type: "payment_received",
-              });
+            await supabase.
+            from("notifications").
+            insert({
+              user_id: publisherProfile.user_id,
+              title: "Print Ad Material Confirmed!",
+              message: `Great news! An advertiser has completed payment for "${listing.title}". Tiny Sticky Ads is now handling the Print Ad Material for your venue.`,
+              type: "payment_received"
+            });
           }
         }
 
         toast({
           title: "Activation Complete!",
-          description: "Your booking is now confirmed and added to the publisher's calendar.",
+          description: "Your booking is now confirmed and added to the publisher's calendar."
         });
       } catch (error: any) {
         toast({
           title: "Error",
           description: error.message || "Failed to complete activation",
-          variant: "destructive",
+          variant: "destructive"
         });
       }
     } else {
       toast({
         title: "Payment Gateway",
-        description: "Payment integration coming soon. Contact support for manual activation.",
+        description: "Payment integration coming soon. Contact support for manual activation."
       });
     }
   };
@@ -731,47 +731,47 @@ const ActivateListing = () => {
   // Calculate subscription price based on selected duration
   const calculateSubscriptionPrice = () => {
     if (!startDate || !endDate || !listing) return 0;
-    
+
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Include both start and end dates
     const diffWeeks = Math.ceil(diffDays / 7);
-    
+
     // Get pricing from multiple sources:
     // 1. listing.specifications.ad_units (ad unit specific pricing)
     // 2. listing.pricing.ad_units (alternative location)
     // 3. listing.pricing (legacy direct pricing)
     const adUnits = listing.specifications?.ad_units || listing.pricing?.ad_units || [];
-    const selectedAdUnit = adUnits.find((unit: any) => 
-      unit.type === approvedAdUnitType || unit.type === activationType
+    const selectedAdUnit = adUnits.find((unit: any) =>
+    unit.type === approvedAdUnitType || unit.type === activationType
     ) || adUnits[0];
-    
+
     // Get weekly rate from multiple possible fields
-    const weeklyRate = 
-      selectedAdUnit?.pricePerWeek || 
-      selectedAdUnit?.weekly_subscription_fee ||
-      listing.pricing?.weekly || 
-      listing.pricing?.pricePerWeek || 
-      0;
-    
+    const weeklyRate =
+    selectedAdUnit?.pricePerWeek ||
+    selectedAdUnit?.weekly_subscription_fee ||
+    listing.pricing?.weekly ||
+    listing.pricing?.pricePerWeek ||
+    0;
+
     // Get monthly rate from multiple possible fields
-    const monthlyRate = 
-      selectedAdUnit?.pricePerMonth || 
-      selectedAdUnit?.monthly_subscription_fee ||
-      listing.pricing?.monthly || 
-      listing.pricing?.pricePerMonth || 
-      0;
-    
+    const monthlyRate =
+    selectedAdUnit?.pricePerMonth ||
+    selectedAdUnit?.monthly_subscription_fee ||
+    listing.pricing?.monthly ||
+    listing.pricing?.pricePerMonth ||
+    0;
+
     // Pricing logic: months apply first, remaining weeks billed at weekly rate
     if (diffWeeks >= 4 && monthlyRate > 0) {
       const fullMonths = Math.floor(diffWeeks / 4);
       const remainingWeeks = diffWeeks % 4;
-      return (fullMonths * monthlyRate) + (remainingWeeks * weeklyRate);
+      return fullMonths * monthlyRate + remainingWeeks * weeklyRate;
     }
-    
+
     if (weeklyRate > 0) {
       return diffWeeks * weeklyRate;
     }
-    
+
     return 0;
   };
 
@@ -791,8 +791,8 @@ const ActivateListing = () => {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+      </div>);
+
   }
 
   // Restrict access to advertisers only
@@ -823,8 +823,8 @@ const ActivateListing = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (!listing) {
@@ -834,13 +834,13 @@ const ActivateListing = () => {
           <p className="text-muted-foreground mb-4">Listing not found</p>
           <Button onClick={() => navigate(-1)}>Go Back</Button>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
-  const primaryImage = Array.isArray(listing.media_urls) && listing.media_urls.length > 0 
-    ? listing.media_urls[0] 
-    : null;
+  const primaryImage = Array.isArray(listing.media_urls) && listing.media_urls.length > 0 ?
+  listing.media_urls[0] :
+  null;
 
   const activationPrice = subscriptionPrice > 0 ? subscriptionPrice : estimatedPublisherPayout;
 
@@ -854,43 +854,43 @@ const ActivateListing = () => {
         </Button>
 
         {/* Step Indicator - Now 3 steps: Book Ad Space → Print Order → Payment */}
-        <ActivationStepper 
-          currentStep={currentStep} 
-          approvalStatus={isWaitingForPublisher ? "pending" : isApprovedByPublisher ? "approved" : undefined}
-        />
+        <ActivationStepper
+          currentStep={currentStep}
+          approvalStatus={isWaitingForPublisher ? "pending" : isApprovedByPublisher ? "approved" : undefined} />
+
 
         {/* Listing Summary with Price */}
         <Card className="mb-8">
           <CardContent className="pt-6">
             <div className="flex flex-col sm:flex-row gap-4 items-start">
-              {primaryImage && (
-                <div className="w-full sm:w-32 h-24 overflow-hidden rounded-lg flex-shrink-0">
+              {primaryImage &&
+              <div className="w-full sm:w-32 h-24 overflow-hidden rounded-lg flex-shrink-0">
                   <img
-                    src={primaryImage}
-                    alt={listing.title}
-                    className="w-full h-full object-cover"
-                  />
+                  src={primaryImage}
+                  alt={listing.title}
+                  className="w-full h-full object-cover" />
+
                 </div>
-              )}
+              }
               <div className="flex-1">
                 <h2 className="text-xl font-bold">{listing.title}</h2>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                   <MapPin className="h-4 w-4" />
                   <span>{listing.location}</span>
                 </div>
-                {listing.specifications?.venue_type && (
-                  <Badge variant="secondary" className="mt-2">
+                {listing.specifications?.venue_type &&
+                <Badge variant="secondary" className="mt-2">
                     {listing.specifications.venue_type}
                   </Badge>
-                )}
+                }
               </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">
-                  {startDate && endDate ? (
-                    <>Total Booking Fee ({Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7))} week{Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7)) !== 1 ? 's' : ''})</>
-                  ) : (
-                    'Total Booking Fee'
-                  )}
+                  {startDate && endDate ?
+                  <>Total Booking Fee ({Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7))} week{Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7)) !== 1 ? 's' : ''})</> :
+
+                  'Total Booking Fee'
+                  }
                 </p>
                 <p className="text-2xl font-bold text-primary">
                   {formatPrice(activationPrice, listing?.specifications?.currency || "USD")}
@@ -901,11 +901,11 @@ const ActivateListing = () => {
         </Card>
 
         {/* Step Content */}
-        {currentStep === "design" && (
-          <div className="space-y-8">
+        {currentStep === "design" &&
+        <div className="space-y-8">
             {/* Show status messages for waiting/rejected states */}
-            {isWaitingForPublisher && (
-              <Card className="border-yellow-500/30 bg-yellow-500/5">
+            {isWaitingForPublisher &&
+          <Card className="border-yellow-500/30 bg-yellow-500/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-yellow-600">
                     <Clock className="h-5 w-5 animate-pulse" />
@@ -916,10 +916,10 @@ const ActivateListing = () => {
                   </CardDescription>
                 </CardHeader>
               </Card>
-            )}
+          }
 
-            {isRejectedByPublisher && (
-              <Card className="border-destructive/30 bg-destructive/5">
+            {isRejectedByPublisher &&
+          <Card className="border-destructive/30 bg-destructive/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-destructive">
                     <XCircle className="h-5 w-5" />
@@ -930,10 +930,10 @@ const ActivateListing = () => {
                   </CardDescription>
                 </CardHeader>
               </Card>
-            )}
+          }
 
-            {isApprovedByPublisher && (
-              <Card className="border-primary bg-primary/5">
+            {isApprovedByPublisher &&
+          <Card className="border-primary bg-primary/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-primary">
                     <CheckCircle className="h-5 w-5" />
@@ -944,27 +944,27 @@ const ActivateListing = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button 
-                    className="w-full" 
-                    size="lg"
-                    onClick={() => setCurrentStep("print-order")}
-                  >
+                  <Button
+                className="w-full"
+                size="lg"
+                onClick={() => setCurrentStep("print-order")}>
+
                     Continue to Print Order
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </CardContent>
               </Card>
-            )}
+          }
 
             {/* Design Upload and Booking - only show if not yet approved */}
-            {!isApprovedByPublisher && (
-              <>
+            {!isApprovedByPublisher &&
+          <>
                 <div className="grid lg:grid-cols-2 gap-8">
                   <AdMockupPreview onApprove={handleMockupApproval} />
                   
                   <div className="space-y-6">
-                    {designApproved ? (
-                      <Card className="border-primary">
+                    {designApproved ?
+                <Card className="border-primary">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-primary">
                             <CheckCircle className="h-5 w-5" />
@@ -974,25 +974,25 @@ const ActivateListing = () => {
                         <CardContent className="space-y-4">
                           <div className="p-4 bg-primary/10 rounded-lg">
                             <p className="text-sm font-medium">
-                              Ad Unit: {approvedAdUnitType.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
+                              Ad Unit: {approvedAdUnitType.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
                               Product SKU: {selectedProduct}
                             </p>
                           </div>
-                          {artworkUrl && (
-                            <div className="p-3 bg-muted rounded-lg">
-                              <img 
-                                src={artworkUrl} 
-                                alt="Your artwork" 
-                                className="max-h-32 mx-auto rounded object-contain"
-                              />
+                          {artworkUrl &&
+                    <div className="p-3 bg-muted rounded-lg">
+                              <img
+                        src={artworkUrl}
+                        alt="Your artwork"
+                        className="max-h-32 mx-auto rounded object-contain" />
+
                             </div>
-                          )}
+                    }
                         </CardContent>
-                      </Card>
-                    ) : (
-                      <Card>
+                      </Card> :
+
+                <Card>
                         <CardHeader>
                           <CardTitle>Step 1: Book Ad Space</CardTitle>
                           <CardDescription>
@@ -1020,123 +1020,123 @@ const ActivateListing = () => {
                           </ul>
                         </CardContent>
                       </Card>
-                    )}
+                }
                   </div>
                 </div>
 
                 {/* Booking Scheduler */}
-                {designApproved && !isWaitingForPublisher && (
-                  <>
+                {designApproved && !isWaitingForPublisher &&
+            <>
                     <BookingScheduler
-                      startDate={startDate}
-                      endDate={endDate}
-                      onDatesChange={handleDatesChange}
-                      pricing={{
-                        ...listing.pricing,
-                        ad_units: listing.specifications?.ad_units || listing.pricing?.ad_units || [],
-                      }}
-                      adUnitType={approvedAdUnitType || activationType}
-                      quantity={quantity}
-                      onEstimatedPayoutChange={handleEstimatedPayoutChange}
-                    />
+                startDate={startDate}
+                endDate={endDate}
+                onDatesChange={handleDatesChange}
+                pricing={{
+                  ...listing.pricing,
+                  ad_units: listing.specifications?.ad_units || listing.pricing?.ad_units || []
+                }}
+                adUnitType={approvedAdUnitType || activationType}
+                quantity={quantity}
+                onEstimatedPayoutChange={handleEstimatedPayoutChange} />
+
 
                     {/* Quantity Selection */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Quantity</CardTitle>
-                        <CardDescription>How many units do you need?</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        {(() => {
-                          const adUnits = listing.specifications?.ad_units || listing.pricing?.ad_units || [];
-                          const selectedAdUnit = adUnits.find((unit: any) =>
-                            unit.type === approvedAdUnitType || unit.type === activationType
-                          ) || adUnits[0];
-                          const formatAdUnitName = (type: string) =>
-                            type?.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) || "N/A";
-                          const currency = listing.specifications?.currency || "USD";
+                    
 
-                          if (selectedAdUnit) {
-                            return (
-                              <div className="rounded-lg border bg-muted/40 p-3 space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="secondary" className="capitalize">
-                                    {formatAdUnitName(selectedAdUnit.type)}
-                                  </Badge>
-                                </div>
-                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
-                                  {selectedAdUnit.pricePerWeek > 0 && (
-                                    <span>
-                                      <span className="font-medium text-foreground">
-                                        {formatPrice(selectedAdUnit.pricePerWeek, currency)}
-                                      </span>{" "}
-                                      / week
-                                    </span>
-                                  )}
-                                  {selectedAdUnit.pricePerMonth > 0 && (
-                                    <span>
-                                      <span className="font-medium text-foreground">
-                                        {formatPrice(selectedAdUnit.pricePerMonth, currency)}
-                                      </span>{" "}
-                                      / month
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          }
-                          return null;
-                        })()}
-                        <div className="max-w-xs">
-                          <Input
-                            type="number"
-                            min={1}
-                            value={quantity}
-                            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                     {/* Submit Booking Request Button */}
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      onClick={handleSubmitAdRequest}
-                      disabled={!canSubmitAdRequest || submittingRequest}
-                    >
-                      {submittingRequest ? (
-                        <>
+                    <Button
+                className="w-full"
+                size="lg"
+                onClick={handleSubmitAdRequest}
+                disabled={!canSubmitAdRequest || submittingRequest}>
+
+                      {submittingRequest ?
+                <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           Submitting Booking Request...
-                        </>
-                      ) : (
-                        <>
+                        </> :
+
+                <>
                           <Send className="h-4 w-4 mr-2" />
                           Submit Booking Request - {formatPrice(subscriptionPrice, listing?.specifications?.currency || "USD")}
                         </>
-                      )}
+                }
                     </Button>
 
-                    {!canSubmitAdRequest && (
-                      <p className="text-sm text-center text-muted-foreground">
+                    {!canSubmitAdRequest &&
+              <p className="text-sm text-center text-muted-foreground">
                         {!designApproved && "Please upload and confirm your design. "}
                         {!startDate && "Please select a start date. "}
                         {!endDate && "Please select an end date. "}
                         {subscriptionPrice <= 0 && "Booking price could not be calculated."}
                       </p>
-                    )}
+              }
                   </>
-                )}
+            }
               </>
-            )}
+          }
           </div>
-        )}
+        }
 
-        {currentStep === "print-order" && (
-          <>
-            {printOrderComplete ? (
-              <div className="max-w-xl mx-auto">
+        {currentStep === "print-order" &&
+        <>
+            {printOrderComplete ?
+          <div className="max-w-xl mx-auto">
                 <Card className="border-yellow-500/50 bg-yellow-500/5">
                   <CardHeader className="text-center">
                     <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center">
@@ -1183,15 +1183,15 @@ const ActivateListing = () => {
                     </div>
 
                     <PrintOrderPaymentGate
-                      orderId={orderId}
-                      onProceedToPayment={() => setCurrentStep("payment")}
-                      onBackToDashboard={() => navigate("/advertiser-dashboard")}
-                    />
+                  orderId={orderId}
+                  onProceedToPayment={() => setCurrentStep("payment")}
+                  onBackToDashboard={() => navigate("/advertiser-dashboard")} />
+
                   </CardContent>
                 </Card>
-              </div>
-            ) : (
-              <div className="space-y-8">
+              </div> :
+
+          <div className="space-y-8">
                 {/* Print Handler Selection */}
                 <div>
                   <h3 className="text-lg font-semibold mb-1">Who will handle printing?</h3>
@@ -1200,14 +1200,14 @@ const ActivateListing = () => {
                   <div className="grid sm:grid-cols-2 gap-4">
                     {/* Option 1: Platform handles printing */}
                     <button
-                      type="button"
-                      onClick={() => setPrintHandler("platform")}
-                      className={`text-left rounded-lg border-2 p-5 transition-all ${
-                        printHandler === "platform"
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/40"
-                      }`}
-                    >
+                  type="button"
+                  onClick={() => setPrintHandler("platform")}
+                  className={`text-left rounded-lg border-2 p-5 transition-all ${
+                  printHandler === "platform" ?
+                  "border-primary bg-primary/5" :
+                  "border-border hover:border-primary/40"}`
+                  }>
+
                       <div className="flex items-center gap-2 mb-2">
                         <Printer className="h-5 w-5 text-primary" />
                         <span className="font-semibold">Tiny Sticky Ads Handles Printing</span>
@@ -1215,15 +1215,15 @@ const ActivateListing = () => {
                       <p className="text-sm text-muted-foreground mb-3">
                         We print the materials for you based on approved specifications.
                       </p>
-                      {selectedPrintProduct && (
-                        <div className="rounded-md bg-muted/60 px-3 py-2 text-sm">
+                      {selectedPrintProduct &&
+                  <div className="rounded-md bg-muted/60 px-3 py-2 text-sm">
                           <span className="text-muted-foreground">Est. cost: </span>
                           <span className="font-semibold text-primary">
                             {formatPrice(calculateOrderTotal(selectedPrintProduct, quantity), listing?.specifications?.currency || "USD")}
                           </span>
                           <span className="text-muted-foreground"> ({quantity} units)</span>
                         </div>
-                      )}
+                  }
                       <p className="text-xs text-muted-foreground mt-2 italic">
                         Printing will only begin after admin approval.
                       </p>
@@ -1231,14 +1231,14 @@ const ActivateListing = () => {
 
                     {/* Option 2: Self-print */}
                     <button
-                      type="button"
-                      onClick={() => setPrintHandler("self")}
-                      className={`text-left rounded-lg border-2 p-5 transition-all ${
-                        printHandler === "self"
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/40"
-                      }`}
-                    >
+                  type="button"
+                  onClick={() => setPrintHandler("self")}
+                  className={`text-left rounded-lg border-2 p-5 transition-all ${
+                  printHandler === "self" ?
+                  "border-primary bg-primary/5" :
+                  "border-border hover:border-primary/40"}`
+                  }>
+
                       <div className="flex items-center gap-2 mb-2">
                         <Upload className="h-5 w-5 text-primary" />
                         <span className="font-semibold">I Will Handle Printing</span>
@@ -1254,8 +1254,8 @@ const ActivateListing = () => {
                 </div>
 
                 {/* Platform-print details */}
-                {printHandler === "platform" && (
-                  <div className="grid lg:grid-cols-2 gap-8">
+                {printHandler === "platform" &&
+            <div className="grid lg:grid-cols-2 gap-8">
                     {/* Auto-detected Print Product */}
                     <Card>
                       <CardHeader>
@@ -1266,8 +1266,8 @@ const ActivateListing = () => {
                         <CardDescription>Auto-detected from listing ad unit type</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {selectedPrintProduct && (
-                          <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                        {selectedPrintProduct &&
+                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
                             <h4 className="font-semibold text-lg">{selectedPrintProduct.name}</h4>
                             <p className="text-sm text-muted-foreground mb-2">{selectedPrintProduct.description}</p>
                             <div className="grid grid-cols-2 gap-2 text-sm">
@@ -1275,19 +1275,19 @@ const ActivateListing = () => {
                               <div><span className="text-muted-foreground">Material:</span> {selectedPrintProduct.specs.material}</div>
                             </div>
                           </div>
-                        )}
+                  }
 
                         <div>
                           <Label>Quantity</Label>
                           <Input
-                            type="number"
-                            min={selectedPrintProduct?.minQuantity || 1}
-                            value={quantity}
-                            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                          />
-                          {selectedPrintProduct && (
-                            <p className="text-xs text-muted-foreground mt-1">Min: {selectedPrintProduct.minQuantity} units</p>
-                          )}
+                      type="number"
+                      min={selectedPrintProduct?.minQuantity || 1}
+                      value={quantity}
+                      onChange={(e) => setQuantity(parseInt(e.target.value) || 1)} />
+
+                          {selectedPrintProduct &&
+                    <p className="text-xs text-muted-foreground mt-1">Min: {selectedPrintProduct.minQuantity} units</p>
+                    }
                         </div>
 
                         <div>
@@ -1295,15 +1295,15 @@ const ActivateListing = () => {
                           <Select value={shippingCountry} onValueChange={setShippingCountry}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              {SHIPPING_COUNTRIES.map((c) => (
-                                <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
-                              ))}
+                              {SHIPPING_COUNTRIES.map((c) =>
+                        <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                        )}
                             </SelectContent>
                           </Select>
                         </div>
 
-                        {selectedPrintProduct && (
-                          <div className="pt-4 border-t space-y-2">
+                        {selectedPrintProduct &&
+                  <div className="pt-4 border-t space-y-2">
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">Product</span>
                               <span>{selectedPrintProduct.name}</span>
@@ -1318,7 +1318,7 @@ const ActivateListing = () => {
                             </div>
                             <p className="text-xs text-muted-foreground">Final price confirmed after admin review</p>
                           </div>
-                        )}
+                  }
                       </CardContent>
                     </Card>
 
@@ -1332,8 +1332,8 @@ const ActivateListing = () => {
                         <p className="text-sm text-muted-foreground">Shipped directly to the publisher venue</p>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {publisherAddress ? (
-                          <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                        {publisherAddress ?
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                             <div>
                               <Label className="text-xs text-muted-foreground">Venue Name</Label>
                               <p className="font-medium">{publisherAddress.businessName}</p>
@@ -1342,20 +1342,20 @@ const ActivateListing = () => {
                               <Label className="text-xs text-muted-foreground">Address</Label>
                               <p className="font-medium">{publisherAddress.location || listing?.location || "Not specified"}</p>
                             </div>
-                          </div>
-                        ) : (
-                          <div className="bg-muted/50 rounded-lg p-4 text-center">
+                          </div> :
+
+                  <div className="bg-muted/50 rounded-lg p-4 text-center">
                             <p className="text-muted-foreground">Loading publisher address...</p>
                           </div>
-                        )}
+                  }
                       </CardContent>
                     </Card>
                   </div>
-                )}
+            }
 
                 {/* Self-print details */}
-                {printHandler === "self" && (
-                  <Card>
+                {printHandler === "self" &&
+            <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Upload className="h-5 w-5" />
@@ -1369,41 +1369,41 @@ const ActivateListing = () => {
                       <div>
                         <Label>Print-Ready File (PNG or PDF) *</Label>
                         <Input
-                          type="file"
-                          accept=".png,.pdf,image/png,application/pdf"
-                          onChange={handleSelfPrintFileUpload}
-                          disabled={selfPrintUploading}
-                          className="mt-1"
-                        />
-                        {selfPrintUploading && (
-                          <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                    type="file"
+                    accept=".png,.pdf,image/png,application/pdf"
+                    onChange={handleSelfPrintFileUpload}
+                    disabled={selfPrintUploading}
+                    className="mt-1" />
+
+                        {selfPrintUploading &&
+                  <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                             <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
                           </div>
-                        )}
-                        {selfPrintFileUrl && (
-                          <p className="text-sm text-primary mt-2 flex items-center gap-1">
+                  }
+                        {selfPrintFileUrl &&
+                  <p className="text-sm text-primary mt-2 flex items-center gap-1">
                             <CheckCircle className="h-4 w-4" /> File uploaded successfully
                           </p>
-                        )}
+                  }
                       </div>
 
                       <div className="flex items-start gap-2">
                         <Checkbox
-                          id="self-print-ack"
-                          checked={selfPrintAcknowledged}
-                          onCheckedChange={(checked) => setSelfPrintAcknowledged(checked === true)}
-                        />
+                    id="self-print-ack"
+                    checked={selfPrintAcknowledged}
+                    onCheckedChange={(checked) => setSelfPrintAcknowledged(checked === true)} />
+
                         <label htmlFor="self-print-ack" className="text-sm leading-snug cursor-pointer">
                           I understand that my graphic must be approved before printing and placement.
                         </label>
                       </div>
                     </CardContent>
                   </Card>
-                )}
+            }
 
                 {/* Status badge + Submit */}
-                {printHandler && (
-                  <div className="space-y-3">
+                {printHandler &&
+            <div className="space-y-3">
                     <div className="flex items-center justify-center">
                       <Badge variant="secondary" className="text-sm px-3 py-1">
                         <Clock className="h-3.5 w-3.5 mr-1.5" />
@@ -1411,57 +1411,57 @@ const ActivateListing = () => {
                       </Badge>
                     </div>
                     <Button
-                      onClick={handlePlacePrintOrder}
-                      disabled={
-                        orderLoading ||
-                        !selectedProductId ||
-                        (printHandler === "platform" && !publisherAddress) ||
-                        (printHandler === "self" && (!selfPrintFileUrl || !selfPrintAcknowledged))
-                      }
-                      className="w-full"
-                      size="lg"
-                    >
-                      {orderLoading ? (
-                        <>
+                onClick={handlePlacePrintOrder}
+                disabled={
+                orderLoading ||
+                !selectedProductId ||
+                printHandler === "platform" && !publisherAddress ||
+                printHandler === "self" && (!selfPrintFileUrl || !selfPrintAcknowledged)
+                }
+                className="w-full"
+                size="lg">
+
+                      {orderLoading ?
+                <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           Submitting for Approval...
-                        </>
-                      ) : (
-                        <>
+                        </> :
+
+                <>
                           <Send className="h-4 w-4 mr-2" />
                           Submit Print Order for Approval
                         </>
-                      )}
+                }
                     </Button>
                   </div>
-                )}
+            }
 
                 <Button
-                  variant="outline"
-                  onClick={() => setCurrentStep("design")}
-                  className="w-full max-w-md mx-auto"
-                >
+              variant="outline"
+              onClick={() => setCurrentStep("design")}
+              className="w-full max-w-md mx-auto">
+
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Design
                 </Button>
               </div>
-            )}
+          }
           </>
-        )}
+        }
 
-        {currentStep === "payment" && (
-          <div className="max-w-2xl mx-auto">
-            {activationStatus === "completed" ? (
-              <OrderSuccessCard
-                orderId={orderId || activationId || "N/A"}
-                productName={selectedPrintProduct?.name || "Print Order"}
-                quantity={quantity}
-                onNewOrder={() => navigate("/explore")}
-              />
-            ) : (
-              <>
-                {printOrderComplete && (
-                  <Card className="mb-6 border-primary">
+        {currentStep === "payment" &&
+        <div className="max-w-2xl mx-auto">
+            {activationStatus === "completed" ?
+          <OrderSuccessCard
+            orderId={orderId || activationId || "N/A"}
+            productName={selectedPrintProduct?.name || "Print Order"}
+            quantity={quantity}
+            onNewOrder={() => navigate("/explore")} /> :
+
+
+          <>
+                {printOrderComplete &&
+            <Card className="mb-6 border-primary">
                     <CardContent className="pt-6">
                       <div className="flex items-center gap-3 text-primary">
                         <CheckCircle className="h-6 w-6" />
@@ -1472,22 +1472,22 @@ const ActivateListing = () => {
                       </div>
                     </CardContent>
                   </Card>
-                )}
+            }
 
                 <PaymentGateway
-                  activationId={activationId || id || ""}
-                  listingTitle={listing?.title || "Ad Space"}
-                  onPaymentSuccess={handlePayNow}
-                  onBack={() => setCurrentStep("print-order")}
-                  disabled={activationStatus === "completed"}
-                />
+              activationId={activationId || id || ""}
+              listingTitle={listing?.title || "Ad Space"}
+              onPaymentSuccess={handlePayNow}
+              onBack={() => setCurrentStep("print-order")}
+              disabled={activationStatus === "completed"} />
+
               </>
-            )}
+          }
           </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default ActivateListing;
