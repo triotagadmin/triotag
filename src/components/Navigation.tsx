@@ -91,9 +91,7 @@ export const Navigation = () => {
         {user ? <>
             {userRole === "talent" ?
         <>
-                <Link to="/hire-talent" onClick={closeMobileMenu}>
-                  <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
-                </Link>
+                
                 <Link to={getDashboardLink()} onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
                 </Link>
@@ -103,9 +101,7 @@ export const Navigation = () => {
                 <Link to="/explore" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
                 </Link>
-                <Link to="/hire-talent" onClick={closeMobileMenu}>
-                  <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
-                </Link>
+                
                 {userRole === "advertiser" &&
           <Link to="/services" onClick={closeMobileMenu}>
                     
@@ -141,9 +137,7 @@ export const Navigation = () => {
             <Link to="/explore" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
             </Link>
-            <Link to="/hire-talent" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>Hire Talent</Button>
-            </Link>
+            
             <Link to="/habit-tracker" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
             </Link>
