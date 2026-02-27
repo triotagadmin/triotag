@@ -241,31 +241,48 @@ export function BookingScheduler({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Rate</span>
-                  <span>
-                    ₱{(pricing?.weekly || pricing?.ad_units?.[0]?.weekly_subscription_fee || 0).toLocaleString()}/week
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Duration</span>
-                  <span>{duration?.weeks || 0} week{(duration?.weeks || 0) !== 1 ? 's' : ''}</span>
-                </div>
-                {quantity > 1 && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Quantity</span>
-                    <span>{quantity} units</span>
+              {(() => {
+                const adUnits = pricing?.ad_units || [];
+                const selectedUnit = adUnits.find((u: any) => u.type === adUnitType) || adUnits[0];
+                const weeklyRate = selectedUnit?.pricePerWeek || selectedUnit?.weekly_subscription_fee || pricing?.weekly || pricing?.pricePerWeek || 0;
+                const monthlyRate = selectedUnit?.pricePerMonth || selectedUnit?.monthly_subscription_fee || pricing?.monthly || pricing?.pricePerMonth || 0;
+                const weeks = duration?.weeks || 0;
+                const useMonthly = weeks >= 4 && monthlyRate > 0;
+                const fullMonths = Math.floor(weeks / 4);
+                const remainingWeeks = weeks % 4;
+
+                return (
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Rate</span>
+                      <span>
+                        {useMonthly
+                          ? `₱${monthlyRate.toLocaleString()}/month`
+                          : `₱${weeklyRate.toLocaleString()}/week`}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Duration</span>
+                      <span>{weeks} week{weeks !== 1 ? 's' : ''}</span>
+                    </div>
+                    {quantity > 1 && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Quantity</span>
+                        <span>{quantity} units</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between pt-2 border-t font-medium text-base">
+                      <span className="text-muted-foreground">Breakdown</span>
+                      <span>
+                        {useMonthly
+                          ? `₱${monthlyRate.toLocaleString()} × ${fullMonths} mo${remainingWeeks > 0 ? ` + ₱${weeklyRate.toLocaleString()} × ${remainingWeeks} wk` : ''}`
+                          : `₱${weeklyRate.toLocaleString()} × ${weeks} wk`}
+                        {quantity > 1 ? ` × ${quantity}` : ''}
+                      </span>
+                    </div>
                   </div>
-                )}
-                <div className="flex justify-between pt-2 border-t font-medium text-base">
-                  <span className="text-muted-foreground">Breakdown</span>
-                  <span>
-                    ₱{(pricing?.weekly || 0).toLocaleString()} × {duration?.weeks || 0} weeks
-                    {quantity > 1 ? ` × ${quantity}` : ''}
-                  </span>
-                </div>
-              </div>
+                );
+              })()}
 
               <div className="pt-3 border-t">
                 <div className="flex justify-between items-center">
