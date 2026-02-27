@@ -1419,9 +1419,9 @@ const ActivateListing = () => {
                 printHandler === "self" && (!selfPrintFileUrl || !selfPrintAcknowledged)
                 }
                 className="w-full"
-                size="lg">
+                size="lg">SUBMIT FOR APPROVAL
 
-                      {orderLoading ?
+                {orderLoading ?
                 <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           Submitting for Approval...
