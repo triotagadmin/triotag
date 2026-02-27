@@ -1394,7 +1394,7 @@ const ActivateListing = () => {
                     onCheckedChange={(checked) => setSelfPrintAcknowledged(checked === true)} />
 
                         <label htmlFor="self-print-ack" className="text-sm leading-snug cursor-pointer">
-                          I understand that my graphic must be approved before printing and placement.
+                          I understand that my graphic must be approved before ad space placement. This is to ensure compliance with content guidelines, ethical standards, and advertising regulations.   
                         </label>
                       </div>
                     </CardContent>
