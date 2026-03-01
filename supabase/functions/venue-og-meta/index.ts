@@ -70,10 +70,11 @@ function buildHtml(
   ogImage: string,
   canonicalUrl: string,
 ): string {
-  const t = escapeHtml(title);
-  const d = escapeHtml(description);
-  const img = escapeHtml(ogImage);
-  const cUrl = escapeHtml(canonicalUrl);
+  const t = escapeText(title);
+  const d = escapeText(description);
+  // URLs: only escape quotes/angle brackets, NOT ampersands (they're valid in URLs)
+  const img = escapeUrl(ogImage);
+  const cUrl = escapeUrl(canonicalUrl);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -100,7 +101,8 @@ function buildHtml(
   <meta name="twitter:image" content="${img}" />
 
   <link rel="canonical" href="${cUrl}" />
-  <meta http-equiv="refresh" content="0;url=${cUrl}" />
+  <!-- Delay redirect so crawlers can read OG tags -->
+  <meta http-equiv="refresh" content="2;url=${cUrl}" />
 </head>
 <body>
   <p>Redirecting to <a href="${cUrl}">${t}</a>…</p>
@@ -108,11 +110,18 @@ function buildHtml(
 </html>`;
 }
 
-function escapeHtml(str: string): string {
+function escapeText(str: string): string {
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function escapeUrl(str: string): string {
+  return str
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
