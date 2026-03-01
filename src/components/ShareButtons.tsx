@@ -80,9 +80,9 @@ const ShareButtons = ({ url, title, description }: ShareButtonsProps) => {
   return (
     <Popover>
       <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
-        <Button variant="outline" size="sm" className="gap-1.5">
+        <Button variant="outline" size="sm" className="gap-1.5 w-full">
           <Share2 className="h-4 w-4" />
-          <span className="hidden sm:inline">Share</span>
+          Share
         </Button>
       </PopoverTrigger>
       <PopoverContent

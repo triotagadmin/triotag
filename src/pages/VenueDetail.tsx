@@ -101,7 +101,8 @@ const VenueDetail = () => {
 
   const images = venue ? (Array.isArray(venue.media_urls) ? venue.media_urls : []) : [];
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const listingUrl = `${supabaseUrl}/functions/v1/og-share?id=${id}`;
+  const ogShareUrl = `${supabaseUrl}/functions/v1/venue-og-meta?id=${id}`;
+  const canonicalUrl = `https://tinystickyads.com/venue/${id}`;
 
   // Set OG meta tags dynamically
   useEffect(() => {
@@ -118,7 +119,7 @@ const VenueDetail = () => {
     document.title = `${venue.title} – Tiny Sticky Ads`;
     setMeta("og:title", venue.title);
     setMeta("og:description", venue.description || "Check out this ad space on Tiny Sticky Ads!");
-    setMeta("og:url", listingUrl);
+    setMeta("og:url", canonicalUrl);
     setMeta("og:image", images[0] || "");
     setMeta("twitter:title", venue.title);
     setMeta("twitter:description", venue.description || "Check out this ad space on Tiny Sticky Ads!");
@@ -147,7 +148,6 @@ const VenueDetail = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <ShareButtons url={listingUrl} title={venue.title} description={venue.description} />
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
@@ -289,6 +289,9 @@ const VenueDetail = () => {
                   <Lock className="h-4 w-4 mr-2" />
                   Activate
                 </Button>
+                <div className="mt-3">
+                  <ShareButtons url={ogShareUrl} title={venue.title} description={venue.description} />
+                </div>
               </CardContent>
             </Card>
           </div>
