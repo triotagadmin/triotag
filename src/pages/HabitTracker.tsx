@@ -60,9 +60,11 @@ const HabitTracker = () => {
   }, []);
   const fetchUserQRCodes = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
       const {
         data: qrCodes
-      } = await supabase.from('qr_codes').select('*').order('created_at', {
+      } = await supabase.from('qr_codes').select('*').eq('created_by', user.id).order('created_at', {
         ascending: false
       }).limit(10);
       if (qrCodes) {
