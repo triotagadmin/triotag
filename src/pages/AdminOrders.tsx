@@ -461,7 +461,16 @@ const AdminOrders = () => {
               <TableCell className="font-mono text-sm">
                 {order.id.slice(0, 8).toUpperCase()}
               </TableCell>
-              <TableCell>{order.product_name}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  {order.product_name}
+                  {(order as any).product_specs?.print_handler === "self" && (
+                    <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px] px-1.5 py-0">
+                      Self-Print
+                    </Badge>
+                  )}
+                </div>
+              </TableCell>
               <TableCell>{order.quantity}</TableCell>
               <TableCell>{order.shipping_country}</TableCell>
               <TableCell>
@@ -746,14 +755,54 @@ const AdminOrders = () => {
                   </div>
                 </div>
 
+                {/* Self-Print Banner */}
+                {selectedOrder.product_specs?.print_handler === "self" && (
+                  <div className="rounded-lg border-2 border-amber-500/30 bg-amber-500/10 p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5 text-amber-600" />
+                      <h4 className="font-semibold text-amber-700 dark:text-amber-400">Self-Served Print Order</h4>
+                    </div>
+                    <p className="text-sm text-amber-800 dark:text-amber-300">
+                      The requester will handle printing themselves. No production fulfillment is needed from Tiny Sticky Ads.
+                      Review the uploaded print-ready file below for compliance before approving.
+                    </p>
+                    {selectedOrder.product_specs?.self_print_file_url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-amber-500/40 text-amber-700 hover:bg-amber-500/10"
+                        onClick={() => window.open(selectedOrder.product_specs.self_print_file_url, "_blank")}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        View Print-Ready File
+                      </Button>
+                    )}
+                  </div>
+                )}
+
+                {/* Platform Fulfillment Banner */}
+                {selectedOrder.product_specs?.print_handler === "platform" && (
+                  <div className="rounded-lg border-2 border-blue-500/30 bg-blue-500/10 p-4">
+                    <div className="flex items-center gap-2">
+                      <Package className="h-5 w-5 text-blue-600" />
+                      <h4 className="font-semibold text-blue-700 dark:text-blue-400">Platform Fulfillment</h4>
+                    </div>
+                    <p className="text-sm text-blue-800 dark:text-blue-300 mt-1">
+                      Tiny Sticky Ads handles printing and delivery for this order.
+                    </p>
+                  </div>
+                )}
+
                 {/* Specs */}
                 {selectedOrder.product_specs && (
                   <div>
                     <h4 className="font-medium mb-2">Specifications</h4>
                     <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1">
-                      {Object.entries(selectedOrder.product_specs).map(([key, value]) => (
+                      {Object.entries(selectedOrder.product_specs)
+                        .filter(([key]) => !["print_handler", "self_print_file_url"].includes(key))
+                        .map(([key, value]) => (
                         <div key={key} className="flex justify-between">
-                          <span className="text-muted-foreground capitalize">{key}:</span>
+                          <span className="text-muted-foreground capitalize">{key.replace(/_/g, " ")}:</span>
                           <span>{String(value)}</span>
                         </div>
                       ))}
