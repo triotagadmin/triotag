@@ -15,7 +15,10 @@ Deno.serve(async (req: Request) => {
   const venueId = url.searchParams.get("id");
 
   if (!venueId) {
-    return new Response("Missing id parameter", { status: 400, headers: corsHeaders });
+    return new Response("Missing id parameter", {
+      status: 400,
+      headers: corsHeaders,
+    });
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -32,12 +35,11 @@ Deno.serve(async (req: Request) => {
   const fallbackImage = `${appUrl}/favicon.png`;
 
   if (error || !venue) {
-    // Return fallback OG page even on error
     const html = buildHtml(
       "Tiny Sticky Ads",
       "Discover micro OOH ad spaces on Tiny Sticky Ads!",
       fallbackImage,
-      appUrl,
+      appUrl
     );
     return new Response(html, {
       headers: { "Content-Type": "text/html; charset=utf-8", ...corsHeaders },
@@ -68,13 +70,12 @@ function buildHtml(
   title: string,
   description: string,
   ogImage: string,
-  canonicalUrl: string,
+  canonicalUrl: string
 ): string {
-  const t = escapeText(title);
-  const d = escapeText(description);
-  // URLs: only escape quotes/angle brackets, NOT ampersands (they're valid in URLs)
-  const img = escapeUrl(ogImage);
-  const cUrl = escapeUrl(canonicalUrl);
+  const t = esc(title);
+  const d = esc(description);
+  const img = escUrl(ogImage);
+  const cUrl = escUrl(canonicalUrl);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -110,7 +111,7 @@ function buildHtml(
 </html>`;
 }
 
-function escapeText(str: string): string {
+function esc(str: string): string {
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -119,7 +120,7 @@ function escapeText(str: string): string {
     .replace(/'/g, "&#039;");
 }
 
-function escapeUrl(str: string): string {
+function escUrl(str: string): string {
   return str
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
