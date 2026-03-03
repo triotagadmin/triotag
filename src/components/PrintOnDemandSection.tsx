@@ -5,37 +5,37 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Printer, Palette, Truck, Zap, Globe, Shield } from "lucide-react";
 
 const features = [
-  {
-    icon: Palette,
-    title: "Design Development",
-    description: "Our skilled graphic artists craft your ad materials, or you can submit your own designs directly to our platform."
-  },
-  {
-    icon: Printer,
-    title: "Premium Printing",
-    description: "High-quality prints powered by Prodigi's global print network"
-  },
-  {
-    icon: Globe,
-    title: "Global Fulfillment",
-    description: "Ship to 170+ countries with local production facilities"
-  },
-  {
-    icon: Truck,
-    title: "Fast Delivery",
-    description: "Express shipping options with real-time tracking"
-  },
-  {
-    icon: Shield,
-    title: "Quality Guaranteed",
-    description: "Every print meets our strict quality standards"
-  },
-  {
-    icon: Zap,
-    title: "Instant Activation",
-    description: "From design to print in minutes, not days"
-  }
-];
+{
+  icon: Palette,
+  title: "Design Development",
+  description: "Our skilled graphic artists craft your ad materials, or you can submit your own designs directly to our platform."
+},
+{
+  icon: Printer,
+  title: "Premium Printing",
+  description: "High-quality prints powered by Prodigi's global print network"
+},
+{
+  icon: Globe,
+  title: "Global Fulfillment",
+  description: "Ship to 170+ countries with local production facilities"
+},
+{
+  icon: Truck,
+  title: "Fast Delivery",
+  description: "Express shipping options with real-time tracking"
+},
+{
+  icon: Shield,
+  title: "Quality Guaranteed",
+  description: "Every print meets our strict quality standards"
+},
+{
+  icon: Zap,
+  title: "Instant Activation",
+  description: "From design to print in minutes, not days"
+}];
+
 
 export const PrintOnDemandSection = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -59,10 +59,10 @@ export const PrintOnDemandSection = () => {
   }, []);
 
   return (
-    <section 
+    <section
       ref={sectionRef}
-      className="relative py-12 md:py-24 overflow-hidden"
-    >
+      className="relative py-12 md:py-24 overflow-hidden">
+      
       {/* Animated background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background" />
       
@@ -72,22 +72,22 @@ export const PrintOnDemandSection = () => {
       <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '0.5s' }} />
 
       {/* Grid pattern overlay */}
-      <div 
+      <div
         className="absolute inset-0 opacity-20"
         style={{
           backgroundImage: `linear-gradient(hsl(var(--primary) / 0.1) 1px, transparent 1px),
                            linear-gradient(90deg, hsl(var(--primary) / 0.1) 1px, transparent 1px)`,
           backgroundSize: '50px 50px'
-        }}
-      />
+        }} />
+      
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
-        <div 
+        <div
           className={`text-center mb-8 md:mb-16 transition-all duration-1000 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}
-        >
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`
+          }>
+          
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 mb-6 animate-pulse-glow">
             <Printer className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-primary">Powered by Prodigi</span>
@@ -100,21 +100,21 @@ export const PrintOnDemandSection = () => {
           </h2>
           
           <p className="text-sm md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">
-            Transform your digital ad designs into high-quality printed materials. 
             Our seamless Prodigi integration handles everything from printing to global delivery.
+          
           </p>
         </div>
 
         {/* Features grid */}
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-10 md:mb-16">
-          {features.map((feature, index) => (
-            <Card 
-              key={feature.title}
-              className={`group relative overflow-hidden border-primary/20 bg-background/50 backdrop-blur-sm 
+          {features.map((feature, index) =>
+          <Card
+            key={feature.title}
+            className={`group relative overflow-hidden border-primary/20 bg-background/50 backdrop-blur-sm 
                 hover:border-primary/50 transition-all duration-500 hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)]
                 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-              style={{ transitionDelay: `${index * 100}ms` }}
-            >
+            style={{ transitionDelay: `${index * 100}ms` }}>
+            
               {/* Card glow effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
@@ -134,18 +134,18 @@ export const PrintOnDemandSection = () => {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          )}
         </div>
 
         {/* Process visualization */}
-        <div 
+        <div
           className={`relative mb-10 md:mb-16 transition-all duration-1000 delay-500 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}
-        >
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`
+          }>
+          
           <div className="grid grid-cols-4 md:flex md:flex-row items-center justify-center gap-2 md:gap-8">
-            {['Design', 'Print', 'Ship', 'Activate'].map((step, index) => (
-              <div key={step} className="flex flex-col items-center">
+            {['Design', 'Print', 'Ship', 'Activate'].map((step, index) =>
+            <div key={step} className="flex flex-col items-center">
                 <div className="relative group">
                   <div className="absolute inset-0 bg-primary/30 rounded-full blur-xl group-hover:blur-2xl transition-all animate-pulse" style={{ animationDelay: `${index * 0.3}s` }} />
                   <div className="relative w-14 h-14 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/50 flex items-center justify-center group-hover:border-primary group-hover:shadow-[0_0_30px_hsl(var(--primary)/0.5)] transition-all duration-300">
@@ -156,21 +156,21 @@ export const PrintOnDemandSection = () => {
                   {step}
                 </p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
         {/* CTA */}
-        <div 
+        <div
           className={`text-center transition-all duration-1000 delay-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}
-        >
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`
+          }>
+          
           <Link to="/explore">
-            <Button 
-              size="lg" 
-              className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-6 md:px-8 py-4 md:py-6 text-sm md:text-lg font-semibold min-h-[44px] shadow-[0_0_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_50px_hsl(var(--primary)/0.6)] transition-all duration-300"
-            >
+            <Button
+              size="lg"
+              className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-6 md:px-8 py-4 md:py-6 text-sm md:text-lg font-semibold min-h-[44px] shadow-[0_0_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_50px_hsl(var(--primary)/0.6)] transition-all duration-300">
+              
               <span className="relative z-10 flex items-center gap-2">
                 <Printer className="h-5 w-5" />
                 Explore Print-Ready Listings
@@ -183,6 +183,6 @@ export const PrintOnDemandSection = () => {
           </p>
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 };
