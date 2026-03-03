@@ -7,8 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User } from "lucide-react";
+import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { BookingsArchive } from "@/components/publisher/BookingsArchive";
+import { BillingInvoices } from "@/components/publisher/BillingInvoices";
+import { MessagesCard } from "@/components/publisher/MessagesCard";
+import { Separator } from "@/components/ui/separator";
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const {
@@ -268,7 +272,38 @@ const VenueDashboard = () => {
                           </div>
                         </div>
                       </Card>)}
+
+          {/* Bottom Modules */}
+          <Separator className="my-8" />
+          
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Management Hub</h2>
+            
+            {profile?.id && <BookingsArchive publisherProfileId={profile.id} />}
+            
+            {user?.id && <MessagesCard userId={user.id} />}
+            
+            {user?.id && <BillingInvoices userId={user.id} />}
+            
+            {/* Account Settings Link */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-primary" />
+                      Account Settings
+                    </CardTitle>
+                    <CardDescription>Manage your profile, password, and notification preferences</CardDescription>
                   </div>
+                  <Button onClick={() => navigate("/publisher/settings")}>
+                    <Settings className="h-4 w-4 mr-2" />Open Settings
+                  </Button>
+                </div>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
                 </div>}
             </CardContent>
           </Card>
