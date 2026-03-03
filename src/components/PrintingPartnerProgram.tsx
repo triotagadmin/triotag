@@ -333,8 +333,8 @@ export const PrintingPartnerProgram = () => {
             Your Competitive Advantage Over Other Print Shops
           </h3>
           <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-8">
-            Most print shops hand over a tarpaulin and hope for a repeat order. You deliver a
-            verified, tracked advertising placement backed by proof — and charge accordingly.
+            Onboard your clients and You deliver a verified, tracked advertising placement backed by proof — and charge accordingly.
+          
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -426,7 +426,7 @@ export const PrintingPartnerProgram = () => {
           </h3>
 
           <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-4">
-            This is not a signup form. It's a partnership.
+
           </p>
           <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
             We work with a limited number of printing companies in each city to build a verified
