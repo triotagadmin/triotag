@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
-import { PrintingPartnerProgram } from "@/components/PrintingPartnerProgram";
+import { PrintOnDemandSection } from "@/components/PrintOnDemandSection";
 import { FeaturedLocations } from "@/components/FeaturedLocations";
 import { AdvertiserTypes } from "@/components/AdvertiserTypes";
 import { CTABanner } from "@/components/CTABanner";
@@ -14,7 +14,7 @@ const Index = () => {
       <Hero />
       <AdvertiserTypes />
       <HowItWorks />
-      <PrintingPartnerProgram />
+      <PrintOnDemandSection />
       <FeaturedLocations />
       <CTABanner />
       <Footer />
