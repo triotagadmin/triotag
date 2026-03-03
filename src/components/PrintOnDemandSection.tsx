@@ -33,7 +33,7 @@ const features = [
 {
   icon: Zap,
   title: "Instant Activation",
-  description: "From design to print in minutes, not days"
+  description: "Streamlined production from design to print"
 }];
 
 
