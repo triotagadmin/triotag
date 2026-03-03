@@ -516,11 +516,11 @@ export const PrintingPartnerProgram = () => {
 
         {/* ════════ CLOSING CTA ════════ */}
         <div className={`text-center max-w-3xl mx-auto ${fadeIn()}`}>
-          <h3 className="text-2xl md:text-4xl font-display font-bold mb-6">
-            Stop Selling Print.
-            <br />
-            <span className="text-primary">Start Selling Advertising.</span>
-          </h3>
+          
+
+
+
+
 
           <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
             Every tarpaulin you install is an ad placement waiting to earn monthly income.
