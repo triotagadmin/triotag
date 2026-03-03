@@ -225,9 +225,9 @@ export const PrintingPartnerProgram = () => {
             keeping them verified, visible, and performing.
           </p>
 
-          <p className="text-base md:text-lg text-primary font-semibold max-w-2xl mx-auto">
-            Tiny Sticky Ads gives printing companies the tools to onboard ad spaces, prove
-            placements, and earn recurring income — without giving up a single client.
+          <p className="text-base md:text-lg text-primary font-semibold max-w-2xl mx-auto">Tiny Sticky Ads gives printing companies the tools to onboard ad spaces, prove placements, and earn recurring income!
+
+
           </p>
         </div>
 
