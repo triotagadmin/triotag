@@ -8,8 +8,8 @@ import {
   TableBody,
   TableRow,
   TableHead,
-  TableCell,
-} from "@/components/ui/table";
+  TableCell } from
+"@/components/ui/table";
 import {
   CheckCircle,
   XCircle,
@@ -26,155 +26,155 @@ import {
   Clock,
   DollarSign,
   Users,
-  Repeat,
-} from "lucide-react";
+  Repeat } from
+"lucide-react";
 
 /* ─── Value Pillars ─── */
 const pillars = [
-  {
-    icon: MapPin,
-    title: "Ad Space Onboarding",
-    description:
-      "Register every tarpaulin, poster, or sticker location as a verified, trackable media placement — giving your print jobs lasting value.",
-  },
-  {
-    icon: Camera,
-    title: "Proof of Placement",
-    description:
-      "Timestamped photos and GPS verification give advertisers confidence that their materials are installed, visible, and performing.",
-  },
-  {
-    icon: BarChart3,
-    title: "Campaign Reporting",
-    description:
-      "Deliver professional placement reports to advertisers — the kind of accountability that turns a one-time print job into a monthly retainer.",
-  },
-  {
-    icon: Shield,
-    title: "Verification & Trust",
-    description:
-      "Every ad placement is verified by our system. Advertisers see proof, you build credibility, and renewals become automatic.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Recurring Revenue",
-    description:
-      "Stop chasing one-off orders. Verified placements give you the proof to charge monthly media fees on top of your print costs.",
-  },
-  {
-    icon: Handshake,
-    title: "Full Control, Zero Competition",
-    description:
-      "You keep your clients, your pricing, and your relationships. No other printer sees your listings. No marketplace fees.",
-  },
-];
+{
+  icon: MapPin,
+  title: "Ad Space Onboarding",
+  description:
+  "Register every tarpaulin, poster, or sticker location as a verified, trackable media placement — giving your print jobs lasting value."
+},
+{
+  icon: Camera,
+  title: "Proof of Placement",
+  description:
+  "Timestamped photos and GPS verification give advertisers confidence that their materials are installed, visible, and performing."
+},
+{
+  icon: BarChart3,
+  title: "Campaign Reporting",
+  description:
+  "Deliver professional placement reports to advertisers — the kind of accountability that turns a one-time print job into a monthly retainer."
+},
+{
+  icon: Shield,
+  title: "Verification & Trust",
+  description:
+  "Every ad placement is verified by our system. Advertisers see proof, you build credibility, and renewals become automatic."
+},
+{
+  icon: TrendingUp,
+  title: "Recurring Revenue",
+  description:
+  "Stop chasing one-off orders. Verified placements give you the proof to charge monthly media fees on top of your print costs."
+},
+{
+  icon: Handshake,
+  title: "Full Control, Zero Competition",
+  description:
+  "You keep your clients, your pricing, and your relationships. No other printer sees your listings. No marketplace fees."
+}];
+
 
 /* ─── Comparison rows ─── */
 const comparisonRows = [
-  {
-    feature: "Revenue per job",
-    traditional: "One-time print fee",
-    partner: "Print fee + monthly media income",
-  },
-  {
-    feature: "Client retention",
-    traditional: "Job-by-job, no guaranteed repeat",
-    partner: "Monthly placements drive renewals",
-  },
-  {
-    feature: "Proof of installation",
-    traditional: "WhatsApp photo at best",
-    partner: "GPS-verified, timestamped reports",
-  },
-  {
-    feature: "Advertiser confidence",
-    traditional: "Trust-based, hard to verify",
-    partner: "Platform-verified placement proof",
-  },
-  {
-    feature: "Campaign reporting",
-    traditional: "None",
-    partner: "Professional reports per placement",
-  },
-  {
-    feature: "Pricing power",
-    traditional: "Race to the bottom on print cost",
-    partner: "Charge for media value, not just ink",
-  },
-  {
-    feature: "Competitive moat",
-    traditional: "Any shop can match your price",
-    partner: "Verified network no competitor can replicate",
-  },
-];
+{
+  feature: "Revenue per job",
+  traditional: "One-time print fee",
+  partner: "Print fee + monthly media income"
+},
+{
+  feature: "Client retention",
+  traditional: "Job-by-job, no guaranteed repeat",
+  partner: "Monthly placements drive renewals"
+},
+{
+  feature: "Proof of installation",
+  traditional: "WhatsApp photo at best",
+  partner: "GPS-verified, timestamped reports"
+},
+{
+  feature: "Advertiser confidence",
+  traditional: "Trust-based, hard to verify",
+  partner: "Platform-verified placement proof"
+},
+{
+  feature: "Campaign reporting",
+  traditional: "None",
+  partner: "Professional reports per placement"
+},
+{
+  feature: "Pricing power",
+  traditional: "Race to the bottom on print cost",
+  partner: "Charge for media value, not just ink"
+},
+{
+  feature: "Competitive moat",
+  traditional: "Any shop can match your price",
+  partner: "Verified network no competitor can replicate"
+}];
+
 
 /* ─── What's included ─── */
 const programIncludes = [
-  {
-    icon: MapPin,
-    title: "Ad Space Onboarding & Listing",
-    description:
-      "We help you register every installation site — walls, fences, vehicles, storefronts — as verified media placements on the platform.",
-  },
-  {
-    icon: DollarSign,
-    title: "Pricing Guidance",
-    description:
-      "Get location-based pricing benchmarks so you know exactly what to charge for monthly ad placement fees on top of your production costs.",
-  },
-  {
-    icon: FileText,
-    title: "Pitch Decks & Proposal Templates",
-    description:
-      "Ready-made presentation materials you can brand as your own when approaching advertisers, agencies, and local businesses.",
-  },
-  {
-    icon: BarChart3,
-    title: "Proof-of-Placement Reports",
-    description:
-      "Automated reports with timestamped photos, GPS coordinates, and installation verification — delivered to your advertisers.",
-  },
-  {
-    icon: Award,
-    title: "Publisher Partner Credentials",
-    description:
-      "A verified badge and partner status that signals professionalism to advertisers and separates you from every other print shop.",
-  },
-  {
-    icon: MessageSquare,
-    title: "WhatsApp & Email Scripts",
-    description:
-      "Proven outreach scripts for contacting potential advertisers, following up on leads, and closing recurring placement deals.",
-  },
-];
+{
+  icon: MapPin,
+  title: "Ad Space Onboarding & Listing",
+  description:
+  "We help you register every installation site — walls, fences, vehicles, storefronts — as verified media placements on the platform."
+},
+{
+  icon: DollarSign,
+  title: "Pricing Guidance",
+  description:
+  "Get location-based pricing benchmarks so you know exactly what to charge for monthly ad placement fees on top of your production costs."
+},
+{
+  icon: FileText,
+  title: "Pitch Decks & Proposal Templates",
+  description:
+  "Ready-made presentation materials you can brand as your own when approaching advertisers, agencies, and local businesses."
+},
+{
+  icon: BarChart3,
+  title: "Proof-of-Placement Reports",
+  description:
+  "Automated reports with timestamped photos, GPS coordinates, and installation verification — delivered to your advertisers."
+},
+{
+  icon: Award,
+  title: "Publisher Partner Credentials",
+  description:
+  "A verified badge and partner status that signals professionalism to advertisers and separates you from every other print shop."
+},
+{
+  icon: MessageSquare,
+  title: "WhatsApp & Email Scripts",
+  description:
+  "Proven outreach scripts for contacting potential advertisers, following up on leads, and closing recurring placement deals."
+}];
+
 
 /* ─── Upsell strategies ─── */
 const upsellStrategies = [
-  {
-    icon: Repeat,
-    title: "Turn One-Time Jobs Into Monthly Contracts",
-    description:
-      'When a client orders a tarpaulin, show them the value: "For ₱X more per month, we verify your placement, deliver proof reports, and help you track ROI." Most say yes.',
-  },
-  {
-    icon: Users,
-    title: "Approach Local Businesses With Data",
-    description:
-      "Use your verified placement reports to cold-pitch businesses near your installation sites. Real proof beats every sales promise.",
-  },
-  {
-    icon: FileText,
-    title: "Bundle Print + Placement as a Package",
-    description:
-      "Stop selling print alone. Offer a complete advertising package: design, print, install, verify, report. Command premium pricing.",
-  },
-  {
-    icon: Clock,
-    title: "Lock In 3–6 Month Placement Deals",
-    description:
-      "With verified reporting, advertisers trust longer commitments. Longer contracts mean predictable income for your shop every month.",
-  },
-];
+{
+  icon: Repeat,
+  title: "Turn One-Time Jobs Into Monthly Contracts",
+  description:
+  'When a client orders a tarpaulin, show them the value: "For ₱X more per month, we verify your placement, deliver proof reports, and help you track ROI." Most say yes.'
+},
+{
+  icon: Users,
+  title: "Approach Local Businesses With Data",
+  description:
+  "Use your verified placement reports to cold-pitch businesses near your installation sites. Real proof beats every sales promise."
+},
+{
+  icon: FileText,
+  title: "Bundle Print + Placement as a Package",
+  description:
+  "Stop selling print alone. Offer a complete advertising package: design, print, install, verify, report. Command premium pricing."
+},
+{
+  icon: Clock,
+  title: "Lock In 3–6 Month Placement Deals",
+  description:
+  "With verified reporting, advertisers trust longer commitments. Longer contracts mean predictable income for your shop every month."
+}];
+
 
 export const PrintingPartnerProgram = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -192,9 +192,9 @@ export const PrintingPartnerProgram = () => {
   }, []);
 
   const fadeIn = (delay = 0) =>
-    `transition-all duration-700 ${
-      isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-    }`;
+  `transition-all duration-700 ${
+  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`;
+
 
   return (
     <section ref={sectionRef} className="relative py-16 md:py-28 overflow-hidden">
@@ -219,9 +219,9 @@ export const PrintingPartnerProgram = () => {
             <span className="text-primary">Into a Recurring Media Business</span>
           </h2>
 
-          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-4">
-            You already print tarpaulins, stickers, posters, and signage. You already install them.
-            Now get paid <span className="text-foreground font-semibold">every month</span> for
+          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-4">You already print tarpaulins, stickers, posters, and signage. With our platform now you can gain another revenue stream by offering your ad space partner to our advertising clients.
+
+            <span className="text-foreground font-semibold">every month</span> for
             keeping them verified, visible, and performing.
           </p>
 
@@ -234,17 +234,17 @@ export const PrintingPartnerProgram = () => {
         {/* ════════ VALUE PILLARS ════════ */}
         <div>
           <h3
-            className={`text-center text-2xl md:text-3xl font-display font-bold mb-10 ${fadeIn()}`}
-          >
+            className={`text-center text-2xl md:text-3xl font-display font-bold mb-10 ${fadeIn()}`}>
+
             What the Platform Does for Your Business
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {pillars.map((p, i) => (
-              <Card
-                key={p.title}
-                className={`group border-border/50 bg-card/60 backdrop-blur-sm hover:border-primary/40 transition-all duration-500 ${fadeIn()}`}
-                style={{ transitionDelay: `${i * 80}ms` }}
-              >
+            {pillars.map((p, i) =>
+            <Card
+              key={p.title}
+              className={`group border-border/50 bg-card/60 backdrop-blur-sm hover:border-primary/40 transition-all duration-500 ${fadeIn()}`}
+              style={{ transitionDelay: `${i * 80}ms` }}>
+
                 <CardContent className="p-5 md:p-6">
                   <div className="flex items-start gap-4">
                     <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
@@ -261,7 +261,7 @@ export const PrintingPartnerProgram = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </div>
 
@@ -339,23 +339,23 @@ export const PrintingPartnerProgram = () => {
 
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
-              {
-                icon: Camera,
-                title: "Timestamped Installation Photos",
-                text: "Every installation is documented with date, time, and GPS. Advertisers never have to guess if their ad is up.",
-              },
-              {
-                icon: Shield,
-                title: "Platform Verification",
-                text: "Tiny Sticky Ads verifies each placement independently. Your word becomes platform-backed proof.",
-              },
-              {
-                icon: Repeat,
-                title: "Renewal-Ready Reporting",
-                text: "Monthly reports make renewal conversations effortless. Advertisers see value, you keep earning.",
-              },
-            ].map((item) => (
-              <Card key={item.title} className="border-border/50 bg-card/60 backdrop-blur-sm">
+            {
+              icon: Camera,
+              title: "Timestamped Installation Photos",
+              text: "Every installation is documented with date, time, and GPS. Advertisers never have to guess if their ad is up."
+            },
+            {
+              icon: Shield,
+              title: "Platform Verification",
+              text: "Tiny Sticky Ads verifies each placement independently. Your word becomes platform-backed proof."
+            },
+            {
+              icon: Repeat,
+              title: "Renewal-Ready Reporting",
+              text: "Monthly reports make renewal conversations effortless. Advertisers see value, you keep earning."
+            }].
+            map((item) =>
+            <Card key={item.title} className="border-border/50 bg-card/60 backdrop-blur-sm">
                 <CardContent className="p-5 text-center">
                   <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                     <item.icon className="h-5 w-5 text-primary" />
@@ -364,7 +364,7 @@ export const PrintingPartnerProgram = () => {
                   <p className="text-sm text-muted-foreground">{item.text}</p>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </div>
 
@@ -392,8 +392,8 @@ export const PrintingPartnerProgram = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {comparisonRows.map((row) => (
-                  <TableRow key={row.feature} className="border-border/40">
+                {comparisonRows.map((row) =>
+                <TableRow key={row.feature} className="border-border/40">
                     <TableCell className="font-medium text-foreground">{row.feature}</TableCell>
                     <TableCell className="text-muted-foreground">
                       <span className="flex items-start gap-2">
@@ -408,7 +408,7 @@ export const PrintingPartnerProgram = () => {
                       </span>
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </div>
@@ -439,8 +439,8 @@ export const PrintingPartnerProgram = () => {
         {/* ════════ WHAT'S INCLUDED ════════ */}
         <div>
           <h3
-            className={`text-center text-2xl md:text-3xl font-display font-bold mb-4 ${fadeIn()}`}
-          >
+            className={`text-center text-2xl md:text-3xl font-display font-bold mb-4 ${fadeIn()}`}>
+
             What's Included in the Program
           </h3>
           <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-10">
@@ -449,12 +449,12 @@ export const PrintingPartnerProgram = () => {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {programIncludes.map((item, i) => (
-              <Card
-                key={item.title}
-                className={`group border-border/50 bg-card/60 backdrop-blur-sm hover:border-primary/40 transition-all duration-500 ${fadeIn()}`}
-                style={{ transitionDelay: `${i * 80}ms` }}
-              >
+            {programIncludes.map((item, i) =>
+            <Card
+              key={item.title}
+              className={`group border-border/50 bg-card/60 backdrop-blur-sm hover:border-primary/40 transition-all duration-500 ${fadeIn()}`}
+              style={{ transitionDelay: `${i * 80}ms` }}>
+
                 <CardContent className="p-5 md:p-6">
                   <div className="flex items-start gap-4">
                     <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
@@ -471,15 +471,15 @@ export const PrintingPartnerProgram = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </div>
 
         {/* ════════ SELL TO ADVERTISERS ════════ */}
         <div>
           <h3
-            className={`text-center text-2xl md:text-3xl font-display font-bold mb-4 ${fadeIn()}`}
-          >
+            className={`text-center text-2xl md:text-3xl font-display font-bold mb-4 ${fadeIn()}`}>
+
             How We Help You Sell Ad Placements
           </h3>
           <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-10">
@@ -488,12 +488,12 @@ export const PrintingPartnerProgram = () => {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-4xl mx-auto">
-            {upsellStrategies.map((s, i) => (
-              <Card
-                key={s.title}
-                className={`group border-border/50 bg-card/60 backdrop-blur-sm hover:border-primary/40 transition-all duration-500 ${fadeIn()}`}
-                style={{ transitionDelay: `${i * 80}ms` }}
-              >
+            {upsellStrategies.map((s, i) =>
+            <Card
+              key={s.title}
+              className={`group border-border/50 bg-card/60 backdrop-blur-sm hover:border-primary/40 transition-all duration-500 ${fadeIn()}`}
+              style={{ transitionDelay: `${i * 80}ms` }}>
+
                 <CardContent className="p-5 md:p-6">
                   <div className="flex items-start gap-4">
                     <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
@@ -510,7 +510,7 @@ export const PrintingPartnerProgram = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </div>
 
@@ -532,8 +532,8 @@ export const PrintingPartnerProgram = () => {
           <Link to="/list-space">
             <Button
               size="lg"
-              className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-semibold shadow-[0_0_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_50px_hsl(var(--primary)/0.6)] transition-all duration-300"
-            >
+              className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-semibold shadow-[0_0_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_50px_hsl(var(--primary)/0.6)] transition-all duration-300">
+
               <span className="relative z-10 flex items-center gap-2">
                 Join the Publisher Partner Program
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -548,6 +548,6 @@ export const PrintingPartnerProgram = () => {
           </p>
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 };
