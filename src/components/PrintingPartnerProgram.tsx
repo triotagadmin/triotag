@@ -219,7 +219,7 @@ export const PrintingPartnerProgram = () => {
             <span className="text-primary">Into a Recurring Media Business</span>
           </h2>
 
-          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-4">You already print tarpaulins, stickers, posters, and signage. With our platform now you can gain another revenue stream by offering your ad space partner to our advertising clients.
+          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-4">You already print tarpaulins, stickers, posters, and signage. With our platform now you can gain another revenue stream by offering ad space to our advertising partners.
 
             <span className="text-foreground font-semibold">every month</span> for
             keeping them verified, visible, and performing.
