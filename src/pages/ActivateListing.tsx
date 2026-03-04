@@ -1253,6 +1253,48 @@ const ActivateListing = () => {
                   </div>
                 </div>
 
+                {/* Ad Unit Materials Catalog - shown when platform handles printing */}
+                {printHandler === "platform" &&
+            <Card className="border-primary/30 bg-primary/5">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Package className="h-5 w-5 text-primary" />
+                        Available Ad Unit Materials & Pricing
+                      </CardTitle>
+                      <CardDescription>Our current catalog of micro ad materials</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {PRINT_PRODUCTS.map((product) => (
+                          <div key={product.id} className={`rounded-lg border p-4 transition-all ${selectedProductId === product.id ? "border-primary bg-primary/10" : "border-border bg-background"}`}>
+                            <h4 className="font-semibold text-sm mb-1">{product.name}</h4>
+                            <p className="text-xs text-muted-foreground mb-2">{product.description}</p>
+                            <div className="space-y-1 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Size:</span>
+                                <span>{product.specs.size}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Material:</span>
+                                <span>{product.specs.material}</span>
+                              </div>
+                              {product.specs.finish && (
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Finish:</span>
+                                  <span>{product.specs.finish}</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="mt-3 pt-2 border-t border-border">
+                              <p className="text-lg font-bold text-primary">${product.pricePerUnit.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">/ unit</span></p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+            }
+
                 {/* Platform-print details */}
                 {printHandler === "platform" &&
             <div className="grid lg:grid-cols-2 gap-8">
