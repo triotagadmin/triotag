@@ -16,7 +16,7 @@ const materials = [
   {
     icon: MapPin,
     title: "Strategic Placement",
-    description: "Every material is designed for high-traffic commercial spaces — bathrooms, countertops, windows, and entryways.",
+    description: "Every material is designed for high-traffic commercial spaces such as tabletops, countertops, windows, and entryways.",
   },
   {
     icon: Eye,
