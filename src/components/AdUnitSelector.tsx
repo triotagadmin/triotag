@@ -24,32 +24,25 @@ interface AdUnitSelectorProps {
 }
 
 const AD_UNIT_TYPES = [{
-  id: "sticker_spot",
-  label: "Sticker Spot (2x2, 3x3, 4x4)"
-}, {
-  id: "door_poster",
-  label: "Door Poster (A4 / A3)"
-}, {
-  id: "countertop_display",
-  label: "Countertop Display"
-}, {
-  id: "mirror_sticker",
-  label: "Mirror Sticker"
+  id: "vinyl_sticker",
+  label: "Vinyl Sticker (A4 Size)",
+  price: "$18",
+  description: "Weather-resistant adhesive vinyl, perfect for walls, windows, and countertops"
 }, {
   id: "table_tent_card",
-  label: "Table Tent Card"
+  label: "Table Tent Card (A4 Size)",
+  price: "$18",
+  description: "Premium 350gsm card stock, ideal for tabletops and countertops"
 }, {
-  id: "wall_frame_display",
-  label: "Wall Frame Display"
+  id: "table_tent_acrylic",
+  label: 'Table Tent Acrylic (4"x6" Size)',
+  price: "$32",
+  description: "Clear acrylic stand with printed insert for a sleek, professional look"
 }, {
-  id: "mural_painting",
-  label: "Mural Painting"
-}, {
-  id: "wheat_paste",
-  label: "Wheat Paste"
-}, {
-  id: "custom_format",
-  label: "Custom Format"
+  id: "coroplast_a_frame",
+  label: 'Coroplast A-Frame Sign (18"x24")',
+  price: "$66",
+  description: "Durable 4mm corrugated plastic, great for sidewalks and entryways"
 }];
 export const AdUnitSelector = ({
   selectedUnits,
@@ -86,9 +79,9 @@ export const AdUnitSelector = ({
   };
   return <div className="space-y-6">
       <div>
-        <h3 className="font-semibold text-lg mb-2">Ad Unit Type for This Venue</h3>
+        <h3 className="font-semibold text-lg mb-2">Ad Unit Material for This Venue</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Select one ad unit type for your venue listing and configure pricing.
+          Select one ad unit material for your venue listing and configure pricing.
         </p>
       </div>
 
@@ -101,17 +94,13 @@ export const AdUnitSelector = ({
                 <div className="flex items-start gap-3">
                   <Checkbox checked={selected} onCheckedChange={() => toggleUnit(unitType.id)} className="mt-1" />
                   <div className="flex-1 space-y-3">
-                    <label className="font-medium cursor-pointer" onClick={() => toggleUnit(unitType.id)}>
-                      {unitType.label}
-                    </label>
+                    <div className="cursor-pointer" onClick={() => toggleUnit(unitType.id)}>
+                      <span className="font-medium">{unitType.label}</span>
+                      <span className="ml-2 text-sm font-semibold text-primary">{unitType.price} / unit</span>
+                      <p className="text-xs text-muted-foreground mt-1">{unitType.description}</p>
+                    </div>
 
                     {selected && <div className="space-y-3 mt-3">
-                        {unitType.id === "custom_format" && <div>
-                            <Label className="text-xs">Custom Format Description</Label>
-                            <Input placeholder="Describe your custom ad format..." value={config?.customFormat || ""} onChange={(e) => updateUnit(unitType.id, {
-                      customFormat: e.target.value
-                    })} className="mt-1" />
-                          </div>}
 
                         <div>
                           <Label className="text-xs">Size *</Label>
