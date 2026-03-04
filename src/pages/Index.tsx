@@ -2,6 +2,8 @@ import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
 import { PrintOnDemandSection } from "@/components/PrintOnDemandSection";
+import { MicroAdMaterials } from "@/components/MicroAdMaterials";
+import { QRTrackingSection } from "@/components/QRTrackingSection";
 import { FeaturedLocations } from "@/components/FeaturedLocations";
 import { AdvertiserTypes } from "@/components/AdvertiserTypes";
 import { CTABanner } from "@/components/CTABanner";
@@ -15,6 +17,8 @@ const Index = () => {
       <AdvertiserTypes />
       <HowItWorks />
       <PrintOnDemandSection />
+      <MicroAdMaterials />
+      <QRTrackingSection />
       <FeaturedLocations />
       <CTABanner />
       <Footer />
