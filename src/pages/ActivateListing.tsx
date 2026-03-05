@@ -583,23 +583,19 @@ const ActivateListing = () => {
 
       if (adminRoles && adminRoles.length > 0) {
         const adminUserId = adminRoles[0].user_id;
-        const handlerLabel = isSelfPrint ? "Advertiser Self-Print" : "Tiny Sticky Ads Printing";
         await supabase.
         from("messages").
         insert({
           sender_id: session.user.id,
           recipient_id: adminUserId,
-          subject: `Print Order Request - ${product.name} (${handlerLabel})`,
+          subject: `Print Order Request - ${product.name}`,
           content: `New print order request submitted:\n\n` +
           `**Listing:** ${listing?.title || "N/A"}\n` +
           `**Product:** ${product.name}\n` +
-          `**Print Handler:** ${handlerLabel}\n` +
-          `**Quantity:** ${quantity} units\n` + (
-          isSelfPrint ?
-          `**Self-Print File:** ${selfPrintFileUrl}\n` :
+          `**Quantity:** ${quantity} units\n` +
           `**Total Price:** $${totalPrice.toFixed(2)}\n` +
           `**Shipping To:** ${publisherAddress?.businessName}\n` +
-          `**Address:** ${publisherAddress?.location || listing?.location || "Not specified"}\n`) +
+          `**Address:** ${publisherAddress?.location || listing?.location || "Not specified"}\n` +
           `\n**Design URL:** ${artworkUrl}\n\n` +
           `Please review and approve this order in the Admin Orders page.`,
           listing_id: listing?.id || null,
