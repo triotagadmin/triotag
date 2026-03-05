@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, MapPin, DollarSign, CreditCard, CheckCircle, Package, Truck, Loader2, ArrowRight, Send, Clock, XCircle, Upload, Printer } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, CreditCard, CheckCircle, Package, Truck, Loader2, ArrowRight, Send, Clock, XCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
@@ -78,11 +78,8 @@ const ActivateListing = () => {
   // Publisher address (shipping destination)
   const [publisherAddress, setPublisherAddress] = useState<PublisherAddress | null>(null);
 
-  // Print handler selection
-  const [printHandler, setPrintHandler] = useState<"platform" | "self" | "">("");
-  const [selfPrintFileUrl, setSelfPrintFileUrl] = useState("");
-  const [selfPrintUploading, setSelfPrintUploading] = useState(false);
-  const [selfPrintAcknowledged, setSelfPrintAcknowledged] = useState(false);
+  // Print handler - platform always handles printing
+  const printHandler = "platform";
 
   // Order state
   const [orderLoading, setOrderLoading] = useState(false);
@@ -529,8 +526,7 @@ const ActivateListing = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const totalPrice = printHandler === "platform" ? calculateOrderTotal(product, quantity) : 0;
-      const isSelfPrint = printHandler === "self";
+      const totalPrice = calculateOrderTotal(product, quantity);
 
       // Create print order in database
       const { data: printOrder, error: orderError } = await supabase.
@@ -543,12 +539,11 @@ const ActivateListing = () => {
         product_name: product.name,
         product_specs: {
           ...product.specs,
-          print_handler: printHandler,
-          self_print_file_url: isSelfPrint ? selfPrintFileUrl : null
+          print_handler: "platform"
         },
         quantity,
-        design_url: isSelfPrint ? selfPrintFileUrl : artworkUrl,
-        shipping_address: isSelfPrint ? { selfPrint: true } : {
+        design_url: artworkUrl,
+        shipping_address: {
           recipientName: publisherAddress?.businessName || "",
           line1: publisherAddress?.location || listing?.location || "",
           line2: null,
@@ -559,7 +554,7 @@ const ActivateListing = () => {
           email: publisherAddress?.contactEmail || "",
           phone: publisherAddress?.contactPhone || ""
         },
-        shipping_country: isSelfPrint ? "N/A" : shippingCountry,
+        shipping_country: shippingCountry,
         total_price: totalPrice
       }).
       select().
@@ -588,23 +583,19 @@ const ActivateListing = () => {
 
       if (adminRoles && adminRoles.length > 0) {
         const adminUserId = adminRoles[0].user_id;
-        const handlerLabel = isSelfPrint ? "Advertiser Self-Print" : "Tiny Sticky Ads Printing";
         await supabase.
         from("messages").
         insert({
           sender_id: session.user.id,
           recipient_id: adminUserId,
-          subject: `Print Order Request - ${product.name} (${handlerLabel})`,
+          subject: `Print Order Request - ${product.name}`,
           content: `New print order request submitted:\n\n` +
           `**Listing:** ${listing?.title || "N/A"}\n` +
           `**Product:** ${product.name}\n` +
-          `**Print Handler:** ${handlerLabel}\n` +
-          `**Quantity:** ${quantity} units\n` + (
-          isSelfPrint ?
-          `**Self-Print File:** ${selfPrintFileUrl}\n` :
+          `**Quantity:** ${quantity} units\n` +
           `**Total Price:** $${totalPrice.toFixed(2)}\n` +
           `**Shipping To:** ${publisherAddress?.businessName}\n` +
-          `**Address:** ${publisherAddress?.location || listing?.location || "Not specified"}\n`) +
+          `**Address:** ${publisherAddress?.location || listing?.location || "Not specified"}\n` +
           `\n**Design URL:** ${artworkUrl}\n\n` +
           `Please review and approve this order in the Admin Orders page.`,
           listing_id: listing?.id || null,
@@ -629,42 +620,6 @@ const ActivateListing = () => {
       });
     } finally {
       setOrderLoading(false);
-    }
-  };
-
-  const handleSelfPrintFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const validTypes = ["image/png", "application/pdf"];
-    if (!validTypes.includes(file.type)) {
-      toast({ title: "Invalid file", description: "Please upload a PNG or PDF file.", variant: "destructive" });
-      return;
-    }
-
-    setSelfPrintUploading(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
-
-      const ext = file.name.split(".").pop();
-      const filePath = `${session.user.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.
-      from("ad-space-media").
-      upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage.
-      from("ad-space-media").
-      getPublicUrl(filePath);
-
-      setSelfPrintFileUrl(urlData.publicUrl);
-      toast({ title: "File uploaded", description: "Your print-ready file has been uploaded." });
-    } catch (error: any) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-    } finally {
-      setSelfPrintUploading(false);
     }
   };
 
@@ -1192,69 +1147,13 @@ const ActivateListing = () => {
               </div> :
 
           <div className="space-y-8">
-                {/* Print Handler Selection */}
+                {/* Print Order Info */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-1">Who will handle printing?</h3>
-                  <p className="text-sm text-muted-foreground mb-4">All print materials require approval before use.</p>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {/* Option 1: Platform handles printing */}
-                    <button
-                  type="button"
-                  onClick={() => setPrintHandler("platform")}
-                  className={`text-left rounded-lg border-2 p-5 transition-all ${
-                  printHandler === "platform" ?
-                  "border-primary bg-primary/5" :
-                  "border-border hover:border-primary/40"}`
-                  }>
-
-                      <div className="flex items-center gap-2 mb-2">
-                        <Printer className="h-5 w-5 text-primary" />
-                        <span className="font-semibold">Tiny Sticky Ads Handles Printing</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        We print the materials for you based on approved specifications.
-                      </p>
-                      {selectedPrintProduct &&
-                  <div className="rounded-md bg-muted/60 px-3 py-2 text-sm">
-                          <span className="text-muted-foreground">Est. cost: </span>
-                          <span className="font-semibold text-primary">
-                            {formatPrice(calculateOrderTotal(selectedPrintProduct, quantity), listing?.specifications?.currency || "USD")}
-                          </span>
-                          <span className="text-muted-foreground"> ({quantity} units)</span>
-                        </div>
-                  }
-                      <p className="text-xs text-muted-foreground mt-2 italic">
-                        Printing will only begin after admin approval.
-                      </p>
-                    </button>
-
-                    {/* Option 2: Self-print */}
-                    <button
-                  type="button"
-                  onClick={() => setPrintHandler("self")}
-                  className={`text-left rounded-lg border-2 p-5 transition-all ${
-                  printHandler === "self" ?
-                  "border-primary bg-primary/5" :
-                  "border-border hover:border-primary/40"}`
-                  }>
-
-                      <div className="flex items-center gap-2 mb-2">
-                        <Upload className="h-5 w-5 text-primary" />
-                        <span className="font-semibold">I Will Handle Printing</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        You will print the materials yourself following the exact approved specifications.
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-2 italic">
-                        Your artwork must be approved before printing and placement.
-                      </p>
-                    </button>
-                  </div>
+                  <h3 className="text-lg font-semibold mb-1">Print Order</h3>
+                  <p className="text-sm text-muted-foreground mb-4">We handle all printing. All print materials require approval before production.</p>
                 </div>
 
-                {/* Ad Unit Materials Catalog - shown when platform handles printing */}
-                {printHandler === "platform" &&
+                {/* Ad Unit Materials Catalog */}
             <Card className="border-primary/30 bg-primary/5">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -1293,10 +1192,8 @@ const ActivateListing = () => {
                       </div>
                     </CardContent>
                   </Card>
-            }
 
-                {/* Platform-print details */}
-                {printHandler === "platform" &&
+                {/* Print details */}
             <div className="grid lg:grid-cols-2 gap-8">
                     {/* Auto-detected Print Product */}
                     <Card>
@@ -1393,58 +1290,8 @@ const ActivateListing = () => {
                       </CardContent>
                     </Card>
                   </div>
-            }
-
-                {/* Self-print details */}
-                {printHandler === "self" &&
-            <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Upload className="h-5 w-5" />
-                        Upload Print-Ready File
-                      </CardTitle>
-                      <CardDescription>
-                        Upload your final print-ready artwork (PNG or PDF). This will be reviewed by our team before you proceed.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <Label>Print-Ready File (PNG or PDF) *</Label>
-                        <Input
-                    type="file"
-                    accept=".png,.pdf,image/png,application/pdf"
-                    onChange={handleSelfPrintFileUpload}
-                    disabled={selfPrintUploading}
-                    className="mt-1" />
-
-                        {selfPrintUploading &&
-                  <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
-                          </div>
-                  }
-                        {selfPrintFileUrl &&
-                  <p className="text-sm text-primary mt-2 flex items-center gap-1">
-                            <CheckCircle className="h-4 w-4" /> File uploaded successfully
-                          </p>
-                  }
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <Checkbox
-                    id="self-print-ack"
-                    checked={selfPrintAcknowledged}
-                    onCheckedChange={(checked) => setSelfPrintAcknowledged(checked === true)} />
-
-                        <label htmlFor="self-print-ack" className="text-sm leading-snug cursor-pointer">
-                          I understand that my graphic must be approved before ad space placement. This is to ensure compliance with content guidelines, ethical standards, and advertising regulations.   
-                        </label>
-                      </div>
-                    </CardContent>
-                  </Card>
-            }
 
                 {/* Status badge + Submit */}
-                {printHandler &&
             <div className="space-y-3">
                     <div className="flex items-center justify-center">
                       <Badge variant="secondary" className="text-sm px-3 py-1">
@@ -1457,8 +1304,7 @@ const ActivateListing = () => {
                 disabled={
                 orderLoading ||
                 !selectedProductId ||
-                printHandler === "platform" && !publisherAddress ||
-                printHandler === "self" && (!selfPrintFileUrl || !selfPrintAcknowledged)
+                !publisherAddress
                 }
                 className="w-full"
                 size="lg">SUBMIT FOR APPROVALS
@@ -1476,7 +1322,6 @@ const ActivateListing = () => {
                 }
                     </Button>
                   </div>
-            }
 
                 <Button
               variant="outline"
