@@ -78,11 +78,8 @@ const ActivateListing = () => {
   // Publisher address (shipping destination)
   const [publisherAddress, setPublisherAddress] = useState<PublisherAddress | null>(null);
 
-  // Print handler selection
-  const [printHandler, setPrintHandler] = useState<"platform" | "self" | "">("");
-  const [selfPrintFileUrl, setSelfPrintFileUrl] = useState("");
-  const [selfPrintUploading, setSelfPrintUploading] = useState(false);
-  const [selfPrintAcknowledged, setSelfPrintAcknowledged] = useState(false);
+  // Print handler - platform always handles printing
+  const printHandler = "platform";
 
   // Order state
   const [orderLoading, setOrderLoading] = useState(false);
