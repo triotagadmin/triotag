@@ -1153,8 +1153,7 @@ const ActivateListing = () => {
                   <p className="text-sm text-muted-foreground mb-4">We handle all printing. All print materials require approval before production.</p>
                 </div>
 
-                {/* Ad Unit Materials Catalog - shown when platform handles printing */}
-                {printHandler === "platform" &&
+                {/* Ad Unit Materials Catalog */}
             <Card className="border-primary/30 bg-primary/5">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
