@@ -1322,7 +1322,6 @@ const ActivateListing = () => {
                 }
                     </Button>
                   </div>
-            }
 
                 <Button
               variant="outline"
