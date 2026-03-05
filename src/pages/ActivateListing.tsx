@@ -623,42 +623,6 @@ const ActivateListing = () => {
     }
   };
 
-  const handleSelfPrintFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const validTypes = ["image/png", "application/pdf"];
-    if (!validTypes.includes(file.type)) {
-      toast({ title: "Invalid file", description: "Please upload a PNG or PDF file.", variant: "destructive" });
-      return;
-    }
-
-    setSelfPrintUploading(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
-
-      const ext = file.name.split(".").pop();
-      const filePath = `${session.user.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.
-      from("ad-space-media").
-      upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage.
-      from("ad-space-media").
-      getPublicUrl(filePath);
-
-      setSelfPrintFileUrl(urlData.publicUrl);
-      toast({ title: "File uploaded", description: "Your print-ready file has been uploaded." });
-    } catch (error: any) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-    } finally {
-      setSelfPrintUploading(false);
-    }
-  };
-
   const handlePayNow = async () => {
     // Mark activation as completed
     if (activationId) {
