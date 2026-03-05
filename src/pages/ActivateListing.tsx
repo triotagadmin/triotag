@@ -526,8 +526,7 @@ const ActivateListing = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const totalPrice = printHandler === "platform" ? calculateOrderTotal(product, quantity) : 0;
-      const isSelfPrint = printHandler === "self";
+      const totalPrice = calculateOrderTotal(product, quantity);
 
       // Create print order in database
       const { data: printOrder, error: orderError } = await supabase.
@@ -540,12 +539,11 @@ const ActivateListing = () => {
         product_name: product.name,
         product_specs: {
           ...product.specs,
-          print_handler: printHandler,
-          self_print_file_url: isSelfPrint ? selfPrintFileUrl : null
+          print_handler: "platform"
         },
         quantity,
-        design_url: isSelfPrint ? selfPrintFileUrl : artworkUrl,
-        shipping_address: isSelfPrint ? { selfPrint: true } : {
+        design_url: artworkUrl,
+        shipping_address: {
           recipientName: publisherAddress?.businessName || "",
           line1: publisherAddress?.location || listing?.location || "",
           line2: null,
@@ -556,7 +554,7 @@ const ActivateListing = () => {
           email: publisherAddress?.contactEmail || "",
           phone: publisherAddress?.contactPhone || ""
         },
-        shipping_country: isSelfPrint ? "N/A" : shippingCountry,
+        shipping_country: shippingCountry,
         total_price: totalPrice
       }).
       select().
