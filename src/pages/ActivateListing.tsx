@@ -1304,8 +1304,7 @@ const ActivateListing = () => {
                 disabled={
                 orderLoading ||
                 !selectedProductId ||
-                printHandler === "platform" && !publisherAddress ||
-                printHandler === "self" && (!selfPrintFileUrl || !selfPrintAcknowledged)
+                !publisherAddress
                 }
                 className="w-full"
                 size="lg">SUBMIT FOR APPROVALS
