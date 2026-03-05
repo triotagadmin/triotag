@@ -1160,7 +1160,7 @@ const ActivateListing = () => {
                         <Package className="h-5 w-5 text-primary" />
                         Available Ad Unit Materials & Pricing
                       </CardTitle>
-                      <CardDescription>Our current catalog of micro ad materials</CardDescription>
+                      <CardDescription>Our current catalog of micro ad materials. Current ad material automatically detected from current listing.</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
