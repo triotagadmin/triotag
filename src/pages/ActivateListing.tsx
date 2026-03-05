@@ -1218,15 +1218,30 @@ const ActivateListing = () => {
 
                         <div>
                           <Label>Quantity</Label>
-                          <Input
-                      type="number"
-                      min={selectedPrintProduct?.minQuantity || 1}
-                      value={quantity}
-                      onChange={(e) => setQuantity(parseInt(e.target.value) || 1)} />
-
-                          {selectedPrintProduct &&
-                    <p className="text-xs text-muted-foreground mt-1">Min: {selectedPrintProduct.minQuantity} units</p>
-                    }
+                          {(() => {
+                            const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
+                            const matchedAdUnit = listingAdUnits.find((unit: any) =>
+                              unit.type === approvedAdUnitType || unit.type === activationType
+                            ) || listingAdUnits[0];
+                            const maxQty = matchedAdUnit?.quantity || 999;
+                            return (
+                              <>
+                                <Input
+                                  type="number"
+                                  min={selectedPrintProduct?.minQuantity || 1}
+                                  max={maxQty}
+                                  value={quantity}
+                                  onChange={(e) => {
+                                    const val = parseInt(e.target.value) || 1;
+                                    setQuantity(Math.min(Math.max(val, selectedPrintProduct?.minQuantity || 1), maxQty));
+                                  }}
+                                />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Min: {selectedPrintProduct?.minQuantity || 1} units — Max: {maxQty} units (from listing)
+                                </p>
+                              </>
+                            );
+                          })()}
                         </div>
 
                         <div>
