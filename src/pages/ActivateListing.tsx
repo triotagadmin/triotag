@@ -1192,10 +1192,8 @@ const ActivateListing = () => {
                       </div>
                     </CardContent>
                   </Card>
-            }
 
-                {/* Platform-print details */}
-                {printHandler === "platform" &&
+                {/* Print details */}
             <div className="grid lg:grid-cols-2 gap-8">
                     {/* Auto-detected Print Product */}
                     <Card>
