@@ -1290,58 +1290,8 @@ const ActivateListing = () => {
                       </CardContent>
                     </Card>
                   </div>
-            }
-
-                {/* Self-print details */}
-                {printHandler === "self" &&
-            <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Upload className="h-5 w-5" />
-                        Upload Print-Ready File
-                      </CardTitle>
-                      <CardDescription>
-                        Upload your final print-ready artwork (PNG or PDF). This will be reviewed by our team before you proceed.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <Label>Print-Ready File (PNG or PDF) *</Label>
-                        <Input
-                    type="file"
-                    accept=".png,.pdf,image/png,application/pdf"
-                    onChange={handleSelfPrintFileUpload}
-                    disabled={selfPrintUploading}
-                    className="mt-1" />
-
-                        {selfPrintUploading &&
-                  <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
-                          </div>
-                  }
-                        {selfPrintFileUrl &&
-                  <p className="text-sm text-primary mt-2 flex items-center gap-1">
-                            <CheckCircle className="h-4 w-4" /> File uploaded successfully
-                          </p>
-                  }
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <Checkbox
-                    id="self-print-ack"
-                    checked={selfPrintAcknowledged}
-                    onCheckedChange={(checked) => setSelfPrintAcknowledged(checked === true)} />
-
-                        <label htmlFor="self-print-ack" className="text-sm leading-snug cursor-pointer">
-                          I understand that my graphic must be approved before ad space placement. This is to ensure compliance with content guidelines, ethical standards, and advertising regulations.   
-                        </label>
-                      </div>
-                    </CardContent>
-                  </Card>
-            }
 
                 {/* Status badge + Submit */}
-                {printHandler &&
             <div className="space-y-3">
                     <div className="flex items-center justify-center">
                       <Badge variant="secondary" className="text-sm px-3 py-1">
