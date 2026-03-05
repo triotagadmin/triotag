@@ -1147,65 +1147,10 @@ const ActivateListing = () => {
               </div> :
 
           <div className="space-y-8">
-                {/* Print Handler Selection */}
+                {/* Print Order Info */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-1">Who will handle printing?</h3>
-                  <p className="text-sm text-muted-foreground mb-4">All print materials require approval before use.</p>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {/* Option 1: Platform handles printing */}
-                    <button
-                  type="button"
-                  onClick={() => setPrintHandler("platform")}
-                  className={`text-left rounded-lg border-2 p-5 transition-all ${
-                  printHandler === "platform" ?
-                  "border-primary bg-primary/5" :
-                  "border-border hover:border-primary/40"}`
-                  }>
-
-                      <div className="flex items-center gap-2 mb-2">
-                        <Printer className="h-5 w-5 text-primary" />
-                        <span className="font-semibold">Tiny Sticky Ads Handles Printing</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        We print the materials for you based on approved specifications.
-                      </p>
-                      {selectedPrintProduct &&
-                  <div className="rounded-md bg-muted/60 px-3 py-2 text-sm">
-                          <span className="text-muted-foreground">Est. cost: </span>
-                          <span className="font-semibold text-primary">
-                            {formatPrice(calculateOrderTotal(selectedPrintProduct, quantity), listing?.specifications?.currency || "USD")}
-                          </span>
-                          <span className="text-muted-foreground"> ({quantity} units)</span>
-                        </div>
-                  }
-                      <p className="text-xs text-muted-foreground mt-2 italic">
-                        Printing will only begin after admin approval.
-                      </p>
-                    </button>
-
-                    {/* Option 2: Self-print */}
-                    <button
-                  type="button"
-                  onClick={() => setPrintHandler("self")}
-                  className={`text-left rounded-lg border-2 p-5 transition-all ${
-                  printHandler === "self" ?
-                  "border-primary bg-primary/5" :
-                  "border-border hover:border-primary/40"}`
-                  }>
-
-                      <div className="flex items-center gap-2 mb-2">
-                        <Upload className="h-5 w-5 text-primary" />
-                        <span className="font-semibold">I Will Handle Printing</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        You will print the materials yourself following the exact approved specifications.
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-2 italic">
-                        Your artwork must be approved before printing and placement.
-                      </p>
-                    </button>
-                  </div>
+                  <h3 className="text-lg font-semibold mb-1">Print Order</h3>
+                  <p className="text-sm text-muted-foreground mb-4">We handle all printing. All print materials require approval before production.</p>
                 </div>
 
                 {/* Ad Unit Materials Catalog - shown when platform handles printing */}
