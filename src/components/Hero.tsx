@@ -5,7 +5,7 @@ import heroBackground from "@/assets/hero-background.gif";
 
 // Single source of truth for hero content
 const HERO_HEADLINE = "The Central Hub for Micro Ads.";
-const HERO_CTA_PRIMARY = { text: "Advertise Now", link: "/auth" };
+const HERO_CTA_PRIMARY = { text: "Advertise Now", link: "/campaign-submit" };
 const HERO_CTA_SECONDARY = { text: "Register Ad Space", link: "/list-space" };
 
 export const Hero = () => {
