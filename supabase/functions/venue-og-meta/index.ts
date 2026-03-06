@@ -53,7 +53,12 @@ Deno.serve(async (req: Request) => {
   const images: string[] = Array.isArray(venue.media_urls)
     ? venue.media_urls
     : [];
-  const ogImage = images.length > 0 ? images[0] : fallbackImage;
+  // Use first listing image, normalized to 1200x630 via weserv.nl proxy
+  // This handles any size/aspect ratio by letterboxing with a white background
+  const rawImage = images.length > 0 ? images[0] : "";
+  const ogImage = rawImage
+    ? `https://images.weserv.nl/?url=${encodeURIComponent(rawImage)}&w=1200&h=630&fit=contain&cbg=white&output=jpg&q=85`
+    : fallbackImage;
 
   const html = buildHtml(title, description, ogImage, canonicalUrl);
 
