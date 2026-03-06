@@ -1,17 +1,27 @@
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sticker, BookOpen, MapPin, Eye } from "lucide-react";
+import { Sticker, BookOpen, Frame, RectangleHorizontal, MapPin, Eye } from "lucide-react";
 
 const materials = [
   {
     icon: Sticker,
-    title: "A4 Vinyl Stickers",
-    description: "Premium 8.3\" × 11.7\" vinyl stickers designed for concrete, glass, and wood surfaces — weather-resistant and built to last.",
+    title: "Vinyl Sticker",
+    description: "Premium weather-resistant vinyl stickers designed for concrete, glass, and wood surfaces — built to last in any environment.",
   },
   {
     icon: BookOpen,
-    title: "Table Tents",
-    description: "Sturdy 4\" × 6\" card-stock table tents with gloss UV coating, perfect for restaurants, cafés, and reception desks.",
+    title: "Table Tent Card",
+    description: "Sturdy card-stock table tents with gloss UV coating, perfect for restaurants, cafés, and reception desks.",
+  },
+  {
+    icon: Frame,
+    title: "Table Tent Acrylic",
+    description: "Sleek acrylic table tent displays that add a premium feel to any tabletop — durable, reusable, and eye-catching.",
+  },
+  {
+    icon: RectangleHorizontal,
+    title: "Coroplast Stand",
+    description: "Lightweight corrugated plastic stands ideal for floor displays, countertops, and point-of-sale placements.",
   },
   {
     icon: MapPin,
