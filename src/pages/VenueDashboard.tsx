@@ -7,12 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User, Settings } from "lucide-react";
+import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User, Settings, Building } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { BookingsArchive } from "@/components/publisher/BookingsArchive";
 import { BillingInvoices } from "@/components/publisher/BillingInvoices";
 import { MessagesCard } from "@/components/publisher/MessagesCard";
 import { Separator } from "@/components/ui/separator";
+import { BranchManager } from "@/components/franchise/BranchManager";
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const {
