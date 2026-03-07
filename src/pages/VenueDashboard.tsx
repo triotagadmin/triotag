@@ -224,7 +224,8 @@ const VenueDashboard = () => {
                 </div>
                 <div className="flex gap-2">
                   <Button onClick={() => navigate("/venue-registration")} disabled={!isApprovedAgent}>
-                    Register New Ad Space
+                    <Building className="h-4 w-4 mr-2" />
+                    Register New Franchise
                   </Button>
                   <Button variant="outline" onClick={() => navigate("/venue-inventory")}>
                     <Upload className="w-4 h-4 mr-2" />View Full Inventory
