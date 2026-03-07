@@ -30,6 +30,7 @@ import BlogPost from "./pages/BlogPost";
 import Marketplace from "./pages/Marketplace";
 import VenueInventory from "./pages/VenueInventory";
 import VenueDetail from "./pages/VenueDetail";
+import FranchiseBranches from "./pages/FranchiseBranches";
 import ActivateListing from "./pages/ActivateListing";
 import NotFound from "./pages/NotFound";
 import ExploreAll from "./pages/ExploreAll";
@@ -87,6 +88,7 @@ const App = () => (
           <Route path="/inventory" element={<VenueInventory />} />
           <Route path="/venue-inventory" element={<VenueInventory />} />
           <Route path="/venue/:id" element={<VenueDetail />} />
+          <Route path="/venue/:id/branches" element={<FranchiseBranches />} />
           <Route path="/activate/:id" element={<ActivateListing />} />
            <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/venue-registration" element={<VenueRegistration />} />

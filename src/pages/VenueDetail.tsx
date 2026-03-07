@@ -5,13 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { ArrowLeft, MapPin, DollarSign, Clock, Users, Phone, Mail, Lock } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Clock, Phone, Lock, Building, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { User } from "@supabase/supabase-js";
 import { OOHAdvertisingDetails } from "@/components/venue/OOHAdvertisingDetails";
 import ShareButtons from "@/components/ShareButtons";
+
 const AD_UNIT_TYPE_LABELS: Record<string, string> = {
+  vinyl_sticker: "Vinyl Sticker",
+  table_tent_card: "Table Tent Card",
+  table_tent_acrylic: "Table Tent Acrylic",
+  coroplast_a_frame: "Coroplast A-Frame Sign",
   countertop_display: "Countertop Display",
   wall_poster: "Wall Poster",
   digital_screen: "Digital Screen",
@@ -19,11 +24,8 @@ const AD_UNIT_TYPE_LABELS: Record<string, string> = {
   floor_decal: "Floor Decal",
   window_cling: "Window Cling",
   standee: "Standee",
-  napkin_holder: "Napkin Holder",
-  receipt_ad: "Receipt Ad",
-  mural_painting: "Mural Painting",
-  wheat_paste: "Wheat Paste"
 };
+
 interface VenueDetails {
   id: string;
   title: string;
@@ -39,47 +41,36 @@ interface VenueDetails {
     business_name: string;
   };
 }
+
 const VenueDetail = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string }>();
   const [venue, setVenue] = useState<VenueDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [branchCount, setBranchCount] = useState(0);
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   useEffect(() => {
-    // Check auth status and admin role
     const checkAuth = async () => {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       if (session?.user) {
-        const {
-          data: roleData
-        } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
+        const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
         setIsAdmin(roleData?.role === "admin");
       }
     };
     checkAuth();
     if (id) {
       fetchVenueDetails();
+      fetchBranchCount();
     }
   }, [id]);
+
   const fetchVenueDetails = async () => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from("ad_spaces").select(`
+      const { data, error } = await supabase.from("ad_spaces").select(`
           *,
           publisher_profiles (
             user_id,
@@ -89,14 +80,20 @@ const VenueDetail = () => {
       if (error) throw error;
       setVenue(data);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to load venue details",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "Failed to load venue details", variant: "destructive" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchBranchCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from("franchise_branches")
+        .select("*", { count: "exact", head: true })
+        .eq("franchise_id", id!);
+      if (!error && count !== null) setBranchCount(count);
+    } catch {}
   };
 
   const images = venue ? (Array.isArray(venue.media_urls) ? venue.media_urls : []) : [];
@@ -104,7 +101,6 @@ const VenueDetail = () => {
   const ogShareUrl = `${supabaseUrl}/functions/v1/venue-og-meta?id=${id}`;
   const canonicalUrl = `https://tinystickyads.com/venue/${id}`;
 
-  // Set OG meta tags dynamically
   useEffect(() => {
     if (!venue) return;
     const setMeta = (property: string, content: string) => {
@@ -139,6 +135,8 @@ const VenueDetail = () => {
         </div>
       </div>;
   }
+
+  const isFranchise = venue.specifications?.is_franchise === true;
 
   return <div className="min-h-screen bg-muted/30">
       <Navigation />
@@ -178,9 +176,18 @@ const VenueDetail = () => {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="text-3xl mb-2">{venue.title}</CardTitle>
-                    {venue.specifications?.venue_type && <Badge variant="secondary" className="mb-4">
-                        {venue.specifications.venue_type}
-                      </Badge>}
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {venue.specifications?.venue_type && <Badge variant="secondary">
+                          {venue.specifications.venue_type}
+                        </Badge>}
+                      {venue.specifications?.industry_category && <Badge variant="outline">
+                          {venue.specifications.industry_category}
+                        </Badge>}
+                      {isFranchise && <Badge className="bg-primary/10 text-primary border-primary/20">
+                          <Building className="h-3 w-3 mr-1" />
+                          Multi-Location
+                        </Badge>}
+                    </div>
                   </div>
                   <Badge variant={venue.approval_status === "approved" ? "default" : venue.approval_status === "pending" ? "secondary" : "destructive"}>
                     {venue.approval_status}
@@ -193,15 +200,26 @@ const VenueDetail = () => {
                   <p className="text-muted-foreground">{venue.description}</p>
                 </div>
 
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold">Location</h3>
-                    <p className="text-muted-foreground">
-                      {venue.specifications?.full_address || venue.location}
-                    </p>
+                {/* Show total locations count instead of a single address */}
+                {branchCount > 0 && (
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <h3 className="font-semibold">{branchCount} Location{branchCount !== 1 ? "s" : ""}</h3>
+                      <p className="text-muted-foreground text-sm">
+                        This brand has {branchCount} branch{branchCount !== 1 ? "es" : ""} available for advertising.
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* View All Locations button */}
+                {branchCount > 0 && (
+                  <Button variant="outline" className="w-full" onClick={() => navigate(`/venue/${id}/branches`)}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    View All Locations ({branchCount})
+                  </Button>
+                )}
 
                 {venue.specifications?.operating_hours && <div className="flex items-start gap-2">
                     <Clock className="h-5 w-5 text-primary mt-0.5" />
@@ -210,15 +228,6 @@ const VenueDetail = () => {
                       <p className="text-muted-foreground">
                         {venue.specifications.operating_hours}
                       </p>
-                    </div>
-                  </div>}
-
-                {venue.specifications?.allowed_ad_formats && <div>
-                    <h3 className="font-semibold mb-2">Allowed Ad Formats</h3>
-                    <div className="flex flex-wrap gap-2 justify-start">
-                      {venue.specifications.allowed_ad_formats.map((format: string) => <Button key={format} variant="cyber" size="sm" className="text-xs h-7 px-3">
-                          {format}
-                        </Button>)}
                     </div>
                   </div>}
 
@@ -233,7 +242,6 @@ const VenueDetail = () => {
               </CardContent>
             </Card>
 
-            {/* OOH Advertising Details Section - from Step 2 of Venue Registration */}
             {venue.specifications?.ooh_details && <OOHAdvertisingDetails oohDetails={venue.specifications.ooh_details} />}
           </div>
 
@@ -269,13 +277,11 @@ const VenueDetail = () => {
                   <p className="font-medium">{venue.publisher_profiles?.business_name}</p>
                 </div>
 
-                {/* Contact info only visible to admins */}
                 {isAdmin ? <>
                     {venue.specifications?.contact_person && <div>
                         <p className="text-sm text-muted-foreground">Contact Person</p>
                         <p className="font-medium">{venue.specifications.contact_person}</p>
                       </div>}
-
                     {venue.specifications?.contact_number && <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         <p className="font-medium">{venue.specifications.contact_number}</p>
@@ -299,4 +305,5 @@ const VenueDetail = () => {
       </div>
     </div>;
 };
+
 export default VenueDetail;

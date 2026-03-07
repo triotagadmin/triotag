@@ -800,6 +800,62 @@ export type Database = {
           },
         ]
       }
+      franchise_branches: {
+        Row: {
+          ad_unit_quantity: number | null
+          branch_operating_hours: string | null
+          branch_photos: Json | null
+          created_at: string
+          franchise_id: string
+          full_address: string
+          google_place_id: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          place_name: string
+          updated_at: string
+        }
+        Insert: {
+          ad_unit_quantity?: number | null
+          branch_operating_hours?: string | null
+          branch_photos?: Json | null
+          created_at?: string
+          franchise_id: string
+          full_address: string
+          google_place_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          place_name: string
+          updated_at?: string
+        }
+        Update: {
+          ad_unit_quantity?: number | null
+          branch_operating_hours?: string | null
+          branch_photos?: Json | null
+          created_at?: string
+          franchise_id?: string
+          full_address?: string
+          google_place_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          place_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "franchise_branches_franchise_id_fkey"
+            columns: ["franchise_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       issue_reports: {
         Row: {
           conversation_id: string | null

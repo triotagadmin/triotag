@@ -50,24 +50,52 @@ interface OOHDetails {
   structuralSafetyNotes: string;
 }
 
-const venueSchema = z.object({
-  title: z.string().trim().min(1, "Venue name is required").max(100),
-  street: z.string().trim().min(1, "Street address is required").max(200),
-  city: z.string().trim().min(1, "City is required").max(100),
+const franchiseSchema = z.object({
+  title: z.string().trim().min(1, "Franchise/brand name is required").max(100),
+  venueType: z.string().min(1, "Venue type is required"),
+  industryCategory: z.string().min(1, "Industry category is required"),
+  description: z.string().trim().min(1, "Brand description is required").max(2000),
+  street: z.string().trim().max(200).optional(),
+  city: z.string().trim().max(100).optional(),
   state: z.string().trim().max(100).optional(),
   postalCode: z.string().trim().max(20).optional(),
-  country: z.string().trim().min(1, "Country is required").max(100),
-  latitude: z.string().trim().optional(),
-  longitude: z.string().trim().optional(),
+  country: z.string().trim().max(100).optional(),
   contactPerson: z.string().trim().min(1, "Contact person is required").max(100),
   contactEmail: z.string().trim().email("Invalid email").max(255),
   contactPhone: z.string().trim().min(1, "Phone is required").max(20),
-  venueType: z.string().min(1, "Venue type is required"),
-  operatingHours: z.string().trim().min(1, "Operating hours are required").max(500),
-  description: z.string().trim().max(1000).optional(),
-  weeklyPrice: z.string().trim().optional(),
-  monthlyPrice: z.string().trim().optional()
+  operatingHours: z.string().trim().max(500).optional(),
 });
+
+const VENUE_TYPES = [
+  { value: "cafe", label: "Café" },
+  { value: "restaurant", label: "Restaurant" },
+  { value: "gym", label: "Gym/Fitness Center" },
+  { value: "spa", label: "Spa/Salon" },
+  { value: "retail", label: "Retail Store" },
+  { value: "bar", label: "Bar/Lounge" },
+  { value: "hotel", label: "Hotel" },
+  { value: "coworking", label: "Co-Working Space" },
+  { value: "clinic", label: "Clinic/Healthcare" },
+  { value: "laundry", label: "Laundromat" },
+  { value: "gas_station", label: "Gas Station" },
+  { value: "convenience", label: "Convenience Store" },
+  { value: "other", label: "Other" },
+];
+
+const INDUSTRY_CATEGORIES = [
+  "Food & Beverage",
+  "Health & Wellness",
+  "Retail & Shopping",
+  "Hospitality & Travel",
+  "Entertainment & Leisure",
+  "Automotive & Transport",
+  "Education & Training",
+  "Professional Services",
+  "Beauty & Personal Care",
+  "Other",
+];
+
+const DEFAULT_DESCRIPTION = "Advertise across multiple locations of this brand. Tiny Sticky Ads connects advertisers with high-traffic venues where small-format ads such as vinyl stickers, table tents, and acrylic displays can be placed inside the venue.";
 
 const VenueRegistration = () => {
   const navigate = useNavigate();
@@ -81,29 +109,23 @@ const VenueRegistration = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const submittedRef = useRef(false);
 
-  // Step management (1: Venue Details, 2: OOH Details)
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Form fields - Step 1
+  // Step 1: Brand/Franchise Details
   const [title, setTitle] = useState("");
+  const [venueType, setVenueType] = useState("");
+  const [customVenueType, setCustomVenueType] = useState("");
+  const [industryCategory, setIndustryCategory] = useState("");
+  const [description, setDescription] = useState(DEFAULT_DESCRIPTION);
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
   const [contactPerson, setContactPerson] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
-  const [venueType, setVenueType] = useState("");
-  const [customVenueType, setCustomVenueType] = useState("");
   const [operatingHours, setOperatingHours] = useState("");
-  const [description, setDescription] = useState("");
-  const [weeklyPrice, setWeeklyPrice] = useState("");
-  const [monthlyPrice, setMonthlyPrice] = useState("");
-  const [currency, setCurrency] = useState("USD");
-  const [allowedAdFormats, setAllowedAdFormats] = useState<string[]>([]);
   const [selectedAdUnits, setSelectedAdUnits] = useState<AdUnitConfig[]>([]);
 
   // OOH Details - Step 2
@@ -132,18 +154,14 @@ const VenueRegistration = () => {
     structuralSafetyNotes: ""
   });
 
-  const currencies = [
-    { code: "USD", symbol: "$", name: "US Dollar" },
-    { code: "EUR", symbol: "€", name: "Euro" },
-    { code: "GBP", symbol: "£", name: "British Pound" },
-    { code: "PHP", symbol: "₱", name: "Philippine Peso" },
-    { code: "JPY", symbol: "¥", name: "Japanese Yen" },
-    { code: "AUD", symbol: "A$", name: "Australian Dollar" },
-    { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
-    { code: "SGD", symbol: "S$", name: "Singapore Dollar" },
-    { code: "INR", symbol: "₹", name: "Indian Rupee" },
-    { code: "CNY", symbol: "¥", name: "Chinese Yuan" },
-  ];
+  // OOH dropdown options
+  const placementTypeOptions = ["Wall-mounted", "Free-standing", "Rooftop", "Street-level", "Elevated", "Indoor", "Outdoor", "Transit shelter", "Kiosk", "Mobile/Vehicle"];
+  const visibilityOptions = ["Excellent (unobstructed)", "Good (minor obstructions)", "Moderate (partial visibility)", "Limited"];
+  const surroundingEnvironmentOptions = ["Commercial district", "Residential area", "Industrial zone", "Entertainment district", "Shopping mall", "Transportation hub", "Educational campus", "Healthcare facility", "Sports venue", "Park/Recreation"];
+  const audienceBehaviorOptions = ["Walking", "Driving", "Public transit", "Shopping", "Dining", "Working", "Exercising", "Waiting", "Socializing"];
+  const measurementSourceOptions = ["Traffic counter", "Municipal data", "Internal estimate", "Third-party study", "Transit authority", "Mall/Venue analytics"];
+  const mediaTypeOptions = ["Static billboard", "Digital billboard", "Poster", "Banner", "Wall wrap", "Transit ad", "Street furniture", "Point of sale", "Floor graphics", "Projection"];
+  const illuminationOptions = ["Backlit", "Frontlit", "LED", "Non-illuminated", "Natural light only", "Neon", "Digital display"];
 
   interface DocumentUploadState {
     type: string;
@@ -155,46 +173,12 @@ const VenueRegistration = () => {
     existingFileName?: string;
   }
 
-  const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([{
-    type: "business_license",
-    label: "Business/Venue License",
-    description: "Official business registration or venue operating license",
-    file: null,
-    uploaded: false
-  }, {
-    type: "government_id",
-    label: "Government-Issued ID",
-    description: "Valid ID of business owner (passport, driver's license, national ID)",
-    file: null,
-    uploaded: false
-  }, {
-    type: "proof_of_address",
-    label: "Proof of Address",
-    description: "Utility bill, bank statement, or lease agreement (within 3 months)",
-    file: null,
-    uploaded: false
-  }, {
-    type: "safety_certificate",
-    label: "Safety Certificates",
-    description: "Fire safety, occupancy permit, or health certificate",
-    file: null,
-    uploaded: false
-  }, {
-    type: "tax_documents",
-    label: "Tax/Registration Documents",
-    description: "Tax registration certificate or similar business documentation",
-    file: null,
-    uploaded: false
-  }]);
-
-  // OOH dropdown options
-  const placementTypeOptions = ["Wall-mounted", "Free-standing", "Rooftop", "Street-level", "Elevated", "Indoor", "Outdoor", "Transit shelter", "Kiosk", "Mobile/Vehicle"];
-  const visibilityOptions = ["Excellent (unobstructed)", "Good (minor obstructions)", "Moderate (partial visibility)", "Limited"];
-  const surroundingEnvironmentOptions = ["Commercial district", "Residential area", "Industrial zone", "Entertainment district", "Shopping mall", "Transportation hub", "Educational campus", "Healthcare facility", "Sports venue", "Park/Recreation"];
-  const audienceBehaviorOptions = ["Walking", "Driving", "Public transit", "Shopping", "Dining", "Working", "Exercising", "Waiting", "Socializing"];
-  const measurementSourceOptions = ["Traffic counter", "Municipal data", "Internal estimate", "Third-party study", "Transit authority", "Mall/Venue analytics"];
-  const mediaTypeOptions = ["Static billboard", "Digital billboard", "Poster", "Banner", "Wall wrap", "Transit ad", "Street furniture", "Point of sale", "Floor graphics", "Projection"];
-  const illuminationOptions = ["Backlit", "Frontlit", "LED", "Non-illuminated", "Natural light only", "Neon", "Digital display"];
+  const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([
+    { type: "business_license", label: "Business/Venue License", description: "Official business registration or venue operating license", file: null, uploaded: false },
+    { type: "government_id", label: "Government-Issued ID", description: "Valid ID of business owner (passport, driver's license, national ID)", file: null, uploaded: false },
+    { type: "proof_of_address", label: "Proof of Address", description: "Utility bill, bank statement, or lease agreement (within 3 months)", file: null, uploaded: false },
+    { type: "tax_documents", label: "Tax/Registration Documents", description: "Tax registration certificate or similar business documentation", file: null, uploaded: false },
+  ]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -216,11 +200,7 @@ const VenueRegistration = () => {
         .maybeSingle();
       if (error) {
         console.error("Error fetching publisher profile:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load profile. Please try again.",
-          variant: "destructive"
-        });
+        toast({ title: "Error", description: "Failed to load profile. Please try again.", variant: "destructive" });
         return;
       }
       if (profile) {
@@ -249,7 +229,7 @@ const VenueRegistration = () => {
         .maybeSingle();
       if (error) throw error;
       if (!venue) {
-        toast({ title: "Error", description: "Venue not found or you don't have permission to edit it.", variant: "destructive" });
+        toast({ title: "Error", description: "Franchise not found or you don't have permission to edit it.", variant: "destructive" });
         navigate("/venue-inventory");
         return;
       }
@@ -260,31 +240,25 @@ const VenueRegistration = () => {
       const specs = venue.specifications as any || {};
       setVenueType(specs.venue_type || "");
       if (specs.custom_venue_type) setCustomVenueType(specs.custom_venue_type);
+      setIndustryCategory(specs.industry_category || "");
       setOperatingHours(specs.operating_hours || "");
-      setAllowedAdFormats(specs.allowed_ad_formats || []);
       setContactPerson(specs.contact_person || "");
       setContactEmail(specs.contact_email || "");
       setContactPhone(specs.contact_number || "");
-      setLatitude(specs.latitude || "");
-      setLongitude(specs.longitude || "");
-      setCurrency(specs.currency || "USD");
 
-      const fullAddress = specs.full_address || venue.location || "";
-      const addressParts = fullAddress.split(", ");
-      if (addressParts.length >= 2) {
-        setStreet(addressParts[0] || "");
-        setCity(addressParts[1] || "");
-        setState(addressParts[2] || "");
-        setPostalCode(addressParts[3] || "");
-        setCountry(addressParts[addressParts.length - 1] || "");
-      }
+      const fullAddress = specs.head_office_address || {};
+      setStreet(fullAddress.street || "");
+      setCity(fullAddress.city || "");
+      setState(fullAddress.state || "");
+      setPostalCode(fullAddress.postal_code || "");
+      setCountry(fullAddress.country || "");
 
       if (specs.ad_units && Array.isArray(specs.ad_units)) {
         setSelectedAdUnits(specs.ad_units.map((u: any) => ({
           type: u.type, quantity: u.quantity || 1, pricePerWeek: u.pricePerWeek || 0,
           pricePerMonth: u.pricePerMonth || 0, specialRules: u.specialRules || "",
           customFormat: u.customFormat, thumbnailUrl: u.thumbnailUrl,
-          size: u.size || "", currency: u.currency || specs.currency || "USD"
+          size: u.size || "", currency: u.currency || "USD"
         })));
       }
 
@@ -315,10 +289,6 @@ const VenueRegistration = () => {
         });
       }
 
-      const pricing = venue.pricing as any || {};
-      setWeeklyPrice(pricing.weekly?.toString() || "");
-      setMonthlyPrice(pricing.monthly?.toString() || "");
-
       const { data: existingDocs } = await supabase
         .from("verification_documents")
         .select("*")
@@ -335,7 +305,7 @@ const VenueRegistration = () => {
       }
     } catch (error: any) {
       console.error("Error loading venue:", error);
-      toast({ title: "Error", description: "Failed to load venue data.", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to load franchise data.", variant: "destructive" });
     }
   };
 
@@ -377,31 +347,15 @@ const VenueRegistration = () => {
     setVerificationDocuments(newDocuments);
   };
 
-  const uploadVerificationDocument = async (doc: DocumentUpload, pubId: string) => {
-    if (!doc.file) return null;
-    const fileExt = doc.file.name.split('.').pop();
-    const fileName = `${doc.type}_${Date.now()}.${fileExt}`;
-    const filePath = `${pubId}/${fileName}`;
-    const { error: uploadError } = await supabase.storage.from('verification-documents').upload(filePath, doc.file);
-    if (uploadError) throw uploadError;
-    const { error: dbError } = await supabase.from('verification_documents').insert({
-      publisher_id: pubId, document_type: doc.type, file_name: doc.file.name, file_url: filePath
-    });
-    if (dbError) throw dbError;
-    return filePath;
-  };
-
   const validateStep1 = () => {
-    if (!title.trim()) { toast({ title: "Error", description: "Venue name is required", variant: "destructive" }); return false; }
+    if (!title.trim()) { toast({ title: "Error", description: "Franchise/brand name is required", variant: "destructive" }); return false; }
     if (!venueType) { toast({ title: "Error", description: "Venue type is required", variant: "destructive" }); return false; }
-    if (!street.trim()) { toast({ title: "Error", description: "Street address is required", variant: "destructive" }); return false; }
-    if (!city.trim()) { toast({ title: "Error", description: "City is required", variant: "destructive" }); return false; }
-    if (!country.trim()) { toast({ title: "Error", description: "Country is required", variant: "destructive" }); return false; }
+    if (!industryCategory) { toast({ title: "Error", description: "Industry category is required", variant: "destructive" }); return false; }
+    if (!description.trim()) { toast({ title: "Error", description: "Brand description is required", variant: "destructive" }); return false; }
     if (!contactPerson.trim()) { toast({ title: "Error", description: "Contact person is required", variant: "destructive" }); return false; }
     if (!contactEmail.trim()) { toast({ title: "Error", description: "Contact email is required", variant: "destructive" }); return false; }
     if (!contactPhone.trim()) { toast({ title: "Error", description: "Contact phone is required", variant: "destructive" }); return false; }
-    if (!operatingHours.trim()) { toast({ title: "Error", description: "Operating hours are required", variant: "destructive" }); return false; }
-    if (uploadedImages.length === 0) { toast({ title: "Error", description: "Please upload at least one photo of your venue", variant: "destructive" }); return false; }
+    if (uploadedImages.length === 0) { toast({ title: "Error", description: "Please upload at least one photo", variant: "destructive" }); return false; }
     if (selectedAdUnits.length === 0) { toast({ title: "Error", description: "Please select at least one ad unit type", variant: "destructive" }); return false; }
     const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
     if (!isEditing && filledDocs.length === 0) { toast({ title: "Error", description: "Please upload at least one verification document", variant: "destructive" }); return false; }
@@ -434,49 +388,32 @@ const VenueRegistration = () => {
   };
 
   const buildVenueData = () => {
-    const validatedData = venueSchema.parse({
-      title, street, city,
-      state: state || undefined, postalCode: postalCode || undefined, country,
-      latitude: latitude || undefined, longitude: longitude || undefined,
-      contactPerson, contactEmail, contactPhone, venueType, operatingHours,
-      description: description || undefined,
-      weeklyPrice: weeklyPrice || undefined, monthlyPrice: monthlyPrice || undefined
-    });
-
-    const fullAddress = [validatedData.street, validatedData.city, validatedData.state, validatedData.postalCode, validatedData.country].filter(Boolean).join(", ");
-    const pricingData: any = {};
-    if (validatedData.weeklyPrice) pricingData.weekly = parseFloat(validatedData.weeklyPrice);
-    if (validatedData.monthlyPrice) pricingData.monthly = parseFloat(validatedData.monthlyPrice);
     const actualVenueType = venueType === "other" ? customVenueType : venueType;
-
-    const parseCoord = (val: string | undefined): number | null => {
-      if (!val) return null;
-      const cleaned = val.replace(/[°NSEW\s]/gi, '').trim();
-      const num = parseFloat(cleaned);
-      if (isNaN(num)) return null;
-      if (/[SW]/i.test(val)) return -num;
-      return num;
-    };
+    const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
 
     return {
       publisher_id: publisherId,
-      title: validatedData.title,
-      location: fullAddress,
-      description: validatedData.description,
-      latitude: parseCoord(validatedData.latitude),
-      longitude: parseCoord(validatedData.longitude),
+      title: title.trim(),
+      location: headOfficeAddress || null,
+      description: description.trim(),
+      latitude: null,
+      longitude: null,
       specifications: {
         venue_type: actualVenueType,
         custom_venue_type: venueType === "other" ? customVenueType : null,
-        full_address: fullAddress,
-        latitude: validatedData.latitude,
-        longitude: validatedData.longitude,
-        contact_person: validatedData.contactPerson,
-        contact_email: validatedData.contactEmail,
-        contact_number: validatedData.contactPhone,
-        operating_hours: validatedData.operatingHours,
-        allowed_ad_formats: allowedAdFormats,
-        currency: currency,
+        industry_category: industryCategory,
+        is_franchise: true,
+        head_office_address: {
+          street: street.trim(),
+          city: city.trim(),
+          state: state.trim(),
+          postal_code: postalCode.trim(),
+          country: country.trim(),
+        },
+        contact_person: contactPerson.trim(),
+        contact_email: contactEmail.trim(),
+        contact_number: contactPhone.trim(),
+        operating_hours: operatingHours.trim() || null,
         ad_units: selectedAdUnits.map(unit => ({
           type: unit.type, quantity: unit.quantity, pricePerWeek: unit.pricePerWeek,
           pricePerMonth: unit.pricePerMonth, specialRules: unit.specialRules,
@@ -485,7 +422,6 @@ const VenueRegistration = () => {
         })),
         ooh_details: oohDetails
       },
-      pricing: Object.keys(pricingData).length > 0 ? pricingData : null,
       media_urls: uploadedImages
     };
   };
@@ -493,8 +429,6 @@ const VenueRegistration = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!publisherId) return;
-
-    // Prevent duplicate submissions
     if (submittedRef.current) return;
     submittedRef.current = true;
 
@@ -512,12 +446,21 @@ const VenueRegistration = () => {
         if (error) throw error;
 
         if (filledDocs.length > 0) {
-          await Promise.all(filledDocs.map(doc => uploadVerificationDocument(doc, publisherId)));
+          for (const doc of filledDocs) {
+            if (!doc.file) continue;
+            const fileExt = doc.file.name.split('.').pop();
+            const fileName = `${doc.type}_${Date.now()}.${fileExt}`;
+            const filePath = `${publisherId}/${fileName}`;
+            const { error: uploadError } = await supabase.storage.from('verification-documents').upload(filePath, doc.file);
+            if (uploadError) throw uploadError;
+            await supabase.from('verification_documents').insert({
+              publisher_id: publisherId, document_type: doc.type, file_name: doc.file.name, file_url: filePath
+            });
+          }
         }
-        toast({ title: "Success", description: "Venue updated successfully" });
+        toast({ title: "Success", description: "Franchise updated successfully" });
         navigate("/venue-inventory");
       } else {
-        // Upload verification docs first
         for (const doc of filledDocs) {
           if (!doc.file) continue;
           const fileExt = doc.file.name.split('.').pop();
@@ -530,7 +473,6 @@ const VenueRegistration = () => {
           });
         }
 
-        // Insert ad space with pending status
         const { error: insertError } = await supabase
           .from("ad_spaces")
           .insert([{ ...venueData, approval_status: "pending" as const }]);
@@ -542,13 +484,12 @@ const VenueRegistration = () => {
     } catch (error: any) {
       submittedRef.current = false;
       console.error("Submission error:", error);
-      toast({ title: "Error", description: error.message || "Failed to submit venue", variant: "destructive" });
+      toast({ title: "Error", description: error.message || "Failed to submit franchise", variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
-  // Step Indicator
   const StepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
       <div className="flex items-center gap-4">
@@ -560,12 +501,10 @@ const VenueRegistration = () => {
           </div>
           <div className="hidden sm:block">
             <p className={`text-sm font-medium ${currentStep >= 1 ? "text-foreground" : "text-muted-foreground"}`}>Step 1</p>
-            <p className="text-xs text-muted-foreground">Venue Details</p>
+            <p className="text-xs text-muted-foreground">Franchise Details</p>
           </div>
         </div>
-
         <div className={`w-16 h-1 rounded transition-colors ${currentStep >= 2 ? "bg-primary" : "bg-muted"}`} />
-
         <div className="flex items-center gap-2">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
             currentStep >= 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
@@ -581,7 +520,6 @@ const VenueRegistration = () => {
     </div>
   );
 
-  // Confirmation screen
   if (showConfirmation) {
     return (
       <div className="min-h-screen bg-muted/30">
@@ -591,10 +529,10 @@ const VenueRegistration = () => {
             <Card>
               <CardContent className="pt-8 pb-8 space-y-4">
                 <CheckCircle className="h-16 w-16 text-primary mx-auto" />
-                <h2 className="text-2xl font-bold">Registration Submitted!</h2>
+                <h2 className="text-2xl font-bold">Franchise Registration Submitted!</h2>
                 <p className="text-muted-foreground">
-                  Your venue registration has been submitted and is now <strong>Pending Review</strong>.
-                  We'll review your submission and notify you once it's approved.
+                  Your franchise listing has been submitted and is now <strong>Pending Review</strong>.
+                  Once approved, you can start adding branch locations from your dashboard.
                 </p>
                 <div className="bg-muted/50 rounded-md p-4 mt-4">
                   <p className="text-sm text-muted-foreground">
@@ -602,7 +540,7 @@ const VenueRegistration = () => {
                   </p>
                 </div>
                 <Button onClick={() => navigate("/venue-inventory")} className="mt-4">
-                  Go to My Venues
+                  Go to My Franchises
                 </Button>
               </CardContent>
             </Card>
@@ -619,12 +557,12 @@ const VenueRegistration = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">
-              {isEditing ? "Edit Ad Space" : "Register Your Ad Space"}
+              {isEditing ? "Edit Franchise Listing" : "Register Franchise / Multi-Location Venue"}
             </CardTitle>
             <p className="text-muted-foreground mt-2">
               {isEditing
-                ? "Update your venue details below"
-                : "Complete all required fields to submit your venue for review. Registration is free."}
+                ? "Update your franchise details below"
+                : "Register a brand or franchise with multiple branch locations. After approval, you can add individual branches from your dashboard."}
             </p>
           </CardHeader>
           <CardContent>
@@ -632,10 +570,11 @@ const VenueRegistration = () => {
 
             {currentStep === 1 && (
               <form className="space-y-6">
-                {/* Venue Name */}
+                {/* Franchise/Brand Name */}
                 <div>
                   <Label htmlFor="title">Venue Name *</Label>
-                  <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Enter venue name" required />
+                  <p className="text-xs text-muted-foreground mb-1">Franchise or brand name</p>
+                  <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g., Coffee Spot, FitLife Gym" required />
                 </div>
 
                 {/* Venue Type */}
@@ -644,16 +583,9 @@ const VenueRegistration = () => {
                   <Select value={venueType} onValueChange={setVenueType} required>
                     <SelectTrigger><SelectValue placeholder="Select venue type" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="restaurant">Restaurant</SelectItem>
-                      <SelectItem value="cafe">Café</SelectItem>
-                      <SelectItem value="gym">Gym/Fitness Center</SelectItem>
-                      <SelectItem value="restroom">Restroom Stall</SelectItem>
-                      <SelectItem value="salon">Salon/Spa</SelectItem>
-                      <SelectItem value="bar">Bar/Lounge</SelectItem>
-                      <SelectItem value="hotel">Hotel</SelectItem>
-                      <SelectItem value="coworking">Co-Working Space</SelectItem>
-                      <SelectItem value="guerrilla">Guerrilla Ad Space</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      {VENUE_TYPES.map(t => (
+                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   {venueType === "other" && (
@@ -663,17 +595,39 @@ const VenueRegistration = () => {
                   )}
                 </div>
 
-                {/* Address Fields */}
+                {/* Industry Category */}
+                <div>
+                  <Label htmlFor="industryCategory">Industry Category *</Label>
+                  <Select value={industryCategory} onValueChange={setIndustryCategory} required>
+                    <SelectTrigger><SelectValue placeholder="Select industry category" /></SelectTrigger>
+                    <SelectContent>
+                      {INDUSTRY_CATEGORIES.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Brand Description */}
+                <div>
+                  <Label htmlFor="description">Brand Description *</Label>
+                  <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={5} required />
+                </div>
+
+                {/* Head Office Address */}
                 <div className="space-y-4">
-                  <h3 className="font-semibold">Full Address</h3>
                   <div>
-                    <Label htmlFor="street">Street Address *</Label>
-                    <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" required />
+                    <h3 className="font-semibold">Head Office / Primary Contact Address</h3>
+                    <p className="text-xs text-muted-foreground">This is NOT used as a branch listing. Branch locations are added separately after registration.</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="street">Street Address</Label>
+                    <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" />
                   </div>
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div>
-                      <Label htmlFor="city">City *</Label>
-                      <Input id="city" value={city} onChange={e => setCity(e.target.value)} placeholder="City" required />
+                      <Label htmlFor="city">City</Label>
+                      <Input id="city" value={city} onChange={e => setCity(e.target.value)} placeholder="City" />
                     </div>
                     <div>
                       <Label htmlFor="state">State/Province</Label>
@@ -686,18 +640,8 @@ const VenueRegistration = () => {
                       <Input id="postalCode" value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="Postal/ZIP Code" />
                     </div>
                     <div>
-                      <Label htmlFor="country">Country *</Label>
-                      <Input id="country" value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" required />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 md:gap-4">
-                    <div>
-                      <Label htmlFor="latitude">Latitude (Google Maps)</Label>
-                      <Input id="latitude" value={latitude} onChange={e => setLatitude(e.target.value)} placeholder="e.g., 40.7128" />
-                    </div>
-                    <div>
-                      <Label htmlFor="longitude">Longitude (Google Maps)</Label>
-                      <Input id="longitude" value={longitude} onChange={e => setLongitude(e.target.value)} placeholder="e.g., -74.0060" />
+                      <Label htmlFor="country">Country</Label>
+                      <Input id="country" value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" />
                     </div>
                   </div>
                 </div>
@@ -723,26 +667,21 @@ const VenueRegistration = () => {
 
                 {/* Operating Hours */}
                 <div>
-                  <Label htmlFor="operatingHours">Operating Hours *</Label>
-                  <Textarea id="operatingHours" value={operatingHours} onChange={e => setOperatingHours(e.target.value)} placeholder="e.g., Monday-Friday: 9 AM - 10 PM, Saturday-Sunday: 10 AM - 11 PM" rows={3} required />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <Label htmlFor="description">Venue Description</Label>
-                  <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe your venue and what makes it unique..." rows={4} />
+                  <Label htmlFor="operatingHours">Operating Hours (Optional)</Label>
+                  <p className="text-xs text-muted-foreground mb-1">Leave blank if hours vary by branch</p>
+                  <Textarea id="operatingHours" value={operatingHours} onChange={e => setOperatingHours(e.target.value)} placeholder="e.g., Monday-Friday: 9 AM - 10 PM, Saturday-Sunday: 10 AM - 11 PM" rows={3} />
                 </div>
 
                 {/* Photo Upload */}
                 <div>
-                  <Label>Upload Additional Photos (Optional, Max 30, JPEG/PNG)</Label>
-                  <p className="text-sm text-muted-foreground mb-2">{uploadedImages.length}/30 photos uploaded.</p>
+                  <Label>Upload Photos *</Label>
+                  <p className="text-sm text-muted-foreground mb-2">Upload photos representing different branches of the franchise. {uploadedImages.length}/30 photos uploaded.</p>
                   <div className="mt-2">
                     <label className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
                       <div className="flex flex-col items-center">
                         <Upload className="w-8 h-8 text-muted-foreground" />
                         <span className="mt-2 text-sm text-muted-foreground">
-                          {uploadingImage ? "Uploading..." : "Click to upload additional images (optional)"}
+                          {uploadingImage ? "Uploading..." : "Click to upload images"}
                         </span>
                       </div>
                       <input type="file" className="hidden" accept="image/jpeg,image/png" multiple onChange={handleImageUpload} disabled={uploadingImage || uploadedImages.length >= 30} />
@@ -752,7 +691,7 @@ const VenueRegistration = () => {
                     <div className="grid grid-cols-3 gap-4 mt-4">
                       {uploadedImages.map((url, index) => (
                         <div key={index} className="relative">
-                          <img src={url} alt={`Venue ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                          <img src={url} alt={`Franchise ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
                           <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeImage(url)}>
                             <X className="h-4 w-4" />
                           </Button>
@@ -765,8 +704,10 @@ const VenueRegistration = () => {
                 {/* Ad Unit Types Selection */}
                 <div className="border-t pt-6">
                   <AdUnitSelector selectedUnits={selectedAdUnits} onUnitsChange={setSelectedAdUnits} publisherId={publisherId} />
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Ad units are available across multiple branches. Final availability is determined per location.
+                  </p>
                 </div>
-
 
                 {/* Verification Documents */}
                 <div className="border-t pt-6">
@@ -774,7 +715,7 @@ const VenueRegistration = () => {
                     Verification Documents {!isEditing && "*"}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    {isEditing ? "Upload additional verification documents if needed (optional during edit)" : "Upload at least one verification document to submit your venue for approval"}
+                    {isEditing ? "Upload additional verification documents if needed" : "Upload at least one verification document at the brand/franchise level"}
                   </p>
 
                   <Alert className="mb-4 bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800">
@@ -841,7 +782,7 @@ const VenueRegistration = () => {
                   <h3 className="font-semibold text-lg border-b pb-2">OOH Location & Placement</h3>
                   <div>
                     <Label htmlFor="exactLocationNotes">Exact Placement Notes</Label>
-                    <Textarea id="exactLocationNotes" value={oohDetails.exactLocationNotes} onChange={e => updateOohField("exactLocationNotes", e.target.value)} placeholder="e.g., North wall of building, visible from Main Street intersection..." rows={3} />
+                    <Textarea id="exactLocationNotes" value={oohDetails.exactLocationNotes} onChange={e => updateOohField("exactLocationNotes", e.target.value)} placeholder="e.g., Inside the venue near the cashier, bathroom walls..." rows={3} />
                   </div>
                   <div>
                     <Label>Placement Type</Label>
@@ -1006,26 +947,24 @@ const VenueRegistration = () => {
                   </div>
                 </div>
 
-                {/* Submit info */}
                 {!isEditing && (
                   <Alert className="bg-muted/50">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      Your submission will be reviewed by our team. You'll be notified once it's approved.
+                      Your franchise submission will be reviewed by our team. Once approved, you can add branch locations from your dashboard.
                     </AlertDescription>
                   </Alert>
                 )}
 
-                {/* Navigation Buttons */}
                 <div className="pt-6 border-t flex flex-col sm:flex-row gap-4">
                   <Button type="button" variant="outline" className="flex-1" onClick={handlePrevStep}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Venue Details
+                    Back to Franchise Details
                   </Button>
                   <Button type="submit" className="flex-1" disabled={loading}>
                     {loading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{isEditing ? "Updating..." : "Submitting..."}</>
-                    ) : isEditing ? "Update Venue" : "Register Your Ad Space"}
+                    ) : isEditing ? "Update Franchise" : "Register Franchise"}
                   </Button>
                 </div>
               </form>

@@ -7,12 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User, Settings } from "lucide-react";
+import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User, Settings, Building } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { BookingsArchive } from "@/components/publisher/BookingsArchive";
 import { BillingInvoices } from "@/components/publisher/BillingInvoices";
 import { MessagesCard } from "@/components/publisher/MessagesCard";
 import { Separator } from "@/components/ui/separator";
+import { BranchManager } from "@/components/franchise/BranchManager";
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const {
@@ -223,7 +224,8 @@ const VenueDashboard = () => {
                 </div>
                 <div className="flex gap-2">
                   <Button onClick={() => navigate("/venue-registration")} disabled={!isApprovedAgent}>
-                    Register New Ad Space
+                    <Building className="h-4 w-4 mr-2" />
+                    Register New Franchise
                   </Button>
                   <Button variant="outline" onClick={() => navigate("/venue-inventory")}>
                     <Upload className="w-4 h-4 mr-2" />View Full Inventory
@@ -272,6 +274,18 @@ const VenueDashboard = () => {
                           </div>
                         </div>
                       </Card>)}
+
+          {/* Branch Management per franchise */}
+          <Separator className="my-8" />
+          
+          {adSpaces.length > 0 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">Branch Locations</h2>
+              {adSpaces.map((space) => (
+                <BranchManager key={space.id} franchiseId={space.id} franchiseName={space.title} />
+              ))}
+            </div>
+          )}
 
           {/* Bottom Modules */}
           <Separator className="my-8" />
