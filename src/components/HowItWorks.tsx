@@ -5,23 +5,27 @@ import { useEffect, useRef, useState } from "react";
 const steps = [
   {
     icon: FileText,
-    title: "Register Your Campaign",
-    description: "Create your brand campaign for products, services, or events and upload promotional materials.",
+    title: "Campaign Setup & Creative Upload",
+    description:
+      "Create your campaign for products, services, or events and upload your marketing assets. This ensures your creatives are ready for deployment across all selected ad spaces or franchise locations.",
   },
   {
     icon: MapPin,
-    title: "Choose Ad Spaces",
-    description: "Select the ad spaces where your campaign will appear.",
+    title: "Ad Space & Branch Selection",
+    description:
+      "Choose where your campaign will appear. Use our ad space marketplace to book high-traffic locations or select franchise branches for multi-location distribution.",
   },
   {
     icon: Rocket,
-    title: "Activate Campaign",
-    description: "Submit your campaign and confirm placements.",
+    title: "Campaign Deployment & Logistics",
+    description:
+      "Activate your campaign and let our OOH logistics platform handle printing, packaging, and distribution of physical materials. Your campaign is delivered to all ad spaces or branch locations efficiently.",
   },
   {
     icon: TrendingUp,
-    title: "Track Results",
-    description: "Monitor QR scans, engagement, and reach across all selected ad spaces.",
+    title: "Analytics & Performance Monitoring",
+    description:
+      "Track your campaign in real time with our campaign analytics dashboard. Measure engagement, reach, and installation compliance to optimize your campaign and maximize ROI.",
   },
 ];
 
@@ -36,7 +40,7 @@ export const HowItWorks = () => {
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (sectionRef.current) {
@@ -55,10 +59,10 @@ export const HowItWorks = () => {
           }`}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 text-foreground">
-            How It Works
+            Plan. Launch. Track. Succeed.
           </h2>
           <p className="text-sm md:text-xl text-muted-foreground">
-            Four simple steps to launch your brand campaign
+            Launch campaigns across multiple locations with one platform
           </p>
         </div>
 
@@ -69,9 +73,7 @@ export const HowItWorks = () => {
               <Card
                 key={index}
                 className={`border border-border hover:border-primary/50 bg-background transition-all duration-500 animate-scale-hover ${
-                  isVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-8"
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
@@ -80,15 +82,9 @@ export const HowItWorks = () => {
                     <Icon className="w-5 h-5 md:w-8 md:h-8 text-primary" />
                     <div className="absolute inset-0 bg-primary/5"></div>
                   </div>
-                  <div className="text-[10px] md:text-sm font-mono text-primary">
-                    0{index + 1}
-                  </div>
-                  <h3 className="text-xs md:text-xl font-bold text-foreground leading-tight">
-                    {step.title}
-                  </h3>
-                  <p className="text-muted-foreground text-[10px] md:text-sm leading-snug">
-                    {step.description}
-                  </p>
+                  <div className="text-[10px] md:text-sm font-mono text-primary">0{index + 1}</div>
+                  <h3 className="text-xs md:text-xl font-bold text-foreground leading-tight">{step.title}</h3>
+                  <p className="text-muted-foreground text-[10px] md:text-sm leading-snug">{step.description}</p>
                 </CardContent>
               </Card>
             );
