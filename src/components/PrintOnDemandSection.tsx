@@ -126,7 +126,7 @@ export const PrintOnDemandSection = () => {
                     <h3 className="text-sm md:text-lg font-semibold text-foreground mb-1 md:mb-2 group-hover:text-primary transition-colors">
                       {feature.title}
                     </h3>
-                    <p className="text-muted-foreground text-xs md:text-sm leading-relaxed">
+                    <p className="text-xs leading-relaxed text-white md:text-base">
                       {feature.description}
                     </p>
                   </div>
