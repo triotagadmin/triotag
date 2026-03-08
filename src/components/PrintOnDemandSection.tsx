@@ -123,7 +123,7 @@ export const PrintOnDemandSection = () => {
                     <feature.icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-sm md:text-lg font-semibold text-foreground mb-1 md:mb-2 group-hover:text-primary transition-colors">
+                    <h3 className="text-sm font-semibold mb-1 md:mb-2 transition-colors text-primary md:text-base">
                       {feature.title}
                     </h3>
                     <p className="text-xs leading-relaxed text-white md:text-base">
