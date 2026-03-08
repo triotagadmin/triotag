@@ -1,27 +1,27 @@
-import { MapPin, Calendar, Camera, TrendingUp } from "lucide-react";
+import { FileText, MapPin, Rocket, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useRef, useState } from "react";
 
 const steps = [
   {
+    icon: FileText,
+    title: "Register Your Campaign",
+    description: "Create your brand campaign for products, services, or events and upload promotional materials.",
+  },
+  {
     icon: MapPin,
-    title: "Register as Advertiser",
-    description: "Browse ambient advertising space worldwide.",
+    title: "Choose Ad Spaces",
+    description: "Select the ad spaces where your campaign will appear.",
   },
   {
-    icon: Calendar,
-    title: "Book Ad Space",
-    description: "Select your ad slots and schedule your campaign",
-  },
-  {
-    icon: Camera,
-    title: "Verify & Approve",
-    description: "Send campaign details and approve campaign",
+    icon: Rocket,
+    title: "Activate Campaign",
+    description: "Submit your campaign and confirm placements.",
   },
   {
     icon: TrendingUp,
     title: "Track Results",
-    description: "Real-time QR Code analytics and proof of placement",
+    description: "Monitor QR scans, engagement, and reach across all selected ad spaces.",
   },
 ];
 
@@ -58,7 +58,7 @@ export const HowItWorks = () => {
             How It Works
           </h2>
           <p className="text-sm md:text-xl text-muted-foreground">
-            Four simple steps to start advertising
+            Four simple steps to launch your brand campaign
           </p>
         </div>
 

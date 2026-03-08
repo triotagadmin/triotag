@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import heroBackground from "@/assets/hero-background.gif";
 
-// Single source of truth for hero content
-const HERO_HEADLINE = "The Central Hub for Micro Ads.";
-const HERO_CTA_PRIMARY = { text: "Advertise Now", link: "/campaign-submit" };
+const HERO_HEADLINE = "The Central Hub for Retail Media Advertising";
+const HERO_SUBHEADLINE = "Promote your products, services, and events through curated ad spaces where people naturally gather. Activate real-world visibility and reach your target audience effectively.";
+const HERO_CTA_PRIMARY = { text: "Advertise Your Brand", link: "/campaign-submit" };
 const HERO_CTA_SECONDARY = { text: "Register Ad Space", link: "/list-space" };
 
 export const Hero = () => {
@@ -26,6 +25,7 @@ export const Hero = () => {
             <h1 className="hero-title text-3xl font-bold tracking-tight text-foreground leading-tight">
               <span className="hero-span text-primary neon-text-glow animate-text-glow">{HERO_HEADLINE}</span>
             </h1>
+            <p className="text-[9px] text-muted-foreground leading-snug">{HERO_SUBHEADLINE}</p>
             <div className={`grid grid-cols-2 gap-2 pt-1 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               <Link to={HERO_CTA_PRIMARY.link} className="block">
                 <Button size="sm" className="relative overflow-hidden w-full text-[8px] px-2 py-1 h-6 min-h-[24px] bg-primary text-primary-foreground font-semibold neon-glow hover:neon-glow-strong transition-all duration-300 hover:bg-primary/90 animate-pulse-glow">
@@ -49,7 +49,7 @@ export const Hero = () => {
           <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-tight">
             <span className="hero-span text-primary neon-text-glow animate-text-glow">{HERO_HEADLINE}</span>
           </h1>
-
+          <p className="text-sm md:text-xl text-muted-foreground max-w-3xl mx-auto">{HERO_SUBHEADLINE}</p>
 
           <div className={`flex flex-row items-center justify-center gap-4 pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
             <Link to={HERO_CTA_PRIMARY.link}>

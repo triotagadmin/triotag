@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { Briefcase } from "lucide-react";
+
 export const CTABanner = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -33,37 +35,32 @@ export const CTABanner = () => {
             `,
             backgroundSize: "40px 40px"
           }} />
-
       </div>
 
       <div className="container mx-auto px-4 md:px-6 text-center space-y-4 md:space-y-8 relative z-10">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 mb-2">
+          <Briefcase className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium text-primary">Careers</span>
+        </div>
+
         <h2
           className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold max-w-3xl mx-auto text-foreground transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-
-          Sign up as our Agent and Earn Extra Income
+          We're Hiring
         </h2>
 
         <p
-          className={`text-base md:text-lg lg:text-xl max-w-2xl mx-auto transition-all duration-700 delay-100 font-semibold tracking-wide uppercase text-white ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-          style={{
-            fontFamily: "'Rajdhani', sans-serif",
-            textShadow: "2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,0.7), 6px 6px 12px rgba(0,0,0,0.8)",
-            transform: "perspective(500px) rotateX(5deg)",
-            animation: "float3d 4s ease-in-out infinite"
-          }}>
-
-          ONBOARD AD SPACE OWNERS AND GET 10% COMMISSION FEE FROM EVERY SUCCESSFUL CAMPAIGN!{" "}
+          className={`text-sm md:text-lg max-w-2xl mx-auto transition-all duration-700 delay-100 text-muted-foreground ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+          We're expanding our team to help brands connect with curated ad spaces. Explore open roles and join a dynamic team shaping the future of brand advertising.
         </p>
 
         <div
           className={`flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8 transition-all duration-700 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
 
-          <Link to="/auth" className="block">
+          <Link to="/careers" className="block">
             <Button
               size="lg"
               className="w-full sm:w-auto text-sm md:text-lg px-6 md:px-10 py-4 md:py-6 min-h-[44px] neon-glow hover:neon-glow-strong">
-
-              Agent Registration  
+              View Job Openings
             </Button>
           </Link>
         </div>

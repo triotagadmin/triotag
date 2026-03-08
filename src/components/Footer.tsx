@@ -50,26 +50,7 @@ export const Footer = () => {
             <h3 className="font-bold text-lg md:text-xl text-primary neon-text-glow">
               Tiny Sticky Ads
             </h3>
-            <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">We connect businesses to place-based ad spaces. From discovering the right locations to booking campaigns online, we streamline the entire process for brands of all sizes to make place-based OOH advertising easy, transparent, and accessible.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-          </p>
+            <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">Tiny Sticky Ads connects brands with curated ad spaces to promote products, services, and events effectively. Our platform makes it easy to distribute campaigns across real-world locations where people naturally gather.</p>
           </div>
 
           {/* Company Links - Two Columns */}

@@ -8,32 +8,32 @@ const features = [
 {
   icon: Palette,
   title: "Design Development",
-  description: "Our skilled graphic artists craft your ad materials, or you can submit your own designs directly to our platform."
+  description: "Upload your own designs or use our team of graphic artists to craft campaign materials for products, services, and events."
 },
 {
   icon: Printer,
   title: "Premium Printing",
-  description: "High-quality prints powered by Prodigi's global print network"
+  description: "High-quality prints via a global print network powered by Prodigi."
 },
 {
   icon: Globe,
   title: "Global Fulfillment",
-  description: "Ship to 170+ countries with local production facilities"
+  description: "Ship to multiple locations with local production facilities."
 },
 {
   icon: Truck,
   title: "Fast Delivery",
-  description: "Express shipping options with real-time tracking"
+  description: "Express shipping with real-time tracking."
 },
 {
   icon: Shield,
   title: "Quality Guaranteed",
-  description: "Every print meets our strict quality standards"
+  description: "Every print meets strict quality standards."
 },
 {
   icon: Zap,
   title: "Instant Activation",
-  description: "Streamlined production from design to print"
+  description: "Streamlined production from design to print."
 }];
 
 
@@ -100,8 +100,7 @@ export const PrintOnDemandSection = () => {
           </h2>
           
           <p className="text-sm md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">
-            Our seamless Prodigi integration handles everything from printing to global delivery.
-          
+            Our Prodigi integration handles printing, fulfillment, and delivery. Campaign materials for products, services, and events are professionally produced and sent to your selected ad spaces.
           </p>
         </div>
 
@@ -173,7 +172,7 @@ export const PrintOnDemandSection = () => {
               
               <span className="relative z-10 flex items-center gap-2">
                 <Printer className="h-5 w-5" />
-                Explore Print-Ready Listings
+                Explore Print-Ready Ad Spaces
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </Button>
