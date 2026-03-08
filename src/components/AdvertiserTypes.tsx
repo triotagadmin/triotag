@@ -69,7 +69,7 @@ export const AdvertiserTypes = () => {
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
             Real-World Brand Visibility
           </h2>
-          <p className="text-sm md:text-xl px-2 text-muted-foreground">
+          <p className="text-sm px-2 text-popover-foreground md:text-base">
             Tiny Sticky Ads is a retail media platform that helps businesses and organizers distribute campaigns for products, services, and events. Our platform combines four key capabilities: a curated ad space marketplace, a branch location distribution system, an out-of-home (OOH) logistics platform, and a campaign analytics dashboard, giving brands full control over deployment and performance tracking.
           
 
@@ -91,10 +91,10 @@ export const AdvertiserTypes = () => {
                   <div className="w-10 h-10 md:w-12 md:h-12 border border-primary/30 bg-primary/5 flex items-center justify-center mb-2 md:mb-4">
                     <Icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   </div>
-                  <CardTitle className="text-base md:text-xl text-foreground">{type.title}</CardTitle>
+                  <CardTitle className="text-base text-secondary md:text-lg">{type.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-xs md:text-sm text-muted-foreground">
+                  <CardDescription className="text-xs md:text-base text-white">
                     {type.description}
                   </CardDescription>
                 </CardContent>
