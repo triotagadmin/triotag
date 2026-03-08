@@ -80,10 +80,12 @@ export const Navigation = () => {
     return "/dashboard";
   };
   const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  // Services visible to guests and advertisers only
+  const showServices = !user || userRole === "advertiser";
+
   const NavLinks = ({
     mobile = false
-
-
   }: {mobile?: boolean;}) => {
     const baseLinkClass = "text-white hover:text-primary hover:drop-shadow-[0_0_8px_hsl(var(--primary))] transition-all duration-300";
     const linkClass = mobile ? `w-full text-left py-3 px-4 ${baseLinkClass}` : baseLinkClass;
@@ -91,7 +93,6 @@ export const Navigation = () => {
         {user ? <>
             {userRole === "talent" ?
         <>
-                
                 <Link to={getDashboardLink()} onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
                 </Link>
@@ -102,11 +103,11 @@ export const Navigation = () => {
                   <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
                 </Link>
                 
-                {userRole === "advertiser" &&
-          <Link to="/services" onClick={closeMobileMenu}>
-                    
+                {showServices &&
+                  <Link to="/services" onClick={closeMobileMenu}>
+                    <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
                   </Link>
-          }
+                }
                 <Link to="/habit-tracker" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
                 </Link>
@@ -137,7 +138,9 @@ export const Navigation = () => {
             <Link to="/explore" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
             </Link>
-            
+            <Link to="/services" onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
+            </Link>
             <Link to="/habit-tracker" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
             </Link>

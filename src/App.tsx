@@ -95,9 +95,6 @@ const App = () => (
           <Route path="/install" element={<Install />} />
           <Route path="/list-space" element={<ListSpace />} />
           <Route path="/services" element={<Services />} />
-          <Route path="/services/quick-ad-sprint" element={<QuickAdSprint />} />
-          <Route path="/services/full-campaign-build" element={<FullCampaignBuild />} />
-          <Route path="/services/ongoing-ad-retainer" element={<OngoingAdRetainer />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/ticket-market" element={<TicketMarket />} />
           <Route path="/ticket-creator" element={<TicketMarket />} />

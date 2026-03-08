@@ -6,32 +6,32 @@ const materials = [
   {
     icon: Sticker,
     title: "Vinyl Sticker",
-    description: "Premium weather-resistant vinyl stickers designed for concrete, glass, and wood surfaces — built to last in any environment.",
+    description: "Durable stickers for windows, walls, and counters.",
   },
   {
     icon: BookOpen,
     title: "Table Tent Card",
-    description: "Sturdy card-stock table tents with gloss UV coating, perfect for restaurants, cafés, and reception desks.",
+    description: "Card-stock displays for café tables and counters.",
   },
   {
     icon: Frame,
     title: "Table Tent Acrylic",
-    description: "Sleek acrylic table tent displays that add a premium feel to any tabletop — durable, reusable, and eye-catching.",
+    description: "Sleek tabletop displays for a premium feel.",
   },
   {
     icon: RectangleHorizontal,
     title: "Coroplast Stand",
-    description: "Lightweight corrugated plastic stands ideal for floor displays, countertops, and point-of-sale placements.",
+    description: "Lightweight floor or countertop stands for maximum visibility.",
   },
   {
     icon: MapPin,
     title: "Strategic Placement",
-    description: "Every material is designed for high-traffic commercial spaces such as tabletops, countertops, windows, and entryways.",
+    description: "Every promotion is designed for high-traffic ad spaces where people naturally gather, ensuring campaigns for products, services, and events get noticed and remembered.",
   },
   {
     icon: Eye,
     title: "Maximum Visibility",
-    description: "Compact formats that catch eyes without overwhelming the space, delivering repeated impressions to a captive audience.",
+    description: "Compact formats catch eyes without overwhelming the space, delivering repeated impressions to your audience.",
   },
 ];
 
@@ -55,10 +55,10 @@ export const MicroAdMaterials = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className={`text-center mb-8 md:mb-16 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-display font-bold mb-4 md:mb-6">
-            Micro Ad Materials
+            Brand Promotion Materials
           </h2>
           <p className="text-sm md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">
-            Get your brand in front of your target audience with our micro ad materials. We use simple yet effective materials that fit seamlessly into high-traffic commercial spaces.
+            Promote products, services, and events through physical formats designed for cafés, retail stores, and high-traffic ad spaces.
           </p>
         </div>
 

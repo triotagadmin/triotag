@@ -128,7 +128,7 @@ export const FeaturedLocations = () => {
             const adUnitCurrency = adUnitsRaw[0]?.currency || specs?.currency || "USD";
             const mediaUrls = Array.isArray(item.media_urls) ? item.media_urls : [];
             const image = mediaUrls[0] as string || venueCafe1;
-            const venueType = VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.custom_venue_type || "Venue";
+            const venueType = VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.custom_venue_type || "Ad Space";
 
             return {
               id: item.id,
@@ -142,7 +142,6 @@ export const FeaturedLocations = () => {
             };
           });
 
-          // Pin DB listings first, fill remaining slots with fallbacks
           const remaining = 3 - dbListings.length;
           const combined = remaining > 0 ?
           [...dbListings, ...fallbackLocations.slice(0, remaining)] :
@@ -167,12 +166,8 @@ export const FeaturedLocations = () => {
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`
           }>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 text-foreground">Featured Ad Space
-
-          </h2>
-          <p className="text-sm md:text-xl text-muted-foreground">Print ready ad spaces in high-traffic areas
-
-          </p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 text-foreground">Featured Ad Spaces</h2>
+          <p className="text-sm md:text-xl text-muted-foreground">Discover curated ad spaces where campaigns for products, services, and events can reach the right audience.</p>
         </div>
 
         {loading ?

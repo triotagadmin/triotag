@@ -107,7 +107,7 @@ const CampaignBuilder = () => {
       }
 
       toast({
-        title: "Campaign created!",
+        title: "Campaign submitted!",
         description: "Your campaign has been submitted for review.",
       });
 
@@ -133,7 +133,7 @@ const CampaignBuilder = () => {
             Create Campaign
           </h1>
           <p className="text-muted-foreground">
-            Build your advertising campaign and reach your target audience
+            Build your brand advertising campaign and reach your target audience with curated ad spaces for products, services, or events.
           </p>
         </div>
 
@@ -142,13 +142,14 @@ const CampaignBuilder = () => {
             <CardHeader>
               <CardTitle>Campaign Details</CardTitle>
               <CardDescription>
-                Provide information about your advertising campaign
+                Provide information about your campaign
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Contact Number */}
               <div className="space-y-2">
                 <Label htmlFor="contact_number">Contact Number *</Label>
+                <p className="text-xs text-muted-foreground">Mobile, Fax or Telephone</p>
                 <Input
                   id="contact_number"
                   type="tel"
@@ -164,7 +165,7 @@ const CampaignBuilder = () => {
                 <Label htmlFor="campaign_name">Campaign Name *</Label>
                 <Input
                   id="campaign_name"
-                  placeholder="Summer Product Launch 2024"
+                  placeholder="e.g., Summer Product Launch 2026"
                   value={formData.campaign_name}
                   onChange={(e) => setFormData({ ...formData, campaign_name: e.target.value })}
                   required
@@ -176,7 +177,7 @@ const CampaignBuilder = () => {
                 <Label htmlFor="campaign_description">Campaign Description</Label>
                 <Textarea
                   id="campaign_description"
-                  placeholder="Describe your campaign objectives and key messages..."
+                  placeholder="Describe your campaign objectives, key messages, or promotional highlights. Include details for products, services, or events."
                   value={formData.campaign_description}
                   onChange={(e) => setFormData({ ...formData, campaign_description: e.target.value })}
                   rows={4}
@@ -195,13 +196,13 @@ const CampaignBuilder = () => {
                     <SelectValue placeholder="Select campaign type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="brand_awareness">Brand Awareness</SelectItem>
-                    <SelectItem value="product_launch">Product Launch</SelectItem>
-                    <SelectItem value="event_promotion">Event Promotion</SelectItem>
-                    <SelectItem value="seasonal">Seasonal Campaign</SelectItem>
-                    <SelectItem value="ongoing">Ongoing Campaign</SelectItem>
+                    <SelectItem value="product">Product</SelectItem>
+                    <SelectItem value="service">Service</SelectItem>
+                    <SelectItem value="event">Event</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">Indicate whether this is a product/service promotion, an event, or both.</p>
               </div>
 
               {/* Ad Unit Type & Price */}
@@ -227,6 +228,7 @@ const CampaignBuilder = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground">Physical formats used in curated ad spaces.</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Current Price per Unit</Label>
@@ -257,6 +259,7 @@ const CampaignBuilder = () => {
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 />
+                <p className="text-xs text-muted-foreground">Specify where you want your campaign to appear in curated ad spaces.</p>
               </div>
 
               {/* Budget */}
@@ -264,7 +267,7 @@ const CampaignBuilder = () => {
                 <div className="space-y-2">
                   <Label htmlFor="budget_amount" className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4" />
-                    Budget Amount *
+                    Campaign Budget *
                   </Label>
                   <Input
                     id="budget_amount"
@@ -286,6 +289,7 @@ const CampaignBuilder = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="USD">USD - US Dollar</SelectItem>
+                      <SelectItem value="PHP">PHP - Philippine Peso</SelectItem>
                       <SelectItem value="EUR">EUR - Euro</SelectItem>
                       <SelectItem value="GBP">GBP - British Pound</SelectItem>
                     </SelectContent>
@@ -331,11 +335,18 @@ const CampaignBuilder = () => {
                 </Label>
                 <Textarea
                   id="target_audience"
-                  placeholder="Describe your target audience (age, interests, demographics...)"
+                  placeholder="Describe your audience (age, interests, demographics) for products, services, or events."
                   value={formData.target_audience}
                   onChange={(e) => setFormData({ ...formData, target_audience: e.target.value })}
                   rows={3}
                 />
+              </div>
+
+              <div className="rounded-md bg-muted/50 border border-border p-4 space-y-2">
+                <p className="text-xs text-muted-foreground">• The Campaign Type allows you to indicate whether this is a product/service promotion, an event, or both.</p>
+                <p className="text-xs text-muted-foreground">• Ad Unit Types are physical formats used in curated ad spaces.</p>
+                <p className="text-xs text-muted-foreground">• Target Location determines which ad spaces your campaign will appear in.</p>
+                <p className="text-xs text-muted-foreground">• Include clear campaign objectives to ensure proper placement and visibility.</p>
               </div>
             </CardContent>
           </Card>
@@ -351,7 +362,7 @@ const CampaignBuilder = () => {
               Cancel
             </Button>
             <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? "Sending Campaign..." : "Send Campaign"}
+              {loading ? "Submitting Campaign..." : "Submit Campaign"}
             </Button>
           </div>
         </form>
