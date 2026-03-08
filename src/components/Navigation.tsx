@@ -104,10 +104,10 @@ export const Navigation = () => {
                 </Link>
                 
                 {showServices &&
-                  <Link to="/services" onClick={closeMobileMenu}>
+          <Link to="/services" onClick={closeMobileMenu}>
                     <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
                   </Link>
-                }
+          }
                 <Link to="/habit-tracker" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
                 </Link>
@@ -139,7 +139,7 @@ export const Navigation = () => {
               <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
             </Link>
             <Link to="/services" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
+              
             </Link>
             <Link to="/habit-tracker" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
