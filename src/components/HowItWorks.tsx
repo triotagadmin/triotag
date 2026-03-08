@@ -83,7 +83,7 @@ export const HowItWorks = () => {
                     <div className="absolute inset-0 bg-primary/5"></div>
                   </div>
                   <div className="text-[10px] md:text-sm font-mono text-primary">0{index + 1}</div>
-                  <h3 className="text-xs md:text-xl font-bold text-foreground leading-tight">{step.title}</h3>
+                  <h3 className="text-xs font-bold leading-tight text-primary md:text-lg">{step.title}</h3>
                   <p className="text-[10px] leading-snug text-card-foreground md:text-base">{step.description}</p>
                 </CardContent>
               </Card>);
