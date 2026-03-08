@@ -49,7 +49,7 @@ export const Hero = () => {
           <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-tight">
             <span className="hero-span text-primary neon-text-glow animate-text-glow">{HERO_HEADLINE}</span>
           </h1>
-          <p className="text-sm md:text-xl text-muted-foreground max-w-3xl mx-auto">{HERO_SUBHEADLINE}</p>
+          
 
           <div className={`flex flex-row items-center justify-center gap-4 pt-4 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
             <Link to={HERO_CTA_PRIMARY.link}>
