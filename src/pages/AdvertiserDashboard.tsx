@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { AdvertiserBranchManager } from "@/components/advertiser/AdvertiserBranchManager";
 import { AdvertiserPrintOrderForm } from "@/components/advertiser/AdvertiserPrintOrderForm";
 import { AdvertiserPrintOrdersList } from "@/components/advertiser/AdvertiserPrintOrdersList";
+import { MyFranchiseSection } from "@/components/advertiser/MyFranchiseSection";
 const AdvertiserDashboard = () => {
   const navigate = useNavigate();
   const {
