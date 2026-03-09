@@ -119,8 +119,12 @@ const Marketplace = () => {
         item.specifications || {};
         const adUnitsFromDb = specs?.ad_units || [];
         const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
-        const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
-        const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
+        const adUnitMaterials: string[] = (specs?.ad_unit_materials || []).map(
+          (mat: string) => AD_UNIT_MATERIAL_LABELS[mat] || mat.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())
+        );
+        const combinedAdUnits = [...adUnitLabels, ...adUnitMaterials];
+        const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || specs?.weekly_lease_price || 0;
+        const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || specs?.monthly_lease_price || 0;
         const currency = adUnitsFromDb[0]?.currency || specs?.currency || "USD";
 
         return {
