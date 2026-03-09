@@ -9,7 +9,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Printer, Plus, Trash2, ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { Printer, Plus, Trash2, ArrowLeft, ArrowRight, Check, Building2 } from "lucide-react";
+
+interface AssociatedListing {
+  id: string;
+  title: string;
+}
 
 interface UnifiedBranch {
   id: string;
@@ -27,21 +32,25 @@ interface MaterialItem {
 
 interface AdvertiserPrintOrderFormProps {
   userId: string;
-  associatedListingIds?: string[];
+  associatedListings?: AssociatedListing[];
   onComplete?: () => void;
 }
 
 const MATERIAL_TYPES = ["Sticker", "Flyer", "Poster", "Table Tent", "Banner", "Other"];
 
-export const AdvertiserPrintOrderForm = ({ userId, associatedListingIds = [], onComplete }: AdvertiserPrintOrderFormProps) => {
+export const AdvertiserPrintOrderForm = ({ userId, associatedListings = [], onComplete }: AdvertiserPrintOrderFormProps) => {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
-  const [branches, setBranches] = useState<UnifiedBranch[]>([]);
+  const [selectedListingId, setSelectedListingId] = useState<string>("all");
+  const [allBranches, setAllBranches] = useState<UnifiedBranch[]>([]);
+  const [filteredBranches, setFilteredBranches] = useState<UnifiedBranch[]>([]);
   const [selectedBranchIds, setSelectedBranchIds] = useState<string[]>([]);
   const [materials, setMaterials] = useState<MaterialItem[]>([{ type: "Sticker", quantity: 1, notes: "" }]);
   const [orderNotes, setOrderNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const listingIds = associatedListings.map((l) => l.id);
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -60,40 +69,55 @@ export const AdvertiserPrintOrderForm = ({ userId, associatedListingIds = [], on
       }
 
       // Shared franchise branches
-      if (associatedListingIds.length > 0) {
+      if (listingIds.length > 0) {
         const { data: frBranches } = await supabase
           .from("franchise_branches")
           .select("id, place_name, full_address, franchise_id, ad_spaces(title)")
-          .in("franchise_id", associatedListingIds)
+          .in("franchise_id", listingIds)
           .order("created_at");
         if (frBranches) {
           frBranches.forEach((b: any) => {
             const exists = unified.some((u) => u.address.toLowerCase().trim() === b.full_address.toLowerCase().trim());
             if (!exists) {
-              unified.push({ id: b.id, name: b.place_name, address: b.full_address, source: "franchise", listing_title: b.ad_spaces?.title });
+              unified.push({
+                id: b.id, name: b.place_name, address: b.full_address,
+                source: "franchise", listing_title: b.ad_spaces?.title,
+              });
             }
           });
         }
       }
 
-      setBranches(unified);
+      setAllBranches(unified);
+      setFilteredBranches(unified);
       setLoading(false);
     };
     fetchBranches();
-  }, [userId, associatedListingIds.join(",")]);
+  }, [userId, listingIds.join(",")]);
+
+  // Filter branches when listing selection changes
+  useEffect(() => {
+    if (selectedListingId === "all") {
+      setFilteredBranches(allBranches);
+    } else {
+      // Show franchise branches for this listing + all standalone advertiser branches
+      const filtered = allBranches.filter((b) => {
+        if (b.source === "advertiser") return true;
+        return b.listing_title === associatedListings.find((l) => l.id === selectedListingId)?.title;
+      });
+      setFilteredBranches(filtered);
+    }
+    setSelectedBranchIds([]);
+  }, [selectedListingId, allBranches]);
 
   const toggleBranch = (id: string) => {
     setSelectedBranchIds((prev) => prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]);
   };
-
   const selectAll = () => {
-    setSelectedBranchIds(selectedBranchIds.length === branches.length ? [] : branches.map((b) => b.id));
+    setSelectedBranchIds(selectedBranchIds.length === filteredBranches.length ? [] : filteredBranches.map((b) => b.id));
   };
-
   const addMaterial = () => { setMaterials([...materials, { type: "Sticker", quantity: 1, notes: "" }]); };
-
   const removeMaterial = (idx: number) => { setMaterials(materials.filter((_, i) => i !== idx)); };
-
   const updateMaterial = (idx: number, field: keyof MaterialItem, value: any) => {
     const updated = [...materials];
     updated[idx] = { ...updated[idx], [field]: value };
@@ -115,7 +139,8 @@ export const AdvertiserPrintOrderForm = ({ userId, associatedListingIds = [], on
       toast({ title: "Error submitting order", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Print order submitted!", description: "Your order is now pending review." });
-      setStep(1); setSelectedBranchIds([]); setMaterials([{ type: "Sticker", quantity: 1, notes: "" }]); setOrderNotes("");
+      setStep(1); setSelectedBranchIds([]); setSelectedListingId("all");
+      setMaterials([{ type: "Sticker", quantity: 1, notes: "" }]); setOrderNotes("");
       onComplete?.();
     }
     setSubmitting(false);
@@ -123,7 +148,7 @@ export const AdvertiserPrintOrderForm = ({ userId, associatedListingIds = [], on
 
   if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
 
-  if (branches.length === 0) {
+  if (allBranches.length === 0) {
     return (
       <Card>
         <CardContent className="pt-6 text-center py-8">
@@ -135,26 +160,54 @@ export const AdvertiserPrintOrderForm = ({ userId, associatedListingIds = [], on
     );
   }
 
+  const totalSteps = associatedListings.length > 0 ? 4 : 3;
+  const adjustedStep = associatedListings.length > 0 ? step : step + 1; // skip listing step if none
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg"><Printer className="h-5 w-5" /> Create Print Order</CardTitle>
         <CardDescription>Send print materials to your branch locations</CardDescription>
         <div className="flex gap-2 pt-2">
-          {[1, 2, 3].map((s) => (<div key={s} className={`h-1.5 flex-1 rounded-full ${s <= step ? "bg-primary" : "bg-muted"}`} />))}
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <div key={i} className={`h-1.5 flex-1 rounded-full ${i < (associatedListings.length > 0 ? step : step) ? "bg-primary" : "bg-muted"}`} />
+          ))}
         </div>
       </CardHeader>
       <CardContent>
-        {step === 1 && (
+        {/* Step 1: Select Listing (only if listings exist) */}
+        {step === 1 && associatedListings.length > 0 && (
+          <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <Building2 className="h-4 w-4" /> Select Listing (Optional)
+            </Label>
+            <p className="text-xs text-muted-foreground">Filter branches by listing or select all.</p>
+            <Select value={selectedListingId} onValueChange={setSelectedListingId}>
+              <SelectTrigger><SelectValue placeholder="All branches" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Branches</SelectItem>
+                {associatedListings.map((l) => (
+                  <SelectItem key={l.id} value={l.id}>{l.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={() => setStep(2)} className="w-full gap-2">
+              Next: Select Branches <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
+        {/* Step 2: Select branches (step 1 if no listings) */}
+        {((step === 2 && associatedListings.length > 0) || (step === 1 && associatedListings.length === 0)) && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium">Select Branch Locations</Label>
               <Button variant="ghost" size="sm" onClick={selectAll}>
-                {selectedBranchIds.length === branches.length ? "Deselect All" : "Select All"}
+                {selectedBranchIds.length === filteredBranches.length ? "Deselect All" : "Select All"}
               </Button>
             </div>
             <div className="space-y-2 max-h-60 overflow-y-auto">
-              {branches.map((branch) => (
+              {filteredBranches.map((branch) => (
                 <label key={`${branch.source}-${branch.id}`} className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                   <Checkbox checked={selectedBranchIds.includes(branch.id)} onCheckedChange={() => toggleBranch(branch.id)} />
                   <div className="min-w-0 flex-1">
@@ -168,13 +221,25 @@ export const AdvertiserPrintOrderForm = ({ userId, associatedListingIds = [], on
               ))}
             </div>
             <p className="text-xs text-muted-foreground">{selectedBranchIds.length} branch(es) selected</p>
-            <Button onClick={() => setStep(2)} disabled={selectedBranchIds.length === 0} className="w-full gap-2">
-              Next: Add Materials <ArrowRight className="h-4 w-4" />
-            </Button>
+            <div className="flex gap-2">
+              {associatedListings.length > 0 && (
+                <Button variant="outline" onClick={() => setStep(1)} className="flex-1 gap-2">
+                  <ArrowLeft className="h-4 w-4" /> Back
+                </Button>
+              )}
+              <Button
+                onClick={() => setStep(associatedListings.length > 0 ? 3 : 2)}
+                disabled={selectedBranchIds.length === 0}
+                className="flex-1 gap-2"
+              >
+                Next: Add Materials <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
 
-        {step === 2 && (
+        {/* Step 3: Add materials */}
+        {((step === 3 && associatedListings.length > 0) || (step === 2 && associatedListings.length === 0)) && (
           <div className="space-y-4">
             <Label className="text-sm font-medium">Print Materials</Label>
             {materials.map((mat, idx) => (
@@ -193,18 +258,25 @@ export const AdvertiserPrintOrderForm = ({ userId, associatedListingIds = [], on
             <Button variant="outline" size="sm" onClick={addMaterial} className="gap-1"><Plus className="h-3.5 w-3.5" /> Add Another Material</Button>
             <div><Label className="text-xs">Order Notes (optional)</Label><Textarea placeholder="Any special instructions..." value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)} rows={2} /></div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(1)} className="flex-1 gap-2"><ArrowLeft className="h-4 w-4" /> Back</Button>
-              <Button onClick={() => setStep(3)} className="flex-1 gap-2">Review Order <ArrowRight className="h-4 w-4" /></Button>
+              <Button variant="outline" onClick={() => setStep(associatedListings.length > 0 ? 2 : 1)} className="flex-1 gap-2"><ArrowLeft className="h-4 w-4" /> Back</Button>
+              <Button onClick={() => setStep(associatedListings.length > 0 ? 4 : 3)} className="flex-1 gap-2">Review Order <ArrowRight className="h-4 w-4" /></Button>
             </div>
           </div>
         )}
 
-        {step === 3 && (
+        {/* Step 4: Review & Submit */}
+        {((step === 4 && associatedListings.length > 0) || (step === 3 && associatedListings.length === 0)) && (
           <div className="space-y-4">
+            {selectedListingId !== "all" && (
+              <div>
+                <Label className="text-sm font-medium">Listing</Label>
+                <p className="text-sm">{associatedListings.find((l) => l.id === selectedListingId)?.title}</p>
+              </div>
+            )}
             <div>
               <Label className="text-sm font-medium">Selected Branches ({selectedBranchIds.length})</Label>
               <div className="mt-1 flex flex-wrap gap-1">
-                {branches.filter((b) => selectedBranchIds.includes(b.id)).map((b) => (
+                {allBranches.filter((b) => selectedBranchIds.includes(b.id)).map((b) => (
                   <Badge key={`${b.source}-${b.id}`} variant="secondary" className="text-xs">{b.name}</Badge>
                 ))}
               </div>
@@ -219,7 +291,7 @@ export const AdvertiserPrintOrderForm = ({ userId, associatedListingIds = [], on
             </div>
             {orderNotes && <div><Label className="text-sm font-medium">Notes</Label><p className="text-sm text-muted-foreground">{orderNotes}</p></div>}
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(2)} className="flex-1 gap-2"><ArrowLeft className="h-4 w-4" /> Back</Button>
+              <Button variant="outline" onClick={() => setStep(associatedListings.length > 0 ? 3 : 2)} className="flex-1 gap-2"><ArrowLeft className="h-4 w-4" /> Back</Button>
               <Button onClick={handleSubmit} disabled={submitting} className="flex-1 gap-2"><Check className="h-4 w-4" />{submitting ? "Submitting..." : "Submit Order"}</Button>
             </div>
           </div>
