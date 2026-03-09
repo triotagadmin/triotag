@@ -474,7 +474,7 @@ const VenueRegistration = () => {
                 {/* Description */}
                 <div>
                   <Label htmlFor="description">Brand Description *</Label>
-                  <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={4} className="rounded-[14px]" required />
+                  <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={4} className="rounded-[14px]" required placeholder="Describe your Brand" />
                 </div>
 
                 {/* Head Office Address */}
