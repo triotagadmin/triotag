@@ -708,31 +708,27 @@ const VenueRegistration = () => {
                             <div className="mt-2 space-y-2">
                               <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
                                 <Clock className="h-3 w-3" />
-                                Pending Advertiser Registration
+                                {ownershipWorkflow === "verification" ? "Pending Advertiser Verification" : "Pending Advertiser Registration"}
                               </Badge>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="w-full gap-1.5 text-xs"
-                                disabled={sendingVerification || verificationSent}
-                                onClick={async () => {
-                                  setSendingVerification(true);
-                                  try {
-                                    const { error } = await supabase.functions.invoke("send-verification-email", {
-                                      body: { email: contactEmail.trim(), userId: editId, userType: "advertiser" },
-                                    });
-                                    if (error) throw error;
-                                    setVerificationSent(true);
-                                    toast({ title: "Verification Sent", description: `Registration invite sent to ${contactEmail}` });
-                                  } catch (err: any) {
-                                    toast({ title: "Error", description: err.message || "Failed to send verification", variant: "destructive" });
-                                  } finally { setSendingVerification(false); }
-                                }}
-                              >
-                                {sendingVerification ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
-                                {verificationSent ? "Verification Sent" : "Send Registration Invite"}
-                              </Button>
+                              {isEditing && editId && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full gap-1.5 text-xs"
+                                  disabled={sendingVerification}
+                                  onClick={async () => {
+                                    try {
+                                      await requestOwnershipWorkflow(editId, contactEmail);
+                                    } catch (err: any) {
+                                      toast({ title: "Error", description: err.message || "Failed to send advertiser workflow email", variant: "destructive" });
+                                    }
+                                  }}
+                                >
+                                  {sendingVerification ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
+                                  {verificationSent ? "Resend Workflow Email" : "Send Workflow Email"}
+                                </Button>
+                              )}
                             </div>
                           )
                         )}
