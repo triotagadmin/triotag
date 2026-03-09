@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { AdvertiserBranchManager } from "@/components/advertiser/AdvertiserBranchManager";
 import { AdvertiserPrintOrderForm } from "@/components/advertiser/AdvertiserPrintOrderForm";
 import { AdvertiserPrintOrdersList } from "@/components/advertiser/AdvertiserPrintOrdersList";
+import { MyFranchiseSection } from "@/components/advertiser/MyFranchiseSection";
 const AdvertiserDashboard = () => {
   const navigate = useNavigate();
   const {
@@ -345,7 +346,10 @@ const AdvertiserDashboard = () => {
           </div>
         )}
 
-
+        {/* My Franchise Section */}
+        <div className="mb-12">
+          {user && <MyFranchiseSection userId={user.id} />}
+        </div>
 
 
         {/* Print Orders Section */}
