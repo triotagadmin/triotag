@@ -107,15 +107,7 @@ const FranchiseBranches = () => {
           </p>
         </div>
 
-        {branches.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <MapPin className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No branches listed yet</h3>
-              <p className="text-muted-foreground">Add branch locations below or contact the managing agent.</p>
-            </CardContent>
-          </Card>
-        ) : (
+        {branches.length === 0 ? null : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {branches.map((branch) => (
               <Card key={branch.id} className="overflow-hidden hover:shadow-md transition-shadow">
