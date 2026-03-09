@@ -54,15 +54,13 @@ const AdvertiserDashboard = () => {
         .order("created_at", { ascending: false });
       if (activations) setBookings(activations);
 
-      // Fetch associated listings (ad_spaces where contact_email matches advertiser email)
-      if (session.user.email) {
-        const { data: listings } = await supabase
-          .from("ad_spaces")
-          .select("id, title, location, approval_status, specifications, created_at")
-          .filter("specifications->>contact_email", "eq", session.user.email)
-          .order("created_at", { ascending: false });
-        if (listings) setAssociatedListings(listings);
-      }
+      // Fetch listings owned by this advertiser (advertiser_id = user_id)
+      const { data: listings } = await supabase
+        .from("ad_spaces")
+        .select("id, title, location, approval_status, specifications, created_at")
+        .eq("advertiser_id", session.user.id)
+        .order("created_at", { ascending: false });
+      if (listings) setAssociatedListings(listings);
     };
     checkUser();
     const {
