@@ -1,0 +1,2 @@
+ALTER PUBLICATION supabase_realtime ADD TABLE public.advertiser_branches;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.advertiser_print_orders;
