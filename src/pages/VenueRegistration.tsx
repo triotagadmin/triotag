@@ -98,7 +98,7 @@ const VISIBILITY_OPTIONS = [
   "Excellent (unobstructed)", "Good (minor obstructions)", "Moderate (partial visibility)", "Limited",
 ];
 
-const DEFAULT_DESCRIPTION = "Advertise across multiple locations of this brand. Tiny Sticky Ads connects advertisers with high-traffic ad spaces where small-format ads such as vinyl stickers, table tents, and acrylic displays can be placed inside the establishment.";
+const DEFAULT_DESCRIPTION = "";
 
 const VenueRegistration = () => {
   const navigate = useNavigate();
