@@ -151,8 +151,10 @@ const VenueRegistration = () => {
   // Advertiser linking status
   const [advertiserLinked, setAdvertiserLinked] = useState(false);
   const [pendingAdvertiserEmail, setPendingAdvertiserEmail] = useState<string | null>(null);
+  const [originalContactEmail, setOriginalContactEmail] = useState("");
   const [sendingVerification, setSendingVerification] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [ownershipWorkflow, setOwnershipWorkflow] = useState<"verification" | "registration" | null>(null);
 
   const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([
     { type: "business_license", label: "Business/Venue License", description: "Official business registration or venue operating license", file: null, uploaded: false },
