@@ -24,7 +24,9 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const url = new URL(req.url);
-    const token = url.searchParams.get("token");
+    const emailToken = url.searchParams.get("token");
+    const listingToken = url.searchParams.get("listing_token");
+    const token = emailToken || listingToken;
 
     if (!token) {
       return new Response(null, {
