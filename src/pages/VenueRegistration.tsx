@@ -697,7 +697,7 @@ const VenueRegistration = () => {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label>Contact Email *</Label>
-                        <Input type="email" value={contactEmail} onChange={e => { setContactEmail(e.target.value); setVerificationSent(false); }} required />
+                        <Input type="email" value={contactEmail} onChange={e => { setContactEmail(e.target.value); setVerificationSent(false); setOwnershipWorkflow(null); }} required />
                         {isEditing && contactEmail.trim() && (
                           advertiserLinked ? (
                             <div className="flex items-center gap-1.5 mt-1.5">
