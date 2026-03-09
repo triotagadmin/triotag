@@ -161,9 +161,15 @@ const VenueInventory = () => {
                 </p>
               )}
             </div>
-            {getStatusBadge(venue.approval_status)}
-          </div>
-          <CardDescription className="line-clamp-2">{venue.description}</CardDescription>
+            <div className="flex flex-wrap items-center gap-2">
+              {getStatusBadge(venue.approval_status)}
+              {venue.pending_advertiser_email && !venue.advertiser_id && (
+                <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
+                  <Clock className="h-3 w-3" /> Pending Advertiser
+                </Badge>
+              )}
+            </div>
+            <CardDescription className="line-clamp-2">{venue.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
