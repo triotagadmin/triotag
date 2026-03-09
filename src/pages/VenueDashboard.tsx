@@ -263,6 +263,11 @@ const VenueDashboard = () => {
                           <div className="mt-2 flex gap-2 flex-wrap">
                             {getStatusBadge(space.approval_status)}
                             <Badge variant="outline">{space.availability_status}</Badge>
+                            {Array.isArray((space as any).leased_advertiser_ids) && (space as any).leased_advertiser_ids.length > 0 && (
+                              <Badge variant="secondary" className="text-xs">
+                                {(space as any).leased_advertiser_ids.length} lessee{(space as any).leased_advertiser_ids.length !== 1 ? "s" : ""}
+                              </Badge>
+                            )}
                           </div>
                           <div className="flex gap-2 mt-3">
                             <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/venue-inventory?edit=${space.id}`)}>
