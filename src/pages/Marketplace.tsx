@@ -172,8 +172,15 @@ const Marketplace = () => {
         const specs = v.specifications as any;
         const adUnitsFromDb = specs?.ad_units || [];
         const adUnitLabels = adUnitsFromDb.map((unit: any) => AD_UNIT_TYPE_LABELS[unit.type] || unit.type);
-        const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || 0;
-        const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || 0;
+        
+        // Also detect ad_unit_materials from newer registration format
+        const adUnitMaterials: string[] = (specs?.ad_unit_materials || []).map(
+          (mat: string) => AD_UNIT_MATERIAL_LABELS[mat] || mat.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())
+        );
+        const combinedAdUnits = [...adUnitLabels, ...adUnitMaterials];
+
+        const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || specs?.weekly_lease_price || 0;
+        const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || specs?.monthly_lease_price || 0;
         const currency = adUnitsFromDb[0]?.currency || specs?.currency || "USD";
 
         return {
@@ -182,7 +189,7 @@ const Marketplace = () => {
           description: v.description || "",
           location: v.location || "Not specified",
           type: VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue",
-          adUnits: adUnitLabels.length > 0 ? adUnitLabels : ["No ad units specified"],
+          adUnits: combinedAdUnits.length > 0 ? combinedAdUnits : ["No ad units specified"],
           image: Array.isArray(v.media_urls) ? (v.media_urls as string[])[0] : undefined,
           ownerName: (v.publisher_profiles_public as any)?.business_name || "Venue",
           createdAt: v.created_at || "",
