@@ -9,13 +9,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_20px_hsl(110_100%_55%_/_0.5),0_0_40px_hsl(110_100%_55%_/_0.3)]",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-primary bg-transparent text-primary hover:bg-primary/10 hover:shadow-[0_0_20px_hsl(110_100%_55%_/_0.3)]",
-        secondary: "bg-muted text-foreground border border-border hover:border-primary hover:text-primary",
-        ghost: "text-muted-foreground hover:bg-primary/10 hover:text-primary",
+        default: "bg-primary text-primary-foreground rounded-[14px] hover:bg-primary/90 hover:shadow-[0_0_12px_hsl(110_100%_55%_/_0.6)] hover:scale-[1.02]",
+        destructive: "bg-destructive text-destructive-foreground rounded-[14px] hover:bg-destructive/90",
+        outline: "border border-primary/40 bg-transparent text-primary rounded-[14px] hover:bg-primary/10 hover:shadow-[0_0_12px_hsl(110_100%_55%_/_0.3)]",
+        secondary: "glass text-foreground rounded-[14px] hover:border-primary/40 hover:text-primary",
+        ghost: "text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-[14px]",
         link: "text-primary underline-offset-4 hover:underline",
-        cyber: "bg-primary text-primary-foreground shadow-[0_0_20px_hsl(110_100%_55%_/_0.5)] hover:shadow-[0_0_30px_hsl(110_100%_55%_/_0.7),0_0_60px_hsl(110_100%_55%_/_0.4)]",
+        cyber: "bg-primary text-primary-foreground rounded-[14px] shadow-[0_0_12px_hsl(110_100%_55%_/_0.4)] hover:shadow-[0_0_20px_hsl(110_100%_55%_/_0.6),0_0_40px_hsl(110_100%_55%_/_0.3)] hover:scale-[1.02]",
       },
       size: {
         default: "h-10 px-5 py-2",
