@@ -325,7 +325,6 @@ const VenueDashboard = () => {
           </div>
         </div>
       </div>
-      </div>
 
       <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
         <DialogContent className="sm:max-w-md">
