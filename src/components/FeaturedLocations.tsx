@@ -167,7 +167,7 @@ export const FeaturedLocations = () => {
           }>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 text-foreground">Featured Ad Spaces</h2>
-          <p className="text-sm md:text-xl text-muted-foreground">Discover curated ad spaces where campaigns for products, services, and events can reach the right audience.</p>
+          <p className="text-sm text-white md:text-base">Discover curated ad spaces where campaigns for products, services, and events can reach the right audience.</p>
         </div>
 
         {loading ?
