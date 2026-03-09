@@ -337,6 +337,12 @@ const Auth = () => {
           return;
         }
         
+        try {
+          await supabase.functions.invoke("sync-pending-listing-ownership");
+        } catch (syncError) {
+          console.error("Failed to sync pending listings on sign in:", syncError);
+        }
+
         toast({
           title: "Welcome back!",
           description: "Successfully signed in.",
