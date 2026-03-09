@@ -24,7 +24,7 @@ const Verify = () => {
     } else if (listingToken) {
       setVerificationType("listing");
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      window.location.href = `${supabaseUrl}/functions/v1/verify-listing-ownership?token=${listingToken}`;
+      window.location.href = `${supabaseUrl}/functions/v1/verify-email?listing_token=${listingToken}`;
     } else if (token) {
       setVerificationType("email");
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
