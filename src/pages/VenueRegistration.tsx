@@ -288,12 +288,19 @@ const VenueRegistration = () => {
   const buildVenueData = () => {
     const actualVenueType = venueType === "other" ? customVenueType : venueType;
     const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
+    const locsJson = additionalLocations.map(l => ({ id: l.id, address: l.address, city: l.city, province: l.province, postalCode: l.postalCode }));
+    const envJson = {
+      venueType: envDetails.venueType, venueSize: envDetails.venueSize, seatingCapacity: envDetails.seatingCapacity,
+      environment: envDetails.environment, customerActivity: envDetails.customerActivity,
+      adPlacementAreas: envDetails.adPlacementAreas, customerDemographics: envDetails.customerDemographics,
+      exactLocationNotes: envDetails.exactLocationNotes, visibility: envDetails.visibility,
+    };
     return {
       publisher_id: publisherId,
       title: title.trim(),
       location: headOfficeAddress || null,
       description: description.trim(),
-      latitude: null, longitude: null,
+      latitude: null as number | null, longitude: null as number | null,
       specifications: {
         venue_type: actualVenueType,
         custom_venue_type: venueType === "other" ? customVenueType : null,
@@ -304,13 +311,13 @@ const VenueRegistration = () => {
         contact_email: contactEmail.trim(),
         contact_number: contactPhone.trim(),
         operating_hours: operatingHours.trim() || null,
-        additional_locations: additionalLocations,
+        additional_locations: locsJson,
         ad_unit_materials: selectedMaterials,
         weekly_lease_price: weeklyLeasePrice ? parseFloat(weeklyLeasePrice) : null,
         monthly_lease_price: monthlyLeasePrice ? parseFloat(monthlyLeasePrice) : null,
         lease_currency: leaseCurrency,
-        environment_details: envDetails,
-      },
+        environment_details: envJson,
+      } as Record<string, unknown>,
       media_urls: uploadedImages,
     };
   };
