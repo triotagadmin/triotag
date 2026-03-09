@@ -251,7 +251,7 @@ const AdvertiserDashboard = () => {
           </Card>
         </div>
 
-        {/* Associated Listings Section */}
+        {/* Owned Listings Section */}
         <div className="mb-12">
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Building2 className="h-6 w-6" />
@@ -259,7 +259,7 @@ const AdvertiserDashboard = () => {
           </h3>
           <Card>
             <CardContent className="pt-6">
-              {associatedListings.length === 0 ? (
+              {ownedListings.length === 0 ? (
                 <div className="text-center py-12">
                   <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-2">No listings associated with your account yet</p>
@@ -267,14 +267,24 @@ const AdvertiserDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {associatedListings.map((listing) => (
+                  {ownedListings.map((listing) => (
                     <div key={listing.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
                       <div className="space-y-1 min-w-0 flex-1">
-                        <p className="font-medium">{listing.title}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{listing.title}</p>
+                          <Badge variant="outline" className="text-xs gap-1">
+                            <Building2 className="h-3 w-3" /> Owned
+                          </Badge>
+                        </div>
                         <p className="text-sm text-muted-foreground flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {listing.location || "—"}
                         </p>
+                        {(listing.leased_advertiser_ids as string[] || []).length > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            {(listing.leased_advertiser_ids as string[]).length} advertiser{(listing.leased_advertiser_ids as string[]).length !== 1 ? "s" : ""} leasing
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <Badge variant={listing.approval_status === "approved" ? "default" : "secondary"}>
@@ -295,9 +305,49 @@ const AdvertiserDashboard = () => {
           </Card>
         </div>
 
-        {/* Branch Management Section */}
+        {/* Leased Listings Section */}
+        {leasedListings.length > 0 && (
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <Key className="h-6 w-6" />
+              Leased Ad Spaces
+            </h3>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  {leasedListings.map((listing) => (
+                    <div key={listing.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{listing.title}</p>
+                          <Badge variant="secondary" className="text-xs gap-1">
+                            <Key className="h-3 w-3" /> Leased
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {listing.location || "—"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/venue/${listing.id}`)}>
+                          View
+                        </Button>
+                        <Button size="sm" onClick={() => navigate(`/activate/${listing.id}`)}>
+                          Activate
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Print Orders Section */}
         <div className="mb-12">
-          {user && <AdvertiserBranchManager userId={user.id} associatedListings={associatedListings.map(l => ({ id: l.id, title: l.title }))} />}
+          {user && <AdvertiserBranchManager userId={user.id} associatedListings={[...ownedListings, ...leasedListings].map(l => ({ id: l.id, title: l.title }))} />}
         </div>
 
 
