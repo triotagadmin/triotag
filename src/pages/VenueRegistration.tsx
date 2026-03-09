@@ -401,11 +401,13 @@ const VenueRegistration = () => {
     try {
       const venueData = buildVenueData();
       const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
+      const normalizedContactEmail = normalizeEmail(contactEmail);
+      const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
 
-      // Resolve advertiser ownership from contact email
-      const ownershipFields = contactEmail.trim()
-        ? await resolveAdvertiserId(contactEmail.trim())
-        : {};
+      const hasDuplicate = await checkDuplicateListing(headOfficeAddress || "", normalizedContactEmail, isEditing ? editId : null);
+      if (hasDuplicate) {
+        throw new Error("A listing with the same location and advertiser email already exists.");
+      }
 
       // Upload docs
       for (const doc of filledDocs) {
@@ -419,34 +421,36 @@ const VenueRegistration = () => {
       }
 
       if (isEditing) {
-        const { error } = await supabase.from("ad_spaces").update({ ...venueData, ...ownershipFields }).eq("id", editId!).eq("publisher_id", publisherId);
+        const emailChanged = normalizedContactEmail !== originalContactEmail;
+        const updatePayload: any = { ...venueData };
+
+        if (emailChanged && normalizedContactEmail) {
+          updatePayload.advertiser_id = null;
+          updatePayload.pending_advertiser_email = normalizedContactEmail;
+        }
+
+        const { error } = await supabase.from("ad_spaces").update(updatePayload).eq("id", editId!).eq("publisher_id", publisherId);
         if (error) throw error;
+
+        if (emailChanged && normalizedContactEmail) {
+          await requestOwnershipWorkflow(editId!, normalizedContactEmail);
+        }
+
+        setOriginalContactEmail(normalizedContactEmail);
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
-        // Check for duplicate listing by title + location before inserting
-        const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
-        const { data: existing } = await supabase
-          .from("ad_spaces")
-          .select("id")
-          .eq("title", title.trim())
-          .eq("location", headOfficeAddress || "")
-          .maybeSingle();
-
-        if (existing) {
-          // Listing already exists — link publisher, don't duplicate
-          toast({ title: "Listing already exists", description: "This location is already listed. It has been linked to your account." });
-          setShowConfirmation(true);
-          window.scrollTo(0, 0);
-          return;
-        }
-
         const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert([{
           ...venueData,
-          ...ownershipFields,
+          advertiser_id: null,
+          pending_advertiser_email: normalizedContactEmail || null,
           approval_status: "pending" as const,
         }]).select("id").single();
         if (insertError) throw insertError;
+
+        if (normalizedContactEmail) {
+          await requestOwnershipWorkflow(insertedData.id, normalizedContactEmail);
+        }
 
         // Save additional locations as franchise branches
         if (insertedData && additionalLocations.length > 0) {
