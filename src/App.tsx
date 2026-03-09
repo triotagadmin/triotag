@@ -108,6 +108,7 @@ const App = () => (
           <Route path="/order-prints" element={<OrderPrints />} />
           <Route path="/venue" element={<VenueDashboard />} />
           <Route path="/venue-publishers" element={<VenueDashboard />} />
+          <Route path="/venue-publishers/:listingId/branches" element={<ManageBranches />} />
           <Route path="/venue-info" element={<Venue />} />
           <Route path="/venue/register" element={<VenueRegistration />} />
           <Route path="/venue/verify" element={<VenueVerification />} />
