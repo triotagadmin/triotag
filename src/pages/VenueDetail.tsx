@@ -64,6 +64,7 @@ const VenueDetail = () => {
       if (session?.user) {
         const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
         setIsAdmin(roleData?.role === "admin");
+        setIsAdvertiser(roleData?.role === "advertiser");
       }
     };
     checkAuth();
