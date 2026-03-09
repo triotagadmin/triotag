@@ -36,6 +36,9 @@ interface VenueDetails {
   approval_status: string;
   specifications: any;
   publisher_id: string;
+  advertiser_id: string | null;
+  leased_advertiser_ids: string[];
+  pending_advertiser_email: string | null;
   publisher_profiles: {
     user_id: string;
     business_name: string;
