@@ -250,10 +250,6 @@ const AdvertiserDashboard = () => {
           {user && <AdvertiserBranchManager userId={user.id} associatedListings={associatedListings.map(l => ({ id: l.id, title: l.title }))} />}
         </div>
 
-        {/* Print Orders Section */}
-        <div className="mb-12">
-          {user && <AdvertiserPrintOrdersList userId={user.id} />}
-        </div>
 
         {/* My Bookings Section */}
         <div className="mb-12">
