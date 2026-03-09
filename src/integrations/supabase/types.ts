@@ -283,6 +283,7 @@ export type Database = {
           full_address: string
           id: string
           latitude: number | null
+          listing_id: string | null
           longitude: number | null
           updated_at: string
         }
@@ -296,6 +297,7 @@ export type Database = {
           full_address: string
           id?: string
           latitude?: number | null
+          listing_id?: string | null
           longitude?: number | null
           updated_at?: string
         }
@@ -309,10 +311,19 @@ export type Database = {
           full_address?: string
           id?: string
           latitude?: number | null
+          listing_id?: string | null
           longitude?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "advertiser_branches_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       advertiser_print_orders: {
         Row: {
