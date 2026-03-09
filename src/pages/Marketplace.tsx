@@ -133,7 +133,7 @@ const Marketplace = () => {
           description: item.description || "",
           location: item.location || "Not specified",
           type: item.category === "agent" ? item.service_type || "Agent Service" : VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue",
-          adUnits: adUnitLabels.length > 0 ? adUnitLabels : item.category === "agent" ? [item.service_type || "Service"] : ["No ad units specified"],
+          adUnits: combinedAdUnits.length > 0 ? combinedAdUnits : item.category === "agent" ? [item.service_type || "Service"] : ["No ad units specified"],
           image: Array.isArray(parsedMediaUrls) ? parsedMediaUrls[0] : undefined,
           ownerName: item.publisher_business_name || (item.category === "agent" ? "Agent" : "Venue"),
           createdAt: item.created_at || "",
