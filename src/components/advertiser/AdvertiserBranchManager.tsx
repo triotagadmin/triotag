@@ -30,12 +30,10 @@ interface AdvertiserBranchManagerProps {
 }
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: typeof Clock }> = {
-  pending_review: { label: "Pending Review", variant: "secondary", icon: Clock },
-  approved: { label: "Approved", variant: "default", icon: CheckCircle },
+  pending_admin: { label: "Pending Review", variant: "secondary", icon: Clock },
   in_production: { label: "In Production", variant: "default", icon: Printer },
   shipped: { label: "Shipped", variant: "default", icon: Package },
-  completed: { label: "Completed", variant: "default", icon: CheckCircle },
-  rejected: { label: "Rejected", variant: "destructive", icon: Clock },
+  delivered: { label: "Delivered", variant: "default", icon: CheckCircle },
 };
 
 export const AdvertiserBranchManager = ({ userId }: AdvertiserBranchManagerProps) => {
