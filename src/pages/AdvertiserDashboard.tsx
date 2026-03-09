@@ -389,6 +389,28 @@ const AdvertiserDashboard = () => {
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <ShoppingCart className="h-6 w-6" />
             My Bookings
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="About My Bookings"
+                  className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted text-muted-foreground hover:bg-muted/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 text-sm" side="bottom" align="start">
+                <div className="space-y-2">
+                  <p className="font-medium">About My Bookings</p>
+                  <p className="text-muted-foreground">
+                    View and manage your ad space bookings. Each booking represents a confirmed reservation of an ad space location.
+                  </p>
+                  <p className="text-muted-foreground">
+                    Track booking status, view details, and browse available ad spaces to create new bookings.
+                  </p>
+                </div>
+              </PopoverContent>
+            </Popover>
           </h3>
           <Card>
             <CardContent className="pt-6">
