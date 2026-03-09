@@ -146,6 +146,7 @@ export type Database = {
       ad_spaces: {
         Row: {
           activation_fee: number | null
+          advertiser_id: string | null
           annual_subscription_fee: number | null
           approval_status: Database["public"]["Enums"]["approval_status"]
           approved_at: string | null
@@ -159,6 +160,7 @@ export type Database = {
           longitude: number | null
           media_urls: Json | null
           monthly_subscription_fee: number | null
+          pending_advertiser_email: string | null
           pricing: Json | null
           publisher_id: string
           rejection_reason: string | null
@@ -168,6 +170,7 @@ export type Database = {
         }
         Insert: {
           activation_fee?: number | null
+          advertiser_id?: string | null
           annual_subscription_fee?: number | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
@@ -181,6 +184,7 @@ export type Database = {
           longitude?: number | null
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
+          pending_advertiser_email?: string | null
           pricing?: Json | null
           publisher_id: string
           rejection_reason?: string | null
@@ -190,6 +194,7 @@ export type Database = {
         }
         Update: {
           activation_fee?: number | null
+          advertiser_id?: string | null
           annual_subscription_fee?: number | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
@@ -203,6 +208,7 @@ export type Database = {
           longitude?: number | null
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
+          pending_advertiser_email?: string | null
           pricing?: Json | null
           publisher_id?: string
           rejection_reason?: string | null
