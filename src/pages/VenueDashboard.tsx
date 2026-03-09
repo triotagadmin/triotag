@@ -14,6 +14,7 @@ import { BillingInvoices } from "@/components/publisher/BillingInvoices";
 import { MessagesCard } from "@/components/publisher/MessagesCard";
 import { Separator } from "@/components/ui/separator";
 import { BranchListingCard } from "@/components/franchise/BranchListingCard";
+import { AdvertiserBranchesReadOnly } from "@/components/publisher/AdvertiserBranchesReadOnly";
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const {
@@ -290,6 +291,9 @@ const VenueDashboard = () => {
             <>
               <Separator className="my-8" />
               <BranchListingCard adSpaces={adSpaces.map((s) => ({ id: s.id, title: s.title, additionalLocations: (s.specifications as any)?.additional_locations || [] }))} />
+              <div className="mt-6">
+                <AdvertiserBranchesReadOnly listingIds={adSpaces.map((s) => s.id)} />
+              </div>
             </>
           )}
 
