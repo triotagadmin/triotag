@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, ShoppingCart, Search, Mail, Receipt, Settings, Plus, MapPin, Globe, Users, TrendingUp, Calendar, Printer, Ticket, Building2 } from "lucide-react";
+import { BarChart3, ShoppingCart, Search, Mail, Receipt, Settings, Plus, MapPin, Globe, Users, TrendingUp, Calendar, Printer, Ticket, Building2, Key } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { format } from "date-fns";
 import { AdvertiserBranchManager } from "@/components/advertiser/AdvertiserBranchManager";
@@ -20,7 +20,8 @@ const AdvertiserDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState<any[]>([]);
-  const [associatedListings, setAssociatedListings] = useState<any[]>([]);
+  const [ownedListings, setOwnedListings] = useState<any[]>([]);
+  const [leasedListings, setLeasedListings] = useState<any[]>([]);
   const [bookingPage, setBookingPage] = useState(0);
   const BOOKINGS_PER_PAGE = 3;
   useEffect(() => {
@@ -55,12 +56,20 @@ const AdvertiserDashboard = () => {
       if (activations) setBookings(activations);
 
       // Fetch listings owned by this advertiser (advertiser_id = user_id)
-      const { data: listings } = await supabase
+      const { data: owned } = await supabase
         .from("ad_spaces")
-        .select("id, title, location, approval_status, specifications, created_at")
+        .select("id, title, location, approval_status, specifications, created_at, leased_advertiser_ids")
         .eq("advertiser_id", session.user.id)
         .order("created_at", { ascending: false });
-      if (listings) setAssociatedListings(listings);
+      if (owned) setOwnedListings(owned);
+
+      // Fetch listings leased by this advertiser
+      const { data: leased } = await supabase
+        .from("ad_spaces")
+        .select("id, title, location, approval_status, specifications, created_at")
+        .contains("leased_advertiser_ids", [session.user.id])
+        .order("created_at", { ascending: false });
+      if (leased) setLeasedListings(leased);
     };
     checkUser();
     const {
@@ -242,7 +251,7 @@ const AdvertiserDashboard = () => {
           </Card>
         </div>
 
-        {/* Associated Listings Section */}
+        {/* Owned Listings Section */}
         <div className="mb-12">
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Building2 className="h-6 w-6" />
@@ -250,7 +259,7 @@ const AdvertiserDashboard = () => {
           </h3>
           <Card>
             <CardContent className="pt-6">
-              {associatedListings.length === 0 ? (
+              {ownedListings.length === 0 ? (
                 <div className="text-center py-12">
                   <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-2">No listings associated with your account yet</p>
@@ -258,14 +267,24 @@ const AdvertiserDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {associatedListings.map((listing) => (
+                  {ownedListings.map((listing) => (
                     <div key={listing.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
                       <div className="space-y-1 min-w-0 flex-1">
-                        <p className="font-medium">{listing.title}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{listing.title}</p>
+                          <Badge variant="outline" className="text-xs gap-1">
+                            <Building2 className="h-3 w-3" /> Owned
+                          </Badge>
+                        </div>
                         <p className="text-sm text-muted-foreground flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {listing.location || "—"}
                         </p>
+                        {(listing.leased_advertiser_ids as string[] || []).length > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            {(listing.leased_advertiser_ids as string[]).length} advertiser{(listing.leased_advertiser_ids as string[]).length !== 1 ? "s" : ""} leasing
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <Badge variant={listing.approval_status === "approved" ? "default" : "secondary"}>
@@ -286,9 +305,49 @@ const AdvertiserDashboard = () => {
           </Card>
         </div>
 
-        {/* Branch Management Section */}
+        {/* Leased Listings Section */}
+        {leasedListings.length > 0 && (
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <Key className="h-6 w-6" />
+              Leased Ad Spaces
+            </h3>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  {leasedListings.map((listing) => (
+                    <div key={listing.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{listing.title}</p>
+                          <Badge variant="secondary" className="text-xs gap-1">
+                            <Key className="h-3 w-3" /> Leased
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {listing.location || "—"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/venue/${listing.id}`)}>
+                          View
+                        </Button>
+                        <Button size="sm" onClick={() => navigate(`/activate/${listing.id}`)}>
+                          Activate
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Print Orders Section */}
         <div className="mb-12">
-          {user && <AdvertiserBranchManager userId={user.id} associatedListings={associatedListings.map(l => ({ id: l.id, title: l.title }))} />}
+          {user && <AdvertiserBranchManager userId={user.id} associatedListings={[...ownedListings, ...leasedListings].map(l => ({ id: l.id, title: l.title }))} />}
         </div>
 
 

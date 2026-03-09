@@ -156,6 +156,7 @@ export type Database = {
           description: string | null
           id: string
           latitude: number | null
+          leased_advertiser_ids: string[]
           location: string | null
           longitude: number | null
           media_urls: Json | null
@@ -180,6 +181,7 @@ export type Database = {
           description?: string | null
           id?: string
           latitude?: number | null
+          leased_advertiser_ids?: string[]
           location?: string | null
           longitude?: number | null
           media_urls?: Json | null
@@ -204,6 +206,7 @@ export type Database = {
           description?: string | null
           id?: string
           latitude?: number | null
+          leased_advertiser_ids?: string[]
           location?: string | null
           longitude?: number | null
           media_urls?: Json | null

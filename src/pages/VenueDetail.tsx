@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { ArrowLeft, MapPin, DollarSign, Clock, Phone, Lock, Building, Eye } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Clock, Phone, Lock, Building, Eye, Key, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { User } from "@supabase/supabase-js";
@@ -36,6 +36,9 @@ interface VenueDetails {
   approval_status: string;
   specifications: any;
   publisher_id: string;
+  advertiser_id: string | null;
+  leased_advertiser_ids: string[];
+  pending_advertiser_email: string | null;
   publisher_profiles: {
     user_id: string;
     business_name: string;
@@ -48,7 +51,9 @@ const VenueDetail = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdvertiser, setIsAdvertiser] = useState(false);
   const [branchCount, setBranchCount] = useState(0);
+  const [leasing, setLeasing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -59,6 +64,7 @@ const VenueDetail = () => {
       if (session?.user) {
         const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
         setIsAdmin(roleData?.role === "admin");
+        setIsAdvertiser(roleData?.role === "advertiser");
       }
     };
     checkAuth();
@@ -291,10 +297,56 @@ const VenueDetail = () => {
                     <span>Ready to advertise here? Activate this micro OOH ad space now!</span>
                   </div>}
 
-                <Button className="w-full mt-4" onClick={() => navigate(`/activate/${venue.id}`)}>
-                  <Lock className="h-4 w-4 mr-2" />
-                  Activate
-                </Button>
+                {/* Lease / Activate buttons */}
+                {(() => {
+                  const isOwner = venue.advertiser_id === user?.id;
+                  const isLeased = user?.id ? (venue.leased_advertiser_ids || []).includes(user.id) : false;
+                  const canLease = isAdvertiser && user && !isOwner && !isLeased && !venue.pending_advertiser_email;
+
+                  return (
+                    <>
+                      {canLease && (
+                        <Button
+                          className="w-full mt-2"
+                          variant="outline"
+                          disabled={leasing}
+                          onClick={async () => {
+                            if (!user) return;
+                            setLeasing(true);
+                            try {
+                              const currentIds = venue.leased_advertiser_ids || [];
+                              if (currentIds.includes(user.id)) {
+                                toast({ title: "Already leased", description: "You are already leasing this listing." });
+                                return;
+                              }
+                              const { error } = await supabase
+                                .from("ad_spaces")
+                                .update({ leased_advertiser_ids: [...currentIds, user.id] } as any)
+                                .eq("id", venue.id);
+                              if (error) throw error;
+                              toast({ title: "Listing Leased!", description: "This listing now appears on your dashboard for campaigns and print orders." });
+                              fetchVenueDetails();
+                            } catch (err: any) {
+                              toast({ title: "Error", description: err.message, variant: "destructive" });
+                            } finally { setLeasing(false); }
+                          }}
+                        >
+                          {leasing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Key className="h-4 w-4 mr-2" />}
+                          Lease this Listing
+                        </Button>
+                      )}
+                      {isLeased && (
+                        <Badge variant="secondary" className="w-full justify-center py-1.5 gap-1">
+                          <Key className="h-3 w-3" /> You are leasing this listing
+                        </Badge>
+                      )}
+                      <Button className="w-full mt-2" onClick={() => navigate(`/activate/${venue.id}`)}>
+                        <Lock className="h-4 w-4 mr-2" />
+                        Activate
+                      </Button>
+                    </>
+                  );
+                })()}
                 <div className="mt-3">
                   <ShareButtons url={ogShareUrl} title={venue.title} description={venue.description} />
                 </div>
