@@ -91,11 +91,6 @@ export const Navigation = () => {
                 <Link to="/explore" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
                 </Link>
-                {showServices && (
-                  <Link to="/services" onClick={closeMobileMenu}>
-                    <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
-                  </Link>
-                )}
                 <Link to="/habit-tracker" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
                 </Link>
