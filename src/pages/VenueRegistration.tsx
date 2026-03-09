@@ -344,19 +344,53 @@ const VenueRegistration = () => {
     };
   };
 
-  const resolveAdvertiserId = async (email: string): Promise<{ advertiser_id?: string; pending_advertiser_email?: string }> => {
-    // Look up if an advertiser account exists with this contact email
-    const { data: advProfile } = await supabase
-      .from("advertiser_profiles")
-      .select("user_id")
-      .eq("contact_email", email.trim())
-      .maybeSingle();
+  const normalizeEmail = (value: string) => value.trim().toLowerCase();
 
-    if (advProfile?.user_id) {
-      return { advertiser_id: advProfile.user_id };
+  const checkDuplicateListing = async (locationValue: string, emailValue: string, excludeId?: string | null) => {
+    const normalizedEmail = normalizeEmail(emailValue);
+    let query = supabase
+      .from("ad_spaces")
+      .select("id")
+      .eq("publisher_id", publisherId)
+      .eq("location", locationValue)
+      .ilike("specifications->>contact_email", normalizedEmail);
+
+    if (excludeId) {
+      query = query.neq("id", excludeId);
     }
-    // No advertiser account yet — store as pending
-    return { pending_advertiser_email: email.trim() };
+
+    const { data } = await query.limit(1).maybeSingle();
+    return Boolean(data);
+  };
+
+  const requestOwnershipWorkflow = async (listingId: string, emailValue: string) => {
+    const normalizedEmail = normalizeEmail(emailValue);
+    if (!normalizedEmail) return;
+
+    setSendingVerification(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("request-listing-ownership", {
+        body: { listingId, email: normalizedEmail },
+      });
+
+      if (error) throw error;
+
+      const workflowType = (data?.workflowType === "verification" ? "verification" : "registration") as "verification" | "registration";
+      setOwnershipWorkflow(workflowType);
+      setAdvertiserLinked(false);
+      setPendingAdvertiserEmail(normalizedEmail);
+      setVerificationSent(true);
+
+      toast({
+        title: workflowType === "verification" ? "Verification requested" : "Registration invite sent",
+        description:
+          workflowType === "verification"
+            ? `Verification email sent to ${normalizedEmail}. Ownership will link after confirmation.`
+            : `Invite sent to ${normalizedEmail}. Ownership links automatically after advertiser signup and verification.`,
+      });
+    } finally {
+      setSendingVerification(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
