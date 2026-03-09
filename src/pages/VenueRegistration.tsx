@@ -348,8 +348,24 @@ const VenueRegistration = () => {
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
-        const { error: insertError } = await supabase.from("ad_spaces").insert([{ ...venueData, approval_status: "pending" as const }]);
+        const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert([{ ...venueData, approval_status: "pending" as const }]).select("id").single();
         if (insertError) throw insertError;
+
+        // Save additional locations as franchise branches
+        if (insertedData && additionalLocations.length > 0) {
+          const branchRows = additionalLocations
+            .filter(loc => loc.address.trim())
+            .map(loc => ({
+              franchise_id: insertedData.id,
+              place_name: loc.city.trim() || loc.address.trim(),
+              full_address: [loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", "),
+            }));
+          if (branchRows.length > 0) {
+            const { error: branchError } = await supabase.from("franchise_branches").insert(branchRows);
+            if (branchError) console.error("Branch save error:", branchError);
+          }
+        }
+
         setShowConfirmation(true);
         window.scrollTo(0, 0);
       }
@@ -480,11 +496,12 @@ const VenueRegistration = () => {
                   </CardContent>
                 </Card>
 
-                {/* Additional Locations */}
+                {/* Additional Locations - only during initial registration */}
+                {!isEditing && (
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center gap-2"><Plus className="h-5 w-5 text-primary" /> Additional Ad Space Locations</CardTitle>
-                    <p className="text-xs text-muted-foreground">If your organization manages multiple locations, you can add them here. Each location will be listed as a separate ad space under your publisher account.</p>
+                    <CardTitle className="text-lg flex items-center gap-2"><Plus className="h-5 w-5 text-primary" /> Branch Locations</CardTitle>
+                    <p className="text-xs text-muted-foreground">Add branch locations for this listing. Each branch will be saved and manageable from your dashboard after registration.</p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {additionalLocations.map((loc) => (
@@ -508,9 +525,10 @@ const VenueRegistration = () => {
                     <Button type="button" variant="outline" className="w-full" onClick={addLocation}>
                       <Plus className="h-4 w-4 mr-2" /> Add Another Location
                     </Button>
-                    <p className="text-xs text-muted-foreground">You can add multiple locations such as different café branches, library locations, or retail outlets.</p>
+                    <p className="text-xs text-muted-foreground">You can add multiple locations such as different café branches, library locations, or retail outlets. After registration, manage branches from your dashboard.</p>
                   </CardContent>
                 </Card>
+                )}
 
                 {/* Ad Unit Materials */}
                 <Card className="rounded-[20px]">
