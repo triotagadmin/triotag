@@ -4,11 +4,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Building, Search, ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Building, Search, ChevronRight, MapPin } from "lucide-react";
+
+interface AdditionalLocation {
+  address: string;
+  city: string;
+  province: string;
+  postalCode: string;
+}
 
 interface AdSpaceListing {
   id: string;
   title: string;
+  additionalLocations?: AdditionalLocation[];
 }
 
 interface BranchListingCardProps {
@@ -77,31 +86,56 @@ export const BranchListingCard = ({ adSpaces }: BranchListingCardProps) => {
           <div className="space-y-3">
             {filtered.map((space) => {
               const count = branchCounts[space.id] ?? 0;
+              const locations = space.additionalLocations || [];
               return (
                 <div
                   key={space.id}
-                  className="glass rounded-[14px] p-4 flex items-center justify-between gap-4 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)] cursor-pointer"
-                  onClick={() =>
-                    navigate(`/venue-publishers/${space.id}/branches`)
-                  }
+                  className="glass rounded-[14px] p-4 space-y-3 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
                 >
-                  <div className="min-w-0">
-                    <p className="font-semibold truncate">{space.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {count} branch{count !== 1 ? "es" : ""} registered
-                    </p>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate">{space.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {count} branch{count !== 1 ? "es" : ""} registered
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() =>
+                        navigate(`/venue-publishers/${space.id}/branches`)
+                      }
+                    >
+                      Manage Branches
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
                   </div>
-                  <Button
-                    size="sm"
-                    className="shrink-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/venue-publishers/${space.id}/branches`);
-                    }}
-                  >
-                    Manage Branches
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
+
+                  {/* Additional Locations from Registration */}
+                  {locations.length > 0 && (
+                    <div className="border-t border-border/40 pt-3 space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        Registered Locations ({locations.length})
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {locations.map((loc, idx) => {
+                          const label = [loc.address, loc.city, loc.province]
+                            .filter(Boolean)
+                            .join(", ");
+                          return (
+                            <Badge
+                              key={idx}
+                              variant="secondary"
+                              className="text-xs font-normal"
+                            >
+                              {label || `Location ${idx + 1}`}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
