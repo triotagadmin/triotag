@@ -197,7 +197,9 @@ const VenueRegistration = () => {
       setIndustryCategory(specs.industry_category || "");
       setOperatingHours(specs.operating_hours || "");
       setContactPerson(specs.contact_person || "");
-      setContactEmail(specs.contact_email || "");
+      const loadedContactEmail = specs.contact_email || "";
+      setContactEmail(loadedContactEmail);
+      setOriginalContactEmail(loadedContactEmail.trim().toLowerCase());
       setContactPhone(specs.contact_number || "");
       setSelectedMaterials(specs.ad_unit_materials || []);
       setWeeklyLeasePrice(specs.weekly_lease_price?.toString() || "");
