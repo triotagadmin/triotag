@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight, Upload, X, CheckCircle, AlertCircle, Building2, Megaphone, Loader2, Plus, Trash2, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, X, CheckCircle, AlertCircle, Building2, Megaphone, Loader2, Plus, Trash2, MapPin, Clock, Mail } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface DocumentUploadState {
@@ -147,6 +148,12 @@ const VenueRegistration = () => {
     exactLocationNotes: "", visibility: "",
   });
 
+  // Advertiser linking status
+  const [advertiserLinked, setAdvertiserLinked] = useState(false);
+  const [pendingAdvertiserEmail, setPendingAdvertiserEmail] = useState<string | null>(null);
+  const [sendingVerification, setSendingVerification] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+
   const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([
     { type: "business_license", label: "Business/Venue License", description: "Official business registration or venue operating license", file: null, uploaded: false },
     { type: "government_id", label: "Government-Issued ID", description: "Valid ID of business owner (passport, driver's license, national ID)", file: null, uploaded: false },
@@ -205,6 +212,15 @@ const VenueRegistration = () => {
 
       if (specs.environment_details) {
         setEnvDetails({ ...envDetails, ...specs.environment_details });
+      }
+
+      // Track advertiser linking status
+      if (venue.advertiser_id) {
+        setAdvertiserLinked(true);
+        setPendingAdvertiserEmail(null);
+      } else if (venue.pending_advertiser_email) {
+        setAdvertiserLinked(false);
+        setPendingAdvertiserEmail(venue.pending_advertiser_email);
       }
 
       const { data: existingDocs } = await supabase.from("verification_documents").select("*").eq("publisher_id", pubId);
@@ -635,7 +651,48 @@ const VenueRegistration = () => {
                   <CardContent className="space-y-4">
                     <div><Label>Contact Person *</Label><Input value={contactPerson} onChange={e => setContactPerson(e.target.value)} placeholder="Full name" required /></div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div><Label>Contact Email *</Label><Input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} required /></div>
+                      <div>
+                        <Label>Contact Email *</Label>
+                        <Input type="email" value={contactEmail} onChange={e => { setContactEmail(e.target.value); setVerificationSent(false); }} required />
+                        {isEditing && contactEmail.trim() && (
+                          advertiserLinked ? (
+                            <div className="flex items-center gap-1.5 mt-1.5">
+                              <CheckCircle className="h-3.5 w-3.5 text-primary" />
+                              <span className="text-xs text-primary font-medium">Advertiser Linked</span>
+                            </div>
+                          ) : (pendingAdvertiserEmail || !advertiserLinked) && (
+                            <div className="mt-2 space-y-2">
+                              <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
+                                <Clock className="h-3 w-3" />
+                                Pending Advertiser Registration
+                              </Badge>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="w-full gap-1.5 text-xs"
+                                disabled={sendingVerification || verificationSent}
+                                onClick={async () => {
+                                  setSendingVerification(true);
+                                  try {
+                                    const { error } = await supabase.functions.invoke("send-verification-email", {
+                                      body: { email: contactEmail.trim(), userId: editId, userType: "advertiser" },
+                                    });
+                                    if (error) throw error;
+                                    setVerificationSent(true);
+                                    toast({ title: "Verification Sent", description: `Registration invite sent to ${contactEmail}` });
+                                  } catch (err: any) {
+                                    toast({ title: "Error", description: err.message || "Failed to send verification", variant: "destructive" });
+                                  } finally { setSendingVerification(false); }
+                                }}
+                              >
+                                {sendingVerification ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
+                                {verificationSent ? "Verification Sent" : "Send Registration Invite"}
+                              </Button>
+                            </div>
+                          )
+                        )}
+                      </div>
                       <div><Label>Contact Number *</Label><Input value={contactPhone} onChange={e => setContactPhone(e.target.value)} placeholder="+1 234 567 8900" required /></div>
                     </div>
                   </CardContent>
