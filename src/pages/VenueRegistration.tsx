@@ -651,7 +651,48 @@ const VenueRegistration = () => {
                   <CardContent className="space-y-4">
                     <div><Label>Contact Person *</Label><Input value={contactPerson} onChange={e => setContactPerson(e.target.value)} placeholder="Full name" required /></div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div><Label>Contact Email *</Label><Input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} required /></div>
+                      <div>
+                        <Label>Contact Email *</Label>
+                        <Input type="email" value={contactEmail} onChange={e => { setContactEmail(e.target.value); setVerificationSent(false); }} required />
+                        {isEditing && contactEmail.trim() && (
+                          advertiserLinked ? (
+                            <div className="flex items-center gap-1.5 mt-1.5">
+                              <CheckCircle className="h-3.5 w-3.5 text-primary" />
+                              <span className="text-xs text-primary font-medium">Advertiser Linked</span>
+                            </div>
+                          ) : (pendingAdvertiserEmail || !advertiserLinked) && (
+                            <div className="mt-2 space-y-2">
+                              <Badge variant="outline" className="gap-1 border-amber-500/40 text-amber-400 bg-amber-500/10">
+                                <Clock className="h-3 w-3" />
+                                Pending Advertiser Registration
+                              </Badge>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="w-full gap-1.5 text-xs"
+                                disabled={sendingVerification || verificationSent}
+                                onClick={async () => {
+                                  setSendingVerification(true);
+                                  try {
+                                    const { error } = await supabase.functions.invoke("send-verification-email", {
+                                      body: { email: contactEmail.trim(), userId: editId, userType: "advertiser" },
+                                    });
+                                    if (error) throw error;
+                                    setVerificationSent(true);
+                                    toast({ title: "Verification Sent", description: `Registration invite sent to ${contactEmail}` });
+                                  } catch (err: any) {
+                                    toast({ title: "Error", description: err.message || "Failed to send verification", variant: "destructive" });
+                                  } finally { setSendingVerification(false); }
+                                }}
+                              >
+                                {sendingVerification ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
+                                {verificationSent ? "Verification Sent" : "Send Registration Invite"}
+                              </Button>
+                            </div>
+                          )
+                        )}
+                      </div>
                       <div><Label>Contact Number *</Label><Input value={contactPhone} onChange={e => setContactPhone(e.target.value)} placeholder="+1 234 567 8900" required /></div>
                     </div>
                   </CardContent>
