@@ -348,8 +348,24 @@ const VenueRegistration = () => {
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
-        const { error: insertError } = await supabase.from("ad_spaces").insert([{ ...venueData, approval_status: "pending" as const }]);
+        const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert([{ ...venueData, approval_status: "pending" as const }]).select("id").single();
         if (insertError) throw insertError;
+
+        // Save additional locations as franchise branches
+        if (insertedData && additionalLocations.length > 0) {
+          const branchRows = additionalLocations
+            .filter(loc => loc.address.trim())
+            .map(loc => ({
+              franchise_id: insertedData.id,
+              place_name: loc.city.trim() || loc.address.trim(),
+              full_address: [loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", "),
+            }));
+          if (branchRows.length > 0) {
+            const { error: branchError } = await supabase.from("franchise_branches").insert(branchRows);
+            if (branchError) console.error("Branch save error:", branchError);
+          }
+        }
+
         setShowConfirmation(true);
         window.scrollTo(0, 0);
       }
