@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { ArrowLeft, MapPin, DollarSign, Clock, Phone, Lock, Building, Eye } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Clock, Phone, Lock, Building, Eye, Key, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { User } from "@supabase/supabase-js";
