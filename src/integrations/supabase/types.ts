@@ -2003,6 +2003,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_advertiser_for_listing: {
+        Args: { _ad_space_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_verified_admin: { Args: { _user_id: string }; Returns: boolean }
       search_nearby_listings: {
         Args: { radius_km?: number; user_lat: number; user_lng: number }

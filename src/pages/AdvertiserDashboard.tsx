@@ -249,12 +249,12 @@ const AdvertiserDashboard = () => {
 
         {/* Branch Management Section */}
         <div className="mb-12">
-          {user && <AdvertiserBranchManager userId={user.id} />}
+          {user && <AdvertiserBranchManager userId={user.id} associatedListingIds={associatedListings.map(l => l.id)} />}
         </div>
 
         {/* Print Orders Section */}
         <div className="mb-12 grid md:grid-cols-2 gap-6">
-          {user && <AdvertiserPrintOrderForm userId={user.id} />}
+          {user && <AdvertiserPrintOrderForm userId={user.id} associatedListingIds={associatedListings.map(l => l.id)} />}
           {user && <AdvertiserPrintOrdersList userId={user.id} />}
         </div>
 
