@@ -1996,6 +1996,14 @@ export type Database = {
       }
     }
     Functions: {
+      check_cross_branch_duplicate: {
+        Args: { _full_address: string; _user_id: string }
+        Returns: {
+          branch_id: string
+          exists_in: string
+          listing_title: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2033,6 +2041,30 @@ export type Database = {
       set_own_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: undefined
+      }
+      upsert_advertiser_branch: {
+        Args: {
+          _advertiser_id: string
+          _branch_name?: string
+          _contact_email?: string
+          _contact_name?: string
+          _contact_phone?: string
+          _full_address: string
+        }
+        Returns: string
+      }
+      upsert_franchise_branch: {
+        Args: {
+          _ad_unit_quantity?: number
+          _branch_operating_hours?: string
+          _franchise_id: string
+          _full_address: string
+          _latitude?: number
+          _longitude?: number
+          _notes?: string
+          _place_name: string
+        }
+        Returns: string
       }
       validate_publisher_ticket: {
         Args: {
