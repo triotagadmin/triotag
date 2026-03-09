@@ -203,6 +203,50 @@ const AdvertiserDashboard = () => {
           </div>
         </div>
 
+        {/* Associated Listings Section */}
+        <div className="mb-12">
+          <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Building2 className="h-6 w-6" />
+            My Listings
+          </h3>
+          <Card>
+            <CardContent className="pt-6">
+              {associatedListings.length === 0 ? (
+                <div className="text-center py-12">
+                  <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground mb-2">No listings associated with your account yet</p>
+                  <p className="text-sm text-muted-foreground">When a publisher adds your email to a listing, it will appear here.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {associatedListings.map((listing) => (
+                    <div key={listing.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <p className="font-medium">{listing.title}</p>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {listing.location || "—"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant={listing.approval_status === "approved" ? "default" : "secondary"}>
+                          {listing.approval_status}
+                        </Badge>
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/venue/${listing.id}`)}>
+                          View
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/venue/${listing.id}/branches`)}>
+                          Branches
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Branch Management Section */}
         <div className="mb-12">
           {user && <AdvertiserBranchManager userId={user.id} />}
