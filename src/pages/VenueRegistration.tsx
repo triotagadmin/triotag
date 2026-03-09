@@ -148,6 +148,12 @@ const VenueRegistration = () => {
     exactLocationNotes: "", visibility: "",
   });
 
+  // Advertiser linking status
+  const [advertiserLinked, setAdvertiserLinked] = useState(false);
+  const [pendingAdvertiserEmail, setPendingAdvertiserEmail] = useState<string | null>(null);
+  const [sendingVerification, setSendingVerification] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+
   const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([
     { type: "business_license", label: "Business/Venue License", description: "Official business registration or venue operating license", file: null, uploaded: false },
     { type: "government_id", label: "Government-Issued ID", description: "Valid ID of business owner (passport, driver's license, national ID)", file: null, uploaded: false },
