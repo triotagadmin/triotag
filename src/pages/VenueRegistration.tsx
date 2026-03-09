@@ -317,7 +317,7 @@ const VenueRegistration = () => {
         monthly_lease_price: monthlyLeasePrice ? parseFloat(monthlyLeasePrice) : null,
         lease_currency: leaseCurrency,
         environment_details: envJson,
-      } as Record<string, unknown>,
+      } as any,
       media_urls: uploadedImages,
     };
   };
