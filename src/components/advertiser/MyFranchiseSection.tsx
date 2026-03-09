@@ -46,7 +46,7 @@ export const MyFranchiseSection = ({ userId }: MyFranchiseSectionProps) => {
       .order("created_at", { ascending: false });
 
     if (error) console.error("Error fetching private locations:", error);
-    else setLocations((data as PrivateLocation[]) || []);
+    else setLocations((data as unknown as PrivateLocation[]) || []);
     setLoading(false);
   };
 
