@@ -98,7 +98,7 @@ const VISIBILITY_OPTIONS = [
   "Excellent (unobstructed)", "Good (minor obstructions)", "Moderate (partial visibility)", "Limited",
 ];
 
-const DEFAULT_DESCRIPTION = "Advertise across multiple locations of this brand. Tiny Sticky Ads connects advertisers with high-traffic ad spaces where small-format ads such as vinyl stickers, table tents, and acrylic displays can be placed inside the establishment.";
+const DEFAULT_DESCRIPTION = "";
 
 const VenueRegistration = () => {
   const navigate = useNavigate();
@@ -474,7 +474,7 @@ const VenueRegistration = () => {
                 {/* Description */}
                 <div>
                   <Label htmlFor="description">Brand Description *</Label>
-                  <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={4} className="rounded-[14px]" required />
+                  <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={4} className="rounded-[14px]" required placeholder="Describe your Brand" />
                 </div>
 
                 {/* Head Office Address */}
