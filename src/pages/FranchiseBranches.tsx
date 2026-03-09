@@ -97,7 +97,7 @@ const FranchiseBranches = () => {
             <CardContent className="py-12 text-center">
               <MapPin className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No branches listed yet</h3>
-              <p className="text-muted-foreground">Branch locations will be added by the managing agent.</p>
+              <p className="text-muted-foreground">Add branch locations from your dashboard or contact the managing agent.</p>
             </CardContent>
           </Card>
         ) : (
