@@ -155,6 +155,31 @@ export const MyFranchiseSection = ({ userId }: MyFranchiseSectionProps) => {
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Store className="h-5 w-5" />
                 My Franchise
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="About My Franchise"
+                      className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted text-muted-foreground hover:bg-muted/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Info className="h-3.5 w-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 text-sm" side="bottom" align="start">
+                    <div className="space-y-2">
+                      <p className="font-medium">About My Franchise</p>
+                      <p className="text-muted-foreground">
+                        My Franchise is your collection of private locations that are not listed in the ad space marketplace.
+                      </p>
+                      <p className="text-muted-foreground">
+                        You can add, edit, or remove locations here. These locations are for your internal use or print campaigns only.
+                      </p>
+                      <p className="text-muted-foreground">
+                        If you want, you can submit a private location to be listed in the marketplace for leasing.
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </CardTitle>
               <CardDescription>
                 Private locations not listed in the ad space marketplace
