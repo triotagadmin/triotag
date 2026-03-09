@@ -51,7 +51,9 @@ const VenueDetail = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdvertiser, setIsAdvertiser] = useState(false);
   const [branchCount, setBranchCount] = useState(0);
+  const [leasing, setLeasing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
