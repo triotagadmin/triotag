@@ -8,15 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import {
-  Plus,
-  MapPin,
-  Calendar,
-  Ticket,
-  QrCode,
-  Building2,
-  Clock,
-  DollarSign,
-  Package,
+  Plus, MapPin, Calendar, Ticket, QrCode, Building2, Clock, DollarSign, Package,
 } from "lucide-react";
 import { CreateVenueDialog } from "@/components/venue-ticketing/CreateVenueDialog";
 import { CreateEventDialog } from "@/components/venue-ticketing/CreateEventDialog";
@@ -58,88 +50,41 @@ const VenuePublisherDashboard = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [isVenuePublisher, setIsVenuePublisher] = useState(false);
 
-  useEffect(() => {
-    checkAuthAndFetch();
-  }, []);
+  useEffect(() => { checkAuthAndFetch(); }, []);
 
   const checkAuthAndFetch = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-      return;
-    }
+    if (!session) { navigate("/auth"); return; }
     setUserId(session.user.id);
     fetchData(session.user.id);
   };
 
   const fetchData = async (currentUserId: string) => {
     try {
-      // Get publisher profile type for this user
       const { data: publisherProfile } = await supabase
-        .from("publisher_profiles")
-        .select("id, publisher_type")
-        .eq("user_id", currentUserId)
-        .maybeSingle();
-
+        .from("publisher_profiles").select("id, publisher_type").eq("user_id", currentUserId).maybeSingle();
       setIsVenuePublisher(publisherProfile?.publisher_type === "venue");
 
-      // Fetch venues
       const { data: venuesData, error: venuesError } = await supabase
-        .from("venues")
-        .select("*")
-        .order("created_at", { ascending: false });
-
+        .from("venues").select("*").order("created_at", { ascending: false });
       if (venuesError) throw venuesError;
       setVenues(venuesData || []);
 
-      // Fetch events with venue info
       const { data: eventsData, error: eventsError } = await supabase
-        .from("venue_events")
-        .select(`
-          *,
-          venues (*)
-        `)
-        .order("event_date", { ascending: true });
-
+        .from("venue_events").select(`*, venues (*)`).order("event_date", { ascending: true });
       if (eventsError) throw eventsError;
       setEvents(eventsData || []);
     } catch (error: any) {
       console.error("Error fetching data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load data.",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "Failed to load data.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateVenue = () => {
-    setShowVenueDialog(true);
-  };
-
-  const handleCreateEvent = (venue: Venue) => {
-    setSelectedVenue(venue);
-    setShowEventDialog(true);
-  };
-
-  const handleGenerateTickets = (event: VenueEvent) => {
-    setSelectedEvent(event);
-    setShowTicketsDialog(true);
-  };
-
-  const handleViewTickets = (eventId: string) => {
-    navigate(`/venue-ticketing/event/${eventId}/tickets`);
-  };
-
-  const handleOpenScanner = (eventId: string) => {
-    navigate(`/venue-ticketing/scanner/${eventId}`);
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-muted/30">
+      <div className="min-h-screen">
         <Navigation />
         <div className="container mx-auto px-6 py-12">
           <p className="text-center text-muted-foreground">Loading dashboard...</p>
@@ -149,22 +94,16 @@ const VenuePublisherDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen">
       <Navigation />
 
-      {/* AD REQUEST anchor button (venue publishers only) */}
+      {/* AD REQUEST anchor */}
       {isVenuePublisher && (
-        <div className="border-b border-border bg-card/40">
+        <div className="border-b border-[rgba(255,255,255,0.06)]">
           <div className="container mx-auto px-6 py-4 flex items-center justify-center">
-            <Button
-              asChild
-              variant="cyber"
-              size="lg"
-              className="relative overflow-hidden animate-pulse-glow neon-glow-strong"
-            >
+            <Button asChild variant="cyber" size="lg" className="relative overflow-hidden animate-pulse-glow">
               <Link to="/publisher/ad-requests" aria-label="Go to Ad Requests">
-                <Package className="h-4 w-4" />
-                AD REQUEST
+                <Package className="h-4 w-4" /> AD REQUEST
               </Link>
             </Button>
           </div>
@@ -172,225 +111,165 @@ const VenuePublisherDashboard = () => {
       )}
 
       {/* Ticket Creator Banner */}
-      <div className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 border-b border-border">
+      <div className="glass border-b border-[rgba(255,255,255,0.06)]">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Ticket className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium">Create and sell event tickets</span>
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={() => navigate("/ticket-creator")}
-              className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 text-white"
-            >
-              <Ticket className="h-4 w-4 mr-2" />
-              Ticket Creator
-            </Button>
-          </div>
+          <Button onClick={() => navigate("/ticket-creator")} variant="cyber" size="sm">
+            <Ticket className="h-4 w-4 mr-2" /> Ticket Creator
+          </Button>
         </div>
       </div>
 
-      {/* Dashboard Content */}
-      <div className="container mx-auto px-6 py-12">
-        <div className="flex items-center justify-between mb-8">
+      {/* Dashboard Content - 2 Column Grid */}
+      <div className="container mx-auto px-4 md:px-6 py-8 max-w-[1200px]">
+        {/* Header */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Venue Publisher Dashboard</h1>
-            <p className="text-muted-foreground">Manage your venues, events, and tickets</p>
+            <h1 className="text-3xl font-bold">Ad Space Publisher Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Manage your ad spaces, events, and tickets</p>
           </div>
-          <Button onClick={handleCreateVenue}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Venue
-          </Button>
+          <div className="flex md:justify-end items-start">
+            <Button onClick={() => setShowVenueDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" /> Add Ad Space
+            </Button>
+          </div>
         </div>
 
         {/* Quick Access to Ad Requests */}
         <Card className="mb-8">
-          <CardHeader>
-            <div className="flex items-center justify-between">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5 text-primary" />
-                  Ad Requests
+                <CardTitle className="flex items-center gap-2 mb-2">
+                  <Package className="h-5 w-5 text-primary" /> Ad Requests
                 </CardTitle>
                 <CardDescription>Review and manage advertiser booking submissions</CardDescription>
               </div>
-              <Button onClick={() => navigate("/publisher/ad-requests")}>
-                <Package className="h-4 w-4 mr-2" />
-                View All Ad Requests
-              </Button>
+              <div className="flex md:justify-end">
+                <Button onClick={() => navigate("/publisher/ad-requests")} className="w-full md:w-auto">
+                  <Package className="h-4 w-4 mr-2" /> View All Ad Requests
+                </Button>
+              </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-center py-4">
-              All ad requests are managed on the dedicated Ad Requests page.
-            </p>
           </CardContent>
         </Card>
 
-        {/* Tabs for Venues and Events */}
+        {/* Tabs */}
         <Tabs defaultValue="venues" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="venues">
-              <Building2 className="h-4 w-4 mr-2" />
-              Venues
+          <TabsList className="grid w-full max-w-md grid-cols-2 glass rounded-[14px]">
+            <TabsTrigger value="venues" className="rounded-[12px]">
+              <Building2 className="h-4 w-4 mr-2" /> Ad Spaces
             </TabsTrigger>
-            <TabsTrigger value="events">
-              <Calendar className="h-4 w-4 mr-2" />
-              Events
+            <TabsTrigger value="events" className="rounded-[12px]">
+              <Calendar className="h-4 w-4 mr-2" /> Events
             </TabsTrigger>
           </TabsList>
 
-          {/* Venues Tab */}
           <TabsContent value="venues">
-            <div className="space-y-6">
-              {venues.length === 0 ? (
-                <Card>
-                  <CardContent className="pt-6 text-center">
-                    <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground mb-4">No venues yet. Create your first venue to get started.</p>
-                    <Button onClick={handleCreateVenue}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Venue
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {venues.map((venue) => (
-                    <Card key={venue.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Building2 className="h-5 w-5 text-primary" />
-                          {venue.name}
-                        </CardTitle>
-                        <CardDescription className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {venue.location}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        {venue.description && (
-                          <p className="text-sm text-muted-foreground mb-4">{venue.description}</p>
-                        )}
-                        <Button 
-                          onClick={() => handleCreateEvent(venue)}
-                          className="w-full"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Create Event
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
+            {venues.length === 0 ? (
+              <Card>
+                <CardContent className="pt-6 text-center">
+                  <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground mb-4">No ad spaces yet. Create your first ad space to get started.</p>
+                  <Button onClick={() => setShowVenueDialog(true)}>
+                    <Plus className="h-4 w-4 mr-2" /> Create Ad Space
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 md:gap-6">
+                {venues.map((venue) => (
+                  <Card key={venue.id}>
+                    <CardHeader className="p-4 md:p-6">
+                      <CardTitle className="flex items-center gap-2">
+                        <Building2 className="h-5 w-5 text-primary" /> {venue.name}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4" /> {venue.location}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-4 md:p-6 pt-0">
+                      {venue.description && (
+                        <p className="text-sm text-muted-foreground mb-4">{venue.description}</p>
+                      )}
+                      <Button onClick={() => { setSelectedVenue(venue); setShowEventDialog(true); }} className="w-full">
+                        <Plus className="h-4 w-4 mr-2" /> Create Event
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
-          {/* Events Tab */}
           <TabsContent value="events">
-            <div className="space-y-6">
-              {events.length === 0 ? (
-                <Card>
-                  <CardContent className="pt-6 text-center">
-                    <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">No events yet. Create a venue first, then add events.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-6">
-                  {events.map((event) => (
-                    <Card key={event.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle>{event.title}</CardTitle>
-                            <CardDescription>
-                              at {event.venues?.name}
-                            </CardDescription>
-                          </div>
-                          <Badge variant={event.status === "published" ? "default" : "secondary"}>
-                            {event.status}
-                          </Badge>
+            {events.length === 0 ? (
+              <Card>
+                <CardContent className="pt-6 text-center">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">No events yet. Create an ad space first, then add events.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                {events.map((event) => (
+                  <Card key={event.id}>
+                    <CardHeader className="p-4 md:p-6">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle>{event.title}</CardTitle>
+                          <CardDescription>at {event.venues?.name}</CardDescription>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            {new Date(event.event_date).toLocaleDateString()}
-                          </div>
-                          {event.event_time && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Clock className="h-4 w-4 text-muted-foreground" />
-                              {event.event_time}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-2 text-sm">
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
-                            ${event.ticket_price}
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Ticket className="h-4 w-4 text-muted-foreground" />
-                            {event.tickets_sold} / {event.total_tickets} tickets sold
-                          </div>
+                        <Badge variant={event.status === "published" ? "default" : "secondary"}>
+                          {event.status}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-4 md:p-6 pt-0">
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          {new Date(event.event_date).toLocaleDateString()}
                         </div>
-                        
-                        <div className="grid grid-cols-3 gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleGenerateTickets(event)}
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Generate
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleViewTickets(event.id)}
-                          >
-                            <Ticket className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                          <Button 
-                            variant="default" 
-                            size="sm"
-                            onClick={() => handleOpenScanner(event.id)}
-                          >
-                            <QrCode className="h-4 w-4 mr-1" />
-                            Scan
-                          </Button>
+                        {event.event_time && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="h-4 w-4 text-muted-foreground" /> {event.event_time}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-sm">
+                          <DollarSign className="h-4 w-4 text-muted-foreground" /> ${event.ticket_price}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Ticket className="h-4 w-4 text-muted-foreground" />
+                          {event.tickets_sold} / {event.total_tickets} tickets sold
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Button variant="outline" size="sm" onClick={() => { setSelectedEvent(event); setShowTicketsDialog(true); }}>
+                          <Plus className="h-4 w-4 mr-1" /> Generate
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/venue-ticketing/event/${event.id}/tickets`)}>
+                          <Ticket className="h-4 w-4 mr-1" /> View
+                        </Button>
+                        <Button variant="default" size="sm" onClick={() => navigate(`/venue-ticketing/scanner/${event.id}`)}>
+                          <QrCode className="h-4 w-4 mr-1" /> Scan
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
 
-      <CreateVenueDialog 
-        open={showVenueDialog} 
-        onOpenChange={setShowVenueDialog}
-        onSuccess={() => userId && fetchData(userId)}
-      />
-      
-      <CreateEventDialog 
-        open={showEventDialog} 
-        onOpenChange={setShowEventDialog}
-        venue={selectedVenue}
-        onSuccess={() => userId && fetchData(userId)}
-      />
-
-      <GenerateTicketsDialog
-        open={showTicketsDialog}
-        onOpenChange={setShowTicketsDialog}
-        event={selectedEvent}
-        onSuccess={() => userId && fetchData(userId)}
-      />
+      <CreateVenueDialog open={showVenueDialog} onOpenChange={setShowVenueDialog} onSuccess={() => userId && fetchData(userId)} />
+      <CreateEventDialog open={showEventDialog} onOpenChange={setShowEventDialog} venue={selectedVenue} onSuccess={() => userId && fetchData(userId)} />
+      <GenerateTicketsDialog open={showTicketsDialog} onOpenChange={setShowTicketsDialog} event={selectedEvent} onSuccess={() => userId && fetchData(userId)} />
     </div>
   );
 };
