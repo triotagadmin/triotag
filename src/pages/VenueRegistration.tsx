@@ -525,6 +525,9 @@ const VenueRegistration = () => {
                     <Button type="button" variant="outline" className="w-full" onClick={addLocation} disabled={additionalLocations.length >= 3}>
                       <Plus className="h-4 w-4 mr-2" /> {additionalLocations.length >= 3 ? "Maximum 3 branches reached" : "Add Branch Location"}
                     </Button>
+                    {additionalLocations.length >= 3 && (
+                      <p className="text-xs text-destructive font-medium">You can add up to 3 branch locations now. Additional branches can be added anytime later in your dashboard.</p>
+                    )}
                     {additionalLocations.length < 3 && (
                       <p className="text-xs text-muted-foreground">{3 - additionalLocations.length} branch slot{3 - additionalLocations.length !== 1 ? "s" : ""} remaining. More can be added from your dashboard after registration.</p>
                     )}
