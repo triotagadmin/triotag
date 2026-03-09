@@ -13,7 +13,7 @@ import { BookingsArchive } from "@/components/publisher/BookingsArchive";
 import { BillingInvoices } from "@/components/publisher/BillingInvoices";
 import { MessagesCard } from "@/components/publisher/MessagesCard";
 import { Separator } from "@/components/ui/separator";
-import { BranchManager } from "@/components/franchise/BranchManager";
+import { BranchListingCard } from "@/components/franchise/BranchListingCard";
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const {
