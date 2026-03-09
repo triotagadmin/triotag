@@ -19,6 +19,8 @@ interface Venue {
   pricing: any;
   approval_status: string;
   specifications: any;
+  advertiser_id: string | null;
+  pending_advertiser_email: string | null;
 }
 
 const VenueInventory = () => {
