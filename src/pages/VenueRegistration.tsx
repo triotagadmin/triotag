@@ -362,7 +362,10 @@ const VenueRegistration = () => {
             }));
           if (branchRows.length > 0) {
             const { error: branchError } = await supabase.from("franchise_branches").insert(branchRows);
-            if (branchError) console.error("Branch save error:", branchError);
+            if (branchError) {
+              console.error("Branch save error:", branchError);
+              toast({ title: "Note", description: `Listing saved but ${branchRows.length} branch(es) could not be saved. You can add them from your dashboard.` });
+            }
           }
         }
 

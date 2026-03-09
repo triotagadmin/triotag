@@ -30,7 +30,6 @@ const FranchiseBranches = () => {
     if (!id) return;
     const fetchData = async () => {
       try {
-        // Fetch franchise name
         const { data: venue, error: venueError } = await supabase
           .from("ad_spaces")
           .select("title")
@@ -54,6 +53,16 @@ const FranchiseBranches = () => {
       }
     };
     fetchData();
+
+    // Realtime subscription for branch updates
+    const channel = supabase
+      .channel(`branches-${id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'franchise_branches', filter: `franchise_id=eq.${id}` }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [id, toast]);
 
   if (loading) {
