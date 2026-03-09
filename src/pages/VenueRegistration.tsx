@@ -662,7 +662,7 @@ const VenueRegistration = () => {
                             </div>
                           ) : (pendingAdvertiserEmail || !advertiserLinked) && (
                             <div className="mt-2 space-y-2">
-                              <Badge variant="outline" className="gap-1 border-amber-500/40 text-amber-400 bg-amber-500/10">
+                              <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
                                 <Clock className="h-3 w-3" />
                                 Pending Advertiser Registration
                               </Badge>
