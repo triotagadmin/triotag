@@ -151,8 +151,10 @@ const VenueRegistration = () => {
   // Advertiser linking status
   const [advertiserLinked, setAdvertiserLinked] = useState(false);
   const [pendingAdvertiserEmail, setPendingAdvertiserEmail] = useState<string | null>(null);
+  const [originalContactEmail, setOriginalContactEmail] = useState("");
   const [sendingVerification, setSendingVerification] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [ownershipWorkflow, setOwnershipWorkflow] = useState<"verification" | "registration" | null>(null);
 
   const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([
     { type: "business_license", label: "Business/Venue License", description: "Official business registration or venue operating license", file: null, uploaded: false },
@@ -195,7 +197,9 @@ const VenueRegistration = () => {
       setIndustryCategory(specs.industry_category || "");
       setOperatingHours(specs.operating_hours || "");
       setContactPerson(specs.contact_person || "");
-      setContactEmail(specs.contact_email || "");
+      const loadedContactEmail = specs.contact_email || "";
+      setContactEmail(loadedContactEmail);
+      setOriginalContactEmail(loadedContactEmail.trim().toLowerCase());
       setContactPhone(specs.contact_number || "");
       setSelectedMaterials(specs.ad_unit_materials || []);
       setWeeklyLeasePrice(specs.weekly_lease_price?.toString() || "");
@@ -218,9 +222,11 @@ const VenueRegistration = () => {
       if (venue.advertiser_id) {
         setAdvertiserLinked(true);
         setPendingAdvertiserEmail(null);
+        setOwnershipWorkflow(null);
       } else if (venue.pending_advertiser_email) {
         setAdvertiserLinked(false);
         setPendingAdvertiserEmail(venue.pending_advertiser_email);
+        setOwnershipWorkflow("registration");
       }
 
       const { data: existingDocs } = await supabase.from("verification_documents").select("*").eq("publisher_id", pubId);
@@ -338,19 +344,53 @@ const VenueRegistration = () => {
     };
   };
 
-  const resolveAdvertiserId = async (email: string): Promise<{ advertiser_id?: string; pending_advertiser_email?: string }> => {
-    // Look up if an advertiser account exists with this contact email
-    const { data: advProfile } = await supabase
-      .from("advertiser_profiles")
-      .select("user_id")
-      .eq("contact_email", email.trim())
-      .maybeSingle();
+  const normalizeEmail = (value: string) => value.trim().toLowerCase();
 
-    if (advProfile?.user_id) {
-      return { advertiser_id: advProfile.user_id };
+  const checkDuplicateListing = async (locationValue: string, emailValue: string, excludeId?: string | null) => {
+    const normalizedEmail = normalizeEmail(emailValue);
+    let query = supabase
+      .from("ad_spaces")
+      .select("id")
+      .eq("publisher_id", publisherId)
+      .eq("location", locationValue)
+      .ilike("specifications->>contact_email", normalizedEmail);
+
+    if (excludeId) {
+      query = query.neq("id", excludeId);
     }
-    // No advertiser account yet — store as pending
-    return { pending_advertiser_email: email.trim() };
+
+    const { data } = await query.limit(1).maybeSingle();
+    return Boolean(data);
+  };
+
+  const requestOwnershipWorkflow = async (listingId: string, emailValue: string) => {
+    const normalizedEmail = normalizeEmail(emailValue);
+    if (!normalizedEmail) return;
+
+    setSendingVerification(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("request-listing-ownership", {
+        body: { listingId, email: normalizedEmail },
+      });
+
+      if (error) throw error;
+
+      const workflowType = (data?.workflowType === "verification" ? "verification" : "registration") as "verification" | "registration";
+      setOwnershipWorkflow(workflowType);
+      setAdvertiserLinked(false);
+      setPendingAdvertiserEmail(normalizedEmail);
+      setVerificationSent(true);
+
+      toast({
+        title: workflowType === "verification" ? "Verification requested" : "Registration invite sent",
+        description:
+          workflowType === "verification"
+            ? `Verification email sent to ${normalizedEmail}. Ownership will link after confirmation.`
+            : `Invite sent to ${normalizedEmail}. Ownership links automatically after advertiser signup and verification.`,
+      });
+    } finally {
+      setSendingVerification(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -361,11 +401,13 @@ const VenueRegistration = () => {
     try {
       const venueData = buildVenueData();
       const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
+      const normalizedContactEmail = normalizeEmail(contactEmail);
+      const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
 
-      // Resolve advertiser ownership from contact email
-      const ownershipFields = contactEmail.trim()
-        ? await resolveAdvertiserId(contactEmail.trim())
-        : {};
+      const hasDuplicate = await checkDuplicateListing(headOfficeAddress || "", normalizedContactEmail, isEditing ? editId : null);
+      if (hasDuplicate) {
+        throw new Error("A listing with the same location and advertiser email already exists.");
+      }
 
       // Upload docs
       for (const doc of filledDocs) {
@@ -379,34 +421,36 @@ const VenueRegistration = () => {
       }
 
       if (isEditing) {
-        const { error } = await supabase.from("ad_spaces").update({ ...venueData, ...ownershipFields }).eq("id", editId!).eq("publisher_id", publisherId);
+        const emailChanged = normalizedContactEmail !== originalContactEmail;
+        const updatePayload: any = { ...venueData };
+
+        if (emailChanged && normalizedContactEmail) {
+          updatePayload.advertiser_id = null;
+          updatePayload.pending_advertiser_email = normalizedContactEmail;
+        }
+
+        const { error } = await supabase.from("ad_spaces").update(updatePayload).eq("id", editId!).eq("publisher_id", publisherId);
         if (error) throw error;
+
+        if (emailChanged && normalizedContactEmail) {
+          await requestOwnershipWorkflow(editId!, normalizedContactEmail);
+        }
+
+        setOriginalContactEmail(normalizedContactEmail);
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
-        // Check for duplicate listing by title + location before inserting
-        const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
-        const { data: existing } = await supabase
-          .from("ad_spaces")
-          .select("id")
-          .eq("title", title.trim())
-          .eq("location", headOfficeAddress || "")
-          .maybeSingle();
-
-        if (existing) {
-          // Listing already exists — link publisher, don't duplicate
-          toast({ title: "Listing already exists", description: "This location is already listed. It has been linked to your account." });
-          setShowConfirmation(true);
-          window.scrollTo(0, 0);
-          return;
-        }
-
         const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert([{
           ...venueData,
-          ...ownershipFields,
+          advertiser_id: null,
+          pending_advertiser_email: normalizedContactEmail || null,
           approval_status: "pending" as const,
         }]).select("id").single();
         if (insertError) throw insertError;
+
+        if (normalizedContactEmail) {
+          await requestOwnershipWorkflow(insertedData.id, normalizedContactEmail);
+        }
 
         // Save additional locations as franchise branches
         if (insertedData && additionalLocations.length > 0) {
@@ -653,7 +697,7 @@ const VenueRegistration = () => {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label>Contact Email *</Label>
-                        <Input type="email" value={contactEmail} onChange={e => { setContactEmail(e.target.value); setVerificationSent(false); }} required />
+                        <Input type="email" value={contactEmail} onChange={e => { setContactEmail(e.target.value); setVerificationSent(false); setOwnershipWorkflow(null); }} required />
                         {isEditing && contactEmail.trim() && (
                           advertiserLinked ? (
                             <div className="flex items-center gap-1.5 mt-1.5">
@@ -664,31 +708,27 @@ const VenueRegistration = () => {
                             <div className="mt-2 space-y-2">
                               <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
                                 <Clock className="h-3 w-3" />
-                                Pending Advertiser Registration
+                                {ownershipWorkflow === "verification" ? "Pending Advertiser Verification" : "Pending Advertiser Registration"}
                               </Badge>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="w-full gap-1.5 text-xs"
-                                disabled={sendingVerification || verificationSent}
-                                onClick={async () => {
-                                  setSendingVerification(true);
-                                  try {
-                                    const { error } = await supabase.functions.invoke("send-verification-email", {
-                                      body: { email: contactEmail.trim(), userId: editId, userType: "advertiser" },
-                                    });
-                                    if (error) throw error;
-                                    setVerificationSent(true);
-                                    toast({ title: "Verification Sent", description: `Registration invite sent to ${contactEmail}` });
-                                  } catch (err: any) {
-                                    toast({ title: "Error", description: err.message || "Failed to send verification", variant: "destructive" });
-                                  } finally { setSendingVerification(false); }
-                                }}
-                              >
-                                {sendingVerification ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
-                                {verificationSent ? "Verification Sent" : "Send Registration Invite"}
-                              </Button>
+                              {isEditing && editId && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full gap-1.5 text-xs"
+                                  disabled={sendingVerification}
+                                  onClick={async () => {
+                                    try {
+                                      await requestOwnershipWorkflow(editId, contactEmail);
+                                    } catch (err: any) {
+                                      toast({ title: "Error", description: err.message || "Failed to send advertiser workflow email", variant: "destructive" });
+                                    }
+                                  }}
+                                >
+                                  {sendingVerification ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
+                                  {verificationSent ? "Resend Workflow Email" : "Send Workflow Email"}
+                                </Button>
+                              )}
                             </div>
                           )
                         )}

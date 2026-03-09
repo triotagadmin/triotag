@@ -24,7 +24,9 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const url = new URL(req.url);
-    const token = url.searchParams.get("token");
+    const emailToken = url.searchParams.get("token");
+    const listingToken = url.searchParams.get("listing_token");
+    const token = emailToken || listingToken;
 
     if (!token) {
       return new Response(null, {
@@ -59,7 +61,80 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Validate token purpose
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Handle listing ownership verification tokens
+    if (payload.purpose === "listing_ownership_verification") {
+      const adSpaceId = payload.ad_space_id as string;
+      const advertiserUserId = payload.advertiser_user_id as string;
+      const advertiserEmail = (payload.advertiser_email as string)?.toLowerCase();
+
+      const { data: listing, error: listingError } = await supabase
+        .from("ad_spaces")
+        .select("id, title, advertiser_id, pending_advertiser_email, publisher_id")
+        .eq("id", adSpaceId)
+        .maybeSingle();
+
+      if (listingError || !listing || (listing.pending_advertiser_email || "").toLowerCase() !== advertiserEmail) {
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${FRONTEND_URL}/verify?listing_verified=failed`,
+            ...corsHeaders,
+          },
+        });
+      }
+
+      if (listing.advertiser_id === advertiserUserId && !listing.pending_advertiser_email) {
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${FRONTEND_URL}/verify?listing_verified=already`,
+            ...corsHeaders,
+          },
+        });
+      }
+
+      const { error: linkError } = await supabase
+        .from("ad_spaces")
+        .update({ advertiser_id: advertiserUserId, pending_advertiser_email: null })
+        .eq("id", adSpaceId);
+
+      if (linkError) {
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${FRONTEND_URL}/verify?listing_verified=failed`,
+            ...corsHeaders,
+          },
+        });
+      }
+
+      const { data: publisherProfile } = await supabase
+        .from("publisher_profiles")
+        .select("user_id")
+        .eq("id", listing.publisher_id)
+        .maybeSingle();
+
+      if (publisherProfile?.user_id) {
+        await supabase.from("notifications").insert({
+          user_id: publisherProfile.user_id,
+          title: "Advertiser ownership verified",
+          message: `${advertiserEmail} verified and is now linked as primary advertiser for ${listing.title}.`,
+          type: "listing_ownership_verified",
+        });
+      }
+
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: `${FRONTEND_URL}/verify?listing_verified=success`,
+          ...corsHeaders,
+        },
+      });
+    }
+
+    // Validate account-email token purpose
     if (payload.purpose !== "email_verification") {
       console.error("[Verify Email Error] Invalid token purpose:", payload.purpose);
       return new Response(null, {
@@ -76,8 +151,6 @@ const handler = async (req: Request): Promise<Response> => {
     const timestamp = new Date().toISOString();
 
     console.log(`[Verify Email] Processing verification for user: ${userId} (${userType}) at ${timestamp}`);
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Determine which table to update based on user type
     if (userType === "advertiser") {

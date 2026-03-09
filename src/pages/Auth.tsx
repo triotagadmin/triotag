@@ -166,6 +166,11 @@ const Auth = () => {
       if (role === "admin") {
         navigate("/admin/dashboard");
       } else if (role === "advertiser") {
+        try {
+          await supabase.functions.invoke("sync-pending-listing-ownership");
+        } catch (syncError) {
+          console.error("Failed to sync pending listings after OAuth:", syncError);
+        }
         navigate("/advertiser-dashboard");
       } else if (role === "publisher") {
         navigate("/venue-publishers");
@@ -332,6 +337,12 @@ const Auth = () => {
           return;
         }
         
+        try {
+          await supabase.functions.invoke("sync-pending-listing-ownership");
+        } catch (syncError) {
+          console.error("Failed to sync pending listings on sign in:", syncError);
+        }
+
         toast({
           title: "Welcome back!",
           description: "Successfully signed in.",

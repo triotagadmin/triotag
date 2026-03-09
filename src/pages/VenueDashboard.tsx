@@ -269,6 +269,11 @@ const VenueDashboard = () => {
                                 {(space as any).leased_advertiser_ids.length} lessee{(space as any).leased_advertiser_ids.length !== 1 ? "s" : ""}
                               </Badge>
                             )}
+                            {(space as any).pending_advertiser_email && !(space as any).advertiser_id && (
+                              <Badge variant="outline" className="text-xs gap-1 border-destructive/40 text-destructive">
+                                <Clock className="w-3 h-3" /> Pending Advertiser
+                              </Badge>
+                            )}
                           </div>
                           <div className="flex gap-2 mt-3">
                             <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/venue-inventory?edit=${space.id}`)}>

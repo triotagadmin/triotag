@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Edit, Eye, MapPin, DollarSign, Trash2 } from "lucide-react";
+import { Plus, Edit, Eye, MapPin, DollarSign, Trash2, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -19,6 +19,8 @@ interface Venue {
   pricing: any;
   approval_status: string;
   specifications: any;
+  advertiser_id: string | null;
+  pending_advertiser_email: string | null;
 }
 
 const VenueInventory = () => {
@@ -159,7 +161,14 @@ const VenueInventory = () => {
                 </p>
               )}
             </div>
-            {getStatusBadge(venue.approval_status)}
+            <div className="flex flex-wrap items-center gap-2">
+              {getStatusBadge(venue.approval_status)}
+              {venue.pending_advertiser_email && !venue.advertiser_id && (
+                <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
+                  <Clock className="h-3 w-3" /> Pending Advertiser
+                </Badge>
+              )}
+            </div>
           </div>
           <CardDescription className="line-clamp-2">{venue.description}</CardDescription>
         </CardHeader>
