@@ -257,6 +257,31 @@ const AdvertiserDashboard = () => {
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Building2 className="h-6 w-6" />
             Ad Space Listings
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="About Ad Space Listings"
+                  className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted text-muted-foreground hover:bg-muted/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 text-sm" side="bottom" align="start">
+                <div className="space-y-2">
+                  <p className="font-medium">About Ad Space Listings</p>
+                  <p className="text-muted-foreground">
+                    These are ad space locations linked to your account by a publishing agent or assigned to you as the primary advertiser.
+                  </p>
+                  <p className="text-muted-foreground">
+                    You can run campaigns, order print materials, and manage branch locations for each listing.
+                  </p>
+                  <p className="text-muted-foreground">
+                    Leased listings from other agents also appear separately below.
+                  </p>
+                </div>
+              </PopoverContent>
+            </Popover>
           </h3>
           <Card>
             <CardContent className="pt-6">
