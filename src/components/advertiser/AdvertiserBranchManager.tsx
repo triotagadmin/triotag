@@ -16,16 +16,15 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-interface UnifiedBranch {
+interface BranchRecord {
   id: string;
-  name: string;
-  address: string;
-  contact_name?: string | null;
-  contact_email?: string | null;
-  contact_phone?: string | null;
-  source: "advertiser" | "franchise";
-  listing_title?: string;
-  listing_id?: string;
+  place_name: string;
+  full_address: string;
+  ad_unit_quantity: number | null;
+  branch_operating_hours: string | null;
+  notes: string | null;
+  listing_title: string;
+  listing_id: string;
 }
 
 interface AssociatedListing {
@@ -40,64 +39,46 @@ interface AdvertiserBranchManagerProps {
 
 export const AdvertiserBranchManager = ({ userId, associatedListings = [] }: AdvertiserBranchManagerProps) => {
   const { toast } = useToast();
-  const [branches, setBranches] = useState<UnifiedBranch[]>([]);
+  const [branches, setBranches] = useState<BranchRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingBranch, setEditingBranch] = useState<UnifiedBranch | null>(null);
+  const [editingBranch, setEditingBranch] = useState<BranchRecord | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Form state - includes target listing for new branches
-  const [targetListing, setTargetListing] = useState<string>("standalone");
-  const [form, setForm] = useState({
-    branch_name: "", full_address: "", contact_name: "", contact_email: "", contact_phone: "",
-  });
+  const [targetListing, setTargetListing] = useState<string>("");
+  const [form, setForm] = useState({ place_name: "", full_address: "", operating_hours: "", notes: "" });
 
   const listingIds = associatedListings.map((l) => l.id);
 
   const fetchBranches = async () => {
-    const unified: UnifiedBranch[] = [];
+    if (listingIds.length === 0) {
+      setBranches([]);
+      setLoading(false);
+      return;
+    }
 
-    // 1. Fetch advertiser-only branches
-    const { data: advBranches } = await supabase
-      .from("advertiser_branches")
-      .select("*")
-      .eq("advertiser_id", userId)
-      .order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("franchise_branches")
+      .select("id, place_name, full_address, ad_unit_quantity, branch_operating_hours, notes, franchise_id, ad_spaces(title)")
+      .in("franchise_id", listingIds)
+      .order("created_at", { ascending: true });
 
-    if (advBranches) {
-      advBranches.forEach((b) =>
-        unified.push({
-          id: b.id, name: b.branch_name || "Unnamed Branch", address: b.full_address,
-          contact_name: b.contact_name, contact_email: b.contact_email, contact_phone: b.contact_phone,
-          source: "advertiser",
-        })
+    if (error) {
+      console.error("Error fetching branches:", error);
+    } else {
+      setBranches(
+        (data || []).map((b: any) => ({
+          id: b.id,
+          place_name: b.place_name,
+          full_address: b.full_address,
+          ad_unit_quantity: b.ad_unit_quantity,
+          branch_operating_hours: b.branch_operating_hours,
+          notes: b.notes,
+          listing_title: b.ad_spaces?.title || "Unknown",
+          listing_id: b.franchise_id,
+        }))
       );
     }
-
-    // 2. Fetch shared franchise branches from associated listings
-    if (listingIds.length > 0) {
-      const { data: frBranches } = await supabase
-        .from("franchise_branches")
-        .select("*, ad_spaces(title)")
-        .in("franchise_id", listingIds)
-        .order("created_at", { ascending: true });
-
-      if (frBranches) {
-        frBranches.forEach((b: any) => {
-          const exists = unified.some(
-            (u) => u.address.toLowerCase().trim() === b.full_address.toLowerCase().trim()
-          );
-          if (!exists) {
-            unified.push({
-              id: b.id, name: b.place_name, address: b.full_address,
-              source: "franchise", listing_title: b.ad_spaces?.title, listing_id: b.franchise_id,
-            });
-          }
-        });
-      }
-    }
-
-    setBranches(unified);
     setLoading(false);
   };
 
@@ -105,34 +86,28 @@ export const AdvertiserBranchManager = ({ userId, associatedListings = [] }: Adv
     fetchBranches();
     const channel = supabase
       .channel(`adv-branches-${userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "advertiser_branches", filter: `advertiser_id=eq.${userId}` }, () => fetchBranches())
       .on("postgres_changes", { event: "*", schema: "public", table: "franchise_branches" }, () => fetchBranches())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [userId, listingIds.join(",")]);
 
   const resetForm = () => {
-    setForm({ branch_name: "", full_address: "", contact_name: "", contact_email: "", contact_phone: "" });
-    setTargetListing("standalone");
+    setForm({ place_name: "", full_address: "", operating_hours: "", notes: "" });
+    setTargetListing(associatedListings.length === 1 ? associatedListings[0].id : "");
     setEditingBranch(null);
   };
 
   const openAdd = () => { resetForm(); setDialogOpen(true); };
 
-  const openEdit = (branch: UnifiedBranch) => {
-    if (branch.source === "franchise") {
-      toast({ title: "Edit via listing", description: "Franchise branches can be edited from the listing's branch page." });
-      return;
-    }
+  const openEdit = (branch: BranchRecord) => {
     setEditingBranch(branch);
+    setTargetListing(branch.listing_id);
     setForm({
-      branch_name: branch.name === "Unnamed Branch" ? "" : branch.name,
-      full_address: branch.address,
-      contact_name: branch.contact_name || "",
-      contact_email: branch.contact_email || "",
-      contact_phone: branch.contact_phone || "",
+      place_name: branch.place_name,
+      full_address: branch.full_address,
+      operating_hours: branch.branch_operating_hours || "",
+      notes: branch.notes || "",
     });
-    setTargetListing("standalone");
     setDialogOpen(true);
   };
 
@@ -141,61 +116,50 @@ export const AdvertiserBranchManager = ({ userId, associatedListings = [] }: Adv
       toast({ title: "Address is required", variant: "destructive" });
       return;
     }
-
-    // Cross-check for duplicates across both tables
-    const { data: dupes } = await supabase.rpc("check_cross_branch_duplicate", {
-      _user_id: userId,
-      _full_address: form.full_address.trim(),
-    });
-    if (dupes && dupes.length > 0 && !editingBranch) {
-      const dup = dupes[0] as any;
-      const desc = dup.exists_in === "franchise"
-        ? `This address already exists as a branch under "${dup.listing_title || "a listing"}".`
-        : "You already have a branch at this address.";
-      toast({ title: "Branch already exists", description: desc, variant: "destructive" });
+    if (!targetListing) {
+      toast({ title: "Please select a listing", variant: "destructive" });
       return;
     }
+    const placeName = form.place_name.trim() || form.full_address.trim().split(",")[0];
 
     setSaving(true);
 
     if (editingBranch) {
-      // Only advertiser branches can be edited inline
-      const { error } = await supabase.from("advertiser_branches").update({
-        branch_name: form.branch_name || null, full_address: form.full_address,
-        contact_name: form.contact_name || null, contact_email: form.contact_email || null,
-        contact_phone: form.contact_phone || null,
-      }).eq("id", editingBranch.id);
+      const { error } = await supabase
+        .from("franchise_branches")
+        .update({
+          place_name: placeName,
+          full_address: form.full_address.trim(),
+          branch_operating_hours: form.operating_hours.trim() || null,
+          notes: form.notes.trim() || null,
+        })
+        .eq("id", editingBranch.id);
       if (error) toast({ title: "Error updating branch", description: error.message, variant: "destructive" });
       else { toast({ title: "Branch updated" }); setDialogOpen(false); resetForm(); }
-    } else if (targetListing !== "standalone") {
-      // Add to franchise_branches (shared with publisher)
+    } else {
+      // Use dedup-aware upsert
       const { error } = await supabase.rpc("upsert_franchise_branch", {
         _franchise_id: targetListing,
-        _place_name: form.branch_name.trim() || form.full_address.trim().split(",")[0],
+        _place_name: placeName,
         _full_address: form.full_address.trim(),
-        _latitude: null, _longitude: null,
+        _latitude: null,
+        _longitude: null,
         _ad_unit_quantity: 0,
-        _branch_operating_hours: null,
-        _notes: null,
+        _branch_operating_hours: form.operating_hours.trim() || null,
+        _notes: form.notes.trim() || null,
       });
       if (error) toast({ title: "Error adding branch", description: error.message, variant: "destructive" });
-      else { toast({ title: "Branch added to listing", description: "This branch is now visible to both you and the publisher." }); setDialogOpen(false); resetForm(); }
-    } else {
-      // Add to advertiser_branches (standalone)
-      const { error } = await supabase.rpc("upsert_advertiser_branch", {
-        _advertiser_id: userId, _full_address: form.full_address.trim(),
-        _branch_name: form.branch_name || null, _contact_name: form.contact_name || null,
-        _contact_email: form.contact_email || null, _contact_phone: form.contact_phone || null,
-      });
-      if (error) toast({ title: "Error adding branch", description: error.message, variant: "destructive" });
-      else { toast({ title: "Branch added" }); setDialogOpen(false); resetForm(); }
+      else {
+        toast({ title: "Branch added", description: "This branch is now visible on both your and the publisher's dashboard." });
+        setDialogOpen(false);
+        resetForm();
+      }
     }
     setSaving(false);
   };
 
-  const handleDelete = async (branch: UnifiedBranch) => {
-    const table = branch.source === "franchise" ? "franchise_branches" : "advertiser_branches";
-    const { error } = await supabase.from(table).delete().eq("id", branch.id);
+  const handleDelete = async (branch: BranchRecord) => {
+    const { error } = await supabase.from("franchise_branches").delete().eq("id", branch.id);
     if (error) toast({ title: "Error removing branch", description: error.message, variant: "destructive" });
     else toast({ title: "Branch removed" });
   };
@@ -210,112 +174,101 @@ export const AdvertiserBranchManager = ({ userId, associatedListings = [] }: Adv
             <MapPin className="h-5 w-5" />
             Branch Locations
           </CardTitle>
-          <CardDescription>Manage your branch locations for print distribution</CardDescription>
+          <CardDescription>
+            {associatedListings.length > 0
+              ? "Manage branch locations shared with publishers for print distribution"
+              : "Branch locations will appear here when a publisher links your account to a listing"}
+          </CardDescription>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-1" onClick={openAdd}>
-              <Plus className="h-4 w-4" /> Add Branch
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingBranch ? "Edit Branch" : "Add Branch"}</DialogTitle>
-              <DialogDescription>
-                {editingBranch ? "Update branch details." : "Add a new branch location. Choose a listing to share it with the publisher, or add it standalone."}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 mt-2">
-              {/* Listing selector - only for new branches */}
-              {!editingBranch && associatedListings.length > 0 && (
-                <div>
-                  <Label>Link to Listing</Label>
-                  <Select value={targetListing} onValueChange={setTargetListing}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a listing..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="standalone">Standalone (my branch only)</SelectItem>
-                      {associatedListings.map((l) => (
-                        <SelectItem key={l.id} value={l.id}>{l.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {targetListing !== "standalone"
-                      ? "This branch will be shared with the publisher and visible on both dashboards."
-                      : "This branch will only be visible on your dashboard."}
-                  </p>
-                </div>
-              )}
-              <div>
-                <Label>Branch Name {targetListing !== "standalone" ? "*" : "(optional)"}</Label>
-                <Input placeholder="e.g. Downtown Branch" value={form.branch_name} onChange={(e) => setForm({ ...form, branch_name: e.target.value })} />
-              </div>
-              <div>
-                <Label>Address *</Label>
-                <Input placeholder="Full address" value={form.full_address} onChange={(e) => setForm({ ...form, full_address: e.target.value })} />
-              </div>
-              {/* Contact fields only for standalone branches */}
-              {targetListing === "standalone" && (
-                <>
-                  <div>
-                    <Label>Contact Name (optional)</Label>
-                    <Input placeholder="Branch contact person" value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label>Email (optional)</Label>
-                      <Input type="email" placeholder="branch@email.com" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} />
-                    </div>
-                    <div>
-                      <Label>Phone (optional)</Label>
-                      <Input placeholder="+1234567890" value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
-                    </div>
-                  </div>
-                </>
-              )}
-              <Button onClick={handleSave} disabled={saving} className="w-full">
-                {saving ? "Saving..." : editingBranch ? "Update Branch" : "Add Branch"}
+        {associatedListings.length > 0 && (
+          <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-1" onClick={openAdd}>
+                <Plus className="h-4 w-4" /> Add Branch
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingBranch ? "Edit Branch" : "Add Branch to Listing"}</DialogTitle>
+                <DialogDescription>
+                  {editingBranch
+                    ? "Update branch details. Changes are visible to both you and the publisher."
+                    : "Add a new branch location. It will be shared with the publisher and visible on both dashboards."}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 mt-2">
+                {!editingBranch && associatedListings.length > 1 && (
+                  <div>
+                    <Label>Listing *</Label>
+                    <Select value={targetListing} onValueChange={setTargetListing}>
+                      <SelectTrigger><SelectValue placeholder="Select a listing..." /></SelectTrigger>
+                      <SelectContent>
+                        {associatedListings.map((l) => (
+                          <SelectItem key={l.id} value={l.id}>{l.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {!editingBranch && associatedListings.length === 1 && (
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Adding branch to</p>
+                    <p className="text-sm font-medium">{associatedListings[0].title}</p>
+                  </div>
+                )}
+                <div>
+                  <Label>Branch Name *</Label>
+                  <Input placeholder="e.g. Caelum Café BGC" value={form.place_name} onChange={(e) => setForm({ ...form, place_name: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Address *</Label>
+                  <Input placeholder="Full address" value={form.full_address} onChange={(e) => setForm({ ...form, full_address: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Operating Hours (optional)</Label>
+                  <Input placeholder="e.g. Mon-Fri 8AM-10PM" value={form.operating_hours} onChange={(e) => setForm({ ...form, operating_hours: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Notes (optional)</Label>
+                  <Input placeholder="Any additional details..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+                </div>
+                <Button onClick={handleSave} disabled={saving} className="w-full">
+                  {saving ? "Saving..." : editingBranch ? "Update Branch" : "Add Branch"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </CardHeader>
       <CardContent>
         {branches.length === 0 ? (
           <div className="text-center py-8">
             <MapPin className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-muted-foreground mb-2">No branches added yet</p>
-            <p className="text-xs text-muted-foreground">Add branch locations or they'll appear here when a publisher links your account to a listing.</p>
+            <p className="text-muted-foreground mb-2">No branches yet</p>
+            <p className="text-xs text-muted-foreground">
+              {associatedListings.length > 0
+                ? "Add your first branch location to start sending print materials."
+                : "Branch locations will appear here when you're linked to a listing."}
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
             {branches.map((branch) => (
-              <div key={`${branch.source}-${branch.id}`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 border rounded-lg">
+              <div key={branch.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 border rounded-lg">
                 <div className="min-w-0 flex-1 space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-sm">{branch.name}</p>
-                    {branch.source === "franchise" && (
-                      <Badge variant="outline" className="text-xs">{branch.listing_title || "Shared"}</Badge>
-                    )}
-                    {branch.source === "advertiser" && (
-                      <Badge variant="secondary" className="text-xs">Standalone</Badge>
-                    )}
+                    <p className="font-medium text-sm">{branch.place_name}</p>
+                    <Badge variant="outline" className="text-xs">{branch.listing_title}</Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{branch.address}</p>
-                  {branch.source === "advertiser" && (branch.contact_name || branch.contact_email || branch.contact_phone) && (
-                    <p className="text-xs text-muted-foreground">
-                      {[branch.contact_name, branch.contact_email, branch.contact_phone].filter(Boolean).join(" · ")}
-                    </p>
+                  <p className="text-xs text-muted-foreground truncate">{branch.full_address}</p>
+                  {branch.branch_operating_hours && (
+                    <p className="text-xs text-muted-foreground">Hours: {branch.branch_operating_hours}</p>
                   )}
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  {branch.source === "advertiser" && (
-                    <Button variant="outline" size="sm" onClick={() => openEdit(branch)}>
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
+                  <Button variant="outline" size="sm" onClick={() => openEdit(branch)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
@@ -326,8 +279,7 @@ export const AdvertiserBranchManager = ({ userId, associatedListings = [] }: Adv
                       <AlertDialogHeader>
                         <AlertDialogTitle>Remove Branch</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to remove this branch?
-                          {branch.source === "franchise" && " This will also remove it from the publisher's dashboard."}
+                          Are you sure? This branch will be removed from both your dashboard and the publisher's dashboard.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
