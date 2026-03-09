@@ -31,6 +31,7 @@ import Marketplace from "./pages/Marketplace";
 import VenueInventory from "./pages/VenueInventory";
 import VenueDetail from "./pages/VenueDetail";
 import FranchiseBranches from "./pages/FranchiseBranches";
+import ManageBranches from "./pages/ManageBranches";
 import ActivateListing from "./pages/ActivateListing";
 import NotFound from "./pages/NotFound";
 import ExploreAll from "./pages/ExploreAll";
