@@ -346,10 +346,8 @@ const AdvertiserDashboard = () => {
           </div>
         )}
 
-        {/* Branch Locations Section */}
-        <div className="mb-12">
-          {user && <AdvertiserBranchLocations userId={user.id} listings={[...ownedListings, ...leasedListings].map(l => ({ id: l.id, title: l.title }))} />}
-        </div>
+
+
 
         {/* Print Orders Section */}
         <div className="mb-12">
