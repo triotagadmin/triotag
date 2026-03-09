@@ -214,6 +214,15 @@ const VenueRegistration = () => {
         setEnvDetails({ ...envDetails, ...specs.environment_details });
       }
 
+      // Track advertiser linking status
+      if (venue.advertiser_id) {
+        setAdvertiserLinked(true);
+        setPendingAdvertiserEmail(null);
+      } else if (venue.pending_advertiser_email) {
+        setAdvertiserLinked(false);
+        setPendingAdvertiserEmail(venue.pending_advertiser_email);
+      }
+
       const { data: existingDocs } = await supabase.from("verification_documents").select("*").eq("publisher_id", pubId);
       if (existingDocs && existingDocs.length > 0) {
         setVerificationDocuments(prev => prev.map(doc => {
