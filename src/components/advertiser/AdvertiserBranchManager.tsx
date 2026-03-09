@@ -45,7 +45,7 @@ export const AdvertiserBranchManager = ({ userId }: AdvertiserBranchManagerProps
       .from("print_orders")
       .select("*")
       .eq("advertiser_id", userId)
-      .in("order_status", ["pending_review", "approved", "in_production"])
+      .in("order_status", ["pending_admin", "in_production"])
       .order("created_at", { ascending: false });
 
     if (error) console.error("Error fetching print orders:", error);
