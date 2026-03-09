@@ -501,14 +501,14 @@ const VenueRegistration = () => {
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2"><Plus className="h-5 w-5 text-primary" /> Branch Locations</CardTitle>
-                    <p className="text-xs text-muted-foreground">Add branch locations for this listing. Each branch will be saved and manageable from your dashboard after registration.</p>
+                    <p className="text-xs text-muted-foreground">You can add up to 3 branch locations now. Additional branches can be added anytime later in your dashboard.</p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {additionalLocations.map((loc) => (
                       <Card key={loc.id} className="rounded-[14px]">
                         <CardContent className="p-4 space-y-3">
                           <div className="flex justify-between items-center">
-                            <Label className="font-semibold text-primary">Location</Label>
+                            <Label className="font-semibold text-primary">Location {additionalLocations.indexOf(loc) + 1} of 3</Label>
                             <Button type="button" variant="ghost" size="sm" onClick={() => removeLocation(loc.id)} className="text-destructive h-8">
                               <Trash2 className="h-4 w-4 mr-1" /> Remove
                             </Button>
@@ -522,10 +522,12 @@ const VenueRegistration = () => {
                         </CardContent>
                       </Card>
                     ))}
-                    <Button type="button" variant="outline" className="w-full" onClick={addLocation}>
-                      <Plus className="h-4 w-4 mr-2" /> Add Another Location
+                    <Button type="button" variant="outline" className="w-full" onClick={addLocation} disabled={additionalLocations.length >= 3}>
+                      <Plus className="h-4 w-4 mr-2" /> {additionalLocations.length >= 3 ? "Maximum 3 branches reached" : "Add Branch Location"}
                     </Button>
-                    <p className="text-xs text-muted-foreground">You can add multiple locations such as different café branches, library locations, or retail outlets. After registration, manage branches from your dashboard.</p>
+                    {additionalLocations.length < 3 && (
+                      <p className="text-xs text-muted-foreground">{3 - additionalLocations.length} branch slot{3 - additionalLocations.length !== 1 ? "s" : ""} remaining. More can be added from your dashboard after registration.</p>
+                    )}
                   </CardContent>
                 </Card>
                 )}
