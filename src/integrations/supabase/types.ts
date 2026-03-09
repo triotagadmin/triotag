@@ -263,6 +263,81 @@ export type Database = {
         }
         Relationships: []
       }
+      advertiser_branches: {
+        Row: {
+          advertiser_id: string
+          branch_name: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          full_address: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          updated_at: string
+        }
+        Insert: {
+          advertiser_id: string
+          branch_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          full_address: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          updated_at?: string
+        }
+        Update: {
+          advertiser_id?: string
+          branch_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          full_address?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      advertiser_print_orders: {
+        Row: {
+          advertiser_id: string
+          branch_ids: string[]
+          created_at: string
+          id: string
+          materials: Json
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          advertiser_id: string
+          branch_ids?: string[]
+          created_at?: string
+          id?: string
+          materials?: Json
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          advertiser_id?: string
+          branch_ids?: string[]
+          created_at?: string
+          id?: string
+          materials?: Json
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       advertiser_profiles: {
         Row: {
           approved_at: string | null
