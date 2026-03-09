@@ -275,16 +275,22 @@ const VenueDashboard = () => {
                         </div>
                       </Card>)}
 
+                  </div>
+                </div>}
+            </CardContent>
+          </Card>
+
           {/* Branch Management per franchise */}
-          <Separator className="my-8" />
-          
           {adSpaces.length > 0 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Branch Locations</h2>
-              {adSpaces.map((space) => (
-                <BranchManager key={space.id} franchiseId={space.id} franchiseName={space.title} />
-              ))}
-            </div>
+            <>
+              <Separator className="my-8" />
+              <h2 className="text-2xl font-bold mb-6">Branch Locations</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                {adSpaces.map((space) => (
+                  <BranchManager key={space.id} franchiseId={space.id} franchiseName={space.title} />
+                ))}
+              </div>
+            </>
           )}
 
           {/* Bottom Modules */}
@@ -317,10 +323,6 @@ const VenueDashboard = () => {
               </CardHeader>
             </Card>
           </div>
-        </div>
-                </div>}
-            </CardContent>
-          </Card>
         </div>
       </div>
 
