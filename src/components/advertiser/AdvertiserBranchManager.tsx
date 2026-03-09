@@ -64,8 +64,8 @@ export const AdvertiserBranchManager = ({ userId }: AdvertiserBranchManagerProps
 
   if (loading) return <p className="text-muted-foreground text-sm">Loading print orders...</p>;
 
-  const pendingOrders = orders.filter(o => o.order_status === "pending_review");
-  const approvedOrders = orders.filter(o => ["approved", "in_production"].includes(o.order_status));
+  const pendingOrders = orders.filter(o => o.order_status === "pending_admin");
+  const approvedOrders = orders.filter(o => o.order_status === "in_production");
 
   return (
     <Card>
