@@ -140,14 +140,17 @@ export const AdvertiserBranchManager = ({ userId, associatedListingIds = [] }: A
       return;
     }
 
-    // Check for duplicate address across both tables
-    const existingDup = branches.find(
-      (b) =>
-        b.address.toLowerCase().trim() === form.full_address.toLowerCase().trim() &&
-        b.id !== editingBranch?.id
-    );
-    if (existingDup) {
-      toast({ title: "Branch already exists", description: `A branch at this address already exists${existingDup.listing_title ? ` (from ${existingDup.listing_title})` : ""}.`, variant: "destructive" });
+    // Cross-check for duplicates across both branch tables
+    const { data: dupes } = await supabase.rpc("check_cross_branch_duplicate", {
+      _user_id: userId,
+      _full_address: form.full_address.trim(),
+    });
+    if (dupes && dupes.length > 0 && !editingBranch) {
+      const dup = dupes[0] as any;
+      const desc = dup.exists_in === "franchise"
+        ? `This address already exists as a branch under "${dup.listing_title || "a listing"}".`
+        : "You already have a branch at this address.";
+      toast({ title: "Branch already exists", description: desc, variant: "destructive" });
       return;
     }
 
@@ -163,13 +166,14 @@ export const AdvertiserBranchManager = ({ userId, associatedListingIds = [] }: A
       if (error) toast({ title: "Error updating branch", description: error.message, variant: "destructive" });
       else { toast({ title: "Branch updated" }); setDialogOpen(false); resetForm(); }
     } else {
-      const { error } = await supabase.from("advertiser_branches").insert({
-        advertiser_id: userId,
-        branch_name: form.branch_name || null,
-        full_address: form.full_address,
-        contact_name: form.contact_name || null,
-        contact_email: form.contact_email || null,
-        contact_phone: form.contact_phone || null,
+      // Use dedup-aware upsert
+      const { error } = await supabase.rpc("upsert_advertiser_branch", {
+        _advertiser_id: userId,
+        _full_address: form.full_address.trim(),
+        _branch_name: form.branch_name || null,
+        _contact_name: form.contact_name || null,
+        _contact_email: form.contact_email || null,
+        _contact_phone: form.contact_phone || null,
       });
       if (error) toast({ title: "Error adding branch", description: error.message, variant: "destructive" });
       else { toast({ title: "Branch added" }); setDialogOpen(false); resetForm(); }

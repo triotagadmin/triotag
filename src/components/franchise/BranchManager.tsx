@@ -92,18 +92,17 @@ export const BranchManager = ({ franchiseId, franchiseName }: BranchManagerProps
         return isNaN(num) ? null : num;
       };
 
-      const { error } = await supabase
-        .from("franchise_branches")
-        .insert({
-          franchise_id: franchiseId,
-          place_name: placeName.trim(),
-          full_address: fullAddress.trim(),
-          latitude: parseCoord(latitude),
-          longitude: parseCoord(longitude),
-          ad_unit_quantity: adUnitQuantity,
-          branch_operating_hours: branchHours.trim() || null,
-          notes: branchNotes.trim() || null,
-        } as any);
+      // Use dedup-aware upsert function
+      const { data, error } = await supabase.rpc("upsert_franchise_branch", {
+        _franchise_id: franchiseId,
+        _place_name: placeName.trim(),
+        _full_address: fullAddress.trim(),
+        _latitude: parseCoord(latitude),
+        _longitude: parseCoord(longitude),
+        _ad_unit_quantity: adUnitQuantity,
+        _branch_operating_hours: branchHours.trim() || null,
+        _notes: branchNotes.trim() || null,
+      });
 
       if (error) throw error;
 
@@ -113,7 +112,10 @@ export const BranchManager = ({ franchiseId, franchiseName }: BranchManagerProps
       fetchBranches();
     } catch (error: any) {
       console.error("Error adding branch:", error);
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      const msg = error.message?.includes("uq_franchise_branch_address")
+        ? "A branch at this address already exists for this listing."
+        : error.message;
+      toast({ title: "Error", description: msg, variant: "destructive" });
     } finally {
       setSaving(false);
     }
