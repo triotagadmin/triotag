@@ -222,9 +222,11 @@ const VenueRegistration = () => {
       if (venue.advertiser_id) {
         setAdvertiserLinked(true);
         setPendingAdvertiserEmail(null);
+        setOwnershipWorkflow(null);
       } else if (venue.pending_advertiser_email) {
         setAdvertiserLinked(false);
         setPendingAdvertiserEmail(venue.pending_advertiser_email);
+        setOwnershipWorkflow("registration");
       }
 
       const { data: existingDocs } = await supabase.from("verification_documents").select("*").eq("publisher_id", pubId);
