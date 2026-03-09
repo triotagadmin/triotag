@@ -41,6 +41,15 @@ const AD_UNIT_TYPE_LABELS: Record<string, string> = {
   wheat_paste: "Wheat Paste"
 };
 
+const AD_UNIT_MATERIAL_LABELS: Record<string, string> = {
+  vinyl_sticker: "Vinyl Sticker",
+  table_tent_card: "Table Tent Card",
+  acrylic_table_tent: "Acrylic Table Tent",
+  coroplast_stand: "Coroplast Stand",
+  poster_frame: "Poster Frame",
+  wall_decal: "Wall Decal",
+};
+
 const VENUE_TYPE_LABELS: Record<string, string> = {
   restaurant: "Restaurant",
   cafe: "Café",
