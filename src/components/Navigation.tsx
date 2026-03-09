@@ -75,19 +75,19 @@ export const Navigation = () => {
   const closeMobileMenu = () => setMobileMenuOpen(false);
   const showServices = !user || userRole === "advertiser";
 
-  const NavLinks = ({ mobile = false }: { mobile?: boolean }) => {
+  const NavLinks = ({ mobile = false }: {mobile?: boolean;}) => {
     const baseLinkClass = "text-white hover:text-primary hover:drop-shadow-[0_0_8px_hsl(var(--primary))] transition-all duration-300";
     const linkClass = mobile ? `w-full text-left py-3 px-4 ${baseLinkClass}` : baseLinkClass;
     return (
       <>
-        {user ? (
-          <>
-            {userRole === "talent" ? (
-              <Link to={getDashboardLink()} onClick={closeMobileMenu}>
+        {user ?
+        <>
+            {userRole === "talent" ?
+          <Link to={getDashboardLink()} onClick={closeMobileMenu}>
                 <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
-              </Link>
-            ) : (
-              <>
+              </Link> :
+
+          <>
                 <Link to="/explore" onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
                 </Link>
@@ -101,30 +101,30 @@ export const Navigation = () => {
                   <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
                 </Link>
               </>
-            )}
-            {!mobile && (
-              <>
+          }
+            {!mobile &&
+          <>
                 <MessengerBell />
                 <NotificationBell />
               </>
-            )}
+          }
             <Button variant="outline" size="sm" onClick={handleSignOut} className={`${baseLinkClass} ${mobile ? "w-full mt-2" : ""}`}>
               Log Out
             </Button>
-            {mobile && (
-              <div className="py-2 flex items-center gap-2">
+            {mobile &&
+          <div className="py-2 flex items-center gap-2">
                 <MessengerBell />
                 <NotificationBell />
               </div>
-            )}
-          </>
-        ) : (
-          <>
+          }
+          </> :
+
+        <>
             <Link to="/explore" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
             </Link>
             <Link to="/services" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>Services</Button>
+              
             </Link>
             <Link to="/habit-tracker" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
@@ -136,9 +136,9 @@ export const Navigation = () => {
               <Button variant="outline" size="sm" className={`${baseLinkClass} ${mobile ? "w-full mt-2" : ""}`}>Log In</Button>
             </Link>
           </>
-        )}
-      </>
-    );
+        }
+      </>);
+
   };
 
   return (
@@ -160,13 +160,13 @@ export const Navigation = () => {
         </button>
       </div>
 
-      {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 glass border-b border-[rgba(255,255,255,0.08)] shadow-lg z-50">
+      {mobileMenuOpen &&
+      <div className="md:hidden absolute top-full left-0 right-0 glass border-b border-[rgba(255,255,255,0.08)] shadow-lg z-50">
           <div className="flex flex-col p-4 space-y-1">
             <NavLinks mobile />
           </div>
         </div>
-      )}
-    </nav>
-  );
+      }
+    </nav>);
+
 };
