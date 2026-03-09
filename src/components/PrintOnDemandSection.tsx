@@ -9,7 +9,7 @@ const features = [
     icon: Palette,
     title: "Design Development",
     description:
-      "Upload your own designs or use our team of graphic artists to craft campaign materials for products, services, and events.",
+      "Upload your own designs and create campaign materials for products, services, and events using our self-service tools.",
   },
   {
     icon: Printer,
