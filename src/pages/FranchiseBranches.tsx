@@ -162,7 +162,8 @@ const FranchiseBranches = () => {
           <div className="mt-8">
             <AdvertiserBranchLocations
               userId={userId}
-              listings={[{ id, title: franchiseName }]}
+              listingId={id}
+              listingTitle={franchiseName}
             />
           </div>
         )}
