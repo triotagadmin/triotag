@@ -120,7 +120,7 @@ export const AdvertiserBranchManager = ({ userId }: AdvertiserBranchManagerProps
 };
 
 function OrderCard({ order }: { order: PrintOrderRecord }) {
-  const config = statusConfig[order.order_status] || statusConfig.pending_review;
+  const config = statusConfig[order.order_status] || statusConfig.pending_admin;
   const StatusIcon = config.icon;
 
   return (
