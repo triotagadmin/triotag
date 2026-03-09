@@ -192,10 +192,15 @@ const AdvertiserDashboard = () => {
           </div>
         </div>
 
-        {/* My Campaigns Section */}
+        {/* Branch Management Section */}
         <div className="mb-12">
-          
-          
+          {user && <AdvertiserBranchManager userId={user.id} />}
+        </div>
+
+        {/* Print Orders Section */}
+        <div className="mb-12 grid md:grid-cols-2 gap-6">
+          {user && <AdvertiserPrintOrderForm userId={user.id} />}
+          {user && <AdvertiserPrintOrdersList userId={user.id} />}
         </div>
 
         {/* My Bookings Section */}
