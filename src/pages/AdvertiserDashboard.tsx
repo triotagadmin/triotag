@@ -12,7 +12,6 @@ import { format } from "date-fns";
 import { AdvertiserBranchManager } from "@/components/advertiser/AdvertiserBranchManager";
 import { AdvertiserPrintOrderForm } from "@/components/advertiser/AdvertiserPrintOrderForm";
 import { AdvertiserPrintOrdersList } from "@/components/advertiser/AdvertiserPrintOrdersList";
-import { AdvertiserBranchLocations } from "@/components/advertiser/AdvertiserBranchLocations";
 const AdvertiserDashboard = () => {
   const navigate = useNavigate();
   const {
@@ -346,10 +345,8 @@ const AdvertiserDashboard = () => {
           </div>
         )}
 
-        {/* Branch Locations Section */}
-        <div className="mb-12">
-          {user && <AdvertiserBranchLocations userId={user.id} listings={[...ownedListings, ...leasedListings].map(l => ({ id: l.id, title: l.title }))} />}
-        </div>
+
+
 
         {/* Print Orders Section */}
         <div className="mb-12">

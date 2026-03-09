@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AdvertiserBranchLocations } from "@/components/advertiser/AdvertiserBranchLocations";
 
 interface Branch {
   id: string;
@@ -25,11 +26,25 @@ const FranchiseBranches = () => {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [franchiseName, setFranchiseName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isAdvertiser, setIsAdvertiser] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     const fetchData = async () => {
       try {
+        // Get current user
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setUserId(session.user.id);
+          const { data: role } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id)
+            .single();
+          setIsAdvertiser(role?.role === "advertiser");
+        }
+
         const { data: venue, error: venueError } = await supabase
           .from("ad_spaces")
           .select("title")
@@ -97,7 +112,7 @@ const FranchiseBranches = () => {
             <CardContent className="py-12 text-center">
               <MapPin className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No branches listed yet</h3>
-              <p className="text-muted-foreground">Add branch locations from your dashboard or contact the managing agent.</p>
+              <p className="text-muted-foreground">Add branch locations below or contact the managing agent.</p>
             </CardContent>
           </Card>
         ) : (
@@ -139,6 +154,16 @@ const FranchiseBranches = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        )}
+
+        {/* Advertiser Branch Locations */}
+        {isAdvertiser && userId && id && (
+          <div className="mt-8">
+            <AdvertiserBranchLocations
+              userId={userId}
+              listings={[{ id, title: franchiseName }]}
+            />
           </div>
         )}
       </div>
