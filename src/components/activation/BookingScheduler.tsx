@@ -251,8 +251,8 @@ export function BookingScheduler({
               {(() => {
                 const adUnits = pricing?.ad_units || [];
                 const selectedUnit = adUnits.find((u: any) => u.type === adUnitType) || adUnits[0];
-                const weeklyRate = selectedUnit?.pricePerWeek || selectedUnit?.weekly_subscription_fee || pricing?.weekly || pricing?.pricePerWeek || 0;
-                const monthlyRate = selectedUnit?.pricePerMonth || selectedUnit?.monthly_subscription_fee || pricing?.monthly || pricing?.pricePerMonth || 0;
+                const weeklyRate = selectedUnit?.pricePerWeek || selectedUnit?.weekly_subscription_fee || pricing?.weekly || pricing?.pricePerWeek || pricing?.weekly_lease_price || 0;
+                const monthlyRate = selectedUnit?.pricePerMonth || selectedUnit?.monthly_subscription_fee || pricing?.monthly || pricing?.pricePerMonth || pricing?.monthly_lease_price || 0;
                 const weeks = duration?.weeks || 0;
                 const useMonthly = weeks >= 4 && monthlyRate > 0;
                 const fullMonths = Math.floor(weeks / 4);
@@ -264,8 +264,8 @@ export function BookingScheduler({
                       <span className="text-muted-foreground">Rate</span>
                       <span>
                         {useMonthly
-                          ? `₱${monthlyRate.toLocaleString()}/month`
-                          : `₱${weeklyRate.toLocaleString()}/week`}
+                          ? `${sym}${monthlyRate.toLocaleString()}/month`
+                          : `${sym}${weeklyRate.toLocaleString()}/week`}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -276,8 +276,8 @@ export function BookingScheduler({
                       <span className="text-muted-foreground">Breakdown</span>
                       <span>
                         {useMonthly
-                          ? `₱${monthlyRate.toLocaleString()} × ${fullMonths} mo${remainingWeeks > 0 ? ` + ₱${weeklyRate.toLocaleString()} × ${remainingWeeks} wk` : ''}`
-                          : `₱${weeklyRate.toLocaleString()} × ${weeks} wk`}
+                          ? `${sym}${monthlyRate.toLocaleString()} × ${fullMonths} mo${remainingWeeks > 0 ? ` + ${sym}${weeklyRate.toLocaleString()} × ${remainingWeeks} wk` : ''}`
+                          : `${sym}${weeklyRate.toLocaleString()} × ${weeks} wk`}
                         {quantity > 1 ? ` × ${quantity}` : ''}
                       </span>
                     </div>
@@ -289,7 +289,7 @@ export function BookingScheduler({
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-lg">Estimated Publisher Payout</span>
                   <span className="text-2xl font-bold text-primary">
-                    ₱{estimatedPayout.toLocaleString()}
+                    {sym}{estimatedPayout.toLocaleString()}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
