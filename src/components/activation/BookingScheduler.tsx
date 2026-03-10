@@ -284,7 +284,7 @@ export function BookingScheduler({
                         {useMonthly
                           ? `${sym}${monthlyRate.toLocaleString()} × ${fullMonths} mo${remainingWeeks > 0 ? ` + ${sym}${weeklyRate.toLocaleString()} × ${remainingWeeks} wk` : ''}`
                           : `${sym}${weeklyRate.toLocaleString()} × ${weeks} wk`}
-                        {quantity > 1 ? ` × ${quantity} units` : ''}
+                        {quantity > 1 ? ` × ${quantity}` : ''}
                       </span>
                     </div>
                   </div>
@@ -293,7 +293,7 @@ export function BookingScheduler({
 
               <div className="pt-3 border-t">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-lg">Estimated Publisher Payout</span>
+                  <span className="font-semibold text-lg">Ad Space Lease Fee</span>
                   <span className="text-2xl font-bold text-primary">
                     {sym}{estimatedPayout.toLocaleString()}
                   </span>
