@@ -542,7 +542,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                         <div className="flex items-center gap-3 px-3 py-2 rounded-[14px] bg-muted/30">
                           <Checkbox
                             checked={allSelected}
-                            onCheckedChange={() => toggleSelectAllForFranchise(franchise.id)}
+                            onCheckedChange={() => toggleSelectAllForFranchise(franchise)}
                             className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                           />
                           <span className="text-sm font-medium text-muted-foreground">Select All Locations</span>
