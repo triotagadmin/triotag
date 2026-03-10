@@ -695,9 +695,9 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className={`h-7 text-[10px] px-2 shrink-0 transition-all duration-300 hover:scale-[1.02] focus-visible:outline-none ${
+                                className={`h-7 text-[10px] px-2 shrink-0 transition-all duration-500 focus-visible:outline-none ${
                                   loc.is_ad_space_listing
-                                    ? 'text-primary bg-primary/10 border border-primary/30 animate-glow-breathe hover:shadow-[0_0_14px_rgba(0,255,128,0.4)] focus-visible:shadow-[0_0_10px_rgba(0,255,128,0.3)]'
+                                    ? 'text-primary bg-primary/10 border border-primary/30 animate-glow-breathe hover:shadow-[0_0_14px_rgba(0,255,128,0.5)]'
                                     : 'text-muted-foreground'
                                 }`}
                                 onClick={e => { e.stopPropagation(); toggleAdSpaceListing(loc.id, loc.is_ad_space_listing); }}
