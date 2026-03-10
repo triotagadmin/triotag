@@ -869,8 +869,8 @@ const VenueRegistration = () => {
 
                 {/* Photos */}
                 <div>
-                  <Label>Upload Photos *</Label>
-                  <p className="text-sm text-muted-foreground mb-2">Upload photos representing different branches. {uploadedImages.length}/30</p>
+                  <Label>Photos {!isEditing && "*"}</Label>
+                  <p className="text-sm text-muted-foreground mb-2">Upload photos representing branches. {uploadedImages.length}/30</p>
                   <label className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-[14px] cursor-pointer hover:bg-muted/30 transition-colors">
                     <div className="flex flex-col items-center">
                       <Upload className="w-8 h-8 text-muted-foreground" />
