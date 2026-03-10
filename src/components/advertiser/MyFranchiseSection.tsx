@@ -323,6 +323,16 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       }
     }
 
+    if ((statusConfirmFranchise as any)._isAdSpace) {
+      // For ad spaces, we don't change marketplace_status in advertiser_franchises
+      // Ad spaces are controlled by their approval_status - skip for now
+      toast({ title: "Ad Space listings are managed by your publishing agent", variant: "destructive" });
+      setSaving(false);
+      setStatusConfirmOpen(false);
+      setStatusConfirmFranchise(null);
+      return;
+    }
+
     const { error } = await supabase
       .from("advertiser_franchises")
       .update({ marketplace_status: newStatus })
