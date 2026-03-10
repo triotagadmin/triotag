@@ -110,6 +110,7 @@ const App = () => (
           <Route path="/venue" element={<VenueDashboard />} />
           <Route path="/venue-publishers" element={<VenueDashboard />} />
           <Route path="/venue-publishers/:listingId/branches" element={<ManageBranches />} />
+          <Route path="/franchise-registration/:franchiseId" element={<FranchiseEdit />} />
           <Route path="/venue-info" element={<Venue />} />
           <Route path="/venue/register" element={<VenueRegistration />} />
           <Route path="/venue/verify" element={<VenueVerification />} />
