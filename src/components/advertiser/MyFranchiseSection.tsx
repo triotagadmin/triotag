@@ -358,9 +358,34 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       toast({ title: "Unable to save location. Please refresh the page and try again.", variant: "destructive" });
       return;
     }
+
+    // Duplicate detection: check if same city + branch_name exists under this franchise
+    const cityValue = locCity.trim() || null;
+    const isAdSpace = targetFranchiseId.startsWith("adspace-");
+    const realAdSpaceId = isAdSpace ? targetFranchiseId.replace("adspace-", "") : null;
+    const realFranchiseId = isAdSpace ? null : targetFranchiseId;
+
+    let dupQuery = supabase.from("advertiser_branches").select("id")
+      .eq("advertiser_id", userId);
+    if (realFranchiseId) dupQuery = dupQuery.eq("advertiser_franchise_id", realFranchiseId);
+    else if (realAdSpaceId) dupQuery = dupQuery.eq("listing_id", realAdSpaceId);
+    if (cityValue) dupQuery = dupQuery.eq("city", cityValue);
+    dupQuery = dupQuery.eq("branch_name", locName.trim());
+
+    const { data: dupes } = await dupQuery;
+    const isDuplicate = dupes && dupes.length > 0 && !(editingLocationId && dupes.length === 1 && dupes[0].id === editingLocationId);
+    if (isDuplicate) {
+      setSaving(false);
+      toast({
+        title: "⚠ This location already exists for this franchise.",
+        description: "Please check your existing branch locations before adding it again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSaving(true);
     const fullAddr = buildFullAddress();
-    const cityValue = locCity.trim() || null;
 
     if (editingLocationId) {
       const { error } = await supabase.from("advertiser_branches").update({
@@ -373,11 +398,6 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       if (error) toast({ title: "Location could not be saved. Please check the form and try again.", variant: "destructive" });
       else { toast({ title: "Location updated" }); setLocationDialogOpen(false); }
     } else {
-      // Determine if this is an ad-space franchise or a regular franchise
-      const isAdSpace = targetFranchiseId.startsWith("adspace-");
-      const realAdSpaceId = isAdSpace ? targetFranchiseId.replace("adspace-", "") : null;
-      const realFranchiseId = isAdSpace ? null : targetFranchiseId;
-
       const { error } = await supabase.from("advertiser_branches").insert({
         advertiser_id: userId,
         advertiser_franchise_id: realFranchiseId,
