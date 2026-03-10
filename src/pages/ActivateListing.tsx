@@ -204,6 +204,7 @@ const ActivateListing = () => {
             setCurrentStep("design");
             if (data.ad_design_url) setDesignApproved(true);
             break;
+          case "pending_approval":
           case "under_review":
           case "rejected":
             setCurrentStep("design");
@@ -378,7 +379,7 @@ const ActivateListing = () => {
     return diffWeeks * weeklyRate;
   };
 
-  // Submit Ad Request to Publisher
+  // Submit Ad Request to Admin for Approval
   const handleSubmitAdRequest = async () => {
     if (!startDate || !endDate || !listing || !artworkUrl) {
       toast({
@@ -418,7 +419,7 @@ const ActivateListing = () => {
           ad_space_id: id,
           advertiser_id: session.user.id,
           publisher_id: listing.publisher_id, // publisher_profile_id (canonical)
-          status: "pending_submission",
+          status: "pending_approval",
           submitted_at: new Date().toISOString(),
           start_date: format(startDate, "yyyy-MM-dd"),
           end_date: format(endDate, "yyyy-MM-dd"),
@@ -438,7 +439,7 @@ const ActivateListing = () => {
         const { error: updateError } = await supabase.
         from("activations").
         update({
-          status: "pending_submission",
+          status: "pending_approval",
           submitted_at: new Date().toISOString(),
           estimated_publisher_payout: bookingPrice,
           quantity,
@@ -446,35 +447,43 @@ const ActivateListing = () => {
           end_date: format(endDate, "yyyy-MM-dd"),
           ad_design_url: artworkUrl,
           activation_type: activationType,
-          publisher_id: listing.publisher_id // keep consistent if older rows used a different value
+          publisher_id: listing.publisher_id
         }).
         eq("id", persistedActivationId);
 
         if (updateError) throw updateError;
       }
 
-      // Send notification to publisher via backend function (non-blocking)
+      // Send notification to all verified admins
       try {
-        await supabase.functions.invoke("notify-ad-request", {
-          body: {
-            publisherProfileId: listing.publisher_id,
-            listingTitle: listing.title,
-            activationId: persistedActivationId
-          }
-        });
+        const { data: adminProfiles } = await supabase
+          .from("admin_profiles")
+          .select("user_id")
+          .eq("status", "verified");
+
+        if (adminProfiles && adminProfiles.length > 0) {
+          const notifications = adminProfiles.map((admin) => ({
+            user_id: admin.user_id,
+            title: "New Booking Request",
+            message: `A new ad space booking request for "${listing.title}" has been submitted and requires your approval.`,
+            type: "booking_request",
+          }));
+
+          await supabase.from("notifications").insert(notifications);
+        }
       } catch (notifyError) {
-        console.error("Failed to send notification:", notifyError);
+        console.error("Failed to send admin notifications:", notifyError);
       }
 
-      setActivationStatus("pending_submission");
+      setActivationStatus("pending_approval");
       toast({
-        title: "Ad Request Submitted!",
-        description: "Your ad request has been sent to the publisher for review."
+        title: "Booking Request Submitted!",
+        description: "Your booking request has been sent to the admin team for review."
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to submit ad request",
+        description: error.message || "Failed to submit booking request",
         variant: "destructive"
       });
     } finally {
@@ -733,14 +742,22 @@ const ActivateListing = () => {
   const subscriptionPrice = calculateSubscriptionPrice();
 
   // Check if schedule and design are complete for submitting
-  // Allow submission if either subscriptionPrice or estimatedPublisherPayout is valid
-  const hasValidPrice = subscriptionPrice > 0 || estimatedPublisherPayout > 0;
-  const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice;
+  // Detect fees from all ad materials in listing
+  const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
+  const hasListingFees = listingAdUnits.some((unit: any) =>
+    (unit.pricePerWeek && unit.pricePerWeek > 0) ||
+    (unit.pricePerMonth && unit.pricePerMonth > 0) ||
+    (unit.weekly_subscription_fee && unit.weekly_subscription_fee > 0) ||
+    (unit.monthly_subscription_fee && unit.monthly_subscription_fee > 0)
+  ) || (listing?.pricing?.weekly && listing.pricing.weekly > 0) || (listing?.pricing?.monthly && listing.pricing.monthly > 0);
 
-  // Check if waiting for publisher response
-  const isWaitingForPublisher = ["pending_submission", "under_review"].includes(activationStatus);
-  const isApprovedByPublisher = activationStatus === "approved";
-  const isRejectedByPublisher = activationStatus === "rejected";
+  const hasValidPrice = subscriptionPrice > 0 || estimatedPublisherPayout > 0;
+  const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice && hasListingFees;
+
+  // Check if waiting for admin response
+  const isWaitingForApproval = ["pending_submission", "pending_approval", "under_review"].includes(activationStatus);
+  const isApproved = activationStatus === "approved";
+  const isRejected = activationStatus === "rejected";
 
   if (loading || isAdvertiser === null) {
     return (
@@ -811,7 +828,7 @@ const ActivateListing = () => {
         {/* Step Indicator - Now 3 steps: Book Ad Space → Print Order → Payment */}
         <ActivationStepper
           currentStep={currentStep}
-          approvalStatus={isWaitingForPublisher ? "pending" : isApprovedByPublisher ? "approved" : undefined} />
+          approvalStatus={isWaitingForApproval ? "pending" : isApproved ? "approved" : undefined} />
 
 
         {/* Listing Summary with Price */}
@@ -859,43 +876,43 @@ const ActivateListing = () => {
         {currentStep === "design" &&
         <div className="space-y-8">
             {/* Show status messages for waiting/rejected states */}
-            {isWaitingForPublisher &&
+            {isWaitingForApproval &&
           <Card className="border-yellow-500/30 bg-yellow-500/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-yellow-600">
                     <Clock className="h-5 w-5 animate-pulse" />
-                    Waiting for Publisher Review
+                    Waiting for Admin Review
                   </CardTitle>
                   <CardDescription>
-                    Your ad request has been submitted. The publisher will review and respond shortly.
+                    Your booking request has been submitted. The admin team will review and respond shortly.
                   </CardDescription>
                 </CardHeader>
               </Card>
           }
 
-            {isRejectedByPublisher &&
+            {isRejected &&
           <Card className="border-destructive/30 bg-destructive/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-destructive">
                     <XCircle className="h-5 w-5" />
-                    Ad Request Rejected
+                    Booking Request Rejected
                   </CardTitle>
                   <CardDescription>
-                    {rejectionReason || "The publisher has rejected your ad request. You can modify and resubmit."}
+                    {rejectionReason || "The admin has rejected your booking request. You can modify and resubmit."}
                   </CardDescription>
                 </CardHeader>
               </Card>
           }
 
-            {isApprovedByPublisher &&
+            {isApproved &&
           <Card className="border-primary bg-primary/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-primary">
                     <CheckCircle className="h-5 w-5" />
-                    Ad Request Approved!
+                    Booking Request Approved!
                   </CardTitle>
                   <CardDescription>
-                    Your ad request has been approved. Proceed to place your print order.
+                    Your booking request has been approved. Proceed to place your print order.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -912,7 +929,7 @@ const ActivateListing = () => {
           }
 
             {/* Design Upload and Booking - only show if not yet approved */}
-            {!isApprovedByPublisher &&
+            {!isApproved &&
           <>
                 <div className="grid lg:grid-cols-2 gap-8">
                   <AdMockupPreview onApprove={handleMockupApproval} />
@@ -980,7 +997,7 @@ const ActivateListing = () => {
                 </div>
 
                 {/* Booking Scheduler */}
-                {designApproved && !isWaitingForPublisher &&
+                {designApproved && !isWaitingForApproval &&
             <>
                     <BookingScheduler
                 startDate={startDate}
@@ -1074,12 +1091,13 @@ const ActivateListing = () => {
                     </Button>
 
                     {!canSubmitAdRequest &&
-              <p className="text-sm text-center text-muted-foreground">
-                        {!designApproved && "Please upload and confirm your design. "}
-                        {!startDate && "Please select a start date. "}
-                        {!endDate && "Please select an end date. "}
-                        {subscriptionPrice <= 0 && "Booking price could not be calculated."}
-                      </p>
+              <div className="space-y-1 text-sm text-center text-muted-foreground">
+                        {!designApproved && <p>⚠ Please upload and confirm your design.</p>}
+                        {!startDate && <p>⚠ Please select a start date.</p>}
+                        {!endDate && <p>⚠ Please select an end date.</p>}
+                        {!hasListingFees && <p>⚠ This listing has no fees configured. Contact the admin.</p>}
+                        {hasListingFees && startDate && endDate && !hasValidPrice && <p>⚠ Booking price could not be calculated for the selected dates.</p>}
+                      </div>
               }
                   </>
             }

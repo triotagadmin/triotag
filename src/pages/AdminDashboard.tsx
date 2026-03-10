@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket, Package, UserCheck, Star } from "lucide-react";
+import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket, Package, UserCheck, Star, Calendar } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import SubmissionDetailsDialog from "@/components/SubmissionDetailsDialog";
 import { Navigation } from "@/components/Navigation";
+import { AdminBookingsQueue } from "@/components/admin/AdminBookingsQueue";
 
 interface Submission {
   id: string;
@@ -1119,8 +1120,12 @@ export default function AdminDashboard() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="marketplace" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+        <Tabs defaultValue="bookings" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-8">
+            <TabsTrigger value="bookings">
+              <Calendar className="w-4 h-4 mr-2" />
+              Bookings
+            </TabsTrigger>
             <TabsTrigger value="marketplace">
               <ShoppingCart className="w-4 h-4 mr-2" />
               Marketplace
@@ -1160,6 +1165,11 @@ export default function AdminDashboard() {
               )}
             </TabsTrigger>
           </TabsList>
+
+          {/* Bookings Tab */}
+          <TabsContent value="bookings" className="space-y-6">
+            <AdminBookingsQueue />
+          </TabsContent>
 
           {/* Marketplace Tab */}
           <TabsContent value="marketplace" className="space-y-6">

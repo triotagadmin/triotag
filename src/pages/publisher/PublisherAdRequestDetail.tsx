@@ -192,13 +192,8 @@ export default function PublisherAdRequestDetail() {
 
       setRequest(data);
 
-      if (data.status === "pending_submission") {
-        await supabase
-          .from("activations")
-          .update({ status: "under_review", reviewer_id: session.user.id })
-          .eq("id", id);
-        setRequest({ ...data, status: "under_review" });
-      }
+      // Mark as viewed (but don't change status - admin handles approval now)
+      // Publishers can only view, not approve/reject
 
       const { data: advertiserProfile } = await supabase
         .from("advertiser_profiles")
@@ -321,7 +316,7 @@ export default function PublisherAdRequestDetail() {
   }
 
   const statusInfo = statusConfig[request.status] || statusConfig.design;
-  const canTakeAction = ["pending_submission", "under_review"].includes(request.status);
+  const canTakeAction = false; // Approval is now handled by admin accounts only
   const duration = request.start_date && request.end_date
     ? Math.ceil((new Date(request.end_date).getTime() - new Date(request.start_date).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
