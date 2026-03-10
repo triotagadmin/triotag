@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { shouldDisableDate, getMinimumBookingDate } from "@/lib/businessDays";
+import { getCurrencySymbol } from "@/hooks/useCurrencyConversion";
 
 interface BookingSchedulerProps {
   startDate: Date | undefined;
@@ -18,6 +19,7 @@ interface BookingSchedulerProps {
   adUnitType?: string;
   quantity?: number;
   onEstimatedPayoutChange?: (payout: number) => void;
+  currency?: string;
 }
 
 export function BookingScheduler({
