@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, MapPin, ChevronLeft, ChevronRight, Building2, X, Loader2 } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import { Navigation } from "@/components/Navigation";
