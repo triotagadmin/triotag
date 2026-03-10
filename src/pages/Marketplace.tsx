@@ -171,6 +171,7 @@ const Marketplace = () => {
       from("ad_spaces").
       select(`*, publisher_profiles_public(business_name, publisher_type)`).
       eq("approval_status", "approved").
+      eq("availability_status", "available").
       order("created_at", { ascending: false });
 
       // Fetch branch counts for all approved listings

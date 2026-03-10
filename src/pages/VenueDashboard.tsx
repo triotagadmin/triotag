@@ -63,7 +63,7 @@ const VenueDashboard = () => {
       setProfile(profileData);
       const {
         data: spacesData
-      } = await supabase.from("ad_spaces").select("*").eq("publisher_id", profileData.id).order("created_at", {
+      } = await supabase.from("ad_spaces").select("*").eq("publisher_id", profileData.id).eq("agent_disconnected", false).order("created_at", {
         ascending: false
       });
       setAdSpaces(spacesData || []);

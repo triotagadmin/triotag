@@ -51,6 +51,7 @@ const ExploreAll = () => {
         .from('ad_spaces')
         .select(`*, publisher_profiles_public(business_name)`)
         .eq('approval_status', 'approved')
+        .eq('availability_status', 'available')
         .order('created_at', { ascending: false });
 
       // Fetch approved agent services (selling listings)

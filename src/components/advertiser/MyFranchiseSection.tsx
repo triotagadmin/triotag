@@ -207,7 +207,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
         .order("created_at", { ascending: false }),
       supabase
         .from("ad_spaces")
-        .select("id, title, location, approval_status, created_at, leased_advertiser_ids, publisher_id, agent_disconnected")
+        .select("id, title, location, approval_status, availability_status, created_at, leased_advertiser_ids, publisher_id, agent_disconnected")
         .eq("advertiser_id", userId)
         .order("created_at", { ascending: false }),
     ]);
@@ -229,20 +229,33 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       }
     }
 
-    const adSpaceFranchises: Franchise[] = adSpaceRows.map((ad: any) => ({
-      id: `adspace-${ad.id}`,
-      _adSpaceId: ad.id,
-      advertiser_id: userId,
-      franchise_name: ad.title,
-      marketplace_status: ad.approval_status === "approved" ? "active" as MarketplaceStatus : "inactive" as MarketplaceStatus,
-      created_at: ad.created_at,
-      updated_at: ad.created_at,
-      _isAdSpace: true,
-      _location: ad.location,
-      _agentDisconnected: ad.agent_disconnected || false,
-      _publisherName: publisherMap[ad.publisher_id] || null,
-      _publisherId: ad.publisher_id,
-    }));
+    const adSpaceFranchises: Franchise[] = adSpaceRows.map((ad: any) => {
+      // Determine marketplace status from both approval_status and availability_status
+      let mktStatus: MarketplaceStatus = "inactive";
+      if (ad.approval_status === "approved" && ad.availability_status === "available") {
+        mktStatus = "active";
+      } else if (ad.approval_status === "pending") {
+        mktStatus = "pending_approval";
+      } else if (ad.approval_status === "rejected") {
+        mktStatus = "rejected";
+      }
+      // If approved but not available, it's inactive (advertiser hasn't activated)
+
+      return {
+        id: `adspace-${ad.id}`,
+        _adSpaceId: ad.id,
+        advertiser_id: userId,
+        franchise_name: ad.title,
+        marketplace_status: mktStatus,
+        created_at: ad.created_at,
+        updated_at: ad.created_at,
+        _isAdSpace: true,
+        _location: ad.location,
+        _agentDisconnected: ad.agent_disconnected || false,
+        _publisherName: publisherMap[ad.publisher_id] || null,
+        _publisherId: ad.publisher_id,
+      };
+    });
 
     setFranchises([...realFranchises, ...adSpaceFranchises] as any);
     if (lRes.data) setLocations(lRes.data as unknown as FranchiseLocation[]);
@@ -473,9 +486,18 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
     }
 
     if ((statusConfirmFranchise as any)._isAdSpace) {
-      // For ad spaces, we don't change marketplace_status in advertiser_franchises
-      // Ad spaces are controlled by their approval_status - skip for now
-      toast({ title: "Ad Space listings are managed by your publishing agent", variant: "destructive" });
+      const adSpaceId = (statusConfirmFranchise as any)._adSpaceId;
+      const newAvailability = statusConfirmAction === "deactivate" ? "unavailable" : "available";
+      const { error } = await supabase
+        .from("ad_spaces")
+        .update({ availability_status: newAvailability } as any)
+        .eq("id", adSpaceId);
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: newAvailability === "available" ? "Listing activated on marketplace" : "Listing deactivated from marketplace" });
+        fetchAll();
+      }
       setSaving(false);
       setStatusConfirmOpen(false);
       setStatusConfirmFranchise(null);

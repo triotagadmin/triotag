@@ -439,6 +439,7 @@ const VenueRegistration = () => {
           advertiser_id: null,
           pending_advertiser_email: normalizedContactEmail || null,
           approval_status: "pending" as const,
+          availability_status: "unavailable",
         }]).select("id").single();
         if (insertError) throw insertError;
 

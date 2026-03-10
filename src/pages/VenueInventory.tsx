@@ -66,6 +66,7 @@ const VenueInventory = () => {
         .from("ad_spaces")
         .select("*")
         .eq("publisher_id", profile.id)
+        .eq("agent_disconnected", false)
         .order("created_at", { ascending: false });
 
       if (venuesError) throw venuesError;
