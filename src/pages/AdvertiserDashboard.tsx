@@ -254,30 +254,38 @@ const AdvertiserDashboard = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-4">
-                  {leasedListings.map((listing) => (
-                    <div key={listing.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{listing.title}</p>
-                          <Badge variant="secondary" className="text-xs gap-1">
-                            <Key className="h-3 w-3" /> Leased
-                          </Badge>
+                  {leasedListings.map((listing) => {
+                    // Extract city + country only (last 2 parts of comma-separated location)
+                    const locParts = (listing.location || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+                    const cityCountry = locParts.length >= 2
+                      ? locParts.slice(-2).join(", ")
+                      : locParts[locParts.length - 1] || "—";
+
+                    return (
+                      <div key={listing.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{listing.title}</p>
+                            <Badge variant="secondary" className="text-xs gap-1">
+                              <Key className="h-3 w-3" /> Bookmarked
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {cityCountry}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {listing.location || "—"}
-                        </p>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Button variant="outline" size="sm" onClick={() => navigate(`/venue/${listing.id}`)}>
+                            View
+                          </Button>
+                          <Button size="sm" onClick={() => navigate(`/activate/${listing.id}`)}>
+                            Activate
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Button variant="outline" size="sm" onClick={() => navigate(`/venue/${listing.id}`)}>
-                          View
-                        </Button>
-                        <Button size="sm" onClick={() => navigate(`/activate/${listing.id}`)}>
-                          Activate
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

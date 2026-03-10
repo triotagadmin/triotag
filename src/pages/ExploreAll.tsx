@@ -265,7 +265,7 @@ const ExploreAll = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="h-4 w-4" />
-                    {listing.location}
+                    {(() => { const p = (listing.location || "").split(",").map(s => s.trim()).filter(Boolean); return p.length >= 2 ? p.slice(-2).join(", ") : p[p.length - 1] || "—"; })()}
                   </div>
                   {listing.type === 'franchise' && listing.city_count && listing.city_count.length > 0 && (
                     <div className="pt-2 border-t mt-2 space-y-1">
