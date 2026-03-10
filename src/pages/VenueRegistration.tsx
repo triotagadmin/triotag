@@ -216,7 +216,7 @@ const VenueRegistration = () => {
       setWeeklyLeasePrice(specs.weekly_lease_price?.toString() || "");
       setMonthlyLeasePrice(specs.monthly_lease_price?.toString() || "");
       setLeaseCurrency(specs.lease_currency || "USD");
-      if (specs.additional_locations) setAdditionalLocations(specs.additional_locations);
+      
 
       const fullAddress = specs.head_office_address || {};
       setStreet(fullAddress.street || "");
