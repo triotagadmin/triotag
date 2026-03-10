@@ -2071,6 +2071,13 @@ export type Database = {
         }[]
       }
       get_auth_email: { Args: never; Returns: string }
+      get_listing_branch_counts: {
+        Args: { _listing_ids: string[] }
+        Returns: {
+          branch_count: number
+          listing_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
