@@ -229,20 +229,33 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       }
     }
 
-    const adSpaceFranchises: Franchise[] = adSpaceRows.map((ad: any) => ({
-      id: `adspace-${ad.id}`,
-      _adSpaceId: ad.id,
-      advertiser_id: userId,
-      franchise_name: ad.title,
-      marketplace_status: ad.approval_status === "approved" ? "active" as MarketplaceStatus : "inactive" as MarketplaceStatus,
-      created_at: ad.created_at,
-      updated_at: ad.created_at,
-      _isAdSpace: true,
-      _location: ad.location,
-      _agentDisconnected: ad.agent_disconnected || false,
-      _publisherName: publisherMap[ad.publisher_id] || null,
-      _publisherId: ad.publisher_id,
-    }));
+    const adSpaceFranchises: Franchise[] = adSpaceRows.map((ad: any) => {
+      // Determine marketplace status from both approval_status and availability_status
+      let mktStatus: MarketplaceStatus = "inactive";
+      if (ad.approval_status === "approved" && ad.availability_status === "available") {
+        mktStatus = "active";
+      } else if (ad.approval_status === "pending") {
+        mktStatus = "pending_approval";
+      } else if (ad.approval_status === "rejected") {
+        mktStatus = "rejected";
+      }
+      // If approved but not available, it's inactive (advertiser hasn't activated)
+
+      return {
+        id: `adspace-${ad.id}`,
+        _adSpaceId: ad.id,
+        advertiser_id: userId,
+        franchise_name: ad.title,
+        marketplace_status: mktStatus,
+        created_at: ad.created_at,
+        updated_at: ad.created_at,
+        _isAdSpace: true,
+        _location: ad.location,
+        _agentDisconnected: ad.agent_disconnected || false,
+        _publisherName: publisherMap[ad.publisher_id] || null,
+        _publisherId: ad.publisher_id,
+      };
+    });
 
     setFranchises([...realFranchises, ...adSpaceFranchises] as any);
     if (lRes.data) setLocations(lRes.data as unknown as FranchiseLocation[]);
