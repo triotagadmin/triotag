@@ -245,6 +245,7 @@ const Marketplace = () => {
             weeklyPrice: 0, // Hidden for public
             currency: "",
             branchCount: v.pending_advertiser_email ? 0 : (branchCountMap[v.id] || 0),
+            branchCities: v.pending_advertiser_email ? [] : (branchCitiesMap[v.id] || []),
           };
         }
 
