@@ -471,7 +471,9 @@ const Marketplace = () => {
                       {(listing.branchCount ?? 0) > 0 ? `Multi-location (${listing.branchCount})` : "Single Location"}
                     </Badge>
                   </div>
-                  <CardDescription className="line-clamp-2">{listing.description}</CardDescription>
+                  {user && listing.description && (
+                    <CardDescription className="line-clamp-2">{listing.description}</CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -479,54 +481,47 @@ const Marketplace = () => {
                     <span>{(() => { const p = (listing.location || "").split(",").map(s => s.trim()).filter(Boolean); return p.length >= 2 ? p.slice(-2).join(", ") : p[p.length - 1] || "—"; })()}</span>
                   </div>
 
-                  {(listing.weeklyPrice || listing.monthlySubscriptionFee) &&
-              <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 space-y-1">
-                      {listing.weeklyPrice !== undefined && listing.weeklyPrice > 0 &&
-                <div>
+                  {user && (listing.weeklyPrice || listing.monthlySubscriptionFee) ? (
+                    <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 space-y-1">
+                      {listing.weeklyPrice !== undefined && listing.weeklyPrice > 0 && (
+                        <div>
                           <span className="font-medium">Weekly:</span> {getCurrencySymbol(listing.currency)}{listing.weeklyPrice}/week
                         </div>
-                }
-                      {listing.monthlySubscriptionFee !== undefined &&
-                listing.monthlySubscriptionFee > 0 &&
-                <div>
-                            <span className="font-medium">Monthly:</span> {getCurrencySymbol(listing.currency)}
-                            {listing.monthlySubscriptionFee}/month
-                          </div>
-                }
+                      )}
+                      {listing.monthlySubscriptionFee !== undefined && listing.monthlySubscriptionFee > 0 && (
+                        <div>
+                          <span className="font-medium">Monthly:</span> {getCurrencySymbol(listing.currency)}
+                          {listing.monthlySubscriptionFee}/month
+                        </div>
+                      )}
                     </div>
-              }
+                  ) : null}
 
-                  {listing.adUnits.length > 0 &&
-              <div className="pt-2 border-t">
+                  {user && listing.adUnits.length > 0 && (
+                    <div className="pt-2 border-t">
                       <p className="text-xs text-muted-foreground mb-2">Ad Units</p>
                       <div className="flex flex-wrap gap-1">
                         {listing.adUnits.slice(0, 3).map((unit) => {
-                    const formatAdUnitName = (sku: string) => {
-                      return sku.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-                    };
-                    return (
-                      <Button key={unit} variant="cyber" size="sm" className="text-xs h-7 px-3">
+                          const formatAdUnitName = (sku: string) => {
+                            return sku.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                          };
+                          return (
+                            <Button key={unit} variant="cyber" size="sm" className="text-xs h-7 px-3">
                               {formatAdUnitName(unit)}
-                            </Button>);
-
-                  })}
-                        {listing.adUnits.length > 3 &&
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-7 px-3 border-primary/50 text-primary">
-
+                            </Button>
+                          );
+                        })}
+                        {listing.adUnits.length > 3 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-7 px-3 border-primary/50 text-primary">
                             +{listing.adUnits.length - 3} more
                           </Button>
-                  }
+                        )}
                       </div>
                     </div>
-              }
-
-                  <div className="pt-2 border-t">
-                    
-                    
-                  </div>
+                  )}
 
                   <div className="flex items-center gap-2 mt-4">
                     <Button className="flex-1">
