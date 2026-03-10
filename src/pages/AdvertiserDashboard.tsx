@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, ShoppingCart, Search, Mail, Receipt, Settings, Plus, MapPin, Globe, Users, TrendingUp, Calendar, Printer, Ticket, Building2, Key, Info } from "lucide-react";
+import { BarChart3, ShoppingCart, Mail, Receipt, Settings, Plus, MapPin, TrendingUp, Calendar, Printer, Ticket, Key, Info } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { format } from "date-fns";
 import { AdvertiserBranchManager } from "@/components/advertiser/AdvertiserBranchManager";
@@ -22,7 +22,6 @@ const AdvertiserDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState<any[]>([]);
-  const [ownedListings, setOwnedListings] = useState<any[]>([]);
   const [leasedListings, setLeasedListings] = useState<any[]>([]);
   const [bookingPage, setBookingPage] = useState(0);
   const BOOKINGS_PER_PAGE = 3;
@@ -56,14 +55,6 @@ const AdvertiserDashboard = () => {
         .eq("advertiser_id", session.user.id)
         .order("created_at", { ascending: false });
       if (activations) setBookings(activations);
-
-      // Fetch listings owned by this advertiser (advertiser_id = user_id)
-      const { data: owned } = await supabase
-        .from("ad_spaces")
-        .select("id, title, location, approval_status, specifications, created_at, leased_advertiser_ids")
-        .eq("advertiser_id", session.user.id)
-        .order("created_at", { ascending: false });
-      if (owned) setOwnedListings(owned);
 
       // Fetch listings leased by this advertiser
       const { data: leased } = await supabase
@@ -253,85 +244,6 @@ const AdvertiserDashboard = () => {
           </Card>
         </div>
 
-        {/* Owned Listings Section */}
-        <div className="mb-12">
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Building2 className="h-6 w-6" />
-            Ad Space Listings
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="About Ad Space Listings"
-                  className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted text-muted-foreground hover:bg-muted/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <Info className="h-3.5 w-3.5" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 text-sm" side="bottom" align="start">
-                <div className="space-y-2">
-                  <p className="font-medium">About Ad Space Listings</p>
-                  <p className="text-muted-foreground">
-                    These are ad space locations linked to your account by a publishing agent or assigned to you as the primary advertiser.
-                  </p>
-                  <p className="text-muted-foreground">
-                    You can run campaigns, order print materials, and manage branch locations for each listing.
-                  </p>
-                  <p className="text-muted-foreground">
-                    Leased listings from other agents also appear separately below.
-                  </p>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </h3>
-          <Card>
-            <CardContent className="pt-6">
-              {ownedListings.length === 0 ? (
-                <div className="text-center py-12">
-                  <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground mb-2">No listings associated with your account yet</p>
-                  <p className="text-sm text-muted-foreground">When a publisher adds your email to a listing, it will appear here.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {ownedListings.map((listing) => (
-                    <div key={listing.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{listing.title}</p>
-                          <Badge variant="outline" className="text-xs gap-1">
-                            <Building2 className="h-3 w-3" /> Owned
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {listing.location || "—"}
-                        </p>
-                        {(listing.leased_advertiser_ids as string[] || []).length > 0 && (
-                          <p className="text-xs text-muted-foreground">
-                            {(listing.leased_advertiser_ids as string[]).length} advertiser{(listing.leased_advertiser_ids as string[]).length !== 1 ? "s" : ""} leasing
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant={listing.approval_status === "approved" ? "default" : "secondary"}>
-                          {listing.approval_status}
-                        </Badge>
-                        <Button variant="outline" size="sm" onClick={() => navigate(`/venue/${listing.id}`)}>
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => navigate(`/venue/${listing.id}/branches`)}>
-                          Branches
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Leased Listings Section */}
         {leasedListings.length > 0 && (
           <div className="mb-12">
@@ -380,7 +292,7 @@ const AdvertiserDashboard = () => {
 
         {/* Print Orders Section */}
         <div className="mb-12">
-          {user && <AdvertiserBranchManager userId={user.id} associatedListings={[...ownedListings, ...leasedListings].map(l => ({ id: l.id, title: l.title }))} />}
+          {user && <AdvertiserBranchManager userId={user.id} associatedListings={leasedListings.map(l => ({ id: l.id, title: l.title }))} />}
         </div>
 
 

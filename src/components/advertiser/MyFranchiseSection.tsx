@@ -33,6 +33,9 @@ interface Franchise {
   marketplace_status: MarketplaceStatus;
   created_at: string;
   updated_at: string;
+  _isAdSpace?: boolean;
+  _adSpaceId?: string;
+  _location?: string;
 }
 
 interface FranchiseLocation {
@@ -110,7 +113,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
   const [saving, setSaving] = useState(false);
 
   const fetchAll = useCallback(async () => {
-    const [fRes, lRes] = await Promise.all([
+    const [fRes, lRes, adRes] = await Promise.all([
       supabase
         .from("advertiser_franchises")
         .select("*")
@@ -121,8 +124,28 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
         .select("*")
         .eq("advertiser_id", userId)
         .order("created_at", { ascending: false }),
+      supabase
+        .from("ad_spaces")
+        .select("id, title, location, approval_status, created_at, leased_advertiser_ids")
+        .eq("advertiser_id", userId)
+        .order("created_at", { ascending: false }),
     ]);
-    if (fRes.data) setFranchises(fRes.data as unknown as Franchise[]);
+
+    // Merge ad_spaces as virtual franchise entries
+    const realFranchises: Franchise[] = (fRes.data || []) as unknown as Franchise[];
+    const adSpaceFranchises: Franchise[] = ((adRes.data || []) as any[]).map((ad: any) => ({
+      id: `adspace-${ad.id}`,
+      _adSpaceId: ad.id,
+      advertiser_id: userId,
+      franchise_name: ad.title,
+      marketplace_status: ad.approval_status === "approved" ? "active" as MarketplaceStatus : "inactive" as MarketplaceStatus,
+      created_at: ad.created_at,
+      updated_at: ad.created_at,
+      _isAdSpace: true,
+      _location: ad.location,
+    }));
+
+    setFranchises([...realFranchises, ...adSpaceFranchises] as any);
     if (lRes.data) setLocations(lRes.data as unknown as FranchiseLocation[]);
     setLoading(false);
   }, [userId]);
@@ -300,6 +323,16 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       }
     }
 
+    if ((statusConfirmFranchise as any)._isAdSpace) {
+      // For ad spaces, we don't change marketplace_status in advertiser_franchises
+      // Ad spaces are controlled by their approval_status - skip for now
+      toast({ title: "Ad Space listings are managed by your publishing agent", variant: "destructive" });
+      setSaving(false);
+      setStatusConfirmOpen(false);
+      setStatusConfirmFranchise(null);
+      return;
+    }
+
     const { error } = await supabase
       .from("advertiser_franchises")
       .update({ marketplace_status: newStatus })
@@ -389,18 +422,33 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                       {expanded ? <ChevronUp className="h-5 w-5 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" />}
                       <div className="min-w-0">
                         <CardTitle className="text-lg">{franchise.franchise_name}</CardTitle>
+                        {(franchise as any)._isAdSpace && (franchise as any)._location && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <MapPin className="h-3 w-3" />
+                            {(franchise as any)._location}
+                          </p>
+                        )}
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {fLocs.length} branch{fLocs.length !== 1 ? "es" : ""} registered
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <Button variant="ghost" size="icon" onClick={() => openEditFranchise(franchise)} className="h-8 w-8">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteFranchise(franchise.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {!(franchise as any)._isAdSpace && (
+                        <>
+                          <Button variant="ghost" size="icon" onClick={() => openEditFranchise(franchise)} className="h-8 w-8">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteFranchise(franchise.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                      {(franchise as any)._isAdSpace && (
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <Store className="h-3 w-3" /> Ad Space
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
