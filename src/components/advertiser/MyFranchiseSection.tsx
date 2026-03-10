@@ -52,7 +52,6 @@ interface FranchiseLocation {
   is_ad_space_listing: boolean;
   created_at: string;
 }
-}
 
 interface MyFranchiseSectionProps {
   userId: string;
