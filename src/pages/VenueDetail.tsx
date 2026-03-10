@@ -94,11 +94,20 @@ const VenueDetail = () => {
 
   const fetchBranchCount = async () => {
     try {
-      const { count, error } = await supabase
+      // Get listing primary address to exclude it
+      const { data: listing } = await supabase.from("ad_spaces").select("location").eq("id", id!).single();
+      const primaryAddress = (listing?.location || "").trim().toLowerCase();
+
+      const { data, error } = await supabase
         .from("franchise_branches")
-        .select("*", { count: "exact", head: true })
+        .select("full_address")
         .eq("franchise_id", id!);
-      if (!error && count !== null) setBranchCount(count);
+      if (!error && data) {
+        const filtered = data.filter(
+          (b: any) => !(primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress)
+        );
+        setBranchCount(filtered.length);
+      }
     } catch {}
   };
 
@@ -142,7 +151,7 @@ const VenueDetail = () => {
       </div>;
   }
 
-  const isFranchise = venue.specifications?.is_franchise === true;
+  const isFranchise = branchCount > 0;
 
   return <div className="min-h-screen bg-muted/30">
       <Navigation />

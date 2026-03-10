@@ -25,25 +25,7 @@ interface DocumentUploadState {
   existingFileName?: string;
 }
 
-interface AdditionalLocation {
-  id: string;
-  address: string;
-  city: string;
-  province: string;
-  postalCode: string;
-}
 
-interface BranchLocation {
-  id: string;
-  branchName: string;
-  address: string;
-  city: string;
-  province: string;
-  postalCode: string;
-  isAdSpaceListing: boolean;
-  dbId?: string;
-  source?: "franchise" | "advertiser";
-}
 
 interface EnvironmentDetails {
   venueType: string;
@@ -143,8 +125,6 @@ const VenueRegistration = () => {
   const [contactPhone, setContactPhone] = useState("");
   const [operatingHours, setOperatingHours] = useState("");
 
-  // Additional Locations
-  const [additionalLocations, setAdditionalLocations] = useState<AdditionalLocation[]>([]);
 
   // Ad Unit Materials (multi-select)
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
@@ -172,8 +152,6 @@ const VenueRegistration = () => {
   // Listing toggle (edit mode)
   const [isListedOnExplore, setIsListedOnExplore] = useState(true);
 
-  // Loaded branches (edit mode - read-only display)
-  const [branches, setBranches] = useState<BranchLocation[]>([]);
 
   const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([
     { type: "business_license", label: "Business/Venue License", description: "Official business registration or venue operating license", file: null, uploaded: false },
@@ -225,7 +203,7 @@ const VenueRegistration = () => {
       setWeeklyLeasePrice(specs.weekly_lease_price?.toString() || "");
       setMonthlyLeasePrice(specs.monthly_lease_price?.toString() || "");
       setLeaseCurrency(specs.lease_currency || "USD");
-      if (specs.additional_locations) setAdditionalLocations(specs.additional_locations);
+      
 
       const fullAddress = specs.head_office_address || {};
       setStreet(fullAddress.street || "");
@@ -249,8 +227,6 @@ const VenueRegistration = () => {
         setOwnershipWorkflow("registration");
       }
 
-      // Load branches for read-only display
-      await loadBranches(venueId);
 
       const { data: existingDocs } = await supabase.from("verification_documents").select("*").eq("publisher_id", pubId);
       if (existingDocs && existingDocs.length > 0) {
@@ -264,72 +240,6 @@ const VenueRegistration = () => {
     }
   };
 
-  const loadBranches = async (listingId: string) => {
-    // Get the listing's primary address to filter it out
-    const { data: listing } = await supabase.from("ad_spaces").select("location").eq("id", listingId).single();
-    const primaryAddress = (listing?.location || "").trim().toLowerCase();
-
-    const [fbRes, abRes] = await Promise.all([
-      supabase
-        .from("franchise_branches")
-        .select("id, place_name, full_address")
-        .eq("franchise_id", listingId)
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("advertiser_branches")
-        .select("id, branch_name, full_address")
-        .eq("listing_id", listingId)
-        .order("created_at", { ascending: true }),
-    ]);
-
-    const combined: BranchLocation[] = [];
-
-    if (!fbRes.error && fbRes.data) {
-      fbRes.data.forEach((b: any) => {
-        // Skip branches that match the primary/head office address
-        if (primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress) return;
-        const parts = (b.full_address || "").split(", ");
-        combined.push({
-          id: crypto.randomUUID(),
-          dbId: b.id,
-          branchName: b.place_name || "",
-          address: parts[0] || "",
-          city: parts[1] || b.place_name || "",
-          province: parts[2] || "",
-          postalCode: parts[3] || "",
-          isAdSpaceListing: true,
-          source: "franchise",
-        });
-      });
-    }
-
-    if (!abRes.error && abRes.data) {
-      abRes.data.forEach((b: any) => {
-        // Skip branches that match the primary/head office address
-        if (primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress) return;
-        const alreadyExists = combined.some(
-          (c) => c.address === (b.full_address || "").split(", ")[0]
-            && c.city === ((b.full_address || "").split(", ")[1] || b.branch_name || "")
-        );
-        if (!alreadyExists) {
-          const parts = (b.full_address || "").split(", ");
-          combined.push({
-            id: crypto.randomUUID(),
-            dbId: b.id,
-            branchName: b.branch_name || "",
-            address: parts[0] || "",
-            city: parts[1] || b.branch_name || "",
-            province: parts[2] || "",
-            postalCode: parts[3] || "",
-            isAdSpaceListing: false,
-            source: "advertiser",
-          });
-        }
-      });
-    }
-
-    setBranches(combined);
-  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -358,12 +268,6 @@ const VenueRegistration = () => {
     const newDocs = [...verificationDocuments]; newDocs[index].file = file; setVerificationDocuments(newDocs);
   };
 
-  // Additional Locations
-  const addLocation = () => setAdditionalLocations([...additionalLocations, { id: crypto.randomUUID(), address: "", city: "", province: "", postalCode: "" }]);
-  const removeLocation = (id: string) => setAdditionalLocations(additionalLocations.filter(l => l.id !== id));
-  const updateLocation = (id: string, field: keyof AdditionalLocation, value: string) => {
-    setAdditionalLocations(additionalLocations.map(l => l.id === id ? { ...l, [field]: value } : l));
-  };
 
   // Materials toggle
   const toggleMaterial = (value: string) => {
@@ -400,7 +304,7 @@ const VenueRegistration = () => {
   const buildVenueData = () => {
     const actualVenueType = venueType === "other" ? customVenueType : venueType;
     const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
-    const locsJson = additionalLocations.map(l => ({ id: l.id, address: l.address, city: l.city, province: l.province, postalCode: l.postalCode }));
+    const locsJson: any[] = [];
     const envJson = {
       venueType: envDetails.venueType, venueSize: envDetails.venueSize, seatingCapacity: envDetails.seatingCapacity,
       environment: envDetails.environment, customerActivity: envDetails.customerActivity,
@@ -542,23 +446,6 @@ const VenueRegistration = () => {
           await requestOwnershipWorkflow(insertedData.id, normalizedContactEmail);
         }
 
-        // Save additional locations as franchise branches
-        if (insertedData && additionalLocations.length > 0) {
-          const branchRows = additionalLocations
-            .filter(loc => loc.address.trim())
-            .map(loc => ({
-              franchise_id: insertedData.id,
-              place_name: loc.city.trim() || loc.address.trim(),
-              full_address: [loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", "),
-            }));
-          if (branchRows.length > 0) {
-            const { error: branchError } = await supabase.from("franchise_branches").insert(branchRows);
-            if (branchError) {
-              console.error("Branch save error:", branchError);
-              toast({ title: "Note", description: `Listing saved but ${branchRows.length} branch(es) could not be saved. You can add them from your dashboard.` });
-            }
-          }
-        }
 
         setShowConfirmation(true);
         window.scrollTo(0, 0);
@@ -697,78 +584,6 @@ const VenueRegistration = () => {
                   </CardContent>
                 </Card>
 
-                {/* Branch Locations - detailed summary when editing, editable when registering */}
-                {isEditing ? (
-                  <Card className="rounded-[20px]">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center gap-2"><Building2 className="h-5 w-5 text-primary" /> Branch Locations</CardTitle>
-                      <p className="text-xs text-muted-foreground">
-                        {branches.length > 0
-                          ? `${branches.length} branch location${branches.length !== 1 ? "s" : ""} — Multi-location listing`
-                          : "Single location listing"}
-                      </p>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      {branches.length > 0 ? (
-                        <div className="space-y-1.5">
-                          {branches.map((loc, idx) => (
-                            <div key={loc.id} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
-                              <span className="text-primary font-medium shrink-0">{idx + 1}.</span>
-                              <div className="truncate flex-1">
-                                <span className="font-medium">{loc.branchName || "Unnamed"}</span>
-                                <span className="text-muted-foreground ml-1.5 text-xs">
-                                  {[loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", ")}
-                                </span>
-                              </div>
-                              {loc.isAdSpaceListing && (
-                                <Badge variant="secondary" className="ml-auto shrink-0 text-[10px]">Ad Space</Badge>
-                              )}
-                            </div>
-                          ))}
-                          <p className="text-xs text-muted-foreground italic mt-2">Branch locations can be managed from the dashboard.</p>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-muted-foreground italic py-2">No branch locations added yet. Add branches from the dashboard.</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <Card className="rounded-[20px]">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center gap-2"><Plus className="h-5 w-5 text-primary" /> Branch Locations</CardTitle>
-                      <p className="text-xs text-muted-foreground">You can add up to 3 branch locations now. Additional branches can be added anytime later in your dashboard.</p>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {additionalLocations.map((loc) => (
-                        <Card key={loc.id} className="rounded-[14px]">
-                          <CardContent className="p-4 space-y-3">
-                            <div className="flex justify-between items-center">
-                              <Label className="font-semibold text-primary">Location {additionalLocations.indexOf(loc) + 1} of 3</Label>
-                              <Button type="button" variant="ghost" size="sm" onClick={() => removeLocation(loc.id)} className="text-destructive h-8">
-                                <Trash2 className="h-4 w-4 mr-1" /> Remove
-                              </Button>
-                            </div>
-                            <Input placeholder="Address" value={loc.address} onChange={e => updateLocation(loc.id, "address", e.target.value)} />
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              <Input placeholder="City" value={loc.city} onChange={e => updateLocation(loc.id, "city", e.target.value)} />
-                              <Input placeholder="Province" value={loc.province} onChange={e => updateLocation(loc.id, "province", e.target.value)} />
-                            </div>
-                            <Input placeholder="Postal Code" value={loc.postalCode} onChange={e => updateLocation(loc.id, "postalCode", e.target.value)} />
-                          </CardContent>
-                        </Card>
-                      ))}
-                      <Button type="button" variant="outline" className="w-full" onClick={addLocation} disabled={additionalLocations.length >= 3}>
-                        <Plus className="h-4 w-4 mr-2" /> {additionalLocations.length >= 3 ? "Maximum 3 branches reached" : "Add Branch Location"}
-                      </Button>
-                      {additionalLocations.length >= 3 && (
-                        <p className="text-xs text-destructive font-medium">You can add up to 3 branch locations now. Additional branches can be added anytime later in your dashboard.</p>
-                      )}
-                      {additionalLocations.length < 3 && (
-                        <p className="text-xs text-muted-foreground">{3 - additionalLocations.length} branch slot{3 - additionalLocations.length !== 1 ? "s" : ""} remaining. More can be added from your dashboard after registration.</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
 
                 {/* Ad Unit Materials */}
                 <Card className="rounded-[20px]">
