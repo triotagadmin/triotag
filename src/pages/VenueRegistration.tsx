@@ -930,6 +930,21 @@ const VenueRegistration = () => {
                   </CardContent>
                 </Card>
 
+                {/* Listing Toggle - only when editing */}
+                {isEditing && (
+                <Card className="rounded-[20px]">
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-base font-semibold">List on Explore Page</Label>
+                        <p className="text-xs text-muted-foreground mt-1">Toggle to activate/deactivate this franchise listing on /explore</p>
+                      </div>
+                      <Switch checked={isListedOnExplore} onCheckedChange={setIsListedOnExplore} />
+                    </div>
+                  </CardContent>
+                </Card>
+                )}
+
                 <div className="pt-6 border-t border-[rgba(255,255,255,0.08)]">
                   <Button type="button" className="w-full" onClick={handleNextStep}>
                     Next: Ad Space Environment Details <ArrowRight className="ml-2 h-4 w-4" />
