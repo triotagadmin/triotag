@@ -13,7 +13,7 @@ import { BookingsArchive } from "@/components/publisher/BookingsArchive";
 import { BillingInvoices } from "@/components/publisher/BillingInvoices";
 import { MessagesCard } from "@/components/publisher/MessagesCard";
 import { Separator } from "@/components/ui/separator";
-import { BranchListingCard } from "@/components/franchise/BranchListingCard";
+
 
 const VenueDashboard = () => {
   const navigate = useNavigate();
@@ -292,12 +292,6 @@ const VenueDashboard = () => {
           </Card>
 
           {/* Branch Management */}
-          {adSpaces.length > 0 && (
-            <>
-              <Separator className="my-8" />
-              <BranchListingCard adSpaces={adSpaces.map((s) => ({ id: s.id, title: s.title, additionalLocations: (s.specifications as any)?.additional_locations || [] }))} />
-            </>
-          )}
 
           {/* Bottom Modules */}
           <Separator className="my-8" />
