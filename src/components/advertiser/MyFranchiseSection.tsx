@@ -639,7 +639,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                         ) : null;
                       })()}
                       {/* Disconnect Publisher Agent button — only for ad-space listings with active agent */}
-                      {isAdSpace && !franchise._agentDisconnected && franchise._publisherName && (
+                      {isAdSpace && !franchise._agentDisconnected && franchise._publisherId && (
                         <Button
                           size="sm"
                           variant="outline"
