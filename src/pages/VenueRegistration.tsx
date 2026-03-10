@@ -816,7 +816,7 @@ const VenueRegistration = () => {
                   <CardHeader className="pb-2"><CardTitle className="text-lg">Contact Information</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     <div><Label>Contact Person *</Label><Input value={contactPerson} onChange={e => setContactPerson(e.target.value)} placeholder="Full name" required /></div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <Label>Contact Email *</Label>
                         <Input type="email" value={contactEmail} onChange={e => { setContactEmail(e.target.value); setVerificationSent(false); setOwnershipWorkflow(null); }} required />
