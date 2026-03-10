@@ -23,6 +23,7 @@ const AdvertiserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState<any[]>([]);
   const [leasedListings, setLeasedListings] = useState<any[]>([]);
+  const [branchCounts, setBranchCounts] = useState<Record<string, number>>({});
   const [bookingPage, setBookingPage] = useState(0);
   const BOOKINGS_PER_PAGE = 3;
   useEffect(() => {
@@ -62,7 +63,19 @@ const AdvertiserDashboard = () => {
         .select("id, title, location, approval_status, specifications, created_at")
         .contains("leased_advertiser_ids", [session.user.id])
         .order("created_at", { ascending: false });
-      if (leased) setLeasedListings(leased);
+      if (leased) {
+        setLeasedListings(leased);
+        // Fetch branch counts for each leased listing
+        const counts: Record<string, number> = {};
+        await Promise.all(leased.map(async (l: any) => {
+          const { count } = await supabase
+            .from("franchise_branches")
+            .select("*", { count: "exact", head: true })
+            .eq("franchise_id", l.id);
+          counts[l.id] = count || 0;
+        }));
+        setBranchCounts(counts);
+      }
     };
     checkUser();
     const {
@@ -274,6 +287,11 @@ const AdvertiserDashboard = () => {
                             <MapPin className="h-3 w-3" />
                             {cityCountry}
                           </p>
+                          {(branchCounts[listing.id] || 0) > 0 && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 ml-4">
+                              {branchCounts[listing.id]} branch location{branchCounts[listing.id] !== 1 ? "s" : ""}
+                            </p>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <Button variant="outline" size="sm" onClick={() => navigate(`/venue/${listing.id}`)}>
