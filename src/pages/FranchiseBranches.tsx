@@ -28,6 +28,7 @@ const FranchiseBranches = () => {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdvertiser, setIsAdvertiser] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -43,6 +44,7 @@ const FranchiseBranches = () => {
             .eq("user_id", session.user.id)
             .single();
           setIsAdvertiser(role?.role === "advertiser");
+          setIsAdmin(role?.role === "admin");
         }
 
         const { data: venue, error: venueError } = await supabase
@@ -109,43 +111,74 @@ const FranchiseBranches = () => {
 
         {branches.length === 0 ? null : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {branches.map((branch) => (
-              <Card key={branch.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                <CardContent className="p-5 space-y-3">
-                  <h3 className="font-semibold text-lg">{branch.place_name}</h3>
-                  
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <p className="text-sm text-muted-foreground">{branch.full_address}</p>
-                  </div>
-
-                  {branch.branch_operating_hours && (
+            {isAdmin ? (
+              // Admin sees full details
+              branches.map((branch) => (
+                <Card key={branch.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                  <CardContent className="p-5 space-y-3">
+                    <h3 className="font-semibold text-lg">{branch.place_name}</h3>
+                    
                     <div className="flex items-start gap-2">
-                      <Clock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <p className="text-sm text-muted-foreground">{branch.branch_operating_hours}</p>
+                      <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      <p className="text-sm text-muted-foreground">{branch.full_address}</p>
                     </div>
-                  )}
 
-                  {branch.ad_unit_quantity > 0 && (
-                    <Badge variant="secondary">
-                      {branch.ad_unit_quantity} ad unit{branch.ad_unit_quantity !== 1 ? "s" : ""} available
-                    </Badge>
-                  )}
+                    {branch.branch_operating_hours && (
+                      <div className="flex items-start gap-2">
+                        <Clock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                        <p className="text-sm text-muted-foreground">{branch.branch_operating_hours}</p>
+                      </div>
+                    )}
 
-                  {branch.latitude && branch.longitude && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => window.open(`https://www.google.com/maps?q=${branch.latitude},${branch.longitude}`, '_blank')}
-                    >
-                      <MapPin className="h-3 w-3 mr-1" />
-                      View on Google Maps
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                    {branch.ad_unit_quantity > 0 && (
+                      <Badge variant="secondary">
+                        {branch.ad_unit_quantity} ad unit{branch.ad_unit_quantity !== 1 ? "s" : ""} available
+                      </Badge>
+                    )}
+
+                    {branch.latitude && branch.longitude && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => window.open(`https://www.google.com/maps?q=${branch.latitude},${branch.longitude}`, '_blank')}
+                      >
+                        <MapPin className="h-3 w-3 mr-1" />
+                        View on Google Maps
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              // Non-admin users see only city and count summary
+              (() => {
+                const cityMap = new Map<string, { count: number; totalAdUnits: number }>();
+                branches.forEach(b => {
+                  const cityName = b.full_address.split(", ").slice(1, 2)[0] || b.place_name || "Unknown";
+                  const existing = cityMap.get(cityName) || { count: 0, totalAdUnits: 0 };
+                  existing.count += 1;
+                  existing.totalAdUnits += (b.ad_unit_quantity || 0);
+                  cityMap.set(cityName, existing);
+                });
+                return Array.from(cityMap.entries()).map(([cityName, info]) => (
+                  <Card key={cityName} className="overflow-hidden hover:shadow-md transition-shadow">
+                    <CardContent className="p-5 space-y-3">
+                      <h3 className="font-semibold text-lg">{cityName}</h3>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-primary shrink-0" />
+                        <p className="text-sm text-muted-foreground">{info.count} location{info.count !== 1 ? "s" : ""}</p>
+                      </div>
+                      {info.totalAdUnits > 0 && (
+                        <Badge variant="secondary">
+                          {info.totalAdUnits} ad unit{info.totalAdUnits !== 1 ? "s" : ""} available
+                        </Badge>
+                      )}
+                    </CardContent>
+                  </Card>
+                ));
+              })()
+            )}
           </div>
         )}
 

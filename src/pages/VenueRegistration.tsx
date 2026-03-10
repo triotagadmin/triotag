@@ -581,11 +581,11 @@ const VenueRegistration = () => {
                   <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={4} className="rounded-[14px]" required placeholder="Describe your Brand" />
                 </div>
 
-                {/* Head Office Address */}
+                {/* Head Office Address - visible only during initial registration or to publisher (not public) */}
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Head Office / Primary Contact Address</CardTitle>
-                    <p className="text-xs text-muted-foreground">This is NOT used as a branch listing.</p>
+                    <p className="text-xs text-muted-foreground">This address is only visible to admin accounts and will not be shown publicly.</p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div><Label>Street Address</Label><Input value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" /></div>

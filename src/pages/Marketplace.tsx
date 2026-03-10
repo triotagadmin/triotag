@@ -27,6 +27,7 @@ interface MarketplaceListing {
   monthlySubscriptionFee?: number;
   weeklyPrice?: number;
   currency?: string;
+  branchCount?: number;
 }
 
 const AD_UNIT_TYPE_LABELS: Record<string, string> = {
@@ -172,6 +173,20 @@ const Marketplace = () => {
       eq("approval_status", "approved").
       order("created_at", { ascending: false });
 
+      // Fetch branch counts for all approved listings
+      const listingIds = (venuesData || []).map(v => v.id);
+      const { data: branchData } = listingIds.length > 0
+        ? await supabase
+            .from("franchise_branches")
+            .select("franchise_id")
+            .in("franchise_id", listingIds)
+        : { data: [] };
+
+      const branchCountMap: Record<string, number> = {};
+      (branchData || []).forEach((b: any) => {
+        branchCountMap[b.franchise_id] = (branchCountMap[b.franchise_id] || 0) + 1;
+      });
+
       const allListings: MarketplaceListing[] = (venuesData || []).map((v) => {
         const specs = v.specifications as any;
         const adUnitsFromDb = specs?.ad_units || [];
@@ -199,7 +214,8 @@ const Marketplace = () => {
           createdAt: v.created_at || "",
           monthlySubscriptionFee: monthlyPrice,
           weeklyPrice: weeklyPrice,
-          currency: currency
+          currency: currency,
+          branchCount: branchCountMap[v.id] || 0,
         };
       });
 
@@ -423,6 +439,9 @@ const Marketplace = () => {
                   <div className="flex flex-wrap gap-2 mb-2">
                     <Badge variant="secondary" className="capitalize">
                       {listing.type}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {(listing.branchCount ?? 0) > 0 ? `Multi-location (${listing.branchCount})` : "Single Location"}
                     </Badge>
                   </div>
                   <CardDescription className="line-clamp-2">{listing.description}</CardDescription>

@@ -101,7 +101,8 @@ const FranchiseEdit = () => {
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
-  const [userRole, setUserRole] = useState<"publisher" | "advertiser" | null>(null);
+  const [userRole, setUserRole] = useState<"publisher" | "advertiser" | "admin" | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [publisherId, setPublisherId] = useState<string | null>(null);
   const submittedRef = useRef(false);
 
@@ -175,7 +176,10 @@ const FranchiseEdit = () => {
       const { data: role } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
       const currentRole = role?.role as string;
 
-      if (currentRole === "publisher") {
+      if (currentRole === "admin") {
+        setUserRole("admin");
+        setIsAdmin(true);
+      } else if (currentRole === "publisher") {
         setUserRole("publisher");
         const { data: pubProfile } = await supabase.from("publisher_profiles").select("id").eq("user_id", session.user.id).maybeSingle();
         if (pubProfile) setPublisherId(pubProfile.id);
@@ -196,11 +200,12 @@ const FranchiseEdit = () => {
       }
 
       // Verify access
+      const isAdminUser = currentRole === "admin";
       const isPublisher = currentRole === "publisher";
       const isOwnerAdvertiser = venue.advertiser_id === session.user.id;
       const isLeasedAdvertiser = Array.isArray(venue.leased_advertiser_ids) && venue.leased_advertiser_ids.includes(session.user.id);
 
-      if (!isPublisher && !isOwnerAdvertiser && !isLeasedAdvertiser) {
+      if (!isAdminUser && !isPublisher && !isOwnerAdvertiser && !isLeasedAdvertiser) {
         toast({ title: "Access denied", description: "You don't have access to this franchise.", variant: "destructive" });
         navigate(-1 as any);
         return;
@@ -605,10 +610,12 @@ const FranchiseEdit = () => {
                   <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={4} className="rounded-[14px]" required placeholder="Describe your Brand" />
                 </div>
 
-                {/* Head Office Address */}
+                {/* Head Office Address - Admin Only */}
+                {isAdmin && (
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Head Office / Primary Contact Address</CardTitle>
+                    <p className="text-xs text-muted-foreground">Only visible to admin accounts.</p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div><Label>Street Address</Label><Input value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" /></div>
@@ -620,9 +627,23 @@ const FranchiseEdit = () => {
                       <div><Label>Postal Code</Label><Input value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="ZIP" /></div>
                       <div><Label>Country</Label><Input value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" /></div>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-border/40 space-y-2">
-                      <p className="text-xs text-muted-foreground">Branch Locations (read-only — edit on dashboard)</p>
-                      {branches.length > 0 ? (
+                  </CardContent>
+                </Card>
+                )}
+
+                {/* Branch Locations Summary - visible to all */}
+                <Card className="rounded-[20px]">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2"><Building2 className="h-5 w-5 text-primary" /> Branch Locations</CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      {branches.length > 0
+                        ? `${branches.length} branch location${branches.length !== 1 ? "s" : ""} — ${branches.length > 0 ? "Multi-location listing" : "Single location listing"}`
+                        : "Single location listing"}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {branches.length > 0 ? (
+                      isAdmin ? (
                         <div className="space-y-1.5">
                           {branches.map((loc, idx) => (
                             <div key={loc.id} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
@@ -640,9 +661,26 @@ const FranchiseEdit = () => {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-muted-foreground italic py-2">No branch locations added yet. Add branches from the dashboard.</p>
-                      )}
-                    </div>
+                        <div className="space-y-1.5">
+                          {(() => {
+                            const cityMap = new Map<string, number>();
+                            branches.forEach(b => {
+                              const c = b.city || "Unknown";
+                              cityMap.set(c, (cityMap.get(c) || 0) + 1);
+                            });
+                            return Array.from(cityMap.entries()).map(([cityName, count]) => (
+                              <div key={cityName} className="flex items-center justify-between text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
+                                <span className="font-medium">{cityName}</span>
+                                <Badge variant="secondary" className="text-[10px]">{count} location{count !== 1 ? "s" : ""}</Badge>
+                              </div>
+                            ));
+                          })()}
+                          <p className="text-xs text-muted-foreground italic mt-2">Full addresses are only visible to admin accounts.</p>
+                        </div>
+                      )
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic py-2">No branch locations added yet. Add branches from the dashboard.</p>
+                    )}
                   </CardContent>
                 </Card>
 
