@@ -827,7 +827,7 @@ const ActivateListing = () => {
         {/* Step Indicator - Now 3 steps: Book Ad Space → Print Order → Payment */}
         <ActivationStepper
           currentStep={currentStep}
-          approvalStatus={isWaitingForPublisher ? "pending" : isApprovedByPublisher ? "approved" : undefined} />
+          approvalStatus={isWaitingForApproval ? "pending" : isApproved ? "approved" : undefined} />
 
 
         {/* Listing Summary with Price */}
