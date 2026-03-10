@@ -110,7 +110,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
   const [saving, setSaving] = useState(false);
 
   const fetchAll = useCallback(async () => {
-    const [fRes, lRes] = await Promise.all([
+    const [fRes, lRes, adRes] = await Promise.all([
       supabase
         .from("advertiser_franchises")
         .select("*")
@@ -121,8 +121,28 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
         .select("*")
         .eq("advertiser_id", userId)
         .order("created_at", { ascending: false }),
+      supabase
+        .from("ad_spaces")
+        .select("id, title, location, approval_status, created_at, leased_advertiser_ids")
+        .eq("advertiser_id", userId)
+        .order("created_at", { ascending: false }),
     ]);
-    if (fRes.data) setFranchises(fRes.data as unknown as Franchise[]);
+
+    // Merge ad_spaces as virtual franchise entries
+    const realFranchises: Franchise[] = (fRes.data || []) as unknown as Franchise[];
+    const adSpaceFranchises: Franchise[] = ((adRes.data || []) as any[]).map((ad: any) => ({
+      id: `adspace-${ad.id}`,
+      _adSpaceId: ad.id,
+      advertiser_id: userId,
+      franchise_name: ad.title,
+      marketplace_status: ad.approval_status === "approved" ? "active" as MarketplaceStatus : "inactive" as MarketplaceStatus,
+      created_at: ad.created_at,
+      updated_at: ad.created_at,
+      _isAdSpace: true,
+      _location: ad.location,
+    }));
+
+    setFranchises([...realFranchises, ...adSpaceFranchises] as any);
     if (lRes.data) setLocations(lRes.data as unknown as FranchiseLocation[]);
     setLoading(false);
   }, [userId]);
