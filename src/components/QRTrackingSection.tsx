@@ -48,10 +48,10 @@ export const QRTrackingSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className={`text-center mb-8 md:mb-16 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 mb-6 animate-pulse-glow">
-            <QrCode className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Verified Placements</span>
-          </div>
+          
+
+
+          
           <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-display font-bold mb-4 md:mb-6">
             Brand Campaign<br />Tracking
           </h2>
