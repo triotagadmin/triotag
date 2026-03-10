@@ -109,6 +109,7 @@ export const FeaturedLocations = () => {
         from("ad_spaces").
         select("id, title, location, media_urls, specifications, availability_status").
         eq("approval_status", "approved").
+        eq("availability_status", "available").
         order("created_at", { ascending: false }).
         limit(6);
 
