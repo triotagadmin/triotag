@@ -372,7 +372,7 @@ const AdvertiserDashboard = () => {
           </div>
         )}
 
-        {/* My Franchise Section */}
+        {/* My Franchises Section */}
         <div className="mb-12">
           {user && <MyFranchiseSection userId={user.id} />}
         </div>
