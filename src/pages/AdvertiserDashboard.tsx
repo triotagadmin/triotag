@@ -249,7 +249,7 @@ const AdvertiserDashboard = () => {
           <div className="mb-12">
             <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <Key className="h-6 w-6" />
-              Leased Ad Spaces
+              Bookmarked Ad Spaces
             </h3>
             <Card>
               <CardContent className="pt-6">
