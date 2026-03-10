@@ -365,6 +365,7 @@ const ActivateListing = () => {
     selectedAdUnit?.weekly_subscription_fee ||
     listing.pricing?.weekly ||
     listing.pricing?.pricePerWeek ||
+    listing.specifications?.weekly_lease_price ||
     0;
 
     const monthlyRate =
@@ -373,6 +374,7 @@ const ActivateListing = () => {
     listing.pricing?.monthly ||
     listing.pricing?.pricePerMonth ||
     listing.monthly_subscription_fee ||
+    listing.specifications?.monthly_lease_price ||
     0;
 
 
