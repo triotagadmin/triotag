@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { ArrowLeft, MapPin, DollarSign, Clock, Phone, Lock, Building, Eye, Key, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Clock, Phone, Lock, Building, Eye, Key, Loader2, Bookmark, BookmarkCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { User } from "@supabase/supabase-js";
@@ -297,15 +297,13 @@ const VenueDetail = () => {
                     <span>Ready to advertise here? Activate this micro OOH ad space now!</span>
                   </div>}
 
-                {/* Lease / Activate buttons */}
+                {/* Bookmark / Activate buttons */}
                 {(() => {
-                  const isOwner = venue.advertiser_id === user?.id;
                   const isLeased = user?.id ? (venue.leased_advertiser_ids || []).includes(user.id) : false;
-                  const canLease = isAdvertiser && user && !isOwner && !isLeased && !venue.pending_advertiser_email;
 
                   return (
                     <>
-                      {canLease && (
+                      {isAdvertiser && user && !isLeased && (
                         <Button
                           className="w-full mt-2"
                           variant="outline"
@@ -316,7 +314,7 @@ const VenueDetail = () => {
                             try {
                               const currentIds = venue.leased_advertiser_ids || [];
                               if (currentIds.includes(user.id)) {
-                                toast({ title: "Already leased", description: "You are already leasing this listing." });
+                                toast({ title: "Already bookmarked", description: "This ad space is already in your dashboard." });
                                 return;
                               }
                               const { error } = await supabase
@@ -324,20 +322,20 @@ const VenueDetail = () => {
                                 .update({ leased_advertiser_ids: [...currentIds, user.id] } as any)
                                 .eq("id", venue.id);
                               if (error) throw error;
-                              toast({ title: "Listing Leased!", description: "This listing now appears on your dashboard for campaigns and print orders." });
+                              toast({ title: "Ad Space Bookmarked!", description: "This listing now appears on your dashboard for campaigns and print orders." });
                               fetchVenueDetails();
                             } catch (err: any) {
                               toast({ title: "Error", description: err.message, variant: "destructive" });
                             } finally { setLeasing(false); }
                           }}
                         >
-                          {leasing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Key className="h-4 w-4 mr-2" />}
-                          Lease this Listing
+                          {leasing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Bookmark className="h-4 w-4 mr-2" />}
+                          Bookmark This Ad Space
                         </Button>
                       )}
-                      {isLeased && (
+                      {isAdvertiser && isLeased && (
                         <Badge variant="secondary" className="w-full justify-center py-1.5 gap-1">
-                          <Key className="h-3 w-3" /> You are leasing this listing
+                          <BookmarkCheck className="h-3 w-3" /> Bookmarked
                         </Badge>
                       )}
                       <Button className="w-full mt-2" onClick={() => navigate(`/activate/${venue.id}`)}>
