@@ -272,12 +272,6 @@ export function BookingScheduler({
                       <span className="text-muted-foreground">Duration</span>
                       <span>{weeks} week{weeks !== 1 ? 's' : ''}</span>
                     </div>
-                    {quantity > 1 && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Quantity (ad units)</span>
-                        <span>{quantity}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between pt-2 border-t font-medium text-base">
                       <span className="text-muted-foreground">Breakdown</span>
                       <span>
