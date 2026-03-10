@@ -449,7 +449,7 @@ const Marketplace = () => {
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="h-4 w-4" />
-                    <span>{listing.location}</span>
+                    <span>{(() => { const p = (listing.location || "").split(",").map(s => s.trim()).filter(Boolean); return p.length >= 2 ? p.slice(-2).join(", ") : p[p.length - 1] || "—"; })()}</span>
                   </div>
 
                   {(listing.weeklyPrice || listing.monthlySubscriptionFee) &&
