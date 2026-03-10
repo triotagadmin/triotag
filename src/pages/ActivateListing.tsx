@@ -375,12 +375,6 @@ const ActivateListing = () => {
     listing.monthly_subscription_fee ||
     0;
 
-    const monthlyRate =
-    selectedAdUnit?.pricePerMonth ||
-    selectedAdUnit?.monthly_subscription_fee ||
-    listing.pricing?.monthly ||
-    listing.pricing?.pricePerMonth ||
-    0;
 
     if (diffWeeks >= 4 && monthlyRate > 0) {
       const fullMonths = Math.floor(diffWeeks / 4);
