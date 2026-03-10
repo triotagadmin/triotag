@@ -274,6 +274,7 @@ export type Database = {
       }
       advertiser_branches: {
         Row: {
+          advertiser_franchise_id: string | null
           advertiser_id: string
           branch_name: string | null
           contact_email: string | null
@@ -288,6 +289,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          advertiser_franchise_id?: string | null
           advertiser_id: string
           branch_name?: string | null
           contact_email?: string | null
@@ -302,6 +304,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          advertiser_franchise_id?: string | null
           advertiser_id?: string
           branch_name?: string | null
           contact_email?: string | null
@@ -317,6 +320,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "advertiser_branches_advertiser_franchise_id_fkey"
+            columns: ["advertiser_franchise_id"]
+            isOneToOne: false
+            referencedRelation: "advertiser_franchises"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "advertiser_branches_listing_id_fkey"
             columns: ["listing_id"]
             isOneToOne: false
@@ -324,6 +334,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      advertiser_franchises: {
+        Row: {
+          advertiser_id: string
+          created_at: string
+          franchise_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          advertiser_id: string
+          created_at?: string
+          franchise_name: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          advertiser_id?: string
+          created_at?: string
+          franchise_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       advertiser_print_orders: {
         Row: {
