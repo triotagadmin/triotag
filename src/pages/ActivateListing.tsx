@@ -762,6 +762,8 @@ const ActivateListing = () => {
     || (listing?.pricing?.monthly && listing.pricing.monthly > 0)
     || (listing?.pricing?.pricePerWeek && listing.pricing.pricePerWeek > 0)
     || (listing?.pricing?.pricePerMonth && listing.pricing.pricePerMonth > 0)
+    || (listing?.specifications?.weekly_lease_price && listing.specifications.weekly_lease_price > 0)
+    || (listing?.specifications?.monthly_lease_price && listing.specifications.monthly_lease_price > 0)
     || (listing?.monthly_subscription_fee && listing.monthly_subscription_fee > 0)
     || (listing?.activation_fee && listing.activation_fee > 0);
 
