@@ -32,6 +32,7 @@ import VenueInventory from "./pages/VenueInventory";
 import VenueDetail from "./pages/VenueDetail";
 import FranchiseBranches from "./pages/FranchiseBranches";
 import ManageBranches from "./pages/ManageBranches";
+import FranchiseEdit from "./pages/FranchiseEdit";
 import ActivateListing from "./pages/ActivateListing";
 import NotFound from "./pages/NotFound";
 import ExploreAll from "./pages/ExploreAll";
@@ -109,6 +110,7 @@ const App = () => (
           <Route path="/venue" element={<VenueDashboard />} />
           <Route path="/venue-publishers" element={<VenueDashboard />} />
           <Route path="/venue-publishers/:listingId/branches" element={<ManageBranches />} />
+          <Route path="/franchise-registration/:franchiseId" element={<FranchiseEdit />} />
           <Route path="/venue-info" element={<Venue />} />
           <Route path="/venue/register" element={<VenueRegistration />} />
           <Route path="/venue/verify" element={<VenueVerification />} />
