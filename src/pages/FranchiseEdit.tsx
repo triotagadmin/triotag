@@ -580,9 +580,9 @@ const FranchiseEdit = () => {
                       <div><Label>Postal Code</Label><Input value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="ZIP" /></div>
                       <div><Label>Country</Label><Input value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" /></div>
                     </div>
-                   {branches.length > 0 && (
-                      <div className="mt-4 pt-4 border-t border-border/40 space-y-2">
-                        <p className="text-xs text-muted-foreground">Branch Locations (read-only — edit on dashboard)</p>
+                    <div className="mt-4 pt-4 border-t border-border/40 space-y-2">
+                      <p className="text-xs text-muted-foreground">Branch Locations (read-only — edit on dashboard)</p>
+                      {branches.length > 0 ? (
                         <div className="space-y-1.5">
                           {branches.map((loc, idx) => (
                             <div key={loc.id} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
@@ -596,8 +596,10 @@ const FranchiseEdit = () => {
                             </div>
                           ))}
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic py-2">No branch locations added yet. Add branches from the dashboard.</p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
 
