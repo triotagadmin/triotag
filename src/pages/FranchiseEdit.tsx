@@ -580,31 +580,26 @@ const FranchiseEdit = () => {
                       <div><Label>Postal Code</Label><Input value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="ZIP" /></div>
                       <div><Label>Country</Label><Input value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" /></div>
                     </div>
+                   {branches.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-border/40 space-y-2">
+                        <p className="text-xs text-muted-foreground">Branch Locations (read-only — edit on dashboard)</p>
+                        <div className="space-y-1.5">
+                          {branches.map((loc, idx) => (
+                            <div key={loc.id} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
+                              <span className="text-primary font-medium shrink-0">{idx + 1}.</span>
+                              <span className="truncate">
+                                {[loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", ") || "No address"}
+                              </span>
+                              {loc.isAdSpaceListing && (
+                                <Badge variant="secondary" className="ml-auto shrink-0 text-[10px]">Ad Space</Badge>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
-
-                {/* Current Locations - Static List */}
-                {branches.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-primary" />
-                      Current Locations ({branches.length})
-                    </h3>
-                    <div className="space-y-1.5">
-                      {branches.map((loc, idx) => (
-                        <div key={loc.id} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
-                          <span className="text-primary font-medium shrink-0">{idx + 1}.</span>
-                          <span className="truncate">
-                            {[loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", ") || "No address"}
-                          </span>
-                          {loc.isAdSpaceListing && (
-                            <Badge variant="secondary" className="ml-auto shrink-0 text-[10px]">Ad Space</Badge>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 {/* Ad Unit Materials */}
                 <Card className="rounded-[20px]">
