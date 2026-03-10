@@ -22,7 +22,6 @@ const AdvertiserDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState<any[]>([]);
-  const [ownedListings, setOwnedListings] = useState<any[]>([]);
   const [leasedListings, setLeasedListings] = useState<any[]>([]);
   const [bookingPage, setBookingPage] = useState(0);
   const BOOKINGS_PER_PAGE = 3;
