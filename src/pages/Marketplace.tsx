@@ -440,6 +440,9 @@ const Marketplace = () => {
                     <Badge variant="secondary" className="capitalize">
                       {listing.type}
                     </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {(listing.branchCount ?? 0) > 0 ? `Multi-location (${listing.branchCount})` : "Single Location"}
+                    </Badge>
                   </div>
                   <CardDescription className="line-clamp-2">{listing.description}</CardDescription>
                 </CardHeader>
