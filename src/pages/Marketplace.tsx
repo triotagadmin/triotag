@@ -234,7 +234,7 @@ const Marketplace = () => {
           return {
             id: v.id,
             title: v.title,
-            description: "", // Hidden for public
+            description: v.description || "", // Public: brand description is visible
             location: v.location || "Not specified",
             type: VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue",
             adUnits: [], // Hidden for public
