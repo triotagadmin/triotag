@@ -583,40 +583,28 @@ const FranchiseEdit = () => {
                   </CardContent>
                 </Card>
 
-                {/* Branch Locations */}
-                <Card className="rounded-[20px]">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center gap-2"><Plus className="h-5 w-5 text-primary" /> Branch Locations</CardTitle>
-                    <p className="text-xs text-muted-foreground">Manage all branch locations. Toggle each branch as an Ad Space Listing individually.</p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {branches.map((loc, idx) => (
-                      <Card key={loc.id} className="rounded-[14px]">
-                        <CardContent className="p-4 space-y-3">
-                          <div className="flex justify-between items-center">
-                            <Label className="font-semibold text-primary">Location {idx + 1}</Label>
-                            <Button type="button" variant="ghost" size="sm" onClick={() => removeBranch(loc.id)} className="text-destructive h-8">
-                              <Trash2 className="h-4 w-4 mr-1" /> Remove
-                            </Button>
-                          </div>
-                          <Input placeholder="Address" value={loc.address} onChange={e => updateBranch(loc.id, "address", e.target.value)} />
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <Input placeholder="City" value={loc.city} onChange={e => updateBranch(loc.id, "city", e.target.value)} />
-                            <Input placeholder="Province / State" value={loc.province} onChange={e => updateBranch(loc.id, "province", e.target.value)} />
-                          </div>
-                          <Input placeholder="Postal Code" value={loc.postalCode} onChange={e => updateBranch(loc.id, "postalCode", e.target.value)} />
-                          <div className="flex items-center justify-between pt-2 border-t border-[rgba(255,255,255,0.08)]">
-                            <Label htmlFor={`listing-${loc.id}`} className="text-sm cursor-pointer">Mark as Ad Space Listing</Label>
-                            <Checkbox id={`listing-${loc.id}`} checked={loc.isAdSpaceListing} onCheckedChange={v => updateBranch(loc.id, "isAdSpaceListing", v)} />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    <Button type="button" variant="outline" className="w-full" onClick={addBranch}>
-                      <Plus className="h-4 w-4 mr-2" /> Add Branch Location
-                    </Button>
-                  </CardContent>
-                </Card>
+                {/* Current Locations - Static List */}
+                {branches.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      Current Locations ({branches.length})
+                    </h3>
+                    <div className="space-y-1.5">
+                      {branches.map((loc, idx) => (
+                        <div key={loc.id} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
+                          <span className="text-primary font-medium shrink-0">{idx + 1}.</span>
+                          <span className="truncate">
+                            {[loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", ") || "No address"}
+                          </span>
+                          {loc.isAdSpaceListing && (
+                            <Badge variant="secondary" className="ml-auto shrink-0 text-[10px]">Ad Space</Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Ad Unit Materials */}
                 <Card className="rounded-[20px]">
