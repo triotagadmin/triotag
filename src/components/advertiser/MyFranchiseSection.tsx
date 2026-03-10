@@ -42,12 +42,16 @@ interface FranchiseLocation {
   id: string;
   advertiser_id: string;
   advertiser_franchise_id: string | null;
+  listing_id: string | null;
   branch_name: string | null;
   full_address: string;
+  city: string | null;
   contact_name: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+  is_ad_space_listing: boolean;
   created_at: string;
+}
 }
 
 interface MyFranchiseSectionProps {
