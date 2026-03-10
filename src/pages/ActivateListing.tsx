@@ -1090,12 +1090,13 @@ const ActivateListing = () => {
                     </Button>
 
                     {!canSubmitAdRequest &&
-              <p className="text-sm text-center text-muted-foreground">
-                        {!designApproved && "Please upload and confirm your design. "}
-                        {!startDate && "Please select a start date. "}
-                        {!endDate && "Please select an end date. "}
-                        {subscriptionPrice <= 0 && "Booking price could not be calculated."}
-                      </p>
+              <div className="space-y-1 text-sm text-center text-muted-foreground">
+                        {!designApproved && <p>⚠ Please upload and confirm your design.</p>}
+                        {!startDate && <p>⚠ Please select a start date.</p>}
+                        {!endDate && <p>⚠ Please select an end date.</p>}
+                        {!hasListingFees && <p>⚠ This listing has no fees configured. Contact the admin.</p>}
+                        {hasListingFees && startDate && endDate && !hasValidPrice && <p>⚠ Booking price could not be calculated for the selected dates.</p>}
+                      </div>
               }
                   </>
             }
