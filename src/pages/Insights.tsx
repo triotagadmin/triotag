@@ -128,6 +128,11 @@ const Insights = () => {
                         {isAdmin && <Button variant="ghost" size="sm" onClick={() => handleEditPost(post.id)}>
                             <Edit className="w-4 h-4" />
                           </Button>}
+                        <ShareButtons
+                          url={`${window.location.origin}/insights/${post.id}`}
+                          title={post.title}
+                          description={post.excerpt}
+                        />
                         <Link to={`/insights/${post.id}`}>
                           <Button variant="ghost" size="sm">
                             Read More <ArrowRight className="ml-2 w-4 h-4" />
