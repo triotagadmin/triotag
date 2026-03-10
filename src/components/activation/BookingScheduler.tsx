@@ -30,8 +30,10 @@ export function BookingScheduler({
   adUnitType,
   quantity = 1,
   onEstimatedPayoutChange,
+  currency,
 }: BookingSchedulerProps) {
   const minDate = getMinimumBookingDate();
+  const sym = getCurrencySymbol(currency);
 
   const handleStartDateSelect = (date: Date | undefined) => {
     onDatesChange(date, endDate);
