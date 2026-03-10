@@ -207,7 +207,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
         .order("created_at", { ascending: false }),
       supabase
         .from("ad_spaces")
-        .select("id, title, location, approval_status, created_at, leased_advertiser_ids, publisher_id, agent_disconnected")
+        .select("id, title, location, approval_status, availability_status, created_at, leased_advertiser_ids, publisher_id, agent_disconnected")
         .eq("advertiser_id", userId)
         .order("created_at", { ascending: false }),
     ]);
