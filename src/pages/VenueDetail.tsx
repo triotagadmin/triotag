@@ -151,7 +151,7 @@ const VenueDetail = () => {
       </div>;
   }
 
-  const isFranchise = venue.specifications?.is_franchise === true;
+  const isFranchise = branchCount > 0;
 
   return <div className="min-h-screen bg-muted/30">
       <Navigation />
