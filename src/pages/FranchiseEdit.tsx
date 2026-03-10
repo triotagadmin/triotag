@@ -200,11 +200,12 @@ const FranchiseEdit = () => {
       }
 
       // Verify access
+      const isAdminUser = currentRole === "admin";
       const isPublisher = currentRole === "publisher";
       const isOwnerAdvertiser = venue.advertiser_id === session.user.id;
       const isLeasedAdvertiser = Array.isArray(venue.leased_advertiser_ids) && venue.leased_advertiser_ids.includes(session.user.id);
 
-      if (!isPublisher && !isOwnerAdvertiser && !isLeasedAdvertiser) {
+      if (!isAdminUser && !isPublisher && !isOwnerAdvertiser && !isLeasedAdvertiser) {
         toast({ title: "Access denied", description: "You don't have access to this franchise.", variant: "destructive" });
         navigate(-1 as any);
         return;
