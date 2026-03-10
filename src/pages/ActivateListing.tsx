@@ -928,7 +928,7 @@ const ActivateListing = () => {
           }
 
             {/* Design Upload and Booking - only show if not yet approved */}
-            {!isApprovedByPublisher &&
+            {!isApproved &&
           <>
                 <div className="grid lg:grid-cols-2 gap-8">
                   <AdMockupPreview onApprove={handleMockupApproval} />
