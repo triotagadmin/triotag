@@ -610,12 +610,11 @@ const FranchiseEdit = () => {
                   <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={4} className="rounded-[14px]" required placeholder="Describe your Brand" />
                 </div>
 
-                {/* Head Office Address - Admin Only */}
-                {isAdmin && (
+                {/* Head Office Address - visible to publisher/advertiser/admin on edit page */}
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Head Office / Primary Contact Address</CardTitle>
-                    <p className="text-xs text-muted-foreground">Only visible to admin accounts.</p>
+                    <p className="text-xs text-muted-foreground">This address is private and will not be shown on public listings.</p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div><Label>Street Address</Label><Input value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" /></div>
@@ -629,7 +628,6 @@ const FranchiseEdit = () => {
                     </div>
                   </CardContent>
                 </Card>
-                )}
 
                 {/* Branch Locations Summary - visible to all */}
                 <Card className="rounded-[20px]">
