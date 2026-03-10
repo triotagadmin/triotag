@@ -141,9 +141,9 @@ const ActivateListing = () => {
     try {
       const { data, error } = await supabase.
       from("ad_spaces").
-      select("id, title, location, description, pricing, specifications, media_urls, publisher_id").
-      eq("id", id).
-      single();
+       select("id, title, location, description, pricing, specifications, media_urls, publisher_id, monthly_subscription_fee, annual_subscription_fee, activation_fee, agent_disconnected").
+       eq("id", id).
+       single();
 
       if (error) throw error;
       setListing(data);
