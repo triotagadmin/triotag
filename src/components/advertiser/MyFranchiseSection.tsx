@@ -204,14 +204,29 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
         .order("created_at", { ascending: false }),
       supabase
         .from("ad_spaces")
-        .select("id, title, location, approval_status, created_at, leased_advertiser_ids")
+        .select("id, title, location, approval_status, created_at, leased_advertiser_ids, publisher_id, agent_disconnected")
         .eq("advertiser_id", userId)
         .order("created_at", { ascending: false }),
     ]);
 
     // Merge ad_spaces as virtual franchise entries
     const realFranchises: Franchise[] = (fRes.data || []) as unknown as Franchise[];
-    const adSpaceFranchises: Franchise[] = ((adRes.data || []) as any[]).map((ad: any) => ({
+    const adSpaceRows = (adRes.data || []) as any[];
+
+    // Fetch publisher names for ad spaces that have agents
+    let publisherMap: Record<string, string> = {};
+    const publisherIds = [...new Set(adSpaceRows.filter(a => a.publisher_id && !a.agent_disconnected).map(a => a.publisher_id))];
+    if (publisherIds.length > 0) {
+      const { data: pubProfiles } = await supabase
+        .from("publisher_profiles")
+        .select("id, business_name")
+        .in("id", publisherIds);
+      if (pubProfiles) {
+        pubProfiles.forEach((p: any) => { publisherMap[p.id] = p.business_name; });
+      }
+    }
+
+    const adSpaceFranchises: Franchise[] = adSpaceRows.map((ad: any) => ({
       id: `adspace-${ad.id}`,
       _adSpaceId: ad.id,
       advertiser_id: userId,
@@ -221,6 +236,9 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       updated_at: ad.created_at,
       _isAdSpace: true,
       _location: ad.location,
+      _agentDisconnected: ad.agent_disconnected || false,
+      _publisherName: publisherMap[ad.publisher_id] || null,
+      _publisherId: ad.publisher_id,
     }));
 
     setFranchises([...realFranchises, ...adSpaceFranchises] as any);
