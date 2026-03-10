@@ -424,12 +424,21 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <Button variant="ghost" size="icon" onClick={() => openEditFranchise(franchise)} className="h-8 w-8">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteFranchise(franchise.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {!(franchise as any)._isAdSpace && (
+                        <>
+                          <Button variant="ghost" size="icon" onClick={() => openEditFranchise(franchise)} className="h-8 w-8">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteFranchise(franchise.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                      {(franchise as any)._isAdSpace && (
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <Store className="h-3 w-3" /> Ad Space
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
