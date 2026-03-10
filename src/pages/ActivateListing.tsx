@@ -31,6 +31,10 @@ interface ListingDetails {
   specifications: any;
   media_urls: any;
   publisher_id: string;
+  monthly_subscription_fee: number | null;
+  annual_subscription_fee: number | null;
+  activation_fee: number | null;
+  agent_disconnected: boolean;
 }
 
 interface PublisherAddress {
