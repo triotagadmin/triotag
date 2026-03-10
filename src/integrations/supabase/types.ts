@@ -147,6 +147,7 @@ export type Database = {
         Row: {
           activation_fee: number | null
           advertiser_id: string | null
+          agent_disconnected: boolean
           annual_subscription_fee: number | null
           approval_status: Database["public"]["Enums"]["approval_status"]
           approved_at: string | null
@@ -172,6 +173,7 @@ export type Database = {
         Insert: {
           activation_fee?: number | null
           advertiser_id?: string | null
+          agent_disconnected?: boolean
           annual_subscription_fee?: number | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
@@ -197,6 +199,7 @@ export type Database = {
         Update: {
           activation_fee?: number | null
           advertiser_id?: string | null
+          agent_disconnected?: boolean
           annual_subscription_fee?: number | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null

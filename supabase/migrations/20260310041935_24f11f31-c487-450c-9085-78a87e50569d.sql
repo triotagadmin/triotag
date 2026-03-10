@@ -1,0 +1,1 @@
+ALTER TABLE public.ad_spaces ADD COLUMN agent_disconnected boolean NOT NULL DEFAULT false;

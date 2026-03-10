@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  MapPin, Plus, Trash2, Edit, Store, Printer, ChevronDown, ChevronUp, Info, Power, PowerOff, Clock, XCircle, Check, ChevronsUpDown
+  MapPin, Plus, Trash2, Edit, Store, Printer, ChevronDown, ChevronUp, Info, Power, PowerOff, Clock, XCircle, Check, ChevronsUpDown, Unplug
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -39,6 +39,9 @@ interface Franchise {
   _isAdSpace?: boolean;
   _adSpaceId?: string;
   _location?: string;
+  _agentDisconnected?: boolean;
+  _publisherName?: string;
+  _publisherId?: string;
 }
 
 interface FranchiseLocation {
@@ -184,6 +187,9 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
   const [statusConfirmOpen, setStatusConfirmOpen] = useState(false);
   const [statusConfirmFranchise, setStatusConfirmFranchise] = useState<Franchise | null>(null);
   const [statusConfirmAction, setStatusConfirmAction] = useState<"activate" | "deactivate">("activate");
+  // Agent disconnect confirmation
+  const [disconnectConfirmOpen, setDisconnectConfirmOpen] = useState(false);
+  const [disconnectFranchise, setDisconnectFranchise] = useState<Franchise | null>(null);
 
   const [saving, setSaving] = useState(false);
 
@@ -201,14 +207,29 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
         .order("created_at", { ascending: false }),
       supabase
         .from("ad_spaces")
-        .select("id, title, location, approval_status, created_at, leased_advertiser_ids")
+        .select("id, title, location, approval_status, created_at, leased_advertiser_ids, publisher_id, agent_disconnected")
         .eq("advertiser_id", userId)
         .order("created_at", { ascending: false }),
     ]);
 
     // Merge ad_spaces as virtual franchise entries
     const realFranchises: Franchise[] = (fRes.data || []) as unknown as Franchise[];
-    const adSpaceFranchises: Franchise[] = ((adRes.data || []) as any[]).map((ad: any) => ({
+    const adSpaceRows = (adRes.data || []) as any[];
+
+    // Fetch publisher names for ad spaces that have agents
+    let publisherMap: Record<string, string> = {};
+    const publisherIds = [...new Set(adSpaceRows.filter(a => a.publisher_id && !a.agent_disconnected).map(a => a.publisher_id))];
+    if (publisherIds.length > 0) {
+      const { data: pubProfiles } = await supabase
+        .from("publisher_profiles")
+        .select("id, business_name")
+        .in("id", publisherIds);
+      if (pubProfiles) {
+        pubProfiles.forEach((p: any) => { publisherMap[p.id] = p.business_name; });
+      }
+    }
+
+    const adSpaceFranchises: Franchise[] = adSpaceRows.map((ad: any) => ({
       id: `adspace-${ad.id}`,
       _adSpaceId: ad.id,
       advertiser_id: userId,
@@ -218,6 +239,9 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       updated_at: ad.created_at,
       _isAdSpace: true,
       _location: ad.location,
+      _agentDisconnected: ad.agent_disconnected || false,
+      _publisherName: publisherMap[ad.publisher_id] || null,
+      _publisherId: ad.publisher_id,
     }));
 
     setFranchises([...realFranchises, ...adSpaceFranchises] as any);
@@ -479,6 +503,29 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
     setStatusConfirmFranchise(null);
   };
 
+  const requestDisconnectAgent = (franchise: Franchise) => {
+    setDisconnectFranchise(franchise);
+    setDisconnectConfirmOpen(true);
+  };
+
+  const confirmDisconnectAgent = async () => {
+    if (!disconnectFranchise || !disconnectFranchise._adSpaceId) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("ad_spaces")
+      .update({ agent_disconnected: true } as any)
+      .eq("id", disconnectFranchise._adSpaceId);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Publisher agent disconnected", description: "The agent no longer has access to this listing." });
+      fetchAll();
+    }
+    setSaving(false);
+    setDisconnectConfirmOpen(false);
+    setDisconnectFranchise(null);
+  };
+
   if (loading) return <p className="text-sm text-muted-foreground">Loading franchises...</p>;
 
   return (
@@ -562,6 +609,16 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {fLocs.length} branch{fLocs.length !== 1 ? "es" : ""} registered
                         </p>
+                        {isAdSpace && franchise._publisherName && !franchise._agentDisconnected && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Publisher Agent: <span className="font-medium text-foreground">{franchise._publisherName}</span>
+                          </p>
+                        )}
+                        {isAdSpace && franchise._agentDisconnected && (
+                          <p className="text-xs text-muted-foreground/60 mt-0.5 italic">
+                            Publisher agent disconnected
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 flex-wrap">
@@ -581,6 +638,19 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                           </Button>
                         ) : null;
                       })()}
+                      {/* Disconnect Publisher Agent button — only for ad-space listings with active agent */}
+                      {isAdSpace && !franchise._agentDisconnected && franchise._publisherName && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 rounded-[16px] backdrop-blur-sm bg-destructive/10 border-destructive/30 text-destructive transition-all duration-500 hover:shadow-[0_0_14px_rgba(255,80,80,0.35)] hover:bg-destructive/15 hover:scale-[1.02] focus-visible:shadow-[0_0_10px_rgba(255,80,80,0.3)] focus-visible:outline-none"
+                          onClick={(e) => { e.stopPropagation(); requestDisconnectAgent(franchise); }}
+                        >
+                          <Unplug className="h-3.5 w-3.5" />
+                          <span className="hidden sm:inline">Disconnect Publisher Agent</span>
+                          <span className="sm:hidden">Disconnect</span>
+                        </Button>
+                      )}
                       {!(franchise as any)._isAdSpace && (
                         <>
                           <Button variant="ghost" size="icon" onClick={() => openEditFranchise(franchise)} className="h-8 w-8">
@@ -881,6 +951,32 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                   ? "Confirm Deactivation"
                   : "Confirm Activation"
               }
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Disconnect Agent Confirmation */}
+      <AlertDialog open={disconnectConfirmOpen} onOpenChange={setDisconnectConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect Publisher Agent?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove the publisher agent
+              {disconnectFranchise?._publisherName && (
+                <span className="font-medium text-foreground"> ({disconnectFranchise._publisherName})</span>
+              )}
+              {" "}from this listing? This action cannot be undone. All listing data will remain intact.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={saving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDisconnectAgent}
+              disabled={saving}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {saving ? "Disconnecting..." : "Confirm Disconnect"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
