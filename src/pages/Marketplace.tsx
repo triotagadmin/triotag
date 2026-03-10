@@ -125,7 +125,7 @@ const Marketplace = () => {
         const combinedAdUnits = [...adUnitLabels, ...adUnitMaterials];
         const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || specs?.weekly_lease_price || 0;
         const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || specs?.monthly_lease_price || 0;
-        const currency = adUnitsFromDb[0]?.currency || specs?.currency || "USD";
+        const currency = adUnitsFromDb[0]?.currency || specs?.lease_currency || specs?.currency || "USD";
 
         return {
           id: item.id,
@@ -185,7 +185,7 @@ const Marketplace = () => {
 
         const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || specs?.weekly_lease_price || 0;
         const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || specs?.monthly_lease_price || 0;
-        const currency = adUnitsFromDb[0]?.currency || specs?.currency || "USD";
+        const currency = adUnitsFromDb[0]?.currency || specs?.lease_currency || specs?.currency || "USD";
 
         return {
           id: v.id,
