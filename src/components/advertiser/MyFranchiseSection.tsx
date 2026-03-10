@@ -583,6 +583,14 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                                 )}
                               </div>
                               <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 text-[10px] px-2 ${loc.is_ad_space_listing ? 'text-primary' : 'text-muted-foreground'}`}
+                                  onClick={e => { e.stopPropagation(); toggleAdSpaceListing(loc.id, loc.is_ad_space_listing); }}
+                                >
+                                  {loc.is_ad_space_listing ? "Listed" : "List as Ad Space"}
+                                </Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEditLocation(loc); }}>
                                   <Edit className="h-3.5 w-3.5" />
                                 </Button>
