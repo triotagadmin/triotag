@@ -697,7 +697,7 @@ const VenueRegistration = () => {
                   </CardContent>
                 </Card>
 
-                {/* Branch Locations - read-only summary when editing, editable when registering */}
+                {/* Branch Locations - detailed summary when editing, editable when registering */}
                 {isEditing ? (
                   <Card className="rounded-[20px]">
                     <CardHeader className="pb-2">
@@ -711,20 +711,21 @@ const VenueRegistration = () => {
                     <CardContent className="space-y-2">
                       {branches.length > 0 ? (
                         <div className="space-y-1.5">
-                          {(() => {
-                            const cityMap = new Map<string, number>();
-                            branches.forEach(b => {
-                              const c = b.city || "Unknown";
-                              cityMap.set(c, (cityMap.get(c) || 0) + 1);
-                            });
-                            return Array.from(cityMap.entries()).map(([cityName, count]) => (
-                              <div key={cityName} className="flex items-center justify-between text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
-                                <span className="font-medium">{cityName}</span>
-                                <Badge variant="secondary" className="text-[10px]">{count} location{count !== 1 ? "s" : ""}</Badge>
+                          {branches.map((loc, idx) => (
+                            <div key={loc.id} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
+                              <span className="text-primary font-medium shrink-0">{idx + 1}.</span>
+                              <div className="truncate flex-1">
+                                <span className="font-medium">{loc.branchName || "Unnamed"}</span>
+                                <span className="text-muted-foreground ml-1.5 text-xs">
+                                  {[loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", ")}
+                                </span>
                               </div>
-                            ));
-                          })()}
-                          <p className="text-xs text-muted-foreground italic mt-2">Manage branches from the dashboard.</p>
+                              {loc.isAdSpaceListing && (
+                                <Badge variant="secondary" className="ml-auto shrink-0 text-[10px]">Ad Space</Badge>
+                              )}
+                            </div>
+                          ))}
+                          <p className="text-xs text-muted-foreground italic mt-2">Branch locations can be managed from the dashboard.</p>
                         </div>
                       ) : (
                         <p className="text-xs text-muted-foreground italic py-2">No branch locations added yet. Add branches from the dashboard.</p>
