@@ -267,7 +267,16 @@ const ExploreAll = () => {
                     <MapPin className="h-4 w-4" />
                     {listing.location}
                   </div>
-                  {(listing.weekly_price || listing.monthly_price) && (
+                  {listing.type === 'franchise' && listing.city_count && listing.city_count.length > 0 && (
+                    <div className="pt-2 border-t mt-2 space-y-1">
+                      {listing.city_count.map(cc => (
+                        <p key={cc.city} className="text-sm">
+                          {cc.city}: <span className="text-primary font-medium">{cc.count} Ad Space{cc.count !== 1 ? 's' : ''} Available</span>
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                  {listing.type !== 'franchise' && (listing.weekly_price || listing.monthly_price) && (
                     <div className="pt-2 border-t mt-2 space-y-1">
                       {listing.weekly_price && (
                         <p className="text-sm font-medium">
