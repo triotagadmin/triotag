@@ -9,6 +9,7 @@ import { Navigation } from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { User } from "@supabase/supabase-js";
 
 interface UnifiedListing {
   id: string;
@@ -27,6 +28,7 @@ interface UnifiedListing {
 
 const ExploreAll = () => {
   const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
   const [listings, setListings] = useState<UnifiedListing[]>([]);
   const [filteredListings, setFilteredListings] = useState<UnifiedListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,14 @@ const ExploreAll = () => {
   const [locationFilter, setLocationFilter] = useState("all");
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
     fetchAllListings();
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -94,33 +103,37 @@ const ExploreAll = () => {
         };
       }).filter(f => f.city_count && f.city_count.length > 0);
 
+      // Determine auth state for data stripping
+      const { data: { session } } = await supabase.auth.getSession();
+      const isAuthenticated = !!session;
+
       // Transform all data into unified format (only selling listings)
       const unifiedListings: UnifiedListing[] = [
         ...(venuesData || []).map(v => ({
           id: v.id,
           type: 'venue' as const,
           title: v.title,
-          description: v.description || '',
+          description: isAuthenticated ? (v.description || '') : '',
           location: v.location || 'N/A',
-          image: (v.media_urls as any)?.[0],
-          publisher_name: (v.publisher_profiles_public as any)?.business_name,
+          image: isAuthenticated ? (v.media_urls as any)?.[0] : undefined,
+          publisher_name: isAuthenticated ? (v.publisher_profiles_public as any)?.business_name : undefined,
           created_at: v.created_at || '',
           venue_type: (v.specifications as any)?.venue_type || (v.specifications as any)?.type || 'Venue',
-          weekly_price: (v.pricing as any)?.weekly,
-          monthly_price: (v.pricing as any)?.monthly,
+          weekly_price: isAuthenticated ? (v.pricing as any)?.weekly : undefined,
+          monthly_price: isAuthenticated ? (v.pricing as any)?.monthly : undefined,
         })),
         ...(servicesData || []).map(s => ({
           id: s.id,
           type: 'agent_service' as const,
           title: s.title,
-          description: s.description || '',
+          description: isAuthenticated ? (s.description || '') : '',
           location: s.location || 'N/A',
-          image: (s.media_urls as any)?.[0],
-          publisher_name: (s.publisher_profiles_public as any)?.business_name,
+          image: isAuthenticated ? (s.media_urls as any)?.[0] : undefined,
+          publisher_name: isAuthenticated ? (s.publisher_profiles_public as any)?.business_name : undefined,
           created_at: s.created_at || '',
           venue_type: s.service_type || 'Service',
-          weekly_price: (s.pricing as any)?.weekly,
-          monthly_price: (s.pricing as any)?.monthly,
+          weekly_price: isAuthenticated ? (s.pricing as any)?.weekly : undefined,
+          monthly_price: isAuthenticated ? (s.pricing as any)?.monthly : undefined,
         })),
         ...franchiseListings,
       ];
@@ -241,7 +254,7 @@ const ExploreAll = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredListings.map((listing) => (
             <Card key={listing.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              {listing.image && (
+              {user && listing.image && (
                 <div className="aspect-video bg-muted overflow-hidden">
                   <img
                     src={listing.image}
@@ -253,14 +266,16 @@ const ExploreAll = () => {
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
                   {getTypeBadge(listing.venue_type || 'Venue')}
-                  {listing.publisher_name && (
+                  {user && listing.publisher_name && (
                     <Badge variant="outline">{listing.publisher_name}</Badge>
                   )}
                 </div>
                 <CardTitle className="text-xl">{listing.title}</CardTitle>
-                <CardDescription className="line-clamp-2">
-                  {listing.description}
-                </CardDescription>
+                {user && listing.description && (
+                  <CardDescription className="line-clamp-2">
+                    {listing.description}
+                  </CardDescription>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
@@ -277,7 +292,7 @@ const ExploreAll = () => {
                       ))}
                     </div>
                   )}
-                  {listing.type !== 'franchise' && (listing.weekly_price || listing.monthly_price) && (
+                  {user && listing.type !== 'franchise' && (listing.weekly_price || listing.monthly_price) && (
                     <div className="pt-2 border-t mt-2 space-y-1">
                       {listing.weekly_price && (
                         <p className="text-sm font-medium">

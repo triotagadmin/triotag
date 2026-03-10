@@ -128,6 +128,24 @@ const Marketplace = () => {
         const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || specs?.monthly_lease_price || 0;
         const currency = adUnitsFromDb[0]?.currency || specs?.lease_currency || specs?.currency || "USD";
 
+        // Strip sensitive data for non-authenticated users
+        if (!user) {
+          return {
+            id: item.id,
+            title: item.title,
+            description: "",
+            location: item.location || "Not specified",
+            type: item.category === "agent" ? item.service_type || "Agent Service" : VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue",
+            adUnits: [],
+            image: Array.isArray(parsedMediaUrls) ? parsedMediaUrls[0] : undefined,
+            ownerName: "",
+            createdAt: item.created_at || "",
+            monthlySubscriptionFee: 0,
+            weeklyPrice: 0,
+            currency: ""
+          };
+        }
+
         return {
           id: item.id,
           title: item.title,
@@ -191,6 +209,10 @@ const Marketplace = () => {
         branchCountMap[b.listing_id] = (branchCountMap[b.listing_id] || 0) + 1;
       });
 
+      // Get current session to determine public vs authenticated view
+      const { data: { session } } = await supabase.auth.getSession();
+      const isAuthenticated = !!session;
+
       const allListings: MarketplaceListing[] = (venuesData || []).map((v) => {
         const specs = v.specifications as any;
         const adUnitsFromDb = specs?.ad_units || [];
@@ -205,6 +227,25 @@ const Marketplace = () => {
         const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || specs?.weekly_lease_price || 0;
         const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || specs?.monthly_lease_price || 0;
         const currency = adUnitsFromDb[0]?.currency || specs?.lease_currency || specs?.currency || "USD";
+
+        // For non-authenticated users, only return safe public fields
+        if (!isAuthenticated) {
+          return {
+            id: v.id,
+            title: v.title,
+            description: "", // Hidden for public
+            location: v.location || "Not specified",
+            type: VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue",
+            adUnits: [], // Hidden for public
+            image: Array.isArray(v.media_urls) ? (v.media_urls as string[])[0] : undefined,
+            ownerName: "", // Hidden for public
+            createdAt: v.created_at || "",
+            monthlySubscriptionFee: 0, // Hidden for public
+            weeklyPrice: 0, // Hidden for public
+            currency: "",
+            branchCount: branchCountMap[v.id] || 0,
+          };
+        }
 
         return {
           id: v.id,
@@ -448,7 +489,9 @@ const Marketplace = () => {
                       {(listing.branchCount ?? 0) > 0 ? `Multi-location (${listing.branchCount})` : "Single Location"}
                     </Badge>
                   </div>
-                  <CardDescription className="line-clamp-2">{listing.description}</CardDescription>
+                  {user && listing.description && (
+                    <CardDescription className="line-clamp-2">{listing.description}</CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -456,54 +499,47 @@ const Marketplace = () => {
                     <span>{(() => { const p = (listing.location || "").split(",").map(s => s.trim()).filter(Boolean); return p.length >= 2 ? p.slice(-2).join(", ") : p[p.length - 1] || "—"; })()}</span>
                   </div>
 
-                  {(listing.weeklyPrice || listing.monthlySubscriptionFee) &&
-              <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 space-y-1">
-                      {listing.weeklyPrice !== undefined && listing.weeklyPrice > 0 &&
-                <div>
+                  {user && (listing.weeklyPrice || listing.monthlySubscriptionFee) ? (
+                    <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 space-y-1">
+                      {listing.weeklyPrice !== undefined && listing.weeklyPrice > 0 && (
+                        <div>
                           <span className="font-medium">Weekly:</span> {getCurrencySymbol(listing.currency)}{listing.weeklyPrice}/week
                         </div>
-                }
-                      {listing.monthlySubscriptionFee !== undefined &&
-                listing.monthlySubscriptionFee > 0 &&
-                <div>
-                            <span className="font-medium">Monthly:</span> {getCurrencySymbol(listing.currency)}
-                            {listing.monthlySubscriptionFee}/month
-                          </div>
-                }
+                      )}
+                      {listing.monthlySubscriptionFee !== undefined && listing.monthlySubscriptionFee > 0 && (
+                        <div>
+                          <span className="font-medium">Monthly:</span> {getCurrencySymbol(listing.currency)}
+                          {listing.monthlySubscriptionFee}/month
+                        </div>
+                      )}
                     </div>
-              }
+                  ) : null}
 
-                  {listing.adUnits.length > 0 &&
-              <div className="pt-2 border-t">
+                  {user && listing.adUnits.length > 0 && (
+                    <div className="pt-2 border-t">
                       <p className="text-xs text-muted-foreground mb-2">Ad Units</p>
                       <div className="flex flex-wrap gap-1">
                         {listing.adUnits.slice(0, 3).map((unit) => {
-                    const formatAdUnitName = (sku: string) => {
-                      return sku.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-                    };
-                    return (
-                      <Button key={unit} variant="cyber" size="sm" className="text-xs h-7 px-3">
+                          const formatAdUnitName = (sku: string) => {
+                            return sku.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                          };
+                          return (
+                            <Button key={unit} variant="cyber" size="sm" className="text-xs h-7 px-3">
                               {formatAdUnitName(unit)}
-                            </Button>);
-
-                  })}
-                        {listing.adUnits.length > 3 &&
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-7 px-3 border-primary/50 text-primary">
-
+                            </Button>
+                          );
+                        })}
+                        {listing.adUnits.length > 3 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-7 px-3 border-primary/50 text-primary">
                             +{listing.adUnits.length - 3} more
                           </Button>
-                  }
+                        )}
                       </div>
                     </div>
-              }
-
-                  <div className="pt-2 border-t">
-                    
-                    
-                  </div>
+                  )}
 
                   <div className="flex items-center gap-2 mt-4">
                     <Button className="flex-1">
