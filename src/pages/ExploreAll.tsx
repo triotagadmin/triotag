@@ -28,6 +28,7 @@ interface UnifiedListing {
 
 const ExploreAll = () => {
   const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
   const [listings, setListings] = useState<UnifiedListing[]>([]);
   const [filteredListings, setFilteredListings] = useState<UnifiedListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,14 @@ const ExploreAll = () => {
   const [locationFilter, setLocationFilter] = useState("all");
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
     fetchAllListings();
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
