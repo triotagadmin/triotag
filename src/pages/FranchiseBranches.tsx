@@ -28,6 +28,7 @@ const FranchiseBranches = () => {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdvertiser, setIsAdvertiser] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!id) return;
