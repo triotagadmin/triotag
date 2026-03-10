@@ -7,12 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  MapPin, Plus, Trash2, Edit, Store, Printer, ChevronDown, ChevronUp, Info, Power, PowerOff, Clock, XCircle
+  MapPin, Plus, Trash2, Edit, Store, Printer, ChevronDown, ChevronUp, Info, Power, PowerOff, Clock, XCircle, Check, ChevronsUpDown
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNavigate } from "react-router-dom";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { getCountries, getProvinces, getCities, getPostalCode } from "@/lib/locationData";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
