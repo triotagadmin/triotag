@@ -105,8 +105,7 @@ export function BookingScheduler({
       total = days * dailyRate;
     }
 
-    // Multiply by quantity if applicable
-    total = total * quantity;
+    // Lease fee is per ad space, not multiplied by quantity
 
     return total;
   }, [startDate, endDate, pricing, adUnitType, quantity]);
