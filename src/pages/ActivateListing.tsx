@@ -875,15 +875,15 @@ const ActivateListing = () => {
         {currentStep === "design" &&
         <div className="space-y-8">
             {/* Show status messages for waiting/rejected states */}
-            {isWaitingForPublisher &&
+            {isWaitingForApproval &&
           <Card className="border-yellow-500/30 bg-yellow-500/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-yellow-600">
                     <Clock className="h-5 w-5 animate-pulse" />
-                    Waiting for Publisher Review
+                    Waiting for Admin Review
                   </CardTitle>
                   <CardDescription>
-                    Your ad request has been submitted. The publisher will review and respond shortly.
+                    Your booking request has been submitted. The admin team will review and respond shortly.
                   </CardDescription>
                 </CardHeader>
               </Card>
