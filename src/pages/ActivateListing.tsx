@@ -756,7 +756,9 @@ const ActivateListing = () => {
   ) || (listing?.pricing?.weekly && listing.pricing.weekly > 0)
     || (listing?.pricing?.monthly && listing.pricing.monthly > 0)
     || (listing?.pricing?.pricePerWeek && listing.pricing.pricePerWeek > 0)
-    || (listing?.pricing?.pricePerMonth && listing.pricing.pricePerMonth > 0);
+    || (listing?.pricing?.pricePerMonth && listing.pricing.pricePerMonth > 0)
+    || (listing?.monthly_subscription_fee && listing.monthly_subscription_fee > 0)
+    || (listing?.activation_fee && listing.activation_fee > 0);
 
   const hasValidPrice = subscriptionPrice > 0 || estimatedPublisherPayout > 0;
   const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice && hasListingFees;
