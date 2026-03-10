@@ -135,7 +135,7 @@ const Marketplace = () => {
           return {
             id: item.id,
             title: item.title,
-            description: "",
+            description: item.description || "",
             location: item.location || "Not specified",
             type: item.category === "agent" ? item.service_type || "Agent Service" : VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue",
             adUnits: [],
