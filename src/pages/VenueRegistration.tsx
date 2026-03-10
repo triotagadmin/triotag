@@ -798,7 +798,7 @@ const VenueRegistration = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <Label>Weekly Lease Price</Label>
                         <Input type="number" value={weeklyLeasePrice} onChange={e => setWeeklyLeasePrice(e.target.value)} placeholder="0.00" />
