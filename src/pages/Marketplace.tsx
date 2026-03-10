@@ -238,7 +238,7 @@ const Marketplace = () => {
             monthlySubscriptionFee: 0, // Hidden for public
             weeklyPrice: 0, // Hidden for public
             currency: "",
-            branchCount: branchCountMap[v.id] || 0,
+            branchCount: v.pending_advertiser_email ? 0 : (branchCountMap[v.id] || 0),
           };
         }
 
