@@ -103,33 +103,37 @@ const ExploreAll = () => {
         };
       }).filter(f => f.city_count && f.city_count.length > 0);
 
+      // Determine auth state for data stripping
+      const { data: { session } } = await supabase.auth.getSession();
+      const isAuthenticated = !!session;
+
       // Transform all data into unified format (only selling listings)
       const unifiedListings: UnifiedListing[] = [
         ...(venuesData || []).map(v => ({
           id: v.id,
           type: 'venue' as const,
           title: v.title,
-          description: v.description || '',
+          description: isAuthenticated ? (v.description || '') : '',
           location: v.location || 'N/A',
-          image: (v.media_urls as any)?.[0],
-          publisher_name: (v.publisher_profiles_public as any)?.business_name,
+          image: isAuthenticated ? (v.media_urls as any)?.[0] : undefined,
+          publisher_name: isAuthenticated ? (v.publisher_profiles_public as any)?.business_name : undefined,
           created_at: v.created_at || '',
           venue_type: (v.specifications as any)?.venue_type || (v.specifications as any)?.type || 'Venue',
-          weekly_price: (v.pricing as any)?.weekly,
-          monthly_price: (v.pricing as any)?.monthly,
+          weekly_price: isAuthenticated ? (v.pricing as any)?.weekly : undefined,
+          monthly_price: isAuthenticated ? (v.pricing as any)?.monthly : undefined,
         })),
         ...(servicesData || []).map(s => ({
           id: s.id,
           type: 'agent_service' as const,
           title: s.title,
-          description: s.description || '',
+          description: isAuthenticated ? (s.description || '') : '',
           location: s.location || 'N/A',
-          image: (s.media_urls as any)?.[0],
-          publisher_name: (s.publisher_profiles_public as any)?.business_name,
+          image: isAuthenticated ? (s.media_urls as any)?.[0] : undefined,
+          publisher_name: isAuthenticated ? (s.publisher_profiles_public as any)?.business_name : undefined,
           created_at: s.created_at || '',
           venue_type: s.service_type || 'Service',
-          weekly_price: (s.pricing as any)?.weekly,
-          monthly_price: (s.pricing as any)?.monthly,
+          weekly_price: isAuthenticated ? (s.pricing as any)?.weekly : undefined,
+          monthly_price: isAuthenticated ? (s.pricing as any)?.monthly : undefined,
         })),
         ...franchiseListings,
       ];
