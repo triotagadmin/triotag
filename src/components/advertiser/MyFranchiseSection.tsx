@@ -423,7 +423,13 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       ) : (
         <div className="space-y-6">
           {franchises.map(franchise => {
-            const fLocs = locations.filter(l => l.advertiser_franchise_id === franchise.id);
+            const isAdSpace = !!(franchise as any)._isAdSpace;
+            const realAdSpaceId = isAdSpace ? (franchise as any)._adSpaceId : null;
+            const fLocs = locations.filter(l => 
+              isAdSpace 
+                ? l.listing_id === realAdSpaceId 
+                : l.advertiser_franchise_id === franchise.id
+            );
             const expanded = expandedFranchises.has(franchise.id);
             const allSelected = fLocs.length > 0 && fLocs.every(l => selectedIds.has(l.id));
             const status = (franchise.marketplace_status || "inactive") as MarketplaceStatus;
