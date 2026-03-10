@@ -192,22 +192,17 @@ const Marketplace = () => {
       eq("availability_status", "available").
       order("created_at", { ascending: false });
 
-      // Fetch branch counts from both franchise_branches and advertiser_branches
+      // Fetch branch counts using secure RPC function (bypasses RLS)
       const listingIds = (venuesData || []).map(v => v.id);
-      const [{ data: franchiseBranchData }, { data: advertiserBranchData }] = listingIds.length > 0
-        ? await Promise.all([
-            supabase.from("franchise_branches").select("franchise_id").in("franchise_id", listingIds),
-            supabase.from("advertiser_branches").select("listing_id").in("listing_id", listingIds).eq("is_ad_space_listing", true),
-          ])
-        : [{ data: [] }, { data: [] }];
-
       const branchCountMap: Record<string, number> = {};
-      (franchiseBranchData || []).forEach((b: any) => {
-        branchCountMap[b.franchise_id] = (branchCountMap[b.franchise_id] || 0) + 1;
-      });
-      (advertiserBranchData || []).forEach((b: any) => {
-        branchCountMap[b.listing_id] = (branchCountMap[b.listing_id] || 0) + 1;
-      });
+      if (listingIds.length > 0) {
+        const { data: branchCounts } = await supabase.rpc("get_listing_branch_counts", {
+          _listing_ids: listingIds,
+        });
+        (branchCounts || []).forEach((row: any) => {
+          branchCountMap[row.listing_id] = Number(row.branch_count) || 0;
+        });
+      }
 
       // Get current session to determine public vs authenticated view
       const { data: { session } } = await supabase.auth.getSession();
