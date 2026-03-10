@@ -564,7 +564,23 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                      {/* Edit Franchise button — navigates to shared edit page */}
+                      {(() => {
+                        const editId = isAdSpace ? realAdSpaceId : franchise.id;
+                        return editId ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1.5 rounded-[16px] backdrop-blur-sm bg-primary/10 border-primary/30 text-primary transition-all duration-500 hover:shadow-[0_0_14px_rgba(0,255,128,0.35)] hover:bg-primary/15 hover:scale-[1.02] focus-visible:shadow-[0_0_10px_rgba(0,255,128,0.3)] focus-visible:outline-none"
+                            onClick={(e) => { e.stopPropagation(); navigate(`/franchise-registration/${editId}`); }}
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">Edit Franchise</span>
+                            <span className="sm:hidden">Edit</span>
+                          </Button>
+                        ) : null;
+                      })()}
                       {!(franchise as any)._isAdSpace && (
                         <>
                           <Button variant="ghost" size="icon" onClick={() => openEditFranchise(franchise)} className="h-8 w-8">
