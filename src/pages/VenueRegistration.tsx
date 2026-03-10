@@ -26,17 +26,6 @@ interface DocumentUploadState {
 }
 
 
-interface BranchLocation {
-  id: string;
-  branchName: string;
-  address: string;
-  city: string;
-  province: string;
-  postalCode: string;
-  isAdSpaceListing: boolean;
-  dbId?: string;
-  source?: "franchise" | "advertiser";
-}
 
 interface EnvironmentDetails {
   venueType: string;
