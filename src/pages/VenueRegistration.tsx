@@ -349,12 +349,6 @@ const VenueRegistration = () => {
     const newDocs = [...verificationDocuments]; newDocs[index].file = file; setVerificationDocuments(newDocs);
   };
 
-  // Additional Locations
-  const addLocation = () => setAdditionalLocations([...additionalLocations, { id: crypto.randomUUID(), address: "", city: "", province: "", postalCode: "" }]);
-  const removeLocation = (id: string) => setAdditionalLocations(additionalLocations.filter(l => l.id !== id));
-  const updateLocation = (id: string, field: keyof AdditionalLocation, value: string) => {
-    setAdditionalLocations(additionalLocations.map(l => l.id === id ? { ...l, [field]: value } : l));
-  };
 
   // Materials toggle
   const toggleMaterial = (value: string) => {
