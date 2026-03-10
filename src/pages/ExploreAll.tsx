@@ -60,6 +60,39 @@ const ExploreAll = () => {
         .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
+      // Fetch franchise listings with active marketplace status and ad-space-listed branches
+      const { data: franchiseData } = await supabase
+        .from('advertiser_franchises')
+        .select('id, franchise_name, marketplace_status, created_at')
+        .eq('marketplace_status', 'active');
+
+      // Fetch branches marked as ad space listings
+      const { data: branchData } = await supabase
+        .from('advertiser_branches')
+        .select('advertiser_franchise_id, city, is_ad_space_listing')
+        .eq('is_ad_space_listing', true);
+
+      // Group branches by franchise and city
+      const franchiseListings: UnifiedListing[] = (franchiseData || []).map(f => {
+        const fBranches = (branchData || []).filter(b => b.advertiser_franchise_id === f.id);
+        const cityMap = new Map<string, number>();
+        fBranches.forEach(b => {
+          const city = b.city || 'Unknown';
+          cityMap.set(city, (cityMap.get(city) || 0) + 1);
+        });
+        const cityCount = Array.from(cityMap.entries()).map(([city, count]) => ({ city, count }));
+        return {
+          id: f.id,
+          type: 'franchise' as const,
+          title: f.franchise_name,
+          description: cityCount.map(c => `${c.city}: ${c.count} Ad Space${c.count !== 1 ? 's' : ''}`).join(' · ') || 'No locations listed',
+          location: cityCount.map(c => c.city).join(', ') || 'N/A',
+          created_at: f.created_at,
+          venue_type: 'Franchise',
+          city_count: cityCount,
+        };
+      }).filter(f => f.city_count && f.city_count.length > 0);
+
       // Transform all data into unified format (only selling listings)
       const unifiedListings: UnifiedListing[] = [
         ...(venuesData || []).map(v => ({
@@ -87,7 +120,8 @@ const ExploreAll = () => {
           venue_type: s.service_type || 'Service',
           weekly_price: (s.pricing as any)?.weekly,
           monthly_price: (s.pricing as any)?.monthly,
-        }))
+        })),
+        ...franchiseListings,
       ];
 
       // Sort by created_at
