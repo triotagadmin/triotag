@@ -210,6 +210,7 @@ const VenueRegistration = () => {
       setTitle(venue.title || "");
       setDescription(venue.description || "");
       setUploadedImages(Array.isArray(venue.media_urls) ? venue.media_urls as string[] : []);
+      setIsListedOnExplore(venue.availability_status !== "unlisted");
       const specs = venue.specifications as any || {};
       setVenueType(specs.venue_type || "");
       if (specs.custom_venue_type) setCustomVenueType(specs.custom_venue_type);
@@ -247,6 +248,9 @@ const VenueRegistration = () => {
         setPendingAdvertiserEmail(venue.pending_advertiser_email);
         setOwnershipWorkflow("registration");
       }
+
+      // Load branches for read-only display
+      await loadBranches(venueId);
 
       const { data: existingDocs } = await supabase.from("verification_documents").select("*").eq("publisher_id", pubId);
       if (existingDocs && existingDocs.length > 0) {
