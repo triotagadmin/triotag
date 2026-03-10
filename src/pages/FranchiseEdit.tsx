@@ -375,6 +375,7 @@ const FranchiseEdit = () => {
   };
 
   const updateBranch = (localId: string, field: keyof BranchLocation, value: any) => {
+    setBranchesEdited(true);
     setBranches(prev => prev.map(b => b.id === localId ? { ...b, [field]: value } : b));
   };
 
