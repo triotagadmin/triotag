@@ -2071,6 +2071,15 @@ export type Database = {
         }[]
       }
       get_auth_email: { Args: never; Returns: string }
+      get_listing_branch_cities: {
+        Args: { _listing_ids: string[] }
+        Returns: {
+          branch_count: number
+          city: string
+          country: string
+          listing_id: string
+        }[]
+      }
       get_listing_branch_counts: {
         Args: { _listing_ids: string[] }
         Returns: {

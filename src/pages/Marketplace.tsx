@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, MapPin, ChevronLeft, ChevronRight, Building2, X, Loader2 } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import { Navigation } from "@/components/Navigation";
@@ -28,6 +29,7 @@ interface MarketplaceListing {
   weeklyPrice?: number;
   currency?: string;
   branchCount?: number;
+  branchCities?: { city: string; country: string; count: number }[];
 }
 
 const AD_UNIT_TYPE_LABELS: Record<string, string> = {
@@ -192,15 +194,19 @@ const Marketplace = () => {
       eq("availability_status", "available").
       order("created_at", { ascending: false });
 
-      // Fetch branch counts using secure RPC function (bypasses RLS)
+      // Fetch branch city data using secure RPC function (bypasses RLS)
       const listingIds = (venuesData || []).map(v => v.id);
       const branchCountMap: Record<string, number> = {};
+      const branchCitiesMap: Record<string, { city: string; country: string; count: number }[]> = {};
       if (listingIds.length > 0) {
-        const { data: branchCounts } = await supabase.rpc("get_listing_branch_counts", {
+        const { data: branchCities } = await supabase.rpc("get_listing_branch_cities", {
           _listing_ids: listingIds,
         });
-        (branchCounts || []).forEach((row: any) => {
-          branchCountMap[row.listing_id] = Number(row.branch_count) || 0;
+        (branchCities || []).forEach((row: any) => {
+          const lid = row.listing_id;
+          branchCountMap[lid] = (branchCountMap[lid] || 0) + Number(row.branch_count);
+          if (!branchCitiesMap[lid]) branchCitiesMap[lid] = [];
+          branchCitiesMap[lid].push({ city: row.city, country: row.country, count: Number(row.branch_count) });
         });
       }
 
@@ -239,6 +245,7 @@ const Marketplace = () => {
             weeklyPrice: 0, // Hidden for public
             currency: "",
             branchCount: v.pending_advertiser_email ? 0 : (branchCountMap[v.id] || 0),
+            branchCities: v.pending_advertiser_email ? [] : (branchCitiesMap[v.id] || []),
           };
         }
 
@@ -256,6 +263,7 @@ const Marketplace = () => {
           weeklyPrice: weeklyPrice,
           currency: currency,
           branchCount: v.pending_advertiser_email ? 0 : (branchCountMap[v.id] || 0),
+          branchCities: v.pending_advertiser_email ? [] : (branchCitiesMap[v.id] || []),
         };
       });
 
@@ -480,9 +488,32 @@ const Marketplace = () => {
                     <Badge variant="secondary" className="capitalize">
                       {listing.type}
                     </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {(listing.branchCount ?? 0) > 0 ? `Multi-location (${listing.branchCount})` : "Single Location"}
-                    </Badge>
+                    <Popover>
+                      <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Badge variant="outline" className="text-xs cursor-pointer hover:bg-accent transition-colors">
+                          {(listing.branchCount ?? 0) > 0 ? `Multi-location (${listing.branchCount})` : "Single Location"}
+                        </Badge>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-64 p-3" align="start" onClick={(e) => e.stopPropagation()}>
+                        <p className="text-sm font-semibold mb-2">Locations</p>
+                        {(listing.branchCount ?? 0) > 0 && listing.branchCities && listing.branchCities.length > 0 ? (
+                          <ul className="space-y-1 text-sm text-muted-foreground">
+                            {listing.branchCities.map((bc, idx) => (
+                              <li key={idx} className="flex items-center gap-1.5">
+                                <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                                <span>{bc.city}, {bc.country}</span>
+                                {bc.count > 1 && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-auto">{bc.count}</Badge>}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                            <span>{(() => { const p = (listing.location || "").split(",").map(s => s.trim()).filter(Boolean); return p.length >= 2 ? p.slice(-2).join(", ") : p[p.length - 1] || "—"; })()}</span>
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   {user && listing.description && (
                     <CardDescription className="line-clamp-2">{listing.description}</CardDescription>
