@@ -194,15 +194,19 @@ const Marketplace = () => {
       eq("availability_status", "available").
       order("created_at", { ascending: false });
 
-      // Fetch branch counts using secure RPC function (bypasses RLS)
+      // Fetch branch city data using secure RPC function (bypasses RLS)
       const listingIds = (venuesData || []).map(v => v.id);
       const branchCountMap: Record<string, number> = {};
+      const branchCitiesMap: Record<string, { city: string; country: string; count: number }[]> = {};
       if (listingIds.length > 0) {
-        const { data: branchCounts } = await supabase.rpc("get_listing_branch_counts", {
+        const { data: branchCities } = await supabase.rpc("get_listing_branch_cities", {
           _listing_ids: listingIds,
         });
-        (branchCounts || []).forEach((row: any) => {
-          branchCountMap[row.listing_id] = Number(row.branch_count) || 0;
+        (branchCities || []).forEach((row: any) => {
+          const lid = row.listing_id;
+          branchCountMap[lid] = (branchCountMap[lid] || 0) + Number(row.branch_count);
+          if (!branchCitiesMap[lid]) branchCitiesMap[lid] = [];
+          branchCitiesMap[lid].push({ city: row.city, country: row.country, count: Number(row.branch_count) });
         });
       }
 
