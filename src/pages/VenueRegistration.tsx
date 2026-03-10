@@ -152,8 +152,6 @@ const VenueRegistration = () => {
   // Listing toggle (edit mode)
   const [isListedOnExplore, setIsListedOnExplore] = useState(true);
 
-  // Loaded branches (edit mode - read-only display)
-  const [branches, setBranches] = useState<BranchLocation[]>([]);
 
   const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([
     { type: "business_license", label: "Business/Venue License", description: "Official business registration or venue operating license", file: null, uploaded: false },
