@@ -136,8 +136,6 @@ const VenueRegistration = () => {
   const [contactPhone, setContactPhone] = useState("");
   const [operatingHours, setOperatingHours] = useState("");
 
-  // Additional Locations
-  const [additionalLocations, setAdditionalLocations] = useState<AdditionalLocation[]>([]);
 
   // Ad Unit Materials (multi-select)
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
