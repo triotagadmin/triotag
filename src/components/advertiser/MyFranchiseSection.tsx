@@ -218,7 +218,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
 
     // Fetch publisher names for ad spaces that have agents
     let publisherMap: Record<string, string> = {};
-    const publisherIds = [...new Set(adSpaceRows.filter(a => a.publisher_id && !a.agent_disconnected).map(a => a.publisher_id))];
+    const publisherIds = [...new Set(adSpaceRows.filter(a => a.publisher_id).map(a => a.publisher_id))];
     if (publisherIds.length > 0) {
       const { data: pubProfiles } = await supabase
         .from("publisher_profiles_public")
@@ -639,7 +639,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                         ) : null;
                       })()}
                       {/* Disconnect Publisher Agent button — only for ad-space listings with active agent */}
-                      {isAdSpace && !franchise._agentDisconnected && franchise._publisherName && (
+                      {isAdSpace && !franchise._agentDisconnected && franchise._publisherId && (
                         <Button
                           size="sm"
                           variant="outline"
