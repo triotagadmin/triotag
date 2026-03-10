@@ -63,7 +63,19 @@ const AdvertiserDashboard = () => {
         .select("id, title, location, approval_status, specifications, created_at")
         .contains("leased_advertiser_ids", [session.user.id])
         .order("created_at", { ascending: false });
-      if (leased) setLeasedListings(leased);
+      if (leased) {
+        setLeasedListings(leased);
+        // Fetch branch counts for each leased listing
+        const counts: Record<string, number> = {};
+        await Promise.all(leased.map(async (l: any) => {
+          const { count } = await supabase
+            .from("franchise_branches")
+            .select("*", { count: "exact", head: true })
+            .eq("franchise_id", l.id);
+          counts[l.id] = count || 0;
+        }));
+        setBranchCounts(counts);
+      }
     };
     checkUser();
     const {
