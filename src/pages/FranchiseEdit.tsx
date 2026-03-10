@@ -280,11 +280,13 @@ const FranchiseEdit = () => {
         combined.push({
           id: crypto.randomUUID(),
           dbId: b.id,
+          branchName: b.place_name || "",
           address: parts[0] || "",
           city: parts[1] || b.place_name || "",
           province: parts[2] || "",
           postalCode: parts[3] || "",
           isAdSpaceListing: true,
+          source: "franchise",
         });
       });
     }
