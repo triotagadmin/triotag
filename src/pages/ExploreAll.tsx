@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 
 interface UnifiedListing {
   id: string;
-  type: 'venue' | 'agent_service';
+  type: 'venue' | 'agent_service' | 'franchise';
   title: string;
   description: string;
   location: string;
@@ -22,6 +22,7 @@ interface UnifiedListing {
   venue_type?: string;
   weekly_price?: number;
   monthly_price?: number;
+  city_count?: { city: string; count: number }[];
 }
 
 const ExploreAll = () => {
@@ -59,6 +60,39 @@ const ExploreAll = () => {
         .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
+      // Fetch franchise listings with active marketplace status and ad-space-listed branches
+      const { data: franchiseData } = await supabase
+        .from('advertiser_franchises')
+        .select('id, franchise_name, marketplace_status, created_at')
+        .eq('marketplace_status', 'active');
+
+      // Fetch branches marked as ad space listings
+      const { data: branchData } = await supabase
+        .from('advertiser_branches')
+        .select('advertiser_franchise_id, city, is_ad_space_listing')
+        .eq('is_ad_space_listing', true);
+
+      // Group branches by franchise and city
+      const franchiseListings: UnifiedListing[] = (franchiseData || []).map(f => {
+        const fBranches = (branchData || []).filter(b => b.advertiser_franchise_id === f.id);
+        const cityMap = new Map<string, number>();
+        fBranches.forEach(b => {
+          const city = b.city || 'Unknown';
+          cityMap.set(city, (cityMap.get(city) || 0) + 1);
+        });
+        const cityCount = Array.from(cityMap.entries()).map(([city, count]) => ({ city, count }));
+        return {
+          id: f.id,
+          type: 'franchise' as const,
+          title: f.franchise_name,
+          description: cityCount.map(c => `${c.city}: ${c.count} Ad Space${c.count !== 1 ? 's' : ''}`).join(' · ') || 'No locations listed',
+          location: cityCount.map(c => c.city).join(', ') || 'N/A',
+          created_at: f.created_at,
+          venue_type: 'Franchise',
+          city_count: cityCount,
+        };
+      }).filter(f => f.city_count && f.city_count.length > 0);
+
       // Transform all data into unified format (only selling listings)
       const unifiedListings: UnifiedListing[] = [
         ...(venuesData || []).map(v => ({
@@ -86,7 +120,8 @@ const ExploreAll = () => {
           venue_type: s.service_type || 'Service',
           weekly_price: (s.pricing as any)?.weekly,
           monthly_price: (s.pricing as any)?.monthly,
-        }))
+        })),
+        ...franchiseListings,
       ];
 
       // Sort by created_at
@@ -181,8 +216,9 @@ const ExploreAll = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="venue">Venues</SelectItem>
+                  <SelectItem value="venue">Ad Spaces</SelectItem>
                   <SelectItem value="agent_service">Agent Services</SelectItem>
+                  <SelectItem value="franchise">Franchise Locations</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -231,7 +267,16 @@ const ExploreAll = () => {
                     <MapPin className="h-4 w-4" />
                     {listing.location}
                   </div>
-                  {(listing.weekly_price || listing.monthly_price) && (
+                  {listing.type === 'franchise' && listing.city_count && listing.city_count.length > 0 && (
+                    <div className="pt-2 border-t mt-2 space-y-1">
+                      {listing.city_count.map(cc => (
+                        <p key={cc.city} className="text-sm">
+                          {cc.city}: <span className="text-primary font-medium">{cc.count} Ad Space{cc.count !== 1 ? 's' : ''} Available</span>
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                  {listing.type !== 'franchise' && (listing.weekly_price || listing.monthly_price) && (
                     <div className="pt-2 border-t mt-2 space-y-1">
                       {listing.weekly_price && (
                         <p className="text-sm font-medium">

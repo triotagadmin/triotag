@@ -42,11 +42,14 @@ interface FranchiseLocation {
   id: string;
   advertiser_id: string;
   advertiser_franchise_id: string | null;
+  listing_id: string | null;
   branch_name: string | null;
   full_address: string;
+  city: string | null;
   contact_name: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+  is_ad_space_listing: boolean;
   created_at: string;
 }
 
@@ -185,14 +188,24 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
     });
   };
 
-  const toggleSelectAllForFranchise = (franchiseId: string) => {
-    const locs = locations.filter(l => l.advertiser_franchise_id === franchiseId);
+  const toggleSelectAllForFranchise = (franchise: Franchise) => {
+    const isAdSpace = !!(franchise as any)._isAdSpace;
+    const realAdSpaceId = isAdSpace ? (franchise as any)._adSpaceId : null;
+    const locs = locations.filter(l => 
+      isAdSpace ? l.listing_id === realAdSpaceId : l.advertiser_franchise_id === franchise.id
+    );
     const allSelected = locs.every(l => selectedIds.has(l.id));
     setSelectedIds(prev => {
       const next = new Set(prev);
       locs.forEach(l => allSelected ? next.delete(l.id) : next.add(l.id));
       return next;
     });
+  };
+
+  const toggleAdSpaceListing = async (locId: string, currentValue: boolean) => {
+    const { error } = await supabase.from("advertiser_branches").update({ is_ad_space_listing: !currentValue }).eq("id", locId);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else fetchAll();
   };
 
   const toggleExpand = (id: string) => {
@@ -241,9 +254,10 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
   // Location CRUD
   const buildFullAddress = () => [locAddress, locCity, locProvince, locPostal, locCountry].filter(Boolean).join(", ");
 
-  const openAddLocation = (franchiseId: string) => {
+  const openAddLocation = (franchise: Franchise) => {
     setEditingLocationId(null);
-    setTargetFranchiseId(franchiseId);
+    // For ad-space franchises, store the real ad space ID; for regular franchises, store franchise ID
+    setTargetFranchiseId(franchise.id);
     setLocName(""); setLocAddress(""); setLocCity(""); setLocProvince(""); setLocPostal(""); setLocCountry(""); setLocContact(""); setLocPhone("");
     setLocationDialogOpen(true);
   };
@@ -262,28 +276,41 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       toast({ title: "Name and address are required", variant: "destructive" });
       return;
     }
+    if (!targetFranchiseId) {
+      toast({ title: "Unable to save location. Please refresh the page and try again.", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const fullAddr = buildFullAddress();
+    const cityValue = locCity.trim() || null;
+
     if (editingLocationId) {
       const { error } = await supabase.from("advertiser_branches").update({
         branch_name: locName.trim(),
         full_address: fullAddr,
+        city: cityValue,
         contact_name: locContact.trim() || null,
         contact_phone: locPhone.trim() || null,
       }).eq("id", editingLocationId);
-      if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+      if (error) toast({ title: "Location could not be saved. Please check the form and try again.", variant: "destructive" });
       else { toast({ title: "Location updated" }); setLocationDialogOpen(false); }
     } else {
+      // Determine if this is an ad-space franchise or a regular franchise
+      const isAdSpace = targetFranchiseId.startsWith("adspace-");
+      const realAdSpaceId = isAdSpace ? targetFranchiseId.replace("adspace-", "") : null;
+      const realFranchiseId = isAdSpace ? null : targetFranchiseId;
+
       const { error } = await supabase.from("advertiser_branches").insert({
         advertiser_id: userId,
-        advertiser_franchise_id: targetFranchiseId,
+        advertiser_franchise_id: realFranchiseId,
+        listing_id: realAdSpaceId,
         branch_name: locName.trim(),
         full_address: fullAddr,
+        city: cityValue,
         contact_name: locContact.trim() || null,
         contact_phone: locPhone.trim() || null,
-        listing_id: null,
       });
-      if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+      if (error) toast({ title: "Location could not be saved. Please check the form and try again.", variant: "destructive" });
       else { toast({ title: "Location added" }); setLocationDialogOpen(false); }
     }
     setSaving(false);
@@ -406,7 +433,13 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       ) : (
         <div className="space-y-6">
           {franchises.map(franchise => {
-            const fLocs = locations.filter(l => l.advertiser_franchise_id === franchise.id);
+            const isAdSpace = !!(franchise as any)._isAdSpace;
+            const realAdSpaceId = isAdSpace ? (franchise as any)._adSpaceId : null;
+            const fLocs = locations.filter(l => 
+              isAdSpace 
+                ? l.listing_id === realAdSpaceId 
+                : l.advertiser_franchise_id === franchise.id
+            );
             const expanded = expandedFranchises.has(franchise.id);
             const allSelected = fLocs.length > 0 && fLocs.every(l => selectedIds.has(l.id));
             const status = (franchise.marketplace_status || "inactive") as MarketplaceStatus;
@@ -462,7 +495,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
 
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-3">
-                    <Button size="sm" variant="outline" onClick={() => openAddLocation(franchise.id)} className="gap-1">
+                    <Button size="sm" variant="outline" onClick={() => openAddLocation(franchise)} className="gap-1">
                       <Plus className="h-3.5 w-3.5" />
                       Add Location
                     </Button>
@@ -509,7 +542,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                         <div className="flex items-center gap-3 px-3 py-2 rounded-[14px] bg-muted/30">
                           <Checkbox
                             checked={allSelected}
-                            onCheckedChange={() => toggleSelectAllForFranchise(franchise.id)}
+                            onCheckedChange={() => toggleSelectAllForFranchise(franchise)}
                             className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                           />
                           <span className="text-sm font-medium text-muted-foreground">Select All Locations</span>
@@ -533,16 +566,31 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                                 className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                               />
                               <div className="min-w-0 flex-1 space-y-0.5">
-                                <p className="font-semibold text-sm">{loc.branch_name || "Unnamed Location"}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-semibold text-sm">{loc.branch_name || "Unnamed Location"}</p>
+                                  {loc.is_ad_space_listing && (
+                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/30">
+                                      Ad Space
+                                    </Badge>
+                                  )}
+                                </div>
                                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                                   <MapPin className="h-3 w-3 shrink-0" />
-                                  {loc.full_address}
+                                  {loc.city || loc.full_address}
                                 </p>
                                 {loc.contact_name && (
                                   <p className="text-xs text-muted-foreground">Contact: {loc.contact_name}</p>
                                 )}
                               </div>
                               <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 text-[10px] px-2 ${loc.is_ad_space_listing ? 'text-primary' : 'text-muted-foreground'}`}
+                                  onClick={e => { e.stopPropagation(); toggleAdSpaceListing(loc.id, loc.is_ad_space_listing); }}
+                                >
+                                  {loc.is_ad_space_listing ? "Listed" : "List as Ad Space"}
+                                </Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEditLocation(loc); }}>
                                   <Edit className="h-3.5 w-3.5" />
                                 </Button>
