@@ -621,7 +621,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                     {fLocs.length > 0 && selectedIds.size > 0 && fLocs.some(l => selectedIds.has(l.id)) && (
                       <Button
                         size="sm"
-                        className="gap-1 bg-primary/10 border border-primary/40 text-primary shadow-[0_0_10px_hsl(var(--primary)/0.3)] animate-[pulse_3s_ease-in-out_infinite] hover:bg-primary/20"
+                        className="gap-1 bg-primary/10 border border-primary/30 text-primary animate-glow-breathe hover:bg-primary/20"
                         onClick={() => navigate("/order-prints", { state: { selectedBranchIds: fLocs.filter(l => selectedIds.has(l.id)).map(l => l.id) } })}
                       >
                         <Printer className="h-3.5 w-3.5" />
