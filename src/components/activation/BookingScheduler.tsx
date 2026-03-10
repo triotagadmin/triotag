@@ -71,12 +71,13 @@ export function BookingScheduler({
       pricing?.pricePerWeek || 
       0;
     
-    // Monthly rate: check ad unit first, then pricing object  
+    // Monthly rate: check ad unit first, then pricing object, then top-level column
     const monthlyRate = 
       selectedAdUnit?.pricePerMonth || 
       selectedAdUnit?.monthly_subscription_fee || 
       pricing?.monthly || 
       pricing?.pricePerMonth || 
+      pricing?.monthly_subscription_fee ||
       0;
     
     // Daily rate fallback
