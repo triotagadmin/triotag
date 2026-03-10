@@ -176,7 +176,10 @@ const FranchiseEdit = () => {
       const { data: role } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
       const currentRole = role?.role as string;
 
-      if (currentRole === "publisher") {
+      if (currentRole === "admin") {
+        setUserRole("admin");
+        setIsAdmin(true);
+      } else if (currentRole === "publisher") {
         setUserRole("publisher");
         const { data: pubProfile } = await supabase.from("publisher_profiles").select("id").eq("user_id", session.user.id).maybeSingle();
         if (pubProfile) setPublisherId(pubProfile.id);
