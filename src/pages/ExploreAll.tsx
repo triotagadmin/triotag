@@ -9,6 +9,7 @@ import { Navigation } from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { User } from "@supabase/supabase-js";
 
 interface UnifiedListing {
   id: string;
