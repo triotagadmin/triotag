@@ -566,10 +566,17 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                                 className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                               />
                               <div className="min-w-0 flex-1 space-y-0.5">
-                                <p className="font-semibold text-sm">{loc.branch_name || "Unnamed Location"}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-semibold text-sm">{loc.branch_name || "Unnamed Location"}</p>
+                                  {loc.is_ad_space_listing && (
+                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/30">
+                                      Ad Space
+                                    </Badge>
+                                  )}
+                                </div>
                                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                                   <MapPin className="h-3 w-3 shrink-0" />
-                                  {loc.full_address}
+                                  {loc.city || loc.full_address}
                                 </p>
                                 {loc.contact_name && (
                                   <p className="text-xs text-muted-foreground">Contact: {loc.contact_name}</p>
