@@ -267,28 +267,41 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       toast({ title: "Name and address are required", variant: "destructive" });
       return;
     }
+    if (!targetFranchiseId) {
+      toast({ title: "Unable to save location. Please refresh the page and try again.", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const fullAddr = buildFullAddress();
+    const cityValue = locCity.trim() || null;
+
     if (editingLocationId) {
       const { error } = await supabase.from("advertiser_branches").update({
         branch_name: locName.trim(),
         full_address: fullAddr,
+        city: cityValue,
         contact_name: locContact.trim() || null,
         contact_phone: locPhone.trim() || null,
       }).eq("id", editingLocationId);
-      if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+      if (error) toast({ title: "Location could not be saved. Please check the form and try again.", variant: "destructive" });
       else { toast({ title: "Location updated" }); setLocationDialogOpen(false); }
     } else {
+      // Determine if this is an ad-space franchise or a regular franchise
+      const isAdSpace = targetFranchiseId.startsWith("adspace-");
+      const realAdSpaceId = isAdSpace ? targetFranchiseId.replace("adspace-", "") : null;
+      const realFranchiseId = isAdSpace ? null : targetFranchiseId;
+
       const { error } = await supabase.from("advertiser_branches").insert({
         advertiser_id: userId,
-        advertiser_franchise_id: targetFranchiseId,
+        advertiser_franchise_id: realFranchiseId,
+        listing_id: realAdSpaceId,
         branch_name: locName.trim(),
         full_address: fullAddr,
+        city: cityValue,
         contact_name: locContact.trim() || null,
         contact_phone: locPhone.trim() || null,
-        listing_id: null,
       });
-      if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+      if (error) toast({ title: "Location could not be saved. Please check the form and try again.", variant: "destructive" });
       else { toast({ title: "Location added" }); setLocationDialogOpen(false); }
     }
     setSaving(false);
