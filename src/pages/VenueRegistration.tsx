@@ -832,7 +832,7 @@ const VenueRegistration = () => {
                                 <Clock className="h-3 w-3" />
                                 {ownershipWorkflow === "verification" ? "Pending Advertiser Verification" : "Pending Advertiser Registration"}
                               </Badge>
-                              {isEditing && editId && (
+                              {editId && (
                                 <Button
                                   type="button"
                                   variant="outline"
