@@ -32,6 +32,7 @@ import VenueInventory from "./pages/VenueInventory";
 import VenueDetail from "./pages/VenueDetail";
 import FranchiseBranches from "./pages/FranchiseBranches";
 import ManageBranches from "./pages/ManageBranches";
+import FranchiseEdit from "./pages/FranchiseEdit";
 import ActivateListing from "./pages/ActivateListing";
 import NotFound from "./pages/NotFound";
 import ExploreAll from "./pages/ExploreAll";
