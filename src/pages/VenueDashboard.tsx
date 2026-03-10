@@ -292,12 +292,6 @@ const VenueDashboard = () => {
           </Card>
 
           {/* Branch Management */}
-          {adSpaces.length > 0 && (
-            <>
-              <Separator className="my-8" />
-              <BranchListingCard adSpaces={adSpaces.map((s) => ({ id: s.id, title: s.title, additionalLocations: (s.specifications as any)?.additional_locations || [] }))} />
-            </>
-          )}
 
           {/* Bottom Modules */}
           <Separator className="my-8" />
