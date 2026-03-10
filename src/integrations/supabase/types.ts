@@ -277,12 +277,14 @@ export type Database = {
           advertiser_franchise_id: string | null
           advertiser_id: string
           branch_name: string | null
+          city: string | null
           contact_email: string | null
           contact_name: string | null
           contact_phone: string | null
           created_at: string
           full_address: string
           id: string
+          is_ad_space_listing: boolean
           latitude: number | null
           listing_id: string | null
           longitude: number | null
@@ -292,12 +294,14 @@ export type Database = {
           advertiser_franchise_id?: string | null
           advertiser_id: string
           branch_name?: string | null
+          city?: string | null
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
           created_at?: string
           full_address: string
           id?: string
+          is_ad_space_listing?: boolean
           latitude?: number | null
           listing_id?: string | null
           longitude?: number | null
@@ -307,12 +311,14 @@ export type Database = {
           advertiser_franchise_id?: string | null
           advertiser_id?: string
           branch_name?: string | null
+          city?: string | null
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
           created_at?: string
           full_address?: string
           id?: string
+          is_ad_space_listing?: boolean
           latitude?: number | null
           listing_id?: string | null
           longitude?: number | null
