@@ -298,97 +298,135 @@ const AdvertiserDashboard = () => {
 
         {/* My Bookings Section */}
         <div className="mb-12">
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <ShoppingCart className="h-6 w-6" />
-            My Bookings
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="About My Bookings"
-                  className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted text-muted-foreground hover:bg-muted/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <Info className="h-3.5 w-3.5" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 text-sm" side="bottom" align="start">
-                <div className="space-y-2">
-                  <p className="font-medium">About My Bookings</p>
-                  <p className="text-muted-foreground">
-                    View and manage your ad space bookings. Each booking represents a confirmed reservation of an ad space location.
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold flex items-center gap-2">
+              <ShoppingCart className="h-6 w-6 text-primary" />
+              My Bookings
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Track all ad space requests from marketplace clients. See the status of each booking: Pending, Approved, or Print Order.
+            </p>
+          </div>
+
+          {bookings.length === 0 ? (
+            <Card className="rounded-[20px]">
+              <CardContent className="pt-8 pb-8">
+                <div className="text-center py-8">
+                  <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <ShoppingCart className="h-8 w-8 text-primary" />
+                  </div>
+                  <p className="text-lg font-semibold mb-1">No bookings yet</p>
+                  <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                    When marketplace users book your ad spaces via the activation flow, their requests will appear here.
                   </p>
-                  <p className="text-muted-foreground">
-                    Track booking status, view details, and browse available ad spaces to create new bookings.
-                  </p>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </h3>
-          <Card>
-            <CardContent className="pt-6">
-              {bookings.length === 0 ? (
-                <div className="text-center py-12">
-                  <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground mb-4">No bookings yet</p>
-                  <Button onClick={() => navigate("/publishers")}>
+                  <Button onClick={() => navigate("/explore")} className="gap-2">
+                    <Eye className="h-4 w-4" />
                     Browse Ad Spaces
                   </Button>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {bookings.slice(bookingPage * BOOKINGS_PER_PAGE, (bookingPage + 1) * BOOKINGS_PER_PAGE).map((booking) => (
-                    <div key={booking.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <p className="font-medium">{(booking.ad_spaces as any)?.title || "Ad Space"}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {(booking.ad_spaces as any)?.location || "—"}
-                        </p>
-                        {booking.start_date && booking.end_date && (
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(booking.start_date), "MMM d, yyyy")} → {format(new Date(booking.end_date), "MMM d, yyyy")}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant={
-                          booking.status === "approved" || booking.status === "completed" ? "default" :
-                          booking.status === "rejected" ? "destructive" : "secondary"
-                        }>
-                          {booking.status.replace(/_/g, " ")}
-                        </Badge>
-                        <Button variant="outline" size="sm" onClick={() => navigate(`/activate/${booking.ad_space_id}`)}>
-                          View Details
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                  {bookings.length > BOOKINGS_PER_PAGE && (
-                    <div className="flex items-center justify-between pt-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={bookingPage === 0}
-                        onClick={() => setBookingPage((p) => p - 1)}
-                      >
-                        Previous
-                      </Button>
-                      <span className="text-sm text-muted-foreground">
-                        Page {bookingPage + 1} of {Math.ceil(bookings.length / BOOKINGS_PER_PAGE)}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={(bookingPage + 1) * BOOKINGS_PER_PAGE >= bookings.length}
-                        onClick={() => setBookingPage((p) => p + 1)}
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {bookings
+                .slice(bookingPage * BOOKINGS_PER_PAGE, (bookingPage + 1) * BOOKINGS_PER_PAGE)
+                .map((booking) => {
+                  const statusConfig: Record<string, { icon: React.ReactNode; label: string; className: string }> = {
+                    pending_approval: { icon: <Clock className="h-4 w-4" />, label: "Pending", className: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30" },
+                    approved: { icon: <CheckCircle2 className="h-4 w-4" />, label: "Approved", className: "bg-primary/15 text-primary border-primary/30" },
+                    pending_admin: { icon: <Package className="h-4 w-4" />, label: "Print Order", className: "bg-blue-500/15 text-blue-400 border-blue-500/30" },
+                    in_production: { icon: <Printer className="h-4 w-4" />, label: "In Production", className: "bg-blue-500/15 text-blue-400 border-blue-500/30" },
+                    completed: { icon: <CheckCircle2 className="h-4 w-4" />, label: "Completed", className: "bg-primary/15 text-primary border-primary/30" },
+                    rejected: { icon: <Clock className="h-4 w-4" />, label: "Rejected", className: "bg-destructive/15 text-destructive border-destructive/30" },
+                    cancelled: { icon: <Clock className="h-4 w-4" />, label: "Cancelled", className: "bg-muted text-muted-foreground border-border" },
+                  };
+                  const status = statusConfig[booking.status] || statusConfig.pending_approval;
+                  const adSpace = booking.ad_spaces as any;
+                  const location = adSpace?.location || "—";
+                  // Extract city from location string
+                  const city = location.includes(",") ? location.split(",").pop()?.trim() : location;
+
+                  return (
+                    <Card key={booking.id} className="rounded-[20px] hover:shadow-[0_0_20px_hsl(110_100%_55%_/_0.15)] transition-all duration-300">
+                      <CardContent className="p-5">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                          {/* Left: Info */}
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div className="flex items-start gap-3">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-base truncate">
+                                  {adSpace?.title || "Ad Space"}
+                                </p>
+                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-0.5">
+                                  <Hash className="h-3.5 w-3.5 shrink-0" />
+                                  <span className="font-mono text-xs">{booking.id.slice(0, 8).toUpperCase()}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                              {city && city !== "—" && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                                  {city}
+                                </span>
+                              )}
+                              {booking.start_date && booking.end_date && (
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-3.5 w-3.5 shrink-0" />
+                                  {format(new Date(booking.start_date), "MMM d")} → {format(new Date(booking.end_date), "MMM d, yyyy")}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Right: Status + Action */}
+                          <div className="flex items-center gap-3 shrink-0">
+                            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold ${status.className}`}>
+                              {status.icon}
+                              {status.label}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5"
+                              onClick={() => navigate(`/activate/${booking.ad_space_id}`)}
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              Details
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+
+              {bookings.length > BOOKINGS_PER_PAGE && (
+                <div className="flex items-center justify-between pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={bookingPage === 0}
+                    onClick={() => setBookingPage((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Page {bookingPage + 1} of {Math.ceil(bookings.length / BOOKINGS_PER_PAGE)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={(bookingPage + 1) * BOOKINGS_PER_PAGE >= bookings.length}
+                    onClick={() => setBookingPage((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          )}
         </div>
 
         {/* Browse & Discover Section */}
