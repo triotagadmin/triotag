@@ -70,10 +70,9 @@ export const AdvertiserTypes = () => {
             Real-World Brand Visibility
           </h2>
           <p className="text-sm px-2 text-popover-foreground md:text-base">
-            Tiny Sticky Ads is an advertising platform that helps businesses and organizers distribute campaigns for
-            products, services, and events. Our platform has four key capabilities: a curated ad space marketplace, a
-            branch location distribution system, an out-of-home (OOH) logistics platform, and a campaign analytics
-            dashboard, giving brands full control over deployment and performance tracking.
+            Tiny Sticky Ads is an advertising management web app that helps businesses streamline print advertising
+            across their franchise and branch locations, manage campaigns from one dashboard and measure results using
+            QR code tracking and AI-powered analytics.
           </p>
         </div>
 
