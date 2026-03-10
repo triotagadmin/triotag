@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const HERO_HEADLINE = "The Central Hub for OOH Micro Advertising";
+const HERO_HEADLINE = "The Central Hub for On-Site Advertising";
 const HERO_SUBHEADLINE =
   "Promote your products, services, and events through curated ad spaces where people naturally gather. Activate real-world visibility and reach your target audience effectively.";
 const HERO_CTA_PRIMARY = { text: "Advertise Your Brand", link: "/campaign-submit" };
