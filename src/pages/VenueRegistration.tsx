@@ -670,7 +670,7 @@ const VenueRegistration = () => {
                   <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={4} className="rounded-[14px]" required placeholder="Describe your Brand" />
                 </div>
 
-                {/* Head Office Address - visible only during initial registration or to publisher (not public) */}
+                {/* Head Office Address */}
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Head Office / Primary Contact Address</CardTitle>
@@ -678,54 +678,87 @@ const VenueRegistration = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div><Label>Street Address</Label><Input value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" /></div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div><Label>City</Label><Input value={city} onChange={e => setCity(e.target.value)} placeholder="City" /></div>
                       <div><Label>State/Province</Label><Input value={state} onChange={e => setState(e.target.value)} placeholder="State" /></div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div><Label>Postal Code</Label><Input value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="ZIP" /></div>
                       <div><Label>Country</Label><Input value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" /></div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Additional Locations - only during initial registration */}
-                {!isEditing && (
-                <Card className="rounded-[20px]">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center gap-2"><Plus className="h-5 w-5 text-primary" /> Branch Locations</CardTitle>
-                    <p className="text-xs text-muted-foreground">You can add up to 3 branch locations now. Additional branches can be added anytime later in your dashboard.</p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {additionalLocations.map((loc) => (
-                      <Card key={loc.id} className="rounded-[14px]">
-                        <CardContent className="p-4 space-y-3">
-                          <div className="flex justify-between items-center">
-                            <Label className="font-semibold text-primary">Location {additionalLocations.indexOf(loc) + 1} of 3</Label>
-                            <Button type="button" variant="ghost" size="sm" onClick={() => removeLocation(loc.id)} className="text-destructive h-8">
-                              <Trash2 className="h-4 w-4 mr-1" /> Remove
-                            </Button>
-                          </div>
-                          <Input placeholder="Address" value={loc.address} onChange={e => updateLocation(loc.id, "address", e.target.value)} />
-                          <div className="grid grid-cols-2 gap-3">
-                            <Input placeholder="City" value={loc.city} onChange={e => updateLocation(loc.id, "city", e.target.value)} />
-                            <Input placeholder="Province" value={loc.province} onChange={e => updateLocation(loc.id, "province", e.target.value)} />
-                          </div>
-                          <Input placeholder="Postal Code" value={loc.postalCode} onChange={e => updateLocation(loc.id, "postalCode", e.target.value)} />
-                        </CardContent>
-                      </Card>
-                    ))}
-                    <Button type="button" variant="outline" className="w-full" onClick={addLocation} disabled={additionalLocations.length >= 3}>
-                      <Plus className="h-4 w-4 mr-2" /> {additionalLocations.length >= 3 ? "Maximum 3 branches reached" : "Add Branch Location"}
-                    </Button>
-                    {additionalLocations.length >= 3 && (
-                      <p className="text-xs text-destructive font-medium">You can add up to 3 branch locations now. Additional branches can be added anytime later in your dashboard.</p>
-                    )}
-                    {additionalLocations.length < 3 && (
-                      <p className="text-xs text-muted-foreground">{3 - additionalLocations.length} branch slot{3 - additionalLocations.length !== 1 ? "s" : ""} remaining. More can be added from your dashboard after registration.</p>
-                    )}
-                  </CardContent>
-                </Card>
+                {/* Branch Locations - read-only summary when editing, editable when registering */}
+                {isEditing ? (
+                  <Card className="rounded-[20px]">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg flex items-center gap-2"><Building2 className="h-5 w-5 text-primary" /> Branch Locations</CardTitle>
+                      <p className="text-xs text-muted-foreground">
+                        {branches.length > 0
+                          ? `${branches.length} branch location${branches.length !== 1 ? "s" : ""} — Multi-location listing`
+                          : "Single location listing"}
+                      </p>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {branches.length > 0 ? (
+                        <div className="space-y-1.5">
+                          {(() => {
+                            const cityMap = new Map<string, number>();
+                            branches.forEach(b => {
+                              const c = b.city || "Unknown";
+                              cityMap.set(c, (cityMap.get(c) || 0) + 1);
+                            });
+                            return Array.from(cityMap.entries()).map(([cityName, count]) => (
+                              <div key={cityName} className="flex items-center justify-between text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
+                                <span className="font-medium">{cityName}</span>
+                                <Badge variant="secondary" className="text-[10px]">{count} location{count !== 1 ? "s" : ""}</Badge>
+                              </div>
+                            ));
+                          })()}
+                          <p className="text-xs text-muted-foreground italic mt-2">Manage branches from the dashboard.</p>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic py-2">No branch locations added yet. Add branches from the dashboard.</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="rounded-[20px]">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg flex items-center gap-2"><Plus className="h-5 w-5 text-primary" /> Branch Locations</CardTitle>
+                      <p className="text-xs text-muted-foreground">You can add up to 3 branch locations now. Additional branches can be added anytime later in your dashboard.</p>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {additionalLocations.map((loc) => (
+                        <Card key={loc.id} className="rounded-[14px]">
+                          <CardContent className="p-4 space-y-3">
+                            <div className="flex justify-between items-center">
+                              <Label className="font-semibold text-primary">Location {additionalLocations.indexOf(loc) + 1} of 3</Label>
+                              <Button type="button" variant="ghost" size="sm" onClick={() => removeLocation(loc.id)} className="text-destructive h-8">
+                                <Trash2 className="h-4 w-4 mr-1" /> Remove
+                              </Button>
+                            </div>
+                            <Input placeholder="Address" value={loc.address} onChange={e => updateLocation(loc.id, "address", e.target.value)} />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <Input placeholder="City" value={loc.city} onChange={e => updateLocation(loc.id, "city", e.target.value)} />
+                              <Input placeholder="Province" value={loc.province} onChange={e => updateLocation(loc.id, "province", e.target.value)} />
+                            </div>
+                            <Input placeholder="Postal Code" value={loc.postalCode} onChange={e => updateLocation(loc.id, "postalCode", e.target.value)} />
+                          </CardContent>
+                        </Card>
+                      ))}
+                      <Button type="button" variant="outline" className="w-full" onClick={addLocation} disabled={additionalLocations.length >= 3}>
+                        <Plus className="h-4 w-4 mr-2" /> {additionalLocations.length >= 3 ? "Maximum 3 branches reached" : "Add Branch Location"}
+                      </Button>
+                      {additionalLocations.length >= 3 && (
+                        <p className="text-xs text-destructive font-medium">You can add up to 3 branch locations now. Additional branches can be added anytime later in your dashboard.</p>
+                      )}
+                      {additionalLocations.length < 3 && (
+                        <p className="text-xs text-muted-foreground">{3 - additionalLocations.length} branch slot{3 - additionalLocations.length !== 1 ? "s" : ""} remaining. More can be added from your dashboard after registration.</p>
+                      )}
+                    </CardContent>
+                  </Card>
                 )}
 
                 {/* Ad Unit Materials */}
