@@ -342,7 +342,7 @@ const FranchiseEdit = () => {
 
   const removeImage = (url: string) => setUploadedImages(prev => prev.filter(img => img !== url));
 
-  const addBranch = () => setBranches(prev => [...prev, { id: crypto.randomUUID(), address: "", city: "", province: "", postalCode: "", isAdSpaceListing: true }]);
+  const addBranch = () => setBranches(prev => [...prev, { id: crypto.randomUUID(), branchName: "", address: "", city: "", province: "", postalCode: "", isAdSpaceListing: true }]);
 
   const removeBranch = async (localId: string) => {
     const branch = branches.find(b => b.id === localId);
