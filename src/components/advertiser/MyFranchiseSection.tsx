@@ -335,10 +335,16 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
   };
   const openEditLocation = (loc: FranchiseLocation) => {
     setEditingLocationId(loc.id);
-    setTargetFranchiseId(loc.advertiser_franchise_id);
+    // Use advertiser_franchise_id or listing_id (as adspace- prefixed) so targetFranchiseId is never null
+    const franchiseRef = loc.advertiser_franchise_id
+      ? loc.advertiser_franchise_id
+      : loc.listing_id
+        ? `adspace-${loc.listing_id}`
+        : loc.id; // fallback to location id itself so validation won't block
+    setTargetFranchiseId(franchiseRef);
     setLocName(loc.branch_name || "");
     setLocAddress(loc.full_address);
-    setLocCity(""); setLocProvince(""); setLocPostal(""); setLocCountry("");
+    setLocCity(loc.city || ""); setLocProvince(""); setLocPostal(""); setLocCountry("");
     setLocContact(loc.contact_name || "");
     setLocPhone(loc.contact_phone || "");
     setLocationDialogOpen(true);
