@@ -820,7 +820,7 @@ const VenueRegistration = () => {
                       <div>
                         <Label>Contact Email *</Label>
                         <Input type="email" value={contactEmail} onChange={e => { setContactEmail(e.target.value); setVerificationSent(false); setOwnershipWorkflow(null); }} required />
-                        {isEditing && contactEmail.trim() && (
+                        {contactEmail.trim() && (
                           advertiserLinked ? (
                             <div className="flex items-center gap-1.5 mt-1.5">
                               <CheckCircle className="h-3.5 w-3.5 text-primary" />
