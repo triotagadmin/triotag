@@ -7,12 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  MapPin, Plus, Trash2, Edit, Store, Printer, ChevronDown, ChevronUp, Info, Power, PowerOff, Clock, XCircle
+  MapPin, Plus, Trash2, Edit, Store, Printer, ChevronDown, ChevronUp, Info, Power, PowerOff, Clock, XCircle, Check, ChevronsUpDown
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNavigate } from "react-router-dom";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { getCountries, getProvinces, getCities, getPostalCode } from "@/lib/locationData";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -79,6 +82,75 @@ const statusConfig: Record<MarketplaceStatus, { label: string; className: string
     className: "bg-destructive/20 text-destructive border-destructive/30",
     icon: <XCircle className="h-3 w-3" />,
   },
+};
+
+// Searchable combobox for location fields
+const LocationCombobox = ({
+  value,
+  onSelect,
+  options,
+  placeholder,
+  searchPlaceholder,
+  allowCustom,
+}: {
+  value: string;
+  onSelect: (val: string) => void;
+  options: string[];
+  placeholder: string;
+  searchPlaceholder?: string;
+  allowCustom?: boolean;
+}) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal h-10 rounded-[14px] border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.06)] backdrop-blur-sm hover:bg-[rgba(255,255,255,0.1)]"
+        >
+          {value || <span className="text-muted-foreground">{placeholder}</span>}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={searchPlaceholder || "Search..."} value={search} onValueChange={setSearch} />
+          <CommandList>
+            <CommandEmpty>
+              {allowCustom && search.trim() ? (
+                <button
+                  className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded-sm cursor-pointer"
+                  onClick={() => { onSelect(search.trim()); setOpen(false); setSearch(""); }}
+                >
+                  Use "{search.trim()}"
+                </button>
+              ) : (
+                "No results found."
+              )}
+            </CommandEmpty>
+            <CommandGroup>
+              {filtered.map(opt => (
+                <CommandItem
+                  key={opt}
+                  value={opt}
+                  onSelect={() => { onSelect(opt); setOpen(false); setSearch(""); }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", value === opt ? "opacity-100" : "opacity-0")} />
+                  {opt}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 };
 
 export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSectionProps) => {
@@ -642,29 +714,73 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
               <Label>Location Name *</Label>
               <Input value={locName} onChange={e => setLocName(e.target.value)} placeholder="e.g., Diliman Branch" />
             </div>
+
+            {/* Step 1: Country */}
+            <div className="space-y-2">
+              <Label>Country *</Label>
+              <LocationCombobox
+                value={locCountry}
+                onSelect={(val) => {
+                  setLocCountry(val);
+                  setLocProvince("");
+                  setLocCity("");
+                  setLocPostal("");
+                }}
+                options={getCountries()}
+                placeholder="Select country"
+                searchPlaceholder="Search country..."
+              />
+            </div>
+
+            {/* Step 2: Province / State */}
+            {locCountry && (
+              <div className="space-y-2">
+                <Label>Province / State</Label>
+                <LocationCombobox
+                  value={locProvince}
+                  onSelect={(val) => {
+                    setLocProvince(val);
+                    setLocCity("");
+                    setLocPostal("");
+                  }}
+                  options={getProvinces(locCountry)}
+                  placeholder="Select province / state"
+                  searchPlaceholder="Search province..."
+                  allowCustom
+                />
+              </div>
+            )}
+
+            {/* Step 3: City */}
+            {locCountry && locProvince && (
+              <div className="space-y-2">
+                <Label>City</Label>
+                <LocationCombobox
+                  value={locCity}
+                  onSelect={(val) => {
+                    setLocCity(val);
+                    const postal = getPostalCode(locCountry, locProvince, val);
+                    if (postal) setLocPostal(postal);
+                  }}
+                  options={getCities(locCountry, locProvince)}
+                  placeholder="Select city"
+                  searchPlaceholder="Search city..."
+                  allowCustom
+                />
+              </div>
+            )}
+
+            {/* Step 4: Postal Code (auto-detected, editable) */}
+            {locCountry && locProvince && locCity && (
+              <div className="space-y-2">
+                <Label>Postal Code {locPostal ? "(auto-detected)" : ""}</Label>
+                <Input value={locPostal} onChange={e => setLocPostal(e.target.value)} placeholder="Postal code" />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Street Address *</Label>
               <Input value={locAddress} onChange={e => setLocAddress(e.target.value)} placeholder="Street address" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>City</Label>
-                <Input value={locCity} onChange={e => setLocCity(e.target.value)} placeholder="City" />
-              </div>
-              <div className="space-y-2">
-                <Label>Province / State</Label>
-                <Input value={locProvince} onChange={e => setLocProvince(e.target.value)} placeholder="Province" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Postal Code</Label>
-                <Input value={locPostal} onChange={e => setLocPostal(e.target.value)} placeholder="Postal code" />
-              </div>
-              <div className="space-y-2">
-                <Label>Country</Label>
-                <Input value={locCountry} onChange={e => setLocCountry(e.target.value)} placeholder="Country" />
-              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
