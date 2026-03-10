@@ -98,12 +98,21 @@ export default {
             boxShadow: "0 0 20px hsl(110 100% 55% / 0.5), 0 0 40px hsl(110 100% 55% / 0.3)",
           },
         },
+        "glow-breathe": {
+          "0%, 100%": {
+            boxShadow: "0 0 8px hsl(var(--primary) / 0.15), 0 0 20px hsl(var(--primary) / 0.08)",
+          },
+          "50%": {
+            boxShadow: "0 0 18px hsl(var(--primary) / 0.35), 0 0 40px hsl(var(--primary) / 0.18)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in-up": "fade-in-up 0.8s ease-out forwards",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "glow-breathe": "glow-breathe 4s ease-in-out infinite",
       },
     },
   },
