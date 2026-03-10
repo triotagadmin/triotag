@@ -260,8 +260,17 @@ const FranchiseEdit = () => {
     }
   };
 
+  // Track whether the user is actively editing branches to prevent realtime overwrite
+  const [branchesEdited, setBranchesEdited] = useState(false);
+
   const loadBranches = async () => {
     if (!franchiseId) return;
+    // Don't overwrite if user has unsaved edits
+    if (branchesEdited) return;
+
+    // Get the listing's primary address to filter it out
+    const { data: listing } = await supabase.from("ad_spaces").select("location").eq("id", franchiseId).single();
+    const primaryAddress = (listing?.location || "").trim().toLowerCase();
 
     // Load from both franchise_branches and advertiser_branches for this listing
     const [fbRes, abRes] = await Promise.all([
@@ -281,6 +290,8 @@ const FranchiseEdit = () => {
 
     if (!fbRes.error && fbRes.data) {
       fbRes.data.forEach((b: any) => {
+        // Skip branches that match the primary/head office address
+        if (primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress) return;
         const parts = (b.full_address || "").split(", ");
         combined.push({
           id: crypto.randomUUID(),
@@ -298,6 +309,8 @@ const FranchiseEdit = () => {
 
     if (!abRes.error && abRes.data) {
       abRes.data.forEach((b: any) => {
+        // Skip branches that match the primary/head office address
+        if (primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress) return;
         // Avoid duplicates by checking full_address
         const alreadyExists = combined.some(
           (c) => c.address === (b.full_address || "").split(", ")[0]
