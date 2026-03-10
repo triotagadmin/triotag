@@ -903,15 +903,15 @@ const ActivateListing = () => {
               </Card>
           }
 
-            {isApprovedByPublisher &&
+            {isApproved &&
           <Card className="border-primary bg-primary/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-primary">
                     <CheckCircle className="h-5 w-5" />
-                    Ad Request Approved!
+                    Booking Request Approved!
                   </CardTitle>
                   <CardDescription>
-                    Your ad request has been approved. Proceed to place your print order.
+                    Your booking request has been approved. Proceed to place your print order.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
