@@ -504,7 +504,7 @@ const VenueRegistration = () => {
 
       if (isEditing) {
         const emailChanged = normalizedContactEmail !== originalContactEmail;
-        const updatePayload: any = { ...venueData };
+        const updatePayload: any = { ...venueData, availability_status: isListedOnExplore ? "available" : "unlisted" };
 
         if (emailChanged && normalizedContactEmail) {
           updatePayload.advertiser_id = null;
