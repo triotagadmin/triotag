@@ -303,11 +303,13 @@ const FranchiseEdit = () => {
           combined.push({
             id: crypto.randomUUID(),
             dbId: b.id,
+            branchName: b.branch_name || "",
             address: parts[0] || "",
             city: parts[1] || b.branch_name || "",
             province: parts[2] || "",
             postalCode: parts[3] || "",
             isAdSpaceListing: false,
+            source: "advertiser",
           });
         }
       });
