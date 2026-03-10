@@ -765,7 +765,7 @@ const VenueRegistration = () => {
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">Ad Unit Materials</CardTitle>
-                    <p className="text-xs text-muted-foreground">Select the types of advertising materials that can be installed in this ad space.</p>
+                    <p className="text-xs text-muted-foreground">Select the types of advertising materials that can be installed.</p>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 gap-3">
