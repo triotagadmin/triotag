@@ -187,6 +187,9 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
   const [statusConfirmOpen, setStatusConfirmOpen] = useState(false);
   const [statusConfirmFranchise, setStatusConfirmFranchise] = useState<Franchise | null>(null);
   const [statusConfirmAction, setStatusConfirmAction] = useState<"activate" | "deactivate">("activate");
+  // Agent disconnect confirmation
+  const [disconnectConfirmOpen, setDisconnectConfirmOpen] = useState(false);
+  const [disconnectFranchise, setDisconnectFranchise] = useState<Franchise | null>(null);
 
   const [saving, setSaving] = useState(false);
 
