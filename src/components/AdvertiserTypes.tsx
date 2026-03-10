@@ -67,7 +67,7 @@ export const AdvertiserTypes = () => {
           className={`max-w-3xl mx-auto text-center mb-8 md:mb-16 space-y-2 md:space-y-4 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-            Real-World Brand Visibility
+            Real-World Hyperlocal Brand Visibility
           </h2>
           <p className="text-sm px-2 text-popover-foreground md:text-base">
             Tiny Sticky Ads is an advertising management web app that helps businesses streamline on-site print
