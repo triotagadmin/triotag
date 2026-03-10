@@ -520,6 +520,8 @@ const FranchiseEdit = () => {
       }
 
       toast({ title: "Success", description: "Franchise updated successfully" });
+      setBranchesEdited(false);
+      await loadBranches(); // Reload fresh data after save
     } catch (error: any) {
       submittedRef.current = false;
       toast({ title: "Error", description: error.message || "Update failed", variant: "destructive" });
