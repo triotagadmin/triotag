@@ -27,6 +27,7 @@ interface MarketplaceListing {
   monthlySubscriptionFee?: number;
   weeklyPrice?: number;
   currency?: string;
+  branchCount?: number;
 }
 
 const AD_UNIT_TYPE_LABELS: Record<string, string> = {
