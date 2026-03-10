@@ -254,7 +254,7 @@ const ExploreAll = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredListings.map((listing) => (
             <Card key={listing.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              {listing.image && (
+              {user && listing.image && (
                 <div className="aspect-video bg-muted overflow-hidden">
                   <img
                     src={listing.image}
@@ -266,14 +266,16 @@ const ExploreAll = () => {
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
                   {getTypeBadge(listing.venue_type || 'Venue')}
-                  {listing.publisher_name && (
+                  {user && listing.publisher_name && (
                     <Badge variant="outline">{listing.publisher_name}</Badge>
                   )}
                 </div>
                 <CardTitle className="text-xl">{listing.title}</CardTitle>
-                <CardDescription className="line-clamp-2">
-                  {listing.description}
-                </CardDescription>
+                {user && listing.description && (
+                  <CardDescription className="line-clamp-2">
+                    {listing.description}
+                  </CardDescription>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
@@ -290,7 +292,7 @@ const ExploreAll = () => {
                       ))}
                     </div>
                   )}
-                  {listing.type !== 'franchise' && (listing.weekly_price || listing.monthly_price) && (
+                  {user && listing.type !== 'franchise' && (listing.weekly_price || listing.monthly_price) && (
                     <div className="pt-2 border-t mt-2 space-y-1">
                       {listing.weekly_price && (
                         <p className="text-sm font-medium">
