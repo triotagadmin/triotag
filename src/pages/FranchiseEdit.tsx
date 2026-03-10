@@ -101,7 +101,8 @@ const FranchiseEdit = () => {
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
-  const [userRole, setUserRole] = useState<"publisher" | "advertiser" | null>(null);
+  const [userRole, setUserRole] = useState<"publisher" | "advertiser" | "admin" | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [publisherId, setPublisherId] = useState<string | null>(null);
   const submittedRef = useRef(false);
 
