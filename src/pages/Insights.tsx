@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ArrowRight, Edit } from "lucide-react";
+import ShareButtons from "@/components/ShareButtons";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -127,6 +128,11 @@ const Insights = () => {
                         {isAdmin && <Button variant="ghost" size="sm" onClick={() => handleEditPost(post.id)}>
                             <Edit className="w-4 h-4" />
                           </Button>}
+                        <ShareButtons
+                          url={`${window.location.origin}/insights/${post.id}`}
+                          title={post.title}
+                          description={post.excerpt}
+                        />
                         <Link to={`/insights/${post.id}`}>
                           <Button variant="ghost" size="sm">
                             Read More <ArrowRight className="ml-2 w-4 h-4" />
