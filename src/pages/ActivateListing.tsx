@@ -741,14 +741,22 @@ const ActivateListing = () => {
   const subscriptionPrice = calculateSubscriptionPrice();
 
   // Check if schedule and design are complete for submitting
-  // Allow submission if either subscriptionPrice or estimatedPublisherPayout is valid
-  const hasValidPrice = subscriptionPrice > 0 || estimatedPublisherPayout > 0;
-  const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice;
+  // Detect fees from all ad materials in listing
+  const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
+  const hasListingFees = listingAdUnits.some((unit: any) =>
+    (unit.pricePerWeek && unit.pricePerWeek > 0) ||
+    (unit.pricePerMonth && unit.pricePerMonth > 0) ||
+    (unit.weekly_subscription_fee && unit.weekly_subscription_fee > 0) ||
+    (unit.monthly_subscription_fee && unit.monthly_subscription_fee > 0)
+  ) || (listing?.pricing?.weekly && listing.pricing.weekly > 0) || (listing?.pricing?.monthly && listing.pricing.monthly > 0);
 
-  // Check if waiting for publisher response
-  const isWaitingForPublisher = ["pending_submission", "under_review"].includes(activationStatus);
-  const isApprovedByPublisher = activationStatus === "approved";
-  const isRejectedByPublisher = activationStatus === "rejected";
+  const hasValidPrice = subscriptionPrice > 0 || estimatedPublisherPayout > 0;
+  const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice && hasListingFees;
+
+  // Check if waiting for admin response
+  const isWaitingForApproval = ["pending_submission", "pending_approval", "under_review"].includes(activationStatus);
+  const isApproved = activationStatus === "approved";
+  const isRejected = activationStatus === "rejected";
 
   if (loading || isAdvertiser === null) {
     return (
