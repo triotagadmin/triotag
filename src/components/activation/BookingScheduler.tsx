@@ -63,21 +63,23 @@ export function BookingScheduler({
     const adUnits = pricing?.ad_units || [];
     const selectedAdUnit = adUnits.find((unit: any) => unit.type === adUnitType) || adUnits[0];
 
-    // Weekly rate: check ad unit first, then pricing object
+    // Weekly rate: check ad unit first, then pricing object, then specs (venue/franchise registration)
     const weeklyRate = 
       selectedAdUnit?.pricePerWeek || 
       selectedAdUnit?.weekly_subscription_fee || 
       pricing?.weekly || 
       pricing?.pricePerWeek || 
+      pricing?.weekly_lease_price ||
       0;
     
-    // Monthly rate: check ad unit first, then pricing object, then top-level column
+    // Monthly rate: check ad unit first, then pricing object, then specs, then top-level column
     const monthlyRate = 
       selectedAdUnit?.pricePerMonth || 
       selectedAdUnit?.monthly_subscription_fee || 
       pricing?.monthly || 
       pricing?.pricePerMonth || 
       pricing?.monthly_subscription_fee ||
+      pricing?.monthly_lease_price ||
       0;
     
     // Daily rate fallback

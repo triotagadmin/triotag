@@ -365,6 +365,7 @@ const ActivateListing = () => {
     selectedAdUnit?.weekly_subscription_fee ||
     listing.pricing?.weekly ||
     listing.pricing?.pricePerWeek ||
+    listing.specifications?.weekly_lease_price ||
     0;
 
     const monthlyRate =
@@ -373,6 +374,7 @@ const ActivateListing = () => {
     listing.pricing?.monthly ||
     listing.pricing?.pricePerMonth ||
     listing.monthly_subscription_fee ||
+    listing.specifications?.monthly_lease_price ||
     0;
 
 
@@ -715,21 +717,23 @@ const ActivateListing = () => {
     unit.type === approvedAdUnitType || unit.type === activationType
     ) || adUnits[0];
 
-    // Get weekly rate from multiple possible fields
+    // Get weekly rate from multiple possible fields (including specs from venue/franchise registration)
     const weeklyRate =
     selectedAdUnit?.pricePerWeek ||
     selectedAdUnit?.weekly_subscription_fee ||
     listing.pricing?.weekly ||
     listing.pricing?.pricePerWeek ||
+    listing.specifications?.weekly_lease_price ||
     0;
 
-    // Get monthly rate from multiple possible fields (including top-level column)
+    // Get monthly rate from multiple possible fields (including top-level column and specs)
     const monthlyRate =
     selectedAdUnit?.pricePerMonth ||
     selectedAdUnit?.monthly_subscription_fee ||
     listing.pricing?.monthly ||
     listing.pricing?.pricePerMonth ||
     listing.monthly_subscription_fee ||
+    listing.specifications?.monthly_lease_price ||
     0;
 
     // Pricing logic: months apply first, remaining weeks billed at weekly rate
@@ -760,6 +764,8 @@ const ActivateListing = () => {
     || (listing?.pricing?.monthly && listing.pricing.monthly > 0)
     || (listing?.pricing?.pricePerWeek && listing.pricing.pricePerWeek > 0)
     || (listing?.pricing?.pricePerMonth && listing.pricing.pricePerMonth > 0)
+    || (listing?.specifications?.weekly_lease_price && listing.specifications.weekly_lease_price > 0)
+    || (listing?.specifications?.monthly_lease_price && listing.specifications.monthly_lease_price > 0)
     || (listing?.monthly_subscription_fee && listing.monthly_subscription_fee > 0)
     || (listing?.activation_fee && listing.activation_fee > 0);
 
@@ -1017,7 +1023,9 @@ const ActivateListing = () => {
                 onDatesChange={handleDatesChange}
                 pricing={{
                   ...listing.pricing,
-                  ad_units: listing.specifications?.ad_units || listing.pricing?.ad_units || []
+                  ad_units: listing.specifications?.ad_units || listing.pricing?.ad_units || [],
+                  weekly_lease_price: listing.specifications?.weekly_lease_price,
+                  monthly_lease_price: listing.specifications?.monthly_lease_price,
                 }}
                 adUnitType={approvedAdUnitType || activationType}
                 quantity={quantity}
