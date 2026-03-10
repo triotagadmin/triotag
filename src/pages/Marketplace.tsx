@@ -515,15 +515,11 @@ const Marketplace = () => {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  {user && listing.description && (
-                    <CardDescription className="line-clamp-2">{listing.description}</CardDescription>
-                  )}
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>{(() => { const p = (listing.location || "").split(",").map(s => s.trim()).filter(Boolean); return p.length >= 2 ? p.slice(-2).join(", ") : p[p.length - 1] || "—"; })()}</span>
-                  </div>
+                  {listing.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">{listing.description}</p>
+                  )}
 
                   {user && (listing.weeklyPrice || listing.monthlySubscriptionFee) ? (
                     <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 space-y-1">
