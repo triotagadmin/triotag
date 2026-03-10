@@ -488,9 +488,32 @@ const Marketplace = () => {
                     <Badge variant="secondary" className="capitalize">
                       {listing.type}
                     </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {(listing.branchCount ?? 0) > 0 ? `Multi-location (${listing.branchCount})` : "Single Location"}
-                    </Badge>
+                    <Popover>
+                      <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Badge variant="outline" className="text-xs cursor-pointer hover:bg-accent transition-colors">
+                          {(listing.branchCount ?? 0) > 0 ? `Multi-location (${listing.branchCount})` : "Single Location"}
+                        </Badge>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-64 p-3" align="start" onClick={(e) => e.stopPropagation()}>
+                        <p className="text-sm font-semibold mb-2">Locations</p>
+                        {(listing.branchCount ?? 0) > 0 && listing.branchCities && listing.branchCities.length > 0 ? (
+                          <ul className="space-y-1 text-sm text-muted-foreground">
+                            {listing.branchCities.map((bc, idx) => (
+                              <li key={idx} className="flex items-center gap-1.5">
+                                <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                                <span>{bc.city}, {bc.country}</span>
+                                {bc.count > 1 && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-auto">{bc.count}</Badge>}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                            <span>{(() => { const p = (listing.location || "").split(",").map(s => s.trim()).filter(Boolean); return p.length >= 2 ? p.slice(-2).join(", ") : p[p.length - 1] || "—"; })()}</span>
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   {user && listing.description && (
                     <CardDescription className="line-clamp-2">{listing.description}</CardDescription>
