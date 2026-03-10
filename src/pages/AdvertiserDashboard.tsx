@@ -56,14 +56,6 @@ const AdvertiserDashboard = () => {
         .order("created_at", { ascending: false });
       if (activations) setBookings(activations);
 
-      // Fetch listings owned by this advertiser (advertiser_id = user_id)
-      const { data: owned } = await supabase
-        .from("ad_spaces")
-        .select("id, title, location, approval_status, specifications, created_at, leased_advertiser_ids")
-        .eq("advertiser_id", session.user.id)
-        .order("created_at", { ascending: false });
-      if (owned) setOwnedListings(owned);
-
       // Fetch listings leased by this advertiser
       const { data: leased } = await supabase
         .from("ad_spaces")
