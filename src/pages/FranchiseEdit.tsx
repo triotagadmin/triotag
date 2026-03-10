@@ -17,12 +17,14 @@ import { Switch } from "@/components/ui/switch";
 
 interface BranchLocation {
   id: string;
+  branchName: string;
   address: string;
   city: string;
   province: string;
   postalCode: string;
   isAdSpaceListing: boolean;
-  dbId?: string; // franchise_branches row id
+  dbId?: string;
+  source?: "franchise" | "advertiser";
 }
 
 interface EnvironmentDetails {
@@ -255,26 +257,65 @@ const FranchiseEdit = () => {
 
   const loadBranches = async () => {
     if (!franchiseId) return;
-    const { data, error } = await supabase
-      .from("franchise_branches")
-      .select("*")
-      .eq("franchise_id", franchiseId)
-      .order("created_at", { ascending: true });
 
-    if (!error && data) {
-      setBranches(data.map((b: any) => {
+    // Load from both franchise_branches and advertiser_branches for this listing
+    const [fbRes, abRes] = await Promise.all([
+      supabase
+        .from("franchise_branches")
+        .select("id, place_name, full_address")
+        .eq("franchise_id", franchiseId)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("advertiser_branches")
+        .select("id, branch_name, full_address")
+        .eq("listing_id", franchiseId)
+        .order("created_at", { ascending: true }),
+    ]);
+
+    const combined: BranchLocation[] = [];
+
+    if (!fbRes.error && fbRes.data) {
+      fbRes.data.forEach((b: any) => {
         const parts = (b.full_address || "").split(", ");
-        return {
+        combined.push({
           id: crypto.randomUUID(),
           dbId: b.id,
+          branchName: b.place_name || "",
           address: parts[0] || "",
           city: parts[1] || b.place_name || "",
           province: parts[2] || "",
           postalCode: parts[3] || "",
-          isAdSpaceListing: true, // all franchise branches are ad space listings by default
-        };
-      }));
+          isAdSpaceListing: true,
+          source: "franchise",
+        });
+      });
     }
+
+    if (!abRes.error && abRes.data) {
+      abRes.data.forEach((b: any) => {
+        // Avoid duplicates by checking full_address
+        const alreadyExists = combined.some(
+          (c) => c.address === (b.full_address || "").split(", ")[0]
+            && c.city === ((b.full_address || "").split(", ")[1] || b.branch_name || "")
+        );
+        if (!alreadyExists) {
+          const parts = (b.full_address || "").split(", ");
+          combined.push({
+            id: crypto.randomUUID(),
+            dbId: b.id,
+            branchName: b.branch_name || "",
+            address: parts[0] || "",
+            city: parts[1] || b.branch_name || "",
+            province: parts[2] || "",
+            postalCode: parts[3] || "",
+            isAdSpaceListing: false,
+            source: "advertiser",
+          });
+        }
+      });
+    }
+
+    setBranches(combined);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -301,7 +342,7 @@ const FranchiseEdit = () => {
 
   const removeImage = (url: string) => setUploadedImages(prev => prev.filter(img => img !== url));
 
-  const addBranch = () => setBranches(prev => [...prev, { id: crypto.randomUUID(), address: "", city: "", province: "", postalCode: "", isAdSpaceListing: true }]);
+  const addBranch = () => setBranches(prev => [...prev, { id: crypto.randomUUID(), branchName: "", address: "", city: "", province: "", postalCode: "", isAdSpaceListing: true }]);
 
   const removeBranch = async (localId: string) => {
     const branch = branches.find(b => b.id === localId);
@@ -587,9 +628,12 @@ const FranchiseEdit = () => {
                           {branches.map((loc, idx) => (
                             <div key={loc.id} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
                               <span className="text-primary font-medium shrink-0">{idx + 1}.</span>
-                              <span className="truncate">
-                                {[loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", ") || "No address"}
-                              </span>
+                              <div className="truncate flex-1">
+                                <span className="font-medium">{loc.branchName || "Unnamed"}</span>
+                                <span className="text-muted-foreground ml-1.5 text-xs">
+                                  {[loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", ")}
+                                </span>
+                              </div>
                               {loc.isAdSpaceListing && (
                                 <Badge variant="secondary" className="ml-auto shrink-0 text-[10px]">Ad Space</Badge>
                               )}
