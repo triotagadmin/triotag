@@ -609,7 +609,6 @@ const FranchiseEdit = () => {
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Head Office / Primary Contact Address</CardTitle>
-                    <p className="text-xs text-muted-foreground">This is NOT used as a branch listing.</p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div><Label>Street Address</Label><Input value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" /></div>
