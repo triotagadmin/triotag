@@ -412,6 +412,12 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                       {expanded ? <ChevronUp className="h-5 w-5 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" />}
                       <div className="min-w-0">
                         <CardTitle className="text-lg">{franchise.franchise_name}</CardTitle>
+                        {(franchise as any)._isAdSpace && (franchise as any)._location && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <MapPin className="h-3 w-3" />
+                            {(franchise as any)._location}
+                          </p>
+                        )}
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {fLocs.length} branch{fLocs.length !== 1 ? "es" : ""} registered
                         </p>
