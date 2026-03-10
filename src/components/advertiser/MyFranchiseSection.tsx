@@ -245,9 +245,10 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
   // Location CRUD
   const buildFullAddress = () => [locAddress, locCity, locProvince, locPostal, locCountry].filter(Boolean).join(", ");
 
-  const openAddLocation = (franchiseId: string) => {
+  const openAddLocation = (franchise: Franchise) => {
     setEditingLocationId(null);
-    setTargetFranchiseId(franchiseId);
+    // For ad-space franchises, store the real ad space ID; for regular franchises, store franchise ID
+    setTargetFranchiseId(franchise.id);
     setLocName(""); setLocAddress(""); setLocCity(""); setLocProvince(""); setLocPostal(""); setLocCountry(""); setLocContact(""); setLocPhone("");
     setLocationDialogOpen(true);
   };
