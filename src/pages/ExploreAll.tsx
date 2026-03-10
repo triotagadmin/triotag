@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 
 interface UnifiedListing {
   id: string;
-  type: 'venue' | 'agent_service';
+  type: 'venue' | 'agent_service' | 'franchise';
   title: string;
   description: string;
   location: string;
@@ -22,6 +22,7 @@ interface UnifiedListing {
   venue_type?: string;
   weekly_price?: number;
   monthly_price?: number;
+  city_count?: { city: string; count: number }[];
 }
 
 const ExploreAll = () => {
