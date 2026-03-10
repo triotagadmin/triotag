@@ -742,14 +742,17 @@ const ActivateListing = () => {
   const subscriptionPrice = calculateSubscriptionPrice();
 
   // Check if schedule and design are complete for submitting
-  // Detect fees from all ad materials in listing
+  // Detect fees from all ad materials in listing (ad_units, pricing jsonb, and top-level columns)
   const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
   const hasListingFees = listingAdUnits.some((unit: any) =>
     (unit.pricePerWeek && unit.pricePerWeek > 0) ||
     (unit.pricePerMonth && unit.pricePerMonth > 0) ||
     (unit.weekly_subscription_fee && unit.weekly_subscription_fee > 0) ||
     (unit.monthly_subscription_fee && unit.monthly_subscription_fee > 0)
-  ) || (listing?.pricing?.weekly && listing.pricing.weekly > 0) || (listing?.pricing?.monthly && listing.pricing.monthly > 0);
+  ) || (listing?.pricing?.weekly && listing.pricing.weekly > 0)
+    || (listing?.pricing?.monthly && listing.pricing.monthly > 0)
+    || (listing?.pricing?.pricePerWeek && listing.pricing.pricePerWeek > 0)
+    || (listing?.pricing?.pricePerMonth && listing.pricing.pricePerMonth > 0);
 
   const hasValidPrice = subscriptionPrice > 0 || estimatedPublisherPayout > 0;
   const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice && hasListingFees;
@@ -1085,7 +1088,7 @@ const ActivateListing = () => {
 
                 <>
                           <Send className="h-4 w-4 mr-2" />
-                          Submit Booking Request - {formatPrice(subscriptionPrice, listing?.specifications?.currency || "USD")}
+                          Submit Booking Request - {formatPrice(activationPrice, listing?.specifications?.currency || "USD")}
                         </>
                 }
                     </Button>
