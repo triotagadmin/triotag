@@ -503,6 +503,29 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
     setStatusConfirmFranchise(null);
   };
 
+  const requestDisconnectAgent = (franchise: Franchise) => {
+    setDisconnectFranchise(franchise);
+    setDisconnectConfirmOpen(true);
+  };
+
+  const confirmDisconnectAgent = async () => {
+    if (!disconnectFranchise || !disconnectFranchise._adSpaceId) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("ad_spaces")
+      .update({ agent_disconnected: true } as any)
+      .eq("id", disconnectFranchise._adSpaceId);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Publisher agent disconnected", description: "The agent no longer has access to this listing." });
+      fetchAll();
+    }
+    setSaving(false);
+    setDisconnectConfirmOpen(false);
+    setDisconnectFranchise(null);
+  };
+
   if (loading) return <p className="text-sm text-muted-foreground">Loading franchises...</p>;
 
   return (
