@@ -216,8 +216,9 @@ const ExploreAll = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="venue">Venues</SelectItem>
+                  <SelectItem value="venue">Ad Spaces</SelectItem>
                   <SelectItem value="agent_service">Agent Services</SelectItem>
+                  <SelectItem value="franchise">Franchise Locations</SelectItem>
                 </SelectContent>
               </Select>
 
