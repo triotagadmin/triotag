@@ -65,14 +65,18 @@ const AdvertiserDashboard = () => {
         .order("created_at", { ascending: false });
       if (leased) {
         setLeasedListings(leased);
-        // Fetch branch counts for each leased listing
+        // Fetch branch counts for each leased listing, excluding primary address
         const counts: Record<string, number> = {};
         await Promise.all(leased.map(async (l: any) => {
-          const { count } = await supabase
+          const primaryAddress = (l.location || "").trim().toLowerCase();
+          const { data: branchData } = await supabase
             .from("franchise_branches")
-            .select("*", { count: "exact", head: true })
+            .select("full_address")
             .eq("franchise_id", l.id);
-          counts[l.id] = count || 0;
+          const filtered = (branchData || []).filter(
+            (b: any) => !(primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress)
+          );
+          counts[l.id] = filtered.length;
         }));
         setBranchCounts(counts);
       }

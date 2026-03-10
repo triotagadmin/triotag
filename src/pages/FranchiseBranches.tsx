@@ -49,20 +49,24 @@ const FranchiseBranches = () => {
 
         const { data: venue, error: venueError } = await supabase
           .from("ad_spaces")
-          .select("title")
+          .select("title, location")
           .eq("id", id)
           .single();
         if (venueError) throw venueError;
         setFranchiseName(venue.title);
+        const primaryAddress = (venue.location || "").trim().toLowerCase();
 
-        // Fetch branches
+        // Fetch branches, excluding primary address
         const { data, error } = await supabase
           .from("franchise_branches")
           .select("*")
           .eq("franchise_id", id)
           .order("place_name", { ascending: true });
         if (error) throw error;
-        setBranches((data as any[]) || []);
+        const filtered = (data as any[] || []).filter(
+          (b: any) => !(primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress)
+        );
+        setBranches(filtered);
       } catch (error: any) {
         toast({ title: "Error", description: "Failed to load branches", variant: "destructive" });
       } finally {

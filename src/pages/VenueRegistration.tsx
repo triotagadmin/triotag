@@ -265,6 +265,10 @@ const VenueRegistration = () => {
   };
 
   const loadBranches = async (listingId: string) => {
+    // Get the listing's primary address to filter it out
+    const { data: listing } = await supabase.from("ad_spaces").select("location").eq("id", listingId).single();
+    const primaryAddress = (listing?.location || "").trim().toLowerCase();
+
     const [fbRes, abRes] = await Promise.all([
       supabase
         .from("franchise_branches")
@@ -282,6 +286,8 @@ const VenueRegistration = () => {
 
     if (!fbRes.error && fbRes.data) {
       fbRes.data.forEach((b: any) => {
+        // Skip branches that match the primary/head office address
+        if (primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress) return;
         const parts = (b.full_address || "").split(", ");
         combined.push({
           id: crypto.randomUUID(),
@@ -299,6 +305,8 @@ const VenueRegistration = () => {
 
     if (!abRes.error && abRes.data) {
       abRes.data.forEach((b: any) => {
+        // Skip branches that match the primary/head office address
+        if (primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress) return;
         const alreadyExists = combined.some(
           (c) => c.address === (b.full_address || "").split(", ")[0]
             && c.city === ((b.full_address || "").split(", ")[1] || b.branch_name || "")
