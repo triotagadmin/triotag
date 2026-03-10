@@ -3,22 +3,34 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  MapPin, Plus, Trash2, Edit, Store, Printer, ChevronDown, ChevronUp, Info
+  MapPin, Plus, Trash2, Edit, Store, Printer, ChevronDown, ChevronUp, Info, Power, PowerOff, Clock, XCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+type MarketplaceStatus = "active" | "inactive" | "pending_approval" | "rejected";
 
 interface Franchise {
   id: string;
   advertiser_id: string;
   franchise_name: string;
+  marketplace_status: MarketplaceStatus;
   created_at: string;
   updated_at: string;
 }
@@ -39,6 +51,29 @@ interface MyFranchiseSectionProps {
   userId: string;
   onSelectionChange?: (selectedLocationIds: string[]) => void;
 }
+
+const statusConfig: Record<MarketplaceStatus, { label: string; className: string; icon: React.ReactNode }> = {
+  active: {
+    label: "Approved on Ad Space Marketplace",
+    className: "bg-primary/20 text-primary border-primary/30",
+    icon: <Power className="h-3 w-3" />,
+  },
+  inactive: {
+    label: "Marketplace Listing Inactive",
+    className: "bg-muted text-muted-foreground border-border",
+    icon: <PowerOff className="h-3 w-3" />,
+  },
+  pending_approval: {
+    label: "Pending Approval",
+    className: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    icon: <Clock className="h-3 w-3" />,
+  },
+  rejected: {
+    label: "Rejected",
+    className: "bg-destructive/20 text-destructive border-destructive/30",
+    icon: <XCircle className="h-3 w-3" />,
+  },
+};
 
 export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSectionProps) => {
   const { toast } = useToast();
@@ -67,6 +102,11 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
   const [locContact, setLocContact] = useState("");
   const [locPhone, setLocPhone] = useState("");
 
+  // Marketplace status confirmation
+  const [statusConfirmOpen, setStatusConfirmOpen] = useState(false);
+  const [statusConfirmFranchise, setStatusConfirmFranchise] = useState<Franchise | null>(null);
+  const [statusConfirmAction, setStatusConfirmAction] = useState<"activate" | "deactivate">("activate");
+
   const [saving, setSaving] = useState(false);
 
   const fetchAll = useCallback(async () => {
@@ -82,7 +122,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
         .eq("advertiser_id", userId)
         .order("created_at", { ascending: false }),
     ]);
-    if (fRes.data) setFranchises(fRes.data as Franchise[]);
+    if (fRes.data) setFranchises(fRes.data as unknown as Franchise[]);
     if (lRes.data) setLocations(lRes.data as unknown as FranchiseLocation[]);
     setLoading(false);
   }, [userId]);
@@ -107,7 +147,6 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
     onSelectionChange?.(Array.from(selectedIds));
   }, [selectedIds, onSelectionChange]);
 
-  // Auto-expand all franchises on load
   useEffect(() => {
     if (franchises.length > 0) {
       setExpandedFranchises(new Set(franchises.map(f => f.id)));
@@ -189,7 +228,6 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
     setEditingLocationId(loc.id);
     setTargetFranchiseId(loc.advertiser_franchise_id);
     setLocName(loc.branch_name || "");
-    // Parse address parts — just put everything in address field for editing
     setLocAddress(loc.full_address);
     setLocCity(""); setLocProvince(""); setLocPostal(""); setLocCountry("");
     setLocContact(loc.contact_name || "");
@@ -236,6 +274,53 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
     }
   };
 
+  // Marketplace status toggle
+  const requestStatusChange = (franchise: Franchise, action: "activate" | "deactivate") => {
+    setStatusConfirmFranchise(franchise);
+    setStatusConfirmAction(action);
+    setStatusConfirmOpen(true);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!statusConfirmFranchise) return;
+    setSaving(true);
+
+    let newStatus: MarketplaceStatus;
+    if (statusConfirmAction === "deactivate") {
+      newStatus = "inactive";
+    } else {
+      // If previously approved (active), go straight to active. Otherwise pending.
+      const wasApproved = statusConfirmFranchise.marketplace_status === "active" || statusConfirmFranchise.marketplace_status === "inactive";
+      // If it was ever active before (now inactive), re-activate directly
+      // If it was rejected or never approved, submit for approval
+      if (statusConfirmFranchise.marketplace_status === "inactive") {
+        newStatus = "active";
+      } else {
+        newStatus = "pending_approval";
+      }
+    }
+
+    const { error } = await supabase
+      .from("advertiser_franchises")
+      .update({ marketplace_status: newStatus })
+      .eq("id", statusConfirmFranchise.id);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      const msg = newStatus === "active"
+        ? "Listing activated on marketplace"
+        : newStatus === "inactive"
+          ? "Listing deactivated from marketplace"
+          : "Listing submitted for approval";
+      toast({ title: msg });
+    }
+
+    setSaving(false);
+    setStatusConfirmOpen(false);
+    setStatusConfirmFranchise(null);
+  };
+
   if (loading) return <p className="text-sm text-muted-foreground">Loading franchises...</p>;
 
   return (
@@ -256,7 +341,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
             </PopoverTrigger>
             <PopoverContent className="w-80 text-sm" side="bottom" align="start">
               <p className="font-medium mb-1">About My Franchises</p>
-              <p className="text-muted-foreground">Organize your locations by franchise. Select locations with checkboxes to use for print orders or ad campaigns.</p>
+              <p className="text-muted-foreground">Organize your locations by franchise. Select locations with checkboxes to use for print orders or ad campaigns. You can also activate or deactivate marketplace listings.</p>
             </PopoverContent>
           </Popover>
         </div>
@@ -291,18 +376,21 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
             const fLocs = locations.filter(l => l.advertiser_franchise_id === franchise.id);
             const expanded = expandedFranchises.has(franchise.id);
             const allSelected = fLocs.length > 0 && fLocs.every(l => selectedIds.has(l.id));
-            const someSelected = fLocs.some(l => selectedIds.has(l.id));
+            const status = (franchise.marketplace_status || "inactive") as MarketplaceStatus;
+            const cfg = statusConfig[status];
+            const canActivate = status === "inactive" || status === "rejected";
+            const canDeactivate = status === "active" || status === "pending_approval";
 
             return (
               <Card key={franchise.id} className="overflow-hidden">
                 <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer" onClick={() => toggleExpand(franchise.id)}>
                       {expanded ? <ChevronUp className="h-5 w-5 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" />}
                       <div className="min-w-0">
                         <CardTitle className="text-lg">{franchise.franchise_name}</CardTitle>
                         <p className="text-sm text-muted-foreground mt-0.5">
-                          {fLocs.length} Location{fLocs.length !== 1 ? "s" : ""} Registered
+                          {fLocs.length} branch{fLocs.length !== 1 ? "es" : ""} registered
                         </p>
                       </div>
                     </div>
@@ -315,7 +403,17 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                       </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-3 flex-wrap">
+
+                  {/* Marketplace Status Badge */}
+                  <div className="mt-3">
+                    <Badge variant="outline" className={`gap-1.5 text-xs px-3 py-1 ${cfg.className}`}>
+                      {cfg.icon}
+                      {cfg.label}
+                    </Badge>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-3">
                     <Button size="sm" variant="outline" onClick={() => openAddLocation(franchise.id)} className="gap-1">
                       <Plus className="h-3.5 w-3.5" />
                       Add Location
@@ -324,6 +422,27 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                       <Button size="sm" className="gap-1" onClick={() => navigate("/order-prints", { state: { selectedBranchIds: fLocs.filter(l => selectedIds.has(l.id)).map(l => l.id) } })}>
                         <Printer className="h-3.5 w-3.5" />
                         Print Order
+                      </Button>
+                    )}
+                    {canActivate && (
+                      <Button
+                        size="sm"
+                        className="gap-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+                        onClick={() => requestStatusChange(franchise, "activate")}
+                      >
+                        <Power className="h-3.5 w-3.5" />
+                        Activate Marketplace Listing
+                      </Button>
+                    )}
+                    {canDeactivate && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1 border-destructive/50 text-destructive hover:bg-destructive/10"
+                        onClick={() => requestStatusChange(franchise, "deactivate")}
+                      >
+                        <PowerOff className="h-3.5 w-3.5" />
+                        Deactivate Marketplace Listing
                       </Button>
                     )}
                   </div>
@@ -467,6 +586,43 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Marketplace Status Confirmation */}
+      <AlertDialog open={statusConfirmOpen} onOpenChange={setStatusConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {statusConfirmAction === "deactivate" ? "Deactivate Listing?" : "Activate Listing?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {statusConfirmAction === "deactivate"
+                ? "This will remove your franchise listing from the Ad Space Marketplace. Advertisers will no longer be able to discover or book this listing."
+                : statusConfirmFranchise?.marketplace_status === "inactive"
+                  ? "This will make your franchise listing visible on the Ad Space Marketplace."
+                  : "This will submit your franchise listing for review. Once approved, it will appear on the Ad Space Marketplace."
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={saving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmStatusChange}
+              disabled={saving}
+              className={statusConfirmAction === "deactivate"
+                ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                : "bg-primary hover:bg-primary/90 text-primary-foreground"
+              }
+            >
+              {saving
+                ? "Processing..."
+                : statusConfirmAction === "deactivate"
+                  ? "Confirm Deactivation"
+                  : "Confirm Activation"
+              }
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
