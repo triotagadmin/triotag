@@ -98,16 +98,25 @@ const VenueDetail = () => {
       const { data: listing } = await supabase.from("ad_spaces").select("location").eq("id", id!).single();
       const primaryAddress = (listing?.location || "").trim().toLowerCase();
 
-      const { data, error } = await supabase
+      // Count advertiser branches linked to this listing (added by the owning advertiser)
+      const { data: abData } = await supabase
+        .from("advertiser_branches")
+        .select("full_address")
+        .eq("listing_id", id!);
+
+      // Also count franchise branches (legacy/publisher-added)
+      const { data: fbData } = await supabase
         .from("franchise_branches")
         .select("full_address")
         .eq("franchise_id", id!);
-      if (!error && data) {
-        const filtered = data.filter(
-          (b: any) => !(primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress)
-        );
-        setBranchCount(filtered.length);
-      }
+
+      const allBranches = [...(abData || []), ...(fbData || [])];
+      const filtered = allBranches.filter(
+        (b: any) => !(primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress)
+      );
+      // Deduplicate by normalized address
+      const unique = new Set(filtered.map((b: any) => (b.full_address || "").trim().toLowerCase()));
+      setBranchCount(unique.size);
     } catch {}
   };
 
