@@ -645,29 +645,73 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
               <Label>Location Name *</Label>
               <Input value={locName} onChange={e => setLocName(e.target.value)} placeholder="e.g., Diliman Branch" />
             </div>
+
+            {/* Step 1: Country */}
+            <div className="space-y-2">
+              <Label>Country *</Label>
+              <LocationCombobox
+                value={locCountry}
+                onSelect={(val) => {
+                  setLocCountry(val);
+                  setLocProvince("");
+                  setLocCity("");
+                  setLocPostal("");
+                }}
+                options={getCountries()}
+                placeholder="Select country"
+                searchPlaceholder="Search country..."
+              />
+            </div>
+
+            {/* Step 2: Province / State */}
+            {locCountry && (
+              <div className="space-y-2">
+                <Label>Province / State</Label>
+                <LocationCombobox
+                  value={locProvince}
+                  onSelect={(val) => {
+                    setLocProvince(val);
+                    setLocCity("");
+                    setLocPostal("");
+                  }}
+                  options={getProvinces(locCountry)}
+                  placeholder="Select province / state"
+                  searchPlaceholder="Search province..."
+                  allowCustom
+                />
+              </div>
+            )}
+
+            {/* Step 3: City */}
+            {locCountry && locProvince && (
+              <div className="space-y-2">
+                <Label>City</Label>
+                <LocationCombobox
+                  value={locCity}
+                  onSelect={(val) => {
+                    setLocCity(val);
+                    const postal = getPostalCode(locCountry, locProvince, val);
+                    if (postal) setLocPostal(postal);
+                  }}
+                  options={getCities(locCountry, locProvince)}
+                  placeholder="Select city"
+                  searchPlaceholder="Search city..."
+                  allowCustom
+                />
+              </div>
+            )}
+
+            {/* Step 4: Postal Code (auto-detected, editable) */}
+            {locCountry && locProvince && locCity && (
+              <div className="space-y-2">
+                <Label>Postal Code {locPostal ? "(auto-detected)" : ""}</Label>
+                <Input value={locPostal} onChange={e => setLocPostal(e.target.value)} placeholder="Postal code" />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Street Address *</Label>
               <Input value={locAddress} onChange={e => setLocAddress(e.target.value)} placeholder="Street address" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>City</Label>
-                <Input value={locCity} onChange={e => setLocCity(e.target.value)} placeholder="City" />
-              </div>
-              <div className="space-y-2">
-                <Label>Province / State</Label>
-                <Input value={locProvince} onChange={e => setLocProvince(e.target.value)} placeholder="Province" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Postal Code</Label>
-                <Input value={locPostal} onChange={e => setLocPostal(e.target.value)} placeholder="Postal code" />
-              </div>
-              <div className="space-y-2">
-                <Label>Country</Label>
-                <Input value={locCountry} onChange={e => setLocCountry(e.target.value)} placeholder="Country" />
-              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
