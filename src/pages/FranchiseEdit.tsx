@@ -17,12 +17,14 @@ import { Switch } from "@/components/ui/switch";
 
 interface BranchLocation {
   id: string;
+  branchName: string;
   address: string;
   city: string;
   province: string;
   postalCode: string;
   isAdSpaceListing: boolean;
-  dbId?: string; // franchise_branches row id
+  dbId?: string;
+  source?: "franchise" | "advertiser";
 }
 
 interface EnvironmentDetails {
