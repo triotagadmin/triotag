@@ -84,6 +84,75 @@ const statusConfig: Record<MarketplaceStatus, { label: string; className: string
   },
 };
 
+// Searchable combobox for location fields
+const LocationCombobox = ({
+  value,
+  onSelect,
+  options,
+  placeholder,
+  searchPlaceholder,
+  allowCustom,
+}: {
+  value: string;
+  onSelect: (val: string) => void;
+  options: string[];
+  placeholder: string;
+  searchPlaceholder?: string;
+  allowCustom?: boolean;
+}) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal h-10 rounded-[14px] border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.06)] backdrop-blur-sm hover:bg-[rgba(255,255,255,0.1)]"
+        >
+          {value || <span className="text-muted-foreground">{placeholder}</span>}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={searchPlaceholder || "Search..."} value={search} onValueChange={setSearch} />
+          <CommandList>
+            <CommandEmpty>
+              {allowCustom && search.trim() ? (
+                <button
+                  className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded-sm cursor-pointer"
+                  onClick={() => { onSelect(search.trim()); setOpen(false); setSearch(""); }}
+                >
+                  Use "{search.trim()}"
+                </button>
+              ) : (
+                "No results found."
+              )}
+            </CommandEmpty>
+            <CommandGroup>
+              {filtered.map(opt => (
+                <CommandItem
+                  key={opt}
+                  value={opt}
+                  onSelect={() => { onSelect(opt); setOpen(false); setSearch(""); }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", value === opt ? "opacity-100" : "opacity-0")} />
+                  {opt}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSectionProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
