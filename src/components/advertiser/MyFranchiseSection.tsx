@@ -636,11 +636,6 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                             Publisher Agent: <span className="font-medium text-foreground">{franchise._publisherName}</span>
                           </p>
                         )}
-                        {isAdSpace && franchise._agentDisconnected && (
-                          <p className="text-xs text-muted-foreground/60 mt-0.5 italic">
-                            Publisher agent disconnected
-                          </p>
-                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 flex-wrap">
