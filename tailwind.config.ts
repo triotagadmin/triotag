@@ -100,10 +100,10 @@ export default {
         },
         "glow-breathe": {
           "0%, 100%": {
-            boxShadow: "0 0 6px rgba(0, 255, 128, 0.2), 0 0 14px rgba(0, 255, 128, 0.08)",
+            boxShadow: "0 0 10px rgba(0, 255, 128, 0.35)",
           },
           "50%": {
-            boxShadow: "0 0 10px rgba(0, 255, 128, 0.35), 0 0 22px rgba(0, 255, 128, 0.12)",
+            boxShadow: "0 0 12px rgba(0, 255, 128, 0.45)",
           },
         },
       },
