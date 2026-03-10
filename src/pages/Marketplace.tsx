@@ -191,6 +191,10 @@ const Marketplace = () => {
         branchCountMap[b.listing_id] = (branchCountMap[b.listing_id] || 0) + 1;
       });
 
+      // Get current session to determine public vs authenticated view
+      const { data: { session } } = await supabase.auth.getSession();
+      const isAuthenticated = !!session;
+
       const allListings: MarketplaceListing[] = (venuesData || []).map((v) => {
         const specs = v.specifications as any;
         const adUnitsFromDb = specs?.ad_units || [];
@@ -205,6 +209,25 @@ const Marketplace = () => {
         const weeklyPrice = adUnitsFromDb[0]?.pricePerWeek || specs?.weekly_lease_price || 0;
         const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || specs?.monthly_lease_price || 0;
         const currency = adUnitsFromDb[0]?.currency || specs?.lease_currency || specs?.currency || "USD";
+
+        // For non-authenticated users, only return safe public fields
+        if (!isAuthenticated) {
+          return {
+            id: v.id,
+            title: v.title,
+            description: "", // Hidden for public
+            location: v.location || "Not specified",
+            type: VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue",
+            adUnits: [], // Hidden for public
+            image: Array.isArray(v.media_urls) ? (v.media_urls as string[])[0] : undefined,
+            ownerName: "", // Hidden for public
+            createdAt: v.created_at || "",
+            monthlySubscriptionFee: 0, // Hidden for public
+            weeklyPrice: 0, // Hidden for public
+            currency: "",
+            branchCount: branchCountMap[v.id] || 0,
+          };
+        }
 
         return {
           id: v.id,
