@@ -617,11 +617,18 @@ const VenueRegistration = () => {
     <div className="min-h-screen">
       <Navigation />
       <div className="container mx-auto px-4 md:px-6 py-8 md:py-12 max-w-4xl">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back
+        </Button>
+
         <Card className="rounded-[24px]">
           <CardHeader>
-            <CardTitle className="text-2xl md:text-3xl">
-              {isEditing ? "Edit Ad Space Listing" : "Register Franchise / Multi-Location Ad Space"}
-            </CardTitle>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <CardTitle className="text-2xl md:text-3xl">
+                {isEditing ? "Edit Ad Space Listing" : "Register Franchise / Multi-Location Ad Space"}
+              </CardTitle>
+              <Badge variant="outline" className="text-xs">Agent View</Badge>
+            </div>
             <p className="text-muted-foreground mt-2">
               {isEditing ? "Update your ad space details below" : "Register a brand or franchise with multiple locations. After approval, you can add individual branches from your dashboard."}
             </p>
