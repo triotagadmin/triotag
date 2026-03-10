@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import SubmissionDetailsDialog from "@/components/SubmissionDetailsDialog";
 import { Navigation } from "@/components/Navigation";
+import { AdminBookingsQueue } from "@/components/admin/AdminBookingsQueue";
 
 interface Submission {
   id: string;
