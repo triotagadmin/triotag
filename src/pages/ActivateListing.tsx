@@ -1023,7 +1023,9 @@ const ActivateListing = () => {
                 onDatesChange={handleDatesChange}
                 pricing={{
                   ...listing.pricing,
-                  ad_units: listing.specifications?.ad_units || listing.pricing?.ad_units || []
+                  ad_units: listing.specifications?.ad_units || listing.pricing?.ad_units || [],
+                  weekly_lease_price: listing.specifications?.weekly_lease_price,
+                  monthly_lease_price: listing.specifications?.monthly_lease_price,
                 }}
                 adUnitType={approvedAdUnitType || activationType}
                 quantity={quantity}
