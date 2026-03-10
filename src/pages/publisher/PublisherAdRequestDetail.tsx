@@ -316,7 +316,7 @@ export default function PublisherAdRequestDetail() {
   }
 
   const statusInfo = statusConfig[request.status] || statusConfig.design;
-  const canTakeAction = ["pending_submission", "under_review"].includes(request.status);
+  const canTakeAction = false; // Approval is now handled by admin accounts only
   const duration = request.start_date && request.end_date
     ? Math.ceil((new Date(request.end_date).getTime() - new Date(request.start_date).getTime()) / (1000 * 60 * 60 * 24))
     : 0;

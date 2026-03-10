@@ -204,6 +204,7 @@ const ActivateListing = () => {
             setCurrentStep("design");
             if (data.ad_design_url) setDesignApproved(true);
             break;
+          case "pending_approval":
           case "under_review":
           case "rejected":
             setCurrentStep("design");
