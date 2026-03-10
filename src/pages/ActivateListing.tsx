@@ -996,7 +996,7 @@ const ActivateListing = () => {
                 </div>
 
                 {/* Booking Scheduler */}
-                {designApproved && !isWaitingForPublisher &&
+                {designApproved && !isWaitingForApproval &&
             <>
                     <BookingScheduler
                 startDate={startDate}
