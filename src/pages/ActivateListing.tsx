@@ -378,7 +378,7 @@ const ActivateListing = () => {
     return diffWeeks * weeklyRate;
   };
 
-  // Submit Ad Request to Publisher
+  // Submit Ad Request to Admin for Approval
   const handleSubmitAdRequest = async () => {
     if (!startDate || !endDate || !listing || !artworkUrl) {
       toast({
@@ -418,7 +418,7 @@ const ActivateListing = () => {
           ad_space_id: id,
           advertiser_id: session.user.id,
           publisher_id: listing.publisher_id, // publisher_profile_id (canonical)
-          status: "pending_submission",
+          status: "pending_approval",
           submitted_at: new Date().toISOString(),
           start_date: format(startDate, "yyyy-MM-dd"),
           end_date: format(endDate, "yyyy-MM-dd"),
@@ -438,7 +438,7 @@ const ActivateListing = () => {
         const { error: updateError } = await supabase.
         from("activations").
         update({
-          status: "pending_submission",
+          status: "pending_approval",
           submitted_at: new Date().toISOString(),
           estimated_publisher_payout: bookingPrice,
           quantity,
@@ -446,35 +446,43 @@ const ActivateListing = () => {
           end_date: format(endDate, "yyyy-MM-dd"),
           ad_design_url: artworkUrl,
           activation_type: activationType,
-          publisher_id: listing.publisher_id // keep consistent if older rows used a different value
+          publisher_id: listing.publisher_id
         }).
         eq("id", persistedActivationId);
 
         if (updateError) throw updateError;
       }
 
-      // Send notification to publisher via backend function (non-blocking)
+      // Send notification to all verified admins
       try {
-        await supabase.functions.invoke("notify-ad-request", {
-          body: {
-            publisherProfileId: listing.publisher_id,
-            listingTitle: listing.title,
-            activationId: persistedActivationId
-          }
-        });
+        const { data: adminProfiles } = await supabase
+          .from("admin_profiles")
+          .select("user_id")
+          .eq("status", "verified");
+
+        if (adminProfiles && adminProfiles.length > 0) {
+          const notifications = adminProfiles.map((admin) => ({
+            user_id: admin.user_id,
+            title: "New Booking Request",
+            message: `A new ad space booking request for "${listing.title}" has been submitted and requires your approval.`,
+            type: "booking_request",
+          }));
+
+          await supabase.from("notifications").insert(notifications);
+        }
       } catch (notifyError) {
-        console.error("Failed to send notification:", notifyError);
+        console.error("Failed to send admin notifications:", notifyError);
       }
 
-      setActivationStatus("pending_submission");
+      setActivationStatus("pending_approval");
       toast({
-        title: "Ad Request Submitted!",
-        description: "Your ad request has been sent to the publisher for review."
+        title: "Booking Request Submitted!",
+        description: "Your booking request has been sent to the admin team for review."
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to submit ad request",
+        description: error.message || "Failed to submit booking request",
         variant: "destructive"
       });
     } finally {
