@@ -32,17 +32,28 @@ export const BranchListingCard = ({ adSpaces }: BranchListingCardProps) => {
   useEffect(() => {
     const fetchCounts = async () => {
       if (adSpaces.length === 0) return;
-      const ids = adSpaces.map((s) => s.id);
-      const { data } = await supabase
-        .from("franchise_branches")
-        .select("franchise_id")
-        .in("franchise_id", ids);
-
       const counts: Record<string, number> = {};
-      ids.forEach((id) => (counts[id] = 0));
-      data?.forEach((row: any) => {
-        counts[row.franchise_id] = (counts[row.franchise_id] || 0) + 1;
-      });
+
+      await Promise.all(adSpaces.map(async (s) => {
+        // Get listing's primary address to exclude it
+        const { data: listing } = await supabase
+          .from("ad_spaces")
+          .select("location")
+          .eq("id", s.id)
+          .single();
+        const primaryAddress = (listing?.location || "").trim().toLowerCase();
+
+        const { data } = await supabase
+          .from("franchise_branches")
+          .select("full_address")
+          .eq("franchise_id", s.id);
+
+        const filtered = (data || []).filter(
+          (b: any) => !(primaryAddress && (b.full_address || "").trim().toLowerCase() === primaryAddress)
+        );
+        counts[s.id] = filtered.length;
+      }));
+
       setBranchCounts(counts);
     };
     fetchCounts();
