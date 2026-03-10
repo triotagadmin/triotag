@@ -105,8 +105,7 @@ export function BookingScheduler({
       total = days * dailyRate;
     }
 
-    // Multiply by quantity if applicable
-    total = total * quantity;
+    // Lease fee is per ad space, not multiplied by quantity
 
     return total;
   }, [startDate, endDate, pricing, adUnitType, quantity]);
@@ -272,19 +271,13 @@ export function BookingScheduler({
                       <span className="text-muted-foreground">Duration</span>
                       <span>{weeks} week{weeks !== 1 ? 's' : ''}</span>
                     </div>
-                    {quantity > 1 && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Quantity (ad units)</span>
-                        <span>{quantity}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between pt-2 border-t font-medium text-base">
                       <span className="text-muted-foreground">Breakdown</span>
                       <span>
                         {useMonthly
                           ? `${sym}${monthlyRate.toLocaleString()} × ${fullMonths} mo${remainingWeeks > 0 ? ` + ${sym}${weeklyRate.toLocaleString()} × ${remainingWeeks} wk` : ''}`
                           : `${sym}${weeklyRate.toLocaleString()} × ${weeks} wk`}
-                        {quantity > 1 ? ` × ${quantity}` : ''}
+                        
                       </span>
                     </div>
                   </div>
