@@ -221,7 +221,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
     const publisherIds = [...new Set(adSpaceRows.filter(a => a.publisher_id && !a.agent_disconnected).map(a => a.publisher_id))];
     if (publisherIds.length > 0) {
       const { data: pubProfiles } = await supabase
-        .from("publisher_profiles")
+        .from("publisher_profiles_public")
         .select("id, business_name")
         .in("id", publisherIds);
       if (pubProfiles) {
