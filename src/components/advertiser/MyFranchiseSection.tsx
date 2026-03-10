@@ -628,6 +628,19 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                           </Button>
                         ) : null;
                       })()}
+                      {/* Disconnect Publisher Agent button — only for ad-space listings with active agent */}
+                      {isAdSpace && !franchise._agentDisconnected && franchise._publisherName && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 rounded-[16px] backdrop-blur-sm bg-destructive/10 border-destructive/30 text-destructive transition-all duration-500 hover:shadow-[0_0_14px_rgba(255,80,80,0.35)] hover:bg-destructive/15 hover:scale-[1.02] focus-visible:shadow-[0_0_10px_rgba(255,80,80,0.3)] focus-visible:outline-none"
+                          onClick={(e) => { e.stopPropagation(); requestDisconnectAgent(franchise); }}
+                        >
+                          <Unplug className="h-3.5 w-3.5" />
+                          <span className="hidden sm:inline">Disconnect Publisher Agent</span>
+                          <span className="sm:hidden">Disconnect</span>
+                        </Button>
+                      )}
                       {!(franchise as any)._isAdSpace && (
                         <>
                           <Button variant="ghost" size="icon" onClick={() => openEditFranchise(franchise)} className="h-8 w-8">
