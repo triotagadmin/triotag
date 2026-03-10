@@ -25,13 +25,6 @@ interface DocumentUploadState {
   existingFileName?: string;
 }
 
-interface AdditionalLocation {
-  id: string;
-  address: string;
-  city: string;
-  province: string;
-  postalCode: string;
-}
 
 interface BranchLocation {
   id: string;
