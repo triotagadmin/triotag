@@ -100,10 +100,10 @@ export default {
         },
         "glow-breathe": {
           "0%, 100%": {
-            boxShadow: "0 0 6px rgba(0, 255, 128, 0.2), 0 0 14px rgba(0, 255, 128, 0.08)",
+            boxShadow: "0 0 10px rgba(0, 255, 128, 0.35)",
           },
           "50%": {
-            boxShadow: "0 0 10px rgba(0, 255, 128, 0.35), 0 0 22px rgba(0, 255, 128, 0.12)",
+            boxShadow: "0 0 12px rgba(0, 255, 128, 0.45)",
           },
         },
       },
@@ -112,7 +112,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in-up": "fade-in-up 0.8s ease-out forwards",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
-        "glow-breathe": "glow-breathe 2s ease-in-out infinite",
+        "glow-breathe": "glow-breathe 4s ease-in-out infinite",
       },
     },
   },
