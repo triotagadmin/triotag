@@ -287,6 +287,11 @@ const AdvertiserDashboard = () => {
                             <MapPin className="h-3 w-3" />
                             {cityCountry}
                           </p>
+                          {(branchCounts[listing.id] || 0) > 0 && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 ml-4">
+                              {branchCounts[listing.id]} branch location{branchCounts[listing.id] !== 1 ? "s" : ""}
+                            </p>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <Button variant="outline" size="sm" onClick={() => navigate(`/venue/${listing.id}`)}>
