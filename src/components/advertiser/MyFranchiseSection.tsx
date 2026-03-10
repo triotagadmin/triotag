@@ -188,14 +188,24 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
     });
   };
 
-  const toggleSelectAllForFranchise = (franchiseId: string) => {
-    const locs = locations.filter(l => l.advertiser_franchise_id === franchiseId);
+  const toggleSelectAllForFranchise = (franchise: Franchise) => {
+    const isAdSpace = !!(franchise as any)._isAdSpace;
+    const realAdSpaceId = isAdSpace ? (franchise as any)._adSpaceId : null;
+    const locs = locations.filter(l => 
+      isAdSpace ? l.listing_id === realAdSpaceId : l.advertiser_franchise_id === franchise.id
+    );
     const allSelected = locs.every(l => selectedIds.has(l.id));
     setSelectedIds(prev => {
       const next = new Set(prev);
       locs.forEach(l => allSelected ? next.delete(l.id) : next.add(l.id));
       return next;
     });
+  };
+
+  const toggleAdSpaceListing = async (locId: string, currentValue: boolean) => {
+    const { error } = await supabase.from("advertiser_branches").update({ is_ad_space_listing: !currentValue }).eq("id", locId);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else fetchAll();
   };
 
   const toggleExpand = (id: string) => {
