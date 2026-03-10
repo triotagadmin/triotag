@@ -31,6 +31,10 @@ interface ListingDetails {
   specifications: any;
   media_urls: any;
   publisher_id: string;
+  monthly_subscription_fee: number | null;
+  annual_subscription_fee: number | null;
+  activation_fee: number | null;
+  agent_disconnected: boolean;
 }
 
 interface PublisherAddress {
@@ -137,9 +141,9 @@ const ActivateListing = () => {
     try {
       const { data, error } = await supabase.
       from("ad_spaces").
-      select("id, title, location, description, pricing, specifications, media_urls, publisher_id").
-      eq("id", id).
-      single();
+       select("id, title, location, description, pricing, specifications, media_urls, publisher_id, monthly_subscription_fee, annual_subscription_fee, activation_fee, agent_disconnected").
+       eq("id", id).
+       single();
 
       if (error) throw error;
       setListing(data);
@@ -368,7 +372,9 @@ const ActivateListing = () => {
     selectedAdUnit?.monthly_subscription_fee ||
     listing.pricing?.monthly ||
     listing.pricing?.pricePerMonth ||
+    listing.monthly_subscription_fee ||
     0;
+
 
     if (diffWeeks >= 4 && monthlyRate > 0) {
       const fullMonths = Math.floor(diffWeeks / 4);
@@ -717,12 +723,13 @@ const ActivateListing = () => {
     listing.pricing?.pricePerWeek ||
     0;
 
-    // Get monthly rate from multiple possible fields
+    // Get monthly rate from multiple possible fields (including top-level column)
     const monthlyRate =
     selectedAdUnit?.pricePerMonth ||
     selectedAdUnit?.monthly_subscription_fee ||
     listing.pricing?.monthly ||
     listing.pricing?.pricePerMonth ||
+    listing.monthly_subscription_fee ||
     0;
 
     // Pricing logic: months apply first, remaining weeks billed at weekly rate
@@ -752,7 +759,9 @@ const ActivateListing = () => {
   ) || (listing?.pricing?.weekly && listing.pricing.weekly > 0)
     || (listing?.pricing?.monthly && listing.pricing.monthly > 0)
     || (listing?.pricing?.pricePerWeek && listing.pricing.pricePerWeek > 0)
-    || (listing?.pricing?.pricePerMonth && listing.pricing.pricePerMonth > 0);
+    || (listing?.pricing?.pricePerMonth && listing.pricing.pricePerMonth > 0)
+    || (listing?.monthly_subscription_fee && listing.monthly_subscription_fee > 0)
+    || (listing?.activation_fee && listing.activation_fee > 0);
 
   const hasValidPrice = subscriptionPrice > 0 || estimatedPublisherPayout > 0;
   const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice && hasListingFees;
