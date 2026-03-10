@@ -240,8 +240,6 @@ const VenueRegistration = () => {
         setOwnershipWorkflow("registration");
       }
 
-      // Load branches for read-only display
-      await loadBranches(venueId);
 
       const { data: existingDocs } = await supabase.from("verification_documents").select("*").eq("publisher_id", pubId);
       if (existingDocs && existingDocs.length > 0) {
