@@ -1029,7 +1029,8 @@ const ActivateListing = () => {
                 }}
                 adUnitType={approvedAdUnitType || activationType}
                 quantity={quantity}
-                onEstimatedPayoutChange={handleEstimatedPayoutChange} />
+                onEstimatedPayoutChange={handleEstimatedPayoutChange}
+                currency={listing.specifications?.lease_currency || listing.specifications?.ad_units?.[0]?.currency || listing.specifications?.currency || "USD"} />
 
 
                     {/* Quantity Selection */}
