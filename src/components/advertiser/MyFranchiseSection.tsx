@@ -955,6 +955,32 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Disconnect Agent Confirmation */}
+      <AlertDialog open={disconnectConfirmOpen} onOpenChange={setDisconnectConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect Publisher Agent?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove the publisher agent
+              {disconnectFranchise?._publisherName && (
+                <span className="font-medium text-foreground"> ({disconnectFranchise._publisherName})</span>
+              )}
+              {" "}from this listing? This action cannot be undone. All listing data will remain intact.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={saving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDisconnectAgent}
+              disabled={saving}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {saving ? "Disconnecting..." : "Confirm Disconnect"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
