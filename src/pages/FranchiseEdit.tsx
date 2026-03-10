@@ -255,26 +255,61 @@ const FranchiseEdit = () => {
 
   const loadBranches = async () => {
     if (!franchiseId) return;
-    const { data, error } = await supabase
-      .from("franchise_branches")
-      .select("*")
-      .eq("franchise_id", franchiseId)
-      .order("created_at", { ascending: true });
 
-    if (!error && data) {
-      setBranches(data.map((b: any) => {
+    // Load from both franchise_branches and advertiser_branches for this listing
+    const [fbRes, abRes] = await Promise.all([
+      supabase
+        .from("franchise_branches")
+        .select("id, place_name, full_address")
+        .eq("franchise_id", franchiseId)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("advertiser_branches")
+        .select("id, branch_name, full_address")
+        .eq("listing_id", franchiseId)
+        .order("created_at", { ascending: true }),
+    ]);
+
+    const combined: BranchLocation[] = [];
+
+    if (!fbRes.error && fbRes.data) {
+      fbRes.data.forEach((b: any) => {
         const parts = (b.full_address || "").split(", ");
-        return {
+        combined.push({
           id: crypto.randomUUID(),
           dbId: b.id,
           address: parts[0] || "",
           city: parts[1] || b.place_name || "",
           province: parts[2] || "",
           postalCode: parts[3] || "",
-          isAdSpaceListing: true, // all franchise branches are ad space listings by default
-        };
-      }));
+          isAdSpaceListing: true,
+        });
+      });
     }
+
+    if (!abRes.error && abRes.data) {
+      abRes.data.forEach((b: any) => {
+        // Avoid duplicates by checking full_address
+        const alreadyExists = combined.some(
+          (c) => c.address === (b.full_address || "").split(", ")[0]
+            && c.city === ((b.full_address || "").split(", ")[1] || b.branch_name || "")
+        );
+        if (!alreadyExists) {
+          const parts = (b.full_address || "").split(", ");
+          combined.push({
+            id: crypto.randomUUID(),
+            dbId: b.id,
+            address: parts[0] || "",
+            city: parts[1] || b.branch_name || "",
+            province: parts[2] || "",
+            postalCode: parts[3] || "",
+            isAdSpaceListing: false,
+          });
+        }
+      });
+    }
+
+    setBranches(combined);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
