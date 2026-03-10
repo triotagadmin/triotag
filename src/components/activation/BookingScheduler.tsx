@@ -284,7 +284,7 @@ export function BookingScheduler({
                         {useMonthly
                           ? `${sym}${monthlyRate.toLocaleString()} × ${fullMonths} mo${remainingWeeks > 0 ? ` + ${sym}${weeklyRate.toLocaleString()} × ${remainingWeeks} wk` : ''}`
                           : `${sym}${weeklyRate.toLocaleString()} × ${weeks} wk`}
-                        {quantity > 1 ? ` × ${quantity} units` : ''}
+                        {quantity > 1 ? ` × ${quantity}` : ''}
                       </span>
                     </div>
                   </div>
