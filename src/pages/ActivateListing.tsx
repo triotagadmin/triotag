@@ -723,12 +723,13 @@ const ActivateListing = () => {
     listing.pricing?.pricePerWeek ||
     0;
 
-    // Get monthly rate from multiple possible fields
+    // Get monthly rate from multiple possible fields (including top-level column)
     const monthlyRate =
     selectedAdUnit?.pricePerMonth ||
     selectedAdUnit?.monthly_subscription_fee ||
     listing.pricing?.monthly ||
     listing.pricing?.pricePerMonth ||
+    listing.monthly_subscription_fee ||
     0;
 
     // Pricing logic: months apply first, remaining weeks billed at weekly rate
