@@ -1120,8 +1120,12 @@ export default function AdminDashboard() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="marketplace" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+        <Tabs defaultValue="bookings" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-8">
+            <TabsTrigger value="bookings">
+              <Calendar className="w-4 h-4 mr-2" />
+              Bookings
+            </TabsTrigger>
             <TabsTrigger value="marketplace">
               <ShoppingCart className="w-4 h-4 mr-2" />
               Marketplace
@@ -1161,6 +1165,11 @@ export default function AdminDashboard() {
               )}
             </TabsTrigger>
           </TabsList>
+
+          {/* Bookings Tab */}
+          <TabsContent value="bookings" className="space-y-6">
+            <AdminBookingsQueue />
+          </TabsContent>
 
           {/* Marketplace Tab */}
           <TabsContent value="marketplace" className="space-y-6">
