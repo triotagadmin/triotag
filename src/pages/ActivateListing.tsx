@@ -889,15 +889,15 @@ const ActivateListing = () => {
               </Card>
           }
 
-            {isRejectedByPublisher &&
+            {isRejected &&
           <Card className="border-destructive/30 bg-destructive/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-destructive">
                     <XCircle className="h-5 w-5" />
-                    Ad Request Rejected
+                    Booking Request Rejected
                   </CardTitle>
                   <CardDescription>
-                    {rejectionReason || "The publisher has rejected your ad request. You can modify and resubmit."}
+                    {rejectionReason || "The admin has rejected your booking request. You can modify and resubmit."}
                   </CardDescription>
                 </CardHeader>
               </Card>
