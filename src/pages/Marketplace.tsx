@@ -128,6 +128,24 @@ const Marketplace = () => {
         const monthlyPrice = adUnitsFromDb[0]?.pricePerMonth || specs?.monthly_lease_price || 0;
         const currency = adUnitsFromDb[0]?.currency || specs?.lease_currency || specs?.currency || "USD";
 
+        // Strip sensitive data for non-authenticated users
+        if (!user) {
+          return {
+            id: item.id,
+            title: item.title,
+            description: "",
+            location: item.location || "Not specified",
+            type: item.category === "agent" ? item.service_type || "Agent Service" : VENUE_TYPE_LABELS[specs?.venue_type] || specs?.venue_type || specs?.type || "Venue",
+            adUnits: [],
+            image: Array.isArray(parsedMediaUrls) ? parsedMediaUrls[0] : undefined,
+            ownerName: "",
+            createdAt: item.created_at || "",
+            monthlySubscriptionFee: 0,
+            weeklyPrice: 0,
+            currency: ""
+          };
+        }
+
         return {
           id: item.id,
           title: item.title,
