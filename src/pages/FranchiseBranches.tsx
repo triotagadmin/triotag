@@ -44,6 +44,7 @@ const FranchiseBranches = () => {
             .eq("user_id", session.user.id)
             .single();
           setIsAdvertiser(role?.role === "advertiser");
+          setIsAdmin(role?.role === "admin");
         }
 
         const { data: venue, error: venueError } = await supabase
