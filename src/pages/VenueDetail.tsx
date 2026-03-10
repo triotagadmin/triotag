@@ -219,13 +219,6 @@ const VenueDetail = () => {
                   </div>
                 )}
 
-                {/* View All Locations button */}
-                {branchCount > 0 && (
-                  <Button variant="outline" className="w-full" onClick={() => navigate(`/venue/${id}/branches`)}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    View All Locations ({branchCount})
-                  </Button>
-                )}
 
                 {venue.specifications?.operating_hours && <div className="flex items-start gap-2">
                     <Clock className="h-5 w-5 text-primary mt-0.5" />
