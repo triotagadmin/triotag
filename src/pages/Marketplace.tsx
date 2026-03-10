@@ -29,6 +29,7 @@ interface MarketplaceListing {
   weeklyPrice?: number;
   currency?: string;
   branchCount?: number;
+  branchCities?: { city: string; country: string; count: number }[];
 }
 
 const AD_UNIT_TYPE_LABELS: Record<string, string> = {
