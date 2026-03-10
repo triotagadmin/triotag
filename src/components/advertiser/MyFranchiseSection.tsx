@@ -479,7 +479,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
 
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-3">
-                    <Button size="sm" variant="outline" onClick={() => openAddLocation(franchise.id)} className="gap-1">
+                    <Button size="sm" variant="outline" onClick={() => openAddLocation(franchise)} className="gap-1">
                       <Plus className="h-3.5 w-3.5" />
                       Add Location
                     </Button>
