@@ -33,6 +33,9 @@ interface Franchise {
   marketplace_status: MarketplaceStatus;
   created_at: string;
   updated_at: string;
+  _isAdSpace?: boolean;
+  _adSpaceId?: string;
+  _location?: string;
 }
 
 interface FranchiseLocation {
