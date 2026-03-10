@@ -398,11 +398,6 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       if (error) toast({ title: "Location could not be saved. Please check the form and try again.", variant: "destructive" });
       else { toast({ title: "Location updated" }); setLocationDialogOpen(false); }
     } else {
-      // Determine if this is an ad-space franchise or a regular franchise
-      const isAdSpace = targetFranchiseId.startsWith("adspace-");
-      const realAdSpaceId = isAdSpace ? targetFranchiseId.replace("adspace-", "") : null;
-      const realFranchiseId = isAdSpace ? null : targetFranchiseId;
-
       const { error } = await supabase.from("advertiser_branches").insert({
         advertiser_id: userId,
         advertiser_franchise_id: realFranchiseId,
