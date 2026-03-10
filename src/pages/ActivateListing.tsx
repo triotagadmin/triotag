@@ -715,21 +715,23 @@ const ActivateListing = () => {
     unit.type === approvedAdUnitType || unit.type === activationType
     ) || adUnits[0];
 
-    // Get weekly rate from multiple possible fields
+    // Get weekly rate from multiple possible fields (including specs from venue/franchise registration)
     const weeklyRate =
     selectedAdUnit?.pricePerWeek ||
     selectedAdUnit?.weekly_subscription_fee ||
     listing.pricing?.weekly ||
     listing.pricing?.pricePerWeek ||
+    listing.specifications?.weekly_lease_price ||
     0;
 
-    // Get monthly rate from multiple possible fields (including top-level column)
+    // Get monthly rate from multiple possible fields (including top-level column and specs)
     const monthlyRate =
     selectedAdUnit?.pricePerMonth ||
     selectedAdUnit?.monthly_subscription_fee ||
     listing.pricing?.monthly ||
     listing.pricing?.pricePerMonth ||
     listing.monthly_subscription_fee ||
+    listing.specifications?.monthly_lease_price ||
     0;
 
     // Pricing logic: months apply first, remaining weeks billed at weekly rate
