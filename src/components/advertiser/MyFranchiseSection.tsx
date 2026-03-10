@@ -39,6 +39,9 @@ interface Franchise {
   _isAdSpace?: boolean;
   _adSpaceId?: string;
   _location?: string;
+  _agentDisconnected?: boolean;
+  _publisherName?: string;
+  _publisherId?: string;
 }
 
 interface FranchiseLocation {
