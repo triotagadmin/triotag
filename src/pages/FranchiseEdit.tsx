@@ -641,7 +641,7 @@ const FranchiseEdit = () => {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {branches.length > 0 ? (
-                      isAdmin ? (
+                      (isAdmin || userRole === "advertiser") ? (
                         <div className="space-y-1.5">
                           {branches.map((loc, idx) => (
                             <div key={loc.id} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
@@ -657,6 +657,9 @@ const FranchiseEdit = () => {
                               )}
                             </div>
                           ))}
+                          {userRole === "advertiser" && (
+                            <p className="text-xs text-muted-foreground italic mt-2">Branch locations can be edited from your dashboard.</p>
+                          )}
                         </div>
                       ) : (
                         <div className="space-y-1.5">
@@ -673,7 +676,7 @@ const FranchiseEdit = () => {
                               </div>
                             ));
                           })()}
-                          <p className="text-xs text-muted-foreground italic mt-2">Full addresses are only visible to admin accounts.</p>
+                          <p className="text-xs text-muted-foreground italic mt-2">Full branch details are visible to advertiser and admin accounts only.</p>
                         </div>
                       )
                     ) : (
