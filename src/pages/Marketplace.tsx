@@ -174,18 +174,21 @@ const Marketplace = () => {
       eq("availability_status", "available").
       order("created_at", { ascending: false });
 
-      // Fetch branch counts for all approved listings
+      // Fetch branch counts from both franchise_branches and advertiser_branches
       const listingIds = (venuesData || []).map(v => v.id);
-      const { data: branchData } = listingIds.length > 0
-        ? await supabase
-            .from("franchise_branches")
-            .select("franchise_id")
-            .in("franchise_id", listingIds)
-        : { data: [] };
+      const [{ data: franchiseBranchData }, { data: advertiserBranchData }] = listingIds.length > 0
+        ? await Promise.all([
+            supabase.from("franchise_branches").select("franchise_id").in("franchise_id", listingIds),
+            supabase.from("advertiser_branches").select("listing_id").in("listing_id", listingIds).eq("is_ad_space_listing", true),
+          ])
+        : [{ data: [] }, { data: [] }];
 
       const branchCountMap: Record<string, number> = {};
-      (branchData || []).forEach((b: any) => {
+      (franchiseBranchData || []).forEach((b: any) => {
         branchCountMap[b.franchise_id] = (branchCountMap[b.franchise_id] || 0) + 1;
+      });
+      (advertiserBranchData || []).forEach((b: any) => {
+        branchCountMap[b.listing_id] = (branchCountMap[b.listing_id] || 0) + 1;
       });
 
       const allListings: MarketplaceListing[] = (venuesData || []).map((v) => {
@@ -442,7 +445,7 @@ const Marketplace = () => {
                       {listing.type}
                     </Badge>
                     <Badge variant="outline" className="text-xs">
-                      {(listing.branchCount ?? 0) > 1 ? `Multi-location (${listing.branchCount})` : "Single Location"}
+                      {(listing.branchCount ?? 0) > 0 ? `Multi-location (${listing.branchCount})` : "Single Location"}
                     </Badge>
                   </div>
                   <CardDescription className="line-clamp-2">{listing.description}</CardDescription>
