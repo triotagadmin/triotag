@@ -293,7 +293,7 @@ export function BookingScheduler({
 
               <div className="pt-3 border-t">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-lg">Estimated Publisher Payout</span>
+                  <span className="font-semibold text-lg">Ad Space Lease Fee</span>
                   <span className="text-2xl font-bold text-primary">
                     {sym}{estimatedPayout.toLocaleString()}
                   </span>
