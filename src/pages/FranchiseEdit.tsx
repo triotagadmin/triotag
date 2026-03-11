@@ -661,16 +661,31 @@ const FranchiseEdit = () => {
                       (isAdmin || userRole === "advertiser") ? (
                         <div className="space-y-1.5">
                           {branches.map((loc, idx) => (
-                            <div key={loc.id} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
-                              <span className="text-primary font-medium shrink-0">{idx + 1}.</span>
-                              <div className="truncate flex-1">
-                                <span className="font-medium">{loc.branchName || "Unnamed"}</span>
-                                <span className="text-muted-foreground ml-1.5 text-xs">
-                                  {[loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", ")}
-                                </span>
+                            <div key={loc.id} className="space-y-0">
+                              <div className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-[12px] bg-muted/30">
+                                <span className="text-primary font-medium shrink-0">{idx + 1}.</span>
+                                <div className="truncate flex-1">
+                                  <span className="font-medium">{loc.branchName || "Unnamed"}</span>
+                                  <span className="text-muted-foreground ml-1.5 text-xs">
+                                    {[loc.address, loc.city, loc.province, loc.postalCode].filter(Boolean).join(", ")}
+                                  </span>
+                                </div>
+                                {loc.isAdSpaceListing && (
+                                  <Badge variant="secondary" className="ml-auto shrink-0 text-[10px]">Ad Space</Badge>
+                                )}
                               </div>
-                              {loc.isAdSpaceListing && (
-                                <Badge variant="secondary" className="ml-auto shrink-0 text-[10px]">Ad Space</Badge>
+                              {/* Branch-specific material config */}
+                              {loc.dbId && franchiseId && selectedMaterials.length > 0 && (
+                                <div className="ml-4 mt-1">
+                                  <BranchMaterialsConfig
+                                    branchDbId={loc.dbId}
+                                    listingId={franchiseId}
+                                    branchName={loc.branchName || "Unnamed"}
+                                    cityName={loc.city || "Unknown"}
+                                    availableMaterials={selectedMaterials}
+                                    materialLabels={Object.fromEntries(AD_UNIT_MATERIALS.map(m => [m.value, m.label]))}
+                                  />
+                                </div>
                               )}
                             </div>
                           ))}
