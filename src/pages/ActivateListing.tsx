@@ -1307,7 +1307,7 @@ const ActivateListing = () => {
                             </div>
                             <div className="flex justify-between text-lg font-bold pt-2 border-t">
                               <span>Estimated Total</span>
-                              <span className="text-primary">{formatPrice(orderTotal, listing?.specifications?.currency || "USD")}</span>
+                              <span className="text-primary">{formatPrice(orderTotal, listing?.specifications?.lease_currency || listing?.specifications?.ad_units?.[0]?.currency || listing?.specifications?.currency || "USD")}</span>
                             </div>
                             <p className="text-xs text-muted-foreground">Final price confirmed after admin review</p>
                           </div>
