@@ -1106,7 +1106,7 @@ const ActivateListing = () => {
 
                 <>
                           <Send className="h-4 w-4 mr-2" />
-                          Submit Booking Request - {formatPrice(activationPrice, listing?.specifications?.currency || "USD")}
+                          Submit Booking Request - {formatPrice(activationPrice, listing?.specifications?.lease_currency || listing?.specifications?.ad_units?.[0]?.currency || listing?.specifications?.currency || "USD")}
                         </>
                 }
                     </Button>
