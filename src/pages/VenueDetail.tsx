@@ -23,7 +23,7 @@ const AD_UNIT_TYPE_LABELS: Record<string, string> = {
   table_tent: "Table Tent",
   floor_decal: "Floor Decal",
   window_cling: "Window Cling",
-  standee: "Standee",
+  standee: "Standee"
 };
 
 interface VenueDetails {
@@ -46,7 +46,7 @@ interface VenueDetails {
 }
 
 const VenueDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{id: string;}>();
   const [venue, setVenue] = useState<VenueDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -99,16 +99,16 @@ const VenueDetail = () => {
       const primaryAddress = (listing?.location || "").trim().toLowerCase();
 
       // Count advertiser branches linked to this listing (added by the owning advertiser)
-      const { data: abData } = await supabase
-        .from("advertiser_branches")
-        .select("full_address")
-        .eq("listing_id", id!);
+      const { data: abData } = await supabase.
+      from("advertiser_branches").
+      select("full_address").
+      eq("listing_id", id!);
 
       // Also count franchise branches (legacy/publisher-added)
-      const { data: fbData } = await supabase
-        .from("franchise_branches")
-        .select("full_address")
-        .eq("franchise_id", id!);
+      const { data: fbData } = await supabase.
+      from("franchise_branches").
+      select("full_address").
+      eq("franchise_id", id!);
 
       const allBranches = [...(abData || []), ...(fbData || [])];
       const filtered = allBranches.filter(
@@ -120,7 +120,7 @@ const VenueDetail = () => {
     } catch {}
   };
 
-  const images = venue ? (Array.isArray(venue.media_urls) ? venue.media_urls : []) : [];
+  const images = venue ? Array.isArray(venue.media_urls) ? venue.media_urls : [] : [];
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const ogShareUrl = `${supabaseUrl}/functions/v1/venue-og-meta?id=${id}`;
   const canonicalUrl = `https://tinystickyads.com/venue/${id}`;
@@ -221,12 +221,12 @@ const VenueDetail = () => {
               <CardContent className="space-y-4">
                 <div>
                   <h3 className="font-semibold mb-2">Description</h3>
-                  <p className="text-muted-foreground">{venue.description}</p>
+                  <p className="text-white">{venue.description}</p>
                 </div>
 
                 {/* Show total locations count instead of a single address */}
-                {branchCount > 0 && (
-                  <div className="flex items-start gap-2">
+                {branchCount > 0 &&
+              <div className="flex items-start gap-2">
                     <MapPin className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <h3 className="font-semibold">{branchCount} Location{branchCount !== 1 ? "s" : ""}</h3>
@@ -235,7 +235,7 @@ const VenueDetail = () => {
                       </p>
                     </div>
                   </div>
-                )}
+              }
 
 
                 {venue.specifications?.operating_hours && <div className="flex items-start gap-2">
@@ -310,52 +310,52 @@ const VenueDetail = () => {
 
                 {/* Bookmark / Activate buttons */}
                 {(() => {
-                  const isLeased = user?.id ? (venue.leased_advertiser_ids || []).includes(user.id) : false;
+                const isLeased = user?.id ? (venue.leased_advertiser_ids || []).includes(user.id) : false;
 
-                  return (
-                    <>
-                      {isAdvertiser && user && !isLeased && (
-                        <Button
-                          className="w-full mt-2"
-                          variant="outline"
-                          disabled={leasing}
-                          onClick={async () => {
-                            if (!user) return;
-                            setLeasing(true);
-                            try {
-                              const currentIds = venue.leased_advertiser_ids || [];
-                              if (currentIds.includes(user.id)) {
-                                toast({ title: "Already bookmarked", description: "This ad space is already in your dashboard." });
-                                return;
-                              }
-                              const { error } = await supabase
-                                .from("ad_spaces")
-                                .update({ leased_advertiser_ids: [...currentIds, user.id] } as any)
-                                .eq("id", venue.id);
-                              if (error) throw error;
-                              toast({ title: "Ad Space Bookmarked!", description: "This listing now appears on your dashboard for campaigns and print orders." });
-                              fetchVenueDetails();
-                            } catch (err: any) {
-                              toast({ title: "Error", description: err.message, variant: "destructive" });
-                            } finally { setLeasing(false); }
-                          }}
-                        >
+                return (
+                  <>
+                      {isAdvertiser && user && !isLeased &&
+                    <Button
+                      className="w-full mt-2"
+                      variant="outline"
+                      disabled={leasing}
+                      onClick={async () => {
+                        if (!user) return;
+                        setLeasing(true);
+                        try {
+                          const currentIds = venue.leased_advertiser_ids || [];
+                          if (currentIds.includes(user.id)) {
+                            toast({ title: "Already bookmarked", description: "This ad space is already in your dashboard." });
+                            return;
+                          }
+                          const { error } = await supabase.
+                          from("ad_spaces").
+                          update({ leased_advertiser_ids: [...currentIds, user.id] } as any).
+                          eq("id", venue.id);
+                          if (error) throw error;
+                          toast({ title: "Ad Space Bookmarked!", description: "This listing now appears on your dashboard for campaigns and print orders." });
+                          fetchVenueDetails();
+                        } catch (err: any) {
+                          toast({ title: "Error", description: err.message, variant: "destructive" });
+                        } finally {setLeasing(false);}
+                      }}>
+                      
                           {leasing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Bookmark className="h-4 w-4 mr-2" />}
                           Bookmark This Ad Space
                         </Button>
-                      )}
-                      {isAdvertiser && isLeased && (
-                        <Badge variant="secondary" className="w-full justify-center py-1.5 gap-1">
+                    }
+                      {isAdvertiser && isLeased &&
+                    <Badge variant="secondary" className="w-full justify-center py-1.5 gap-1">
                           <BookmarkCheck className="h-3 w-3" /> Bookmarked
                         </Badge>
-                      )}
+                    }
                       <Button className="w-full mt-2" onClick={() => navigate(`/activate/${venue.id}`)}>
                         <Lock className="h-4 w-4 mr-2" />
                         Activate
                       </Button>
-                    </>
-                  );
-                })()}
+                    </>);
+
+              })()}
                 <div className="mt-3">
                   <ShareButtons url={ogShareUrl} title={venue.title} description={venue.description} />
                 </div>
