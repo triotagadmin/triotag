@@ -614,6 +614,51 @@ export type Database = {
         }
         Relationships: []
       }
+      branch_materials: {
+        Row: {
+          branch_id: string
+          created_at: string
+          id: string
+          listing_id: string
+          material_type: string
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          material_type: string
+          quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          material_type?: string
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branch_materials_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "franchise_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branch_materials_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           ad_unit_price: number | null
