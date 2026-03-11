@@ -883,7 +883,7 @@ const ActivateListing = () => {
                   }
                 </p>
                 <p className="text-2xl font-bold text-primary">
-                  {formatPrice(activationPrice, listing?.specifications?.currency || "USD")}
+                  {formatPrice(activationPrice, listing?.specifications?.lease_currency || listing?.specifications?.ad_units?.[0]?.currency || listing?.specifications?.currency || "USD")}
                 </p>
               </div>
             </div>
