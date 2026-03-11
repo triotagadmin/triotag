@@ -1199,36 +1199,48 @@ const ActivateListing = () => {
                         <Package className="h-5 w-5 text-primary" />
                         Available Ad Unit Materials & Pricing
                       </CardTitle>
-                      <CardDescription>Our current catalog of micro ad materials. Current ad material automatically detected from current listing.</CardDescription>
+                      <CardDescription>All configured materials for this listing. Currency detected from listing configuration.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                        {PRINT_PRODUCTS.map((product) => (
-                          <div key={product.id} className={`rounded-lg border p-4 transition-all ${selectedProductId === product.id ? "border-primary bg-primary/10" : "border-border bg-background"}`}>
-                            <h4 className="font-semibold text-sm mb-1">{product.name}</h4>
-                            <p className="text-xs text-muted-foreground mb-2">{product.description}</p>
-                            <div className="space-y-1 text-xs">
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Size:</span>
-                                <span>{product.specs.size}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Material:</span>
-                                <span>{product.specs.material}</span>
-                              </div>
-                              {product.specs.finish && (
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Finish:</span>
-                                  <span>{product.specs.finish}</span>
+                      {(() => {
+                        const listingCurrency = listing?.specifications?.lease_currency || listing?.specifications?.ad_units?.[0]?.currency || listing?.specifications?.currency || "USD";
+                        const listingMaterials: string[] = listing?.specifications?.ad_unit_materials || [];
+                        const materialLabels: Record<string, string> = {
+                          vinyl_sticker: "Vinyl Sticker",
+                          table_tent_card: "Table Tent Card",
+                          acrylic_table_tent: "Acrylic Table Tent",
+                          coroplast_stand: "Coroplast Stand",
+                          poster_frame: "Poster Frame",
+                          wall_decal: "Wall Decal",
+                        };
+                        return (
+                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {listingMaterials.length > 0 ? listingMaterials.map((matType) => (
+                              <div key={matType} className="rounded-lg border p-4 bg-background">
+                                <h4 className="font-semibold text-sm mb-1">{materialLabels[matType] || matType}</h4>
+                                <div className="space-y-1 text-xs mt-2">
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Weekly Fee:</span>
+                                    <span>{formatPrice(listing?.specifications?.weekly_lease_price || 0, listingCurrency)}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Monthly Fee:</span>
+                                    <span>{formatPrice(listing?.specifications?.monthly_lease_price || 0, listingCurrency)}</span>
+                                  </div>
                                 </div>
-                              )}
-                            </div>
-                            <div className="mt-3 pt-2 border-t border-border">
-                              <p className="text-lg font-bold text-primary">${product.pricePerUnit.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">/ unit</span></p>
-                            </div>
+                              </div>
+                            )) : PRINT_PRODUCTS.map((product) => (
+                              <div key={product.id} className={`rounded-lg border p-4 transition-all ${selectedProductId === product.id ? "border-primary bg-primary/10" : "border-border bg-background"}`}>
+                                <h4 className="font-semibold text-sm mb-1">{product.name}</h4>
+                                <p className="text-xs text-muted-foreground mb-2">{product.description}</p>
+                                <div className="mt-3 pt-2 border-t border-border">
+                                  <p className="text-lg font-bold text-primary">${product.pricePerUnit.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">/ unit</span></p>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
 
