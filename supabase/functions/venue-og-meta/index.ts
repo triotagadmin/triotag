@@ -97,7 +97,7 @@ function buildHtml(
   <meta property="og:image" content="${img}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:site_name" content="Tiny Sticky Ads" />
+  <meta property="og:site_name" content="TrioTag" />
 
   <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image" />

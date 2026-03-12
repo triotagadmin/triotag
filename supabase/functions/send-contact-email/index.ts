@@ -22,9 +22,9 @@ serve(async (req) => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: "Tiny Sticky Ads <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@tinystickyads.com>",
       to: ["tinystickyads@gmail.com"],
-      subject: `New Contact Form Submission – Tiny Sticky Ads: ${subject}`,
+      subject: `New Contact Form Submission – TrioTag: ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
