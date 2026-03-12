@@ -22,7 +22,7 @@ const coreServices = [
   {
     title: "Creative Development",
     icon: Palette,
-    description: "Our team develops the visual advertising materials used in Tiny Sticky Ads campaigns. We design ad creatives optimized for small-format ad space placements such as table tents, stickers, and micro signage.",
+    description: "Our team develops the visual advertising materials used in TrioTag campaigns. We design ad creatives optimized for small-format ad space placements such as table tents, stickers, and micro signage.",
     formats: ["Vinyl Stickers", "Table Tent Cards", "Acrylic Table Tents", "Coroplast Stands"],
     process: ["Campaign brief review", "Visual concept development", "Design optimization for small-format visibility", "Print-ready production files", "Final creative approval"],
     principles: ["High readability in small spaces", "Strong visual hierarchy", "Clear call-to-action", "Brand consistency"],
