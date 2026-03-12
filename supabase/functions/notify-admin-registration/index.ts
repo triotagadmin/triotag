@@ -95,7 +95,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
 
           <p style="color: #666; font-size: 14px; margin-top: 30px;">
-            This is an automated notification from TinyStickyAds Admin System.
+            This is an automated notification from TrioTag Admin System.
           </p>
         </div>
       `,
