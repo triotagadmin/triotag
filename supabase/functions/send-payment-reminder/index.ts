@@ -131,7 +131,7 @@ serve(async (req) => {
                   Please log in to your dashboard to complete the payment and proceed with your campaign.
                 </p>
                 <p style="color: #999; font-size: 12px; margin-top: 30px;">
-                  This is an automated reminder from TinyStickyAds platform.
+                  This is an automated reminder from TrioTag platform.
                 </p>
               </div>
             `,
