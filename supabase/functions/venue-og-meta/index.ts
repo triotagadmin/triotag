@@ -47,9 +47,9 @@ Deno.serve(async (req: Request) => {
   }
 
   const canonicalUrl = `${appUrl}/venue/${venue.id}`;
-  const title = venue.title || "Tiny Sticky Ads";
+  const title = venue.title || "TrioTag";
   const description =
-    venue.description || "Check out this ad space on Tiny Sticky Ads!";
+    venue.description || "Check out this ad space on TrioTag!";
   const images: string[] = Array.isArray(venue.media_urls)
     ? venue.media_urls
     : [];
