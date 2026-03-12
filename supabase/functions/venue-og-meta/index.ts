@@ -36,8 +36,8 @@ Deno.serve(async (req: Request) => {
 
   if (error || !venue) {
     const html = buildHtml(
-      "Tiny Sticky Ads",
-      "Discover micro OOH ad spaces on Tiny Sticky Ads!",
+      "TrioTag",
+      "Discover micro OOH ad spaces on TrioTag!",
       fallbackImage,
       appUrl
     );
