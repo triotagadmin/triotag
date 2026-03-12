@@ -86,7 +86,7 @@ function buildHtml(
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>${t} – Tiny Sticky Ads</title>
+  <title>${t} – TrioTag</title>
   <meta name="description" content="${d}" />
 
   <!-- Open Graph -->
