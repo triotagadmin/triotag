@@ -87,7 +87,7 @@ serve(async (req) => {
           <h2 style="color: #333;">${subject}</h2>
           <p style="color: #666; line-height: 1.6;">${message}</p>
           <p style="color: #999; font-size: 12px; margin-top: 30px;">
-            This is an automated message from TinyStickyAds platform.
+            This is an automated message from TrioTag platform.
           </p>
         </div>
       `,

@@ -200,7 +200,7 @@ serve(async (req) => {
             ⚠️ Payment is required to proceed. You will receive reminders every 7 days until payment is completed.
           </p>
           <p style="color: #999; font-size: 12px; margin-top: 30px;">
-            This is an automated message from TinyStickyAds platform.
+            This is an automated message from TrioTag platform.
           </p>
         </div>
       `,
