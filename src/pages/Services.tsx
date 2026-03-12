@@ -30,7 +30,7 @@ const coreServices = [
   {
     title: "Campaign Management",
     icon: Settings,
-    description: "Tiny Sticky Ads manages the entire campaign lifecycle, from planning to deployment. Our system coordinates advertisers, ad spaces, and placements to ensure smooth campaign execution.",
+    description: "TrioTag manages the entire campaign lifecycle, from planning to deployment. Our system coordinates advertisers, ad spaces, and placements to ensure smooth campaign execution.",
     includes: ["Ad space selection", "Placement coordination", "Creative approval workflow", "Deployment scheduling", "Campaign monitoring"],
     operations: ["Coordinating ad space placements", "Managing installation schedules", "Ensuring campaign compliance", "Monitoring active campaigns"],
   },
