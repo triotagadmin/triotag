@@ -114,7 +114,7 @@ const TermsOfService = () => {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-foreground mb-4">9. Limitation of Liability</h2>
             <p className="text-muted-foreground mb-4">
-              To the maximum extent permitted by law, Tiny Sticky Ads shall not be liable for any 
+              To the maximum extent permitted by law, TrioTag shall not be liable for any 
               indirect, incidental, special, consequential, or punitive damages, including loss of 
               profits, data, or other intangible losses.
             </p>
