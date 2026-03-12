@@ -51,7 +51,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to tinystickyads@gmail.com
     const emailResponse = await resend.emails.send({
-      from: "Tiny Sticky Ads <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@tinystickyads.com>",
       to: ["tinystickyads@gmail.com"],
       subject: `New ${publisherTypeLabel} Listing Submission`,
       html: `
