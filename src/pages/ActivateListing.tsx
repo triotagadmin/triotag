@@ -672,7 +672,7 @@ const ActivateListing = () => {
             insert({
               user_id: publisherProfile.user_id,
               title: "Print Ad Material Confirmed!",
-              message: `Great news! An advertiser has completed payment for "${listing.title}". Tiny Sticky Ads is now handling the Print Ad Material for your venue.`,
+              message: `Great news! An advertiser has completed payment for "${listing.title}". TrioTag is now handling the Print Ad Material for your venue.`,
               type: "payment_received"
             });
           }

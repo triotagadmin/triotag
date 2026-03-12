@@ -83,7 +83,7 @@ export const Footer = () => {
 
             {/* Copyright */}
             <p className="text-xs md:text-sm text-muted-foreground text-center">
-              © {new Date().getFullYear()} Tiny Sticky Ads. All rights reserved.
+              © {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
             </p>
           </div>
         </div>

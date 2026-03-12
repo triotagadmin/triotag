@@ -788,7 +788,7 @@ const AdminOrders = () => {
                       <h4 className="font-semibold text-blue-700 dark:text-blue-400">Platform Fulfillment</h4>
                     </div>
                     <p className="text-sm text-blue-800 dark:text-blue-300 mt-1">
-                      Tiny Sticky Ads handles printing and delivery for this order.
+                      TrioTag handles printing and delivery for this order.
                     </p>
                   </div>
                 )}

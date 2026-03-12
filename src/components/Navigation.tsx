@@ -146,9 +146,9 @@ export const Navigation = () => {
     <nav className="sticky top-0 z-50 glass rounded-none border-b border-[rgba(255,255,255,0.08)]">
       <div className="container mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2 md:space-x-3 group">
-          <img src={favicon} alt="Tiny Sticky Ads Logo" className="w-6 h-6 md:w-8 md:h-8" />
+          <img src={favicon} alt={`${BRAND_NAME} Logo`} className="w-6 h-6 md:w-8 md:h-8" />
           <span className="font-bold text-base md:text-xl text-foreground group-hover:text-primary transition-colors duration-300">
-            Tiny Sticky Ads
+            {BRAND_NAME}
           </span>
         </Link>
 

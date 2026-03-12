@@ -89,7 +89,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-muted/30">
       <nav className="bg-card border-b">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="font-bold text-xl">Tiny Sticky Ads</h1>
+          <h1 className="font-bold text-xl">TrioTag</h1>
           <Button variant="outline" onClick={handleSignOut}>
             Sign Out
           </Button>
