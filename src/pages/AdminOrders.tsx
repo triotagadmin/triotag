@@ -763,7 +763,7 @@ const AdminOrders = () => {
                       <h4 className="font-semibold text-amber-700 dark:text-amber-400">Self-Served Print Order</h4>
                     </div>
                     <p className="text-sm text-amber-800 dark:text-amber-300">
-                      The requester will handle printing themselves. No production fulfillment is needed from Tiny Sticky Ads.
+                      The requester will handle printing themselves. No production fulfillment is needed from TrioTag.
                       Review the uploaded print-ready file below for compliance before approving.
                     </p>
                     {selectedOrder.product_specs?.self_print_file_url && (
@@ -788,7 +788,7 @@ const AdminOrders = () => {
                       <h4 className="font-semibold text-blue-700 dark:text-blue-400">Platform Fulfillment</h4>
                     </div>
                     <p className="text-sm text-blue-800 dark:text-blue-300 mt-1">
-                      Tiny Sticky Ads handles printing and delivery for this order.
+                      TrioTag handles printing and delivery for this order.
                     </p>
                   </div>
                 )}

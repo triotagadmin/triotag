@@ -136,13 +136,13 @@ const VenueDetail = () => {
       }
       el.setAttribute("content", content);
     };
-    document.title = `${venue.title} – Tiny Sticky Ads`;
+    document.title = `${venue.title} – TrioTag`;
     setMeta("og:title", venue.title);
-    setMeta("og:description", venue.description || "Check out this ad space on Tiny Sticky Ads!");
+    setMeta("og:description", venue.description || "Check out this ad space on TrioTag!");
     setMeta("og:url", canonicalUrl);
     setMeta("og:image", images[0] || "");
     setMeta("twitter:title", venue.title);
-    setMeta("twitter:description", venue.description || "Check out this ad space on Tiny Sticky Ads!");
+    setMeta("twitter:description", venue.description || "Check out this ad space on TrioTag!");
     setMeta("twitter:image", images[0] || "");
   }, [venue]);
 

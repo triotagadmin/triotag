@@ -55,19 +55,19 @@ const handler = async (req: Request): Promise<Response> => {
     const verificationUrl = `https://tinystickyads.com/verify?token=${token}`;
 
     const emailResponse = await resend.emails.send({
-      from: "TinyStickyAds <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@tinystickyads.com>",
       to: [email],
-      subject: "Verify your TinyStickyAds Account",
+      subject: "Verify your TrioTag Account",
       html: `
-        <h1>Welcome to TinyStickyAds!</h1>
+        <h1>Welcome to TrioTag!</h1>
         <p>Thank you for signing up. Please verify your email address to complete your registration.</p>
         <p>Click the link below to verify your account:</p>
         <p><a href="${verificationUrl}" style="background-color: #4CAF50; color: white; padding: 14px 20px; text-decoration: none; display: inline-block; border-radius: 4px;">Verify Email Address</a></p>
         <p>Or copy and paste this link into your browser:</p>
         <p>${verificationUrl}</p>
         <p>This link will expire in 24 hours.</p>
-        <p>If you didn't create an account with TinyStickyAds, you can safely ignore this email.</p>
-        <p>Best regards,<br>The TinyStickyAds Team</p>
+        <p>If you didn't create an account with TrioTag, you can safely ignore this email.</p>
+        <p>Best regards,<br>The TrioTag Team</p>
       `,
     });
 

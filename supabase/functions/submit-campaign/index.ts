@@ -66,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Tiny Sticky Ads <onboarding@resend.dev>",
+        from: "TrioTag <onboarding@resend.dev>",
         to: ["tinystickyads@gmail.com"],
         subject: `New Campaign Submission: ${submission.campaignName}`,
         html: emailHtml,

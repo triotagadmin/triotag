@@ -540,7 +540,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-6">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome to Tiny Sticky Ads</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to TrioTag</CardTitle>
           <CardDescription>Sign in or create an account to get started</CardDescription>
         </CardHeader>
         <CardContent>

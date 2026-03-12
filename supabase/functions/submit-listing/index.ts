@@ -51,7 +51,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to tinystickyads@gmail.com
     const emailResponse = await resend.emails.send({
-      from: "Tiny Sticky Ads <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@tinystickyads.com>",
       to: ["tinystickyads@gmail.com"],
       subject: `New ${publisherTypeLabel} Listing Submission`,
       html: `
@@ -115,7 +115,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
 
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px;">
-            <p>This submission was received from the Tiny Sticky Ads listing form.</p>
+            <p>This submission was received from the TrioTag listing form.</p>
             <p>Submitted at: ${new Date().toLocaleString()}</p>
           </div>
         </div>

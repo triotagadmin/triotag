@@ -109,7 +109,7 @@ serve(async (req) => {
         // Send reminder email
         try {
           await resend.emails.send({
-            from: "TinyStickyAds <noreply@tinystickyads.com>",
+            from: "TrioTag <noreply@tinystickyads.com>",
             to: [advertiserProfile.contact_email],
             subject: `Payment Reminder - Order #${orderIdShort}`,
             html: `
@@ -131,7 +131,7 @@ serve(async (req) => {
                   Please log in to your dashboard to complete the payment and proceed with your campaign.
                 </p>
                 <p style="color: #999; font-size: 12px; margin-top: 30px;">
-                  This is an automated reminder from TinyStickyAds platform.
+                  This is an automated reminder from TrioTag platform.
                 </p>
               </div>
             `,
@@ -175,7 +175,7 @@ serve(async (req) => {
 
     // Send email via Resend
     const emailResponse = await resend.emails.send({
-      from: "TinyStickyAds <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@tinystickyads.com>",
       to: [advertiserEmail],
       subject: `Payment Required - Order #${orderIdShort} Approved! 🎉`,
       html: `
@@ -200,7 +200,7 @@ serve(async (req) => {
             ⚠️ Payment is required to proceed. You will receive reminders every 7 days until payment is completed.
           </p>
           <p style="color: #999; font-size: 12px; margin-top: 30px;">
-            This is an automated message from TinyStickyAds platform.
+            This is an automated message from TrioTag platform.
           </p>
         </div>
       `,

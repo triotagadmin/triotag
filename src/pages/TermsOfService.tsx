@@ -19,7 +19,7 @@ const TermsOfService = () => {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-foreground mb-4">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground mb-4">
-              By accessing or using Tiny Sticky Ads ("the Platform"), you agree to be bound by these 
+              By accessing or using TrioTag ("the Platform"), you agree to be bound by these 
               Terms of Service. If you do not agree to these terms, please do not use our services.
             </p>
           </section>
@@ -27,7 +27,7 @@ const TermsOfService = () => {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-foreground mb-4">2. Description of Service</h2>
             <p className="text-muted-foreground mb-4">
-              Tiny Sticky Ads is a micro-advertising marketplace that connects advertisers with venues, 
+              TrioTag is a micro-advertising marketplace that connects advertisers with venues, 
               agents, and digital publishers. We provide a platform for:
             </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
@@ -106,7 +106,7 @@ const TermsOfService = () => {
             <h2 className="text-xl font-semibold text-foreground mb-4">8. Intellectual Property</h2>
             <p className="text-muted-foreground mb-4">
               The Platform and its original content, features, and functionality are owned by 
-              Tiny Sticky Ads and are protected by international copyright, trademark, and other 
+              TrioTag and are protected by international copyright, trademark, and other 
               intellectual property laws.
             </p>
           </section>
@@ -114,7 +114,7 @@ const TermsOfService = () => {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-foreground mb-4">9. Limitation of Liability</h2>
             <p className="text-muted-foreground mb-4">
-              To the maximum extent permitted by law, Tiny Sticky Ads shall not be liable for any 
+              To the maximum extent permitted by law, TrioTag shall not be liable for any 
               indirect, incidental, special, consequential, or punitive damages, including loss of 
               profits, data, or other intangible losses.
             </p>
@@ -142,7 +142,7 @@ const TermsOfService = () => {
             <h2 className="text-xl font-semibold text-foreground mb-4">12. Governing Law</h2>
             <p className="text-muted-foreground mb-4">
               These Terms shall be governed by and construed in accordance with the laws of the 
-              jurisdiction in which Tiny Sticky Ads operates, without regard to its conflict of 
+              jurisdiction in which TrioTag operates, without regard to its conflict of 
               law provisions.
             </p>
           </section>

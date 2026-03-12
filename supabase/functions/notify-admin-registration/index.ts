@@ -61,7 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
     const verificationUrl = `https://tinystickyads.com/admin/verify?token=${token}`;
 
     const emailResponse = await resend.emails.send({
-      from: "TinyStickyAds <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@tinystickyads.com>",
       to: ["tinystickyads@gmail.com"],
       subject: "New Admin Registration Pending Approval",
       html: `
@@ -95,7 +95,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
 
           <p style="color: #666; font-size: 14px; margin-top: 30px;">
-            This is an automated notification from TinyStickyAds Admin System.
+            This is an automated notification from TrioTag Admin System.
           </p>
         </div>
       `,

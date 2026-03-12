@@ -80,7 +80,7 @@ const Contact = () => {
               Contact Us
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Have questions about Tiny Sticky Ads? We'd love to hear from you. 
+              Have questions about TrioTag? We'd love to hear from you. 
               Send us a message and we'll respond as soon as possible.
             </p>
           </div>

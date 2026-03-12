@@ -14,7 +14,7 @@ interface ShareButtonsProps {
   description?: string;
 }
 
-const SHARE_TEXT_SUFFIX = "Check out this ad space on Tiny Sticky Ads!";
+const SHARE_TEXT_SUFFIX = "Check out this ad space on TrioTag!";
 
 const ShareButtons = ({ url, title, description }: ShareButtonsProps) => {
   const [copied, setCopied] = useState(false);

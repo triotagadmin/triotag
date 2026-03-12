@@ -36,8 +36,8 @@ Deno.serve(async (req: Request) => {
 
   if (error || !venue) {
     const html = buildHtml(
-      "Tiny Sticky Ads",
-      "Discover micro OOH ad spaces on Tiny Sticky Ads!",
+      "TrioTag",
+      "Discover micro OOH ad spaces on TrioTag!",
       fallbackImage,
       appUrl
     );
@@ -47,9 +47,9 @@ Deno.serve(async (req: Request) => {
   }
 
   const canonicalUrl = `${appUrl}/venue/${venue.id}`;
-  const title = venue.title || "Tiny Sticky Ads";
+  const title = venue.title || "TrioTag";
   const description =
-    venue.description || "Check out this ad space on Tiny Sticky Ads!";
+    venue.description || "Check out this ad space on TrioTag!";
   const images: string[] = Array.isArray(venue.media_urls)
     ? venue.media_urls
     : [];
@@ -86,7 +86,7 @@ function buildHtml(
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>${t} – Tiny Sticky Ads</title>
+  <title>${t} – TrioTag</title>
   <meta name="description" content="${d}" />
 
   <!-- Open Graph -->
@@ -97,7 +97,7 @@ function buildHtml(
   <meta property="og:image" content="${img}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:site_name" content="Tiny Sticky Ads" />
+  <meta property="og:site_name" content="TrioTag" />
 
   <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image" />
