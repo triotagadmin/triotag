@@ -1,6 +1,7 @@
 import { Facebook, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FaTiktok } from "react-icons/fa";
+import { BRAND_NAME, BRAND_DESCRIPTION } from "@/lib/brand";
 interface FooterLink {
   label: string;
   href: string;
