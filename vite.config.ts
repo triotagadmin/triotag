@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'icon-192x192.png', 'icon-512x512.png'],
       manifest: {
-        name: 'Tiny Sticky Ads - Micro Advertising',
-        short_name: 'Tiny Sticky Ads',
+        name: 'TrioTag - Micro Advertising',
+        short_name: 'TrioTag',
         description: 'Track your ad campaigns and choose the ads you want to see',
         theme_color: '#39FF14',
         background_color: '#000000',
