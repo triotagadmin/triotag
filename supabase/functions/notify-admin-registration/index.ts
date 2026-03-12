@@ -61,7 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
     const verificationUrl = `https://tinystickyads.com/admin/verify?token=${token}`;
 
     const emailResponse = await resend.emails.send({
-      from: "TinyStickyAds <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@tinystickyads.com>",
       to: ["tinystickyads@gmail.com"],
       subject: "New Admin Registration Pending Approval",
       html: `
