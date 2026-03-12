@@ -109,7 +109,7 @@ serve(async (req) => {
         // Send reminder email
         try {
           await resend.emails.send({
-            from: "TinyStickyAds <noreply@tinystickyads.com>",
+            from: "TrioTag <noreply@tinystickyads.com>",
             to: [advertiserProfile.contact_email],
             subject: `Payment Reminder - Order #${orderIdShort}`,
             html: `
