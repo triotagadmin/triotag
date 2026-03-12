@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import favicon from "/favicon.gif";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MessengerBell } from "@/components/MessengerBell";
+import { BRAND_NAME } from "@/lib/brand";
 
 export const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
