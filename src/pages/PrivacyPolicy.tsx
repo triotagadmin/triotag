@@ -19,7 +19,7 @@ const PrivacyPolicy = () => {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-foreground mb-4">1. Introduction</h2>
             <p className="text-muted-foreground mb-4">
-              Welcome to Tiny Sticky Ads ("we," "our," or "us"). We are committed to protecting your 
+              Welcome to TrioTag ("we," "our," or "us"). We are committed to protecting your 
               personal information and your right to privacy. This Privacy Policy explains how we collect, 
               use, disclose, and safeguard your information when you use our platform.
             </p>
