@@ -19,7 +19,7 @@ const TermsOfService = () => {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-foreground mb-4">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground mb-4">
-              By accessing or using Tiny Sticky Ads ("the Platform"), you agree to be bound by these 
+              By accessing or using TrioTag ("the Platform"), you agree to be bound by these 
               Terms of Service. If you do not agree to these terms, please do not use our services.
             </p>
           </section>
