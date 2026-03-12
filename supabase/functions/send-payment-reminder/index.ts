@@ -175,7 +175,7 @@ serve(async (req) => {
 
     // Send email via Resend
     const emailResponse = await resend.emails.send({
-      from: "TinyStickyAds <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@tinystickyads.com>",
       to: [advertiserEmail],
       subject: `Payment Required - Order #${orderIdShort} Approved! 🎉`,
       html: `
