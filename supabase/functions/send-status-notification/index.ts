@@ -79,7 +79,7 @@ serve(async (req) => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "TinyStickyAds <onboarding@resend.dev>",
+      from: "TrioTag <onboarding@resend.dev>",
       to: [recipientEmail],
       subject: subject,
       html: `
