@@ -106,7 +106,7 @@ const TermsOfService = () => {
             <h2 className="text-xl font-semibold text-foreground mb-4">8. Intellectual Property</h2>
             <p className="text-muted-foreground mb-4">
               The Platform and its original content, features, and functionality are owned by 
-              Tiny Sticky Ads and are protected by international copyright, trademark, and other 
+              TrioTag and are protected by international copyright, trademark, and other 
               intellectual property laws.
             </p>
           </section>
