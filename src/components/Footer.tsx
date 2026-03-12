@@ -49,9 +49,9 @@ export const Footer = () => {
           {/* Brand Section */}
           <div className="space-y-3 text-center sm:text-left">
             <h3 className="font-bold text-lg md:text-xl text-primary neon-text-glow">
-              Tiny Sticky Ads
+              {BRAND_NAME}
             </h3>
-            <p className="text-xs md:text-sm leading-relaxed text-white">Tiny Sticky Ads connects brands with curated ad spaces to promote products, services, and events effectively. Our platform makes it easy to distribute campaigns across real-world locations where people naturally gather.</p>
+            <p className="text-xs md:text-sm leading-relaxed text-white">{BRAND_DESCRIPTION}</p>
           </div>
 
           {/* Company Links - Two Columns */}
