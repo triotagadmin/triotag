@@ -86,7 +86,7 @@ const ActivateListing = () => {
   const [rejectionReason, setRejectionReason] = useState<string | undefined>();
   const [approvedTotalAmount, setApprovedTotalAmount] = useState<number>(0);
 
-  // Print order state - Manual Admin System
+  // Print order state - Branch-level system
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [shippingCountry, setShippingCountry] = useState("PH");
@@ -101,6 +101,15 @@ const ActivateListing = () => {
   const [orderLoading, setOrderLoading] = useState(false);
   const [printOrderComplete, setPrintOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState("");
+
+  // Branch-level print order state
+  const [allBranchOptions, setAllBranchOptions] = useState<BranchOption[]>([]);
+  const [selectedBranchIds, setSelectedBranchIds] = useState<Set<string>>(new Set());
+  const [branchConfigs, setBranchConfigs] = useState<BranchMaterialConfig[]>([]);
+  const [branchesLoading, setBranchesLoading] = useState(false);
+  const [availableMaterials, setAvailableMaterials] = useState<{ type: string; label: string }[]>([]);
+  const [detectedCurrency, setDetectedCurrency] = useState("USD");
+  const [branchOrderSubmitting, setBranchOrderSubmitting] = useState(false);
 
   // Check if user is an advertiser
   useEffect(() => {
