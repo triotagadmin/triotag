@@ -73,8 +73,8 @@ export const AdvertiserTypes = () => {
             TrioTag is a web-based application for print advertising management that helps businesses streamline print
             advertising across their franchise and branch locations, manage campaigns from one dashboard and measure
             results using QR code tracking and AI-powered analytics. Businesses can also list their own locations as
-            advertising spaces on our platform, creating a new revenue stream by connecting with brands actively looking
-            for placement opportunities.
+            advertising spaces on our marketplace platform, creating a new revenue stream by connecting with brands
+            actively looking for placement opportunities.
           </p>
         </div>
 
