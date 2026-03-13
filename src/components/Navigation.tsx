@@ -93,10 +93,7 @@ export const Navigation = () => {
                   <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
                 </Link>
                 <Link to="/habit-tracker" onClick={closeMobileMenu}>
-                  <Button variant="ghost" size="sm" className={linkClass}>Apps</Button>
-                </Link>
-                <Link to="/insights" onClick={closeMobileMenu}>
-                  <Button variant="ghost" size="sm" className={linkClass}>Insights</Button>
+                  <Button variant="ghost" size="sm" className={linkClass}>QR Code</Button>
                 </Link>
                 <Link to={getDashboardLink()} onClick={closeMobileMenu}>
                   <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
