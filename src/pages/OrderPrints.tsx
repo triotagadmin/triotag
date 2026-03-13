@@ -23,11 +23,13 @@ const AD_UNIT_MATERIAL_LABELS: Record<string, string> = {
 
 const OrderPrints = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
   const [userId, setUserId] = useState("");
-  const [selectedFranchiseId, setSelectedFranchiseId] = useState("");
+  const preselectedFranchiseId = (location.state as any)?.preselectedFranchiseId || "";
+  const [selectedFranchiseId, setSelectedFranchiseId] = useState(preselectedFranchiseId);
   const [branches, setBranches] = useState<BranchMaterialConfig[]>([]);
   const [branchesLoading, setBranchesLoading] = useState(false);
   const [availableMaterials, setAvailableMaterials] = useState<{ type: string; label: string }[]>([]);
