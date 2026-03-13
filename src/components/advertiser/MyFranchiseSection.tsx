@@ -581,10 +581,6 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       {selectedIds.size > 0 && (
         <div className="mb-4 p-3 rounded-[20px] glass border border-primary/30 flex items-center justify-between gap-3 flex-wrap">
           <span className="text-sm font-medium">{selectedIds.size} location{selectedIds.size !== 1 ? "s" : ""} selected</span>
-          <Button size="sm" className="gap-1" onClick={() => navigate("/order-prints", { state: { selectedBranchIds: Array.from(selectedIds) } })}>
-            <Printer className="h-4 w-4" />
-            Start Print Order
-          </Button>
         </div>
       )}
 
