@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,9 +18,21 @@ import { ProductCard } from "@/components/print-order/ProductCard";
 import { OrderSuccessCard } from "@/components/print-order/OrderSuccessCard";
 import { PaymentGateway } from "@/components/activation/PaymentGateway";
 import { PrintOrderPaymentGate } from "@/components/activation/PrintOrderPaymentGate";
+import { BranchSelector, type BranchOption } from "@/components/print-order/BranchSelector";
+import { BranchMaterialConfigurator, type BranchMaterialConfig } from "@/components/print-order/BranchMaterialConfigurator";
+import { PrintOrderSummary } from "@/components/print-order/PrintOrderSummary";
 import { PRINT_PRODUCTS, SHIPPING_COUNTRIES, calculateOrderTotal, getProductById } from "@/lib/printProducts";
 import { format } from "date-fns";
 import { getCurrencySymbol, formatPrice, getCurrencyName } from "@/hooks/useCurrencyConversion";
+
+const AD_UNIT_MATERIAL_LABELS: Record<string, string> = {
+  vinyl_sticker: "Vinyl Sticker",
+  table_tent_card: "Table Tent Card",
+  acrylic_table_tent: "Acrylic Table Tent",
+  coroplast_stand: "Coroplast Stand",
+  poster_frame: "Poster Frame",
+  wall_decal: "Wall Decal",
+};
 
 interface ListingDetails {
   id: string;
