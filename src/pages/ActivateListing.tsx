@@ -1340,10 +1340,10 @@ const ActivateListing = () => {
         <>
             {printOrderComplete ?
           <div className="max-w-xl mx-auto">
-                <Card className="border-yellow-500/50 bg-yellow-500/5">
+                <Card className="border-primary/30 bg-primary/5">
                   <CardHeader className="text-center">
-                    <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                      <Clock className="h-8 w-8 text-yellow-500" />
+                    <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Clock className="h-8 w-8 text-primary" />
                     </div>
                     <CardTitle className="text-2xl">Order Submitted for Review</CardTitle>
                     <CardDescription className="text-base">
@@ -1357,16 +1357,12 @@ const ActivateListing = () => {
                         <span className="font-mono font-medium">{orderId.slice(0, 8).toUpperCase()}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Product</span>
-                        <span className="font-medium">{selectedPrintProduct?.name || "Print Order"}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Quantity</span>
-                        <span className="font-medium">{quantity} units</span>
+                        <span className="text-muted-foreground">Branches</span>
+                        <span className="font-medium">{branchesWithMaterials.length} location(s)</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Status</span>
-                        <span className="font-medium text-yellow-500">Pending Admin Approval</span>
+                        <Badge variant="secondary">Pending Admin Approval</Badge>
                       </div>
                     </div>
 
@@ -1376,7 +1372,7 @@ const ActivateListing = () => {
                         <div>
                           <p className="font-medium text-sm">What happens next?</p>
                           <ol className="text-sm text-muted-foreground mt-2 space-y-1 list-decimal list-inside">
-                            <li>Admin reviews your design file</li>
+                            <li>Admin reviews your order details</li>
                             <li>You receive approval notification</li>
                             <li>Proceed to Payment (Step 3)</li>
                             <li>Production begins after payment</li>
@@ -1389,7 +1385,6 @@ const ActivateListing = () => {
                   orderId={orderId}
                   onProceedToPayment={() => setCurrentStep("payment")}
                   onBackToDashboard={() => navigate("/advertiser-dashboard")} />
-
                   </CardContent>
                 </Card>
               </div> :
@@ -1397,212 +1392,80 @@ const ActivateListing = () => {
           <div className="space-y-8">
                 {/* Print Order Info */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-1">Print Order</h3>
-                  <p className="text-sm text-muted-foreground mb-4">We handle all printing. All print materials require approval before production.</p>
+                  <h3 className="text-lg font-semibold mb-1">Print Order — Branch-Level Configuration</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Select branch locations, configure ad materials per branch, and submit your print order.
+                  </p>
                 </div>
 
-                {/* Ad Unit Materials Catalog */}
-            <Card className="border-primary/30 bg-primary/5">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Package className="h-5 w-5 text-primary" />
-                        Available Ad Unit Materials & Pricing
-                      </CardTitle>
-                      <CardDescription>All configured materials for this listing. Currency detected from listing configuration.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {(() => {
-                        const listingCurrency = listing?.specifications?.lease_currency || listing?.specifications?.ad_units?.[0]?.currency || listing?.specifications?.currency || "USD";
-                        const listingMaterials: string[] = listing?.specifications?.ad_unit_materials || [];
-                        const materialLabels: Record<string, string> = {
-                          vinyl_sticker: "Vinyl Sticker",
-                          table_tent_card: "Table Tent Card",
-                          acrylic_table_tent: "Acrylic Table Tent",
-                          coroplast_stand: "Coroplast Stand",
-                          poster_frame: "Poster Frame",
-                          wall_decal: "Wall Decal",
-                        };
-                        return (
-                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {listingMaterials.length > 0 ? listingMaterials.map((matType) => (
-                              <div key={matType} className="rounded-lg border p-4 bg-background">
-                                <h4 className="font-semibold text-sm mb-1">{materialLabels[matType] || matType}</h4>
-                                <div className="space-y-1 text-xs mt-2">
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Weekly Fee:</span>
-                                    <span>{formatPrice(listing?.specifications?.weekly_lease_price || 0, listingCurrency)}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Monthly Fee:</span>
-                                    <span>{formatPrice(listing?.specifications?.monthly_lease_price || 0, listingCurrency)}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            )) : PRINT_PRODUCTS.map((product) => (
-                              <div key={product.id} className={`rounded-lg border p-4 transition-all ${selectedProductId === product.id ? "border-primary bg-primary/10" : "border-border bg-background"}`}>
-                                <h4 className="font-semibold text-sm mb-1">{product.name}</h4>
-                                <p className="text-xs text-muted-foreground mb-2">{product.description}</p>
-                                <div className="mt-3 pt-2 border-t border-border">
-                                  <p className="text-lg font-bold text-primary">${product.pricePerUnit.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">/ unit</span></p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })()}
+                {branchesLoading ? (
+                  <Card>
+                    <CardContent className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
                     </CardContent>
                   </Card>
+                ) : (
+                  <>
+                    {/* Section 1: Branch Selection */}
+                    <BranchSelector
+                      branches={allBranchOptions}
+                      selectedIds={selectedBranchIds}
+                      onChange={setSelectedBranchIds}
+                    />
 
-                {/* Print details */}
-            <div className="grid lg:grid-cols-2 gap-8">
-                    {/* Auto-detected Print Product */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Package className="h-5 w-5 text-primary" />
-                          Print Product
-                        </CardTitle>
-                        <CardDescription>Auto-detected from listing ad unit type</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        {selectedPrintProduct &&
-                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                            <h4 className="font-semibold text-lg">{selectedPrintProduct.name}</h4>
-                            <p className="text-sm text-muted-foreground mb-2">{selectedPrintProduct.description}</p>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div><span className="text-muted-foreground">Size:</span> {selectedPrintProduct.specs.size}</div>
-                              <div><span className="text-muted-foreground">Material:</span> {selectedPrintProduct.specs.material}</div>
-                            </div>
-                          </div>
-                  }
-
-                        <div>
-                          <Label>Quantity</Label>
-                          {(() => {
-                            const listingAdUnits = listing?.specifications?.ad_units || listing?.pricing?.ad_units || [];
-                            const matchedAdUnit = listingAdUnits.find((unit: any) =>
-                              unit.type === approvedAdUnitType || unit.type === activationType
-                            ) || listingAdUnits[0];
-                            const maxQty = matchedAdUnit?.quantity || 999;
-                            return (
-                              <>
-                                <Input
-                                  type="number"
-                                  min={selectedPrintProduct?.minQuantity || 1}
-                                  max={maxQty}
-                                  value={quantity}
-                                  onChange={(e) => {
-                                    const val = parseInt(e.target.value) || 1;
-                                    setQuantity(Math.min(Math.max(val, selectedPrintProduct?.minQuantity || 1), maxQty));
-                                  }}
-                                />
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Min: {selectedPrintProduct?.minQuantity || 1} units — Max: {maxQty} units (from listing)
-                                </p>
-                              </>
+                    {/* Section 2: Branch-Level Material Configuration (only selected branches) */}
+                    {selectedBranchIds.size > 0 && (
+                      <div>
+                        <h2 className="text-lg font-semibold mb-3">Configure Ad Materials per Selected Branch</h2>
+                        <BranchMaterialConfigurator
+                          branches={selectedBranchConfigs}
+                          onChange={(updated) => {
+                            // Merge updated configs back into full branchConfigs
+                            const updatedMap = new Map(updated.map((b) => [b.branchId, b]));
+                            setBranchConfigs((prev) =>
+                              prev.map((b) => updatedMap.get(b.branchId) || b)
                             );
-                          })()}
-                        </div>
+                          }}
+                          availableMaterials={availableMaterials}
+                        />
+                      </div>
+                    )}
 
-                        <div>
-                          <Label>Shipping Country</Label>
-                          <Select value={shippingCountry} onValueChange={setShippingCountry}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              {SHIPPING_COUNTRIES.map((c) =>
-                        <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
-                        )}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                    {/* Section 3: Order Summary */}
+                    {branchesWithMaterials.length > 0 && (
+                      <PrintOrderSummary
+                        franchiseName={listing?.title || ""}
+                        branches={selectedBranchConfigs}
+                        currency={detectedCurrency}
+                      />
+                    )}
 
-                        {selectedPrintProduct &&
-                  <div className="pt-4 border-t space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Product</span>
-                              <span>{selectedPrintProduct.name}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Quantity</span>
-                              <span>{quantity} units</span>
-                            </div>
-                            <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                              <span>Estimated Total</span>
-                              <span className="text-primary">{formatPrice(orderTotal, listing?.specifications?.lease_currency || listing?.specifications?.ad_units?.[0]?.currency || listing?.specifications?.currency || "USD")}</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">Final price confirmed after admin review</p>
-                          </div>
-                  }
-                      </CardContent>
-                    </Card>
-
-                    {/* Shipping destination */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Truck className="h-5 w-5" />
-                          Shipping Destination
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">Shipped directly to the publisher venue</p>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        {publisherAddress ?
-                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                            <div>
-                              <Label className="text-xs text-muted-foreground">Venue Name</Label>
-                              <p className="font-medium">{publisherAddress.businessName}</p>
-                            </div>
-                            <div>
-                              <Label className="text-xs text-muted-foreground">Address</Label>
-                              <p className="font-medium">{publisherAddress.location || listing?.location || "Not specified"}</p>
-                            </div>
-                          </div> :
-
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                            <p className="text-muted-foreground">Loading publisher address...</p>
-                          </div>
-                  }
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                {/* Status badge + Submit */}
-            <div className="space-y-3">
-                    <div className="flex items-center justify-center">
-                      <Badge variant="secondary" className="text-sm px-3 py-1">
-                        <Clock className="h-3.5 w-3.5 mr-1.5" />
-                        Status: Pending Approval
-                      </Badge>
-                    </div>
+                    {/* Submit Button */}
                     <Button
-                onClick={handlePlacePrintOrder}
-                disabled={
-                orderLoading ||
-                !selectedProductId ||
-                !publisherAddress
-                }
-                className="w-full"
-                size="lg">SUBMIT FOR APPROVALS
-
-                {orderLoading ?
-                <>
+                      className="w-full"
+                      size="lg"
+                      onClick={handleSubmitBranchPrintOrder}
+                      disabled={branchOrderSubmitting || selectedBranchIds.size === 0}
+                    >
+                      {branchOrderSubmitting ? (
+                        <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Submitting for Approval...
-                        </> :
-
-                <>
+                          Submitting Print Order...
+                        </>
+                      ) : (
+                        <>
                           <Send className="h-4 w-4 mr-2" />
                           Submit Print Order for Approval
                         </>
-                }
+                      )}
                     </Button>
-                  </div>
+                  </>
+                )}
 
                 <Button
               variant="outline"
               onClick={() => setCurrentStep("design")}
               className="w-full max-w-md mx-auto">
-
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Design
                 </Button>
