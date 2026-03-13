@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -23,11 +23,13 @@ const AD_UNIT_MATERIAL_LABELS: Record<string, string> = {
 
 const OrderPrints = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
   const [userId, setUserId] = useState("");
-  const [selectedFranchiseId, setSelectedFranchiseId] = useState("");
+  const preselectedFranchiseId = (location.state as any)?.preselectedFranchiseId || "";
+  const [selectedFranchiseId, setSelectedFranchiseId] = useState(preselectedFranchiseId);
   const [branches, setBranches] = useState<BranchMaterialConfig[]>([]);
   const [branchesLoading, setBranchesLoading] = useState(false);
   const [availableMaterials, setAvailableMaterials] = useState<{ type: string; label: string }[]>([]);
@@ -82,11 +84,18 @@ const OrderPrints = () => {
         materials = matTypes.map((t) => ({ type: t, label: AD_UNIT_MATERIAL_LABELS[t] || t }));
       }
 
-      // Load franchise branches
+      // Load franchise branches (publisher-managed)
       const { data: fBranches } = await supabase
         .from("franchise_branches")
         .select("id, place_name, full_address")
         .eq("franchise_id", realId)
+        .order("created_at");
+
+      // Also load advertiser branches linked to this listing
+      const { data: advBranches } = await supabase
+        .from("advertiser_branches")
+        .select("id, branch_name, full_address, city")
+        .eq("listing_id", realId)
         .order("created_at");
 
       // Load existing branch_materials
@@ -101,15 +110,42 @@ const OrderPrints = () => {
         matMap.get(m.branch_id)!.set(m.material_type, m.quantity);
       });
 
-      branchData = (fBranches || []).map((b: any) => {
+      // Merge both branch sources, deduplicating by ID
+      const seenIds = new Set<string>();
+      const allBranches: { id: string; name: string; address: string; city: string }[] = [];
+
+      (fBranches || []).forEach((b: any) => {
+        if (!seenIds.has(b.id)) {
+          seenIds.add(b.id);
+          const addressParts = b.full_address?.split(",") || [];
+          allBranches.push({
+            id: b.id,
+            name: b.place_name,
+            address: b.full_address,
+            city: addressParts.length >= 2 ? addressParts[addressParts.length - 2]?.trim() : "",
+          });
+        }
+      });
+
+      (advBranches || []).forEach((b: any) => {
+        if (!seenIds.has(b.id)) {
+          seenIds.add(b.id);
+          allBranches.push({
+            id: b.id,
+            name: b.branch_name || b.full_address,
+            address: b.full_address,
+            city: b.city || "",
+          });
+        }
+      });
+
+      branchData = allBranches.map((b) => {
         const branchMats = matMap.get(b.id);
-        const addressParts = b.full_address?.split(",") || [];
-        const city = addressParts.length >= 2 ? addressParts[addressParts.length - 2]?.trim() : "";
         return {
           branchId: b.id,
-          branchName: b.place_name,
-          fullAddress: b.full_address,
-          city,
+          branchName: b.name,
+          fullAddress: b.address,
+          city: b.city,
           materials: materials.map((m) => ({
             materialType: m.type,
             materialLabel: m.label,
@@ -117,8 +153,8 @@ const OrderPrints = () => {
           })),
           shippingAddress: {
             recipient: "",
-            street: b.full_address || "",
-            city,
+            street: b.address || "",
+            city: b.city,
             province: "",
             postalCode: "",
             contact: "",
