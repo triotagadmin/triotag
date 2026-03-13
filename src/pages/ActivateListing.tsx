@@ -158,6 +158,194 @@ const ActivateListing = () => {
     }
   }, [listing, activationType, selectedProductId]);
 
+  // Load branch locations when listing is available and step is print-order
+  const loadBranchesForListing = useCallback(async () => {
+    if (!id || !listing) return;
+    setBranchesLoading(true);
+
+    const specs = (listing.specifications as any) || {};
+    const listingCurrency = specs.lease_currency || specs.ad_units?.[0]?.currency || specs.currency || "USD";
+    setDetectedCurrency(listingCurrency);
+
+    // Get materials from listing specs
+    const matTypes: string[] = specs.ad_unit_materials || [];
+    const materials = matTypes.length > 0
+      ? matTypes.map((t) => ({ type: t, label: AD_UNIT_MATERIAL_LABELS[t] || t }))
+      : [{ type: "vinyl_sticker", label: "Vinyl Sticker" }, { type: "table_tent_card", label: "Table Tent Card" }];
+    setAvailableMaterials(materials);
+
+    // Load franchise branches
+    const { data: fBranches } = await supabase
+      .from("franchise_branches")
+      .select("id, place_name, full_address")
+      .eq("franchise_id", id)
+      .order("created_at");
+
+    // Load advertiser branches
+    const { data: advBranches } = await supabase
+      .from("advertiser_branches")
+      .select("id, branch_name, full_address, city")
+      .eq("listing_id", id)
+      .order("created_at");
+
+    // Load existing branch_materials
+    const { data: existingMats } = await supabase
+      .from("branch_materials")
+      .select("branch_id, material_type, quantity")
+      .eq("listing_id", id);
+
+    const matMap = new Map<string, Map<string, number>>();
+    existingMats?.forEach((m: any) => {
+      if (!matMap.has(m.branch_id)) matMap.set(m.branch_id, new Map());
+      matMap.get(m.branch_id)!.set(m.material_type, m.quantity);
+    });
+
+    // Merge & deduplicate
+    const seenIds = new Set<string>();
+    const allBranches: BranchOption[] = [];
+    const configs: BranchMaterialConfig[] = [];
+
+    (fBranches || []).forEach((b: any) => {
+      if (!seenIds.has(b.id)) {
+        seenIds.add(b.id);
+        const addressParts = b.full_address?.split(",") || [];
+        const city = addressParts.length >= 2 ? addressParts[addressParts.length - 2]?.trim() : "";
+        allBranches.push({ id: b.id, name: b.place_name, address: b.full_address, city });
+        const branchMats = matMap.get(b.id);
+        configs.push({
+          branchId: b.id,
+          branchName: b.place_name,
+          fullAddress: b.full_address,
+          city,
+          materials: materials.map((m) => ({
+            materialType: m.type,
+            materialLabel: m.label,
+            quantity: branchMats?.get(m.type) || 0,
+          })),
+          shippingAddress: { recipient: "", street: b.full_address || "", city, province: "", postalCode: "", contact: "" },
+        });
+      }
+    });
+
+    (advBranches || []).forEach((b: any) => {
+      if (!seenIds.has(b.id)) {
+        seenIds.add(b.id);
+        allBranches.push({ id: b.id, name: b.branch_name || b.full_address, address: b.full_address, city: b.city || "" });
+        configs.push({
+          branchId: b.id,
+          branchName: b.branch_name || b.full_address,
+          fullAddress: b.full_address,
+          city: b.city || "",
+          materials: materials.map((m) => ({
+            materialType: m.type,
+            materialLabel: m.label,
+            quantity: 0,
+          })),
+          shippingAddress: { recipient: "", street: b.full_address || "", city: b.city || "", province: "", postalCode: "", contact: "" },
+        });
+      }
+    });
+
+    setAllBranchOptions(allBranches);
+    setBranchConfigs(configs);
+    // Auto-select all branches
+    setSelectedBranchIds(new Set(allBranches.map((b) => b.id)));
+    setBranchesLoading(false);
+  }, [id, listing]);
+
+  useEffect(() => {
+    if (currentStep === "print-order" && listing && allBranchOptions.length === 0) {
+      loadBranchesForListing();
+    }
+  }, [currentStep, listing, allBranchOptions.length, loadBranchesForListing]);
+
+  // Get selected branch configs for display
+  const selectedBranchConfigs = branchConfigs.filter((b) => selectedBranchIds.has(b.branchId));
+  const branchesWithMaterials = selectedBranchConfigs.filter((b) => b.materials.some((m) => m.quantity > 0));
+
+  const handleSubmitBranchPrintOrder = async () => {
+    if (selectedBranchIds.size === 0) {
+      toast({ title: "Select at least one branch", variant: "destructive" });
+      return;
+    }
+
+    if (branchesWithMaterials.length === 0) {
+      toast({ title: "Set quantity > 0 for at least one material", variant: "destructive" });
+      return;
+    }
+
+    // Validate shipping addresses
+    for (const b of branchesWithMaterials) {
+      if (!b.shippingAddress.recipient.trim() || !b.shippingAddress.street.trim() || !b.shippingAddress.city.trim()) {
+        toast({ title: `Complete shipping address for ${b.branchName}`, variant: "destructive" });
+        return;
+      }
+    }
+
+    setBranchOrderSubmitting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const payload = {
+        franchiseName: listing?.title || "",
+        branches: branchesWithMaterials.map((b) => ({
+          branchId: b.branchId,
+          branchName: b.branchName,
+          shippingAddress: b.shippingAddress,
+          materials: b.materials.filter((m) => m.quantity > 0).map((m) => ({
+            materialType: m.materialType,
+            materialLabel: m.materialLabel,
+            quantity: m.quantity,
+          })),
+        })),
+        currency: detectedCurrency,
+        submittedBy: session.user.id,
+      };
+
+      // Insert into advertiser_print_orders
+      const { data: order, error } = await supabase
+        .from("advertiser_print_orders")
+        .insert({
+          advertiser_id: session.user.id,
+          branch_ids: branchesWithMaterials.map((b) => b.branchId),
+          materials: payload as any,
+          notes: JSON.stringify({ franchise_name: listing?.title, currency: detectedCurrency }),
+          status: "pending",
+        })
+        .select("id")
+        .single();
+
+      if (error) throw error;
+
+      // Update activation with print order reference
+      if (activationId) {
+        await supabase
+          .from("activations")
+          .update({ status: "printing", print_order_id: order.id, quantity: branchesWithMaterials.reduce((sum, b) => sum + b.materials.reduce((s, m) => s + m.quantity, 0), 0) })
+          .eq("id", activationId);
+      }
+
+      // Send email notification
+      try {
+        await supabase.functions.invoke("submit-print-order-email", {
+          body: { ...payload, orderId: order.id },
+        });
+      } catch (emailErr) {
+        console.error("Email notification failed:", emailErr);
+      }
+
+      setOrderId(order.id);
+      setPrintOrderComplete(true);
+      setActivationStatus("printing");
+      toast({ title: "Print order submitted!", description: "Your order is pending admin review." });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setBranchOrderSubmitting(false);
+    }
+  };
+
   const fetchListingDetails = async () => {
     try {
       const { data, error } = await supabase.
