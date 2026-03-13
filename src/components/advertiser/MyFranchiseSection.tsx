@@ -721,16 +721,18 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                         Deactivate Marketplace Listing
                       </Button>
                     )}
-                    {fLocs.length > 0 && selectedIds.size > 0 && fLocs.some(l => selectedIds.has(l.id)) && (
-                      <Button
-                        size="sm"
-                        className="gap-1 bg-primary/10 border border-primary/30 text-primary animate-glow-breathe transition-all duration-300 hover:scale-[1.02] hover:bg-primary/15 hover:shadow-[0_0_14px_rgba(0,255,128,0.4)] focus-visible:shadow-[0_0_10px_rgba(0,255,128,0.3)] focus-visible:outline-none"
-                        onClick={() => navigate("/order-prints", { state: { selectedBranchIds: fLocs.filter(l => selectedIds.has(l.id)).map(l => l.id) } })}
-                      >
-                        <Printer className="h-3.5 w-3.5" />
-                        Print Order
-                      </Button>
-                    )}
+                    <Button
+                      size="sm"
+                      className="gap-1 bg-primary/10 border border-primary/30 text-primary animate-glow-breathe transition-all duration-300 hover:scale-[1.02] hover:bg-primary/15 hover:shadow-[0_0_14px_rgba(0,255,128,0.4)] focus-visible:shadow-[0_0_10px_rgba(0,255,128,0.3)] focus-visible:outline-none"
+                      onClick={() => {
+                        const isAdSpace = !!(franchise as any)._isAdSpace;
+                        const franchiseKey = isAdSpace ? `listing_${(franchise as any)._adSpaceId}` : `adv_${franchise.id}`;
+                        navigate("/order-prints", { state: { preselectedFranchiseId: franchiseKey } });
+                      }}
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                      Print Order
+                    </Button>
                   </div>
                 </CardHeader>
 
