@@ -70,7 +70,7 @@ export const AdvertiserTypes = () => {
             Hyperlocal Brand Visibility
           </h2>
           <p className="text-sm px-2 text-popover-foreground md:text-base">
-            TrioTag is web-based application for print advertising management that helps businesses streamline print
+            TrioTag is a web-based application for print advertising management that helps businesses streamline print
             advertising across their franchise and branch locations, manage campaigns from one dashboard and measure
             results using QR code tracking and AI-powered analytics.
           </p>
