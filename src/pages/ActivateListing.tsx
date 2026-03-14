@@ -18,9 +18,8 @@ import { ProductCard } from "@/components/print-order/ProductCard";
 import { OrderSuccessCard } from "@/components/print-order/OrderSuccessCard";
 import { PaymentGateway } from "@/components/activation/PaymentGateway";
 import { PrintOrderPaymentGate } from "@/components/activation/PrintOrderPaymentGate";
-import { BranchSelector, type BranchOption } from "@/components/print-order/BranchSelector";
-import { BranchMaterialConfigurator, type BranchMaterialConfig } from "@/components/print-order/BranchMaterialConfigurator";
-import { PrintOrderSummary } from "@/components/print-order/PrintOrderSummary";
+import { PrintOrderWizard, type BranchOption } from "@/components/print-order/PrintOrderWizard";
+import { type BranchMaterialConfig } from "@/components/print-order/BranchMaterialConfigurator";
 import { PRINT_PRODUCTS, SHIPPING_COUNTRIES, calculateOrderTotal, getProductById } from "@/lib/printProducts";
 import { format } from "date-fns";
 import { getCurrencySymbol, formatPrice, getCurrencyName } from "@/hooks/useCurrencyConversion";
@@ -259,92 +258,8 @@ const ActivateListing = () => {
     }
   }, [currentStep, listing, allBranchOptions.length, loadBranchesForListing]);
 
-  // Get selected branch configs for display
-  const selectedBranchConfigs = branchConfigs.filter((b) => selectedBranchIds.has(b.branchId));
-  const branchesWithMaterials = selectedBranchConfigs.filter((b) => b.materials.some((m) => m.quantity > 0));
 
-  const handleSubmitBranchPrintOrder = async () => {
-    if (selectedBranchIds.size === 0) {
-      toast({ title: "Select at least one branch", variant: "destructive" });
-      return;
-    }
 
-    if (branchesWithMaterials.length === 0) {
-      toast({ title: "Set quantity > 0 for at least one material", variant: "destructive" });
-      return;
-    }
-
-    // Validate shipping addresses
-    for (const b of branchesWithMaterials) {
-      if (!b.shippingAddress.recipient.trim() || !b.shippingAddress.street.trim() || !b.shippingAddress.city.trim()) {
-        toast({ title: `Complete shipping address for ${b.branchName}`, variant: "destructive" });
-        return;
-      }
-    }
-
-    setBranchOrderSubmitting(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
-
-      const payload = {
-        franchiseName: listing?.title || "",
-        branches: branchesWithMaterials.map((b) => ({
-          branchId: b.branchId,
-          branchName: b.branchName,
-          shippingAddress: b.shippingAddress,
-          materials: b.materials.filter((m) => m.quantity > 0).map((m) => ({
-            materialType: m.materialType,
-            materialLabel: m.materialLabel,
-            quantity: m.quantity,
-          })),
-        })),
-        currency: detectedCurrency,
-        submittedBy: session.user.id,
-      };
-
-      // Insert into advertiser_print_orders
-      const { data: order, error } = await supabase
-        .from("advertiser_print_orders")
-        .insert({
-          advertiser_id: session.user.id,
-          branch_ids: branchesWithMaterials.map((b) => b.branchId),
-          materials: payload as any,
-          notes: JSON.stringify({ franchise_name: listing?.title, currency: detectedCurrency }),
-          status: "pending",
-        })
-        .select("id")
-        .single();
-
-      if (error) throw error;
-
-      // Update activation with print order reference
-      if (activationId) {
-        await supabase
-          .from("activations")
-          .update({ status: "printing", print_order_id: order.id, quantity: branchesWithMaterials.reduce((sum, b) => sum + b.materials.reduce((s, m) => s + m.quantity, 0), 0) })
-          .eq("id", activationId);
-      }
-
-      // Send email notification
-      try {
-        await supabase.functions.invoke("submit-print-order-email", {
-          body: { ...payload, orderId: order.id },
-        });
-      } catch (emailErr) {
-        console.error("Email notification failed:", emailErr);
-      }
-
-      setOrderId(order.id);
-      setPrintOrderComplete(true);
-      setActivationStatus("printing");
-      toast({ title: "Print order submitted!", description: "Your order is pending admin review." });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally {
-      setBranchOrderSubmitting(false);
-    }
-  };
 
   const fetchListingDetails = async () => {
     try {
@@ -1358,7 +1273,7 @@ const ActivateListing = () => {
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Branches</span>
-                        <span className="font-medium">{branchesWithMaterials.length} location(s)</span>
+                        <span className="font-medium">{branchConfigs.filter(b => b.materials.some(m => m.quantity > 0)).length} location(s)</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Status</span>
@@ -1389,87 +1304,83 @@ const ActivateListing = () => {
                 </Card>
               </div> :
 
-          <div className="space-y-8">
-                {/* Print Order Info */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">Print Order — Branch-Level Configuration</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Select branch locations, configure ad materials per branch, and submit your print order.
-                  </p>
-                </div>
+          <PrintOrderWizard
+                branches={allBranchOptions}
+                availableMaterials={availableMaterials}
+                franchiseName={listing?.title || ""}
+                currency={detectedCurrency}
+                loading={branchesLoading}
+                submitting={branchOrderSubmitting}
+                onSubmit={async ({ selectedBranches }) => {
+                  setBranchConfigs(selectedBranches);
+                  // Re-use existing submit logic
+                  setBranchOrderSubmitting(true);
+                  try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) throw new Error("Not authenticated");
 
-                {branchesLoading ? (
-                  <Card>
-                    <CardContent className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <>
-                    {/* Section 1: Branch Selection */}
-                    <BranchSelector
-                      branches={allBranchOptions}
-                      selectedIds={selectedBranchIds}
-                      onChange={setSelectedBranchIds}
-                    />
+                    const payload = {
+                      franchiseName: listing?.title || "",
+                      branches: selectedBranches.map((b) => ({
+                        branchId: b.branchId,
+                        branchName: b.branchName,
+                        shippingAddress: b.shippingAddress,
+                        materials: b.materials.filter((m) => m.quantity > 0).map((m) => ({
+                          materialType: m.materialType,
+                          materialLabel: m.materialLabel,
+                          quantity: m.quantity,
+                        })),
+                      })),
+                      currency: detectedCurrency,
+                      submittedBy: session.user.id,
+                    };
 
-                    {/* Section 2: Branch-Level Material Configuration (only selected branches) */}
-                    {selectedBranchIds.size > 0 && (
-                      <div>
-                        <h2 className="text-lg font-semibold mb-3">Configure Ad Materials per Selected Branch</h2>
-                        <BranchMaterialConfigurator
-                          branches={selectedBranchConfigs}
-                          onChange={(updated) => {
-                            // Merge updated configs back into full branchConfigs
-                            const updatedMap = new Map(updated.map((b) => [b.branchId, b]));
-                            setBranchConfigs((prev) =>
-                              prev.map((b) => updatedMap.get(b.branchId) || b)
-                            );
-                          }}
-                          availableMaterials={availableMaterials}
-                        />
-                      </div>
-                    )}
+                    const { data: order, error } = await supabase
+                      .from("advertiser_print_orders")
+                      .insert({
+                        advertiser_id: session.user.id,
+                        branch_ids: selectedBranches.map((b) => b.branchId),
+                        materials: payload as any,
+                        notes: JSON.stringify({ franchise_name: listing?.title, currency: detectedCurrency }),
+                        status: "pending",
+                      })
+                      .select("id")
+                      .single();
 
-                    {/* Section 3: Order Summary */}
-                    {branchesWithMaterials.length > 0 && (
-                      <PrintOrderSummary
-                        franchiseName={listing?.title || ""}
-                        branches={selectedBranchConfigs}
-                        currency={detectedCurrency}
-                      />
-                    )}
+                    if (error) throw error;
 
-                    {/* Submit Button */}
-                    <Button
-                      className="w-full"
-                      size="lg"
-                      onClick={handleSubmitBranchPrintOrder}
-                      disabled={branchOrderSubmitting || selectedBranchIds.size === 0}
-                    >
-                      {branchOrderSubmitting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Submitting Print Order...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" />
-                          Submit Print Order for Approval
-                        </>
-                      )}
-                    </Button>
-                  </>
-                )}
+                    if (activationId) {
+                      await supabase
+                        .from("activations")
+                        .update({
+                          status: "payment_pending",
+                          print_order_id: order.id,
+                          quantity: selectedBranches.reduce((sum, b) => sum + b.materials.reduce((s, m) => s + m.quantity, 0), 0),
+                        })
+                        .eq("id", activationId);
+                    }
 
-                <Button
-              variant="outline"
-              onClick={() => setCurrentStep("design")}
-              className="w-full max-w-md mx-auto">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Design
-                </Button>
-              </div>
+                    try {
+                      await supabase.functions.invoke("submit-print-order-email", {
+                        body: { ...payload, orderId: order.id },
+                      });
+                    } catch (emailErr) {
+                      console.error("Email notification failed:", emailErr);
+                    }
+
+                    setOrderId(order.id);
+                    setPrintOrderComplete(true);
+                    setActivationStatus("payment_pending");
+                    setCurrentStep("payment");
+                    toast({ title: "Print order submitted!", description: "Proceed to payment." });
+                  } catch (err: any) {
+                    toast({ title: "Error", description: err.message, variant: "destructive" });
+                  } finally {
+                    setBranchOrderSubmitting(false);
+                  }
+                }}
+                onBack={() => setCurrentStep("design")}
+              />
           }
           </>
         }
