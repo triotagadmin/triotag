@@ -3,11 +3,55 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, paymongo-signature",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, paymongo-signature, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function verifyWebhookSignature(body: string, signatureHeader: string | null, secret: string): Promise<boolean> {
+  if (!signatureHeader || !secret) {
+    console.warn("Missing signature header or webhook secret");
+    return false;
+  }
+
+  // PayMongo signature format: t=<timestamp>,te=<test_signature>,li=<live_signature>
+  const parts: Record<string, string> = {};
+  for (const part of signatureHeader.split(",")) {
+    const [key, value] = part.split("=", 2);
+    if (key && value) parts[key.trim()] = value.trim();
+  }
+
+  const timestamp = parts["t"];
+  const testSig = parts["te"];
+  const liveSig = parts["li"];
+
+  if (!timestamp) {
+    console.error("No timestamp in signature header");
+    return false;
+  }
+
+  // Construct the signed payload: timestamp + "." + raw body
+  const signedPayload = `${timestamp}.${body}`;
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(signedPayload));
+  const computedSig = Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  // Check against both live and test signatures
+  const isValid = computedSig === liveSig || computedSig === testSig;
+  if (!isValid) {
+    console.error("Signature mismatch. Computed:", computedSig, "Live:", liveSig, "Test:", testSig);
+  }
+  return isValid;
+}
+
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -17,28 +61,107 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const signature = req.headers.get("paymongo-signature");
+    const webhookSecret = Deno.env.get("PAYMONGO_WEBHOOK_SECRET");
+    const signatureHeader = req.headers.get("paymongo-signature");
     const body = await req.text();
-    
-    console.log("Webhook received with signature:", signature);
-    console.log("Webhook body:", body);
 
-    // Parse the webhook payload
+    console.log("Webhook received, event signature present:", !!signatureHeader);
+
+    // Verify webhook signature
+    if (webhookSecret) {
+      const isValid = await verifyWebhookSignature(body, signatureHeader, webhookSecret);
+      if (!isValid) {
+        console.error("Invalid webhook signature — rejecting request");
+        return new Response(JSON.stringify({ error: "Invalid signature" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      console.log("Webhook signature verified successfully");
+    } else {
+      console.warn("PAYMONGO_WEBHOOK_SECRET not configured — skipping signature verification");
+    }
+
     const payload = JSON.parse(body);
     const eventType = payload.data?.attributes?.type;
     const eventData = payload.data?.attributes?.data;
 
     console.log("Event type:", eventType);
-    console.log("Event data:", JSON.stringify(eventData));
 
-    // Handle checkout session payment success
+    // ── payment.paid ──
+    if (eventType === "payment.paid") {
+      const paymentId = eventData?.id;
+      const metadata = eventData?.attributes?.metadata;
+      const checkoutSessionId = eventData?.attributes?.source?.id;
+
+      console.log("payment.paid — paymentId:", paymentId, "metadata:", JSON.stringify(metadata));
+
+      if (metadata?.type === "listing_submission") {
+        await supabase
+          .from("listing_submissions")
+          .update({ payment_status: "paid" })
+          .eq("id", metadata.listing_id);
+        console.log("Listing submission marked paid:", metadata.listing_id);
+      } else if (checkoutSessionId) {
+        const { data: saleData } = await supabase
+          .from("ticket_sales")
+          .update({
+            payment_status: "paid",
+            paymongo_payment_id: paymentId,
+            qr_code: `QR-${(checkoutSessionId as string).substring(0, 8).toUpperCase()}`,
+          })
+          .eq("paymongo_checkout_session_id", checkoutSessionId)
+          .select()
+          .single();
+
+        if (saleData) {
+          const { data: ticketData } = await supabase
+            .from("tickets")
+            .select("quantity_sold")
+            .eq("id", saleData.ticket_id)
+            .single();
+
+          if (ticketData) {
+            await supabase
+              .from("tickets")
+              .update({ quantity_sold: ticketData.quantity_sold + saleData.quantity })
+              .eq("id", saleData.ticket_id);
+          }
+          console.log("Ticket sale updated via payment.paid");
+        }
+      }
+    }
+
+    // ── payment.failed ──
+    if (eventType === "payment.failed") {
+      const paymentId = eventData?.id;
+      const checkoutSessionId = eventData?.attributes?.source?.id;
+      const metadata = eventData?.attributes?.metadata;
+
+      console.log("payment.failed — paymentId:", paymentId);
+
+      if (metadata?.type === "listing_submission") {
+        await supabase
+          .from("listing_submissions")
+          .update({ payment_status: "failed" })
+          .eq("id", metadata.listing_id);
+        console.log("Listing submission marked failed:", metadata.listing_id);
+      } else if (checkoutSessionId) {
+        await supabase
+          .from("ticket_sales")
+          .update({ payment_status: "failed" })
+          .eq("paymongo_checkout_session_id", checkoutSessionId);
+        console.log("Ticket sale marked failed for session:", checkoutSessionId);
+      }
+    }
+
+    // ── checkout_session.payment.paid ──
     if (eventType === "checkout_session.payment.paid") {
       const checkoutSessionId = eventData?.id;
       const metadata = eventData?.attributes?.metadata;
       const paymentId = eventData?.attributes?.payments?.[0]?.id;
 
-      console.log("Processing payment success for session:", checkoutSessionId);
-      console.log("Metadata:", JSON.stringify(metadata));
+      console.log("checkout_session.payment.paid — session:", checkoutSessionId);
 
       if (!checkoutSessionId) {
         console.error("No checkout session ID in webhook");
@@ -48,29 +171,22 @@ serve(async (req) => {
         });
       }
 
-      // Check if this is a listing submission payment
       if (metadata?.type === "listing_submission") {
-        const listingId = metadata.listing_id;
-        console.log("Processing listing payment for:", listingId);
-
-        const { error: listingUpdateError } = await supabase
+        await supabase
           .from("listing_submissions")
           .update({ payment_status: "paid" })
-          .eq("id", listingId);
-
-        if (listingUpdateError) {
-          console.error("Failed to update listing payment:", listingUpdateError);
-        } else {
-          console.log("Listing payment marked as paid:", listingId);
-        }
+          .eq("id", metadata.listing_id);
+        console.log("Listing payment marked as paid:", metadata.listing_id);
+      } else if (metadata?.type === "venue_registration") {
+        // Venue registration payments handled via callback
+        console.log("Venue registration payment received:", metadata.venue_id);
       } else {
-        // Update the ticket sale record
         const { data: saleData, error: updateError } = await supabase
           .from("ticket_sales")
           .update({
             payment_status: "paid",
             paymongo_payment_id: paymentId,
-            qr_code: `QR-${checkoutSessionId.substring(0, 8).toUpperCase()}`,
+            qr_code: `QR-${(checkoutSessionId as string).substring(0, 8).toUpperCase()}`,
           })
           .eq("paymongo_checkout_session_id", checkoutSessionId)
           .select()
@@ -78,25 +194,20 @@ serve(async (req) => {
 
         if (updateError) {
           console.error("Failed to update ticket sale:", updateError);
-        } else {
-          console.log("Updated ticket sale:", saleData);
+        } else if (saleData) {
+          const { data: ticketData } = await supabase
+            .from("tickets")
+            .select("quantity_sold")
+            .eq("id", saleData.ticket_id)
+            .single();
 
-          if (saleData) {
-            const { data: ticketData } = await supabase
+          if (ticketData) {
+            await supabase
               .from("tickets")
-              .select("quantity_sold")
-              .eq("id", saleData.ticket_id)
-              .single();
-
-            if (ticketData) {
-              await supabase
-                .from("tickets")
-                .update({ quantity_sold: ticketData.quantity_sold + saleData.quantity })
-                .eq("id", saleData.ticket_id);
-            }
-
-            console.log("Updated ticket quantity sold");
+              .update({ quantity_sold: ticketData.quantity_sold + saleData.quantity })
+              .eq("id", saleData.ticket_id);
           }
+          console.log("Updated ticket quantity sold");
         }
       }
     }
