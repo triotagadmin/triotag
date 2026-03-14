@@ -1273,7 +1273,7 @@ const ActivateListing = () => {
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Branches</span>
-                        <span className="font-medium">{branchesWithMaterials.length} location(s)</span>
+                        <span className="font-medium">{branchConfigs.filter(b => b.materials.some(m => m.quantity > 0)).length} location(s)</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Status</span>
