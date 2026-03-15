@@ -11,43 +11,24 @@ async function verifyWebhookSignature(body: string, signatureHeader: string | nu
     console.warn("Missing signature header or webhook secret");
     return false;
   }
-
-  // PayMongo signature format: t=<timestamp>,te=<test_signature>,li=<live_signature>
   const parts: Record<string, string> = {};
   for (const part of signatureHeader.split(",")) {
     const [key, value] = part.split("=", 2);
     if (key && value) parts[key.trim()] = value.trim();
   }
-
   const timestamp = parts["t"];
   const testSig = parts["te"];
   const liveSig = parts["li"];
+  if (!timestamp) { console.error("No timestamp in signature header"); return false; }
 
-  if (!timestamp) {
-    console.error("No timestamp in signature header");
-    return false;
-  }
-
-  // Construct the signed payload: timestamp + "." + raw body
   const signedPayload = `${timestamp}.${body}`;
   const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
+  const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(signedPayload));
-  const computedSig = Array.from(new Uint8Array(signature))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const computedSig = Array.from(new Uint8Array(signature)).map((b) => b.toString(16).padStart(2, "0")).join("");
 
-  // Check against both live and test signatures
   const isValid = computedSig === liveSig || computedSig === testSig;
-  if (!isValid) {
-    console.error("Signature mismatch. Computed:", computedSig, "Live:", liveSig, "Test:", testSig);
-  }
+  if (!isValid) console.error("Signature mismatch. Computed:", computedSig, "Live:", liveSig, "Test:", testSig);
   return isValid;
 }
 
@@ -67,14 +48,12 @@ serve(async (req) => {
 
     console.log("Webhook received, event signature present:", !!signatureHeader);
 
-    // Verify webhook signature
     if (webhookSecret) {
       const isValid = await verifyWebhookSignature(body, signatureHeader, webhookSecret);
       if (!isValid) {
         console.error("Invalid webhook signature — rejecting request");
         return new Response(JSON.stringify({ error: "Invalid signature" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       console.log("Webhook signature verified successfully");
@@ -88,6 +67,55 @@ serve(async (req) => {
 
     console.log("Event type:", eventType);
 
+    // Helper to handle activation payment updates
+    async function handleActivationPayment(metadata: Record<string, string>, paymentId: string | null, status: "paid" | "failed") {
+      const activationId = metadata?.activation_id;
+      if (!activationId) return false;
+
+      const newStatus = status === "paid" ? "completed" : "payment_failed";
+      const { error } = await supabase
+        .from("activations")
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", activationId);
+
+      if (error) {
+        console.error(`Failed to update activation ${activationId}:`, error);
+        return false;
+      }
+
+      console.log(`Activation ${activationId} marked as ${newStatus}`);
+
+      // On successful payment, notify publisher
+      if (status === "paid") {
+        const { data: activation } = await supabase
+          .from("activations")
+          .select(`*, ad_spaces (title, publisher_id)`)
+          .eq("id", activationId)
+          .single();
+
+        if (activation?.publisher_id) {
+          const { data: pub } = await supabase
+            .from("publisher_profiles")
+            .select("user_id")
+            .eq("id", activation.publisher_id)
+            .single();
+
+          if (pub?.user_id) {
+            await supabase.from("notifications").insert({
+              user_id: pub.user_id,
+              title: "Booking Confirmed & Paid!",
+              message: `Payment received for "${activation.ad_spaces?.title}". Booking confirmed from ${activation.start_date} to ${activation.end_date}.`,
+              type: "payment_received",
+            });
+          }
+        }
+      }
+      return true;
+    }
+
     // ── payment.paid ──
     if (eventType === "payment.paid") {
       const paymentId = eventData?.id;
@@ -96,11 +124,10 @@ serve(async (req) => {
 
       console.log("payment.paid — paymentId:", paymentId, "metadata:", JSON.stringify(metadata));
 
-      if (metadata?.type === "listing_submission") {
-        await supabase
-          .from("listing_submissions")
-          .update({ payment_status: "paid" })
-          .eq("id", metadata.listing_id);
+      if (metadata?.type === "activation_payment") {
+        await handleActivationPayment(metadata, paymentId, "paid");
+      } else if (metadata?.type === "listing_submission") {
+        await supabase.from("listing_submissions").update({ payment_status: "paid" }).eq("id", metadata.listing_id);
         console.log("Listing submission marked paid:", metadata.listing_id);
       } else if (checkoutSessionId) {
         const { data: saleData } = await supabase
@@ -115,17 +142,9 @@ serve(async (req) => {
           .single();
 
         if (saleData) {
-          const { data: ticketData } = await supabase
-            .from("tickets")
-            .select("quantity_sold")
-            .eq("id", saleData.ticket_id)
-            .single();
-
+          const { data: ticketData } = await supabase.from("tickets").select("quantity_sold").eq("id", saleData.ticket_id).single();
           if (ticketData) {
-            await supabase
-              .from("tickets")
-              .update({ quantity_sold: ticketData.quantity_sold + saleData.quantity })
-              .eq("id", saleData.ticket_id);
+            await supabase.from("tickets").update({ quantity_sold: ticketData.quantity_sold + saleData.quantity }).eq("id", saleData.ticket_id);
           }
           console.log("Ticket sale updated via payment.paid");
         }
@@ -135,23 +154,17 @@ serve(async (req) => {
     // ── payment.failed ──
     if (eventType === "payment.failed") {
       const paymentId = eventData?.id;
-      const checkoutSessionId = eventData?.attributes?.source?.id;
       const metadata = eventData?.attributes?.metadata;
+      const checkoutSessionId = eventData?.attributes?.source?.id;
 
       console.log("payment.failed — paymentId:", paymentId);
 
-      if (metadata?.type === "listing_submission") {
-        await supabase
-          .from("listing_submissions")
-          .update({ payment_status: "failed" })
-          .eq("id", metadata.listing_id);
-        console.log("Listing submission marked failed:", metadata.listing_id);
+      if (metadata?.type === "activation_payment") {
+        await handleActivationPayment(metadata, paymentId, "failed");
+      } else if (metadata?.type === "listing_submission") {
+        await supabase.from("listing_submissions").update({ payment_status: "failed" }).eq("id", metadata.listing_id);
       } else if (checkoutSessionId) {
-        await supabase
-          .from("ticket_sales")
-          .update({ payment_status: "failed" })
-          .eq("paymongo_checkout_session_id", checkoutSessionId);
-        console.log("Ticket sale marked failed for session:", checkoutSessionId);
+        await supabase.from("ticket_sales").update({ payment_status: "failed" }).eq("paymongo_checkout_session_id", checkoutSessionId);
       }
     }
 
@@ -164,21 +177,16 @@ serve(async (req) => {
       console.log("checkout_session.payment.paid — session:", checkoutSessionId);
 
       if (!checkoutSessionId) {
-        console.error("No checkout session ID in webhook");
         return new Response(JSON.stringify({ received: true }), {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      if (metadata?.type === "listing_submission") {
-        await supabase
-          .from("listing_submissions")
-          .update({ payment_status: "paid" })
-          .eq("id", metadata.listing_id);
-        console.log("Listing payment marked as paid:", metadata.listing_id);
+      if (metadata?.type === "activation_payment") {
+        await handleActivationPayment(metadata, paymentId, "paid");
+      } else if (metadata?.type === "listing_submission") {
+        await supabase.from("listing_submissions").update({ payment_status: "paid" }).eq("id", metadata.listing_id);
       } else if (metadata?.type === "venue_registration") {
-        // Venue registration payments handled via callback
         console.log("Venue registration payment received:", metadata.venue_id);
       } else {
         const { data: saleData, error: updateError } = await supabase
@@ -195,35 +203,21 @@ serve(async (req) => {
         if (updateError) {
           console.error("Failed to update ticket sale:", updateError);
         } else if (saleData) {
-          const { data: ticketData } = await supabase
-            .from("tickets")
-            .select("quantity_sold")
-            .eq("id", saleData.ticket_id)
-            .single();
-
+          const { data: ticketData } = await supabase.from("tickets").select("quantity_sold").eq("id", saleData.ticket_id).single();
           if (ticketData) {
-            await supabase
-              .from("tickets")
-              .update({ quantity_sold: ticketData.quantity_sold + saleData.quantity })
-              .eq("id", saleData.ticket_id);
+            await supabase.from("tickets").update({ quantity_sold: ticketData.quantity_sold + saleData.quantity }).eq("id", saleData.ticket_id);
           }
-          console.log("Updated ticket quantity sold");
         }
       }
     }
 
     return new Response(JSON.stringify({ received: true }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
     console.error("Webhook error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
