@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -8,8 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Upload, X, Image as ImageIcon, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import * as tf from "@tensorflow/tfjs";
-import * as nsfwjs from "nsfwjs";
 
 const BRAND_CATEGORIES = [
   "Food & Beverage",
@@ -53,46 +51,29 @@ interface AdMockupPreviewProps {
   }) => void;
 }
 
-// Cached NSFW model reference
-let nsfwModel: nsfwjs.NSFWJS | null = null;
-
-const loadNsfwModel = async (): Promise<nsfwjs.NSFWJS> => {
-  if (nsfwModel) return nsfwModel;
-  tf.enableProdMode();
-  nsfwModel = await nsfwjs.load();
-  return nsfwModel;
-};
-
+// Server-side NSFW moderation via edge function
 const moderateImage = async (file: File): Promise<{ safe: boolean; reason?: string }> => {
-  const model = await loadNsfwModel();
-  const img = document.createElement("img");
-  const url = URL.createObjectURL(file);
-  
-  return new Promise((resolve) => {
-    img.onload = async () => {
-      try {
-        const predictions = await model.classify(img);
-        URL.revokeObjectURL(url);
-        
-        const porn = predictions.find(p => p.className === "Porn")?.probability || 0;
-        const hentai = predictions.find(p => p.className === "Hentai")?.probability || 0;
-        
-        if (porn > 0.7 || hentai > 0.7) {
-          resolve({ safe: false, reason: "This image violates our advertising content policy and cannot be uploaded." });
-        } else {
-          resolve({ safe: true });
-        }
-      } catch {
-        URL.revokeObjectURL(url);
-        resolve({ safe: true }); // Allow on model error
-      }
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve({ safe: true });
-    };
-    img.src = url;
-  });
+  try {
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve((reader.result as string).split(",")[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const { data, error } = await supabase.functions.invoke("moderate-image", {
+      body: { image: base64, fileName: file.name },
+    });
+
+    if (error) {
+      console.warn("Moderation service unavailable, allowing upload:", error);
+      return { safe: true };
+    }
+
+    return { safe: data.safe, reason: data.reason };
+  } catch {
+    return { safe: true }; // Allow on service error
+  }
 };
 
 export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
@@ -102,12 +83,6 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [modelLoading, setModelLoading] = useState(true);
-
-  // Preload NSFW model on mount
-  useEffect(() => {
-    loadNsfwModel().then(() => setModelLoading(false)).catch(() => setModelLoading(false));
-  }, []);
 
   // Campaign details state
   const [campaignName, setCampaignName] = useState("");
