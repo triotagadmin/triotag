@@ -13,6 +13,7 @@ interface PaymentGatewayProps {
   listingTitle: string;
   onPaymentSuccess: () => void;
   onBack: () => void;
+  onCancelBooking?: () => void;
   disabled?: boolean;
 }
 
