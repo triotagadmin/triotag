@@ -156,6 +156,12 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
           throw new Error(`File too large: ${file.name}. Maximum 10MB per file.`);
         }
 
+        // NSFW moderation check
+        const moderation = await moderateImage(file);
+        if (!moderation.safe) {
+          throw new Error(moderation.reason || "This image violates our advertising content policy and cannot be uploaded.");
+        }
+
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
         const filePath = `${session.user.id}/activations/${fileName}`;
