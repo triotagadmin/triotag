@@ -117,7 +117,7 @@ const PrivacyPolicy = () => {
             <p className="text-muted-foreground">
               Email:{" "}
               <a href="mailto:tinystickyads@gmail.com" className="text-primary hover:underline">
-                contact@tinysticky.ads
+                tinystickyads@gmail.com
               </a>
             </p>
           </section>
