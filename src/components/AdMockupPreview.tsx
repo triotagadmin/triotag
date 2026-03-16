@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Image as ImageIcon, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import * as tf from "@tensorflow/tfjs";
+import * as nsfwjs from "nsfwjs";
 
 const BRAND_CATEGORIES = [
   "Food & Beverage",
@@ -51,6 +53,48 @@ interface AdMockupPreviewProps {
   }) => void;
 }
 
+// Cached NSFW model reference
+let nsfwModel: nsfwjs.NSFWJS | null = null;
+
+const loadNsfwModel = async (): Promise<nsfwjs.NSFWJS> => {
+  if (nsfwModel) return nsfwModel;
+  tf.enableProdMode();
+  nsfwModel = await nsfwjs.load();
+  return nsfwModel;
+};
+
+const moderateImage = async (file: File): Promise<{ safe: boolean; reason?: string }> => {
+  const model = await loadNsfwModel();
+  const img = document.createElement("img");
+  const url = URL.createObjectURL(file);
+  
+  return new Promise((resolve) => {
+    img.onload = async () => {
+      try {
+        const predictions = await model.classify(img);
+        URL.revokeObjectURL(url);
+        
+        const porn = predictions.find(p => p.className === "Porn")?.probability || 0;
+        const hentai = predictions.find(p => p.className === "Hentai")?.probability || 0;
+        
+        if (porn > 0.7 || hentai > 0.7) {
+          resolve({ safe: false, reason: "This image violates our advertising content policy and cannot be uploaded." });
+        } else {
+          resolve({ safe: true });
+        }
+      } catch {
+        URL.revokeObjectURL(url);
+        resolve({ safe: true }); // Allow on model error
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve({ safe: true });
+    };
+    img.src = url;
+  });
+};
+
 export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +102,12 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [modelLoading, setModelLoading] = useState(true);
+
+  // Preload NSFW model on mount
+  useEffect(() => {
+    loadNsfwModel().then(() => setModelLoading(false)).catch(() => setModelLoading(false));
+  }, []);
 
   // Campaign details state
   const [campaignName, setCampaignName] = useState("");
@@ -104,6 +154,12 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
         // Validate file size (max 10MB)
         if (file.size > 10 * 1024 * 1024) {
           throw new Error(`File too large: ${file.name}. Maximum 10MB per file.`);
+        }
+
+        // NSFW moderation check
+        const moderation = await moderateImage(file);
+        if (!moderation.safe) {
+          throw new Error(moderation.reason || "This image violates our advertising content policy and cannot be uploaded.");
         }
 
         const fileExt = file.name.split('.').pop();
