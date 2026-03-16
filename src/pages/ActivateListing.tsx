@@ -1415,9 +1415,19 @@ const ActivateListing = () => {
               listingTitle={listing?.title || "Ad Space"}
               onPaymentSuccess={handlePayNow}
               onBack={() => setCurrentStep("print-order")}
-              onCancelBooking={() => {
+              onCancelBooking={async () => {
+                // Persist cancellation to database
+                if (activationId) {
+                  await supabase
+                    .from("activations")
+                    .update({ status: "design" as any, updated_at: new Date().toISOString() })
+                    .eq("id", activationId);
+                }
                 setCurrentStep("design");
                 setActivationStatus("design");
+                setDesignApproved(false);
+                setPrintOrderComplete(false);
+                setOrderId("");
                 toast({ title: "Booking Cancelled", description: "You can start a new booking from the beginning." });
               }}
               disabled={activationStatus === "completed"} />
