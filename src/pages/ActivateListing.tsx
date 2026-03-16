@@ -1415,6 +1415,11 @@ const ActivateListing = () => {
               listingTitle={listing?.title || "Ad Space"}
               onPaymentSuccess={handlePayNow}
               onBack={() => setCurrentStep("print-order")}
+              onCancelBooking={() => {
+                setCurrentStep("design");
+                setActivationStatus("design");
+                toast({ title: "Booking Cancelled", description: "You can start a new booking from the beginning." });
+              }}
               disabled={activationStatus === "completed"} />
 
               </>
