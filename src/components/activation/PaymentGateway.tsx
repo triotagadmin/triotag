@@ -410,10 +410,17 @@ export const PaymentGateway = ({
         </div>
       </div>
 
-      {/* Back Button */}
-      <Button variant="outline" onClick={onBack} disabled={isProcessing} className="w-full">
-        Back to Print Order
-      </Button>
+      {/* Navigation Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Button variant="outline" onClick={onBack} disabled={isProcessing} className="flex-1">
+          Back to Print Order
+        </Button>
+        {onCancelBooking && (
+          <Button variant="destructive" onClick={onCancelBooking} disabled={isProcessing} className="flex-1">
+            Cancel & Restart Booking
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
