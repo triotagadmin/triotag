@@ -1160,7 +1160,10 @@ const ActivateListing = () => {
                 adUnitType={approvedAdUnitType || activationType}
                 quantity={quantity}
                 onEstimatedPayoutChange={handleEstimatedPayoutChange}
-                currency={listing.specifications?.lease_currency || listing.specifications?.ad_units?.[0]?.currency || listing.specifications?.currency || "USD"} />
+                currency={listing.specifications?.lease_currency || listing.specifications?.ad_units?.[0]?.currency || listing.specifications?.currency || "USD"}
+                branches={allBranchOptions}
+                selectedBranchIds={bookingSelectedBranchIds}
+                onSelectedBranchIdsChange={setBookingSelectedBranchIds} />
 
 
                     {/* Quantity Selection */}
