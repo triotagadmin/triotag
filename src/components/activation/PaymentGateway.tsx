@@ -211,14 +211,24 @@ export const PaymentGateway = ({
           // Try advertiser_print_orders first (used by activation print order wizard)
           const { data: advPrintOrder } = await supabase
             .from("advertiser_print_orders")
-            .select("total_cost")
+            .select("total_cost, materials")
             .eq("id", activation.print_order_id)
             .single();
-          if (advPrintOrder?.total_cost) {
-            setMaterialCost(advPrintOrder.total_cost);
-            amount += advPrintOrder.total_cost;
+
+          let matCost = advPrintOrder?.total_cost || 0;
+
+          // Fallback: calculate from materials JSON if total_cost wasn't saved
+          if (matCost <= 0 && advPrintOrder?.materials) {
+            const mats = advPrintOrder.materials as Record<string, unknown>;
+            const branches = (mats?.branches || []) as Array<{ materials: { materialType: string; quantity: number }[] }>;
+            matCost = calculateTotalOrderCost(branches);
+          }
+
+          if (matCost > 0) {
+            setMaterialCost(matCost);
+            amount += matCost;
           } else {
-            // Fallback to print_orders table
+            // Final fallback to print_orders table
             const { data: printOrder } = await supabase
               .from("print_orders")
               .select("total_price")
