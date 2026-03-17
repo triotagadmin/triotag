@@ -752,77 +752,75 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
 
                 {expanded && fLocs.length > 0 && (
                   <CardContent className="pt-0">
-                    {(
-                      <div className="border-t border-border/50 pt-3 space-y-2">
-                        {/* Select All */}
-                        <div className="flex items-center gap-3 px-3 py-2 rounded-[14px] bg-muted/30">
-                          <Checkbox
-                            checked={allSelected}
-                            onCheckedChange={() => toggleSelectAllForFranchise(franchise)}
-                            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                          />
-                          <span className="text-sm font-medium text-muted-foreground">Select All Locations</span>
-                        </div>
+                    <div className="border-t border-border/50 pt-3 space-y-2">
+                      {/* Select All */}
+                      <div className="flex items-center gap-3 px-3 py-2 rounded-[14px] bg-muted/30">
+                        <Checkbox
+                          checked={allSelected}
+                          onCheckedChange={() => toggleSelectAllForFranchise(franchise)}
+                          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        />
+                        <span className="text-sm font-medium text-muted-foreground">Select All Locations</span>
+                      </div>
 
-                        {fLocs.map(loc => {
-                          const isSelected = selectedIds.has(loc.id);
-                          return (
-                            <div
-                              key={loc.id}
-                              className={`flex items-start gap-3 px-3 py-3 rounded-[14px] transition-all duration-200 hover:translate-y-[-1px] hover:shadow-md cursor-pointer group
-                                ${isSelected
-                                  ? "border border-primary/40 bg-primary/5 shadow-[0_0_12px_hsl(var(--primary)/0.15)]"
-                                  : "border border-border/50 bg-card/50 hover:border-primary/20 hover:shadow-[0_0_8px_hsl(var(--primary)/0.1)]"
-                                }`}
-                              onClick={() => toggleSelect(loc.id)}
-                            >
-                              <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={() => toggleSelect(loc.id)}
-                                className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                              />
-                              <div className="min-w-0 flex-1 space-y-0.5">
-                                <div className="flex items-center gap-2">
-                                  <p className="font-semibold text-sm">{loc.branch_name || "Unnamed Location"}</p>
-                                  {loc.is_ad_space_listing && (
-                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/30">
-                                      Ad Space
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <MapPin className="h-3 w-3 shrink-0" />
-                                  {loc.city || loc.full_address}
-                                </p>
-                                {loc.contact_name && (
-                                  <p className="text-xs text-muted-foreground">Contact: {loc.contact_name}</p>
+                      {fLocs.map(loc => {
+                        const isSelected = selectedIds.has(loc.id);
+                        return (
+                          <div
+                            key={loc.id}
+                            className={`flex items-start gap-3 px-3 py-3 rounded-[14px] transition-all duration-200 hover:translate-y-[-1px] hover:shadow-md cursor-pointer group
+                              ${isSelected
+                                ? "border border-primary/40 bg-primary/5 shadow-[0_0_12px_hsl(var(--primary)/0.15)]"
+                                : "border border-border/50 bg-card/50 hover:border-primary/20 hover:shadow-[0_0_8px_hsl(var(--primary)/0.1)]"
+                              }`}
+                            onClick={() => toggleSelect(loc.id)}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => toggleSelect(loc.id)}
+                              className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                            />
+                            <div className="min-w-0 flex-1 space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-sm">{loc.branch_name || "Unnamed Location"}</p>
+                                {loc.is_ad_space_listing && (
+                                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/30">
+                                    Ad Space
+                                  </Badge>
                                 )}
                               </div>
-                              <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEditLocation(loc); }}>
-                                  <Edit className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={e => { e.stopPropagation(); deleteLocation(loc.id); }}>
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className={`h-7 text-[10px] px-2 shrink-0 transition-all duration-500 focus-visible:outline-none ${
-                                  loc.is_ad_space_listing
-                                    ? 'text-primary bg-primary/10 border border-primary/30 animate-glow-breathe hover:shadow-[0_0_14px_rgba(0,255,128,0.5)]'
-                                    : 'text-muted-foreground'
-                                }`}
-                                onClick={e => { e.stopPropagation(); toggleAdSpaceListing(loc.id, loc.is_ad_space_listing); }}
-                              >
-                                {loc.is_ad_space_listing ? "Listed" : "List as Ad Space"}
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <MapPin className="h-3 w-3 shrink-0" />
+                                {loc.city || loc.full_address}
+                              </p>
+                              {loc.contact_name && (
+                                <p className="text-xs text-muted-foreground">Contact: {loc.contact_name}</p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEditLocation(loc); }}>
+                                <Edit className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={e => { e.stopPropagation(); deleteLocation(loc.id); }}>
+                                <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </div>
-                          );
-                        })}
-                      </div>
-                    )
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className={`h-7 text-[10px] px-2 shrink-0 transition-all duration-500 focus-visible:outline-none ${
+                                loc.is_ad_space_listing
+                                  ? 'text-primary bg-primary/10 border border-primary/30 animate-glow-breathe hover:shadow-[0_0_14px_rgba(0,255,128,0.5)]'
+                                  : 'text-muted-foreground'
+                              }`}
+                              onClick={e => { e.stopPropagation(); toggleAdSpaceListing(loc.id, loc.is_ad_space_listing); }}
+                            >
+                              {loc.is_ad_space_listing ? "Listed" : "List as Ad Space"}
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </CardContent>
                 )}
               </Card>
