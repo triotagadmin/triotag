@@ -78,10 +78,7 @@ export const PrintOrderSummary = ({ franchiseName, branches, currency }: PrintOr
                     {branch.city}
                   </Badge>
                 </div>
-                <div className="text-right">
-                  <span className="text-sm font-semibold text-primary">
-                    {formatCurrency(branchCost, "USD")}
-                  </span>
+                <div className="text-right text-sm">
                   <PhpConversion amountUsd={branchCost} />
                 </div>
               </div>
