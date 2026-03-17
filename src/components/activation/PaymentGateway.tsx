@@ -163,6 +163,7 @@ export const PaymentGateway = ({
   onBack,
   onCancelBooking,
   disabled = false,
+  orderParams,
 }: PaymentGatewayProps) => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("card");
   const [isProcessing, setIsProcessing] = useState(false);
