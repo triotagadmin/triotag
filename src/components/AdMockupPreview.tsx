@@ -98,10 +98,10 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
     if (!files || files.length === 0) return;
 
     // Check limit
-    if (uploadedImages.length + files.length > 30) {
+    if (uploadedImages.length + files.length > 20) {
       toast({
         title: "Too many files",
-        description: "Maximum 30 photos allowed.",
+        description: "Maximum 20 photos allowed.",
         variant: "destructive",
       });
       return;
@@ -178,7 +178,17 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
     }
   };
 
-  const removeImage = (url: string) => {
+  const removeImage = async (url: string) => {
+    // Remove from storage
+    try {
+      const parsedUrl = new URL(url);
+      const pathMatch = parsedUrl.pathname.match(/\/object\/public\/ad-space-media\/(.+)/);
+      if (pathMatch) {
+        await supabase.storage.from('ad-space-media').remove([decodeURIComponent(pathMatch[1])]);
+      }
+    } catch (e) {
+      console.warn("Could not delete file from storage:", e);
+    }
     setUploadedImages(prev => prev.filter(img => img !== url));
     setIsConfirmed(false);
   };
@@ -315,7 +325,7 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
         <div className="space-y-2">
           <Label>Upload Your Creative *</Label>
           <p className="text-sm text-muted-foreground">
-            {uploadedImages.length}/30 photos uploaded (minimum 1 required)
+            {uploadedImages.length}/20 photos uploaded (minimum 1 required)
           </p>
           <div 
             className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
@@ -328,12 +338,12 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
               multiple
               onChange={handleFileChange}
               className="hidden"
-              disabled={uploading || uploadedImages.length >= 30}
+              disabled={uploading || uploadedImages.length >= 20}
             />
             <div className="space-y-2">
               <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                {uploading ? "Uploading..." : "Click to upload PNG or JPG (max 10MB each, up to 30 photos)"}
+                {uploading ? "Uploading..." : "Click to upload PNG or JPG (max 10MB each, up to 20 photos)"}
               </p>
             </div>
           </div>

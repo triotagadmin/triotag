@@ -1416,18 +1416,35 @@ const ActivateListing = () => {
               onPaymentSuccess={handlePayNow}
               onBack={() => setCurrentStep("print-order")}
               onCancelBooking={async () => {
-                // Persist cancellation to database
+                // Persist cancellation to database and clear design
                 if (activationId) {
                   await supabase
                     .from("activations")
-                    .update({ status: "design" as any, updated_at: new Date().toISOString() })
+                    .update({ status: "design" as any, ad_design_url: null, updated_at: new Date().toISOString() })
                     .eq("id", activationId);
+                }
+                // Delete uploaded artwork from storage if present
+                if (artworkUrl) {
+                  try {
+                    const url = new URL(artworkUrl);
+                    const pathMatch = url.pathname.match(/\/object\/public\/ad-space-media\/(.+)/);
+                    if (pathMatch) {
+                      await supabase.storage.from('ad-space-media').remove([decodeURIComponent(pathMatch[1])]);
+                    }
+                  } catch (e) {
+                    console.warn("Could not delete artwork file:", e);
+                  }
                 }
                 setCurrentStep("design");
                 setActivationStatus("design");
                 setDesignApproved(false);
+                setArtworkUrl("");
+                setSelectedProduct("");
+                setApprovedAdUnitType("");
                 setPrintOrderComplete(false);
                 setOrderId("");
+                setStartDate(undefined);
+                setEndDate(undefined);
                 toast({ title: "Booking Cancelled", description: "You can start a new booking from the beginning." });
               }}
               disabled={activationStatus === "completed"} />
