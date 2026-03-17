@@ -219,6 +219,8 @@ serve(async (req) => {
 
       if (metadata?.type === "activation_payment") {
         await handleActivationPayment(metadata, paymentId, "failed");
+      } else if (metadata?.type === "print_order") {
+        await handlePrintOrderPayment(metadata, "failed");
       } else if (metadata?.type === "listing_submission") {
         await supabase.from("listing_submissions").update({ payment_status: "failed" }).eq("id", metadata.listing_id);
       } else if (checkoutSessionId) {
