@@ -34,7 +34,7 @@ export const FranchiseSelector = ({ userId, selectedFranchiseId, onSelect }: Fra
         .from("ad_spaces")
         .select("id, title, location, specifications")
         .eq("approval_status", "approved")
-        .or(`advertiser_id.eq.${userId},leased_advertiser_ids.cs.{${userId}}`);
+        .eq("advertiser_id", userId);
 
       const allItems: FranchiseOption[] = [];
 
