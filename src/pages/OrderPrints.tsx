@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle, Send } from "lucide-react";
+import { Loader2, CheckCircle, Send, CreditCard, AlertCircle } from "lucide-react";
 import { FranchiseSelector } from "@/components/print-order/FranchiseSelector";
 import { BranchMaterialConfigurator, type BranchMaterialConfig } from "@/components/print-order/BranchMaterialConfigurator";
 import { PrintOrderSummary } from "@/components/print-order/PrintOrderSummary";
 import { BRAND_NAME } from "@/lib/brand";
+import { calculateTotalOrderCost, formatCurrency } from "@/lib/materialPricing";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const AD_UNIT_MATERIAL_LABELS: Record<string, string> = {
   vinyl_sticker: "Vinyl Sticker",
@@ -38,6 +40,20 @@ const OrderPrints = () => {
   const [submitting, setSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+
+  // Check for returning from payment
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    if (sessionId) {
+      // User returned from PayMongo, show success
+      setOrderComplete(true);
+      setOrderId(sessionId.slice(0, 8));
+      // Clean the URL
+      window.history.replaceState({}, "", "/order-prints");
+    }
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -69,7 +85,6 @@ const OrderPrints = () => {
     let name = "";
 
     if (isListing) {
-      // Load listing details for materials/currency
       const { data: listing } = await supabase
         .from("ad_spaces")
         .select("title, location, specifications")
@@ -84,14 +99,12 @@ const OrderPrints = () => {
         materials = matTypes.map((t) => ({ type: t, label: AD_UNIT_MATERIAL_LABELS[t] || t }));
       }
 
-      // Load franchise branches (publisher-managed)
       const { data: fBranches } = await supabase
         .from("franchise_branches")
         .select("id, place_name, full_address")
         .eq("franchise_id", realId)
         .order("created_at");
 
-      // Also load advertiser branches that are listing locations (visible to all advertisers)
       const { data: advBranches } = await supabase
         .from("advertiser_branches")
         .select("id, branch_name, full_address, city")
@@ -99,7 +112,6 @@ const OrderPrints = () => {
         .eq("is_ad_space_listing", true)
         .order("created_at");
 
-      // Load existing branch_materials
       const { data: existingMats } = await supabase
         .from("branch_materials")
         .select("branch_id, material_type, quantity")
@@ -111,11 +123,9 @@ const OrderPrints = () => {
         matMap.get(m.branch_id)!.set(m.material_type, m.quantity);
       });
 
-      // Merge both branch sources, deduplicating by ID
       const seenIds = new Set<string>();
       const allBranches: { id: string; name: string; address: string; city: string }[] = [];
 
-      // Include head office / main branch as the first entry
       if (listing) {
         const headAddress = listing.location || "";
         const headParts = headAddress.split(",").map((s: string) => s.trim());
@@ -180,7 +190,6 @@ const OrderPrints = () => {
         };
       });
     } else if (isAdv) {
-      // Load advertiser franchise
       const { data: franchise } = await supabase
         .from("advertiser_franchises")
         .select("franchise_name")
@@ -195,7 +204,6 @@ const OrderPrints = () => {
         .eq("advertiser_franchise_id", realId)
         .order("created_at");
 
-      // Try to get materials from linked listings
       const listingIds = [...new Set((advBranches || []).map((b: any) => b.listing_id).filter(Boolean))];
       if (listingIds.length > 0) {
         const { data: listings } = await supabase
@@ -214,7 +222,6 @@ const OrderPrints = () => {
         materials = Array.from(matSet).map((t) => ({ type: t, label: AD_UNIT_MATERIAL_LABELS[t] || t }));
       }
 
-      // Default materials if none found
       if (materials.length === 0) {
         materials = [
           { type: "vinyl_sticker", label: "Vinyl Sticker" },
@@ -271,11 +278,29 @@ const OrderPrints = () => {
     }
 
     // Validate shipping addresses
+    const addressErrors: string[] = [];
     for (const b of branchesWithMaterials) {
-      if (!b.shippingAddress.recipient.trim() || !b.shippingAddress.street.trim() || !b.shippingAddress.city.trim()) {
-        toast({ title: `Complete shipping address for ${b.branchName}`, variant: "destructive" });
-        return;
+      if (!b.shippingAddress.street.trim()) {
+        addressErrors.push(`"${b.branchName}" is missing a shipping address`);
+      } else if (!b.shippingAddress.city.trim()) {
+        addressErrors.push(`"${b.branchName}" is missing a city`);
       }
+    }
+
+    if (addressErrors.length > 0) {
+      toast({
+        title: "Complete shipping address",
+        description: addressErrors[0],
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const totalCost = calculateTotalOrderCost(branchesWithMaterials);
+
+    if (totalCost <= 0) {
+      toast({ title: "Order total must be greater than 0", variant: "destructive" });
+      return;
     }
 
     setSubmitting(true);
@@ -296,9 +321,10 @@ const OrderPrints = () => {
         })),
         currency,
         submittedBy: userId,
+        totalCost,
       };
 
-      // Insert into advertiser_print_orders
+      // Insert into advertiser_print_orders with unpaid status
       const { data: order, error } = await supabase
         .from("advertiser_print_orders")
         .insert({
@@ -306,27 +332,43 @@ const OrderPrints = () => {
           branch_ids: branchesWithMaterials.map((b) => b.branchId),
           materials: payload as any,
           notes: JSON.stringify({ franchise_name: franchiseName, currency }),
-          status: "pending",
+          status: "awaiting_payment",
+          payment_status: "unpaid",
+          total_cost: totalCost,
         })
         .select("id")
         .single();
 
       if (error) throw error;
 
-      // Send email notification
-      try {
-        await supabase.functions.invoke("submit-print-order-email", {
-          body: { ...payload, orderId: order.id },
-        });
-      } catch (emailErr) {
-        console.error("Email notification failed:", emailErr);
-      }
+      // Create PayMongo checkout session
+      setPaymentProcessing(true);
+      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
+        "print-order-checkout",
+        {
+          body: {
+            orderId: order.id,
+            totalCost,
+            currency,
+            franchiseName,
+            userId,
+            successUrl: `${window.location.origin}/order-prints`,
+            cancelUrl: `${window.location.origin}/order-prints`,
+          },
+        }
+      );
 
-      setOrderId(order.id);
-      setOrderComplete(true);
-      toast({ title: "Print order submitted!", description: "Your order is pending admin review." });
+      if (checkoutError) throw checkoutError;
+
+      if (checkoutData?.checkoutUrl) {
+        // Redirect to PayMongo checkout
+        window.location.href = checkoutData.checkoutUrl;
+      } else {
+        throw new Error("Failed to create payment session");
+      }
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
+      setPaymentProcessing(false);
     } finally {
       setSubmitting(false);
     }
@@ -367,18 +409,18 @@ const OrderPrints = () => {
           <Card className="max-w-lg mx-auto text-center">
             <CardHeader>
               <CheckCircle className="h-16 w-16 text-primary mx-auto mb-4" />
-              <CardTitle className="text-2xl">Print Order Submitted!</CardTitle>
-              <CardDescription>Your order is now pending admin approval.</CardDescription>
+              <CardTitle className="text-2xl">Payment Confirmed — Order Submitted!</CardTitle>
+              <CardDescription>Your print order has been submitted and payment confirmed. An admin will review it shortly.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 bg-muted/50 rounded-[14px]">
-                <p className="text-sm text-muted-foreground">Order ID</p>
+                <p className="text-sm text-muted-foreground">Order Reference</p>
                 <p className="font-mono font-bold">{orderId.slice(0, 8).toUpperCase()}</p>
               </div>
               <div className="p-4 bg-primary/5 border border-primary/20 rounded-[14px]">
                 <p className="text-sm font-medium mb-2">Status Flow</p>
                 <div className="flex flex-wrap gap-1 justify-center text-xs">
-                  <Badge variant="default">Pending</Badge>
+                  <Badge variant="default">Paid</Badge>
                   <span className="text-muted-foreground">→</span>
                   <Badge variant="secondary">Approved</Badge>
                   <span className="text-muted-foreground">→</span>
@@ -405,6 +447,7 @@ const OrderPrints = () => {
   }
 
   const branchesWithMaterials = branches.filter((b) => b.materials.some((m) => m.quantity > 0));
+  const totalCost = calculateTotalOrderCost(branchesWithMaterials);
 
   return (
     <div className="min-h-screen bg-background">
@@ -447,7 +490,7 @@ const OrderPrints = () => {
                     />
                   </div>
 
-                  {/* Section 3: Order Summary */}
+                  {/* Section 3: Order Summary with Real-Time Pricing */}
                   {branchesWithMaterials.length > 0 && (
                     <>
                       <PrintOrderSummary
@@ -456,21 +499,31 @@ const OrderPrints = () => {
                         currency={currency}
                       />
 
+                      {/* Payment Info */}
+                      <Alert className="border-primary/30">
+                        <CreditCard className="h-4 w-4" />
+                        <AlertDescription>
+                          Clicking "Pay & Submit" will redirect you to our secure payment gateway.
+                          Your order will be submitted after successful payment of{" "}
+                          <strong className="text-primary">{formatCurrency(totalCost, currency)}</strong>.
+                        </AlertDescription>
+                      </Alert>
+
                       <Button
                         className="w-full"
                         size="lg"
                         onClick={handleSubmit}
-                        disabled={submitting}
+                        disabled={submitting || paymentProcessing}
                       >
-                        {submitting ? (
+                        {submitting || paymentProcessing ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Submitting...
+                            {paymentProcessing ? "Redirecting to payment..." : "Processing..."}
                           </>
                         ) : (
                           <>
-                            <Send className="h-4 w-4 mr-2" />
-                            Submit Print Order
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Pay & Submit — {formatCurrency(totalCost, currency)}
                           </>
                         )}
                       </Button>
