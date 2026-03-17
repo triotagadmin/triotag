@@ -899,8 +899,9 @@ const ActivateListing = () => {
     || (listing?.monthly_subscription_fee && listing.monthly_subscription_fee > 0)
     || (listing?.activation_fee && listing.activation_fee > 0);
 
-  const hasValidPrice = subscriptionPrice > 0 || estimatedPublisherPayout > 0;
-  const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice && hasListingFees;
+  const hasBranchesAvailable = allBranchOptions.length > 0;
+  const hasBranchesSelected = !hasBranchesAvailable || bookingSelectedBranchIds.size > 0;
+  const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice && hasListingFees && hasBranchesSelected;
 
   // Check if waiting for admin response
   const isWaitingForApproval = ["pending_submission", "pending_approval", "under_review"].includes(activationStatus);
