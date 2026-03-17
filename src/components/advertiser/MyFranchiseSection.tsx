@@ -192,6 +192,20 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
   const [disconnectFranchise, setDisconnectFranchise] = useState<Franchise | null>(null);
 
   const [saving, setSaving] = useState(false);
+  const [currentUserPublisherId, setCurrentUserPublisherId] = useState<string | null>(null);
+
+  // Check if current user also has a publisher profile (to hide disconnect button for self)
+  useEffect(() => {
+    const fetchOwnPublisherProfile = async () => {
+      const { data } = await supabase
+        .from("publisher_profiles")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      setCurrentUserPublisherId(data?.id || null);
+    };
+    fetchOwnPublisherProfile();
+  }, [userId]);
 
   const fetchAll = useCallback(async () => {
     const [fRes, lRes, adRes] = await Promise.all([
@@ -656,7 +670,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                         ) : null;
                       })()}
                       {/* Disconnect Publisher Agent button — only for ad-space listings with active agent */}
-                      {isAdSpace && !franchise._agentDisconnected && franchise._publisherId && (
+                      {isAdSpace && !franchise._agentDisconnected && franchise._publisherId && franchise._publisherId !== currentUserPublisherId && (
                         <Button
                           size="sm"
                           variant="outline"
