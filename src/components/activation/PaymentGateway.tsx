@@ -207,14 +207,26 @@ export const PaymentGateway = ({
         setLeaseCost(amount);
 
         if (activation.print_order_id) {
-          const { data: printOrder } = await supabase
-            .from("print_orders")
-            .select("total_price")
+          // Try advertiser_print_orders first (used by activation print order wizard)
+          const { data: advPrintOrder } = await supabase
+            .from("advertiser_print_orders")
+            .select("total_cost")
             .eq("id", activation.print_order_id)
             .single();
-          if (printOrder?.total_price) {
-            setMaterialCost(printOrder.total_price);
-            amount += printOrder.total_price;
+          if (advPrintOrder?.total_cost) {
+            setMaterialCost(advPrintOrder.total_cost);
+            amount += advPrintOrder.total_cost;
+          } else {
+            // Fallback to print_orders table
+            const { data: printOrder } = await supabase
+              .from("print_orders")
+              .select("total_price")
+              .eq("id", activation.print_order_id)
+              .single();
+            if (printOrder?.total_price) {
+              setMaterialCost(printOrder.total_price);
+              amount += printOrder.total_price;
+            }
           }
         }
 
