@@ -638,22 +638,29 @@ const FranchiseEdit = () => {
                   <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={4} className="rounded-[14px]" required placeholder="Describe your Brand" />
                 </div>
 
-                {/* Head Office Address - visible to publisher/advertiser/admin on edit page */}
+                {/* Head Office Address - Location Picker Map */}
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Head Office / Primary Contact Address</CardTitle>
-                    <p className="text-xs text-muted-foreground">This address is private and will not be shown on public listings.</p>
+                    <p className="text-xs text-muted-foreground">This address is private and will not be shown on public listings. Search or pin your location on the map.</p>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div><Label>Street Address</Label><Input value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" /></div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div><Label>City</Label><Input value={city} onChange={e => setCity(e.target.value)} placeholder="City" /></div>
-                      <div><Label>State/Province</Label><Input value={state} onChange={e => setState(e.target.value)} placeholder="State" /></div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div><Label>Postal Code</Label><Input value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="ZIP" /></div>
-                      <div><Label>Country</Label><Input value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" /></div>
-                    </div>
+                  <CardContent>
+                    <LocationPickerMap
+                      initialLocation={headOfficeLat && headOfficeLng ? { lat: headOfficeLat, lng: headOfficeLng } : null}
+                      onConfirm={(loc: LocationData) => {
+                        setHeadOfficeLat(loc.lat);
+                        setHeadOfficeLng(loc.lng);
+                        setHeadOfficeFullAddress(loc.address);
+                        // Also parse into individual fields for backwards compatibility
+                        const parts = loc.address.split(",").map(s => s.trim());
+                        setStreet(parts[0] || "");
+                        setCity(parts.length >= 3 ? parts[parts.length - 3] : "");
+                        setState(parts.length >= 2 ? parts[parts.length - 2] : "");
+                        setCountry(parts.length >= 1 ? parts[parts.length - 1] : "");
+                        setPostalCode("");
+                      }}
+                      mapHeight="350px"
+                    />
                   </CardContent>
                 </Card>
 
