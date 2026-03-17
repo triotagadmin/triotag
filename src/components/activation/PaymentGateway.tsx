@@ -138,6 +138,7 @@ const OrderSummaryCard = ({
 };
 
 
+export const PaymentGateway = ({
   activationId,
   listingTitle,
   onPaymentSuccess,
