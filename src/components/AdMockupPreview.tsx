@@ -98,10 +98,10 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
     if (!files || files.length === 0) return;
 
     // Check limit
-    if (uploadedImages.length + files.length > 30) {
+    if (uploadedImages.length + files.length > 20) {
       toast({
         title: "Too many files",
-        description: "Maximum 30 photos allowed.",
+        description: "Maximum 20 photos allowed.",
         variant: "destructive",
       });
       return;
