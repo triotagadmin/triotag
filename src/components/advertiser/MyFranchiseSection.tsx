@@ -576,7 +576,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
             </PopoverContent>
           </Popover>
         </div>
-        <Button size="sm" onClick={openAddFranchise} className="gap-1">
+        <Button size="sm" onClick={() => navigate("/venue-registration")} className="gap-1">
           <Plus className="h-4 w-4" />
           New Franchise
         </Button>
@@ -594,7 +594,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
             <Store className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-muted-foreground mb-1">No franchises yet</p>
             <p className="text-xs text-muted-foreground mb-4">Create a franchise to start adding locations.</p>
-            <Button size="sm" onClick={openAddFranchise}><Plus className="h-4 w-4 mr-1" />Create Franchise</Button>
+            <Button size="sm" onClick={() => navigate("/venue-registration")}><Plus className="h-4 w-4 mr-1" />Create Franchise</Button>
           </CardContent>
         </Card>
       ) : (
