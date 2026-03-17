@@ -822,7 +822,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                           );
                         })}
                       </div>
-                    )}
+                    )
                   </CardContent>
                 )}
               </Card>
