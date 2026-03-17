@@ -63,6 +63,7 @@ export const PrintOrderWizard = ({
   submitting,
   onSubmit,
   onBack,
+  onCancel,
 }: PrintOrderWizardProps) => {
   const [currentStep, setCurrentStep] = useState<WizardStep>("materials");
   const [selectedBranchIds, setSelectedBranchIds] = useState<Set<string>>(new Set());
