@@ -72,7 +72,7 @@ const OrderPrints = () => {
       // Load listing details for materials/currency
       const { data: listing } = await supabase
         .from("ad_spaces")
-        .select("title, specifications")
+        .select("title, location, specifications")
         .eq("id", realId)
         .single();
 
