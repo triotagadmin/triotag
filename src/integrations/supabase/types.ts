@@ -379,7 +379,10 @@ export type Database = {
           id: string
           materials: Json
           notes: string | null
+          payment_status: string
+          paymongo_checkout_session_id: string | null
           status: string
+          total_cost: number | null
           updated_at: string
         }
         Insert: {
@@ -389,7 +392,10 @@ export type Database = {
           id?: string
           materials?: Json
           notes?: string | null
+          payment_status?: string
+          paymongo_checkout_session_id?: string | null
           status?: string
+          total_cost?: number | null
           updated_at?: string
         }
         Update: {
@@ -399,7 +405,10 @@ export type Database = {
           id?: string
           materials?: Json
           notes?: string | null
+          payment_status?: string
+          paymongo_checkout_session_id?: string | null
           status?: string
+          total_cost?: number | null
           updated_at?: string
         }
         Relationships: []
