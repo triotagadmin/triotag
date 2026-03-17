@@ -21,6 +21,7 @@ import { PrintOrderPaymentGate } from "@/components/activation/PrintOrderPayment
 import { PrintOrderWizard, type BranchOption } from "@/components/print-order/PrintOrderWizard";
 import { type BranchMaterialConfig } from "@/components/print-order/BranchMaterialConfigurator";
 import { PRINT_PRODUCTS, SHIPPING_COUNTRIES, calculateOrderTotal, getProductById } from "@/lib/printProducts";
+import { calculateTotalOrderCost } from "@/lib/materialPricing";
 import { format } from "date-fns";
 import { getCurrencySymbol, formatPrice, getCurrencyName } from "@/hooks/useCurrencyConversion";
 
@@ -1350,6 +1351,8 @@ const ActivateListing = () => {
                       submittedBy: session.user.id,
                     };
 
+                    const totalCost = calculateTotalOrderCost(selectedBranches);
+
                     const { data: order, error } = await supabase
                       .from("advertiser_print_orders")
                       .insert({
@@ -1358,6 +1361,7 @@ const ActivateListing = () => {
                         materials: payload as any,
                         notes: JSON.stringify({ franchise_name: listing?.title, currency: detectedCurrency }),
                         status: "pending",
+                        total_cost: totalCost,
                       })
                       .select("id")
                       .single();
