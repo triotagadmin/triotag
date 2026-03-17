@@ -1253,6 +1253,7 @@ const ActivateListing = () => {
                         {!endDate && <p>⚠ Please select an end date.</p>}
                         {!hasListingFees && <p>⚠ This listing has no fees configured. Contact the admin.</p>}
                         {hasListingFees && startDate && endDate && !hasValidPrice && <p>⚠ Booking price could not be calculated for the selected dates.</p>}
+                        {hasBranchesAvailable && !hasBranchesSelected && <p>⚠ Please select at least one branch location.</p>}
                       </div>
               }
                   </>
