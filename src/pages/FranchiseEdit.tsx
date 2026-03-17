@@ -244,6 +244,11 @@ const FranchiseEdit = () => {
       setPostalCode(fullAddress.postal_code || "");
       setCountry(fullAddress.country || "");
 
+      // Load lat/lng from ad_spaces columns
+      if (venue.latitude) setHeadOfficeLat(venue.latitude);
+      if (venue.longitude) setHeadOfficeLng(venue.longitude);
+      setHeadOfficeFullAddress(venue.location || "");
+
       if (specs.environment_details) {
         setEnvDetails(prev => ({ ...prev, ...specs.environment_details }));
       }
