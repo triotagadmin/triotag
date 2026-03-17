@@ -12,14 +12,13 @@ import { BranchMaterialConfigurator, type BranchMaterialConfig } from "./BranchM
 import { BranchShippingForm, type ShippingAddress } from "./BranchShippingForm";
 import { PrintOrderSummary } from "./PrintOrderSummary";
 
-type WizardStep = "branches" | "materials" | "configure" | "review" | "submit";
+type WizardStep = "materials" | "configure" | "review" | "submit";
 
 const WIZARD_STEPS: { id: WizardStep; label: string; number: number }[] = [
-  { id: "branches", label: "Select Locations", number: 1 },
-  { id: "materials", label: "Select Materials", number: 2 },
-  { id: "configure", label: "Configure Per Branch", number: 3 },
-  { id: "review", label: "Review Order", number: 4 },
-  { id: "submit", label: "Submit", number: 5 },
+  { id: "materials", label: "Select Materials", number: 1 },
+  { id: "configure", label: "Configure Per Branch", number: 2 },
+  { id: "review", label: "Review Order", number: 3 },
+  { id: "submit", label: "Submit", number: 4 },
 ];
 
 const MATERIAL_ICONS: Record<string, React.ReactNode> = {
