@@ -255,11 +255,12 @@ const ActivateListing = () => {
     setBranchesLoading(false);
   }, [id, listing]);
 
+  // Load branches as soon as listing is available (needed for both booking fee calculation and print order)
   useEffect(() => {
-    if (currentStep === "print-order" && listing && allBranchOptions.length === 0) {
+    if (listing && allBranchOptions.length === 0) {
       loadBranchesForListing();
     }
-  }, [currentStep, listing, allBranchOptions.length, loadBranchesForListing]);
+  }, [listing, allBranchOptions.length, loadBranchesForListing]);
 
 
 
