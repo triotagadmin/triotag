@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, MapPin, Package } from "lucide-react";
 import { MaterialQuantityInput } from "./MaterialQuantityInput";
-import { BranchShippingForm, type ShippingAddress } from "./BranchShippingForm";
+import type { ShippingAddress } from "./BranchShippingForm";
 
 export interface BranchMaterialConfig {
   branchId: string;
@@ -52,12 +52,6 @@ export const BranchMaterialConfigurator = ({
     );
   };
 
-  const updateBranchShipping = (branchId: string, address: ShippingAddress) => {
-    onChange(
-      branches.map((b) => (b.branchId === branchId ? { ...b, shippingAddress: address } : b))
-    );
-  };
-
   if (branches.length === 0) {
     return (
       <Card>
@@ -102,6 +96,15 @@ export const BranchMaterialConfigurator = ({
 
             {isExpanded && (
               <CardContent className="pt-0 space-y-4">
+                {/* Ship-to address (auto-bound from branch location) */}
+                <div className="rounded-lg border border-border/50 bg-muted/30 p-3">
+                  <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5">
+                    <MapPin className="h-3 w-3" />
+                    Ship to this location
+                  </p>
+                  <p className="text-sm">{branch.fullAddress}</p>
+                </div>
+
                 {/* Ad Unit Materials */}
                 <div>
                   <p className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -118,15 +121,6 @@ export const BranchMaterialConfigurator = ({
                       />
                     ))}
                   </div>
-                </div>
-
-                {/* Shipping Address */}
-                <div>
-                  <p className="text-sm font-medium mb-2">Shipping Address</p>
-                  <BranchShippingForm
-                    address={branch.shippingAddress}
-                    onChange={(addr) => updateBranchShipping(branch.branchId, addr)}
-                  />
                 </div>
               </CardContent>
             )}
