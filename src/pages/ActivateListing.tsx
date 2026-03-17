@@ -1464,6 +1464,13 @@ const ActivateListing = () => {
               listingTitle={listing?.title || "Ad Space"}
               onPaymentSuccess={handlePayNow}
               onBack={() => setCurrentStep("print-order")}
+              orderParams={{
+                locations: Math.max(selectedBranchIds.size || bookingSelectedBranchIds.size, 1),
+                weeks: startDate && endDate
+                  ? Math.max(Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7)), 1)
+                  : 1,
+                material: branchConfigs[0]?.materials?.[0]?.materialType || approvedAdUnitType || "vinyl_sticker",
+              }}
               onCancelBooking={async () => {
                 // Persist cancellation to database and clear design
                 if (activationId) {
