@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import {
   MapPin, Package, CheckCircle, ArrowRight, ArrowLeft, Send, Loader2,
-  Coffee, Layers, DoorOpen, LayoutGrid, Image, StickerIcon
+  Coffee, Layers, DoorOpen, LayoutGrid, Image, StickerIcon, XCircle
 } from "lucide-react";
 import { BranchMaterialConfigurator, type BranchMaterialConfig } from "./BranchMaterialConfigurator";
 import { BranchShippingForm, type ShippingAddress } from "./BranchShippingForm";
