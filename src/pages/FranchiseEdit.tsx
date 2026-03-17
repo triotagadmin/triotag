@@ -119,6 +119,9 @@ const FranchiseEdit = () => {
   const [state, setState] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
+  const [headOfficeLat, setHeadOfficeLat] = useState<number | null>(null);
+  const [headOfficeLng, setHeadOfficeLng] = useState<number | null>(null);
+  const [headOfficeFullAddress, setHeadOfficeFullAddress] = useState("");
   const [contactPerson, setContactPerson] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
