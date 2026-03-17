@@ -340,7 +340,7 @@ const VenueRegistration = () => {
       title: title.trim(),
       location: headOfficeAddress || null,
       description: description.trim(),
-      latitude: null as number | null, longitude: null as number | null,
+      latitude: latitude, longitude: longitude,
       specifications: {
         venue_type: actualVenueType,
         custom_venue_type: venueType === "other" ? customVenueType : null,
