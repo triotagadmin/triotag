@@ -590,22 +590,27 @@ const VenueRegistration = () => {
                   <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={4} className="rounded-[14px]" required placeholder="Describe your Brand" />
                 </div>
 
-                {/* Head Office Address */}
+                {/* Head Office Address - Location Picker */}
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Head Office / Primary Contact Address</CardTitle>
-                    <p className="text-xs text-muted-foreground">This address is private and will not be shown on public listings.</p>
+                    <CardTitle className="text-lg flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Head Office / Primary Location</CardTitle>
+                    <p className="text-xs text-muted-foreground">Search for your location or click the map to place a pin. This address is private.</p>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div><Label>Street Address</Label><Input value={street} onChange={e => setStreet(e.target.value)} placeholder="123 Main Street" /></div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div><Label>City</Label><Input value={city} onChange={e => setCity(e.target.value)} placeholder="City" /></div>
-                      <div><Label>State/Province</Label><Input value={state} onChange={e => setState(e.target.value)} placeholder="State" /></div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div><Label>Postal Code</Label><Input value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="ZIP" /></div>
-                      <div><Label>Country</Label><Input value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" /></div>
-                    </div>
+                  <CardContent>
+                    <LocationPickerMap
+                      initialLocation={latitude && longitude ? { lat: latitude, lng: longitude } : null}
+                      onConfirm={(loc: LocationData) => {
+                        setLatitude(loc.lat);
+                        setLongitude(loc.lng);
+                        // Parse address parts from the full address string
+                        const parts = loc.address.split(",").map(s => s.trim());
+                        if (parts.length >= 1) setStreet(parts[0]);
+                        if (parts.length >= 2) setCity(parts[1]);
+                        if (parts.length >= 3) setState(parts[2]);
+                        if (parts.length >= 4) setPostalCode(parts[3]);
+                        if (parts.length >= 5) setCountry(parts[parts.length - 1]);
+                      }}
+                    />
                   </CardContent>
                 </Card>
 
