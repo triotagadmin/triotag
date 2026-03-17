@@ -59,32 +59,18 @@ export const FranchiseSelector = ({ userId, selectedFranchiseId, onSelect }: Fra
         const listingIds = adSpaces.map(a => a.id);
         let branchCounts = new Map<string, number>();
         if (listingIds.length > 0) {
-          // Count from franchise_branches
+          // get_listing_branch_counts already excludes primary address and filters is_ad_space_listing
           const { data: counts } = await supabase.rpc("get_listing_branch_counts", { _listing_ids: listingIds });
-          counts?.forEach((c: any) => branchCounts.set(c.listing_id, c.branch_count));
-
-          // Also count from advertiser_branches linked to these listings
-          const { data: advBranchCounts } = await supabase
-            .from("advertiser_branches")
-            .select("listing_id")
-            .in("listing_id", listingIds);
-          
-          if (advBranchCounts) {
-            const advCountMap = new Map<string, number>();
-            advBranchCounts.forEach((b: any) => {
-              advCountMap.set(b.listing_id, (advCountMap.get(b.listing_id) || 0) + 1);
-            });
-            advCountMap.forEach((count, lid) => {
-              branchCounts.set(lid, (branchCounts.get(lid) || 0) + count);
-            });
-          }
+          counts?.forEach((c: any) => branchCounts.set(c.listing_id, Number(c.branch_count)));
         }
         for (const a of adSpaces) {
           const specs = (a.specifications as any) || {};
+          // Total locations = 1 (head office) + active branch count
+          const activeBranches = branchCounts.get(a.id) || 0;
           allItems.push({
             id: `listing_${a.id}`,
             franchise_name: a.title,
-            branchCount: branchCounts.get(a.id) || 0,
+            branchCount: activeBranches,
             city: specs.head_office_address?.city || a.location?.split(",")[0]?.trim() || "Unknown",
           });
         }
@@ -142,7 +128,7 @@ export const FranchiseSelector = ({ userId, selectedFranchiseId, onSelect }: Fra
                 <p className="font-semibold">{f.franchise_name}</p>
                 <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
                   <MapPin className="h-3.5 w-3.5" />
-                  {f.city} — {f.branchCount > 0 ? `${f.branchCount + 1} Locations` : "1 Location"}
+                  {f.city} — {f.branchCount + 1} {f.branchCount + 1 === 1 ? "Location" : "Locations"}
                 </p>
               </div>
               <Badge variant={f.branchCount > 0 ? "default" : "secondary"}>
