@@ -260,32 +260,17 @@ export const PaymentGateway = ({
     }
     setIsProcessing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("activation-checkout", {
-        body: {
-          activationId,
-          buyerName,
-          buyerEmail,
-          buyerPhone: buyerPhone || undefined,
-          companyName: companyName || undefined,
-          billingAddress,
-          billingCity: city,
-          billingCountry: country,
-          billingZip: zipCode,
-          paymentMethod: selectedMethod,
-          successUrl: `${window.location.origin}/payment-success`,
-          cancelUrl: `${window.location.origin}/activate/${activationId}?payment=cancelled`,
-        },
-      });
-      if (error) throw error;
-      if (data?.checkoutUrl) {
-        toast({ title: "Redirecting to Secure Checkout", description: "You will be redirected to complete your payment..." });
-        window.location.href = data.checkoutUrl;
-      } else {
-        throw new Error("Failed to create checkout session");
-      }
+      // Update activation status to reflect payment attempt
+      await supabase
+        .from("activations")
+        .update({ status: "payment_pending" })
+        .eq("id", activationId);
+
+      // Redirect to PayMongo payment page
+      window.location.href = "https://paymongo.page/l/triotag";
     } catch (error: any) {
       console.error("Checkout error:", error);
-      toast({ title: "Checkout Failed", description: error.message || "Failed to create checkout session. Please try again.", variant: "destructive" });
+      toast({ title: "Checkout Failed", description: error.message || "Failed to proceed to checkout. Please try again.", variant: "destructive" });
       setIsProcessing(false);
     }
   };
