@@ -411,12 +411,14 @@ const OrderPrints = () => {
         </div>
 
         <div className="space-y-8">
-          {/* Section 1: Franchise Selection */}
-          <FranchiseSelector
-            userId={userId}
-            selectedFranchiseId={selectedFranchiseId}
-            onSelect={setSelectedFranchiseId}
-          />
+          {/* Section 1: Franchise Selection (hidden when preselected) */}
+          {!preselectedFranchiseId && (
+            <FranchiseSelector
+              userId={userId}
+              selectedFranchiseId={selectedFranchiseId}
+              onSelect={setSelectedFranchiseId}
+            />
+          )}
 
           {/* Section 2: Branch-Level Material Configuration */}
           {selectedFranchiseId && (
