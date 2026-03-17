@@ -183,22 +183,13 @@ const ActivateListing = () => {
       .eq("franchise_id", id)
       .order("created_at");
 
-    // Load advertiser branches - only for the current user
-    const { data: { session } } = await supabase.auth.getSession();
-    const currentUserId = session?.user?.id;
-
-    const advQuery = supabase
+    // Load advertiser branches that are listing locations (visible to all advertisers)
+    const { data: advBranches } = await supabase
       .from("advertiser_branches")
       .select("id, branch_name, full_address, city")
       .eq("listing_id", id)
+      .eq("is_ad_space_listing", true)
       .order("created_at");
-
-    // Only load branches owned by the current user
-    if (currentUserId) {
-      advQuery.eq("advertiser_id", currentUserId);
-    }
-
-    const { data: advBranches } = await advQuery;
 
     // Load existing branch_materials
     const { data: existingMats } = await supabase
