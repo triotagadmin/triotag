@@ -1,0 +1,1 @@
+DELETE FROM public.advertiser_branches WHERE id = 'a63688bb-878f-431e-b198-3df31e72c6dd';
