@@ -6,16 +6,22 @@ import { getMaterialUnitPrice, calculateBranchCost, calculateTotalOrderCost, for
 import { useCurrencyConversion, formatPrice } from "@/hooks/useCurrencyConversion";
 
 const PhpConversion = ({ amountUsd }: { amountUsd: number }) => {
-  const { convertedAmount, rate, loading } = useCurrencyConversion(amountUsd, "USD", "PHP");
+  const { convertedAmount, loading } = useCurrencyConversion(amountUsd, "USD", "PHP");
 
   if (loading) {
     return <Loader2 className="h-3 w-3 animate-spin inline text-muted-foreground" />;
   }
 
+  const phpAmount = convertedAmount ?? amountUsd;
   return (
-    <span className="text-xs text-muted-foreground font-normal">
-      {" "}≈ {formatPrice(convertedAmount ?? amountUsd, "PHP")}
-    </span>
+    <>
+      <span className="font-semibold">
+        ₱{phpAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
+      </span>
+      <span className="text-xs text-muted-foreground font-normal ml-1">
+        (${amountUsd.toLocaleString("en-US", { minimumFractionDigits: 2 })} USD)
+      </span>
+    </>
   );
 };
 

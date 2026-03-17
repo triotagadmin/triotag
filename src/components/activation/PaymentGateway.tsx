@@ -56,10 +56,14 @@ const PhpConversionInline = ({ amountUsd }: { amountUsd: number }) => {
   const { convertedAmount, loading } = useCurrencyConversion(amountUsd, "USD", "PHP");
   if (amountUsd <= 0) return null;
   if (loading) return <Loader2 className="h-3 w-3 animate-spin inline ml-1" />;
+  const phpAmount = convertedAmount ?? amountUsd;
   return (
-    <span className="text-xs text-muted-foreground font-normal ml-1">
-      ≈ ₱{(convertedAmount ?? amountUsd).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
-    </span>
+    <>
+      <span className="font-semibold">₱{phpAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span>
+      <span className="text-xs text-muted-foreground font-normal ml-1">
+        (${amountUsd.toLocaleString("en-US", { minimumFractionDigits: 2 })} USD)
+      </span>
+    </>
   );
 };
 
