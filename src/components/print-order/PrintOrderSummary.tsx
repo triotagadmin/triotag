@@ -1,8 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, MapPin } from "lucide-react";
+import { DollarSign, MapPin, ArrowRightLeft, Loader2 } from "lucide-react";
 import type { BranchMaterialConfig } from "./BranchMaterialConfigurator";
 import { getMaterialUnitPrice, calculateBranchCost, calculateTotalOrderCost, formatCurrency } from "@/lib/materialPricing";
+import { useCurrencyConversion, formatPrice } from "@/hooks/useCurrencyConversion";
+
+const PhpConversion = ({ amountUsd }: { amountUsd: number }) => {
+  const { convertedAmount, rate, loading } = useCurrencyConversion(amountUsd, "USD", "PHP");
+
+  if (loading) {
+    return <Loader2 className="h-3 w-3 animate-spin inline text-muted-foreground" />;
+  }
+
+  return (
+    <span className="text-xs text-muted-foreground font-normal">
+      {" "}≈ {formatPrice(convertedAmount ?? amountUsd, "PHP")}
+    </span>
+  );
+};
 
 interface PrintOrderSummaryProps {
   franchiseName: string;
@@ -57,9 +72,12 @@ export const PrintOrderSummary = ({ franchiseName, branches, currency }: PrintOr
                     {branch.city}
                   </Badge>
                 </div>
-                <span className="text-sm font-semibold text-primary">
-                  {formatCurrency(branchCost, currency)}
-                </span>
+                <div className="text-right">
+                  <span className="text-sm font-semibold text-primary">
+                    {formatCurrency(branchCost, "USD")}
+                  </span>
+                  <PhpConversion amountUsd={branchCost} />
+                </div>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
                 Shipping: {branch.shippingAddress.city || branch.city}, {branch.shippingAddress.province}
@@ -75,14 +93,23 @@ export const PrintOrderSummary = ({ franchiseName, branches, currency }: PrintOr
             {Array.from(materialTotals.entries()).map(([type, { label, total, unitPrice }]) => (
               <div key={type} className="flex justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {label} ({total} units × {formatCurrency(unitPrice, currency)})
+                  {label} ({total} units × {formatCurrency(unitPrice, "USD")})
                 </span>
-                <span className="font-medium">{formatCurrency(total * unitPrice, currency)}</span>
+                <div className="text-right">
+                  <span className="font-medium">{formatCurrency(total * unitPrice, "USD")}</span>
+                  <PhpConversion amountUsd={total * unitPrice} />
+                </div>
               </div>
             ))}
-            <div className="flex justify-between text-base font-bold pt-2 border-t border-border mt-2">
-              <span>Total Order Cost</span>
-              <span className="text-primary">{formatCurrency(totalCost, currency)}</span>
+            <div className="flex justify-between items-center text-base font-bold pt-2 border-t border-border mt-2">
+              <div className="flex items-center gap-1.5">
+                <span>Total Order Cost</span>
+                <ArrowRightLeft className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+              <div className="text-right">
+                <span className="text-primary">{formatCurrency(totalCost, "USD")}</span>
+                <PhpConversion amountUsd={totalCost} />
+              </div>
             </div>
           </div>
         )}
