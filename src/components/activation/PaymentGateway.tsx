@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CreditCard, Smartphone, Loader2, CheckCircle, Shield, Lock, ExternalLink, Building2, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrencyConversion } from "@/hooks/useCurrencyConversion";
 
 interface PaymentGatewayProps {
   activationId: string;
@@ -50,6 +51,93 @@ const COUNTRIES = [
   { code: "AU", name: "Australia" },
 ];
 
+const PhpConversionInline = ({ amountUsd }: { amountUsd: number }) => {
+  const { convertedAmount, loading } = useCurrencyConversion(amountUsd, "USD", "PHP");
+  if (amountUsd <= 0) return null;
+  if (loading) return <Loader2 className="h-3 w-3 animate-spin inline ml-1" />;
+  return (
+    <span className="text-xs text-muted-foreground font-normal ml-1">
+      ≈ ₱{(convertedAmount ?? amountUsd).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
+    </span>
+  );
+};
+
+const OrderSummaryCard = ({
+  listingTitle,
+  activationId,
+  leaseCost,
+  materialCost,
+  bookingAmount,
+  currency,
+  formatPrice,
+}: {
+  listingTitle: string;
+  activationId: string;
+  leaseCost: number;
+  materialCost: number;
+  bookingAmount: number;
+  currency: string;
+  formatPrice: (price: number, curr?: string) => string;
+}) => {
+  const isUsd = currency === "USD";
+  return (
+    <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Shield className="h-5 w-5 text-primary" />
+          Order Summary
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Ad Space Activation</span>
+            <span className="font-medium">{listingTitle}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Booking ID</span>
+            <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{activationId.slice(0, 8).toUpperCase()}</span>
+          </div>
+
+          <div className="border-t border-border/50 pt-2 mt-2 space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Ad Space Lease Fee</span>
+              <span className="font-medium">
+                {formatPrice(leaseCost)}
+                {isUsd && <PhpConversionInline amountUsd={leaseCost} />}
+              </span>
+            </div>
+            {materialCost > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Ad Material Cost</span>
+                <span className="font-medium">
+                  {formatPrice(materialCost)}
+                  {isUsd && <PhpConversionInline amountUsd={materialCost} />}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-primary/20 pt-3 mt-3">
+            <div className="flex justify-between items-center">
+              <span className="font-semibold text-lg">Total Amount</span>
+              <div className="text-right">
+                <span className="text-2xl font-bold text-primary">{formatPrice(bookingAmount)}</span>
+                {isUsd && (
+                  <div>
+                    <PhpConversionInline amountUsd={bookingAmount} />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+
 export const PaymentGateway = ({
   activationId,
   listingTitle,
@@ -62,6 +150,8 @@ export const PaymentGateway = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [bookingAmount, setBookingAmount] = useState(0);
+  const [leaseCost, setLeaseCost] = useState(0);
+  const [materialCost, setMaterialCost] = useState(0);
   const [currency, setCurrency] = useState("PHP");
 
   // Billing info
@@ -114,13 +204,18 @@ export const PaymentGateway = ({
           }
         }
 
+        setLeaseCost(amount);
+
         if (activation.print_order_id) {
           const { data: printOrder } = await supabase
             .from("print_orders")
             .select("total_price")
             .eq("id", activation.print_order_id)
             .single();
-          if (printOrder?.total_price) amount += printOrder.total_price;
+          if (printOrder?.total_price) {
+            setMaterialCost(printOrder.total_price);
+            amount += printOrder.total_price;
+          }
         }
 
         setBookingAmount(amount);
@@ -198,33 +293,15 @@ export const PaymentGateway = ({
 
   return (
     <div className="space-y-6">
-      {/* Order Summary */}
-      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            Order Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Ad Space Activation</span>
-              <span className="font-medium">{listingTitle}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Booking ID</span>
-              <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{activationId.slice(0, 8).toUpperCase()}</span>
-            </div>
-            <div className="border-t border-primary/20 pt-3 mt-3">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-lg">Total Amount</span>
-                <span className="text-2xl font-bold text-primary">{formatPrice(bookingAmount)}</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <OrderSummaryCard
+        listingTitle={listingTitle}
+        activationId={activationId}
+        leaseCost={leaseCost}
+        materialCost={materialCost}
+        bookingAmount={bookingAmount}
+        currency={currency}
+        formatPrice={formatPrice}
+      />
 
       {/* Section 1 — Billing Information */}
       <Card>
