@@ -289,17 +289,42 @@ export const PaymentGateway = ({
     }
     setIsProcessing(true);
     try {
-      // Update activation status to reflect payment attempt
-      await supabase
-        .from("activations")
-        .update({ status: "payment_pending" })
-        .eq("id", activationId);
+      const locations = orderParams?.locations || 1;
+      const weeks = orderParams?.weeks || 1;
+      const material = orderParams?.material || "vinyl_sticker";
 
-      // Redirect to PayMongo payment page
-      window.location.href = "https://paymongo.page/l/triotag";
+      // Call backend — send ONLY order parameters, NOT the price
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          activationId,
+          locations,
+          weeks,
+          material,
+          paymentMethod: selectedMethod,
+          buyerName,
+          buyerEmail,
+          buyerPhone,
+          companyName,
+          billingAddress,
+          billingCity: city,
+          billingCountry: country,
+          billingZip: zipCode,
+          successUrl: `${window.location.origin}/payment-success`,
+          cancelUrl: window.location.href,
+        },
+      });
+
+      if (error) throw new Error(error.message || "Unable to proceed to payment. Please try again.");
+      if (data?.error) throw new Error(data.error);
+
+      const checkoutUrl = data?.checkout_url;
+      if (!checkoutUrl) throw new Error("Unable to proceed to payment. Please try again.");
+
+      // Redirect to PayMongo checkout
+      window.location.href = checkoutUrl;
     } catch (error: any) {
       console.error("Checkout error:", error);
-      toast({ title: "Checkout Failed", description: error.message || "Failed to proceed to checkout. Please try again.", variant: "destructive" });
+      toast({ title: "Checkout Failed", description: error.message || "Unable to proceed to payment. Please try again.", variant: "destructive" });
       setIsProcessing(false);
     }
   };
