@@ -51,7 +51,93 @@ const COUNTRIES = [
   { code: "AU", name: "Australia" },
 ];
 
-export const PaymentGateway = ({
+const PhpConversionInline = ({ amountUsd }: { amountUsd: number }) => {
+  const { convertedAmount, loading } = useCurrencyConversion(amountUsd, "USD", "PHP");
+  if (amountUsd <= 0) return null;
+  if (loading) return <Loader2 className="h-3 w-3 animate-spin inline ml-1" />;
+  return (
+    <span className="text-xs text-muted-foreground font-normal ml-1">
+      ≈ ₱{(convertedAmount ?? amountUsd).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
+    </span>
+  );
+};
+
+const OrderSummaryCard = ({
+  listingTitle,
+  activationId,
+  leaseCost,
+  materialCost,
+  bookingAmount,
+  currency,
+  formatPrice,
+}: {
+  listingTitle: string;
+  activationId: string;
+  leaseCost: number;
+  materialCost: number;
+  bookingAmount: number;
+  currency: string;
+  formatPrice: (price: number, curr?: string) => string;
+}) => {
+  const isUsd = currency === "USD";
+  return (
+    <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Shield className="h-5 w-5 text-primary" />
+          Order Summary
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Ad Space Activation</span>
+            <span className="font-medium">{listingTitle}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Booking ID</span>
+            <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{activationId.slice(0, 8).toUpperCase()}</span>
+          </div>
+
+          <div className="border-t border-border/50 pt-2 mt-2 space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Ad Space Lease Fee</span>
+              <span className="font-medium">
+                {formatPrice(leaseCost)}
+                {isUsd && <PhpConversionInline amountUsd={leaseCost} />}
+              </span>
+            </div>
+            {materialCost > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Ad Material Cost</span>
+                <span className="font-medium">
+                  {formatPrice(materialCost)}
+                  {isUsd && <PhpConversionInline amountUsd={materialCost} />}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-primary/20 pt-3 mt-3">
+            <div className="flex justify-between items-center">
+              <span className="font-semibold text-lg">Total Amount</span>
+              <div className="text-right">
+                <span className="text-2xl font-bold text-primary">{formatPrice(bookingAmount)}</span>
+                {isUsd && (
+                  <div>
+                    <PhpConversionInline amountUsd={bookingAmount} />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+
   activationId,
   listingTitle,
   onPaymentSuccess,
