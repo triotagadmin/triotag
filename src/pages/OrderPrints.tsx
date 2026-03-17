@@ -156,21 +156,24 @@ const OrderPrints = () => {
 
       branchData = allBranches.map((b) => {
         const branchMats = matMap.get(b.id);
+        const addressParts = (b.address || "").split(",").map((s: string) => s.trim());
+        const derivedCity = b.city || (addressParts.length >= 2 ? addressParts[addressParts.length - 2] : "");
+        const derivedProvince = addressParts.length >= 3 ? addressParts[addressParts.length - 3] : "";
         return {
           branchId: b.id,
           branchName: b.name,
           fullAddress: b.address,
-          city: b.city,
+          city: derivedCity,
           materials: materials.map((m) => ({
             materialType: m.type,
             materialLabel: m.label,
             quantity: branchMats?.get(m.type) || 0,
           })),
           shippingAddress: {
-            recipient: "",
+            recipient: b.name || "",
             street: b.address || "",
-            city: b.city,
-            province: "",
+            city: derivedCity,
+            province: derivedProvince,
             postalCode: "",
             contact: "",
           },
