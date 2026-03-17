@@ -326,7 +326,9 @@ const ActivateListing = () => {
         if (data.start_date) setStartDate(new Date(data.start_date));
         if (data.end_date) setEndDate(new Date(data.end_date));
         if (data.activation_type) setActivationType(data.activation_type as ActivationType);
-        if (data.print_order_id) {
+        // Only restore print order state if the activation is past the print-order phase
+        const printOrderActiveStatuses = ["payment_pending", "completed", "printing", "in_production", "shipped"];
+        if (data.print_order_id && printOrderActiveStatuses.includes(data.status)) {
           setPrintOrderComplete(true);
           setOrderId(data.print_order_id);
         }
