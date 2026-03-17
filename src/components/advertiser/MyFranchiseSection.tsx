@@ -710,10 +710,17 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
 
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-3">
-                    <Button size="sm" variant="outline" onClick={() => openAddLocation(franchise)} className="gap-1">
-                      <Plus className="h-3.5 w-3.5" />
-                      Add Location
-                    </Button>
+                    {fLocs.length > 0 ? (
+                      <Button size="sm" variant="outline" onClick={() => openAddLocation(franchise)} className="gap-1">
+                        <Plus className="h-3.5 w-3.5" />
+                        Add Branch Location
+                      </Button>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground px-3 py-1.5 rounded-md border border-border/50 bg-muted/30">
+                        <MapPin className="h-3.5 w-3.5" />
+                        Single Location
+                      </div>
+                    )}
                     {canActivate && (
                       <Button
                         size="sm"
