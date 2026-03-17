@@ -694,11 +694,6 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                           </Button>
                         </>
                       )}
-                      {(franchise as any)._isAdSpace && (
-                        <Badge variant="outline" className="text-xs gap-1">
-                          <Store className="h-3 w-3" /> Ad Space
-                        </Badge>
-                      )}
                     </div>
                   </div>
 
