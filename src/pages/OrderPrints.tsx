@@ -222,25 +222,29 @@ const OrderPrints = () => {
         ];
       }
 
-      branchData = (advBranches || []).map((b: any) => ({
-        branchId: b.id,
-        branchName: b.branch_name || b.full_address,
-        fullAddress: b.full_address,
-        city: b.city || "",
-        materials: materials.map((m) => ({
-          materialType: m.type,
-          materialLabel: m.label,
-          quantity: 0,
-        })),
-        shippingAddress: {
-          recipient: "",
-          street: b.full_address || "",
-          city: b.city || "",
-          province: "",
-          postalCode: "",
-          contact: "",
-        },
-      }));
+      branchData = (advBranches || []).map((b: any) => {
+        const addressParts = (b.full_address || "").split(",").map((s: string) => s.trim());
+        const derivedCity = b.city || (addressParts.length >= 2 ? addressParts[addressParts.length - 2] : "");
+        return {
+          branchId: b.id,
+          branchName: b.branch_name || b.full_address,
+          fullAddress: b.full_address,
+          city: derivedCity,
+          materials: materials.map((m) => ({
+            materialType: m.type,
+            materialLabel: m.label,
+            quantity: 0,
+          })),
+          shippingAddress: {
+            recipient: b.branch_name || b.full_address || "",
+            street: b.full_address || "",
+            city: derivedCity,
+            province: "",
+            postalCode: "",
+            contact: "",
+          },
+        };
+      });
     }
 
     setFranchiseName(name);
