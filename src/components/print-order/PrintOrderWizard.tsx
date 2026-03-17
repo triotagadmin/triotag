@@ -71,6 +71,13 @@ export const PrintOrderWizard = ({
   const currentStepIndex = WIZARD_STEPS.findIndex((s) => s.id === currentStep);
   const progressPercent = ((currentStepIndex + 1) / WIZARD_STEPS.length) * 100;
 
+  // Auto-select all branches passed from booking step
+  useEffect(() => {
+    if (branches.length > 0) {
+      setSelectedBranchIds(new Set(branches.map((b) => b.id)));
+    }
+  }, [branches]);
+
   // Build branch configs when moving to configure step
   useEffect(() => {
     if (currentStep === "configure" && selectedBranchIds.size > 0) {
