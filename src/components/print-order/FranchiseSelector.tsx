@@ -128,7 +128,7 @@ export const FranchiseSelector = ({ userId, selectedFranchiseId, onSelect }: Fra
                 <p className="font-semibold">{f.franchise_name}</p>
                 <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
                   <MapPin className="h-3.5 w-3.5" />
-                  {f.city} — {f.branchCount > 0 ? `${f.branchCount + 1} Locations` : "1 Location"}
+                  {f.city} — {f.branchCount + 1} {f.branchCount + 1 === 1 ? "Location" : "Locations"}
                 </p>
               </div>
               <Badge variant={f.branchCount > 0 ? "default" : "secondary"}>
