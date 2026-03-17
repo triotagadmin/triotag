@@ -59,32 +59,18 @@ export const FranchiseSelector = ({ userId, selectedFranchiseId, onSelect }: Fra
         const listingIds = adSpaces.map(a => a.id);
         let branchCounts = new Map<string, number>();
         if (listingIds.length > 0) {
-          // Count from franchise_branches
+          // get_listing_branch_counts already excludes primary address and filters is_ad_space_listing
           const { data: counts } = await supabase.rpc("get_listing_branch_counts", { _listing_ids: listingIds });
-          counts?.forEach((c: any) => branchCounts.set(c.listing_id, c.branch_count));
-
-          // Also count from advertiser_branches linked to these listings
-          const { data: advBranchCounts } = await supabase
-            .from("advertiser_branches")
-            .select("listing_id")
-            .in("listing_id", listingIds);
-          
-          if (advBranchCounts) {
-            const advCountMap = new Map<string, number>();
-            advBranchCounts.forEach((b: any) => {
-              advCountMap.set(b.listing_id, (advCountMap.get(b.listing_id) || 0) + 1);
-            });
-            advCountMap.forEach((count, lid) => {
-              branchCounts.set(lid, (branchCounts.get(lid) || 0) + count);
-            });
-          }
+          counts?.forEach((c: any) => branchCounts.set(c.listing_id, Number(c.branch_count)));
         }
         for (const a of adSpaces) {
           const specs = (a.specifications as any) || {};
+          // Total locations = 1 (head office) + active branch count
+          const activeBranches = branchCounts.get(a.id) || 0;
           allItems.push({
             id: `listing_${a.id}`,
             franchise_name: a.title,
-            branchCount: branchCounts.get(a.id) || 0,
+            branchCount: activeBranches,
             city: specs.head_office_address?.city || a.location?.split(",")[0]?.trim() || "Unknown",
           });
         }
