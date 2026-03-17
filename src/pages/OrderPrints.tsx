@@ -324,12 +324,17 @@ const OrderPrints = () => {
         totalCost,
       };
 
+      // Strip synthetic prefixes (head_, listing_, adv_) from branch IDs for DB storage
+      const cleanBranchIds = branchesWithMaterials
+        .map((b) => b.branchId.replace(/^head_/, ""))
+        .filter((id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
+
       // Insert into advertiser_print_orders with unpaid status
       const { data: order, error } = await supabase
         .from("advertiser_print_orders")
         .insert({
           advertiser_id: userId,
-          branch_ids: branchesWithMaterials.map((b) => b.branchId),
+          branch_ids: cleanBranchIds.length > 0 ? cleanBranchIds : [],
           materials: payload as any,
           notes: JSON.stringify({ franchise_name: franchiseName, currency }),
           status: "awaiting_payment",
@@ -341,31 +346,9 @@ const OrderPrints = () => {
 
       if (error) throw error;
 
-      // Create PayMongo checkout session
+      // Redirect to PayMongo payment link
       setPaymentProcessing(true);
-      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
-        "print-order-checkout",
-        {
-          body: {
-            orderId: order.id,
-            totalCost,
-            currency,
-            franchiseName,
-            userId,
-            successUrl: `${window.location.origin}/order-prints`,
-            cancelUrl: `${window.location.origin}/order-prints`,
-          },
-        }
-      );
-
-      if (checkoutError) throw checkoutError;
-
-      if (checkoutData?.checkoutUrl) {
-        // Redirect to PayMongo checkout
-        window.location.href = checkoutData.checkoutUrl;
-      } else {
-        throw new Error("Failed to create payment session");
-      }
+      window.location.href = "https://paymongo.page/l/triotag";
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setPaymentProcessing(false);
