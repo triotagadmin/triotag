@@ -289,17 +289,10 @@ export const PaymentGateway = ({
     }
     setIsProcessing(true);
     try {
-      const locations = orderParams?.locations || 1;
-      const weeks = orderParams?.weeks || 1;
-      const material = orderParams?.material || "vinyl_sticker";
-
-      // Call backend — send ONLY order parameters, NOT the price
+      // Call backend — send ONLY activationId, backend computes all pricing
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
           activationId,
-          locations,
-          weeks,
-          material,
           paymentMethod: selectedMethod,
           buyerName,
           buyerEmail,
