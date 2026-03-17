@@ -115,6 +115,20 @@ const OrderPrints = () => {
       const seenIds = new Set<string>();
       const allBranches: { id: string; name: string; address: string; city: string }[] = [];
 
+      // Include head office / main branch as the first entry
+      if (listing) {
+        const headAddress = listing.location || "";
+        const headParts = headAddress.split(",").map((s: string) => s.trim());
+        const headCity = headParts.length >= 2 ? headParts[headParts.length - 2] : "";
+        allBranches.push({
+          id: `head_${realId}`,
+          name: `${listing.title} (Head Office)`,
+          address: headAddress,
+          city: headCity,
+        });
+        seenIds.add(`head_${realId}`);
+      }
+
       (fBranches || []).forEach((b: any) => {
         if (!seenIds.has(b.id)) {
           seenIds.add(b.id);
