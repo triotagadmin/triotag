@@ -182,6 +182,8 @@ serve(async (req) => {
 
       if (metadata?.type === "activation_payment") {
         await handleActivationPayment(metadata, paymentId, "paid");
+      } else if (metadata?.type === "print_order") {
+        await handlePrintOrderPayment(metadata, "paid");
       } else if (metadata?.type === "listing_submission") {
         await supabase.from("listing_submissions").update({ payment_status: "paid" }).eq("id", metadata.listing_id);
         console.log("Listing submission marked paid:", metadata.listing_id);
