@@ -51,6 +51,7 @@ interface PrintOrderWizardProps {
     selectedMaterialTypes: string[];
   }) => void;
   onBack?: () => void;
+  onCancel?: () => void;
 }
 
 export const PrintOrderWizard = ({
