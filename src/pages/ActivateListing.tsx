@@ -1314,7 +1314,7 @@ const ActivateListing = () => {
               </div> :
 
           <PrintOrderWizard
-                branches={allBranchOptions}
+                branches={allBranchOptions.filter((b) => bookingSelectedBranchIds.has(b.id))}
                 availableMaterials={availableMaterials}
                 franchiseName={listing?.title || ""}
                 currency={detectedCurrency}
