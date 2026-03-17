@@ -178,7 +178,17 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
     }
   };
 
-  const removeImage = (url: string) => {
+  const removeImage = async (url: string) => {
+    // Remove from storage
+    try {
+      const parsedUrl = new URL(url);
+      const pathMatch = parsedUrl.pathname.match(/\/object\/public\/ad-space-media\/(.+)/);
+      if (pathMatch) {
+        await supabase.storage.from('ad-space-media').remove([decodeURIComponent(pathMatch[1])]);
+      }
+    } catch (e) {
+      console.warn("Could not delete file from storage:", e);
+    }
     setUploadedImages(prev => prev.filter(img => img !== url));
     setIsConfirmed(false);
   };
