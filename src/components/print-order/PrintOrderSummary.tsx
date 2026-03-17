@@ -96,10 +96,9 @@ export const PrintOrderSummary = ({ franchiseName, branches, currency }: PrintOr
             {Array.from(materialTotals.entries()).map(([type, { label, total, unitPrice }]) => (
               <div key={type} className="flex justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {label} ({total} units × {formatCurrency(unitPrice, "USD")})
+                  {label} ({total} units × ${unitPrice.toLocaleString("en-US", { minimumFractionDigits: 2 })})
                 </span>
                 <div className="text-right">
-                  <span className="font-medium">{formatCurrency(total * unitPrice, "USD")}</span>
                   <PhpConversion amountUsd={total * unitPrice} />
                 </div>
               </div>
@@ -109,8 +108,7 @@ export const PrintOrderSummary = ({ franchiseName, branches, currency }: PrintOr
                 <span>Total Order Cost</span>
                 <ArrowRightLeft className="h-3.5 w-3.5 text-muted-foreground" />
               </div>
-              <div className="text-right">
-                <span className="text-primary">{formatCurrency(totalCost, "USD")}</span>
+              <div className="text-right text-primary">
                 <PhpConversion amountUsd={totalCost} />
               </div>
             </div>
