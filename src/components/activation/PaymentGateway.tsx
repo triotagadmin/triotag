@@ -8,6 +8,7 @@ import { CreditCard, Smartphone, Loader2, CheckCircle, Shield, Lock, ExternalLin
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrencyConversion } from "@/hooks/useCurrencyConversion";
+import { calculateTotalOrderCost } from "@/lib/materialPricing";
 
 interface PaymentGatewayProps {
   activationId: string;

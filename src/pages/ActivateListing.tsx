@@ -21,6 +21,7 @@ import { PrintOrderPaymentGate } from "@/components/activation/PrintOrderPayment
 import { PrintOrderWizard, type BranchOption } from "@/components/print-order/PrintOrderWizard";
 import { type BranchMaterialConfig } from "@/components/print-order/BranchMaterialConfigurator";
 import { PRINT_PRODUCTS, SHIPPING_COUNTRIES, calculateOrderTotal, getProductById } from "@/lib/printProducts";
+import { calculateTotalOrderCost } from "@/lib/materialPricing";
 import { format } from "date-fns";
 import { getCurrencySymbol, formatPrice, getCurrencyName } from "@/hooks/useCurrencyConversion";
 
