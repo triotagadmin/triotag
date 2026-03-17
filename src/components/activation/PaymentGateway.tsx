@@ -206,33 +206,15 @@ export const PaymentGateway = ({
 
   return (
     <div className="space-y-6">
-      {/* Order Summary */}
-      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            Order Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Ad Space Activation</span>
-              <span className="font-medium">{listingTitle}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Booking ID</span>
-              <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{activationId.slice(0, 8).toUpperCase()}</span>
-            </div>
-            <div className="border-t border-primary/20 pt-3 mt-3">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-lg">Total Amount</span>
-                <span className="text-2xl font-bold text-primary">{formatPrice(bookingAmount)}</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <OrderSummaryCard
+        listingTitle={listingTitle}
+        activationId={activationId}
+        leaseCost={leaseCost}
+        materialCost={materialCost}
+        bookingAmount={bookingAmount}
+        currency={currency}
+        formatPrice={formatPrice}
+      />
 
       {/* Section 1 — Billing Information */}
       <Card>
