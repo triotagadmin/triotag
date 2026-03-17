@@ -116,6 +116,62 @@ serve(async (req) => {
       return true;
     }
 
+    // Helper to handle print order payment updates
+    async function handlePrintOrderPayment(metadata: Record<string, string>, status: "paid" | "failed") {
+      const orderId = metadata?.order_id;
+      if (!orderId) return false;
+
+      const newPaymentStatus = status === "paid" ? "paid" : "failed";
+      const { error } = await supabase
+        .from("advertiser_print_orders")
+        .update({
+          payment_status: newPaymentStatus,
+          status: status === "paid" ? "pending" : "payment_failed",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", orderId);
+
+      if (error) {
+        console.error(`Failed to update print order ${orderId}:`, error);
+        return false;
+      }
+
+      console.log(`Print order ${orderId} payment marked as ${newPaymentStatus}`);
+
+      // On successful payment, send the order email
+      if (status === "paid") {
+        try {
+          const { data: order } = await supabase
+            .from("advertiser_print_orders")
+            .select("*")
+            .eq("id", orderId)
+            .single();
+
+          if (order) {
+            const orderMaterials = order.materials as any;
+            // Invoke the email function with the stored order data
+            const emailUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/submit-print-order-email`;
+            await fetch(emailUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+              },
+              body: JSON.stringify({
+                ...orderMaterials,
+                orderId: orderId,
+                paymentStatus: "paid",
+                totalCost: order.total_cost,
+              }),
+            });
+          }
+        } catch (emailErr) {
+          console.error("Failed to send print order email:", emailErr);
+        }
+      }
+      return true;
+    }
+
     // ── payment.paid ──
     if (eventType === "payment.paid") {
       const paymentId = eventData?.id;
