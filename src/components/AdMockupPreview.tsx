@@ -333,7 +333,7 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
             <div className="space-y-2">
               <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                {uploading ? "Uploading..." : "Click to upload PNG or JPG (max 10MB each, up to 30 photos)"}
+                {uploading ? "Uploading..." : "Click to upload PNG or JPG (max 10MB each, up to 20 photos)"}
               </p>
             </div>
           </div>
