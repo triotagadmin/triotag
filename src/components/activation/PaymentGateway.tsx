@@ -56,10 +56,14 @@ const PhpConversionInline = ({ amountUsd }: { amountUsd: number }) => {
   const { convertedAmount, loading } = useCurrencyConversion(amountUsd, "USD", "PHP");
   if (amountUsd <= 0) return null;
   if (loading) return <Loader2 className="h-3 w-3 animate-spin inline ml-1" />;
+  const phpAmount = convertedAmount ?? amountUsd;
   return (
-    <span className="text-xs text-muted-foreground font-normal ml-1">
-      ≈ ₱{(convertedAmount ?? amountUsd).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
-    </span>
+    <>
+      <span className="font-semibold">₱{phpAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span>
+      <span className="text-xs text-muted-foreground font-normal ml-1">
+        (${amountUsd.toLocaleString("en-US", { minimumFractionDigits: 2 })} USD)
+      </span>
+    </>
   );
 };
 
@@ -103,17 +107,23 @@ const OrderSummaryCard = ({
           <div className="border-t border-border/50 pt-2 mt-2 space-y-1.5">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Ad Space Lease Fee</span>
-              <span className="font-medium">
-                {formatPrice(leaseCost)}
-                {isUsd && <PhpConversionInline amountUsd={leaseCost} />}
+              <span>
+                {isUsd ? (
+                  <PhpConversionInline amountUsd={leaseCost} />
+                ) : (
+                  <span className="font-medium">{formatPrice(leaseCost)}</span>
+                )}
               </span>
             </div>
             {materialCost > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Ad Material Cost</span>
-                <span className="font-medium">
-                  {formatPrice(materialCost)}
-                  {isUsd && <PhpConversionInline amountUsd={materialCost} />}
+                <span>
+                  {isUsd ? (
+                    <PhpConversionInline amountUsd={materialCost} />
+                  ) : (
+                    <span className="font-medium">{formatPrice(materialCost)}</span>
+                  )}
                 </span>
               </div>
             )}
@@ -123,11 +133,12 @@ const OrderSummaryCard = ({
             <div className="flex justify-between items-center">
               <span className="font-semibold text-lg">Total Amount</span>
               <div className="text-right">
-                <span className="text-2xl font-bold text-primary">{formatPrice(bookingAmount)}</span>
-                {isUsd && (
-                  <div>
+                {isUsd ? (
+                  <span className="text-2xl font-bold text-primary">
                     <PhpConversionInline amountUsd={bookingAmount} />
-                  </div>
+                  </span>
+                ) : (
+                  <span className="text-2xl font-bold text-primary">{formatPrice(bookingAmount)}</span>
                 )}
               </div>
             </div>
