@@ -117,13 +117,18 @@ export const PaymentGateway = ({
           }
         }
 
+        setLeaseCost(amount);
+
         if (activation.print_order_id) {
           const { data: printOrder } = await supabase
             .from("print_orders")
             .select("total_price")
             .eq("id", activation.print_order_id)
             .single();
-          if (printOrder?.total_price) amount += printOrder.total_price;
+          if (printOrder?.total_price) {
+            setMaterialCost(printOrder.total_price);
+            amount += printOrder.total_price;
+          }
         }
 
         setBookingAmount(amount);
