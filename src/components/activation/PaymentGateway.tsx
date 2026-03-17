@@ -17,6 +17,12 @@ interface PaymentGatewayProps {
   onBack: () => void;
   onCancelBooking?: () => void;
   disabled?: boolean;
+  /** Order parameters sent to backend for server-side pricing */
+  orderParams?: {
+    locations: number;
+    weeks: number;
+    material: string;
+  };
 }
 
 type PaymentMethod = "card" | "gcash" | "maya";
