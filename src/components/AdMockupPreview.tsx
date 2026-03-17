@@ -328,7 +328,7 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
               multiple
               onChange={handleFileChange}
               className="hidden"
-              disabled={uploading || uploadedImages.length >= 30}
+              disabled={uploading || uploadedImages.length >= 20}
             />
             <div className="space-y-2">
               <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
