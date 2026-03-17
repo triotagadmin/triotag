@@ -412,23 +412,39 @@ export const PrintOrderWizard = ({
 
       {/* Navigation Buttons */}
       {currentStep !== "submit" && (
-        <div className="flex justify-between gap-4">
-          <Button variant="outline" onClick={goPrev}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {currentStepIndex === 0 ? "Back to Design" : "Previous"}
-          </Button>
-          <Button onClick={goNext} disabled={!canProceed()}>
-            Next
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between gap-4">
+            <Button variant="outline" onClick={goPrev}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {currentStepIndex === 0 ? "Back to Design" : "Previous"}
+            </Button>
+            <Button onClick={goNext} disabled={!canProceed()}>
+              Next
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+          {onCancel && (
+            <Button variant="ghost" onClick={onCancel} className="w-full text-destructive hover:text-destructive hover:bg-destructive/10">
+              <XCircle className="h-4 w-4 mr-2" />
+              Cancel Booking
+            </Button>
+          )}
         </div>
       )}
 
       {currentStep === "submit" && (
-        <Button variant="outline" onClick={goPrev} className="w-full">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Review
-        </Button>
+        <div className="flex flex-col gap-3">
+          <Button variant="outline" onClick={goPrev} className="w-full">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Review
+          </Button>
+          {onCancel && (
+            <Button variant="ghost" onClick={onCancel} className="w-full text-destructive hover:text-destructive hover:bg-destructive/10">
+              <XCircle className="h-4 w-4 mr-2" />
+              Cancel Booking
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );
