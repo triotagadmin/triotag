@@ -348,9 +348,13 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
       else { toast({ title: "Franchise updated" }); setFranchiseDialogOpen(false); }
     } else {
-      const { error } = await supabase.from("advertiser_franchises").insert({ advertiser_id: userId, franchise_name: franchiseName.trim() });
+      const { data, error } = await supabase.from("advertiser_franchises").insert({ advertiser_id: userId, franchise_name: franchiseName.trim() }).select("id").single();
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-      else { toast({ title: "Franchise created" }); setFranchiseDialogOpen(false); }
+      else {
+        toast({ title: "Franchise created", description: "Redirecting to registration..." });
+        setFranchiseDialogOpen(false);
+        navigate(`/franchise-registration/${data.id}`);
+      }
     }
     setSaving(false);
   };
