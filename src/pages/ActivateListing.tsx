@@ -1351,6 +1351,8 @@ const ActivateListing = () => {
                       submittedBy: session.user.id,
                     };
 
+                    const totalCost = calculateTotalOrderCost(selectedBranches);
+
                     const { data: order, error } = await supabase
                       .from("advertiser_print_orders")
                       .insert({
@@ -1359,6 +1361,7 @@ const ActivateListing = () => {
                         materials: payload as any,
                         notes: JSON.stringify({ franchise_name: listing?.title, currency: detectedCurrency }),
                         status: "pending",
+                        total_cost: totalCost,
                       })
                       .select("id")
                       .single();
