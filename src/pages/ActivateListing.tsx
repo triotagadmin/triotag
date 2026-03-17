@@ -250,8 +250,10 @@ const ActivateListing = () => {
 
     setAllBranchOptions(allBranches);
     setBranchConfigs(configs);
-    // Auto-select all branches
-    setSelectedBranchIds(new Set(allBranches.map((b) => b.id)));
+    // Auto-select all branches for both booking and print order
+    const allIds = new Set(allBranches.map((b) => b.id));
+    setSelectedBranchIds(allIds);
+    setBookingSelectedBranchIds(allIds);
     setBranchesLoading(false);
   }, [id, listing]);
 
