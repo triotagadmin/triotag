@@ -157,7 +157,10 @@ const ActivateListing = () => {
     }
   }, [listing, activationType, selectedProductId]);
 
-  // Load branch locations when listing is available and step is print-order
+  // Booking-step branch selection (for fee calculation)
+  const [bookingSelectedBranchIds, setBookingSelectedBranchIds] = useState<Set<string>>(new Set());
+
+  // Load branch locations when listing is available
   const loadBranchesForListing = useCallback(async () => {
     if (!id || !listing) return;
     setBranchesLoading(true);
