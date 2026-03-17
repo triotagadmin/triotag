@@ -131,8 +131,6 @@ export const PrintOrderWizard = ({
 
   const canProceed = () => {
     switch (currentStep) {
-      case "branches":
-        return selectedBranchIds.size > 0;
       case "materials":
         return selectedMaterialTypes.size > 0;
       case "configure":
