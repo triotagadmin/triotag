@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CreditCard, Smartphone, Loader2, CheckCircle, Shield, Lock, ExternalLink, Building2, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrencyConversion } from "@/hooks/useCurrencyConversion";
 
 interface PaymentGatewayProps {
   activationId: string;
