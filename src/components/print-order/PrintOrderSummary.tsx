@@ -61,22 +61,6 @@ export const PrintOrderSummary = ({ franchiseName, branches, currency }: PrintOr
                   {formatCurrency(branchCost, currency)}
                 </span>
               </div>
-              {branch.materials
-                .filter((m) => m.quantity > 0)
-                .map((m) => {
-                  const unitPrice = getMaterialUnitPrice(m.materialType);
-                  const lineTotal = unitPrice * m.quantity;
-                  return (
-                    <div key={m.materialType} className="flex justify-between text-xs pl-2">
-                      <span className="text-muted-foreground">
-                        {m.materialLabel} × {m.quantity}
-                      </span>
-                      <span className="font-medium">
-                        {formatCurrency(unitPrice, currency)}/ea = {formatCurrency(lineTotal, currency)}
-                      </span>
-                    </div>
-                  );
-                })}
               <div className="text-xs text-muted-foreground mt-1">
                 Shipping: {branch.shippingAddress.city || branch.city}, {branch.shippingAddress.province}
               </div>
