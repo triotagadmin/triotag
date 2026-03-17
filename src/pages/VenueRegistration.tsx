@@ -14,6 +14,7 @@ import { ArrowLeft, ArrowRight, Upload, X, CheckCircle, AlertCircle, Building2, 
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
+import { LocationPickerMap, type LocationData } from "@/components/LocationPickerMap";
 
 interface DocumentUploadState {
   type: string;
