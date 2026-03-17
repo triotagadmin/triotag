@@ -63,6 +63,8 @@ export const PaymentGateway = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [bookingAmount, setBookingAmount] = useState(0);
+  const [leaseCost, setLeaseCost] = useState(0);
+  const [materialCost, setMaterialCost] = useState(0);
   const [currency, setCurrency] = useState("PHP");
 
   // Billing info
