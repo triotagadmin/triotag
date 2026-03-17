@@ -157,7 +157,10 @@ const ActivateListing = () => {
     }
   }, [listing, activationType, selectedProductId]);
 
-  // Load branch locations when listing is available and step is print-order
+  // Booking-step branch selection (for fee calculation)
+  const [bookingSelectedBranchIds, setBookingSelectedBranchIds] = useState<Set<string>>(new Set());
+
+  // Load branch locations when listing is available
   const loadBranchesForListing = useCallback(async () => {
     if (!id || !listing) return;
     setBranchesLoading(true);
@@ -247,16 +250,19 @@ const ActivateListing = () => {
 
     setAllBranchOptions(allBranches);
     setBranchConfigs(configs);
-    // Auto-select all branches
-    setSelectedBranchIds(new Set(allBranches.map((b) => b.id)));
+    // Auto-select all branches for both booking and print order
+    const allIds = new Set(allBranches.map((b) => b.id));
+    setSelectedBranchIds(allIds);
+    setBookingSelectedBranchIds(allIds);
     setBranchesLoading(false);
   }, [id, listing]);
 
+  // Load branches as soon as listing is available (needed for both booking fee calculation and print order)
   useEffect(() => {
-    if (currentStep === "print-order" && listing && allBranchOptions.length === 0) {
+    if (listing && allBranchOptions.length === 0) {
       loadBranchesForListing();
     }
-  }, [currentStep, listing, allBranchOptions.length, loadBranchesForListing]);
+  }, [listing, allBranchOptions.length, loadBranchesForListing]);
 
 
 
@@ -894,7 +900,9 @@ const ActivateListing = () => {
     || (listing?.activation_fee && listing.activation_fee > 0);
 
   const hasValidPrice = subscriptionPrice > 0 || estimatedPublisherPayout > 0;
-  const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice && hasListingFees;
+  const hasBranchesAvailable = allBranchOptions.length > 0;
+  const hasBranchesSelected = !hasBranchesAvailable || bookingSelectedBranchIds.size > 0;
+  const canSubmitAdRequest = designApproved && startDate && endDate && hasValidPrice && hasListingFees && hasBranchesSelected;
 
   // Check if waiting for admin response
   const isWaitingForApproval = ["pending_submission", "pending_approval", "under_review"].includes(activationStatus);
@@ -1154,7 +1162,10 @@ const ActivateListing = () => {
                 adUnitType={approvedAdUnitType || activationType}
                 quantity={quantity}
                 onEstimatedPayoutChange={handleEstimatedPayoutChange}
-                currency={listing.specifications?.lease_currency || listing.specifications?.ad_units?.[0]?.currency || listing.specifications?.currency || "USD"} />
+                currency={listing.specifications?.lease_currency || listing.specifications?.ad_units?.[0]?.currency || listing.specifications?.currency || "USD"}
+                branches={allBranchOptions}
+                selectedBranchIds={bookingSelectedBranchIds}
+                onSelectedBranchIdsChange={setBookingSelectedBranchIds} />
 
 
                     {/* Quantity Selection */}
@@ -1242,6 +1253,7 @@ const ActivateListing = () => {
                         {!endDate && <p>⚠ Please select an end date.</p>}
                         {!hasListingFees && <p>⚠ This listing has no fees configured. Contact the admin.</p>}
                         {hasListingFees && startDate && endDate && !hasValidPrice && <p>⚠ Booking price could not be calculated for the selected dates.</p>}
+                        {hasBranchesAvailable && !hasBranchesSelected && <p>⚠ Please select at least one branch location.</p>}
                       </div>
               }
                   </>
@@ -1305,7 +1317,7 @@ const ActivateListing = () => {
               </div> :
 
           <PrintOrderWizard
-                branches={allBranchOptions}
+                branches={allBranchOptions.filter((b) => bookingSelectedBranchIds.has(b.id))}
                 availableMaterials={availableMaterials}
                 franchiseName={listing?.title || ""}
                 currency={detectedCurrency}
