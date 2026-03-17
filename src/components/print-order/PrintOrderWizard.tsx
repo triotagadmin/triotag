@@ -12,14 +12,13 @@ import { BranchMaterialConfigurator, type BranchMaterialConfig } from "./BranchM
 import { BranchShippingForm, type ShippingAddress } from "./BranchShippingForm";
 import { PrintOrderSummary } from "./PrintOrderSummary";
 
-type WizardStep = "branches" | "materials" | "configure" | "review" | "submit";
+type WizardStep = "materials" | "configure" | "review" | "submit";
 
 const WIZARD_STEPS: { id: WizardStep; label: string; number: number }[] = [
-  { id: "branches", label: "Select Locations", number: 1 },
-  { id: "materials", label: "Select Materials", number: 2 },
-  { id: "configure", label: "Configure Per Branch", number: 3 },
-  { id: "review", label: "Review Order", number: 4 },
-  { id: "submit", label: "Submit", number: 5 },
+  { id: "materials", label: "Select Materials", number: 1 },
+  { id: "configure", label: "Configure Per Branch", number: 2 },
+  { id: "review", label: "Review Order", number: 3 },
+  { id: "submit", label: "Submit", number: 4 },
 ];
 
 const MATERIAL_ICONS: Record<string, React.ReactNode> = {
@@ -64,13 +63,20 @@ export const PrintOrderWizard = ({
   onSubmit,
   onBack,
 }: PrintOrderWizardProps) => {
-  const [currentStep, setCurrentStep] = useState<WizardStep>("branches");
+  const [currentStep, setCurrentStep] = useState<WizardStep>("materials");
   const [selectedBranchIds, setSelectedBranchIds] = useState<Set<string>>(new Set());
   const [selectedMaterialTypes, setSelectedMaterialTypes] = useState<Set<string>>(new Set());
   const [branchConfigs, setBranchConfigs] = useState<BranchMaterialConfig[]>([]);
 
   const currentStepIndex = WIZARD_STEPS.findIndex((s) => s.id === currentStep);
   const progressPercent = ((currentStepIndex + 1) / WIZARD_STEPS.length) * 100;
+
+  // Auto-select all branches passed from booking step
+  useEffect(() => {
+    if (branches.length > 0) {
+      setSelectedBranchIds(new Set(branches.map((b) => b.id)));
+    }
+  }, [branches]);
 
   // Build branch configs when moving to configure step
   useEffect(() => {
@@ -132,8 +138,6 @@ export const PrintOrderWizard = ({
 
   const canProceed = () => {
     switch (currentStep) {
-      case "branches":
-        return selectedBranchIds.size > 0;
       case "materials":
         return selectedMaterialTypes.size > 0;
       case "configure":
@@ -225,68 +229,7 @@ export const PrintOrderWizard = ({
         </CardContent>
       </Card>
 
-      {/* Step 1: Select Branch Locations */}
-      {currentStep === "branches" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MapPin className="h-5 w-5 text-primary" />
-              Select Branch Locations
-            </CardTitle>
-            <CardDescription>
-              Choose the branch locations you want to order print materials for.
-            </CardDescription>
-            <div className="flex items-center gap-2 pt-2">
-              <Button variant="outline" size="sm" onClick={selectAllBranches}>
-                Select All
-              </Button>
-              <Button variant="outline" size="sm" onClick={deselectAllBranches}>
-                Deselect All
-              </Button>
-              <Badge variant="secondary" className="ml-auto">
-                {selectedBranchIds.size} location{selectedBranchIds.size !== 1 ? "s" : ""} selected
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {branches.map((branch) => {
-                const isSelected = selectedBranchIds.has(branch.id);
-                return (
-                  <div
-                    key={branch.id}
-                    className={`p-4 rounded-[14px] border-2 cursor-pointer transition-all flex items-start gap-3 ${
-                      isSelected
-                        ? "border-primary bg-primary/5 shadow-[0_0_12px_hsl(110_100%_55%_/_0.15)]"
-                        : "border-border hover:border-primary/40"
-                    }`}
-                    onClick={() => toggleBranch(branch.id)}
-                  >
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => toggleBranch(branch.id)}
-                      className="mt-0.5"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">{branch.name}</p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                        <MapPin className="h-3 w-3 flex-shrink-0" />
-                        {branch.city || branch.address}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {branches.length === 0 && (
-              <div className="text-center py-8">
-                <Package className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
-                <p className="text-muted-foreground">No branch locations found.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      {/* Step 1: Select Print Materials */}
 
       {/* Step 2: Select Print Materials */}
       {currentStep === "materials" && (
