@@ -91,11 +91,12 @@ const OrderPrints = () => {
         .eq("franchise_id", realId)
         .order("created_at");
 
-      // Also load advertiser branches linked to this listing
+      // Also load advertiser branches linked to this listing (only for current user)
       const { data: advBranches } = await supabase
         .from("advertiser_branches")
         .select("id, branch_name, full_address, city")
         .eq("listing_id", realId)
+        .eq("advertiser_id", userId)
         .order("created_at");
 
       // Load existing branch_materials
