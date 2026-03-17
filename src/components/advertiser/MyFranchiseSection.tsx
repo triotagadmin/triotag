@@ -642,9 +642,11 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                             {(franchise as any)._location}
                           </p>
                         )}
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          {fLocs.length} branch{fLocs.length !== 1 ? "es" : ""} registered
-                        </p>
+                        {fLocs.length > 0 && (
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            {fLocs.length} branch{fLocs.length !== 1 ? "es" : ""} registered
+                          </p>
+                        )}
                         {isAdSpace && franchise._publisherName && !franchise._agentDisconnected && (
                           <p className="text-xs text-muted-foreground mt-0.5">
                             Publisher Agent: <span className="font-medium text-foreground">{franchise._publisherName}</span>
