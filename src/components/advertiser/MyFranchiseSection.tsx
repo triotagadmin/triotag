@@ -762,7 +762,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                     {fLocs.length === 0 ? (
                       <div className="text-center py-6 border-t border-border/50">
                         <MapPin className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">No locations yet. Add your first location.</p>
+                        <p className="text-sm text-muted-foreground">Single location listing. No branch locations added.</p>
                       </div>
                     ) : (
                       <div className="border-t border-border/50 pt-3 space-y-2">
