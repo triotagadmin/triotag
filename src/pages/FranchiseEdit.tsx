@@ -455,13 +455,15 @@ const FranchiseEdit = () => {
     setLoading(true);
     try {
       const actualVenueType = venueType === "other" ? customVenueType : venueType;
-      const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
+      const headOfficeAddress = headOfficeFullAddress || [street, city, state, postalCode, country].filter(Boolean).join(", ");
       const normalizedContactEmail = normalizeEmail(contactEmail);
       const emailChanged = normalizedContactEmail !== originalContactEmail;
 
       const updatePayload: any = {
         title: title.trim(),
         location: headOfficeAddress || null,
+        latitude: headOfficeLat,
+        longitude: headOfficeLng,
         description: description.trim(),
         availability_status: isListedOnExplore ? "available" : "unlisted",
         specifications: {
