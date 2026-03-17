@@ -167,14 +167,35 @@ const VenueRegistration = () => {
       if (editParam) { setEditId(editParam); setIsEditing(true); }
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { navigate("/auth"); return; }
-      const { data: profile, error } = await supabase
+
+      // Try publisher profile first
+      let { data: profile, error } = await supabase
         .from("publisher_profiles").select("id, contact_email, contact_phone").eq("user_id", session.user.id).maybeSingle();
       if (error) { toast({ title: "Error", description: "Failed to load profile.", variant: "destructive" }); return; }
+
+      // If no publisher profile, auto-create one for advertisers
+      if (!profile) {
+        const { data: newProfile, error: createError } = await supabase
+          .from("publisher_profiles")
+          .insert({
+            user_id: session.user.id,
+            publisher_type: "venue" as const,
+            business_name: session.user.email || "My Business",
+            contact_email: session.user.email || "",
+            verified: false,
+            verification_status: "pending" as const,
+          })
+          .select("id, contact_email, contact_phone")
+          .single();
+        if (createError) { toast({ title: "Error", description: "Failed to initialize profile for registration.", variant: "destructive" }); return; }
+        profile = newProfile;
+      }
+
       if (profile) {
         setPublisherId(profile.id);
         if (!editParam) { setContactEmail(profile.contact_email || ""); setContactPhone(profile.contact_phone || ""); }
         if (editParam) await loadVenueData(editParam, profile.id);
-      } else { navigate("/auth"); }
+      }
     };
     checkAuth();
   }, [navigate, toast]);
