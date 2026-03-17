@@ -315,7 +315,7 @@ export const AdMockupPreview = ({ onApprove }: AdMockupPreviewProps) => {
         <div className="space-y-2">
           <Label>Upload Your Creative *</Label>
           <p className="text-sm text-muted-foreground">
-            {uploadedImages.length}/30 photos uploaded (minimum 1 required)
+            {uploadedImages.length}/20 photos uploaded (minimum 1 required)
           </p>
           <div 
             className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
