@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Material unit prices in USD (fallback if not stored)
+// Material unit prices in USD (server-side source of truth)
 const MATERIAL_PRICES_USD: Record<string, number> = {
   vinyl_sticker: 2,
   vinyl: 2,
@@ -19,6 +19,8 @@ const MATERIAL_PRICES_USD: Record<string, number> = {
   poster_frame: 2,
   wall_decal: 2,
 };
+
+const USD_TO_PHP = 56;
 
 interface CheckoutRequest {
   activationId: string;
@@ -33,6 +35,12 @@ interface CheckoutRequest {
   billingZip?: string;
   successUrl: string;
   cancelUrl: string;
+}
+
+interface BranchLineItem {
+  branchName: string;
+  leaseCostPhp: number;
+  materialCostPhp: number;
 }
 
 serve(async (req) => {
@@ -73,147 +81,204 @@ serve(async (req) => {
       throw new Error("Activation not found");
     }
 
+    const adSpace = activation.ad_spaces;
+    const specs = adSpace?.specifications || {};
+    const pricing = adSpace?.pricing || {};
+    const leaseCurrency = specs?.lease_currency || specs?.currency || "PHP";
+    const listingTitle = adSpace?.title || "Ad Space Booking";
+    const adSpaceId = activation.ad_space_id;
+
     console.log("[create-checkout] Activation:", {
-      id: activation.id,
-      status: activation.status,
-      total_amount: activation.total_amount,
-      start_date: activation.start_date,
-      end_date: activation.end_date,
+      id: activation.id, status: activation.status,
+      start_date: activation.start_date, end_date: activation.end_date,
       print_order_id: activation.print_order_id,
     });
 
-    // ── 2. Compute lease cost from ad space rates & booking dates ──
-    let leaseCost = activation.total_amount || activation.estimated_publisher_payout || 0;
+    // ── 2. Compute per-branch lease rate ──
+    const adUnits = specs?.ad_units || pricing?.ad_units || [];
+    const selectedAdUnit = adUnits[0];
+    const weeklyRate = selectedAdUnit?.pricePerWeek || pricing?.weekly || 0;
+    const monthlyRate = selectedAdUnit?.pricePerMonth || pricing?.monthly || 0;
 
-    if (leaseCost <= 0 && activation.start_date && activation.end_date) {
+    let diffWeeks = 1;
+    if (activation.start_date && activation.end_date) {
       const startDate = new Date(activation.start_date);
       const endDate = new Date(activation.end_date);
       const diffDays = Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      const diffWeeks = Math.ceil(diffDays / 7);
-
-      const adSpace = activation.ad_spaces;
-      const specs = adSpace?.specifications || {};
-      const pricing = adSpace?.pricing || {};
-      const adUnits = specs?.ad_units || pricing?.ad_units || [];
-      const selectedAdUnit = adUnits[0];
-      const weeklyRate = selectedAdUnit?.pricePerWeek || pricing?.weekly || 0;
-      const monthlyRate = selectedAdUnit?.pricePerMonth || pricing?.monthly || 0;
-
-      if (diffWeeks >= 4 && monthlyRate > 0) {
-        const fullMonths = Math.floor(diffWeeks / 4);
-        const remainingWeeks = diffWeeks % 4;
-        leaseCost = (fullMonths * monthlyRate) + (remainingWeeks * weeklyRate);
-      } else {
-        leaseCost = diffWeeks * weeklyRate;
-      }
-      console.log("[create-checkout] Computed lease from dates:", { diffWeeks, weeklyRate, monthlyRate, leaseCost });
+      diffWeeks = Math.ceil(diffDays / 7);
     }
 
-    // ── 3. Compute material cost from print orders ──
-    let materialCost = 0;
+    let perBranchLease = 0;
+    if (diffWeeks >= 4 && monthlyRate > 0) {
+      const fullMonths = Math.floor(diffWeeks / 4);
+      const remainingWeeks = diffWeeks % 4;
+      perBranchLease = (fullMonths * monthlyRate) + (remainingWeeks * weeklyRate);
+    } else {
+      perBranchLease = diffWeeks * weeklyRate;
+    }
+
+    console.log("[create-checkout] Per-branch lease:", { diffWeeks, weeklyRate, monthlyRate, perBranchLease });
+
+    // ── 3. Fetch branch data & compute per-branch materials ──
+    // Get franchise branches
+    const { data: fBranches } = await supabase
+      .from("franchise_branches")
+      .select("id, place_name, full_address")
+      .eq("franchise_id", adSpaceId);
+
+    // Get advertiser branches
+    const { data: advBranches } = await supabase
+      .from("advertiser_branches")
+      .select("id, branch_name, full_address, city")
+      .eq("listing_id", adSpaceId)
+      .eq("is_ad_space_listing", true);
+
+    // Build branch map
+    const branchMap = new Map<string, string>();
+    (fBranches || []).forEach((b: any) => branchMap.set(b.id, b.place_name));
+    (advBranches || []).forEach((b: any) => branchMap.set(b.id, b.branch_name || b.full_address));
+
+    // Get material data from print order
+    let branchLineItems: BranchLineItem[] = [];
+    let totalMaterialCost = 0;
 
     if (activation.print_order_id) {
-      // Try advertiser_print_orders first
       const { data: advPrintOrder } = await supabase
         .from("advertiser_print_orders")
-        .select("total_cost, materials")
+        .select("total_cost, materials, branch_ids")
         .eq("id", activation.print_order_id)
         .single();
 
-      materialCost = advPrintOrder?.total_cost || 0;
-
-      // Fallback: calculate from materials JSON
-      if (materialCost <= 0 && advPrintOrder?.materials) {
+      if (advPrintOrder?.materials) {
         const mats = advPrintOrder.materials as any;
         const branches = mats?.branches || [];
+
         for (const branch of branches) {
+          const branchId = branch?.branchId || "";
+          const branchName = branchMap.get(branchId) || branch?.branchName || "Branch";
+          let branchMatCost = 0;
+
           for (const mat of (branch?.materials || [])) {
             if (mat.quantity > 0) {
               const unitPrice = MATERIAL_PRICES_USD[mat.materialType] || 2;
-              materialCost += unitPrice * mat.quantity;
+              branchMatCost += unitPrice * mat.quantity;
             }
           }
+
+          totalMaterialCost += branchMatCost;
+          branchLineItems.push({
+            branchName,
+            leaseCostPhp: 0, // will be set below
+            materialCostPhp: 0,
+          });
+        }
+
+        // If materials JSON has branch data, use those branch IDs for lease
+        if (branchLineItems.length > 0) {
+          // Each branch gets the per-branch lease
+          branchLineItems = branchLineItems.map((item) => ({
+            ...item,
+            leaseCostPhp: leaseCurrency === "USD" ? perBranchLease * USD_TO_PHP : perBranchLease,
+          }));
         }
       }
 
-      // Final fallback to print_orders table
-      if (materialCost <= 0) {
-        const { data: printOrder } = await supabase
-          .from("print_orders")
-          .select("total_price")
-          .eq("id", activation.print_order_id)
-          .single();
-        if (printOrder?.total_price) materialCost = printOrder.total_price;
+      // Fallback: use stored total_cost
+      if (totalMaterialCost <= 0 && advPrintOrder?.total_cost) {
+        totalMaterialCost = advPrintOrder.total_cost;
       }
 
-      console.log("[create-checkout] Material cost:", materialCost);
+      // Re-compute per-branch material costs in PHP
+      if (advPrintOrder?.materials) {
+        const mats = advPrintOrder.materials as any;
+        const branches = mats?.branches || [];
+        branchLineItems = branches.map((branch: any, i: number) => {
+          const branchId = branch?.branchId || "";
+          const branchName = branchMap.get(branchId) || branch?.branchName || `Branch ${i + 1}`;
+          let branchMatCost = 0;
+          for (const mat of (branch?.materials || [])) {
+            if (mat.quantity > 0) {
+              const unitPrice = MATERIAL_PRICES_USD[mat.materialType] || 2;
+              branchMatCost += unitPrice * mat.quantity;
+            }
+          }
+          const matPhp = leaseCurrency === "USD" ? branchMatCost * USD_TO_PHP : branchMatCost;
+          const leasePhp = leaseCurrency === "USD" ? perBranchLease * USD_TO_PHP : perBranchLease;
+          return { branchName, leaseCostPhp: leasePhp, materialCostPhp: matPhp };
+        });
+      }
     }
 
-    // ── 4. Determine currency & convert ──
-    const specs = activation.ad_spaces?.specifications || {};
-    const leaseCurrency = specs?.lease_currency || specs?.currency || "PHP";
-    const listingTitle = activation.ad_spaces?.title || "Ad Space Booking";
+    // If no branch data from print order, count branches and compute flat lease
+    if (branchLineItems.length === 0) {
+      const branchCount = Math.max((fBranches?.length || 0) + (advBranches?.length || 0), 1);
+      // Use total activation amount or compute from branch count
+      let totalLease = activation.total_amount || activation.estimated_publisher_payout || 0;
+      if (totalLease <= 0) totalLease = perBranchLease * branchCount;
 
-    // Convert amounts to PHP if needed
-    const USD_TO_PHP = 56;
-    let leasePhp = leaseCurrency === "USD" ? leaseCost * USD_TO_PHP : leaseCost;
-    let materialPhp = leaseCurrency === "USD" ? materialCost * USD_TO_PHP : materialCost;
-
-    // If both are 0, it's invalid
-    const totalPhp = leasePhp + materialPhp;
-    if (totalPhp <= 0) {
-      throw new Error("Invalid booking amount. Please ensure dates and pricing are configured.");
+      const leasePhp = leaseCurrency === "USD" ? totalLease * USD_TO_PHP : totalLease;
+      branchLineItems = [{
+        branchName: listingTitle,
+        leaseCostPhp: leasePhp,
+        materialCostPhp: 0,
+      }];
     }
 
-    const leaseCentavos = Math.round(leasePhp * 100);
-    const materialCentavos = Math.round(materialPhp * 100);
-    const totalCentavos = leaseCentavos + materialCentavos;
+    // ── 4. Build PayMongo line items (per-branch) ──
+    const lineItems: any[] = [];
+    let totalCentavos = 0;
+
+    for (const item of branchLineItems) {
+      if (item.leaseCostPhp > 0) {
+        const centavos = Math.round(item.leaseCostPhp * 100);
+        lineItems.push({
+          currency: "PHP",
+          amount: centavos,
+          description: `Lease: ${activation.start_date || "N/A"} to ${activation.end_date || "N/A"}`,
+          name: `Lease — ${item.branchName}`,
+          quantity: 1,
+        });
+        totalCentavos += centavos;
+      }
+      if (item.materialCostPhp > 0) {
+        const centavos = Math.round(item.materialCostPhp * 100);
+        lineItems.push({
+          currency: "PHP",
+          amount: centavos,
+          description: `Print materials for ${item.branchName}`,
+          name: `Materials — ${item.branchName}`,
+          quantity: 1,
+        });
+        totalCentavos += centavos;
+      }
+    }
+
+    // Fallback: if no line items were generated
+    if (lineItems.length === 0) {
+      // Use activation total
+      let fallbackAmount = activation.total_amount || activation.estimated_publisher_payout || 0;
+      if (fallbackAmount <= 0) fallbackAmount = perBranchLease;
+      const fallbackPhp = leaseCurrency === "USD" ? fallbackAmount * USD_TO_PHP : fallbackAmount;
+      const centavos = Math.round(fallbackPhp * 100);
+      lineItems.push({
+        currency: "PHP",
+        amount: centavos,
+        description: `Ad Space Booking`,
+        name: listingTitle,
+        quantity: 1,
+      });
+      totalCentavos = centavos;
+    }
 
     if (totalCentavos < 100) {
       throw new Error("Minimum payment amount is ₱1.00");
     }
 
-    console.log("[create-checkout] Pricing breakdown:", {
-      leaseCost, materialCost, leaseCurrency,
-      leasePhp, materialPhp, totalPhp,
-      leaseCentavos, materialCentavos, totalCentavos,
-    });
+    const totalPhp = totalCentavos / 100;
 
-    // ── 5. Build PayMongo line items ──
-    const lineItems: any[] = [];
+    console.log("[create-checkout] Line items:", lineItems.length, "Total PHP:", totalPhp);
 
-    if (leaseCentavos > 0) {
-      lineItems.push({
-        currency: "PHP",
-        amount: leaseCentavos,
-        description: `Booking: ${activation.start_date || "N/A"} to ${activation.end_date || "N/A"}`,
-        name: `Ad Space Lease — ${listingTitle}`,
-        quantity: 1,
-      });
-    }
-
-    if (materialCentavos > 0) {
-      lineItems.push({
-        currency: "PHP",
-        amount: materialCentavos,
-        description: "Print materials for all selected branches",
-        name: "Print Materials",
-        quantity: 1,
-      });
-    }
-
-    // Fallback: single line item if somehow only total is available
-    if (lineItems.length === 0) {
-      lineItems.push({
-        currency: "PHP",
-        amount: totalCentavos,
-        description: `Ad Space Booking — ${listingTitle}`,
-        name: "Ad Space Booking",
-        quantity: 1,
-      });
-    }
-
-    // ── 6. Map payment method ──
+    // ── 5. Map payment method ──
     const methodMap: Record<string, string[]> = {
       card: ["card"],
       gcash: ["gcash"],
@@ -221,7 +286,7 @@ serve(async (req) => {
     };
     const paymentMethodTypes = methodMap[paymentMethod || "card"] || ["card", "gcash", "paymaya"];
 
-    // ── 7. Create PayMongo Checkout Session ──
+    // ── 6. Create PayMongo Checkout Session ──
     const checkoutPayload = {
       data: {
         attributes: {
@@ -240,9 +305,8 @@ serve(async (req) => {
           },
           metadata: {
             activation_id: activationId,
-            lease_cost_php: leasePhp.toString(),
-            material_cost_php: materialPhp.toString(),
             total_php: totalPhp.toString(),
+            branch_count: branchLineItems.length.toString(),
             buyer_name: buyerName,
             buyer_email: buyerEmail,
             company_name: companyName || "",
@@ -278,8 +342,8 @@ serve(async (req) => {
       throw new Error("Payment gateway returned an invalid response");
     }
 
-    // ── 8. Update activation with server-computed total ──
-    const totalUsd = leaseCurrency === "USD" ? (leaseCost + materialCost) : totalPhp / USD_TO_PHP;
+    // ── 7. Update activation with server-computed total ──
+    const totalUsd = leaseCurrency === "USD" ? totalPhp / USD_TO_PHP : totalPhp;
     await supabase
       .from("activations")
       .update({
@@ -289,15 +353,14 @@ serve(async (req) => {
       })
       .eq("id", activationId);
 
-    console.log("[create-checkout] SUCCESS — Session:", sessionId);
+    console.log("[create-checkout] SUCCESS — Session:", sessionId, "Total PHP:", totalPhp);
 
     return new Response(
       JSON.stringify({
         checkout_url: checkoutUrl,
         sessionId,
-        lease_php: leasePhp,
-        material_php: materialPhp,
         total_php: totalPhp,
+        branch_count: branchLineItems.length,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
