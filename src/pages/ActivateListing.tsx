@@ -1464,6 +1464,10 @@ const ActivateListing = () => {
               listingTitle={listing?.title || "Ad Space"}
               onPaymentSuccess={handlePayNow}
               onBack={() => setCurrentStep("print-order")}
+              branchConfigs={branchConfigs}
+              selectedBranchIds={selectedBranchIds.size > 0 ? selectedBranchIds : bookingSelectedBranchIds}
+              startDate={startDate}
+              endDate={endDate}
               orderParams={{
                 locations: Math.max(selectedBranchIds.size || bookingSelectedBranchIds.size, 1),
                 weeks: startDate && endDate
