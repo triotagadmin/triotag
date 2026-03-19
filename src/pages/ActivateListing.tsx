@@ -904,37 +904,6 @@ const ActivateListing = () => {
 
   }
 
-  // Restrict access to advertisers only
-  if (!isAdvertiser) {
-    return (
-      <div className="min-h-screen bg-muted/30">
-        <Navigation />
-        <div className="container mx-auto px-6 py-12 max-w-2xl">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-destructive">Access Restricted</CardTitle>
-              <CardDescription>
-                Only advertiser accounts can activate listings. Publishers cannot activate their own or other listings.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                If you're an advertiser, please make sure you're logged in with your advertiser account.
-              </p>
-              <div className="flex gap-3">
-                <Button onClick={() => navigate("/auth")} variant="default">
-                  Sign In as Advertiser
-                </Button>
-                <Button onClick={() => navigate(-1)} variant="outline">
-                  Go Back
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>);
-
-  }
 
   if (!listing) {
     return (
