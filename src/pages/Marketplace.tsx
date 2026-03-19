@@ -304,14 +304,6 @@ const Marketplace = () => {
   };
 
   const handleListingClick = (listing: MarketplaceListing) => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to view listing details and make transactions."
-      });
-      navigate("/auth");
-      return;
-    }
     navigate(`/venue/${listing.id}`);
   };
 
