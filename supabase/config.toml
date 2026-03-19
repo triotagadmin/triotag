@@ -38,9 +38,8 @@ verify_jwt = false
 
 [functions.paymongo-webhook]
 verify_jwt = false
- 
- [functions.activation-checkout]
- verify_jwt = false
+
+
  
  [functions.activation-payment-callback]
  verify_jwt = false
