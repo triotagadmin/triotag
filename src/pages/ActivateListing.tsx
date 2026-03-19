@@ -111,26 +111,9 @@ const ActivateListing = () => {
   const [detectedCurrency, setDetectedCurrency] = useState("USD");
   const [branchOrderSubmitting, setBranchOrderSubmitting] = useState(false);
 
-  // Check if user is an advertiser
+  // Allow all users (including guests) to access the booking flow
   useEffect(() => {
-    const checkAdvertiserAccess = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setIsAdvertiser(false);
-        return;
-      }
-
-      // Check if user has an advertiser profile
-      const { data: advertiserProfile } = await supabase.
-      from("advertiser_profiles").
-      select("id").
-      eq("user_id", session.user.id).
-      maybeSingle();
-
-      setIsAdvertiser(!!advertiserProfile);
-    };
-
-    checkAdvertiserAccess();
+    setIsAdvertiser(true);
   }, []);
 
   useEffect(() => {
