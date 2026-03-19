@@ -304,14 +304,6 @@ const Marketplace = () => {
   };
 
   const handleListingClick = (listing: MarketplaceListing) => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to view listing details and make transactions."
-      });
-      navigate("/auth");
-      return;
-    }
     navigate(`/venue/${listing.id}`);
   };
 
@@ -565,7 +557,7 @@ const Marketplace = () => {
 
                   <div className="flex items-center gap-2 mt-4">
                     <Button className="flex-1">
-                      {user ? "View Details" : "Log in to View"}
+                      View Details
                     </Button>
                     <ShareButtons
                       url={`${window.location.origin}/venue/${listing.id}`}
