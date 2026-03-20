@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreditCard, Smartphone, Loader2, CheckCircle, Shield, Lock, ExternalLink, Building2, Wallet, MapPin, Package, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, Shield, Lock, ExternalLink, Building2, MapPin, Package, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrencyConversion } from "@/hooks/useCurrencyConversion";
@@ -35,13 +35,7 @@ interface PaymentGatewayProps {
   endDate?: Date;
 }
 
-type PaymentMethod = "card" | "gcash" | "maya";
-
-const PAYMENT_METHODS = [
-  { id: "card" as PaymentMethod, name: "Credit / Debit Card", description: "Pay securely with Visa or Mastercard", icon: CreditCard },
-  { id: "gcash" as PaymentMethod, name: "GCash", description: "Pay instantly with your GCash e-wallet", icon: Smartphone },
-  { id: "maya" as PaymentMethod, name: "Maya", description: "Pay with your Maya digital wallet", icon: Wallet },
-];
+// Payment methods are now dynamically fetched by the backend from PayMongo merchant capabilities
 
 const COUNTRIES = [
   { code: "PH", name: "Philippines" },
@@ -226,7 +220,6 @@ export const PaymentGateway = ({
   activationId, listingTitle, onPaymentSuccess, onBack, onCancelBooking,
   disabled = false, orderParams, branchConfigs, selectedBranchIds, startDate, endDate,
 }: PaymentGatewayProps) => {
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("card");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [bookingAmount, setBookingAmount] = useState(0);
@@ -371,7 +364,6 @@ export const PaymentGateway = ({
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
           activationId,
-          paymentMethod: selectedMethod,
           buyerName,
           buyerEmail,
           buyerPhone,
@@ -481,58 +473,23 @@ export const PaymentGateway = ({
         </CardContent>
       </Card>
 
-      {/* Payment Method */}
+      {/* Payment Info */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2"><CreditCard className="h-5 w-5" />Payment Method</CardTitle>
-          <CardDescription>Select your preferred payment option</CardDescription>
+          <CardTitle className="text-lg flex items-center gap-2"><Shield className="h-5 w-5 text-primary" />Payment</CardTitle>
+          <CardDescription>You'll choose your payment method on the secure PayMongo checkout page</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {PAYMENT_METHODS.map((method) => {
-              const Icon = method.icon;
-              const isSelected = selectedMethod === method.id;
-              return (
-                <div
-                  key={method.id}
-                  className={`relative flex flex-col rounded-xl border-2 p-4 transition-all cursor-pointer ${
-                    isSelected ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" : "border-border hover:border-primary/50 hover:bg-muted/50"
-                  }`}
-                  onClick={() => !isProcessing && setSelectedMethod(method.id)}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`p-2.5 rounded-xl ${isSelected ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1"><p className="font-semibold text-sm">{method.name}</p></div>
-                    {isSelected && <CheckCircle className="h-5 w-5 text-primary" />}
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-3">{method.description}</p>
-                  <div className="flex items-center gap-2 mt-auto">
-                    {method.id === "card" && (
-                      <>
-                        <div className="bg-[#1A1F71] text-white text-[10px] font-bold px-2 py-1 rounded italic">VISA</div>
-                        <div className="flex"><div className="w-4 h-4 bg-[#EB001B] rounded-full -mr-1.5"></div><div className="w-4 h-4 bg-[#F79E1B] rounded-full opacity-90"></div></div>
-                      </>
-                    )}
-                    {method.id === "gcash" && <div className="bg-[#007DFE] text-white text-[10px] font-bold px-3 py-1 rounded-full">GCash</div>}
-                    {method.id === "maya" && <div className="bg-[#22B24C] text-white text-[10px] font-bold px-3 py-1 rounded-full">Maya</div>}
-                  </div>
-                </div>
-              );
-            })}
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">QRPh</div>
+            <div className="bg-[#22B24C] text-white text-xs font-bold px-3 py-1.5 rounded-full">Maya</div>
+            <div className="bg-[#00B14F] text-white text-xs font-bold px-3 py-1.5 rounded-full">GrabPay</div>
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">BDO Online</div>
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">BPI Online</div>
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">Landbank</div>
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">Metrobank</div>
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">UnionBank</div>
           </div>
-          {selectedMethod === "card" && (
-            <div className="bg-muted/50 rounded-lg p-4 border mt-2">
-              <div className="flex items-start gap-3">
-                <Lock className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <p className="font-medium text-sm">Secure Card Payment</p>
-                  <p className="text-xs text-muted-foreground mt-1">Your card details are entered directly on PayMongo's secure checkout page. TrioTag never stores your card information.</p>
-                </div>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
@@ -566,11 +523,11 @@ export const PaymentGateway = ({
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Lock className="h-3 w-3" /><span>256-bit SSL encrypted payment</span>
         </div>
-        <div className="flex items-center gap-3 opacity-60">
-          <div className="bg-[#1A1F71] text-white text-[8px] font-bold px-1.5 py-0.5 rounded italic">VISA</div>
-          <div className="flex"><div className="w-3 h-3 bg-[#EB001B] rounded-full -mr-1"></div><div className="w-3 h-3 bg-[#F79E1B] rounded-full opacity-90"></div></div>
-          <div className="bg-[#007DFE] text-white text-[8px] font-bold px-2 py-0.5 rounded-full">GCash</div>
+        <div className="flex items-center flex-wrap gap-2 opacity-60">
           <div className="bg-[#22B24C] text-white text-[8px] font-bold px-2 py-0.5 rounded-full">Maya</div>
+          <div className="bg-[#00B14F] text-white text-[8px] font-bold px-2 py-0.5 rounded-full">GrabPay</div>
+          <div className="text-muted-foreground text-[8px] font-medium px-2 py-0.5 rounded-full bg-muted">QRPh</div>
+          <div className="text-muted-foreground text-[8px] font-medium px-2 py-0.5 rounded-full bg-muted">Online Banking</div>
         </div>
       </div>
 

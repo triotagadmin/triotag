@@ -9,20 +9,11 @@ const corsHeaders = {
 
 // ── Canonical material prices (USD) — must match src/lib/printProducts.ts ──
 const MATERIAL_UNIT_PRICES_USD: Record<string, number> = {
-  "vinyl-sticker": 18,
-  "vinyl_sticker": 18,
-  "vinyl": 18,
-  "table-tent-card": 18,
-  "table_tent_card": 18,
-  "table-tent-acrylic": 32,
-  "table_tent_acrylic": 32,
-  "acrylic_table_tent": 32,
-  "acrylic": 32,
-  "coroplast-a-frame": 66,
-  "coroplast_stand": 66,
-  "coroplast": 66,
-  "poster_frame": 18,
-  "wall_decal": 18,
+  "vinyl-sticker": 18, "vinyl_sticker": 18, "vinyl": 18,
+  "table-tent-card": 18, "table_tent_card": 18,
+  "table-tent-acrylic": 32, "table_tent_acrylic": 32, "acrylic_table_tent": 32, "acrylic": 32,
+  "coroplast-a-frame": 66, "coroplast_stand": 66, "coroplast": 66,
+  "poster_frame": 18, "wall_decal": 18,
 };
 
 const USD_TO_PHP = 56;
@@ -30,6 +21,49 @@ const USD_TO_PHP = 56;
 function getMaterialPrice(materialType: string): number {
   return MATERIAL_UNIT_PRICES_USD[materialType] ?? 18;
 }
+
+// ── Fetch allowed payment methods from PayMongo merchant capabilities ──
+async function fetchAllowedPaymentMethods(secretKey: string): Promise<string[]> {
+  try {
+    const res = await fetch("https://api.paymongo.com/v1/merchants/capabilities/payment_methods", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Basic ${btoa(secretKey + ":")}`,
+      },
+    });
+
+    if (!res.ok) {
+      console.warn("[create-checkout] Failed to fetch merchant payment methods, status:", res.status);
+      const errBody = await res.text();
+      console.warn("[create-checkout] Error body:", errBody);
+      return [];
+    }
+
+    const data = await res.json();
+    // PayMongo returns { data: [ { attributes: { payment_method_type: "..." } }, ... ] }
+    const methods: string[] = [];
+    if (Array.isArray(data?.data)) {
+      for (const item of data.data) {
+        const methodType = item?.attributes?.payment_method_type;
+        if (methodType && typeof methodType === "string") {
+          methods.push(methodType);
+        }
+      }
+    }
+    console.log("[create-checkout] Merchant allowed payment methods:", methods);
+    return methods;
+  } catch (err) {
+    console.error("[create-checkout] Error fetching merchant payment methods:", err);
+    return [];
+  }
+}
+
+// All PayMongo Checkout-supported payment method types
+const ALL_CHECKOUT_METHODS = [
+  "card", "gcash", "grab_pay", "paymaya", "qrph",
+  "dob", "billease", "shopee_pay",
+];
 
 interface CheckoutRequest {
   activationId: string;
@@ -61,7 +95,7 @@ serve(async (req) => {
 
     const body: CheckoutRequest = await req.json();
     const {
-      activationId, paymentMethod, buyerName, buyerEmail, buyerPhone,
+      activationId, buyerName, buyerEmail, buyerPhone,
       companyName, billingAddress, billingCity, billingCountry, billingZip,
       successUrl, cancelUrl,
     } = body;
@@ -113,7 +147,6 @@ serve(async (req) => {
       perBranchLease = diffWeeks * weeklyRate;
     }
 
-    // Convert lease to PHP once
     const perBranchLeasePhp = leaseCurrency === "USD" ? perBranchLease * USD_TO_PHP : perBranchLease;
 
     // ── 3. Fetch branches ──
@@ -132,7 +165,7 @@ serve(async (req) => {
     (fBranches || []).forEach((b: any) => branchMap.set(b.id, b.place_name));
     (advBranches || []).forEach((b: any) => branchMap.set(b.id, b.branch_name || b.full_address));
 
-    // ── 4. Build per-branch line items (single pass) ──
+    // ── 4. Build per-branch line items ──
     interface BranchItem { branchName: string; leasePhp: number; materialPhp: number; }
     const branchItems: BranchItem[] = [];
 
@@ -160,16 +193,12 @@ serve(async (req) => {
 
           const materialPhp = leaseCurrency === "USD" ? branchMatUsd * USD_TO_PHP : branchMatUsd;
 
-          branchItems.push({
-            branchName,
-            leasePhp: perBranchLeasePhp,
-            materialPhp,
-          });
+          branchItems.push({ branchName, leasePhp: perBranchLeasePhp, materialPhp });
         }
       }
     }
 
-    // Fallback: no branch data from print order — use all available branches
+    // Fallback: no branch data from print order
     if (branchItems.length === 0) {
       const allBranches = [...(fBranches || []), ...(advBranches || [])];
       if (allBranches.length > 0) {
@@ -181,14 +210,9 @@ serve(async (req) => {
           });
         }
       } else {
-        // Single-location fallback
         let totalLease = activation.total_amount || activation.estimated_publisher_payout || perBranchLease;
         const leasePhp = leaseCurrency === "USD" ? totalLease * USD_TO_PHP : totalLease;
-        branchItems.push({
-          branchName: listingTitle,
-          leasePhp,
-          materialPhp: 0,
-        });
+        branchItems.push({ branchName: listingTitle, leasePhp, materialPhp: 0 });
       }
     }
 
@@ -199,10 +223,9 @@ serve(async (req) => {
 
     for (const item of branchItems) {
       if (item.leasePhp > 0) {
-        const centavos = Math.round(item.leasePhp * 100);
         lineItems.push({
           currency: "PHP",
-          amount: centavos,
+          amount: Math.round(item.leasePhp * 100),
           name: `Lease — ${item.branchName}`,
           description: `Lease: ${activation.start_date || "N/A"} to ${activation.end_date || "N/A"}`,
           quantity: 1,
@@ -210,10 +233,9 @@ serve(async (req) => {
         totalLeasePhp += item.leasePhp;
       }
       if (item.materialPhp > 0) {
-        const centavos = Math.round(item.materialPhp * 100);
         lineItems.push({
           currency: "PHP",
-          amount: centavos,
+          amount: Math.round(item.materialPhp * 100),
           name: `Materials — ${item.branchName}`,
           description: `Print materials for ${item.branchName}`,
           quantity: 1,
@@ -225,7 +247,6 @@ serve(async (req) => {
     const totalPhp = totalLeasePhp + totalMaterialPhp;
     const totalCentavos = Math.round(totalPhp * 100);
 
-    // Guarantee at least one valid line item
     if (lineItems.length === 0 || totalCentavos < 100) {
       throw new Error(`Computed total is too low (₱${totalPhp.toFixed(2)}). Please ensure lease rates and materials are configured.`);
     }
@@ -238,13 +259,23 @@ serve(async (req) => {
       lineItemCount: lineItems.length,
     });
 
-    // ── 6. Payment method mapping ──
-    const methodMap: Record<string, string[]> = {
-      card: ["card"],
-      gcash: ["gcash"],
-      maya: ["paymaya"],
-    };
-    const paymentMethodTypes = methodMap[paymentMethod || ""] || ["card", "gcash", "paymaya"];
+    // ── 6. Dynamically fetch allowed payment methods from PayMongo ──
+    const merchantMethods = await fetchAllowedPaymentMethods(paymongoSecretKey);
+
+    let paymentMethodTypes: string[];
+    if (merchantMethods.length > 0) {
+      // Intersect merchant-allowed methods with Checkout-supported methods
+      paymentMethodTypes = merchantMethods.filter((m) => ALL_CHECKOUT_METHODS.includes(m));
+      if (paymentMethodTypes.length === 0) {
+        // Merchant has methods but none match Checkout-supported — use merchant list as-is
+        paymentMethodTypes = merchantMethods;
+      }
+    } else {
+      // Fallback: use the user's known active methods
+      paymentMethodTypes = ["qrph", "grab_pay", "paymaya", "dob"];
+    }
+
+    console.log("[create-checkout] Using payment_method_types:", paymentMethodTypes);
 
     // ── 7. Create PayMongo Checkout Session ──
     const checkoutPayload = {
@@ -270,6 +301,7 @@ serve(async (req) => {
             buyer_name: buyerName,
             buyer_email: buyerEmail,
             company_name: companyName || "",
+            listing_title: listingTitle,
             type: "activation_payment",
           },
         },
@@ -301,7 +333,7 @@ serve(async (req) => {
       throw new Error("Payment gateway returned an invalid response");
     }
 
-    // ── 8. Update activation with canonical total (stored in PHP) ──
+    // ── 8. Update activation with canonical total (PHP) ──
     await supabase
       .from("activations")
       .update({
@@ -322,6 +354,7 @@ serve(async (req) => {
         materialPhp: Math.round(totalMaterialPhp * 100) / 100,
         totalPhp: Math.round(totalPhp * 100) / 100,
         branchCount: branchItems.length,
+        paymentMethods: paymentMethodTypes,
         lineItems: lineItems.map((li) => ({ name: li.name, amount: li.amount / 100, currency: li.currency })),
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
