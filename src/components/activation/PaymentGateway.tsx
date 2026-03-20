@@ -220,7 +220,6 @@ export const PaymentGateway = ({
   activationId, listingTitle, onPaymentSuccess, onBack, onCancelBooking,
   disabled = false, orderParams, branchConfigs, selectedBranchIds, startDate, endDate,
 }: PaymentGatewayProps) => {
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("card");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [bookingAmount, setBookingAmount] = useState(0);
