@@ -473,58 +473,23 @@ export const PaymentGateway = ({
         </CardContent>
       </Card>
 
-      {/* Payment Method */}
+      {/* Payment Info */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2"><CreditCard className="h-5 w-5" />Payment Method</CardTitle>
-          <CardDescription>Select your preferred payment option</CardDescription>
+          <CardTitle className="text-lg flex items-center gap-2"><Shield className="h-5 w-5 text-primary" />Payment</CardTitle>
+          <CardDescription>You'll choose your payment method on the secure PayMongo checkout page</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {PAYMENT_METHODS.map((method) => {
-              const Icon = method.icon;
-              const isSelected = selectedMethod === method.id;
-              return (
-                <div
-                  key={method.id}
-                  className={`relative flex flex-col rounded-xl border-2 p-4 transition-all cursor-pointer ${
-                    isSelected ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" : "border-border hover:border-primary/50 hover:bg-muted/50"
-                  }`}
-                  onClick={() => !isProcessing && setSelectedMethod(method.id)}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`p-2.5 rounded-xl ${isSelected ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1"><p className="font-semibold text-sm">{method.name}</p></div>
-                    {isSelected && <CheckCircle className="h-5 w-5 text-primary" />}
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-3">{method.description}</p>
-                  <div className="flex items-center gap-2 mt-auto">
-                    {method.id === "card" && (
-                      <>
-                        <div className="bg-[#1A1F71] text-white text-[10px] font-bold px-2 py-1 rounded italic">VISA</div>
-                        <div className="flex"><div className="w-4 h-4 bg-[#EB001B] rounded-full -mr-1.5"></div><div className="w-4 h-4 bg-[#F79E1B] rounded-full opacity-90"></div></div>
-                      </>
-                    )}
-                    {method.id === "gcash" && <div className="bg-[#007DFE] text-white text-[10px] font-bold px-3 py-1 rounded-full">GCash</div>}
-                    {method.id === "maya" && <div className="bg-[#22B24C] text-white text-[10px] font-bold px-3 py-1 rounded-full">Maya</div>}
-                  </div>
-                </div>
-              );
-            })}
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">QRPh</div>
+            <div className="bg-[#22B24C] text-white text-xs font-bold px-3 py-1.5 rounded-full">Maya</div>
+            <div className="bg-[#00B14F] text-white text-xs font-bold px-3 py-1.5 rounded-full">GrabPay</div>
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">BDO Online</div>
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">BPI Online</div>
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">Landbank</div>
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">Metrobank</div>
+            <div className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full">UnionBank</div>
           </div>
-          {selectedMethod === "card" && (
-            <div className="bg-muted/50 rounded-lg p-4 border mt-2">
-              <div className="flex items-start gap-3">
-                <Lock className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <p className="font-medium text-sm">Secure Card Payment</p>
-                  <p className="text-xs text-muted-foreground mt-1">Your card details are entered directly on PayMongo's secure checkout page. TrioTag never stores your card information.</p>
-                </div>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
