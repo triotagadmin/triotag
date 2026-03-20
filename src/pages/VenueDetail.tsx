@@ -172,8 +172,9 @@ const VenueDetail = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-8">
+          {/* Left column: Photos, Pricing & Contact */}
+          <div className="lg:col-span-1 space-y-6">
             {images.length > 0 && <Card>
                 <CardContent className="p-6">
                   <Carousel className="w-full">
@@ -195,74 +196,6 @@ const VenueDetail = () => {
                 </CardContent>
               </Card>}
 
-            <Card>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-3xl mb-2">{venue.title}</CardTitle>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {venue.specifications?.venue_type && <Badge variant="secondary">
-                          {venue.specifications.venue_type}
-                        </Badge>}
-                      {venue.specifications?.industry_category && <Badge variant="outline">
-                          {venue.specifications.industry_category}
-                        </Badge>}
-                      {isFranchise && <Badge className="bg-primary/10 text-primary border-primary/20">
-                          <Building className="h-3 w-3 mr-1" />
-                          Multi-Location
-                        </Badge>}
-                    </div>
-                  </div>
-                  <Badge variant={venue.approval_status === "approved" ? "default" : venue.approval_status === "pending" ? "secondary" : "destructive"}>
-                    {venue.approval_status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Description</h3>
-                  <p className="text-white">{venue.description}</p>
-                </div>
-
-                {/* Show total locations count instead of a single address */}
-                {branchCount > 0 &&
-              <div className="flex items-start gap-2">
-                    <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <h3 className="font-semibold">{branchCount} Location{branchCount !== 1 ? "s" : ""}</h3>
-                      <p className="text-muted-foreground text-sm">
-                        This brand has {branchCount} branch{branchCount !== 1 ? "es" : ""} available for advertising.
-                      </p>
-                    </div>
-                  </div>
-              }
-
-
-                {venue.specifications?.operating_hours && <div className="flex items-start gap-2">
-                    <Clock className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <h3 className="font-semibold">Operating Hours</h3>
-                      <p className="text-muted-foreground">
-                        {venue.specifications.operating_hours}
-                      </p>
-                    </div>
-                  </div>}
-
-                {venue.specifications?.ad_units && venue.specifications.ad_units.length > 0 && <div>
-                    <h3 className="font-semibold mb-2">Available Ad Units</h3>
-                    <div className="flex flex-wrap gap-2 justify-start">
-                      {venue.specifications.ad_units.map((unit: any, idx: number) => <Button key={idx} variant="cyber" size="sm" className="text-xs h-7 px-3">
-                          {AD_UNIT_TYPE_LABELS[unit.type] || unit.type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
-                        </Button>)}
-                    </div>
-                  </div>}
-              </CardContent>
-            </Card>
-
-            {venue.specifications?.ooh_details && <OOHAdvertisingDetails oohDetails={venue.specifications.ooh_details} />}
-          </div>
-
-          <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -308,10 +241,8 @@ const VenueDetail = () => {
                     <span>Ready to advertise here? Activate this micro OOH ad space now!</span>
                   </div>}
 
-                {/* Bookmark / Activate buttons */}
                 {(() => {
                 const isLeased = user?.id ? (venue.leased_advertiser_ids || []).includes(user.id) : false;
-
                 return (
                   <>
                       {isAdvertiser && user && !isLeased &&
@@ -339,7 +270,6 @@ const VenueDetail = () => {
                           toast({ title: "Error", description: err.message, variant: "destructive" });
                         } finally {setLeasing(false);}
                       }}>
-                      
                           {leasing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Bookmark className="h-4 w-4 mr-2" />}
                           Bookmark This Ad Space
                         </Button>
@@ -354,13 +284,79 @@ const VenueDetail = () => {
                         Activate
                       </Button>
                     </>);
-
               })()}
                 <div className="mt-3">
                   <ShareButtons url={ogShareUrl} title={venue.title} description={venue.description} />
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Right column: Listing information (visible to all) */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-3xl mb-2">{venue.title}</CardTitle>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {venue.specifications?.venue_type && <Badge variant="secondary">
+                          {venue.specifications.venue_type}
+                        </Badge>}
+                      {venue.specifications?.industry_category && <Badge variant="outline">
+                          {venue.specifications.industry_category}
+                        </Badge>}
+                      {isFranchise && <Badge className="bg-primary/10 text-primary border-primary/20">
+                          <Building className="h-3 w-3 mr-1" />
+                          Multi-Location
+                        </Badge>}
+                    </div>
+                  </div>
+                  <Badge variant={venue.approval_status === "approved" ? "default" : venue.approval_status === "pending" ? "secondary" : "destructive"}>
+                    {venue.approval_status}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-2">Description</h3>
+                  <p className="text-foreground">{venue.description}</p>
+                </div>
+
+                {branchCount > 0 &&
+              <div className="flex items-start gap-2">
+                    <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <h3 className="font-semibold">{branchCount} Location{branchCount !== 1 ? "s" : ""}</h3>
+                      <p className="text-muted-foreground text-sm">
+                        This brand has {branchCount} branch{branchCount !== 1 ? "es" : ""} available for advertising.
+                      </p>
+                    </div>
+                  </div>
+              }
+
+                {venue.specifications?.operating_hours && <div className="flex items-start gap-2">
+                    <Clock className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <h3 className="font-semibold">Operating Hours</h3>
+                      <p className="text-muted-foreground">
+                        {venue.specifications.operating_hours}
+                      </p>
+                    </div>
+                  </div>}
+
+                {venue.specifications?.ad_units && venue.specifications.ad_units.length > 0 && <div>
+                    <h3 className="font-semibold mb-2">Available Ad Units</h3>
+                    <div className="flex flex-wrap gap-2 justify-start">
+                      {venue.specifications.ad_units.map((unit: any, idx: number) => <Button key={idx} variant="cyber" size="sm" className="text-xs h-7 px-3">
+                          {AD_UNIT_TYPE_LABELS[unit.type] || unit.type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                        </Button>)}
+                    </div>
+                  </div>}
+              </CardContent>
+            </Card>
+
+            {venue.specifications?.ooh_details && <OOHAdvertisingDetails oohDetails={venue.specifications.ooh_details} />}
           </div>
         </div>
       </div>
