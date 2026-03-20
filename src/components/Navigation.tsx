@@ -81,46 +81,36 @@ export const Navigation = () => {
     const linkClass = mobile ? `w-full text-left py-3 px-4 ${baseLinkClass}` : baseLinkClass;
     return (
       <>
-        {user ?
-        <>
-            {userRole === "talent" ?
-          <Link to={getDashboardLink()} onClick={closeMobileMenu}>
-                <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
-              </Link> :
-
+        <Link to="/explore" onClick={closeMobileMenu}>
+          <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
+        </Link>
+        <Link to="/habit-tracker" onClick={closeMobileMenu}>
+          <Button variant="ghost" size="sm" className={linkClass}>QR Code</Button>
+        </Link>
+        {user ? (
           <>
-                <Link to="/explore" onClick={closeMobileMenu}>
-                  <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
-                </Link>
-                <Link to="/habit-tracker" onClick={closeMobileMenu}>
-                  <Button variant="ghost" size="sm" className={linkClass}>QR Code</Button>
-                </Link>
-                <Link to={getDashboardLink()} onClick={closeMobileMenu}>
-                  <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
-                </Link>
-              </>
-          }
-            {!mobile &&
-          <>
+            {userRole !== "talent" ? null : null}
+            <Link to={getDashboardLink()} onClick={closeMobileMenu}>
+              <Button variant="ghost" size="sm" className={linkClass}>Dashboard</Button>
+            </Link>
+            {!mobile && (
+              <>
                 <MessengerBell />
                 <NotificationBell />
               </>
-          }
+            )}
             <Button variant="outline" size="sm" onClick={handleSignOut} className={`${baseLinkClass} ${mobile ? "w-full mt-2" : ""}`}>
               Log Out
             </Button>
-            {mobile &&
-          <div className="py-2 flex items-center gap-2">
+            {mobile && (
+              <div className="py-2 flex items-center gap-2">
                 <MessengerBell />
                 <NotificationBell />
               </div>
-          }
-          </> :
-
-        <>
-            <Link to="/explore" onClick={closeMobileMenu}>
-              <Button variant="ghost" size="sm" className={linkClass}>Ad Space</Button>
-            </Link>
+            )}
+          </>
+        ) : (
+          <>
             <Link to="/insights" onClick={closeMobileMenu}>
               <Button variant="ghost" size="sm" className={linkClass}>Insights</Button>
             </Link>
@@ -128,7 +118,7 @@ export const Navigation = () => {
               <Button variant="outline" size="sm" className={`${baseLinkClass} ${mobile ? "w-full mt-2" : ""}`}>Log In</Button>
             </Link>
           </>
-        }
+        )}
       </>);
 
   };
