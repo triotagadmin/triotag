@@ -523,11 +523,11 @@ export const PaymentGateway = ({
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Lock className="h-3 w-3" /><span>256-bit SSL encrypted payment</span>
         </div>
-        <div className="flex items-center gap-3 opacity-60">
-          <div className="bg-[#1A1F71] text-white text-[8px] font-bold px-1.5 py-0.5 rounded italic">VISA</div>
-          <div className="flex"><div className="w-3 h-3 bg-[#EB001B] rounded-full -mr-1"></div><div className="w-3 h-3 bg-[#F79E1B] rounded-full opacity-90"></div></div>
-          <div className="bg-[#007DFE] text-white text-[8px] font-bold px-2 py-0.5 rounded-full">GCash</div>
+        <div className="flex items-center flex-wrap gap-2 opacity-60">
           <div className="bg-[#22B24C] text-white text-[8px] font-bold px-2 py-0.5 rounded-full">Maya</div>
+          <div className="bg-[#00B14F] text-white text-[8px] font-bold px-2 py-0.5 rounded-full">GrabPay</div>
+          <div className="text-muted-foreground text-[8px] font-medium px-2 py-0.5 rounded-full bg-muted">QRPh</div>
+          <div className="text-muted-foreground text-[8px] font-medium px-2 py-0.5 rounded-full bg-muted">Online Banking</div>
         </div>
       </div>
 
