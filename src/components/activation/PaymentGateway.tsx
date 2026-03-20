@@ -154,12 +154,13 @@ const BranchBreakdownCard = ({
             <span className="text-muted-foreground">Total Lease Fees ({branches.length} branches)</span>
             <span>{isUsd ? <PhpConversionInline amountUsd={totalLease} /> : <span className="font-medium">{formatPriceFn(totalLease)}</span>}</span>
           </div>
-          {totalMaterial > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Total Print Materials</span>
-              <span>{isUsd ? <PhpConversionInline amountUsd={totalMaterial} /> : <span className="font-medium">{formatPriceFn(totalMaterial)}</span>}</span>
-            </div>
-          )}
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground flex items-center gap-1">
+              <Package className="h-3.5 w-3.5" />
+              Total Ad Materials
+            </span>
+            <span>{isUsd ? <PhpConversionInline amountUsd={totalMaterial} /> : <span className="font-medium">{formatPriceFn(totalMaterial)}</span>}</span>
+          </div>
           <div className="flex justify-between items-center pt-2">
             <span className="font-semibold text-lg">Grand Total</span>
             <span className="text-2xl font-bold text-primary">
