@@ -35,13 +35,7 @@ interface PaymentGatewayProps {
   endDate?: Date;
 }
 
-type PaymentMethod = "card" | "gcash" | "maya";
-
-const PAYMENT_METHODS = [
-  { id: "card" as PaymentMethod, name: "Credit / Debit Card", description: "Pay securely with Visa or Mastercard", icon: CreditCard },
-  { id: "gcash" as PaymentMethod, name: "GCash", description: "Pay instantly with your GCash e-wallet", icon: Smartphone },
-  { id: "maya" as PaymentMethod, name: "Maya", description: "Pay with your Maya digital wallet", icon: Wallet },
-];
+// Payment methods are now dynamically fetched by the backend from PayMongo merchant capabilities
 
 const COUNTRIES = [
   { code: "PH", name: "Philippines" },
