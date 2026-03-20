@@ -364,7 +364,6 @@ export const PaymentGateway = ({
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
           activationId,
-          paymentMethod: selectedMethod,
           buyerName,
           buyerEmail,
           buyerPhone,
