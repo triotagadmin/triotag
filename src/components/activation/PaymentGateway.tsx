@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreditCard, Smartphone, Loader2, CheckCircle, Shield, Lock, ExternalLink, Building2, Wallet, MapPin, Package, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, Shield, Lock, ExternalLink, Building2, MapPin, Package, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrencyConversion } from "@/hooks/useCurrencyConversion";
