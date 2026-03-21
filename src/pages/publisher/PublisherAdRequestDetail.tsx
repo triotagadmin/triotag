@@ -427,7 +427,7 @@ export default function PublisherAdRequestDetail() {
                 )}
                 {request.competitive_conflict_declaration && (
                   <div className="p-3 bg-muted/50 rounded-lg border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">Advertiser Notes / Competitive Conflict</p>
+                    <p className="text-xs text-muted-foreground mb-1">Print Partner Notes / Competitive Conflict</p>
                     <p className="text-sm">{request.competitive_conflict_declaration}</p>
                   </div>
                 )}
