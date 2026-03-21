@@ -24,7 +24,8 @@ const features = [
   {
     icon: Truck,
     title: "Fast Delivery",
-    description: "Express and coordinated delivery to multiple branch locations.",
+    description:
+      "Express and coordinated delivery to multiple branch locations, enabling centralized dispatch, synchronized installation timelines, and efficient logistics management to ensure consistent and timely campaign execution across all sites.",
   },
   {
     icon: Shield,
