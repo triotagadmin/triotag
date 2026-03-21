@@ -7,35 +7,23 @@ import { Printer, Palette, Truck, Zap, Globe, Shield } from "lucide-react";
 const features = [
   {
     icon: Palette,
-    title: "Upload Your Design",
-    description: "Upload your ad designs for campaign materials promoting your products, services, and events.",
+    title: "Centralized Operations",
+    description: "Manage all campaigns, clients, and locations in one system.",
   },
   {
     icon: Printer,
-    title: "Premium Printing",
-    description: "High-quality prints via a global print network powered by Prodigi.",
+    title: "New Revenue Opportunities",
+    description: "Expand your services from printing to full campaign execution.",
   },
   {
     icon: Globe,
-    title: "Global Fulfillment",
-    description:
-      "Triotag provides international production via Prodigi serving Europe, the Middle East and Africa (EMEA), and the Americas (AMER), we also established partnerships with local production facilities across Asia-Pacific (APAC), enabling seamless and scalable global ad deployment.",
-  },
-  {
-    icon: Truck,
-    title: "Fast Delivery",
-    description:
-      "Express and coordinated delivery to multiple branch locations, enabling centralized dispatch, synchronized installation timelines, and efficient logistics management to ensure consistent and timely campaign execution across all sites.",
-  },
-  {
-    icon: Shield,
-    title: "Quality Guaranteed",
-    description: "Every print meets strict quality standards.",
+    title: "Multi-Location Control",
+    description: "Launch campaigns across multiple branches without manual coordination.",
   },
   {
     icon: Zap,
-    title: "Instant Activation",
-    description: "Streamlined production from upload to print.",
+    title: "Verified Campaign Deployment",
+    description: "Ensure placements are active with QR tracking, geo-tagging, and verification tools.",
   },
 ];
 
