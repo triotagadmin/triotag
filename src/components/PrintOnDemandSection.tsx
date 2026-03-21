@@ -27,16 +27,6 @@ const features = [
     description:
       "Express and coordinated delivery to multiple branch locations, enabling centralized dispatch, synchronized installation timelines, and efficient logistics management to ensure consistent and timely campaign execution across all sites.",
   },
-  {
-    icon: Shield,
-    title: "Quality Guaranteed",
-    description: "Every print meets strict quality standards.",
-  },
-  {
-    icon: Zap,
-    title: "Instant Activation",
-    description: "Streamlined production from upload to print.",
-  },
 ];
 
 export const PrintOnDemandSection = () => {
