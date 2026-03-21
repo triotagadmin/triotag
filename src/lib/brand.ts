@@ -3,7 +3,7 @@
 
 export const BRAND_NAME = "TrioTag";
 export const BRAND_TAGLINE = "Micro Advertising.";
-export const BRAND_DESCRIPTION = `${BRAND_NAME} is a campaign management platform designed for printing companies to execute, manage, and scale real-world advertising campaigns across multiple locations.`;
+export const BRAND_DESCRIPTION = `${BRAND_NAME} is a campaign management platform designed for printing companies to execute, manage, and scale print advertising campaigns across multiple locations.`;
 export const BRAND_EMAIL = "tinystickyads@gmail.com";
 export const BRAND_PHONE = "+639456640894";
 
