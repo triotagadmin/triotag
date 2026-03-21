@@ -19,13 +19,23 @@ const features = [
     icon: Globe,
     title: "Global Fulfillment",
     description:
-      "Triotag provides international production via Prodigi and has also established partnerships with local production facilities across Asia-Pacific (APAC), Europe, the Middle East and Africa (EMEA), and the Americas (AMER), enabling seamless and scalable global ad deployment.",
+      "Triotag provides international production via Prodigi serving Europe, the Middle East and Africa (EMEA), and the Americas (AMER), we also established partnerships with local production facilities across Asia-Pacific (APAC), enabling seamless and scalable global ad deployment.",
   },
   {
     icon: Truck,
     title: "Fast Delivery",
     description:
       "Express and coordinated delivery to multiple branch locations, enabling centralized dispatch, synchronized installation timelines, and efficient logistics management to ensure consistent and timely campaign execution across all sites.",
+  },
+  {
+    icon: Shield,
+    title: "Quality Guaranteed",
+    description: "Every print meets strict quality standards.",
+  },
+  {
+    icon: Zap,
+    title: "Instant Activation",
+    description: "Streamlined production from upload to print.",
   },
 ];
 
