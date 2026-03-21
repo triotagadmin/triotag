@@ -681,7 +681,7 @@ export default function PublisherAdRequestDetail() {
                 <CardContent className="pt-6">
                   <Button variant="outline" className="w-full" onClick={handleMessageAdvertiser}>
                     <MessageSquare className="h-4 w-4 mr-2" />
-                    Message Advertiser
+                    Message Print Partner
                   </Button>
                 </CardContent>
               </Card>
