@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Printer, Palette, Truck, Zap, Globe, Shield } from "lucide-react";
+import { Printer, Dashboard, Truck, Zap, Globe, Shield } from "lucide-react";
 
 const features = [
   {
-    icon: Palette,
+    icon: Dashboard,
     title: "Centralized Operations",
     description: "Manage all campaigns, clients, and locations in one system.",
   },
