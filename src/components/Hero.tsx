@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 const HERO_HEADLINE = "The Central Hub for Hyperlocal Print Ads";
 const HERO_SUBHEADLINE = "Bridging printing companies and brands into a scalable advertising network";
 const HERO_CTA_PRIMARY = { text: "Advertise Your Brand", link: "/campaign-submit" };
-const HERO_CTA_SECONDARY = { text: "Register Ad Space", link: "/list-space" };
+const HERO_CTA_SECONDARY = { text: "Register as Print Partner", link: "/list-space" };
 
 export const Hero = () => {
   const [isVisible, setIsVisible] = useState(false);
