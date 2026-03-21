@@ -235,7 +235,7 @@ export default function PublisherAdRequestDetail() {
         type: "ad_request_approved",
       });
 
-      toast({ title: "Request Approved", description: "The advertiser has been notified and can now proceed." });
+      toast({ title: "Request Approved", description: "The Print Partner has been notified and can now proceed." });
       navigate("/publisher/ad-requests");
     } catch (error: any) {
       toast({ title: "Error", description: error.message || "Failed to approve request", variant: "destructive" });
@@ -271,7 +271,7 @@ export default function PublisherAdRequestDetail() {
         type: "ad_request_rejected",
       });
 
-      toast({ title: "Request Rejected", description: "The advertiser has been notified." });
+      toast({ title: "Request Rejected", description: "The Print Partner has been notified." });
       navigate("/publisher/ad-requests");
     } catch (error: any) {
       toast({ title: "Error", description: error.message || "Failed to reject request", variant: "destructive" });
@@ -427,7 +427,7 @@ export default function PublisherAdRequestDetail() {
                 )}
                 {request.competitive_conflict_declaration && (
                   <div className="p-3 bg-muted/50 rounded-lg border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">Advertiser Notes / Competitive Conflict</p>
+                    <p className="text-xs text-muted-foreground mb-1">Print Partner Notes / Competitive Conflict</p>
                     <p className="text-sm">{request.competitive_conflict_declaration}</p>
                   </div>
                 )}
@@ -670,7 +670,7 @@ export default function PublisherAdRequestDetail() {
                   <Separator />
                   <Button variant="outline" className="w-full" onClick={handleMessageAdvertiser}>
                     <MessageSquare className="h-4 w-4 mr-2" />
-                    Message Advertiser
+                    Message Print Partner
                   </Button>
                 </CardContent>
               </Card>
@@ -681,7 +681,7 @@ export default function PublisherAdRequestDetail() {
                 <CardContent className="pt-6">
                   <Button variant="outline" className="w-full" onClick={handleMessageAdvertiser}>
                     <MessageSquare className="h-4 w-4 mr-2" />
-                    Message Advertiser
+                    Message Print Partner
                   </Button>
                 </CardContent>
               </Card>
@@ -704,7 +704,7 @@ export default function PublisherAdRequestDetail() {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Account Type</p>
-                      <Badge variant="outline" className="capitalize">{advertiser.status === "approved" ? "Verified Advertiser" : "Advertiser"}</Badge>
+                      <Badge variant="outline" className="capitalize">{advertiser.status === "approved" ? "Verified Print Partner" : "Print Partner"}</Badge>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Account ID</p>

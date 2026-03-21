@@ -45,7 +45,7 @@ export function ScheduleSummary({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-primary" />
-          Advertiser Compliance & Campaign Details
+          Print Partner Compliance & Campaign Details
         </CardTitle>
         <CardDescription>
           Complete the form below to submit your booking for publisher approval

@@ -637,7 +637,7 @@ const VenueRegistration = () => {
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">Ad Space Lease Pricing</CardTitle>
-                    <p className="text-xs text-muted-foreground">Set the lease price for advertisers.</p>
+                    <p className="text-xs text-muted-foreground">Set the lease price for Print Partners.</p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>

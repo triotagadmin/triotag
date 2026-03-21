@@ -74,7 +74,7 @@ serve(async (req) => {
           if (!publisherUserId) return null;
           return {
             user_id: publisherUserId,
-            title: "Advertiser ownership linked",
+            title: "Print Partner ownership linked",
             message: `${normalizedEmail} completed signup/verification and is now linked to ${listing.title}.`,
             type: "listing_ownership_verified",
           };

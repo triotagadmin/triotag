@@ -10,10 +10,10 @@ const coreServices = [
   {
     title: "Location Bundling",
     icon: MapPin,
-    description: "Location Bundling allows advertisers to combine multiple ad placements across strategic ad spaces into one unified campaign. Instead of booking individual placements manually, advertisers deploy campaigns across curated ad space bundles designed for maximum exposure.",
+    description: "Location Bundling allows Print Partners to combine multiple ad placements across strategic ad spaces into one unified campaign. Instead of booking individual placements manually, Print Partners deploy campaigns across curated ad space bundles designed for maximum exposure.",
     howItWorks: [
       "Ad spaces are grouped by location, audience type, or campaign goal",
-      "Advertisers choose bundles instead of individual placements",
+      "Print Partners choose bundles instead of individual placements",
       "Campaigns scale efficiently across multiple ad spaces",
     ],
     bundles: ["Coffee Shop Network Bundle", "University District Bundle", "Business District Bundle", "Community Lifestyle Bundle"],
@@ -30,20 +30,20 @@ const coreServices = [
   {
     title: "Campaign Management",
     icon: Settings,
-    description: "TrioTag manages the entire campaign lifecycle, from planning to deployment. Our system coordinates advertisers, ad spaces, and placements to ensure smooth campaign execution.",
+    description: "TrioTag manages the entire campaign lifecycle, from planning to deployment. Our system coordinates Print Partners, ad spaces, and placements to ensure smooth campaign execution.",
     includes: ["Ad space selection", "Placement coordination", "Creative approval workflow", "Deployment scheduling", "Campaign monitoring"],
     operations: ["Coordinating ad space placements", "Managing installation schedules", "Ensuring campaign compliance", "Monitoring active campaigns"],
   },
 ];
 
 const roadmapSteps = [
-  { num: "01", title: "Campaign Submission", description: "Advertiser submits campaign details through the campaign submission form.", details: ["Campaign name", "Contact information", "Campaign description", "Ad format preference", "Target locations"] },
-  { num: "02", title: "Campaign Review", description: "Our team reviews the campaign brief to determine best ad spaces, best ad formats, and bundle recommendations. We may contact the advertiser for clarification." },
-  { num: "03", title: "Location Bundling", description: "We curate a strategic placement bundle that includes selected ad spaces, placement quantities, and geographic targeting. Advertisers receive a proposed campaign plan." },
-  { num: "04", title: "Creative Development", description: "Our design team prepares the advertising materials including ad layout design, format optimization, and advertiser approval. Final files are prepared for printing." },
+  { num: "01", title: "Campaign Submission", description: "Print Partner submits campaign details through the campaign submission form.", details: ["Campaign name", "Contact information", "Campaign description", "Ad format preference", "Target locations"] },
+  { num: "02", title: "Campaign Review", description: "Our team reviews the campaign brief to determine best ad spaces, best ad formats, and bundle recommendations. We may contact the Print Partner for clarification." },
+  { num: "03", title: "Location Bundling", description: "We curate a strategic placement bundle that includes selected ad spaces, placement quantities, and geographic targeting. Print Partners receive a proposed campaign plan." },
+  { num: "04", title: "Creative Development", description: "Our design team prepares the advertising materials including ad layout design, format optimization, and Print Partner approval. Final files are prepared for printing." },
   { num: "05", title: "Production & Deployment", description: "Ad materials are printed and deployed across selected ad spaces. Deployment includes installation coordination, placement verification, and coordination with ad space operators." },
-  { num: "06", title: "Campaign Activation", description: "Once placements are installed, the campaign becomes active. Advertisers receive confirmation that their ads are live across the selected ad spaces." },
-  { num: "07", title: "Campaign Completion", description: "At the end of the campaign, placements are removed or renewed. Advertisers can launch follow-up campaigns." },
+  { num: "06", title: "Campaign Activation", description: "Once placements are installed, the campaign becomes active. Print Partners receive confirmation that their ads are live across the selected ad spaces." },
+  { num: "07", title: "Campaign Completion", description: "At the end of the campaign, placements are removed or renewed. Print Partners can launch follow-up campaigns." },
 ];
 
 const Services = () => {
@@ -67,7 +67,7 @@ const Services = () => {
           <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">TrioTag<br />Advertising Services</h1>
           <p className="text-primary font-semibold text-sm md:text-lg mb-3">Physical micro-advertising placed inside real-world ad spaces like coffee shops, libraries, and retail environments.</p>
           <p className="text-muted-foreground text-xs md:text-base max-w-3xl mx-auto mb-8">
-            TrioTag helps brands reach real people in real places through small but powerful physical ad placements. Our ad space network allows advertisers to deploy targeted campaigns across strategic locations.
+            TrioTag helps brands reach real people in real places through small but powerful physical ad placements. Our ad space network allows Print Partners to deploy targeted campaigns across strategic locations.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4">
             <Link to="/campaign-submit">

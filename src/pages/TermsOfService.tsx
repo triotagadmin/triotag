@@ -25,11 +25,11 @@ const TermsOfService = () => {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-foreground mb-4">2. Description of Service</h2>
             <p className="text-muted-foreground mb-4">
-              TrioTag is a micro-advertising marketplace that connects advertisers with venues, agents, and digital
+              TrioTag is a micro-advertising marketplace that connects Print Partners with venues, agents, and digital
               publishers. We provide a platform for:
             </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
-              <li>Advertisers to find and book advertising spaces</li>
+              <li>Print Partners to find and book advertising spaces</li>
               <li>Venue publishers to list physical advertising locations</li>
               <li>Agent publishers to offer promotional services</li>
               <li>Digital publishers to provide digital advertising inventory</li>
@@ -64,8 +64,8 @@ const TermsOfService = () => {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">5. Advertiser Terms</h2>
-            <p className="text-muted-foreground mb-4">As an advertiser, you agree to:</p>
+            <h2 className="text-xl font-semibold text-foreground mb-4">5. Print Partner Terms</h2>
+            <p className="text-muted-foreground mb-4">As a Print Partner, you agree to:</p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
               <li>Ensure all advertising content complies with applicable laws</li>
               <li>Not submit content that is defamatory, obscene, or offensive</li>

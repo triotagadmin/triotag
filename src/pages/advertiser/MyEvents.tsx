@@ -62,7 +62,7 @@ const MyEvents = () => {
       if (!profile) {
         toast({
           title: "Profile not found",
-          description: "Please complete your advertiser profile first.",
+          description: "Please complete your Print Partner profile first.",
           variant: "destructive"
         });
         navigate("/advertiser-dashboard");

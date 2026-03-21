@@ -45,11 +45,11 @@ const Verify = () => {
           <CardDescription>
             {status === "loading" &&
               (verificationType === "listing"
-                ? "Please wait while we verify advertiser ownership for this listing"
+                ? "Please wait while we verify Print Partner ownership for this listing"
                 : "Please wait while we verify your email address")}
             {status === "success" &&
               (verificationType === "listing"
-                ? "This listing is now linked to the advertiser account"
+                ? "This listing is now linked to the Print Partner account"
                 : "Your email has been successfully verified")}
             {status === "already" &&
               (verificationType === "listing"

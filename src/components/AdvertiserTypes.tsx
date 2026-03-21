@@ -6,7 +6,7 @@ const advertiserTypes = [
   {
     title: "Products & Merchandise",
     description:
-      "Promote consumer products in high-traffic ad spaces to increase brand visibility and audience engagement. Our platform enables advertisers to select strategic ad space locations and deploy campaign materials across multiple sites through a centralized dashboard.",
+      "Promote consumer products in high-traffic ad spaces to increase brand visibility and audience engagement. Our platform enables Print Partners to select strategic ad space locations and deploy campaign materials across multiple sites through a centralized dashboard.",
     icon: ShoppingBag,
   },
   {

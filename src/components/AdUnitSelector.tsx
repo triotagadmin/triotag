@@ -145,7 +145,7 @@ export const AdUnitSelector = ({
                       })} className="mt-1" placeholder="0" />
                           </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">Set the rental price advertisers will pay per week or per month for this ad placement. Rental price is per ad unit. The currency symbol updates based on your selection above.</p>
+                        <p className="text-xs text-muted-foreground">Set the rental price Print Partners will pay per week or per month for this ad placement. Rental price is per ad unit. The currency symbol updates based on your selection above.</p>
                       </div>}
                   </div>
                 </div>
