@@ -13,7 +13,7 @@ const coreServices = [
     description: "Location Bundling allows Print Partners to combine multiple ad placements across strategic ad spaces into one unified campaign. Instead of booking individual placements manually, Print Partners deploy campaigns across curated ad space bundles designed for maximum exposure.",
     howItWorks: [
       "Ad spaces are grouped by location, audience type, or campaign goal",
-      "Advertisers choose bundles instead of individual placements",
+      "Print Partners choose bundles instead of individual placements",
       "Campaigns scale efficiently across multiple ad spaces",
     ],
     bundles: ["Coffee Shop Network Bundle", "University District Bundle", "Business District Bundle", "Community Lifestyle Bundle"],
