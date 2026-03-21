@@ -235,7 +235,7 @@ export default function PublisherAdRequestDetail() {
         type: "ad_request_approved",
       });
 
-      toast({ title: "Request Approved", description: "The advertiser has been notified and can now proceed." });
+      toast({ title: "Request Approved", description: "The Print Partner has been notified and can now proceed." });
       navigate("/publisher/ad-requests");
     } catch (error: any) {
       toast({ title: "Error", description: error.message || "Failed to approve request", variant: "destructive" });
