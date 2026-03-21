@@ -119,8 +119,8 @@ const handler = async (req: Request): Promise<Response> => {
       if (publisherProfile?.user_id) {
         await supabase.from("notifications").insert({
           user_id: publisherProfile.user_id,
-          title: "Advertiser ownership verified",
-          message: `${advertiserEmail} verified and is now linked as primary advertiser for ${listing.title}.`,
+          title: "Print Partner ownership verified",
+          message: `${advertiserEmail} verified and is now linked as primary Print Partner for ${listing.title}.`,
           type: "listing_ownership_verified",
         });
       }
