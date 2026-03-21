@@ -10,7 +10,7 @@ const coreServices = [
   {
     title: "Location Bundling",
     icon: MapPin,
-    description: "Location Bundling allows advertisers to combine multiple ad placements across strategic ad spaces into one unified campaign. Instead of booking individual placements manually, advertisers deploy campaigns across curated ad space bundles designed for maximum exposure.",
+    description: "Location Bundling allows Print Partners to combine multiple ad placements across strategic ad spaces into one unified campaign. Instead of booking individual placements manually, Print Partners deploy campaigns across curated ad space bundles designed for maximum exposure.",
     howItWorks: [
       "Ad spaces are grouped by location, audience type, or campaign goal",
       "Advertisers choose bundles instead of individual placements",
