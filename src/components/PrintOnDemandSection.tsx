@@ -162,12 +162,12 @@ export const PrintOnDemandSection = () => {
             >
               <span className="relative z-10 flex items-center gap-2">
                 <Printer className="h-5 w-5" />
-                Explore Print-Ready Ad Spaces
+                Register as Print Partner
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </Button>
           </Link>
-          <p className="mt-4 text-sm text-muted-foreground">No minimum orders • Global shipping • Quality guaranteed</p>
+          <p className="mt-4 text-sm text-muted-foreground">Scale your print business today.</p>
         </div>
       </div>
     </section>
