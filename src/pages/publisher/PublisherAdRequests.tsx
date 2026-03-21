@@ -261,7 +261,7 @@ export default function PublisherAdRequests() {
           <div className="flex-1">
             <h1 className="text-3xl font-bold">Ad Requests</h1>
             <p className="text-muted-foreground mt-1">
-              Review and manage Print Partner booking submissions
+              Review and manage advertiser booking submissions
             </p>
           </div>
         </div>

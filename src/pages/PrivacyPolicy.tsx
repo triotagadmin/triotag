@@ -43,7 +43,7 @@ const PrivacyPolicy = () => {
             <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
               <li>Provide, maintain, and improve our services</li>
               <li>Process transactions and send related information</li>
-              <li>Connect Print Partners with publishers</li>
+              <li>Connect advertisers with publishers</li>
               <li>Send promotional communications (with your consent)</li>
               <li>Respond to your comments, questions, and requests</li>
               <li>Monitor and analyze trends, usage, and activities</li>

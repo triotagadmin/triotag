@@ -277,7 +277,7 @@ const TalentProfileSubmission = () => {
                   id="bio"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell Print Partners about yourself, your experience, and what you can offer..."
+                  placeholder="Tell advertisers about yourself, your experience, and what you can offer..."
                   rows={4}
                   maxLength={1000}
                 />

@@ -100,7 +100,7 @@ const VenueDashboard = () => {
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Ticket className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium">Manage your Ad Space Requests from Print Partners</span>
+            <span className="text-sm font-medium">Manage your Ad Space Requests from Advertisers</span>
           </div>
           <Button onClick={() => navigate("/publisher/ad-requests")} className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 text-white">
             <Ticket className="h-4 w-4 mr-2" />Ad Request

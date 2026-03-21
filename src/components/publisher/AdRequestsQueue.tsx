@@ -249,7 +249,7 @@ export const AdRequestsQueue = ({ requests, onStatusChange }: AdRequestsQueuePro
           <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No Booking Requests</h3>
           <p className="text-muted-foreground">
-            Booking requests from Print Partners will appear here for your review.
+            Booking requests from advertisers will appear here for your review.
           </p>
         </CardContent>
       </Card>

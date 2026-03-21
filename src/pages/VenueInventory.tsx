@@ -166,7 +166,7 @@ const VenueInventory = () => {
               {getStatusBadge(venue.approval_status)}
               {venue.pending_advertiser_email && !venue.advertiser_id && (
                 <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
-                  <Clock className="h-3 w-3" /> Pending Print Partner
+                  <Clock className="h-3 w-3" /> Pending Advertiser
                 </Badge>
               )}
             </div>

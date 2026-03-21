@@ -198,7 +198,7 @@ serve(async (req) => {
 
     await adminClient.from("notifications").insert({
       user_id: user.id,
-      title: "Print Partner ownership request sent",
+      title: "Advertiser ownership request sent",
       message:
         workflowType === "verification"
           ? `Verification request sent to ${normalizedEmail} for ${listing.title}.`

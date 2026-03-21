@@ -951,7 +951,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
             </AlertDialogTitle>
             <AlertDialogDescription>
               {statusConfirmAction === "deactivate"
-                ? "This will remove your franchise listing from the Ad Space Marketplace. Print Partners will no longer be able to discover or book this listing."
+                ? "This will remove your franchise listing from the Ad Space Marketplace. Advertisers will no longer be able to discover or book this listing."
                 : statusConfirmFranchise?.marketplace_status === "inactive"
                   ? "This will make your franchise listing visible on the Ad Space Marketplace."
                   : "This will submit your franchise listing for review. Once approved, it will appear on the Ad Space Marketplace."

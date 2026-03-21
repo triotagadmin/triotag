@@ -47,7 +47,7 @@ serve(async (req) => {
       .insert({
         user_id: publisherProfile.user_id,
         title: "New Ad Request Received!",
-        message: `A Print Partner has submitted an ad request for "${listingTitle}". Please review and respond.`,
+        message: `An advertiser has submitted an ad request for "${listingTitle}". Please review and respond.`,
         type: "ad_request_received",
       });
 

@@ -139,8 +139,8 @@ const Messages = () => {
               .maybeSingle();
 
             if (advertiserProfile) {
-              name = advertiserProfile.contact_name || advertiserProfile.company_name || "Print Partner";
-              role = "Print Partner";
+              name = advertiserProfile.contact_name || advertiserProfile.company_name || "Advertiser";
+              role = "Advertiser";
             } else {
               const { data: publisherProfile } = await supabase
                 .from("publisher_profiles")

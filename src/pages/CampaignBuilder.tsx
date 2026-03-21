@@ -54,7 +54,7 @@ const CampaignBuilder = () => {
       if (!profile) {
         toast({
           title: "Profile not found",
-          description: "Please complete your Print Partner profile first.",
+          description: "Please complete your advertiser profile first.",
           variant: "destructive",
         });
         navigate("/advertiser-dashboard");
