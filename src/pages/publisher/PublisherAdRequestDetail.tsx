@@ -271,7 +271,7 @@ export default function PublisherAdRequestDetail() {
         type: "ad_request_rejected",
       });
 
-      toast({ title: "Request Rejected", description: "The advertiser has been notified." });
+      toast({ title: "Request Rejected", description: "The Print Partner has been notified." });
       navigate("/publisher/ad-requests");
     } catch (error: any) {
       toast({ title: "Error", description: error.message || "Failed to reject request", variant: "destructive" });
