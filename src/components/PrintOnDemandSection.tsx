@@ -97,7 +97,6 @@ export const PrintOnDemandSection = () => {
           <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-display font-bold mb-4 md:mb-6">
             Built to Help Print Companies Scale Faster
             <br />
-            From Print Shop to Scalable Print Network
           </h2>
 
           <p className="text-sm max-w-3xl mx-auto leading-relaxed px-2 text-white md:text-base">
