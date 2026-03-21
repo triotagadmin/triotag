@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 const HERO_HEADLINE = "The Central Hub for Hyperlocal Print Ads";
-const HERO_SUBHEADLINE =
-  "Promote your products, services, and events through curated ad spaces where people naturally gather. Activate real-world visibility and reach your target audience effectively.";
+const HERO_SUBHEADLINE = "Bridging printing companies and brands into a scalable advertising network";
 const HERO_CTA_PRIMARY = { text: "Advertise Your Brand", link: "/campaign-submit" };
 const HERO_CTA_SECONDARY = { text: "Register Ad Space", link: "/list-space" };
 
