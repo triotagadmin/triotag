@@ -373,7 +373,7 @@ const OrderPrints = () => {
           <Card className="max-w-md mx-auto">
             <CardHeader>
               <CardTitle>Account Verification Required</CardTitle>
-              <CardDescription>Only verified advertiser accounts can order print materials.</CardDescription>
+              <CardDescription>Only verified Print Partner accounts can order print materials.</CardDescription>
             </CardHeader>
             <CardContent>
               <Button onClick={() => navigate("/advertiser-dashboard")}>Back to Dashboard</Button>
