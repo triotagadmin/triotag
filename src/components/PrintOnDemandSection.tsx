@@ -94,15 +94,15 @@ export const PrintOnDemandSection = () => {
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`
           }>
           
-          <a
-            href="https://www.prodigi.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 mb-6 animate-pulse-glow hover:bg-primary/20 transition-colors">
-            
-            <Printer className="h-4 w-4 text-primary" />
-            
-          </a>
+          
+
+
+
+
+
+
+
+          
 
           <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-display font-bold mb-4 md:mb-6">
             Print on Demand
