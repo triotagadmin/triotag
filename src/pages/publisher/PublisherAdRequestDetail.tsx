@@ -704,7 +704,7 @@ export default function PublisherAdRequestDetail() {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Account Type</p>
-                      <Badge variant="outline" className="capitalize">{advertiser.status === "approved" ? "Verified Advertiser" : "Advertiser"}</Badge>
+                      <Badge variant="outline" className="capitalize">{advertiser.status === "approved" ? "Verified Print Partner" : "Print Partner"}</Badge>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Account ID</p>

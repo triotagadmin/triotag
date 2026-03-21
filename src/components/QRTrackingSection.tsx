@@ -56,7 +56,7 @@ export const QRTrackingSection = () => {
             Brand Campaign<br />Tracking
           </h2>
           <p className="text-sm max-w-3xl mx-auto leading-relaxed px-2 text-white md:text-base">
-            We verify every placement using QR codes, geo-tagging, and real-time video verification so advertisers know exactly where their campaigns are displayed.
+            We verify every placement using QR codes, geo-tagging, and real-time video verification so Print Partners know exactly where their campaigns are displayed.
           </p>
         </div>
 

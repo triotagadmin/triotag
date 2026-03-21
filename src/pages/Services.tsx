@@ -67,7 +67,7 @@ const Services = () => {
           <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">TrioTag<br />Advertising Services</h1>
           <p className="text-primary font-semibold text-sm md:text-lg mb-3">Physical micro-advertising placed inside real-world ad spaces like coffee shops, libraries, and retail environments.</p>
           <p className="text-muted-foreground text-xs md:text-base max-w-3xl mx-auto mb-8">
-            TrioTag helps brands reach real people in real places through small but powerful physical ad placements. Our ad space network allows advertisers to deploy targeted campaigns across strategic locations.
+            TrioTag helps brands reach real people in real places through small but powerful physical ad placements. Our ad space network allows Print Partners to deploy targeted campaigns across strategic locations.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4">
             <Link to="/campaign-submit">

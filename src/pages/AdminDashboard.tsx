@@ -275,7 +275,7 @@ export default function AdminDashboard() {
           status: c.status,
           location: c.location,
           createdAt: c.created_at || "",
-          ownerName: (c.advertiser_profiles as any)?.company_name || "Advertiser",
+          ownerName: (c.advertiser_profiles as any)?.company_name || "Print Partner",
           table: "campaigns"
         })),
         ...(adSpaces || []).map(v => ({
