@@ -29,7 +29,7 @@ const TermsOfService = () => {
               publishers. We provide a platform for:
             </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
-              <li>Advertisers to find and book advertising spaces</li>
+              <li>Print Partners to find and book advertising spaces</li>
               <li>Venue publishers to list physical advertising locations</li>
               <li>Agent publishers to offer promotional services</li>
               <li>Digital publishers to provide digital advertising inventory</li>

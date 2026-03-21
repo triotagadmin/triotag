@@ -1136,7 +1136,7 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="advertisers">
               <Monitor className="w-4 h-4 mr-2" />
-              Advertisers
+              Print Partners
             </TabsTrigger>
             <TabsTrigger value="agents">
               <UserCheck className="w-4 h-4 mr-2" />
