@@ -394,7 +394,7 @@ const TalentDashboard = () => {
             ) : (
               <Card>
                 <CardContent className="py-12 text-center text-muted-foreground">
-                  No reviews yet. Complete bookings to receive reviews from advertisers.
+                  No reviews yet. Complete bookings to receive reviews from Print Partners.
                 </CardContent>
               </Card>
             )}
