@@ -168,6 +168,9 @@ const App = () => (
               <AdminOrders />
             </ProtectedAdminRoute>
           } />
+          {/* Client Checkout (public, no auth) */}
+          <Route path="/checkout/success" element={<ClientPaymentSuccess />} />
+          <Route path="/checkout/:token" element={<ClientCheckout />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
