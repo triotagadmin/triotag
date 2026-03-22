@@ -16,6 +16,7 @@ import { MyFranchiseSection } from "@/components/advertiser/MyFranchiseSection";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getRoleDisplayName } from "@/lib/brand";
 const AdvertiserDashboard = () => {
+  const [userRole, setUserRole] = useState<string>("advertiser");
   const navigate = useNavigate();
   const {
     toast
