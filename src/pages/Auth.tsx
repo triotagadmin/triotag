@@ -318,7 +318,7 @@ const Auth = () => {
           description: "Successfully signed in as admin.",
         });
         navigate("/admin/dashboard");
-      } else if (roles?.role === "advertiser") {
+      } else if (roles?.role === "advertiser" || roles?.role === "print_partner") {
         const { data: profile } = await supabase
           .from("advertiser_profiles")
           .select("verified")
