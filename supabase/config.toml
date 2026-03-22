@@ -67,3 +67,6 @@ verify_jwt = false
 
 [functions.create-checkout]
 verify_jwt = false
+
+[functions.create-client-checkout]
+verify_jwt = false

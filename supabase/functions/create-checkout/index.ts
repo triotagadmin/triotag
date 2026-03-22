@@ -66,7 +66,8 @@ const ALL_CHECKOUT_METHODS = [
 ];
 
 interface CheckoutRequest {
-  activationId: string;
+  activationId?: string;
+  checkoutToken?: string;
   paymentMethod?: string;
   buyerName: string;
   buyerEmail: string;
@@ -95,15 +96,102 @@ serve(async (req) => {
 
     const body: CheckoutRequest = await req.json();
     const {
-      activationId, buyerName, buyerEmail, buyerPhone,
+      activationId, checkoutToken, buyerName, buyerEmail, buyerPhone,
       companyName, billingAddress, billingCity, billingCountry, billingZip,
       successUrl, cancelUrl,
     } = body;
 
     // ── Validate required fields ──
-    if (!activationId) throw new Error("activationId is required");
     if (!buyerName || !buyerEmail) throw new Error("buyerName and buyerEmail are required");
     if (!successUrl || !cancelUrl) throw new Error("successUrl and cancelUrl are required");
+
+    // ═══════════════════════════════════════════════════════════════
+    // PATH A: Client Checkout (Print Partner → Client flow)
+    // ═══════════════════════════════════════════════════════════════
+    if (checkoutToken) {
+      const { data: clientCheckout, error: coError } = await supabase
+        .from("client_checkouts")
+        .select("*")
+        .eq("token", checkoutToken)
+        .single();
+
+      if (coError || !clientCheckout) throw new Error("Client checkout not found");
+      if (clientCheckout.status === "paid") throw new Error("This checkout has already been paid");
+
+      const lineItems = (clientCheckout.line_items || []).map((item: any) => ({
+        currency: "PHP",
+        amount: Math.round((item.amount || 0) * 100),
+        name: item.name || "Item",
+        description: item.description || "",
+        quantity: item.quantity || 1,
+      }));
+
+      const totalCentavos = Math.round((clientCheckout.grand_total || 0) * 100);
+      if (lineItems.length === 0 || totalCentavos < 100) {
+        throw new Error("Invalid checkout total");
+      }
+
+      const merchantMethods = await fetchAllowedPaymentMethods(paymongoSecretKey);
+      let paymentMethodTypes = merchantMethods.filter((m) => ALL_CHECKOUT_METHODS.includes(m));
+      if (paymentMethodTypes.length === 0) paymentMethodTypes = merchantMethods.length > 0 ? merchantMethods : ["qrph", "grab_pay", "paymaya", "dob"];
+
+      const paymongoResponse = await fetch("https://api.paymongo.com/v1/checkout_sessions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Basic ${btoa(paymongoSecretKey + ":")}`,
+        },
+        body: JSON.stringify({
+          data: {
+            attributes: {
+              send_email_receipt: true,
+              show_description: true,
+              show_line_items: true,
+              line_items: lineItems,
+              payment_method_types: paymentMethodTypes,
+              success_url: successUrl,
+              cancel_url: cancelUrl,
+              description: `Client Checkout — ${clientCheckout.listing_title || "Order"}`,
+              billing: { name: buyerName, email: buyerEmail, phone: buyerPhone || "" },
+              metadata: {
+                type: "client_checkout",
+                checkout_id: clientCheckout.id,
+                checkout_token: checkoutToken,
+                print_partner_id: clientCheckout.print_partner_id,
+                total_php: clientCheckout.grand_total.toString(),
+                buyer_name: buyerName,
+                buyer_email: buyerEmail,
+                listing_title: clientCheckout.listing_title || "",
+              },
+            },
+          },
+        }),
+      });
+
+      const paymongoData = await paymongoResponse.json();
+      if (!paymongoResponse.ok) {
+        throw new Error(`Payment gateway error: ${paymongoData.errors?.[0]?.detail || "Unknown"}`);
+      }
+
+      const checkoutUrl = paymongoData.data?.attributes?.checkout_url;
+      const sessionId = paymongoData.data?.id;
+
+      await supabase
+        .from("client_checkouts")
+        .update({ paymongo_checkout_session_id: sessionId, status: "awaiting_client_payment", updated_at: new Date().toISOString() })
+        .eq("id", clientCheckout.id);
+
+      return new Response(
+        JSON.stringify({ checkoutUrl, sessionId, totalPhp: clientCheckout.grand_total }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PATH B: Standard Activation Checkout (existing flow)
+    // ═══════════════════════════════════════════════════════════════
+    if (!activationId) throw new Error("activationId or checkoutToken is required");
 
     // ── 1. Fetch activation + ad space ──
     const { data: activation, error: activationError } = await supabase
