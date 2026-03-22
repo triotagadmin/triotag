@@ -93,7 +93,7 @@ const Auth = () => {
 
         // The trigger handle_new_user_role should handle this, but ensure it exists
         // Create the appropriate profile and mark as verified
-        if (storedUserType === "advertiser") {
+        if (storedUserType === "advertiser" || storedUserType === "print_partner") {
           const { data: existingProfile } = await supabase
             .from("advertiser_profiles")
             .select("id")
