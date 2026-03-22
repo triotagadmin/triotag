@@ -76,7 +76,7 @@ const Auth = () => {
           .eq("user_id", userId)
           .maybeSingle();
 
-        const intendedRole = storedUserType === "venue" ? "publisher" : storedUserType;
+        const intendedRole = storedUserType === "venue" ? "publisher" : storedUserType === "print_partner" ? "print_partner" : storedUserType;
 
         if (existingRole) {
           if (existingRole.role === intendedRole) {
