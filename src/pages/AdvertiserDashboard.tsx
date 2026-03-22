@@ -14,6 +14,7 @@ import { AdvertiserPrintOrderForm } from "@/components/advertiser/AdvertiserPrin
 import { AdvertiserPrintOrdersList } from "@/components/advertiser/AdvertiserPrintOrdersList";
 import { MyFranchiseSection } from "@/components/advertiser/MyFranchiseSection";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { getRoleDisplayName } from "@/lib/brand";
 const AdvertiserDashboard = () => {
   const navigate = useNavigate();
   const {
