@@ -2233,7 +2233,12 @@ export type Database = {
         | "other"
       admin_status: "pending" | "verified" | "rejected"
       agent_role: "guerrilla" | "influencer" | "model" | "artist"
-      app_role: "admin" | "publisher" | "advertiser" | "talent"
+      app_role:
+        | "admin"
+        | "publisher"
+        | "advertiser"
+        | "talent"
+        | "print_partner"
       approval_status: "pending" | "approved" | "rejected"
       booking_status:
         | "pending"
@@ -2400,7 +2405,7 @@ export const Constants = {
       ],
       admin_status: ["pending", "verified", "rejected"],
       agent_role: ["guerrilla", "influencer", "model", "artist"],
-      app_role: ["admin", "publisher", "advertiser", "talent"],
+      app_role: ["admin", "publisher", "advertiser", "talent", "print_partner"],
       approval_status: ["pending", "approved", "rejected"],
       booking_status: [
         "pending",
