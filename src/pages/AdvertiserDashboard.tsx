@@ -44,10 +44,11 @@ const AdvertiserDashboard = () => {
       const {
         data: roles
       } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
-      if (!roles || roles.role !== "advertiser") {
+      if (!roles || !["advertiser", "print_partner"].includes(roles.role)) {
         navigate("/dashboard");
         return;
       }
+      setUserRole(roles.role);
       setUser(session.user);
       setLoading(false);
 
