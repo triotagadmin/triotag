@@ -755,6 +755,86 @@ export type Database = {
           },
         ]
       }
+      client_checkouts: {
+        Row: {
+          activation_id: string | null
+          ad_space_id: string | null
+          campaign_dates: string | null
+          client_company: string | null
+          client_email: string
+          client_name: string
+          created_at: string | null
+          currency: string | null
+          grand_total: number | null
+          id: string
+          lease_total: number | null
+          line_items: Json
+          listing_title: string | null
+          material_total: number | null
+          paid_at: string | null
+          payment_method: string | null
+          paymongo_checkout_session_id: string | null
+          print_partner_id: string
+          status: string | null
+          token: string
+          updated_at: string | null
+        }
+        Insert: {
+          activation_id?: string | null
+          ad_space_id?: string | null
+          campaign_dates?: string | null
+          client_company?: string | null
+          client_email: string
+          client_name: string
+          created_at?: string | null
+          currency?: string | null
+          grand_total?: number | null
+          id?: string
+          lease_total?: number | null
+          line_items?: Json
+          listing_title?: string | null
+          material_total?: number | null
+          paid_at?: string | null
+          payment_method?: string | null
+          paymongo_checkout_session_id?: string | null
+          print_partner_id: string
+          status?: string | null
+          token?: string
+          updated_at?: string | null
+        }
+        Update: {
+          activation_id?: string | null
+          ad_space_id?: string | null
+          campaign_dates?: string | null
+          client_company?: string | null
+          client_email?: string
+          client_name?: string
+          created_at?: string | null
+          currency?: string | null
+          grand_total?: number | null
+          id?: string
+          lease_total?: number | null
+          line_items?: Json
+          listing_title?: string | null
+          material_total?: number | null
+          paid_at?: string | null
+          payment_method?: string | null
+          paymongo_checkout_session_id?: string | null
+          print_partner_id?: string
+          status?: string | null
+          token?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_checkouts_activation_id_fkey"
+            columns: ["activation_id"]
+            isOneToOne: false
+            referencedRelation: "activations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_messages: {
         Row: {
           content: string
