@@ -66,7 +66,8 @@ const ALL_CHECKOUT_METHODS = [
 ];
 
 interface CheckoutRequest {
-  activationId: string;
+  activationId?: string;
+  checkoutToken?: string;
   paymentMethod?: string;
   buyerName: string;
   buyerEmail: string;
