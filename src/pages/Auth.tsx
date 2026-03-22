@@ -89,7 +89,7 @@ const Auth = () => {
         }
 
         // New Google user - create role and profile
-        const mappedRole = storedUserType === "venue" ? "publisher" : storedUserType;
+        const mappedRole = storedUserType === "venue" ? "publisher" : storedUserType === "print_partner" ? "print_partner" : storedUserType;
 
         // The trigger handle_new_user_role should handle this, but ensure it exists
         // Create the appropriate profile and mark as verified
