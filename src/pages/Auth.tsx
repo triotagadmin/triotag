@@ -165,7 +165,7 @@ const Auth = () => {
     const routeByRole = async (role: string) => {
       if (role === "admin") {
         navigate("/admin/dashboard");
-      } else if (role === "advertiser") {
+      } else if (role === "advertiser" || role === "print_partner") {
         try {
           await supabase.functions.invoke("sync-pending-listing-ownership");
         } catch (syncError) {
