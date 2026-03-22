@@ -147,7 +147,7 @@ const AdvertiserDashboard = () => {
       <div className="container mx-auto px-6 py-12">
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">
-            Welcome back, Advertiser!
+            Welcome back, {getRoleDisplayName(userRole)}!
           </h2>
           <p className="text-muted-foreground">{user?.email}</p>
         </div>
