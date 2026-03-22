@@ -68,6 +68,8 @@ import HireTalent from "./pages/HireTalent";
 import TalentProfileSubmission from "./pages/TalentProfileSubmission";
 import TalentDashboard from "./pages/TalentDashboard";
 import BookTalent from "./pages/BookTalent";
+import ClientCheckout from "./pages/ClientCheckout";
+import ClientPaymentSuccess from "./pages/ClientPaymentSuccess";
 
 const queryClient = new QueryClient();
 
