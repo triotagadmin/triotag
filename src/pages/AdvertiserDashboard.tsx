@@ -13,6 +13,7 @@ import { AdvertiserBranchManager } from "@/components/advertiser/AdvertiserBranc
 import { AdvertiserPrintOrderForm } from "@/components/advertiser/AdvertiserPrintOrderForm";
 import { AdvertiserPrintOrdersList } from "@/components/advertiser/AdvertiserPrintOrdersList";
 import { MyFranchiseSection } from "@/components/advertiser/MyFranchiseSection";
+import { ClientCheckoutsList } from "@/components/advertiser/ClientCheckoutsList";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 const AdvertiserDashboard = () => {
   const navigate = useNavigate();
