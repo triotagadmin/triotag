@@ -1,200 +1,69 @@
 
 
-## Plan: Duplicate Advertiser Role + Print Partner Client Checkout Flow
+# Bug Fix Plan: Document Viewing, Location Search, and Payment Gate
 
-This is a large feature set with two main tracks: (A) role duplication and renaming, and (B) a client-facing checkout system for Print Partners. Here is the implementation plan.
+## Bug 1: Publisher Documents Cannot Be Viewed (404 Error)
 
----
+**Root Cause:** The `verification-documents` storage bucket is configured as **private** (not public), but the code uses `getPublicUrl()` when saving file URLs to the database. Public URLs for private buckets always return 404 errors.
 
-### Track A: Role Duplication and Renaming
-
-**Database Changes (1 migration)**
-
-1. Add `print_partner` to the `app_role` enum:
-   ```sql
-   ALTER TYPE public.app_role ADD VALUE 'print_partner';
-   ```
-
-2. Create a new table `client_checkouts` (needed for Track B, but created here):
-   ```sql
-   CREATE TABLE public.client_checkouts (
-     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-     token text UNIQUE NOT NULL DEFAULT encode(gen_random_bytes(24), 'hex'),
-     print_partner_id uuid NOT NULL,
-     activation_id uuid REFERENCES activations(id),
-     ad_space_id uuid,
-     client_name text NOT NULL,
-     client_email text NOT NULL,
-     client_company text,
-     listing_title text,
-     campaign_dates text,
-     line_items jsonb NOT NULL DEFAULT '[]',
-     lease_total numeric DEFAULT 0,
-     material_total numeric DEFAULT 0,
-     grand_total numeric DEFAULT 0,
-     currency text DEFAULT 'PHP',
-     status text DEFAULT 'draft',
-     paymongo_checkout_session_id text,
-     payment_method text,
-     paid_at timestamptz,
-     created_at timestamptz DEFAULT now(),
-     updated_at timestamptz DEFAULT now()
-   );
-   ALTER TABLE public.client_checkouts ENABLE ROW LEVEL SECURITY;
-   -- Print partners can manage their own checkouts
-   CREATE POLICY "print_partners_manage_own" ON public.client_checkouts
-     FOR ALL TO authenticated
-     USING (print_partner_id = auth.uid());
-   -- Public can view by token (for the checkout page)
-   CREATE POLICY "public_view_by_token" ON public.client_checkouts
-     FOR SELECT TO public USING (true);
-   -- Admins can manage all
-   CREATE POLICY "admins_manage_all" ON public.client_checkouts
-     FOR ALL TO authenticated
-     USING (has_role(auth.uid(), 'admin'));
-   ```
-
-**Backend Changes**
-
-3. Update `handle_new_user_role` trigger function to handle `print_partner` user_type by mapping it to the `print_partner` role.
-
-4. Create a new trigger function `handle_new_print_partner` (similar to `handle_new_advertiser`) that creates an `advertiser_profiles` row for `print_partner` users -- since they share the same profile/functionality.
-
-5. Update all RLS policies and DB functions that check `role = 'advertiser'` to also accept `'print_partner'`. Key places:
-   - `advertiser_profiles` policies
-   - `activations` policies
-   - `campaigns` policies
-   - `advertiser_print_orders` policies
-   - `franchise_branches` policies (advertiser checks)
-   - `has_role` calls in edge functions
-
-**Frontend: UI Renaming**
-
-6. **Auth page** (`src/pages/Auth.tsx`):
-   - Change signup options from `"Advertiser"` to two options: `"Franchise Partner"` (value: `advertiser`) and `"Print Partner"` (value: `print_partner`)
-
-7. **Brand config** (`src/lib/brand.ts`): Add role display name map:
-   ```typescript
-   export const ROLE_DISPLAY_NAMES: Record<string, string> = {
-     advertiser: "Franchise Partner",
-     print_partner: "Print Partner",
-     publisher: "Agent",
-     admin: "Admin",
-     talent: "Talent",
-   };
-   ```
-
-8. **Navigation** (`src/components/Navigation.tsx`):
-   - `getDashboardLink`: add `print_partner` mapping to `/advertiser-dashboard`
-   - Display correct role label
-
-9. **AdvertiserDashboard** (`src/pages/AdvertiserDashboard.tsx`):
-   - Accept both `advertiser` and `print_partner` roles
-   - Show "Franchise Partner Dashboard" or "Print Partner Dashboard" based on role
-   - Change role check from `roles.role !== "advertiser"` to `!["advertiser", "print_partner"].includes(roles.role)`
-
-10. **AdvertiserSettings** (`src/pages/AdvertiserSettings.tsx`): Same role check update + title rename
-
-11. **All user-facing "Advertiser" text**: Search and replace display text across ~38 files where "Advertiser" appears in UI labels (not DB/logic references). Key files:
-    - Dashboard headers, navigation labels, toast messages
-    - Terms of service, onboarding text
-
-12. **Auth sign-in routing**: In `handleSignIn`, add `print_partner` case that routes to `/advertiser-dashboard` (same as advertiser).
+**Fix:**
+1. **VenueRegistration.tsx** and **VenueVerification.tsx**: Change the upload flow to store only the **storage path** (e.g., `publisherId/filename.ext`) in the `file_url` column instead of the full public URL.
+2. **SubmissionDetailsDialog.tsx**: Instead of rendering `file_url` as a direct link, generate a **signed URL on demand** using `supabase.storage.from('verification-documents').createSignedUrl(path, 3600)` when the admin clicks "View Document."
+3. **AdminDashboard.tsx**: Add an inline image/document preview when viewing verification documents. For image files (jpg, png), display them directly using the signed URL. For PDFs, open in a new tab via the signed URL.
+4. **Existing data migration**: For already-stored URLs, extract the storage path from the full URL pattern and generate signed URLs at display time.
 
 ---
 
-### Track B: Print Partner Client Checkout Flow
+## Bug 2: Location Search Not Loading Listings + Radius Change + Text Input
 
-**Frontend Changes**
+**Root Cause:** The `search_nearby_listings` RPC function works correctly, but the issue may be related to how results are processed. Additionally, the radius needs to change from 50km to 10km, and a manual text input bar is needed.
 
-13. **ActivateListing.tsx -- Custom pricing for Print Partners**:
-    - Detect if current user role is `print_partner`
-    - In Step 2 (Print Order), make unit price editable per material line item (add Input field next to each material row)
-    - Store custom prices in state alongside material configs
-    - Auto-calculate line totals from custom price x quantity
+**Fixes:**
+1. **LocationSearchModal.tsx**: 
+   - Change `radiusKm` default from `50` to `10`.
+   - Update the circle radius on the map to reflect 10km.
+   - Add a text input field for manual location entry using a geocoding approach (search by city/address name using the OpenStreetMap Nominatim API, which is free and requires no API key).
+   - When a user types a location and presses search, geocode the text to lat/lng coordinates and place the pin accordingly.
 
-14. **New Step 3: Client Checkout Preparation** (in ActivateListing.tsx):
-    - Add a new step after Print Order for `print_partner` role only
-    - Form fields: client name, client email, client company (optional)
-    - Review summary: ad space fees, print material fees with custom prices, grand total
-    - Button: "Generate Client Checkout Page"
-    - On click: call edge function to create `client_checkouts` record, return token
-    - Show generated URL, copy button, preview button, payment status badge
+2. **Marketplace.tsx**: 
+   - Change `radius_km: 50` to `radius_km: 10` in the `handleLocationSearch` RPC call.
+   - Update the UI text from "50 km" to "10 km" in all display strings.
+   - Remove the filter that only shows `category === "venue"` results -- include agent services too (they are returned by the RPC).
+   - Debug the result mapping to ensure `media_urls` (returned as JSON from the RPC) is handled correctly (it may need parsing).
 
-15. **New page: `src/pages/ClientCheckout.tsx`** (public, no auth required):
-    - Route: `/checkout/:token`
-    - Fetches checkout record by token from `client_checkouts`
-    - Displays branded TrioTag checkout page with:
-      - Campaign/booking title
-      - "Prepared by [Print Partner name]"
-      - Client name
-      - Ad space details, campaign dates
-      - Print material line items with custom prices (read-only)
-      - Pricing breakdown: lease fees, print fees, grand total
-      - "Proceed to Payment" button
-    - On payment click: calls `create-checkout` edge function with checkout token
-    - Redirects to PayMongo hosted checkout
-
-16. **New page: `src/pages/ClientPaymentSuccess.tsx`**:
-    - Route: `/checkout/success`
-    - Shows payment confirmation to client
-
-17. **Print Partner Dashboard section**: Add "Client Checkouts" tab showing list of generated checkout pages with status, link copy, and payment status.
-
-**App.tsx Routes**
-
-18. Add routes:
-    ```
-    /checkout/:token → ClientCheckout
-    /checkout/success → ClientPaymentSuccess
-    ```
-
-**Edge Function Changes**
-
-19. **New edge function: `create-client-checkout`**:
-    - Accepts: activation details, line items, client info, custom prices
-    - Creates `client_checkouts` record
-    - Returns: token, public URL
-
-20. **Update `create-checkout` edge function**:
-    - Accept optional `checkoutToken` parameter
-    - When present, fetch pricing from `client_checkouts` instead of computing from activation
-    - Create PayMongo session with the client checkout's line items and total
-    - Update `client_checkouts` with PayMongo session ID
-
-21. **Update `paymongo-webhook`**:
-    - Check metadata for `type: "client_checkout"`
-    - On success: update `client_checkouts.status` to `paid`, create activation/job record, send notification to Print Partner
-    - Send email notification to `tinystickyads@gmail.com`
+3. **search_nearby_listings RPC**: Update the default `radius_km` parameter from `50` to `10` via a database migration.
 
 ---
 
-### Summary of Files to Create/Edit
+## Bug 3: Advertiser Payment Should Be Blocked Until Admin Approves Print Order
 
-| Action | File |
-|--------|------|
-| Edit | `src/lib/brand.ts` -- add role display names |
-| Edit | `src/pages/Auth.tsx` -- add Print Partner signup option, routing |
-| Edit | `src/components/Navigation.tsx` -- support print_partner role |
-| Edit | `src/pages/AdvertiserDashboard.tsx` -- accept both roles, dynamic title |
-| Edit | `src/pages/AdvertiserSettings.tsx` -- accept both roles |
-| Edit | `src/pages/ActivateListing.tsx` -- custom pricing + client checkout step |
-| Create | `src/pages/ClientCheckout.tsx` -- public branded checkout page |
-| Create | `src/pages/ClientPaymentSuccess.tsx` -- payment success page |
-| Edit | `src/App.tsx` -- add new routes |
-| Create | `supabase/functions/create-client-checkout/index.ts` |
-| Edit | `supabase/functions/create-checkout/index.ts` -- support client checkout token |
-| Edit | `supabase/functions/paymongo-webhook/index.ts` -- handle client checkout payments |
-| Migration | Add `print_partner` enum value, `client_checkouts` table, update trigger functions, update RLS policies |
-| Edit | ~10 more files for "Advertiser" -> "Franchise Partner" UI text |
+**Root Cause:** In `ActivateListing.tsx`, the "Proceed to Payment" button (line 1133-1140) is always visible once a print order is submitted, regardless of whether the admin has approved it on `/admin/orders`. There is no check for the print order's `order_status`.
+
+**Fixes:**
+1. **ActivateListing.tsx**:
+   - After a print order is submitted, fetch the `print_orders` record to check its `order_status`.
+   - Subscribe to realtime changes on the `print_orders` table for the specific order to detect when admin approves.
+   - **Disable/hide the "Proceed to Payment" button** unless `order_status === "in_production"` (which means admin has approved).
+   - Show a clear message: "Waiting for admin approval before you can proceed to payment."
+   - When the admin approves (status changes to `in_production`), the button becomes active automatically.
+
+2. **PaymentGateway.tsx**:
+   - Add a server-side check: before creating the checkout session, verify the print order status is `in_production` or later. This acts as a safety net even if the UI is bypassed.
 
 ---
 
-### Technical Constraints
+## Technical Details
 
-- The `app_role` enum currently has: `admin`, `publisher`, `advertiser`, `talent`. Adding `print_partner` requires a DB migration.
-- Print Partner reuses `advertiser_profiles` table -- no new profile table needed.
-- Custom pricing is stored in `client_checkouts.line_items` JSON, not in the materials table.
-- The public checkout page uses token-based access, no auth required.
-- All existing advertiser workflows remain untouched -- this is purely additive.
+### Files to modify:
+- `src/pages/VenueRegistration.tsx` -- Store storage path instead of public URL
+- `src/pages/VenueVerification.tsx` -- Store storage path instead of public URL  
+- `src/components/SubmissionDetailsDialog.tsx` -- Generate signed URLs for document viewing, add image preview
+- `src/components/marketplace/LocationSearchModal.tsx` -- Add text input, change radius to 10km, add geocoding
+- `src/pages/Marketplace.tsx` -- Update radius, fix result filtering
+- `src/pages/ActivateListing.tsx` -- Gate payment step behind admin approval of print order
+- `src/components/activation/PaymentGateway.tsx` -- Add server-side approval check
+- Database migration: Update `search_nearby_listings` default radius from 50 to 10
+
+### No new dependencies needed
+- Geocoding uses the free OpenStreetMap Nominatim API (fetch-based, no library needed)
 

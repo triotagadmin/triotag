@@ -67,7 +67,7 @@ export const Navigation = () => {
 
   const getDashboardLink = () => {
     if (userRole === "admin") return "/admin/dashboard";
-    if (userRole === "advertiser" || userRole === "print_partner") return "/advertiser-dashboard";
+    if (userRole === "advertiser") return "/advertiser-dashboard";
     if (userRole === "publisher") return "/venue-publishers";
     if (userRole === "talent") return "/talent-dashboard";
     return "/dashboard";

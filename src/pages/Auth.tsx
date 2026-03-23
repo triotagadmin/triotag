@@ -76,7 +76,7 @@ const Auth = () => {
           .eq("user_id", userId)
           .maybeSingle();
 
-        const intendedRole = storedUserType === "venue" ? "publisher" : storedUserType === "print_partner" ? "print_partner" : storedUserType;
+        const intendedRole = storedUserType === "venue" ? "publisher" : storedUserType;
 
         if (existingRole) {
           if (existingRole.role === intendedRole) {
@@ -89,11 +89,11 @@ const Auth = () => {
         }
 
         // New Google user - create role and profile
-        const mappedRole = storedUserType === "venue" ? "publisher" : storedUserType === "print_partner" ? "print_partner" : storedUserType;
+        const mappedRole = storedUserType === "venue" ? "publisher" : storedUserType;
 
         // The trigger handle_new_user_role should handle this, but ensure it exists
         // Create the appropriate profile and mark as verified
-        if (storedUserType === "advertiser" || storedUserType === "print_partner") {
+        if (storedUserType === "advertiser") {
           const { data: existingProfile } = await supabase
             .from("advertiser_profiles")
             .select("id")
@@ -165,7 +165,7 @@ const Auth = () => {
     const routeByRole = async (role: string) => {
       if (role === "admin") {
         navigate("/admin/dashboard");
-      } else if (role === "advertiser" || role === "print_partner") {
+      } else if (role === "advertiser") {
         try {
           await supabase.functions.invoke("sync-pending-listing-ownership");
         } catch (syncError) {
@@ -318,7 +318,7 @@ const Auth = () => {
           description: "Successfully signed in as admin.",
         });
         navigate("/admin/dashboard");
-      } else if (roles?.role === "advertiser" || roles?.role === "print_partner") {
+      } else if (roles?.role === "advertiser") {
         const { data: profile } = await supabase
           .from("advertiser_profiles")
           .select("verified")
@@ -589,8 +589,7 @@ const Auth = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="advertiser">Franchise Partner</SelectItem>
-                      <SelectItem value="print_partner">Print Partner</SelectItem>
+                      <SelectItem value="advertiser">Advertiser</SelectItem>
                       <SelectItem value="venue">Agent</SelectItem>
                     </SelectContent>
                   </Select>

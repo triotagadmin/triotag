@@ -14,9 +14,7 @@ import { AdvertiserPrintOrderForm } from "@/components/advertiser/AdvertiserPrin
 import { AdvertiserPrintOrdersList } from "@/components/advertiser/AdvertiserPrintOrdersList";
 import { MyFranchiseSection } from "@/components/advertiser/MyFranchiseSection";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { getRoleDisplayName } from "@/lib/brand";
 const AdvertiserDashboard = () => {
-  const [userRole, setUserRole] = useState<string>("advertiser");
   const navigate = useNavigate();
   const {
     toast
@@ -44,11 +42,10 @@ const AdvertiserDashboard = () => {
       const {
         data: roles
       } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
-      if (!roles || !["advertiser", "print_partner"].includes(roles.role)) {
+      if (!roles || roles.role !== "advertiser") {
         navigate("/dashboard");
         return;
       }
-      setUserRole(roles.role);
       setUser(session.user);
       setLoading(false);
 
@@ -147,7 +144,7 @@ const AdvertiserDashboard = () => {
       <div className="container mx-auto px-6 py-12">
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">
-            Welcome back, {getRoleDisplayName(userRole)}!
+            Welcome back, Advertiser!
           </h2>
           <p className="text-muted-foreground">{user?.email}</p>
         </div>

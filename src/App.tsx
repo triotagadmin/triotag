@@ -68,8 +68,6 @@ import HireTalent from "./pages/HireTalent";
 import TalentProfileSubmission from "./pages/TalentProfileSubmission";
 import TalentDashboard from "./pages/TalentDashboard";
 import BookTalent from "./pages/BookTalent";
-import ClientCheckout from "./pages/ClientCheckout";
-import ClientPaymentSuccess from "./pages/ClientPaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -168,9 +166,6 @@ const App = () => (
               <AdminOrders />
             </ProtectedAdminRoute>
           } />
-          {/* Client Checkout (public, no auth) */}
-          <Route path="/checkout/success" element={<ClientPaymentSuccess />} />
-          <Route path="/checkout/:token" element={<ClientCheckout />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

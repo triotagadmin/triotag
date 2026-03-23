@@ -283,62 +283,6 @@ serve(async (req) => {
         }
       }
 
-      // ── Client Checkout Payment (Print Partner flow) ──
-      else if (metadata?.type === "client_checkout") {
-        const checkoutId = metadata?.checkout_id;
-        const checkoutToken = metadata?.checkout_token;
-        const printPartnerId = metadata?.print_partner_id;
-
-        if (checkoutId) {
-          const { error } = await supabase
-            .from("client_checkouts")
-            .update({ status: "paid", paid_at: now, payment_method: paymentMethodType, updated_at: now })
-            .eq("id", checkoutId);
-
-          if (error) {
-            console.error(`Failed to update client checkout ${checkoutId}:`, error);
-          } else {
-            console.log(`Client checkout ${checkoutId} marked as paid`);
-
-            // Update linked activation if exists
-            const { data: co } = await supabase
-              .from("client_checkouts")
-              .select("activation_id")
-              .eq("id", checkoutId)
-              .single();
-
-            if (co?.activation_id) {
-              await supabase
-                .from("activations")
-                .update({ status: "completed", updated_at: now })
-                .eq("id", co.activation_id);
-            }
-
-            // Notify print partner
-            if (printPartnerId) {
-              await supabase.from("notifications").insert({
-                user_id: printPartnerId,
-                title: "Client Payment Received!",
-                message: `Your client "${metadata?.buyer_name || "N/A"}" has paid ₱${parseFloat(metadata?.total_php || "0").toLocaleString("en-PH", { minimumFractionDigits: 2 })} for "${metadata?.listing_title || "order"}".`,
-                type: "client_payment_received",
-              });
-            }
-
-            // Send admin email
-            await sendPaymentSuccessEmail({
-              paymentType: "Client Checkout (Print Partner)",
-              orderId: checkoutId,
-              listingTitle: metadata?.listing_title || "Client Checkout",
-              customerName: metadata?.buyer_name || "N/A",
-              customerEmail: metadata?.buyer_email || "N/A",
-              totalPaid: `₱${parseFloat(metadata?.total_php || "0").toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-              paymentDate: now,
-              paymentMethod: paymentMethodType,
-            });
-          }
-        }
-      }
-
       // ── Venue Registration Payment ──
       else if (metadata?.type === "venue_registration") {
         console.log("Venue registration payment received:", metadata.venue_id);
