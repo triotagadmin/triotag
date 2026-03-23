@@ -297,6 +297,56 @@ serve(async (req) => {
           paymentMethod: paymentMethodType,
         });
       }
+
+      // ── Client Checkout Payment (Print Partner) ──
+      else if (metadata?.type === "client_checkout") {
+        const checkoutDbId = metadata?.checkout_id;
+        if (checkoutDbId) {
+          // Update checkout status to paid
+          const { data: clientCheckout, error: ccErr } = await supabase
+            .from("client_checkouts")
+            .update({ status: "paid", paid_at: now, payment_method: paymentMethodType })
+            .eq("id", checkoutDbId)
+            .select("*")
+            .single();
+
+          if (ccErr) {
+            console.error(`Failed to update client checkout ${checkoutDbId}:`, ccErr);
+          } else {
+            console.log(`Client checkout ${checkoutDbId} marked as paid`);
+
+            // Update linked activation if exists
+            if (clientCheckout?.activation_id) {
+              await supabase
+                .from("activations")
+                .update({ status: "completed", updated_at: now })
+                .eq("id", clientCheckout.activation_id);
+            }
+
+            // Notify the Print Partner
+            if (clientCheckout?.print_partner_id) {
+              await supabase.from("notifications").insert({
+                user_id: clientCheckout.print_partner_id,
+                title: "Client Payment Received!",
+                message: `${clientCheckout.client_name} has paid ₱${(clientCheckout.grand_total || 0).toLocaleString("en-PH", { minimumFractionDigits: 2 })} for "${clientCheckout.listing_title || "Campaign"}".`,
+                type: "client_payment_received",
+              });
+            }
+
+            // Send email notification
+            await sendPaymentSuccessEmail({
+              paymentType: "Client Checkout (Print Partner)",
+              orderId: checkoutDbId,
+              listingTitle: clientCheckout?.listing_title || "Client Checkout",
+              customerName: clientCheckout?.client_name || "N/A",
+              customerEmail: clientCheckout?.client_email || "N/A",
+              totalPaid: `₱${(clientCheckout?.grand_total || 0).toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              paymentDate: now,
+              paymentMethod: paymentMethodType,
+            });
+          }
+        }
+      }
     }
 
     // ── payment.failed — handle failures ──
