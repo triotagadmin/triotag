@@ -502,6 +502,9 @@ const AdvertiserDashboard = () => {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Client Checkout Pages (Print Partner) */}
+          <ClientCheckoutsList />
         </div>
       </div>
     </div>;
