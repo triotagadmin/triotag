@@ -91,6 +91,7 @@ const App = () => (
           <Route path="/venue/:id/branches" element={<FranchiseBranches />} />
           <Route path="/activate/:id" element={<ActivateListing />} />
            <Route path="/payment-success" element={<PaymentSuccess />} />
+           <Route path="/checkout/:token" element={<ClientCheckout />} />
           <Route path="/venue-registration" element={<VenueRegistration />} />
           <Route path="/campaign-builder" element={<CampaignBuilder />} />
           <Route path="/habit-tracker" element={<HabitTracker />} />
