@@ -58,6 +58,7 @@ import TicketMarket from "./pages/TicketMarket";
 import ValidateTicket from "./pages/ValidateTicket";
 
  import PaymentSuccess from "./pages/PaymentSuccess";
+ import ClientCheckout from "./pages/ClientCheckout";
  
 import PublisherAdRequests from "./pages/publisher/PublisherAdRequests";
 import PublisherAdRequestDetail from "./pages/publisher/PublisherAdRequestDetail";
