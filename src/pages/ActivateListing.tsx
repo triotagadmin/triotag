@@ -1372,29 +1372,31 @@ const ActivateListing = () => {
                       ? `${format(startDate, "MMM d, yyyy")} – ${format(endDate, "MMM d, yyyy")}`
                       : null;
 
+                    const checkoutPayload = {
+                      print_partner_id: session.user.id,
+                      client_name: clientInfo.clientName,
+                      client_email: clientInfo.clientEmail,
+                      client_company: clientInfo.companyName || null,
+                      listing_title: listing?.title || null,
+                      campaign_dates: campaignDates,
+                      ad_space_id: id || null,
+                      activation_id: activationId || null,
+                      line_items: {
+                        campaignTitle: clientInfo.campaignTitle,
+                        notes: clientInfo.notes,
+                        branches: partnerBranches,
+                      } as any,
+                      lease_total: activationPrice,
+                      material_total: materialTotal,
+                      grand_total: grandTotal,
+                      currency: "PHP",
+                      token,
+                      status: "draft",
+                    };
+
                     const { data: checkout, error } = await supabase
                       .from("client_checkouts")
-                      .insert({
-                        print_partner_id: session.user.id,
-                        client_name: clientInfo.clientName,
-                        client_email: clientInfo.clientEmail,
-                        client_company: clientInfo.companyName || null,
-                        listing_title: listing?.title || null,
-                        campaign_dates: campaignDates,
-                        ad_space_id: id || null,
-                        activation_id: activationId || null,
-                        line_items: {
-                          campaignTitle: clientInfo.campaignTitle,
-                          notes: clientInfo.notes,
-                          branches: partnerBranches,
-                        },
-                        lease_total: activationPrice,
-                        material_total: materialTotal,
-                        grand_total: grandTotal,
-                        currency: "PHP",
-                        token,
-                        status: "draft",
-                      })
+                      .insert(checkoutPayload as any)
                       .select("id, token")
                       .single();
 
