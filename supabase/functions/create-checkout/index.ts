@@ -93,7 +93,14 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const body: CheckoutRequest = await req.json();
+    const body = await req.json();
+
+    // ── Route: Guest Booking ──
+    if (body.type === "guest_booking") {
+      return await handleGuestBookingCheckout(body, paymongoSecretKey, supabase);
+    }
+
+    // ── Route: Activation Payment (default) ──
     const {
       activationId, buyerName, buyerEmail, buyerPhone,
       companyName, billingAddress, billingCity, billingCountry, billingZip,
