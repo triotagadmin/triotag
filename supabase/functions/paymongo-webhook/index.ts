@@ -373,3 +373,119 @@ serve(async (req) => {
     });
   }
 });
+
+// ── Send guest booking confirmation email ──
+async function sendGuestBookingConfirmationEmail(booking: any, locations: any[]) {
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendApiKey) {
+    console.warn("[webhook] RESEND_API_KEY not set — skipping guest confirmation email");
+    return;
+  }
+
+  const locationRows = locations.map(loc =>
+    `<tr>
+      <td style="padding:6px 8px;border:1px solid #e5e5e5;">${loc.branch_name || "—"}</td>
+      <td style="padding:6px 8px;border:1px solid #e5e5e5;">${loc.branch_address || "—"}</td>
+      <td style="padding:6px 8px;border:1px solid #e5e5e5;">${loc.city || "—"}</td>
+      <td style="padding:6px 8px;border:1px solid #e5e5e5;">${loc.quantity}× ${loc.duration_weeks}wk</td>
+      <td style="padding:6px 8px;border:1px solid #e5e5e5;text-align:right;">₱${(loc.subtotal || 0).toLocaleString()}</td>
+    </tr>`
+  ).join("");
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:650px;margin:0 auto;padding:20px;">
+      <h2 style="color:#16a34a;">🎉 Booking Confirmed — TrioTag</h2>
+      <p>Hi ${booking.guest_name || "there"},</p>
+      <p>Your location bundle booking has been confirmed! Here are your details:</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+        <tr><td style="padding:6px 0;color:#666;">Booking Reference</td><td style="font-family:monospace;font-weight:bold;">${booking.id.slice(0,8).toUpperCase()}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Total Paid</td><td style="font-weight:bold;color:#16a34a;font-size:18px;">₱${(booking.total_price || 0).toLocaleString()}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Payment Date</td><td>${new Date().toLocaleString("en-PH")}</td></tr>
+        ${booking.brand_name ? `<tr><td style="padding:6px 0;color:#666;">Brand</td><td>${booking.brand_name}</td></tr>` : ""}
+        ${booking.creative_url ? `<tr><td style="padding:6px 0;color:#666;">Creative</td><td><a href="${booking.creative_url}">View uploaded creative</a></td></tr>` : ""}
+      </table>
+
+      <h3 style="margin-top:20px;">Selected Locations</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <thead><tr style="background:#f5f5f5;">
+          <th style="padding:8px;border:1px solid #e5e5e5;text-align:left;">Branch</th>
+          <th style="padding:8px;border:1px solid #e5e5e5;text-align:left;">Address</th>
+          <th style="padding:8px;border:1px solid #e5e5e5;text-align:left;">City</th>
+          <th style="padding:8px;border:1px solid #e5e5e5;text-align:left;">Qty</th>
+          <th style="padding:8px;border:1px solid #e5e5e5;text-align:right;">Subtotal</th>
+        </tr></thead>
+        <tbody>${locationRows}</tbody>
+      </table>
+
+      <h3 style="margin-top:20px;">Next Steps</h3>
+      <ol>
+        <li>Our team will review your booking and creative.</li>
+        <li>We'll coordinate with the location partners for activation.</li>
+        <li>You'll receive updates via email at ${booking.guest_email}.</li>
+      </ol>
+
+      <p style="color:#999;font-size:12px;margin-top:20px;">Questions? Contact us at tinystickyads@gmail.com</p>
+    </div>
+  `;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${resendApiKey}`,
+      },
+      body: JSON.stringify({
+        from: "TrioTag <onboarding@resend.dev>",
+        to: [booking.guest_email],
+        subject: `✅ Booking Confirmed — ${booking.id.slice(0,8).toUpperCase()} — TrioTag`,
+        html,
+      }),
+    });
+    if (!res.ok) {
+      console.error("[webhook] Guest email failed:", res.status, await res.text());
+    } else {
+      console.log("[webhook] Guest confirmation sent to", booking.guest_email);
+    }
+
+    // Also send full details to admin
+    const adminHtml = `
+      <div style="font-family:Arial,sans-serif;max-width:650px;margin:0 auto;padding:20px;">
+        <h2>📋 New Guest Bundle Booking</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:6px 0;color:#666;">Booking ID</td><td style="font-family:monospace;">${booking.id}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">Guest Email</td><td>${booking.guest_email}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">Guest Name</td><td>${booking.guest_name || "—"}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">Brand</td><td>${booking.brand_name || "—"}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">Phone</td><td>${booking.guest_phone || "—"}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">Locations</td><td>${booking.total_locations}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">Total</td><td style="font-weight:bold;">₱${(booking.total_price || 0).toLocaleString()}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">Payment</td><td style="color:#16a34a;font-weight:bold;">PAID</td></tr>
+          ${booking.creative_url ? `<tr><td style="padding:6px 0;color:#666;">Creative</td><td><a href="${booking.creative_url}">View</a></td></tr>` : ""}
+        </table>
+        <h3>Locations</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="background:#f5f5f5;"><th style="padding:6px;border:1px solid #ddd;">Branch</th><th style="padding:6px;border:1px solid #ddd;">Address</th><th style="padding:6px;border:1px solid #ddd;">City</th><th style="padding:6px;border:1px solid #ddd;">Subtotal</th></tr></thead>
+          <tbody>${locationRows}</tbody>
+        </table>
+      </div>
+    `;
+
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${resendApiKey}`,
+      },
+      body: JSON.stringify({
+        from: "TrioTag <onboarding@resend.dev>",
+        to: [ADMIN_EMAIL],
+        subject: `📋 Guest Bundle Booking — ${booking.id.slice(0,8).toUpperCase()} — ${booking.total_locations} locations`,
+        html: adminHtml,
+      }),
+    });
+  } catch (err) {
+    console.error("[webhook] Guest booking email error:", err);
+  }
+}
