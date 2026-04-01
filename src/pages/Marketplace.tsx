@@ -582,6 +582,7 @@ const Marketplace = () => {
         onSearch={handleLocationSearch}
         radiusKm={10} />
 
+      <GuestBasketFloat />
       <Footer />
     </div>);
 
