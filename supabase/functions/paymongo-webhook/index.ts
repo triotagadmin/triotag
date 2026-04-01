@@ -297,8 +297,53 @@ serve(async (req) => {
           paymentMethod: paymentMethodType,
         });
       }
-    }
+      }
 
+      // ── Guest Booking Payment ──
+      else if (metadata?.type === "guest_booking") {
+        const guestBookingId = metadata?.guest_booking_id;
+        if (guestBookingId) {
+          const { error } = await supabase
+            .from("guest_bookings")
+            .update({ payment_status: "paid", booking_status: "confirmed", updated_at: now })
+            .eq("id", guestBookingId);
+
+          if (error) {
+            console.error(`Failed to update guest booking ${guestBookingId}:`, error);
+          } else {
+            console.log(`Guest booking ${guestBookingId} marked as paid`);
+
+            // Fetch booking details for email
+            const { data: booking } = await supabase
+              .from("guest_bookings")
+              .select("*")
+              .eq("id", guestBookingId)
+              .single();
+
+            const { data: locations } = await supabase
+              .from("guest_booking_locations")
+              .select("*")
+              .eq("guest_booking_id", guestBookingId);
+
+            // Send guest confirmation email
+            if (booking) {
+              await sendGuestBookingConfirmationEmail(booking, locations || []);
+            }
+
+            // Send admin notification
+            await sendPaymentSuccessEmail({
+              paymentType: "Guest Location Bundle",
+              orderId: guestBookingId,
+              listingTitle: `${(locations || []).length} Location(s) Bundle`,
+              customerName: metadata?.guest_name || booking?.guest_name || "Guest",
+              customerEmail: metadata?.guest_email || booking?.guest_email || "N/A",
+              totalPaid: `₱${parseFloat(metadata?.total_php || "0").toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              paymentDate: now,
+              paymentMethod: paymentMethodType,
+            });
+          }
+        }
+      }
     // ── payment.failed — handle failures ──
     if (eventType === "payment.failed") {
       const metadata = eventData?.attributes?.metadata;
