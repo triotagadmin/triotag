@@ -93,7 +93,14 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const body: CheckoutRequest = await req.json();
+    const body = await req.json();
+
+    // ── Route: Guest Booking ──
+    if (body.type === "guest_booking") {
+      return await handleGuestBookingCheckout(body, paymongoSecretKey, supabase);
+    }
+
+    // ── Route: Activation Payment (default) ──
     const {
       activationId, buyerName, buyerEmail, buyerPhone,
       companyName, billingAddress, billingCity, billingCountry, billingZip,
@@ -367,3 +374,83 @@ serve(async (req) => {
     );
   }
 });
+
+// ── Guest Booking Checkout Handler ──
+async function handleGuestBookingCheckout(body: any, paymongoSecretKey: string, supabase: any) {
+  const { guestBookingId, guestEmail, guestName, lineItems, totalAmount, currency, successUrl, cancelUrl } = body;
+
+  if (!guestBookingId || !guestEmail) throw new Error("guestBookingId and guestEmail are required");
+  if (!lineItems || !Array.isArray(lineItems) || lineItems.length === 0) throw new Error("lineItems are required");
+  if (!successUrl || !cancelUrl) throw new Error("successUrl and cancelUrl are required");
+
+  const pmLineItems = lineItems.map((li: any) => ({
+    currency: (li.currency || currency || "PHP").toUpperCase(),
+    amount: li.amount,
+    name: li.name,
+    quantity: li.quantity || 1,
+  }));
+
+  // Fetch payment methods
+  const merchantMethods = await fetchAllowedPaymentMethods(paymongoSecretKey);
+  let paymentMethodTypes: string[];
+  if (merchantMethods.length > 0) {
+    paymentMethodTypes = merchantMethods.filter((m) => ALL_CHECKOUT_METHODS.includes(m));
+    if (paymentMethodTypes.length === 0) paymentMethodTypes = merchantMethods;
+  } else {
+    paymentMethodTypes = ["qrph", "grab_pay", "paymaya", "dob"];
+  }
+
+  const totalPhp = totalAmount / 100;
+
+  const checkoutPayload = {
+    data: {
+      attributes: {
+        send_email_receipt: true,
+        show_description: true,
+        show_line_items: true,
+        line_items: pmLineItems,
+        payment_method_types: paymentMethodTypes,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        description: `TrioTag Location Bundle Booking`,
+        billing: { name: guestName || guestEmail, email: guestEmail },
+        metadata: {
+          type: "guest_booking",
+          guest_booking_id: guestBookingId,
+          guest_email: guestEmail,
+          guest_name: guestName || "",
+          total_php: totalPhp.toFixed(2),
+        },
+      },
+    },
+  };
+
+  const res = await fetch("https://api.paymongo.com/v1/checkout_sessions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Basic ${btoa(paymongoSecretKey + ":")}`,
+    },
+    body: JSON.stringify(checkoutPayload),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const detail = data.errors?.[0]?.detail || `PayMongo API error (HTTP ${res.status})`;
+    console.error("[create-checkout] Guest booking PayMongo error:", data.errors);
+    throw new Error(`Payment gateway error: ${detail}`);
+  }
+
+  const checkoutUrl = data.data?.attributes?.checkout_url;
+  const sessionId = data.data?.id;
+
+  if (!checkoutUrl || !sessionId) throw new Error("Payment gateway returned invalid response");
+
+  console.log("[create-checkout] Guest booking checkout created:", sessionId);
+
+  return new Response(
+    JSON.stringify({ checkoutUrl, checkoutSessionId: sessionId, totalPhp }),
+    { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+  );
+}

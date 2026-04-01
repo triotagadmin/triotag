@@ -9,6 +9,8 @@ import { Search, MapPin, ChevronLeft, ChevronRight, Building2, X, Loader2 } from
 import ShareButtons from "@/components/ShareButtons";
 import { Navigation } from "@/components/Navigation";
 import { LocationSearchModal } from "@/components/marketplace/LocationSearchModal";
+import { LocationBundlingSearch } from "@/components/marketplace/LocationBundlingSearch";
+import { GuestBasketFloat } from "@/components/marketplace/GuestBasketFloat";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -399,6 +401,9 @@ const Marketplace = () => {
           </CardContent>
         </Card>
 
+        {/* Location Bundling Search */}
+        <LocationBundlingSearch />
+
         {/* Location Search Loading */}
         {locationSearching &&
         <div className="flex items-center justify-center py-8 mb-6">
@@ -577,6 +582,7 @@ const Marketplace = () => {
         onSearch={handleLocationSearch}
         radiusKm={10} />
 
+      <GuestBasketFloat />
       <Footer />
     </div>);
 
