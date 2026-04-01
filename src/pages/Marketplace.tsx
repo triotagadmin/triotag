@@ -401,6 +401,9 @@ const Marketplace = () => {
           </CardContent>
         </Card>
 
+        {/* Location Bundling Search */}
+        <LocationBundlingSearch />
+
         {/* Location Search Loading */}
         {locationSearching &&
         <div className="flex items-center justify-center py-8 mb-6">
