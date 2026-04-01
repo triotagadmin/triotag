@@ -20,7 +20,6 @@ import { PaymentGateway } from "@/components/activation/PaymentGateway";
 import { PrintOrderPaymentGate } from "@/components/activation/PrintOrderPaymentGate";
 import { PrintOrderWizard, type BranchOption } from "@/components/print-order/PrintOrderWizard";
 import { type BranchMaterialConfig } from "@/components/print-order/BranchMaterialConfigurator";
-import type { PrintPartnerBranchConfig } from "@/components/print-order/PrintPartnerConfigurator";
 import { PRINT_PRODUCTS, SHIPPING_COUNTRIES, calculateOrderTotal, getProductById } from "@/lib/printProducts";
 import { calculateTotalOrderCost } from "@/lib/materialPricing";
 import { format } from "date-fns";
@@ -1280,12 +1279,9 @@ const ActivateListing = () => {
                 currency={detectedCurrency}
                 loading={branchesLoading}
                 submitting={branchOrderSubmitting}
-                leaseCost={activationPrice}
-                leaseCurrency={listing?.specifications?.lease_currency || "PHP"}
-                startDate={startDate}
-                endDate={endDate}
                 onSubmit={async ({ selectedBranches }) => {
                   setBranchConfigs(selectedBranches);
+                  // Re-use existing submit logic
                   setBranchOrderSubmitting(true);
                   try {
                     const { data: { session } } = await supabase.auth.getSession();
@@ -1348,73 +1344,6 @@ const ActivateListing = () => {
                     setActivationStatus("payment_pending");
                     setCurrentStep("payment");
                     toast({ title: "Print order submitted!", description: "Proceed to payment." });
-                  } catch (err: any) {
-                    toast({ title: "Error", description: err.message, variant: "destructive" });
-                  } finally {
-                    setBranchOrderSubmitting(false);
-                  }
-                }}
-                onSubmitPrintPartner={async ({ branches: partnerBranches, clientInfo }) => {
-                  setBranchOrderSubmitting(true);
-                  try {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (!session) throw new Error("Not authenticated");
-
-                    const materialTotal = partnerBranches.reduce(
-                      (sum, b) => sum + b.materials.reduce((s, m) => s + m.quantity * m.customUnitPrice, 0), 0
-                    );
-                    const grandTotal = activationPrice + materialTotal;
-
-                    const token = Array.from(crypto.getRandomValues(new Uint8Array(24)))
-                      .map((b) => b.toString(16).padStart(2, "0")).join("");
-
-                    const campaignDates = startDate && endDate
-                      ? `${format(startDate, "MMM d, yyyy")} – ${format(endDate, "MMM d, yyyy")}`
-                      : null;
-
-                    const checkoutPayload = {
-                      print_partner_id: session.user.id,
-                      client_name: clientInfo.clientName,
-                      client_email: clientInfo.clientEmail,
-                      client_company: clientInfo.companyName || null,
-                      listing_title: listing?.title || null,
-                      campaign_dates: campaignDates,
-                      ad_space_id: id || null,
-                      activation_id: activationId || null,
-                      line_items: {
-                        campaignTitle: clientInfo.campaignTitle,
-                        notes: clientInfo.notes,
-                        branches: partnerBranches,
-                      } as any,
-                      lease_total: activationPrice,
-                      material_total: materialTotal,
-                      grand_total: grandTotal,
-                      currency: "PHP",
-                      token,
-                      status: "draft",
-                    };
-
-                    const { data: checkout, error } = await supabase
-                      .from("client_checkouts")
-                      .insert(checkoutPayload as any)
-                      .select("id, token")
-                      .single();
-
-                    if (error) throw error;
-
-                    const checkoutUrl = `${window.location.origin}/checkout/${checkout.token}`;
-                    
-                    toast({
-                      title: "Client Checkout Page Created!",
-                      description: "Share the link with your client to proceed with payment.",
-                    });
-
-                    // Copy to clipboard
-                    try { await navigator.clipboard.writeText(checkoutUrl); } catch {}
-
-                    // Navigate to dashboard or show success
-                    setPrintOrderComplete(true);
-                    setOrderId(checkout.id);
                   } catch (err: any) {
                     toast({ title: "Error", description: err.message, variant: "destructive" });
                   } finally {
