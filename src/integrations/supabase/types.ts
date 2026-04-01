@@ -1131,6 +1131,119 @@ export type Database = {
           },
         ]
       }
+      guest_booking_locations: {
+        Row: {
+          branch_address: string | null
+          branch_id: string | null
+          branch_name: string | null
+          city: string | null
+          created_at: string
+          duration_weeks: number
+          guest_booking_id: string
+          id: string
+          listing_id: string
+          quantity: number
+          subtotal: number
+          unit_price: number
+          unit_type: string | null
+        }
+        Insert: {
+          branch_address?: string | null
+          branch_id?: string | null
+          branch_name?: string | null
+          city?: string | null
+          created_at?: string
+          duration_weeks?: number
+          guest_booking_id: string
+          id?: string
+          listing_id: string
+          quantity?: number
+          subtotal?: number
+          unit_price?: number
+          unit_type?: string | null
+        }
+        Update: {
+          branch_address?: string | null
+          branch_id?: string | null
+          branch_name?: string | null
+          city?: string | null
+          created_at?: string
+          duration_weeks?: number
+          guest_booking_id?: string
+          id?: string
+          listing_id?: string
+          quantity?: number
+          subtotal?: number
+          unit_price?: number
+          unit_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_booking_locations_guest_booking_id_fkey"
+            columns: ["guest_booking_id"]
+            isOneToOne: false
+            referencedRelation: "guest_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guest_bookings: {
+        Row: {
+          booking_status: string
+          brand_name: string | null
+          created_at: string
+          creative_url: string | null
+          currency: string
+          guest_email: string
+          guest_name: string | null
+          guest_phone: string | null
+          id: string
+          notes: string | null
+          payment_status: string
+          paymongo_checkout_session_id: string | null
+          total_locations: number
+          total_price: number
+          total_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          booking_status?: string
+          brand_name?: string | null
+          created_at?: string
+          creative_url?: string | null
+          currency?: string
+          guest_email: string
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          paymongo_checkout_session_id?: string | null
+          total_locations?: number
+          total_price?: number
+          total_quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          booking_status?: string
+          brand_name?: string | null
+          created_at?: string
+          creative_url?: string | null
+          currency?: string
+          guest_email?: string
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          paymongo_checkout_session_id?: string | null
+          total_locations?: number
+          total_price?: number
+          total_quantity?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       issue_reports: {
         Row: {
           conversation_id: string | null
