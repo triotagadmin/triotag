@@ -243,6 +243,12 @@ const Auth = () => {
         options: {
           data: {
             user_type: userType,
+            ...(userType === "print_partner" ? {
+              company_name: companyName,
+              contact_name: contactName,
+              contact_phone: contactPhone,
+              business_address: businessAddress,
+            } : {}),
           },
         },
       });
