@@ -42,6 +42,10 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState<string>("advertiser");
+  const [companyName, setCompanyName] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [businessAddress, setBusinessAddress] = useState("");
   const [showResendVerification, setShowResendVerification] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
   const [activeTab, setActiveTab] = useState("signin");
@@ -114,6 +118,27 @@ const Auth = () => {
               .update({ verified: true })
               .eq("user_id", userId);
           }
+        } else if (storedUserType === "print_partner") {
+          const { data: existingProfile } = await supabase
+            .from("print_partner_profiles")
+            .select("id")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+          if (!existingProfile) {
+            await supabase.from("print_partner_profiles").insert({
+              user_id: userId,
+              company_name: session.user.user_metadata?.full_name || "",
+              contact_person: session.user.user_metadata?.full_name || "",
+              contact_email: userEmail,
+              verified: true,
+            });
+          } else {
+            await supabase
+              .from("print_partner_profiles")
+              .update({ verified: true })
+              .eq("user_id", userId);
+          }
         } else if (storedUserType === "venue") {
           const { data: existingProfile } = await supabase
             .from("publisher_profiles")
@@ -172,6 +197,8 @@ const Auth = () => {
           console.error("Failed to sync pending listings after OAuth:", syncError);
         }
         navigate("/advertiser-dashboard");
+      } else if (role === "print_partner") {
+        navigate("/print-partner/dashboard");
       } else if (role === "publisher") {
         navigate("/venue-publishers");
       } else if (role === "talent") {
@@ -216,6 +243,12 @@ const Auth = () => {
         options: {
           data: {
             user_type: userType,
+            ...(userType === "print_partner" ? {
+              company_name: companyName,
+              contact_name: contactName,
+              contact_phone: contactPhone,
+              business_address: businessAddress,
+            } : {}),
           },
         },
       });
@@ -348,6 +381,30 @@ const Auth = () => {
           description: "Successfully signed in.",
         });
         navigate("/");
+      } else if (roles?.role === "print_partner") {
+        const { data: profile } = await supabase
+          .from("print_partner_profiles")
+          .select("verified")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        
+        if (profile && !profile.verified) {
+          toast({
+            title: "Email not verified",
+            description: "Please verify your email before logging in.",
+            variant: "destructive",
+          });
+          setShowResendVerification(true);
+          setResendEmail(validatedData.email);
+          await supabase.auth.signOut();
+          return;
+        }
+
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in as Print Partner.",
+        });
+        navigate("/print-partner/dashboard");
       } else if (roles?.role === "publisher") {
         const { data: profile } = await supabase
           .from("publisher_profiles")
@@ -434,15 +491,26 @@ const Auth = () => {
       if (advertiser) {
         userId = advertiser.user_id;
       } else {
-        // Try publisher
-        const { data: publisher } = await supabase
-          .from("publisher_profiles")
+        // Try print partner
+        const { data: printPartner } = await supabase
+          .from("print_partner_profiles")
           .select("user_id")
           .eq("contact_email", resendEmail)
           .maybeSingle();
         
-        if (publisher) {
-          userId = publisher.user_id;
+        if (printPartner) {
+          userId = printPartner.user_id;
+        } else {
+          // Try publisher
+          const { data: publisher } = await supabase
+            .from("publisher_profiles")
+            .select("user_id")
+            .eq("contact_email", resendEmail)
+            .maybeSingle();
+          
+          if (publisher) {
+            userId = publisher.user_id;
+          }
         }
       }
 
@@ -589,11 +657,32 @@ const Auth = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="advertiser">Advertiser</SelectItem>
+                      <SelectItem value="advertiser">Brand Advertiser</SelectItem>
+                      <SelectItem value="print_partner">Print Partner</SelectItem>
                       <SelectItem value="venue">Agent</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+                {userType === "print_partner" && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="company-name">Company Name</Label>
+                      <Input id="company-name" placeholder="Your printing company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="contact-name">Contact Person</Label>
+                      <Input id="contact-name" placeholder="Full name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="contact-phone">Phone Number</Label>
+                      <Input id="contact-phone" placeholder="+63..." value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="business-address">Business Address</Label>
+                      <Input id="business-address" placeholder="Full address" value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} />
+                    </div>
+                  </>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
