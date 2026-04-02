@@ -197,6 +197,8 @@ const Auth = () => {
           console.error("Failed to sync pending listings after OAuth:", syncError);
         }
         navigate("/advertiser-dashboard");
+      } else if (role === "print_partner") {
+        navigate("/print-partner/dashboard");
       } else if (role === "publisher") {
         navigate("/venue-publishers");
       } else if (role === "talent") {
