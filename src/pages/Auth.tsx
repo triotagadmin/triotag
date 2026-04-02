@@ -118,6 +118,27 @@ const Auth = () => {
               .update({ verified: true })
               .eq("user_id", userId);
           }
+        } else if (storedUserType === "print_partner") {
+          const { data: existingProfile } = await supabase
+            .from("print_partner_profiles")
+            .select("id")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+          if (!existingProfile) {
+            await supabase.from("print_partner_profiles").insert({
+              user_id: userId,
+              company_name: session.user.user_metadata?.full_name || "",
+              contact_person: session.user.user_metadata?.full_name || "",
+              contact_email: userEmail,
+              verified: true,
+            });
+          } else {
+            await supabase
+              .from("print_partner_profiles")
+              .update({ verified: true })
+              .eq("user_id", userId);
+          }
         } else if (storedUserType === "venue") {
           const { data: existingProfile } = await supabase
             .from("publisher_profiles")
