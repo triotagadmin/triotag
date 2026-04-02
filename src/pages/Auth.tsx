@@ -491,15 +491,26 @@ const Auth = () => {
       if (advertiser) {
         userId = advertiser.user_id;
       } else {
-        // Try publisher
-        const { data: publisher } = await supabase
-          .from("publisher_profiles")
+        // Try print partner
+        const { data: printPartner } = await supabase
+          .from("print_partner_profiles")
           .select("user_id")
           .eq("contact_email", resendEmail)
           .maybeSingle();
         
-        if (publisher) {
-          userId = publisher.user_id;
+        if (printPartner) {
+          userId = printPartner.user_id;
+        } else {
+          // Try publisher
+          const { data: publisher } = await supabase
+            .from("publisher_profiles")
+            .select("user_id")
+            .eq("contact_email", resendEmail)
+            .maybeSingle();
+          
+          if (publisher) {
+            userId = publisher.user_id;
+          }
         }
       }
 
