@@ -20,6 +20,7 @@ import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
 import AdvertiserSettings from "./pages/AdvertiserSettings";
+import PrintPartnerDashboard from "./pages/PrintPartnerDashboard";
 import Venue from "./pages/Venue";
 import VenueDashboard from "./pages/VenueDashboard";
 import VenueRegistration from "./pages/VenueRegistration";
