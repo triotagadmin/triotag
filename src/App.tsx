@@ -109,6 +109,14 @@ const App = () => (
           
           <Route path="/advertiser-dashboard" element={<AdvertiserDashboard />} />
           <Route path="/advertiser-settings" element={<AdvertiserSettings />} />
+          <Route path="/print-partner/dashboard" element={<PrintPartnerDashboard />} />
+          <Route path="/print-partner/clients" element={<PrintPartnerDashboard />} />
+          <Route path="/print-partner/campaigns" element={<PrintPartnerDashboard />} />
+          <Route path="/print-partner/jobs" element={<PrintPartnerDashboard />} />
+          <Route path="/print-partner/pricing" element={<PrintPartnerDashboard />} />
+          <Route path="/print-partner/revenue" element={<PrintPartnerDashboard />} />
+          <Route path="/print-partner/files" element={<PrintPartnerDashboard />} />
+          <Route path="/print-partner/settings" element={<PrintPartnerDashboard />} />
           <Route path="/order-prints" element={<OrderPrints />} />
           <Route path="/venue" element={<VenueDashboard />} />
           <Route path="/venue-publishers" element={<VenueDashboard />} />
