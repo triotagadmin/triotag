@@ -1501,6 +1501,594 @@ export type Database = {
           },
         ]
       }
+      print_partner_branch_jobs: {
+        Row: {
+          branch_name: string | null
+          created_at: string
+          delivery_fee: number | null
+          full_address: string | null
+          id: string
+          job_id: string
+          location_id: string | null
+          materials: Json | null
+          quantities: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          branch_name?: string | null
+          created_at?: string
+          delivery_fee?: number | null
+          full_address?: string | null
+          id?: string
+          job_id: string
+          location_id?: string | null
+          materials?: Json | null
+          quantities?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          branch_name?: string | null
+          created_at?: string
+          delivery_fee?: number | null
+          full_address?: string | null
+          id?: string
+          job_id?: string
+          location_id?: string | null
+          materials?: Json | null
+          quantities?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_partner_branch_jobs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_partner_branch_jobs_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_campaign_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      print_partner_campaign_locations: {
+        Row: {
+          branch_name: string
+          campaign_id: string
+          city: string | null
+          contact_number: string | null
+          created_at: string
+          delivery_fee: number | null
+          delivery_notes: string | null
+          full_address: string
+          id: string
+          materials: Json | null
+          quantities: Json | null
+          recipient_name: string | null
+          region: string | null
+          status: string
+          subtotal: number | null
+          updated_at: string
+        }
+        Insert: {
+          branch_name: string
+          campaign_id: string
+          city?: string | null
+          contact_number?: string | null
+          created_at?: string
+          delivery_fee?: number | null
+          delivery_notes?: string | null
+          full_address: string
+          id?: string
+          materials?: Json | null
+          quantities?: Json | null
+          recipient_name?: string | null
+          region?: string | null
+          status?: string
+          subtotal?: number | null
+          updated_at?: string
+        }
+        Update: {
+          branch_name?: string
+          campaign_id?: string
+          city?: string | null
+          contact_number?: string | null
+          created_at?: string
+          delivery_fee?: number | null
+          delivery_notes?: string | null
+          full_address?: string
+          id?: string
+          materials?: Json | null
+          quantities?: Json | null
+          recipient_name?: string | null
+          region?: string | null
+          status?: string
+          subtotal?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_partner_campaign_locations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      print_partner_campaigns: {
+        Row: {
+          campaign_name: string
+          client_id: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          internal_notes: string | null
+          partner_id: string
+          payment_status: string | null
+          start_date: string | null
+          status: string
+          total_estimated_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_name: string
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          internal_notes?: string | null
+          partner_id: string
+          payment_status?: string | null
+          start_date?: string | null
+          status?: string
+          total_estimated_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_name?: string
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          internal_notes?: string | null
+          partner_id?: string
+          payment_status?: string | null
+          start_date?: string | null
+          status?: string
+          total_estimated_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_partner_campaigns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_partner_campaigns_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      print_partner_checkout_links: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          partner_id: string
+          paymongo_checkout_session_id: string | null
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          partner_id: string
+          paymongo_checkout_session_id?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          partner_id?: string
+          paymongo_checkout_session_id?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_partner_checkout_links_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_partner_checkout_links_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      print_partner_clients: {
+        Row: {
+          billing_address: string | null
+          company_name: string
+          completed_jobs: number | null
+          contact_person: string | null
+          created_at: string
+          email: string | null
+          id: string
+          lifetime_spend: number | null
+          notes: string | null
+          partner_id: string
+          phone: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          billing_address?: string | null
+          company_name: string
+          completed_jobs?: number | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          lifetime_spend?: number | null
+          notes?: string | null
+          partner_id: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          billing_address?: string | null
+          company_name?: string
+          completed_jobs?: number | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          lifetime_spend?: number | null
+          notes?: string | null
+          partner_id?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_partner_clients_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      print_partner_files: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          file_name: string
+          file_type: string | null
+          file_url: string
+          id: string
+          partner_id: string
+          tags: string[] | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          file_name: string
+          file_type?: string | null
+          file_url: string
+          id?: string
+          partner_id: string
+          tags?: string[] | null
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          file_name?: string
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          partner_id?: string
+          tags?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_partner_files_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_partner_files_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      print_partner_jobs: {
+        Row: {
+          campaign_id: string
+          client_id: string | null
+          created_at: string
+          deadline: string | null
+          id: string
+          notes: string | null
+          partner_id: string
+          payment_status: string | null
+          priority: string | null
+          status: string
+          total_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          client_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          notes?: string | null
+          partner_id: string
+          payment_status?: string | null
+          priority?: string | null
+          status?: string
+          total_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          client_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          notes?: string | null
+          partner_id?: string
+          payment_status?: string | null
+          priority?: string | null
+          status?: string
+          total_value?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_partner_jobs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_partner_jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_partner_jobs_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      print_partner_material_pricing: {
+        Row: {
+          base_price: number
+          bulk_tiers: Json | null
+          created_at: string
+          design_fee: number | null
+          id: string
+          is_active: boolean | null
+          material_name: string
+          min_quantity: number | null
+          partner_id: string
+          rush_fee: number | null
+          unit_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number
+          bulk_tiers?: Json | null
+          created_at?: string
+          design_fee?: number | null
+          id?: string
+          is_active?: boolean | null
+          material_name: string
+          min_quantity?: number | null
+          partner_id: string
+          rush_fee?: number | null
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          bulk_tiers?: Json | null
+          created_at?: string
+          design_fee?: number | null
+          id?: string
+          is_active?: boolean | null
+          material_name?: string
+          min_quantity?: number | null
+          partner_id?: string
+          rush_fee?: number | null
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_partner_material_pricing_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      print_partner_profiles: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          business_address: string | null
+          company_name: string
+          contact_email: string
+          contact_person: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          logo_url: string | null
+          rejection_reason: string | null
+          service_areas: string[] | null
+          status: string
+          token_expires: string | null
+          updated_at: string
+          user_id: string
+          verification_token: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          business_address?: string | null
+          company_name?: string
+          contact_email?: string
+          contact_person?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          rejection_reason?: string | null
+          service_areas?: string[] | null
+          status?: string
+          token_expires?: string | null
+          updated_at?: string
+          user_id: string
+          verification_token?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          business_address?: string | null
+          company_name?: string
+          contact_email?: string
+          contact_person?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          rejection_reason?: string | null
+          service_areas?: string[] | null
+          status?: string
+          token_expires?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_token?: string | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      print_partner_proofs: {
+        Row: {
+          branch_job_id: string | null
+          campaign_id: string | null
+          created_at: string
+          file_type: string | null
+          file_url: string
+          id: string
+          job_id: string | null
+          notes: string | null
+          partner_id: string
+        }
+        Insert: {
+          branch_job_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          file_type?: string | null
+          file_url: string
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          partner_id: string
+        }
+        Update: {
+          branch_job_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          partner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_partner_proofs_branch_job_id_fkey"
+            columns: ["branch_job_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_branch_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_partner_proofs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_partner_proofs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "print_partner_proofs_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       publisher_profiles: {
         Row: {
           agent_role: Database["public"]["Enums"]["agent_role"] | null
