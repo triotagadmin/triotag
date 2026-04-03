@@ -13,6 +13,7 @@ import {
   Bell, Settings, Plus, Link2, TrendingUp, Package, Truck, CheckCircle2,
   Clock, Printer, Menu, X
 } from "lucide-react";
+import { PrintPartnerClientsContent } from "@/components/print-partner/PrintPartnerClientsContent";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/print-partner/dashboard" },
