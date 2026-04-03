@@ -13,6 +13,7 @@ import {
   Bell, Settings, Plus, Link2, TrendingUp, Package, Truck, CheckCircle2,
   Clock, Printer, Menu, X
 } from "lucide-react";
+import { PrintPartnerClientsContent } from "@/components/print-partner/PrintPartnerClientsContent";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/print-partner/dashboard" },
@@ -192,70 +193,82 @@ const PrintPartnerDashboard = () => {
 
         {/* Main content */}
         <main className="flex-1 p-4 md:p-8">
-          <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground text-sm mt-1">Welcome back, {profile?.contact_person || "Partner"}</p>
-          </div>
+          {currentPath === "/print-partner/clients" ? (
+            <>
+              <div className="mb-8">
+                <h1 className="text-2xl md:text-3xl font-bold">Clients</h1>
+                <p className="text-muted-foreground text-sm mt-1">Manage your franchise listings and custom material pricing</p>
+              </div>
+              <PrintPartnerClientsContent userId={user!.id} partnerId={profile.id} />
+            </>
+          ) : (
+            <>
+              <div className="mb-8">
+                <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
+                <p className="text-muted-foreground text-sm mt-1">Welcome back, {profile?.contact_person || "Partner"}</p>
+              </div>
 
-          {/* Stats grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
-            {[
-              { label: "Active Clients", value: stats.totalClients, icon: Users, color: "text-blue-400" },
-              { label: "Active Campaigns", value: stats.activeCampaigns, icon: Megaphone, color: "text-purple-400" },
-              { label: "Pending Payments", value: stats.pendingPayments, icon: Clock, color: "text-yellow-400" },
-              { label: "In Production", value: stats.inProduction, icon: Package, color: "text-orange-400" },
-              { label: "Ready to Dispatch", value: stats.readyForDispatch, icon: Truck, color: "text-cyan-400" },
-              { label: "Completed Jobs", value: stats.completedJobs, icon: CheckCircle2, color: "text-primary" },
-              { label: "Total Revenue", value: `₱${stats.totalRevenue.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-400" },
-            ].map((stat) => (
-              <Card key={stat.label} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                    <span className="text-xs text-muted-foreground">{stat.label}</span>
+              {/* Stats grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+                {[
+                  { label: "Active Clients", value: stats.totalClients, icon: Users, color: "text-blue-400" },
+                  { label: "Active Campaigns", value: stats.activeCampaigns, icon: Megaphone, color: "text-purple-400" },
+                  { label: "Pending Payments", value: stats.pendingPayments, icon: Clock, color: "text-yellow-400" },
+                  { label: "In Production", value: stats.inProduction, icon: Package, color: "text-orange-400" },
+                  { label: "Ready to Dispatch", value: stats.readyForDispatch, icon: Truck, color: "text-cyan-400" },
+                  { label: "Completed Jobs", value: stats.completedJobs, icon: CheckCircle2, color: "text-primary" },
+                  { label: "Total Revenue", value: `₱${stats.totalRevenue.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-400" },
+                ].map((stat) => (
+                  <Card key={stat.label} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                        <span className="text-xs text-muted-foreground">{stat.label}</span>
+                      </div>
+                      <p className="text-xl md:text-2xl font-bold">{stat.value}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Quick actions */}
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => navigate("/print-partner/clients")}>
+                    <Plus className="h-5 w-5" />
+                    <span className="text-xs">Add Client</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => navigate("/print-partner/campaigns")}>
+                    <Megaphone className="h-5 w-5" />
+                    <span className="text-xs">New Campaign</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => navigate("/print-partner/campaigns")}>
+                    <Link2 className="h-5 w-5" />
+                    <span className="text-xs">Checkout Link</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => navigate("/print-partner/jobs")}>
+                    <Briefcase className="h-5 w-5" />
+                    <span className="text-xs">View Jobs</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Recent activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Recent Activity</CardTitle>
+                  <CardDescription>Your latest actions and updates</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Bell className="h-8 w-8 mx-auto mb-3 opacity-40" />
+                    <p className="text-sm">No recent activity yet. Start by adding a client or creating a campaign.</p>
                   </div>
-                  <p className="text-xl md:text-2xl font-bold">{stat.value}</p>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-
-          {/* Quick actions */}
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => navigate("/print-partner/clients")}>
-                <Plus className="h-5 w-5" />
-                <span className="text-xs">Add Client</span>
-              </Button>
-              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => navigate("/print-partner/campaigns")}>
-                <Megaphone className="h-5 w-5" />
-                <span className="text-xs">New Campaign</span>
-              </Button>
-              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => navigate("/print-partner/campaigns")}>
-                <Link2 className="h-5 w-5" />
-                <span className="text-xs">Checkout Link</span>
-              </Button>
-              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => navigate("/print-partner/jobs")}>
-                <Briefcase className="h-5 w-5" />
-                <span className="text-xs">View Jobs</span>
-              </Button>
-            </div>
-          </div>
-
-          {/* Placeholder for recent activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Recent Activity</CardTitle>
-              <CardDescription>Your latest actions and updates</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <Bell className="h-8 w-8 mx-auto mb-3 opacity-40" />
-                <p className="text-sm">No recent activity yet. Start by adding a client or creating a campaign.</p>
-              </div>
-            </CardContent>
-          </Card>
+            </>
+          )}
         </main>
       </div>
     </div>
