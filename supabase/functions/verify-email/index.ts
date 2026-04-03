@@ -203,11 +203,53 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       console.log(`[Verify Email Success] Advertiser verified successfully`);
+    } else if (userType === "print_partner") {
+      const { data: profile, error: fetchError } = await supabase
+        .from("print_partner_profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      if (fetchError || !profile) {
+        console.error("[Verify Email Error] Print partner profile not found:", fetchError);
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${FRONTEND_URL}/verify?verified=failed`,
+            ...corsHeaders,
+          },
+        });
+      }
+
+      if (profile.verified) {
+        console.log(`[Verify Email] Print partner already verified`);
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${FRONTEND_URL}/verify?verified=already`,
+            ...corsHeaders,
+          },
+        });
+      }
+
+      const { error: updateError } = await supabase
+        .from("print_partner_profiles")
+        .update({ verified: true })
+        .eq("user_id", userId);
+
+      if (updateError) {
+        console.error("[Verify Email Error] Failed to update print partner:", updateError);
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${FRONTEND_URL}/verify?verified=failed`,
+            ...corsHeaders,
+          },
+        });
+      }
+
+      console.log(`[Verify Email Success] Print partner verified successfully`);
     } else if (userType === "talent") {
-      // Talent accounts don't have a separate verified flag on their profile.
-      // We just need to confirm the email is valid. The talent_profiles table
-      // uses a status enum (pending/approved/rejected) managed by admins.
-      // Mark verification as successful so the user can proceed to login.
       console.log(`[Verify Email Success] Talent email verified successfully for user: ${userId}`);
     } else {
       // Publisher (venue, digital, agent)
