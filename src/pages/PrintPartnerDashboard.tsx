@@ -93,8 +93,8 @@ const PrintPartnerDashboard = () => {
     return <div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>;
   }
 
-  // Pending approval state
-  if (profile && profile.status !== "approved" && profile.status !== "active") {
+  // If no profile exists, show onboarding prompt
+  if (!profile) {
     return (
       <div className="min-h-screen bg-muted/30">
         <Navigation />
@@ -102,15 +102,16 @@ const PrintPartnerDashboard = () => {
           <Card className="max-w-lg mx-auto">
             <CardHeader>
               <CardTitle className="flex items-center justify-center gap-2">
-                <Clock className="h-6 w-6 text-yellow-500" />
-                Account Pending Approval
+                <Printer className="h-6 w-6 text-primary" />
+                Welcome to Print Partner
               </CardTitle>
               <CardDescription>
-                {profile.status === "rejected"
-                  ? `Your account was not approved. Reason: ${profile.rejection_reason || "No reason provided."}`
-                  : "Your Print Partner account is being reviewed by the TrioTag team. You'll be notified once approved."}
+                We couldn't find your profile. Please try logging out and signing up again, or contact support.
               </CardDescription>
             </CardHeader>
+            <CardContent>
+              <Button onClick={() => navigate("/auth")}>Back to Login</Button>
+            </CardContent>
           </Card>
         </div>
       </div>
