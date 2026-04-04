@@ -125,11 +125,6 @@ export const PrintPartnerClientsContent = ({ userId, partnerId }: PrintPartnerCl
   const [expandedFranchises, setExpandedFranchises] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
 
-  // Material pricing
-  const [materialPricing, setMaterialPricing] = useState<MaterialPricing[]>([]);
-  const [pricingDialogOpen, setPricingDialogOpen] = useState(false);
-  const [editingPricing, setEditingPricing] = useState<MaterialPricing | null>(null);
-  const [pricingForm, setPricingForm] = useState({ material_name: "", base_price: "", min_quantity: "1", rush_fee: "0", design_fee: "0" });
 
   // Location dialog
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
