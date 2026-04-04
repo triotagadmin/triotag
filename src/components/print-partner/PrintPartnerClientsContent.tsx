@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { getCountries, getProvinces, getCities, getPostalCode } from "@/lib/locationData";
 import { cn } from "@/lib/utils";
-import { PRINT_PRODUCTS } from "@/lib/printProducts";
+
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
