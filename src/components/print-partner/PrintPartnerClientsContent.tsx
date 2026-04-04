@@ -145,11 +145,10 @@ export const PrintPartnerClientsContent = ({ userId, partnerId }: PrintPartnerCl
   const [statusConfirmAction, setStatusConfirmAction] = useState<"activate" | "deactivate">("activate");
 
   const fetchAll = useCallback(async () => {
-    const [fRes, lRes, adRes, priceRes] = await Promise.all([
+    const [fRes, lRes, adRes] = await Promise.all([
       supabase.from("advertiser_franchises").select("*").eq("advertiser_id", userId).order("created_at", { ascending: false }),
       supabase.from("advertiser_branches").select("*").eq("advertiser_id", userId).order("created_at", { ascending: false }),
       supabase.from("ad_spaces").select("id, title, location, approval_status, availability_status, created_at").eq("advertiser_id", userId).order("created_at", { ascending: false }),
-      supabase.from("print_partner_material_pricing").select("*").eq("partner_id", partnerId).order("created_at", { ascending: false }),
     ]);
 
     const realFranchises: Franchise[] = (fRes.data || []) as unknown as Franchise[];
