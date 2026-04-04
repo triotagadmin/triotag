@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 
 import {
-  MapPin, Plus, Trash2, Edit, Store, Printer, ChevronDown, ChevronUp, Info, Power, PowerOff, Clock, XCircle, DollarSign, ChevronsUpDown, Check
+  MapPin, Plus, Trash2, Edit, Store, Printer, ChevronDown, ChevronUp, Info, Power, PowerOff, Clock, XCircle, ChevronsUpDown, Check
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
