@@ -465,58 +465,6 @@ export const PrintPartnerClientsContent = ({ userId, partnerId }: PrintPartnerCl
         </DialogContent>
       </Dialog>
 
-      {/* Material Pricing Dialog */}
-      <Dialog open={pricingDialogOpen} onOpenChange={setPricingDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingPricing ? "Edit Material Pricing" : "Add Material Pricing"}</DialogTitle>
-            <DialogDescription>Set your custom price for this ad material type.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div className="space-y-2">
-              <Label>Material Name *</Label>
-              {editingPricing ? (
-                <Input value={pricingForm.material_name} disabled />
-              ) : (
-                <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={pricingForm.material_name}
-                  onChange={e => setPricingForm(f => ({ ...f, material_name: e.target.value }))}
-                >
-                  <option value="">Select material...</option>
-                  {PRINT_PRODUCTS.map(p => (
-                    <option key={p.id} value={p.name}>{p.name} (Default: ${p.pricePerUnit})</option>
-                  ))}
-                  <option value="Custom Material">Custom Material</option>
-                </select>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label>Price per Unit (₱) *</Label>
-              <Input type="number" min="0" step="0.01" value={pricingForm.base_price} onChange={e => setPricingForm(f => ({ ...f, base_price: e.target.value }))} placeholder="0.00" />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-2">
-                <Label>Min Qty</Label>
-                <Input type="number" min="1" value={pricingForm.min_quantity} onChange={e => setPricingForm(f => ({ ...f, min_quantity: e.target.value }))} />
-              </div>
-              <div className="space-y-2">
-                <Label>Rush Fee (₱)</Label>
-                <Input type="number" min="0" step="0.01" value={pricingForm.rush_fee} onChange={e => setPricingForm(f => ({ ...f, rush_fee: e.target.value }))} />
-              </div>
-              <div className="space-y-2">
-                <Label>Design Fee (₱)</Label>
-                <Input type="number" min="0" step="0.01" value={pricingForm.design_fee} onChange={e => setPricingForm(f => ({ ...f, design_fee: e.target.value }))} />
-              </div>
-            </div>
-            <Button onClick={savePricing} disabled={saving} className="w-full">
-              {saving ? "Saving..." : editingPricing ? "Update Pricing" : "Save Pricing"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Marketplace Confirmation */}
       <AlertDialog open={statusConfirmOpen} onOpenChange={setStatusConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
