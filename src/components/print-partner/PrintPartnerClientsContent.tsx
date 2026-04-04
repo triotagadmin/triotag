@@ -50,17 +50,6 @@ interface FranchiseLocation {
   created_at: string;
 }
 
-interface MaterialPricing {
-  id: string;
-  partner_id: string;
-  material_name: string;
-  unit_type: string;
-  base_price: number;
-  min_quantity: number;
-  rush_fee: number;
-  design_fee: number;
-  is_active: boolean;
-}
 
 interface PrintPartnerClientsContentProps {
   userId: string;
