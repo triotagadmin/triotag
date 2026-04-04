@@ -261,6 +261,11 @@ export const PrintPartnerClientsContent = ({ userId, partnerId }: PrintPartnerCl
     setStatusConfirmFranchise(null);
   };
 
+  if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
+
+  return (
+    <>
+      {/* Franchise / Ad Space Listings */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <h3 className="text-xl font-bold flex items-center gap-2">
