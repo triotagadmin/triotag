@@ -14,6 +14,7 @@ import {
   Clock, Printer, Menu, X
 } from "lucide-react";
 import { PrintPartnerClientsContent } from "@/components/print-partner/PrintPartnerClientsContent";
+import { PrintPartnerPricingContent } from "@/components/print-partner/PrintPartnerPricingContent";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/print-partner/dashboard" },
