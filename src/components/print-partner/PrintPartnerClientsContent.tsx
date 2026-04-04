@@ -166,7 +166,6 @@ export const PrintPartnerClientsContent = ({ userId, partnerId }: PrintPartnerCl
 
     setFranchises([...realFranchises, ...adSpaceFranchises] as any);
     if (lRes.data) setLocations(lRes.data as unknown as FranchiseLocation[]);
-    if (priceRes.data) setMaterialPricing(priceRes.data as unknown as MaterialPricing[]);
     setLoading(false);
   }, [userId, partnerId]);
 

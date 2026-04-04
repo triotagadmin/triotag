@@ -198,9 +198,17 @@ const PrintPartnerDashboard = () => {
             <>
               <div className="mb-8">
                 <h1 className="text-2xl md:text-3xl font-bold">Clients</h1>
-                <p className="text-muted-foreground text-sm mt-1">Manage your franchise listings and custom material pricing</p>
+                <p className="text-muted-foreground text-sm mt-1">Manage your franchise listings and branch locations</p>
               </div>
               <PrintPartnerClientsContent userId={user!.id} partnerId={profile.id} />
+            </>
+          ) : currentPath === "/print-partner/pricing" ? (
+            <>
+              <div className="mb-8">
+                <h1 className="text-2xl md:text-3xl font-bold">Pricing</h1>
+                <p className="text-muted-foreground text-sm mt-1">Set custom material pricing for your print services</p>
+              </div>
+              <PrintPartnerPricingContent partnerId={profile.id} />
             </>
           ) : (
             <>
