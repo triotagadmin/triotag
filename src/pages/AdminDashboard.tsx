@@ -221,7 +221,7 @@ export default function AdminDashboard() {
           const role = roleMap.get(a.user_id);
           return {
             id: a.id,
-            type: (role === "print_partner" ? "print_partner" : "advertiser") as const,
+            type: (role === "print_partner" ? "print_partner" : "advertiser") as Submission["type"],
             actualRole: role || "advertiser",
             name: a.company_name,
             email: a.contact_email,
