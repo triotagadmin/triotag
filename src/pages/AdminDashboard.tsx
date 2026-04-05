@@ -1338,7 +1338,7 @@ export default function AdminDashboard() {
 
           {/* Accounts Tab */}
           <TabsContent value="advertisers" className="space-y-6">
-            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "advertiser" || s.type === "print_partner"), "Account Submissions", "Manage Brand Advertiser and Print Partner account submissions")}
+            {renderSubmissionsPanel(filteredSubmissions.filter(s => ["advertiser", "print_partner", "publisher", "admin"].includes(s.type)), "All Accounts", "Manage all registered accounts across all roles")}
           </TabsContent>
 
           {/* Agents Tab */}
