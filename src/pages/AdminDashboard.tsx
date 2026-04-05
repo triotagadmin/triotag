@@ -19,7 +19,8 @@ import { AdminBookingsQueue } from "@/components/admin/AdminBookingsQueue";
 
 interface Submission {
   id: string;
-  type: "publisher" | "admin" | "advertiser" | "campaign" | "ad_space" | "verification_document" | "agent_service";
+  type: "publisher" | "admin" | "advertiser" | "campaign" | "ad_space" | "verification_document" | "agent_service" | "print_partner";
+  actualRole?: string;
   name: string;
   email?: string;
   location?: string;
