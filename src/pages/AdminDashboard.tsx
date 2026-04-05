@@ -217,15 +217,30 @@ export default function AdminDashboard() {
           userId: a.user_id,
           details: a,
         })),
-        ...(advertisers || []).map((a) => ({
-          id: a.id,
-          type: "advertiser" as const,
-          name: a.company_name,
-          email: a.contact_email,
-          status: a.status,
-          createdAt: a.created_at,
-          userId: a.user_id,
-          details: a,
+        ...(advertisers || []).map((a) => {
+          const role = roleMap.get(a.user_id);
+          return {
+            id: a.id,
+            type: (role === "print_partner" ? "print_partner" : "advertiser") as const,
+            actualRole: role || "advertiser",
+            name: a.company_name,
+            email: a.contact_email,
+            status: a.status,
+            createdAt: a.created_at,
+            userId: a.user_id,
+            details: a,
+          };
+        }),
+        ...(printPartners || []).map((p) => ({
+          id: p.id,
+          type: "print_partner" as const,
+          actualRole: "print_partner",
+          name: p.company_name,
+          email: p.contact_email,
+          status: p.status,
+          createdAt: p.created_at,
+          userId: p.user_id,
+          details: p,
         })),
         ...(campaigns || []).map((c) => ({
           id: c.id,
