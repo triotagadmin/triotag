@@ -1111,7 +1111,7 @@ export default function AdminDashboard() {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        {submission.status === "pending" && (
+                        {submission.status === "pending" && submission.type !== "admin" && (
                           <>
                             <Button
                               size="sm"
