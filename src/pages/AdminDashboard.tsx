@@ -217,31 +217,43 @@ export default function AdminDashboard() {
           userId: a.user_id,
           details: a,
         })),
-        ...(advertisers || []).map((a) => {
-          const role = roleMap.get(a.user_id);
-          return {
-            id: a.id,
-            type: (role === "print_partner" ? "print_partner" : "advertiser") as Submission["type"],
-            actualRole: role || "advertiser",
-            name: a.company_name,
-            email: a.contact_email,
-            status: a.status,
-            createdAt: a.created_at,
-            userId: a.user_id,
-            details: a,
-          };
-        }),
-        ...(printPartners || []).map((p) => ({
-          id: p.id,
-          type: "print_partner" as const,
-          actualRole: "print_partner",
-          name: p.company_name,
-          email: p.contact_email,
-          status: p.status,
-          createdAt: p.created_at,
-          userId: p.user_id,
-          details: p,
-        })),
+        ...(advertisers || [])
+          .filter((a) => {
+            const role = roleMap.get(a.user_id);
+            // Only show accounts with a matching advertiser or print_partner role
+            return role === "advertiser" || role === "print_partner";
+          })
+          .map((a) => {
+            const role = roleMap.get(a.user_id)!;
+            return {
+              id: a.id,
+              type: (role === "print_partner" ? "print_partner" : "advertiser") as Submission["type"],
+              actualRole: role,
+              name: a.company_name,
+              email: a.contact_email,
+              status: a.status,
+              createdAt: a.created_at,
+              userId: a.user_id,
+              details: a,
+            };
+          }),
+        ...(printPartners || [])
+          .filter((p) => {
+            const role = roleMap.get(p.user_id);
+            // Only show if role exists and not already covered by advertiser_profiles
+            return role === "print_partner" && !(advertisers || []).some(a => a.user_id === p.user_id);
+          })
+          .map((p) => ({
+            id: p.id,
+            type: "print_partner" as const,
+            actualRole: "print_partner",
+            name: p.company_name,
+            email: p.contact_email,
+            status: p.status,
+            createdAt: p.created_at,
+            userId: p.user_id,
+            details: p,
+          })),
         ...(campaigns || []).map((c) => ({
           id: c.id,
           type: "campaign" as const,
