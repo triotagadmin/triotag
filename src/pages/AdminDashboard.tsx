@@ -151,6 +151,22 @@ export default function AdminDashboard() {
         .select("*")
         .order("created_at", { ascending: false });
 
+      // Load print partner profiles
+      const { data: printPartners } = await supabase
+        .from("print_partner_profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      // Load user roles for correct account type detection
+      const allUserIds = [
+        ...(advertisers || []).map(a => a.user_id),
+        ...(printPartners || []).map(p => p.user_id),
+      ].filter(Boolean);
+      const { data: userRoles } = allUserIds.length > 0
+        ? await supabase.from("user_roles").select("user_id, role").in("user_id", allUserIds)
+        : { data: [] };
+      const roleMap = new Map((userRoles || []).map(r => [r.user_id, r.role]));
+
       // Load campaigns
       const { data: campaigns } = await supabase
         .from("campaigns")
