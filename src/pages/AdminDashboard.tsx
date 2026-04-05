@@ -161,9 +161,17 @@ export default function AdminDashboard() {
       const allUserIds = [
         ...(advertisers || []).map(a => a.user_id),
         ...(printPartners || []).map(p => p.user_id),
+        ...(admins || []).map(a => a.user_id),
       ].filter(Boolean);
-      const { data: userRoles } = allUserIds.length > 0
-        ? await supabase.from("user_roles").select("user_id, role").in("user_id", allUserIds)
+      // Also fetch publisher (agent) user_ids from publisher_profiles
+      const { data: publisherProfiles } = await supabase
+        .from("publisher_profiles")
+        .select("user_id, business_name, contact_email, verification_status, created_at, id")
+        .order("created_at", { ascending: false });
+      const publisherUserIds = (publisherProfiles || []).map(p => p.user_id);
+      const combinedUserIds = [...new Set([...allUserIds, ...publisherUserIds])];
+      const { data: userRoles } = combinedUserIds.length > 0
+        ? await supabase.from("user_roles").select("user_id, role").in("user_id", combinedUserIds)
         : { data: [] };
       const roleMap = new Map((userRoles || []).map(r => [r.user_id, r.role]));
 
