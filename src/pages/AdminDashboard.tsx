@@ -959,9 +959,20 @@ export default function AdminDashboard() {
   };
 
   const getTypeBadge = (type: string, publisherType?: string) => {
+    const displayNames: Record<string, string> = {
+      advertiser: "Brand Advertiser",
+      print_partner: "Print Partner",
+      publisher: "Agent",
+      admin: "Admin",
+      campaign: "Campaign",
+      ad_space: "Ad Space",
+      verification_document: "Verification",
+      agent_service: "Agent Service",
+      talent: "Talent",
+    };
     return (
       <Badge variant="outline" className="capitalize">
-        {type.replace("_", " ")}
+        {displayNames[type] || type.replace("_", " ")}
       </Badge>
     );
   };
