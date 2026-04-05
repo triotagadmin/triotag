@@ -262,6 +262,19 @@ export default function AdminDashboard() {
             userId: p.user_id,
             details: p,
           })),
+        ...(publisherProfiles || [])
+          .filter((p) => roleMap.get(p.user_id) === "publisher")
+          .map((p) => ({
+            id: p.id,
+            type: "publisher" as const,
+            actualRole: "publisher",
+            name: p.business_name || "Unnamed Agent",
+            email: p.contact_email,
+            status: p.verification_status || "pending",
+            createdAt: p.created_at,
+            userId: p.user_id,
+            details: p,
+          })),
         ...(campaigns || []).map((c) => ({
           id: c.id,
           type: "campaign" as const,
