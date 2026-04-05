@@ -1261,9 +1261,9 @@ export default function AdminDashboard() {
             {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "publisher" || s.type === "ad_space"), "Publisher Submissions", "Manage venue, digital, and agent publisher submissions")}
           </TabsContent>
 
-          {/* Advertisers Tab */}
+          {/* Accounts Tab */}
           <TabsContent value="advertisers" className="space-y-6">
-            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "advertiser"), "Advertiser Submissions", "Manage advertiser profile submissions")}
+            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "advertiser" || s.type === "print_partner"), "Account Submissions", "Manage Brand Advertiser and Print Partner account submissions")}
           </TabsContent>
 
           {/* Agents Tab */}
