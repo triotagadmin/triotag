@@ -1132,7 +1132,7 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="publishers">
               <Building className="w-4 h-4 mr-2" />
-              Publishers
+              Ad Space
             </TabsTrigger>
             <TabsTrigger value="advertisers">
               <Monitor className="w-4 h-4 mr-2" />
