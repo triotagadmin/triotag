@@ -19,7 +19,8 @@ import { AdminBookingsQueue } from "@/components/admin/AdminBookingsQueue";
 
 interface Submission {
   id: string;
-  type: "publisher" | "admin" | "advertiser" | "campaign" | "ad_space" | "verification_document" | "agent_service";
+  type: "publisher" | "admin" | "advertiser" | "campaign" | "ad_space" | "verification_document" | "agent_service" | "print_partner";
+  actualRole?: string;
   name: string;
   email?: string;
   location?: string;
@@ -150,6 +151,22 @@ export default function AdminDashboard() {
         .select("*")
         .order("created_at", { ascending: false });
 
+      // Load print partner profiles
+      const { data: printPartners } = await supabase
+        .from("print_partner_profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      // Load user roles for correct account type detection
+      const allUserIds = [
+        ...(advertisers || []).map(a => a.user_id),
+        ...(printPartners || []).map(p => p.user_id),
+      ].filter(Boolean);
+      const { data: userRoles } = allUserIds.length > 0
+        ? await supabase.from("user_roles").select("user_id, role").in("user_id", allUserIds)
+        : { data: [] };
+      const roleMap = new Map((userRoles || []).map(r => [r.user_id, r.role]));
+
       // Load campaigns
       const { data: campaigns } = await supabase
         .from("campaigns")
@@ -200,15 +217,30 @@ export default function AdminDashboard() {
           userId: a.user_id,
           details: a,
         })),
-        ...(advertisers || []).map((a) => ({
-          id: a.id,
-          type: "advertiser" as const,
-          name: a.company_name,
-          email: a.contact_email,
-          status: a.status,
-          createdAt: a.created_at,
-          userId: a.user_id,
-          details: a,
+        ...(advertisers || []).map((a) => {
+          const role = roleMap.get(a.user_id);
+          return {
+            id: a.id,
+            type: (role === "print_partner" ? "print_partner" : "advertiser") as Submission["type"],
+            actualRole: role || "advertiser",
+            name: a.company_name,
+            email: a.contact_email,
+            status: a.status,
+            createdAt: a.created_at,
+            userId: a.user_id,
+            details: a,
+          };
+        }),
+        ...(printPartners || []).map((p) => ({
+          id: p.id,
+          type: "print_partner" as const,
+          actualRole: "print_partner",
+          name: p.company_name,
+          email: p.contact_email,
+          status: p.status,
+          createdAt: p.created_at,
+          userId: p.user_id,
+          details: p,
         })),
         ...(campaigns || []).map((c) => ({
           id: c.id,
@@ -927,9 +959,20 @@ export default function AdminDashboard() {
   };
 
   const getTypeBadge = (type: string, publisherType?: string) => {
+    const displayNames: Record<string, string> = {
+      advertiser: "Brand Advertiser",
+      print_partner: "Print Partner",
+      publisher: "Agent",
+      admin: "Admin",
+      campaign: "Campaign",
+      ad_space: "Ad Space",
+      verification_document: "Verification",
+      agent_service: "Agent Service",
+      talent: "Talent",
+    };
     return (
       <Badge variant="outline" className="capitalize">
-        {type.replace("_", " ")}
+        {displayNames[type] || type.replace("_", " ")}
       </Badge>
     );
   };
@@ -1136,7 +1179,7 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="advertisers">
               <Monitor className="w-4 h-4 mr-2" />
-              Advertisers
+              Accounts
             </TabsTrigger>
             <TabsTrigger value="agents">
               <UserCheck className="w-4 h-4 mr-2" />
@@ -1260,9 +1303,9 @@ export default function AdminDashboard() {
             {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "publisher" || s.type === "ad_space"), "Publisher Submissions", "Manage venue, digital, and agent publisher submissions")}
           </TabsContent>
 
-          {/* Advertisers Tab */}
+          {/* Accounts Tab */}
           <TabsContent value="advertisers" className="space-y-6">
-            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "advertiser"), "Advertiser Submissions", "Manage advertiser profile submissions")}
+            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "advertiser" || s.type === "print_partner"), "Account Submissions", "Manage Brand Advertiser and Print Partner account submissions")}
           </TabsContent>
 
           {/* Agents Tab */}
