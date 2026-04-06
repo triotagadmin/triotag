@@ -92,8 +92,6 @@ export default function AdminDashboard() {
     loadMarketplaceListings();
     loadNotifications();
     loadTicketSubmissions();
-    loadAgentProfiles();
-    loadTalentProfiles();
   }, []);
 
   useEffect(() => {
