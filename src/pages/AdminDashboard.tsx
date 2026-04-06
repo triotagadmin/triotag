@@ -1172,9 +1172,7 @@ export default function AdminDashboard() {
             <AdminMaterialsTab />
           </TabsContent>
 
-
-                <CardHeader className="pb-3">
-                  <CardDescription>Pending</CardDescription>
+          {/* Verification Documents Tab */}
                   <CardTitle className="text-3xl text-yellow-600">
                     {agentProfiles.filter(a => a.verification_status === "pending").length}
                   </CardTitle>
