@@ -1000,6 +1000,7 @@ export default function AdminDashboard() {
     );
   }
 
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -1032,44 +1033,21 @@ export default function AdminDashboard() {
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="bookings" className="space-y-6">
           <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="bookings">
-              <Calendar className="w-4 h-4 mr-2" />
-              Bookings
-            </TabsTrigger>
-            <TabsTrigger value="marketplace">
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Marketplace
-            </TabsTrigger>
-            <TabsTrigger value="publishers">
-              <Building className="w-4 h-4 mr-2" />
-              Ad Space
-            </TabsTrigger>
-            <TabsTrigger value="advertisers">
-              <Monitor className="w-4 h-4 mr-2" />
-              Accounts
-            </TabsTrigger>
-            <TabsTrigger value="materials">
-              <DollarSign className="w-4 h-4 mr-2" />
-              Materials
-            </TabsTrigger>
-            <TabsTrigger value="documents">
-              <UserCircle className="w-4 h-4 mr-2" />
-              Documents
-            </TabsTrigger>
+            <TabsTrigger value="bookings"><Calendar className="w-4 h-4 mr-2" />Bookings</TabsTrigger>
+            <TabsTrigger value="marketplace"><ShoppingCart className="w-4 h-4 mr-2" />Marketplace</TabsTrigger>
+            <TabsTrigger value="publishers"><Building className="w-4 h-4 mr-2" />Ad Space</TabsTrigger>
+            <TabsTrigger value="advertisers"><Monitor className="w-4 h-4 mr-2" />Accounts</TabsTrigger>
+            <TabsTrigger value="materials"><DollarSign className="w-4 h-4 mr-2" />Materials</TabsTrigger>
+            <TabsTrigger value="documents"><UserCircle className="w-4 h-4 mr-2" />Documents</TabsTrigger>
             <TabsTrigger value="notifications">
-              <Bell className="w-4 h-4 mr-2" />
-              Notifications
+              <Bell className="w-4 h-4 mr-2" />Notifications
               {notifications.filter(n => !n.read).length > 0 && (
-                <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
-                  {notifications.filter(n => !n.read).length}
-                </Badge>
+                <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">{notifications.filter(n => !n.read).length}</Badge>
               )}
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="bookings" className="space-y-6">
-            <AdminBookingsQueue />
-          </TabsContent>
+          <TabsContent value="bookings" className="space-y-6"><AdminBookingsQueue /></TabsContent>
 
           <TabsContent value="marketplace" className="space-y-6">
             <Card>
@@ -1080,21 +1058,13 @@ export default function AdminDashboard() {
               <CardContent>
                 {totalMarketplaceSlides > 1 && (
                   <div className="flex items-center justify-center gap-4 mb-6">
-                    <Button variant="outline" size="icon" onClick={() => setMarketplaceSlide(prev => (prev - 1 + totalMarketplaceSlides) % totalMarketplaceSlides)}>
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
+                    <Button variant="outline" size="icon" onClick={() => setMarketplaceSlide(prev => (prev - 1 + totalMarketplaceSlides) % totalMarketplaceSlides)}><ChevronLeft className="h-4 w-4" /></Button>
                     <div className="flex gap-2">
                       {Array.from({ length: totalMarketplaceSlides }).map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setMarketplaceSlide(idx)}
-                          className={`w-2 h-2 rounded-full transition-colors ${idx === marketplaceSlide ? "bg-primary" : "bg-muted-foreground/30"}`}
-                        />
+                        <button key={idx} onClick={() => setMarketplaceSlide(idx)} className={`w-2 h-2 rounded-full transition-colors ${idx === marketplaceSlide ? "bg-primary" : "bg-muted-foreground/30"}`} />
                       ))}
                     </div>
-                    <Button variant="outline" size="icon" onClick={() => setMarketplaceSlide(prev => (prev + 1) % totalMarketplaceSlides)}>
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+                    <Button variant="outline" size="icon" onClick={() => setMarketplaceSlide(prev => (prev + 1) % totalMarketplaceSlides)}><ChevronRight className="h-4 w-4" /></Button>
                   </div>
                 )}
                 <p className="text-sm text-muted-foreground mb-4">
@@ -1103,41 +1073,29 @@ export default function AdminDashboard() {
                 </p>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                   {getCurrentMarketplaceItems().length === 0 ? (
-                    <div className="col-span-full text-center py-8 text-muted-foreground">
-                      No marketplace listings found
-                    </div>
-                  ) : (
-                    getCurrentMarketplaceItems().map((listing) => (
-                      <Card key={`${listing.table}-${listing.id}`} className="overflow-hidden">
-                        <CardHeader className="pb-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <CardTitle className="text-sm line-clamp-1">{listing.title}</CardTitle>
-                            <div className="flex gap-1">
-                              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditDialog(listing)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => openDeleteDialog(listing)}>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
+                    <div className="col-span-full text-center py-8 text-muted-foreground">No marketplace listings found</div>
+                  ) : getCurrentMarketplaceItems().map((listing) => (
+                    <Card key={`${listing.table}-${listing.id}`} className="overflow-hidden">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="text-sm line-clamp-1">{listing.title}</CardTitle>
+                          <div className="flex gap-1">
+                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditDialog(listing)}><Edit className="h-4 w-4" /></Button>
+                            <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => openDeleteDialog(listing)}><Trash2 className="h-4 w-4" /></Button>
                           </div>
-                          <div className="flex gap-2 flex-wrap">
-                            <Badge variant="outline" className={`capitalize text-xs ${getCategoryBadgeColor(listing.category)}`}>
-                              {listing.category}
-                            </Badge>
-                            {getStatusBadge(listing.status)}
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                            {listing.description || "No description"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">By: {listing.ownerName}</p>
-                          {listing.location && <p className="text-xs text-muted-foreground">Location: {listing.location}</p>}
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          <Badge variant="outline" className={`capitalize text-xs ${getCategoryBadgeColor(listing.category)}`}>{listing.category}</Badge>
+                          {getStatusBadge(listing.status)}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{listing.description || "No description"}</p>
+                        <p className="text-xs text-muted-foreground">By: {listing.ownerName}</p>
+                        {listing.location && <p className="text-xs text-muted-foreground">Location: {listing.location}</p>}
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -1151,9 +1109,7 @@ export default function AdminDashboard() {
             {renderSubmissionsPanel(filteredSubmissions.filter(s => ["advertiser", "print_partner", "publisher", "admin"].includes(s.type)), "All Accounts", "Manage all registered accounts across all roles")}
           </TabsContent>
 
-          <TabsContent value="materials" className="space-y-6">
-            <AdminMaterialsTab />
-          </TabsContent>
+          <TabsContent value="materials" className="space-y-6"><AdminMaterialsTab /></TabsContent>
 
           <TabsContent value="documents" className="space-y-6">
             {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "verification_document"), "Verification Documents", "Manage agent credential verification documents")}
@@ -1161,10 +1117,7 @@ export default function AdminDashboard() {
 
           <TabsContent value="notifications">
             <Card>
-              <CardHeader>
-                <CardTitle>Notifications</CardTitle>
-                <CardDescription>System notifications and alerts</CardDescription>
-              </CardHeader>
+              <CardHeader><CardTitle>Notifications</CardTitle><CardDescription>System notifications and alerts</CardDescription></CardHeader>
               <CardContent>
                 {notifications.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">No notifications</p>
@@ -1207,13 +1160,7 @@ export default function AdminDashboard() {
           {(actionType === "reject" || actionType === "info") && (
             <div className="space-y-2">
               <Label htmlFor="note">{actionType === "reject" ? "Rejection Reason" : "Information Needed"}</Label>
-              <Textarea
-                id="note"
-                value={actionNote}
-                onChange={(e) => setActionNote(e.target.value)}
-                placeholder={actionType === "reject" ? "Please explain why this submission is being rejected..." : "Please describe what information is needed..."}
-                rows={4}
-              />
+              <Textarea id="note" value={actionNote} onChange={(e) => setActionNote(e.target.value)} placeholder={actionType === "reject" ? "Please explain why..." : "Please describe what info is needed..."} rows={4} />
             </div>
           )}
           <DialogFooter>
@@ -1227,539 +1174,20 @@ export default function AdminDashboard() {
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Listing</DialogTitle>
-            <DialogDescription>Update the listing information below.</DialogDescription>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Edit Listing</DialogTitle><DialogDescription>Update the listing information below.</DialogDescription></DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-title">Title</Label>
-              <Input id="edit-title" value={editFormData.title} onChange={(e) => setEditFormData(prev => ({ ...prev, title: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Description</Label>
-              <Textarea id="edit-description" value={editFormData.description} onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))} rows={4} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-location">Location</Label>
-              <Input id="edit-location" value={editFormData.location} onChange={(e) => setEditFormData(prev => ({ ...prev, location: e.target.value }))} />
-            </div>
+            <div className="space-y-2"><Label htmlFor="edit-title">Title</Label><Input id="edit-title" value={editFormData.title} onChange={(e) => setEditFormData(prev => ({ ...prev, title: e.target.value }))} /></div>
+            <div className="space-y-2"><Label htmlFor="edit-description">Description</Label><Textarea id="edit-description" value={editFormData.description} onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))} rows={4} /></div>
+            <div className="space-y-2"><Label htmlFor="edit-location">Location</Label><Input id="edit-location" value={editFormData.location} onChange={(e) => setEditFormData(prev => ({ ...prev, location: e.target.value }))} /></div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleEditSave}>Save Changes</Button>
-          </DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button><Button onClick={handleEditSave}>Save Changes</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Listing</DialogTitle>
-            <DialogDescription>Are you sure you want to delete "{deletingListing?.title}"? This action cannot be undone.</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-primary" />
-            <div>
-              <h1 className="text-xl font-bold">Admin Dashboard</h1>
-              <p className="text-sm text-muted-foreground">Welcome back, {adminName}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="default" onClick={() => navigate("/admin/orders")}>
-              <Package className="w-4 h-4 mr-2" />
-              Ad Orders
-            </Button>
-            <Button variant="outline" onClick={() => navigate("/admin/blog-submission")}>
-              <FileText className="w-4 h-4 mr-2" />
-              Blog
-            </Button>
-            <Button variant="outline" onClick={() => navigate("/admin/newsletter-dashboard")}>
-              <Bell className="w-4 h-4 mr-2" />
-              News
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="bookings" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="bookings">
-              <Calendar className="w-4 h-4 mr-2" />
-              Bookings
-            </TabsTrigger>
-            <TabsTrigger value="marketplace">
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Marketplace
-            </TabsTrigger>
-            <TabsTrigger value="publishers">
-              <Building className="w-4 h-4 mr-2" />
-              Ad Space
-            </TabsTrigger>
-            <TabsTrigger value="advertisers">
-              <Monitor className="w-4 h-4 mr-2" />
-              Accounts
-            </TabsTrigger>
-            <TabsTrigger value="materials">
-              <DollarSign className="w-4 h-4 mr-2" />
-              Materials
-            </TabsTrigger>
-            <TabsTrigger value="documents">
-              <UserCircle className="w-4 h-4 mr-2" />
-              Documents
-            </TabsTrigger>
-            <TabsTrigger value="notifications">
-              <Bell className="w-4 h-4 mr-2" />
-              Notifications
-              {notifications.filter(n => !n.read).length > 0 && (
-                <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
-                  {notifications.filter(n => !n.read).length}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Bookings Tab */}
-          <TabsContent value="bookings" className="space-y-6">
-            <AdminBookingsQueue />
-          </TabsContent>
-
-          {/* Marketplace Tab */}
-          <TabsContent value="marketplace" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Marketplace Listings</CardTitle>
-                <CardDescription>Manage all marketplace submissions - edit or delete listings</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* Carousel Navigation */}
-                {totalMarketplaceSlides > 1 && (
-                  <div className="flex items-center justify-center gap-4 mb-6">
-                    <Button variant="outline" size="icon" onClick={() => setMarketplaceSlide(prev => (prev - 1 + totalMarketplaceSlides) % totalMarketplaceSlides)}>
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <div className="flex gap-2">
-                      {Array.from({ length: totalMarketplaceSlides }).map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setMarketplaceSlide(idx)}
-                          className={`w-2 h-2 rounded-full transition-colors ${idx === marketplaceSlide ? "bg-primary" : "bg-muted-foreground/30"}`}
-                        />
-                      ))}
-                    </div>
-                    <Button variant="outline" size="icon" onClick={() => setMarketplaceSlide(prev => (prev + 1) % totalMarketplaceSlides)}>
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-
-                <p className="text-sm text-muted-foreground mb-4">
-                  Showing {getCurrentMarketplaceItems().length} of {marketplaceListings.length} listings
-                  {totalMarketplaceSlides > 1 && ` • Slide ${marketplaceSlide + 1} of ${totalMarketplaceSlides}`}
-                </p>
-
-                {/* Horizontal Listings Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                  {getCurrentMarketplaceItems().length === 0 ? (
-                    <div className="col-span-full text-center py-8 text-muted-foreground">
-                      No marketplace listings found
-                    </div>
-                  ) : (
-                    getCurrentMarketplaceItems().map((listing) => (
-                      <Card key={`${listing.table}-${listing.id}`} className="overflow-hidden">
-                        <CardHeader className="pb-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <CardTitle className="text-sm line-clamp-1">{listing.title}</CardTitle>
-                            <div className="flex gap-1">
-                              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditDialog(listing)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => openDeleteDialog(listing)}>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="flex gap-2 flex-wrap">
-                            <Badge variant="outline" className={`capitalize text-xs ${getCategoryBadgeColor(listing.category)}`}>
-                              {listing.category}
-                            </Badge>
-                            {getStatusBadge(listing.status)}
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                            {listing.description || "No description"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            By: {listing.ownerName}
-                          </p>
-                          {listing.location && (
-                            <p className="text-xs text-muted-foreground">
-                              Location: {listing.location}
-                            </p>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-
-          {/* Publishers Tab */}
-          <TabsContent value="publishers" className="space-y-6">
-            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "publisher" || s.type === "ad_space"), "Publisher Submissions", "Manage venue, digital, and agent publisher submissions")}
-          </TabsContent>
-
-          {/* Accounts Tab */}
-          <TabsContent value="advertisers" className="space-y-6">
-            {renderSubmissionsPanel(filteredSubmissions.filter(s => ["advertiser", "print_partner", "publisher", "admin"].includes(s.type)), "All Accounts", "Manage all registered accounts across all roles")}
-          </TabsContent>
-
-          {/* Materials Tab */}
-          <TabsContent value="materials" className="space-y-6">
-            <AdminMaterialsTab />
-          </TabsContent>
-
-          {/* Verification Documents Tab */}
-          <TabsContent value="documents" className="space-y-6">
-            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "verification_document"), "Verification Documents", "Manage agent credential verification documents")}
-          </TabsContent>
-                    {agentProfiles.filter(a => a.verification_status === "pending").length}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent><Clock className="w-4 h-4 text-muted-foreground" /></CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription>Approved</CardDescription>
-                  <CardTitle className="text-3xl text-green-600">
-                    {agentProfiles.filter(a => a.verification_status === "approved").length}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent><CheckCircle className="w-4 h-4 text-muted-foreground" /></CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Agent Accounts</CardTitle>
-                <CardDescription>Approve or reject agent accounts. Rejected agents are permanently deleted.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Agent Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Date Applied</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {agentProfiles.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                          No agent accounts found
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      agentProfiles.map((agent) => (
-                        <TableRow key={agent.id}>
-                          <TableCell className="font-medium">{agent.business_name}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{agent.contact_email}</TableCell>
-                          <TableCell>{getStatusBadge(agent.verification_status)}</TableCell>
-                          <TableCell className="text-sm">
-                            {new Date(agent.created_at).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex justify-end gap-2">
-                              {agent.verification_status === "pending" && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="default"
-                                    disabled={agentActionLoading === agent.id}
-                                    onClick={() => handleAgentApprove(agent)}
-                                  >
-                                    <CheckCircle className="w-4 h-4 mr-1" />
-                                    Approve
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    disabled={agentActionLoading === agent.id}
-                                    onClick={() => handleAgentReject(agent)}
-                                  >
-                                    <XCircle className="w-4 h-4 mr-1" />
-                                    Reject
-                                  </Button>
-                                </>
-                              )}
-                              {agent.verification_status === "approved" && (
-                                <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-                                  <CheckCircle className="w-3 h-3 mr-1" />Active
-                                </Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Talent Tab */}
-          <TabsContent value="talent" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Talent Submissions</CardTitle>
-                <CardDescription>Approve or reject talent profiles for the Hire Talent marketplace</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Skill</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {talentProfiles.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground py-8">No talent submissions</TableCell>
-                      </TableRow>
-                    ) : talentProfiles.map((t) => (
-                      <TableRow key={t.id}>
-                        <TableCell className="font-medium">{t.full_name}</TableCell>
-                        <TableCell><Badge variant="outline" className="capitalize">{t.skill_type}</Badge></TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{t.location}</TableCell>
-                        <TableCell>{getStatusBadge(t.status)}</TableCell>
-                        <TableCell className="text-sm">{new Date(t.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <div className="flex justify-end gap-2">
-                            {t.status === "pending" && (
-                              <>
-                                <Button size="sm" onClick={() => handleTalentApprove(t)} disabled={talentActionLoading === t.id}>
-                                  <CheckCircle className="w-4 h-4" />
-                                </Button>
-                                <Button size="sm" variant="destructive" onClick={() => setTalentRejectId(t.id)} disabled={talentActionLoading === t.id}>
-                                  <XCircle className="w-4 h-4" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                          {talentRejectId === t.id && (
-                            <div className="mt-2 space-y-2">
-                              <Textarea
-                                placeholder="Rejection reason..."
-                                value={talentRejectNote}
-                                onChange={(e) => setTalentRejectNote(e.target.value)}
-                                rows={2}
-                              />
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="destructive" onClick={() => handleTalentReject(t.id, talentRejectNote)}>
-                                  Confirm Reject
-                                </Button>
-                                <Button size="sm" variant="ghost" onClick={() => { setTalentRejectId(null); setTalentRejectNote(""); }}>
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Verification Documents Tab */}
-          <TabsContent value="documents" className="space-y-6">
-            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "verification_document"), "Verification Documents", "Manage agent credential verification documents")}
-          </TabsContent>
-
-          <TabsContent value="notifications">
-            <Card>
-              <CardHeader>
-                <CardTitle>Notifications</CardTitle>
-                <CardDescription>System notifications and alerts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {notifications.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No notifications</p>
-                ) : (
-                  <div className="space-y-4">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-4 border rounded-lg ${!notification.read ? "bg-muted/50" : ""}`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{notification.title}</h4>
-                            <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              {new Date(notification.created_at).toLocaleString()}
-                            </p>
-                          </div>
-                          {!notification.read && (
-                            <Badge variant="default" className="ml-4">New</Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* Action Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {actionType === "approve" && "Approve Submission"}
-              {actionType === "reject" && "Reject Submission"}
-              {actionType === "info" && "Request More Information"}
-            </DialogTitle>
-            <DialogDescription>
-              {actionType === "approve" && "This will approve the submission and notify the user."}
-              {actionType === "reject" && "Please provide a reason for rejection."}
-              {actionType === "info" && "Specify what additional information is needed."}
-            </DialogDescription>
-          </DialogHeader>
-          {(actionType === "reject" || actionType === "info") && (
-            <div className="space-y-2">
-              <Label htmlFor="note">
-                {actionType === "reject" ? "Rejection Reason" : "Information Needed"}
-              </Label>
-              <Textarea
-                id="note"
-                value={actionNote}
-                onChange={(e) => setActionNote(e.target.value)}
-                placeholder={
-                  actionType === "reject"
-                    ? "Please explain why this submission is being rejected..."
-                    : "Please describe what information is needed..."
-                }
-                rows={4}
-              />
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAction}
-              disabled={(actionType === "reject" || actionType === "info") && !actionNote.trim()}
-            >
-              Confirm
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Details Dialog */}
-      <SubmissionDetailsDialog
-        open={isDetailsDialogOpen}
-        onOpenChange={setIsDetailsDialogOpen}
-        submission={viewDetailsSubmission}
-      />
-
-      {/* Edit Listing Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Listing</DialogTitle>
-            <DialogDescription>
-              Update the listing information below.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-title">Title</Label>
-              <Input
-                id="edit-title"
-                value={editFormData.title}
-                onChange={(e) => setEditFormData(prev => ({ ...prev, title: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Description</Label>
-              <Textarea
-                id="edit-description"
-                value={editFormData.description}
-                onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
-                rows={4}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-location">Location</Label>
-              <Input
-                id="edit-location"
-                value={editFormData.location}
-                onChange={(e) => setEditFormData(prev => ({ ...prev, location: e.target.value }))}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleEditSave}>
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Listing</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{deletingListing?.title}"? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
+          <DialogHeader><DialogTitle>Delete Listing</DialogTitle><DialogDescription>Are you sure you want to delete "{deletingListing?.title}"? This action cannot be undone.</DialogDescription></DialogHeader>
+          <DialogFooter><Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button><Button variant="destructive" onClick={handleDelete}>Delete</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
