@@ -1032,7 +1032,7 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="bookings" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="bookings">
               <Calendar className="w-4 h-4 mr-2" />
               Bookings
@@ -1049,18 +1049,9 @@ export default function AdminDashboard() {
               <Monitor className="w-4 h-4 mr-2" />
               Accounts
             </TabsTrigger>
-            <TabsTrigger value="agents">
-              <UserCheck className="w-4 h-4 mr-2" />
-              Agents
-            </TabsTrigger>
-            <TabsTrigger value="talent">
-              <Star className="w-4 h-4 mr-2" />
-              Talent
-              {talentProfiles.filter(t => t.status === "pending").length > 0 && (
-                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                  {talentProfiles.filter(t => t.status === "pending").length}
-                </Badge>
-              )}
+            <TabsTrigger value="materials">
+              <DollarSign className="w-4 h-4 mr-2" />
+              Materials
             </TabsTrigger>
             <TabsTrigger value="documents">
               <UserCircle className="w-4 h-4 mr-2" />
