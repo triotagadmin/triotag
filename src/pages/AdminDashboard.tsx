@@ -1171,9 +1171,8 @@ export default function AdminDashboard() {
           <TabsContent value="materials" className="space-y-6">
             <AdminMaterialsTab />
           </TabsContent>
-                </CardHeader>
-                <CardContent><Users className="w-4 h-4 text-muted-foreground" /></CardContent>
-              </Card>
+
+
               <Card>
                 <CardHeader className="pb-3">
                   <CardDescription>Pending</CardDescription>
