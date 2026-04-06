@@ -1173,7 +1173,6 @@ export default function AdminDashboard() {
           </TabsContent>
 
 
-              <Card>
                 <CardHeader className="pb-3">
                   <CardDescription>Pending</CardDescription>
                   <CardTitle className="text-3xl text-yellow-600">
