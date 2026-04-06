@@ -1167,13 +1167,10 @@ export default function AdminDashboard() {
             {renderSubmissionsPanel(filteredSubmissions.filter(s => ["advertiser", "print_partner", "publisher", "admin"].includes(s.type)), "All Accounts", "Manage all registered accounts across all roles")}
           </TabsContent>
 
-          {/* Agents Tab */}
-          <TabsContent value="agents" className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription>Total Agents</CardDescription>
-                  <CardTitle className="text-3xl">{agentProfiles.length}</CardTitle>
+          {/* Materials Tab */}
+          <TabsContent value="materials" className="space-y-6">
+            <AdminMaterialsTab />
+          </TabsContent>
                 </CardHeader>
                 <CardContent><Users className="w-4 h-4 text-muted-foreground" /></CardContent>
               </Card>
