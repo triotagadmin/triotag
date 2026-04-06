@@ -83,15 +83,7 @@ export default function AdminDashboard() {
   const [ticketSubmissions, setTicketSubmissions] = useState<any[]>([]);
   const [ticketSlide, setTicketSlide] = useState(0);
   
-  // Agents state
-  const [agentProfiles, setAgentProfiles] = useState<any[]>([]);
-  const [agentActionLoading, setAgentActionLoading] = useState<string | null>(null);
   
-  // Talent state
-  const [talentProfiles, setTalentProfiles] = useState<any[]>([]);
-  const [talentActionLoading, setTalentActionLoading] = useState<string | null>(null);
-  const [talentRejectNote, setTalentRejectNote] = useState("");
-  const [talentRejectId, setTalentRejectId] = useState<string | null>(null);
   
 
   useEffect(() => {
