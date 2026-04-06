@@ -1173,7 +1173,9 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Verification Documents Tab */}
-                  <CardTitle className="text-3xl text-yellow-600">
+          <TabsContent value="documents" className="space-y-6">
+            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "verification_document"), "Verification Documents", "Manage agent credential verification documents")}
+          </TabsContent>
                     {agentProfiles.filter(a => a.verification_status === "pending").length}
                   </CardTitle>
                 </CardHeader>
