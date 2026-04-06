@@ -143,6 +143,48 @@ export type Database = {
           },
         ]
       }
+      ad_material_pricing: {
+        Row: {
+          base_cost: number
+          created_at: string
+          currency: string
+          default_size: string
+          id: string
+          is_active: boolean
+          material_name: string
+          prodigi_sku: string | null
+          prodigi_variant_id: string | null
+          selling_price: number
+          updated_at: string
+        }
+        Insert: {
+          base_cost?: number
+          created_at?: string
+          currency?: string
+          default_size: string
+          id?: string
+          is_active?: boolean
+          material_name: string
+          prodigi_sku?: string | null
+          prodigi_variant_id?: string | null
+          selling_price?: number
+          updated_at?: string
+        }
+        Update: {
+          base_cost?: number
+          created_at?: string
+          currency?: string
+          default_size?: string
+          id?: string
+          is_active?: boolean
+          material_name?: string
+          prodigi_sku?: string | null
+          prodigi_variant_id?: string | null
+          selling_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ad_spaces: {
         Row: {
           activation_fee: number | null
@@ -1913,6 +1955,8 @@ export type Database = {
           base_price: number
           bulk_tiers: Json | null
           created_at: string
+          currency: string
+          default_size: string
           design_fee: number | null
           id: string
           is_active: boolean | null
@@ -1920,6 +1964,7 @@ export type Database = {
           min_quantity: number | null
           partner_id: string
           rush_fee: number | null
+          selling_price: number
           unit_type: string | null
           updated_at: string
         }
@@ -1927,6 +1972,8 @@ export type Database = {
           base_price?: number
           bulk_tiers?: Json | null
           created_at?: string
+          currency?: string
+          default_size?: string
           design_fee?: number | null
           id?: string
           is_active?: boolean | null
@@ -1934,6 +1981,7 @@ export type Database = {
           min_quantity?: number | null
           partner_id: string
           rush_fee?: number | null
+          selling_price?: number
           unit_type?: string | null
           updated_at?: string
         }
@@ -1941,6 +1989,8 @@ export type Database = {
           base_price?: number
           bulk_tiers?: Json | null
           created_at?: string
+          currency?: string
+          default_size?: string
           design_fee?: number | null
           id?: string
           is_active?: boolean | null
@@ -1948,6 +1998,7 @@ export type Database = {
           min_quantity?: number | null
           partner_id?: string
           rush_fee?: number | null
+          selling_price?: number
           unit_type?: string | null
           updated_at?: string
         }
@@ -1965,6 +2016,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          blocked_reason: string | null
           business_address: string | null
           company_name: string
           contact_email: string
@@ -1972,6 +2024,7 @@ export type Database = {
           contact_phone: string | null
           created_at: string
           id: string
+          is_blocked: boolean
           logo_url: string | null
           rejection_reason: string | null
           service_areas: string[] | null
@@ -1985,6 +2038,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          blocked_reason?: string | null
           business_address?: string | null
           company_name?: string
           contact_email?: string
@@ -1992,6 +2046,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           id?: string
+          is_blocked?: boolean
           logo_url?: string | null
           rejection_reason?: string | null
           service_areas?: string[] | null
@@ -2005,6 +2060,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          blocked_reason?: string | null
           business_address?: string | null
           company_name?: string
           contact_email?: string
@@ -2012,6 +2068,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           id?: string
+          is_blocked?: boolean
           logo_url?: string | null
           rejection_reason?: string | null
           service_areas?: string[] | null
