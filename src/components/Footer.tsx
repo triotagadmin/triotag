@@ -1,91 +1,90 @@
-import { Facebook, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
-import { FaTiktok } from "react-icons/fa";
+import { Facebook, Instagram, Linkedin, Youtube, TrendingUp } from "lucide-react";
 import { BRAND_NAME, BRAND_DESCRIPTION } from "@/lib/brand";
-interface FooterLink {
-  label: string;
-  href: string;
-  external?: boolean;
-}
+
+const linkCol = (title: string, links: { label: string; href: string; external?: boolean }[]) => (
+  <div>
+    <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">{title}</h4>
+    <ul className="space-y-2">
+      {links.map((l) => (
+        <li key={l.label}>
+          {l.external ? (
+            <a href={l.href} target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-400 hover:text-green-500 transition-colors">
+              {l.label}
+            </a>
+          ) : (
+            <Link to={l.href} className="text-sm text-zinc-400 hover:text-green-500 transition-colors">
+              {l.label}
+            </Link>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
 export const Footer = () => {
-  const socialLinks = [{
-    icon: Facebook,
-    href: "https://facebook.com",
-    label: "Facebook"
-  }, {
-    icon: Instagram,
-    href: "https://instagram.com",
-    label: "Instagram"
-  }, {
-    icon: FaTiktok,
-    href: "https://tiktok.com",
-    label: "TikTok",
-    isReactIcon: true
-  }, {
-    icon: Linkedin,
-    href: "https://linkedin.com",
-    label: "LinkedIn"
-  }];
-  const footerLinks = {
-    company: [{
-      label: "About Us",
-      href: "https://sites.google.com/view/stickymedia",
-      external: true
-    }, {
-      label: "Contact",
-      href: "/contact"
-    }, {
-      label: "Privacy Policy",
-      href: "/privacy"
-    }, {
-      label: "Terms of Service",
-      href: "/terms"
-    }]
-  };
-  return <footer className="bg-card border-t border-border">
-      <div className="container mx-auto px-4 md:px-6 py-4 md:py-8">
-        {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
-          {/* Brand Section */}
-          <div className="space-y-3 text-center sm:text-left">
-            <h3 className="font-bold text-lg md:text-xl text-primary neon-text-glow">
-              {BRAND_NAME}
-            </h3>
-            <p className="text-xs md:text-sm leading-relaxed text-white">{BRAND_DESCRIPTION}</p>
+  return (
+    <footer className="bg-black border-t border-white/10">
+      <div className="container mx-auto px-4 md:px-6 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
+          <div className="lg:col-span-2 space-y-4">
+            <Link to="/" className="flex items-center gap-2">
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-green-600 text-white">
+                <TrendingUp className="w-4 h-4" />
+              </span>
+              <span className="text-xl font-bold text-white">{BRAND_NAME}</span>
+            </Link>
+            <p className="text-sm text-zinc-400 max-w-sm leading-relaxed">{BRAND_DESCRIPTION}</p>
           </div>
 
-          {/* Company Links - Two Columns */}
-          <div className="space-y-3 text-center sm:text-left">
-            <h4 className="font-semibold text-foreground uppercase tracking-wider text-xs md:text-sm">
-              Company
-            </h4>
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
-              {footerLinks.company.map((link: FooterLink) => <li key={link.label}>
-                  {link.external ? <a href={link.href} target="_blank" rel="noopener noreferrer" className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200">
-                      {link.label}
-                    </a> : <Link to={link.href} className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors duration-200">
-                      {link.label}
-                    </Link>}
-                </li>)}
-            </ul>
-          </div>
+          {linkCol("Platform", [
+            { label: "For Retailers", href: "/list-space" },
+            { label: "For Advertisers", href: "/campaign-submit" },
+            { label: "Inventory Formats", href: "/explore" },
+            { label: "Resources", href: "/insights" },
+          ])}
+
+          {linkCol("Company", [
+            { label: "About Us", href: "https://sites.google.com/view/stickymedia", external: true },
+            { label: "Careers", href: "/careers" },
+            { label: "News & Press", href: "/insights" },
+            { label: "Contact Us", href: "/contact" },
+          ])}
+
+          {linkCol("Legal", [
+            { label: "Terms of Service", href: "/terms" },
+            { label: "Privacy Policy", href: "/privacy" },
+            { label: "Cookie Policy", href: "/privacy" },
+          ])}
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-border pt-4 md:pt-6">
-          <div className="flex flex-col items-center gap-3 md:gap-4">
-            {/* Social Icons */}
-            <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4">
-              {socialLinks.map((social) => {const IconComponent = social.icon;return <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded border border-border bg-muted/30 text-muted-foreground hover:text-primary hover:border-primary hover:neon-glow transition-all duration-300" aria-label={social.label}>
-                    <IconComponent className="w-3 h-3 md:w-4 md:h-4" />
-                  </a>;})}
-            </div>
-
-            {/* Copyright */}
-            <p className="text-xs md:text-sm text-muted-foreground text-center">
-              © {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
-            </p>
+        <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-zinc-500">© {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.</p>
+          <div className="flex items-center gap-3">
+            {[
+              { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
+              { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
+              { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
+              { icon: Youtube, href: "https://youtube.com", label: "YouTube" },
+            ].map((s) => {
+              const Icon = s.icon;
+              return (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  className="w-9 h-9 inline-flex items-center justify-center rounded-md border border-white/10 text-zinc-400 hover:text-green-500 hover:border-green-500/50 transition-colors"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              );
+            })}
           </div>
         </div>
       </div>
-    </footer>;};
+    </footer>
+  );
+};
