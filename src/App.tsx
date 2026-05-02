@@ -67,6 +67,10 @@ import Messages from "./pages/Messages";
 import PublisherSettings from "./pages/PublisherSettings";
 
 import HireTalent from "./pages/HireTalent";
+import AdvertiserExplore from "./pages/advertiser/AdvertiserExplore";
+import AdvertiserCityOverview from "./pages/advertiser/AdvertiserCityOverview";
+import AdvertiserAreaDetails from "./pages/advertiser/AdvertiserAreaDetails";
+import AdvertiserCampaignCreate from "./pages/advertiser/AdvertiserCampaignCreate";
 import TalentProfileSubmission from "./pages/TalentProfileSubmission";
 import TalentDashboard from "./pages/TalentDashboard";
 import BookTalent from "./pages/BookTalent";
@@ -177,6 +181,11 @@ const App = () => (
               <AdminOrders />
             </ProtectedAdminRoute>
           } />
+          {/* Advertiser inventory explorer (aggregated, no venue names exposed) */}
+          <Route path="/advertiser/explore" element={<AdvertiserExplore />} />
+          <Route path="/advertiser/explore/:city" element={<AdvertiserCityOverview />} />
+          <Route path="/advertiser/explore/:city/:area" element={<AdvertiserAreaDetails />} />
+          <Route path="/advertiser/campaigns/create" element={<AdvertiserCampaignCreate />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
