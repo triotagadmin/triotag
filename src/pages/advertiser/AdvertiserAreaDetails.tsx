@@ -51,7 +51,7 @@ export default function AdvertiserAreaDetails() {
     let map: any;
     (async () => {
       const L = await import("leaflet");
-      await import("leaflet/dist/leaflet.css");
+
       if (cancelled || !mapRef.current) return;
       map = L.map(mapRef.current, { zoomControl: false, scrollWheelZoom: false }).setView([data.city.lat, data.city.lng], 13);
       L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 19 }).addTo(map);

@@ -24,7 +24,7 @@ export default function AdvertiserCityOverview() {
     let map: any;
     (async () => {
       const L = await import("leaflet");
-      await import("leaflet/dist/leaflet.css");
+
       if (cancelled || !mapRef.current) return;
       map = L.map(mapRef.current, { zoomControl: false, scrollWheelZoom: false }).setView([city.lat, city.lng], 11);
       L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 19 }).addTo(map);

@@ -37,7 +37,7 @@ export default function AdvertiserExplore() {
     let cancelled = false;
     (async () => {
       const L = await import("leaflet");
-      await import("leaflet/dist/leaflet.css");
+
       if (cancelled || !mapRef.current || mapInstanceRef.current) return;
 
       const map = L.map(mapRef.current, {
