@@ -202,6 +202,7 @@ export type Database = {
           leased_advertiser_ids: string[]
           location: string | null
           longitude: number | null
+          media_type: Database["public"]["Enums"]["media_type"]
           media_urls: Json | null
           monthly_subscription_fee: number | null
           pending_advertiser_email: string | null
@@ -228,6 +229,7 @@ export type Database = {
           leased_advertiser_ids?: string[]
           location?: string | null
           longitude?: number | null
+          media_type?: Database["public"]["Enums"]["media_type"]
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
           pending_advertiser_email?: string | null
@@ -254,6 +256,7 @@ export type Database = {
           leased_advertiser_ids?: string[]
           location?: string | null
           longitude?: number | null
+          media_type?: Database["public"]["Enums"]["media_type"]
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
           pending_advertiser_email?: string | null
@@ -614,6 +617,282 @@ export type Database = {
           {
             foreignKeyName: "agent_services_publisher_id_fkey"
             columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aooh_campaigns: {
+        Row: {
+          advertiser_id: string | null
+          audio_duration_sec: number | null
+          audio_file_name: string | null
+          audio_file_url: string
+          campaign_id: string | null
+          campaign_name: string
+          created_at: string
+          dayparts: Json | null
+          end_date: string | null
+          id: string
+          max_plays_per_day: number | null
+          play_frequency_min: number | null
+          rejection_reason: string | null
+          script_notes: string | null
+          spot_duration: string | null
+          start_date: string | null
+          status: string
+          total_plays: number
+          total_venues: number
+          updated_at: string
+        }
+        Insert: {
+          advertiser_id?: string | null
+          audio_duration_sec?: number | null
+          audio_file_name?: string | null
+          audio_file_url: string
+          campaign_id?: string | null
+          campaign_name: string
+          created_at?: string
+          dayparts?: Json | null
+          end_date?: string | null
+          id?: string
+          max_plays_per_day?: number | null
+          play_frequency_min?: number | null
+          rejection_reason?: string | null
+          script_notes?: string | null
+          spot_duration?: string | null
+          start_date?: string | null
+          status?: string
+          total_plays?: number
+          total_venues?: number
+          updated_at?: string
+        }
+        Update: {
+          advertiser_id?: string | null
+          audio_duration_sec?: number | null
+          audio_file_name?: string | null
+          audio_file_url?: string
+          campaign_id?: string | null
+          campaign_name?: string
+          created_at?: string
+          dayparts?: Json | null
+          end_date?: string | null
+          id?: string
+          max_plays_per_day?: number | null
+          play_frequency_min?: number | null
+          rejection_reason?: string | null
+          script_notes?: string | null
+          spot_duration?: string | null
+          start_date?: string | null
+          status?: string
+          total_plays?: number
+          total_venues?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aooh_campaigns_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertiser_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_campaigns_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertiser_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_campaigns_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aooh_play_logs: {
+        Row: {
+          ad_space_id: string | null
+          aooh_campaign_id: string
+          completed: boolean
+          device_info: Json | null
+          duration_sec: number | null
+          id: string
+          played_at: string
+          player_session_id: string | null
+          venue_id: string | null
+        }
+        Insert: {
+          ad_space_id?: string | null
+          aooh_campaign_id: string
+          completed?: boolean
+          device_info?: Json | null
+          duration_sec?: number | null
+          id?: string
+          played_at?: string
+          player_session_id?: string | null
+          venue_id?: string | null
+        }
+        Update: {
+          ad_space_id?: string | null
+          aooh_campaign_id?: string
+          completed?: boolean
+          device_info?: Json | null
+          duration_sec?: number | null
+          id?: string
+          played_at?: string
+          player_session_id?: string | null
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aooh_play_logs_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_play_logs_aooh_campaign_id_fkey"
+            columns: ["aooh_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "aooh_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_play_logs_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_play_logs_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aooh_player_sessions: {
+        Row: {
+          access_token: string
+          ad_space_id: string | null
+          created_at: string
+          id: string
+          is_online: boolean
+          label: string | null
+          last_active_at: string | null
+          venue_id: string | null
+        }
+        Insert: {
+          access_token?: string
+          ad_space_id?: string | null
+          created_at?: string
+          id?: string
+          is_online?: boolean
+          label?: string | null
+          last_active_at?: string | null
+          venue_id?: string | null
+        }
+        Update: {
+          access_token?: string
+          ad_space_id?: string | null
+          created_at?: string
+          id?: string
+          is_online?: boolean
+          label?: string | null
+          last_active_at?: string | null
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aooh_player_sessions_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_player_sessions_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_player_sessions_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aooh_venue_assignments: {
+        Row: {
+          ad_space_id: string
+          aooh_campaign_id: string
+          assigned_at: string
+          dayparts: Json | null
+          id: string
+          max_plays_per_day: number | null
+          play_frequency_min: number | null
+          status: string
+          venue_id: string | null
+        }
+        Insert: {
+          ad_space_id: string
+          aooh_campaign_id: string
+          assigned_at?: string
+          dayparts?: Json | null
+          id?: string
+          max_plays_per_day?: number | null
+          play_frequency_min?: number | null
+          status?: string
+          venue_id?: string | null
+        }
+        Update: {
+          ad_space_id?: string
+          aooh_campaign_id?: string
+          assigned_at?: string
+          dayparts?: Json | null
+          id?: string
+          max_plays_per_day?: number | null
+          play_frequency_min?: number | null
+          status?: string
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aooh_venue_assignments_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_venue_assignments_aooh_campaign_id_fkey"
+            columns: ["aooh_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "aooh_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_venue_assignments_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_venue_assignments_venue_id_fkey"
+            columns: ["venue_id"]
             isOneToOne: false
             referencedRelation: "publisher_profiles_public"
             referencedColumns: ["id"]
@@ -3084,6 +3363,7 @@ export type Database = {
         | "declined"
         | "completed"
         | "cancelled"
+      media_type: "OOH" | "DOOH" | "AOOH"
       print_order_status:
         | "pending_admin"
         | "in_production"
@@ -3252,6 +3532,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      media_type: ["OOH", "DOOH", "AOOH"],
       print_order_status: [
         "pending_admin",
         "in_production",

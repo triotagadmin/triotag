@@ -50,6 +50,15 @@ const Auth = () => {
   const [resendEmail, setResendEmail] = useState("");
   const [activeTab, setActiveTab] = useState("signin");
 
+  // Read ?redirect=... once so post-auth flows can honor it
+  const redirectTo = (() => {
+    if (typeof window === "undefined") return null;
+    const r = new URLSearchParams(window.location.search).get("redirect");
+    if (!r || !r.startsWith("/")) return null;
+    return r;
+  })();
+  const goAfterAuth = (fallback: string) => navigate(redirectTo || fallback);
+
   // Handle post-OAuth redirect: detect session, create profile if needed, route to dashboard
   useEffect(() => {
     const handleOAuthRedirect = async () => {
@@ -189,18 +198,18 @@ const Auth = () => {
 
     const routeByRole = async (role: string) => {
       if (role === "admin") {
-        navigate("/admin/dashboard");
+        goAfterAuth("/admin/dashboard");
       } else if (role === "advertiser") {
         try {
           await supabase.functions.invoke("sync-pending-listing-ownership");
         } catch (syncError) {
           console.error("Failed to sync pending listings after OAuth:", syncError);
         }
-        navigate("/advertiser-dashboard");
+        goAfterAuth("/advertiser-dashboard");
       } else if (role === "print_partner") {
-        navigate("/print-partner/dashboard");
+        goAfterAuth("/print-partner/dashboard");
       } else if (role === "publisher") {
-        navigate("/venue-publishers");
+        goAfterAuth("/venue-publishers");
       } else if (role === "talent") {
         // Check talent profile status
         const { data: { session } } = await supabase.auth.getSession();
@@ -350,7 +359,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "Successfully signed in as admin.",
         });
-        navigate("/admin/dashboard");
+        goAfterAuth("/admin/dashboard");
       } else if (roles?.role === "advertiser") {
         const { data: profile } = await supabase
           .from("advertiser_profiles")
@@ -380,7 +389,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "Successfully signed in.",
         });
-        navigate("/");
+        goAfterAuth("/advertiser-dashboard");
       } else if (roles?.role === "print_partner") {
         const { data: profile } = await supabase
           .from("print_partner_profiles")
@@ -404,7 +413,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "Successfully signed in as Print Partner.",
         });
-        navigate("/print-partner/dashboard");
+        goAfterAuth("/print-partner/dashboard");
       } else if (roles?.role === "publisher") {
         const { data: profile } = await supabase
           .from("publisher_profiles")
@@ -429,9 +438,9 @@ const Auth = () => {
             title: "Welcome back!",
             description: "Successfully signed in.",
           });
-          navigate("/");
+          goAfterAuth("/venue-publishers");
         } else {
-          navigate("/");
+          goAfterAuth("/venue-publishers");
         }
       } else if (roles?.role === "talent") {
         // Check talent profile status to route correctly
@@ -447,9 +456,9 @@ const Auth = () => {
         });
 
         if (talentProfile?.status === "approved") {
-          navigate("/talent-dashboard");
+          goAfterAuth("/talent-dashboard");
         } else {
-          navigate("/talent-profile");
+          goAfterAuth("/talent-profile");
         }
       } else {
         navigate("/");

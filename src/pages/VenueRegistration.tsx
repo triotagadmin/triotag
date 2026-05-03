@@ -155,7 +155,22 @@ const VenueRegistration = () => {
   // Listing toggle (edit mode)
   const [isListedOnExplore, setIsListedOnExplore] = useState(true);
 
+  // Available Ad Formats (multi-select)
+  const [selectedFormats, setSelectedFormats] = useState<("OOH" | "DOOH" | "AOOH")[]>([]);
+  // OOH details
+  const [oohPrintFormat, setOohPrintFormat] = useState("");
+  const [oohPlacementCount, setOohPlacementCount] = useState("");
+  // DOOH details
+  const [doohScreenDescription, setDoohScreenDescription] = useState("");
+  const [doohScreenType, setDoohScreenType] = useState("");
+  const [doohScreenCount, setDoohScreenCount] = useState("");
+  // AOOH details
+  const [aoohSpotDuration, setAoohSpotDuration] = useState("");
+  const [aoohPlayFrequency, setAoohPlayFrequency] = useState("");
+  const [aoohAudioZones, setAoohAudioZones] = useState("");
 
+  const toggleFormat = (f: "OOH" | "DOOH" | "AOOH") =>
+    setSelectedFormats(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([
     { type: "business_license", label: "Business/Venue License", description: "Official business registration or venue operating license", file: null, uploaded: false },
     { type: "government_id", label: "Government-Issued ID", description: "Valid ID of business owner (passport, driver's license, national ID)", file: null, uploaded: false },
@@ -322,7 +337,14 @@ const VenueRegistration = () => {
     return true;
   };
 
-  const handleNextStep = () => { if (validateStep1()) { setCurrentStep(2); window.scrollTo(0, 0); } };
+  const handleNextStep = () => {
+    if (!validateStep1()) return;
+    if (selectedFormats.length === 0) {
+      toast({ title: "Error", description: "Please select at least one ad format", variant: "destructive" });
+      return;
+    }
+    setCurrentStep(2); window.scrollTo(0, 0);
+  };
   const handlePrevStep = () => { setCurrentStep(1); window.scrollTo(0, 0); };
 
   const buildVenueData = () => {
@@ -458,17 +480,25 @@ const VenueRegistration = () => {
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
-        const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert([{
+        const formatDetails: Record<string, any> = {
+          OOH: { print_format: oohPrintFormat, placement_count: oohPlacementCount ? parseInt(oohPlacementCount) : null },
+          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenType, screen_count: doohScreenCount ? parseInt(doohScreenCount) : null },
+          AOOH: { spot_duration: aoohSpotDuration, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: aoohAudioZones ? parseInt(aoohAudioZones) : null },
+        };
+        const rows = selectedFormats.map(fmt => ({
           ...venueData,
+          specifications: { ...(venueData.specifications as any), format_details: formatDetails[fmt] },
+          media_type: fmt,
           advertiser_id: null,
           pending_advertiser_email: normalizedContactEmail || null,
           approval_status: "pending" as const,
           availability_status: "unavailable",
-        }]).select("id").single();
+        }));
+        const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert(rows).select("id");
         if (insertError) throw insertError;
 
-        if (normalizedContactEmail) {
-          await requestOwnershipWorkflow(insertedData.id, normalizedContactEmail);
+        if (normalizedContactEmail && insertedData?.[0]) {
+          await requestOwnershipWorkflow(insertedData[0].id, normalizedContactEmail);
         }
 
 
@@ -614,6 +644,67 @@ const VenueRegistration = () => {
                   </CardContent>
                 </Card>
 
+
+                {/* Available Ad Formats */}
+                <Card className="rounded-[20px]">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Available Ad Formats *</CardTitle>
+                    <p className="text-xs text-muted-foreground">Select all formats your venue can host. A separate listing is created per format.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {([
+                        { k: "OOH", title: "OOH — Print Advertising", desc: "Static print formats — table tents, posters, stickers, shelf signage, floor graphics." },
+                        { k: "DOOH", title: "DOOH — Digital Screens", desc: "Digital screen formats — LED displays, TV screens, menu boards, video walls." },
+                        { k: "AOOH", title: "AOOH — Audio Advertising", desc: "In-venue audio — branded jingles, promotional spots, announcements, queue audio." },
+                      ] as const).map(f => {
+                        const on = selectedFormats.includes(f.k);
+                        return (
+                          <button key={f.k} type="button" onClick={() => toggleFormat(f.k)}
+                            className={`text-left p-4 rounded-[14px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
+                            <div className="font-semibold mb-1">{f.title}</div>
+                            <div className="text-xs text-muted-foreground">{f.desc}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selectedFormats.includes("OOH") && (
+                      <div className="border-t pt-4 grid sm:grid-cols-2 gap-3">
+                        <div><Label>Print Format Type</Label>
+                          <Select value={oohPrintFormat} onValueChange={setOohPrintFormat}>
+                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectContent>{["Table Tent","Poster/Wall","Floor Sticker","Shelf Signage","Counter Display","Aisle Signage","Entrance Banner","Other"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div><Label># Print Placements</Label><Input type="number" value={oohPlacementCount} onChange={e=>setOohPlacementCount(e.target.value)} /></div>
+                      </div>
+                    )}
+                    {selectedFormats.includes("DOOH") && (
+                      <div className="border-t pt-4 grid sm:grid-cols-2 gap-3">
+                        <div className="sm:col-span-2"><Label>Screen Description</Label><Input value={doohScreenDescription} onChange={e=>setDoohScreenDescription(e.target.value)} placeholder="e.g. 55-inch LED at entrance" /></div>
+                        <div><Label>Screen Type</Label>
+                          <Select value={doohScreenType} onValueChange={setDoohScreenType}>
+                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectContent>{["Indoor Screen","Outdoor Screen","Menu Board","Video Wall","Checkout Screen"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div><Label># Screens</Label><Input type="number" value={doohScreenCount} onChange={e=>setDoohScreenCount(e.target.value)} /></div>
+                      </div>
+                    )}
+                    {selectedFormats.includes("AOOH") && (
+                      <div className="border-t pt-4 grid sm:grid-cols-3 gap-3">
+                        <div><Label>Spot Duration</Label>
+                          <Select value={aoohSpotDuration} onValueChange={setAoohSpotDuration}>
+                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectContent>{["15 seconds","30 seconds","60 seconds"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div><Label>Play Frequency (min)</Label><Input type="number" value={aoohPlayFrequency} onChange={e=>setAoohPlayFrequency(e.target.value)} placeholder="e.g. 30" /></div>
+                        <div><Label># Audio Zones</Label><Input type="number" value={aoohAudioZones} onChange={e=>setAoohAudioZones(e.target.value)} /></div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Ad Unit Materials */}
                 <Card className="rounded-[20px]">

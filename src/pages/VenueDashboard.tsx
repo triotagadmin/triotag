@@ -262,6 +262,9 @@ const VenueDashboard = () => {
                           <h4 className="font-semibold truncate">{space.title}</h4>
                           <p className="text-sm text-muted-foreground truncate">{space.location}</p>
                           <div className="mt-2 flex gap-2 flex-wrap">
+                            {space.media_type === "DOOH" && <Badge className="bg-blue-600 hover:bg-blue-600">DOOH</Badge>}
+                            {space.media_type === "AOOH" && <Badge className="bg-red-600 hover:bg-red-600">AOOH</Badge>}
+                            {(!space.media_type || space.media_type === "OOH") && <Badge className="bg-green-600 hover:bg-green-600">OOH</Badge>}
                             {getStatusBadge(space.approval_status)}
                             <Badge variant="outline">{space.availability_status}</Badge>
                             {Array.isArray((space as any).leased_advertiser_ids) && (space as any).leased_advertiser_ids.length > 0 && (

@@ -1,27 +1,126 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { Menu, X, TrendingUp } from "lucide-react";
+import { Menu, X, TrendingUp, LogOut, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MessengerBell } from "@/components/MessengerBell";
 import { BRAND_NAME } from "@/lib/brand";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+  DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
-const NAV_LINKS = [
+type Role = "advertiser" | "publisher" | "print_partner" | "talent" | "admin" | null;
+
+interface NavLinkDef { label: string; to: string; gated?: boolean; }
+
+const PUBLIC_LINKS: NavLinkDef[] = [
   { label: "Home", to: "/" },
   { label: "For Retailers", to: "/list-space" },
   { label: "For Advertisers", to: "/campaign-submit" },
-  { label: "Inventory Formats", to: "/explore" },
+  { label: "Inventory", to: "/advertiser/explore", gated: true },
   { label: "Resources", to: "/insights" },
   { label: "Company", to: "/contact" },
 ];
 
+const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
+  if (!loggedIn) return PUBLIC_LINKS;
+  switch (role) {
+    case "advertiser":
+      return [
+        { label: "Home", to: "/" },
+        { label: "For Retailers", to: "/list-space" },
+        { label: "For Advertisers", to: "/campaign-submit" },
+        { label: "Inventory", to: "/advertiser/explore" },
+        { label: "Resources", to: "/insights" },
+        { label: "Company", to: "/contact" },
+      ];
+    case "publisher":
+      return [
+        { label: "Home", to: "/" },
+        { label: "For Retailers", to: "/list-space" },
+        { label: "For Advertisers", to: "/campaign-submit" },
+        { label: "Resources", to: "/insights" },
+        { label: "Company", to: "/contact" },
+      ];
+    case "print_partner":
+      return [
+        { label: "Home", to: "/" },
+        { label: "For Retailers", to: "/list-space" },
+        { label: "Resources", to: "/insights" },
+        { label: "Company", to: "/contact" },
+      ];
+    case "talent":
+      return [
+        { label: "Home", to: "/" },
+        { label: "Resources", to: "/insights" },
+        { label: "Company", to: "/contact" },
+      ];
+    case "admin":
+      return [
+        { label: "Home", to: "/" },
+        { label: "Admin Dashboard", to: "/admin/dashboard" },
+      ];
+    default:
+      return PUBLIC_LINKS;
+  }
+};
+
+interface MenuItem { label: string; to: string; }
+
+const dropdownForRole = (role: Role): MenuItem[] => {
+  switch (role) {
+    case "advertiser": return [
+      { label: "Dashboard", to: "/advertiser-dashboard" },
+      { label: "My Campaigns", to: "/advertiser-dashboard" },
+      { label: "Wallet", to: "/advertiser-settings" },
+      { label: "Settings", to: "/advertiser-settings" },
+    ];
+    case "publisher": return [
+      { label: "My Dashboard", to: "/venue-publishers" },
+      { label: "My Ad Spaces", to: "/venue-inventory" },
+      { label: "Earnings", to: "/venue-publishers" },
+      { label: "Settings", to: "/publisher/settings" },
+    ];
+    case "print_partner": return [
+      { label: "POS Dashboard", to: "/print-partner/dashboard" },
+      { label: "My Clients", to: "/print-partner/clients" },
+      { label: "Venue Listings", to: "/print-partner/jobs" },
+      { label: "Earnings", to: "/print-partner/revenue" },
+      { label: "Settings", to: "/print-partner/settings" },
+    ];
+    case "talent": return [
+      { label: "My Dashboard", to: "/talent-dashboard" },
+      { label: "Campaign Invites", to: "/talent-dashboard" },
+      { label: "Submissions", to: "/talent-dashboard" },
+      { label: "Earnings", to: "/talent-dashboard" },
+      { label: "Settings", to: "/talent-profile" },
+    ];
+    case "admin": return [
+      { label: "Admin Dashboard", to: "/admin/dashboard" },
+      { label: "Settings", to: "/admin/dashboard" },
+    ];
+    default: return [];
+  }
+};
+
+const ROLE_LABEL: Record<string, string> = {
+  advertiser: "Advertiser",
+  publisher: "Publisher",
+  print_partner: "Print Partner",
+  talent: "Talent",
+  admin: "Admin",
+};
+
 export const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<Role>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -38,34 +137,34 @@ export const Navigation = () => {
 
   const fetchUserRole = async (userId: string) => {
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
-    setUserRole(data?.role ?? null);
+    setUserRole((data?.role as Role) ?? null);
   };
 
   const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {
-      console.error(e);
-    }
-    setUser(null);
-    setUserRole(null);
-    setMobileMenuOpen(false);
+    try { await supabase.auth.signOut(); } catch (e) { console.error(e); }
+    setUser(null); setUserRole(null); setMobileMenuOpen(false);
     navigate("/");
-  };
-
-  const getDashboardLink = () => {
-    if (userRole === "admin") return "/admin/dashboard";
-    if (userRole === "advertiser") return "/advertiser-dashboard";
-    if (userRole === "print_partner") return "/print-partner/dashboard";
-    if (userRole === "publisher") return "/venue-publishers";
-    if (userRole === "talent") return "/talent-dashboard";
-    return "/dashboard";
   };
 
   const close = () => setMobileMenuOpen(false);
 
+  const handleGatedClick = (link: NavLinkDef, e: React.MouseEvent) => {
+    if (link.gated && !user) {
+      e.preventDefault();
+      navigate(`/auth?redirect=${encodeURIComponent(link.to)}`);
+      close();
+    }
+  };
+
+  const links = linksForRole(userRole, !!user);
+  const menu = dropdownForRole(userRole);
+  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Account";
+  const initial = (userName[0] || "U").toUpperCase();
+
+  const isActive = (to: string) => location.pathname === to || (to !== "/" && location.pathname.startsWith(to));
+
   return (
-    <nav className="sticky top-0 z-50 bg-black/95 backdrop-blur border-b border-white/10">
+    <nav className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
       <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         <Link to="/" onClick={close} className="flex items-center gap-2 group">
           <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-green-600 text-white">
@@ -75,11 +174,16 @@ export const Navigation = () => {
         </Link>
 
         <div className="hidden lg:flex items-center gap-1">
-          {NAV_LINKS.map((l) => (
+          {links.map((l) => (
             <Link
               key={l.label}
               to={l.to}
-              className="px-3 py-2 text-sm text-zinc-300 hover:text-green-500 transition-colors"
+              onClick={(e) => handleGatedClick(l, e)}
+              className={`px-3 py-2 text-sm transition-colors border-b-2 ${
+                isActive(l.to)
+                  ? "text-green-500 border-green-500"
+                  : "text-zinc-300 border-transparent hover:text-green-500"
+              }`}
             >
               {l.label}
             </Link>
@@ -89,17 +193,47 @@ export const Navigation = () => {
         <div className="hidden lg:flex items-center gap-2">
           {user ? (
             <>
+              {userRole === "admin" && (
+                <Badge className="bg-green-600 hover:bg-green-600 text-white">Admin Panel</Badge>
+              )}
               <MessengerBell />
               <NotificationBell />
-              <Link to={getDashboardLink()}>
-                <Button variant="outline" size="sm">Dashboard</Button>
-              </Link>
-              <Button variant="default" size="sm" onClick={handleSignOut}>Log Out</Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-9 h-9 rounded-full bg-green-600 text-white font-semibold flex items-center justify-center hover:bg-green-500 transition-colors">
+                    {initial}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 bg-white border border-gray-100 rounded-xl shadow-lg p-2"
+                >
+                  <DropdownMenuLabel className="px-2 pt-1 pb-2">
+                    <div className="text-sm font-bold text-zinc-900 truncate">{userName}</div>
+                    {userRole && (
+                      <span className="inline-block mt-1 px-2 py-0.5 text-[11px] rounded-full bg-green-100 text-green-700 font-medium">
+                        {ROLE_LABEL[userRole] || userRole}
+                      </span>
+                    )}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {menu.map((m) => (
+                    <DropdownMenuItem key={m.label} onClick={() => navigate(m.to)} className="cursor-pointer">
+                      <UserIcon className="w-4 h-4 mr-2 text-zinc-500" />
+                      {m.label}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-red-600 cursor-pointer focus:text-red-600">
+                    <LogOut className="w-4 h-4 mr-2" /> Log Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <>
-              <Link to="/auth"><Button variant="outline" size="sm">Login</Button></Link>
-              <Link to="/auth"><Button variant="default" size="sm">Get Started</Button></Link>
+              <Link to="/auth"><Button variant="outline" size="sm" className="border-green-500 text-green-500 hover:bg-green-500/10">Log In</Button></Link>
+              <Link to="/auth"><Button size="sm" className="bg-green-600 hover:bg-green-500 text-white">Get Started</Button></Link>
             </>
           )}
         </div>
@@ -114,37 +248,59 @@ export const Navigation = () => {
       </div>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-black border-b border-white/10 shadow-lg">
-          <div className="flex flex-col p-4 gap-1">
-            {NAV_LINKS.map((l) => (
+        <div className="lg:hidden fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-[#0c0c0c] border-l border-white/10 shadow-2xl overflow-y-auto z-50">
+          <div className="flex items-center justify-between p-4 border-b border-white/10">
+            <span className="text-white font-bold">{BRAND_NAME}</span>
+            <button onClick={close} className="text-white p-1"><X className="w-5 h-5" /></button>
+          </div>
+          {user && (
+            <div className="p-4 border-b border-white/10">
+              <div className="text-sm text-white font-semibold truncate">{userName}</div>
+              {userRole && (
+                <span className="inline-block mt-1 px-2 py-0.5 text-[11px] rounded-full bg-green-600/20 text-green-400 font-medium">
+                  {ROLE_LABEL[userRole] || userRole}
+                </span>
+              )}
+            </div>
+          )}
+          <div className="flex flex-col p-2">
+            {links.map((l) => (
               <Link
                 key={l.label}
                 to={l.to}
-                onClick={close}
-                className="px-3 py-3 text-sm text-zinc-200 hover:text-green-500 hover:bg-white/5 rounded-md"
+                onClick={(e) => { handleGatedClick(l, e); close(); }}
+                className={`px-3 py-3 text-sm rounded-md ${
+                  isActive(l.to) ? "text-green-500 bg-white/5" : "text-zinc-200 hover:bg-white/5 hover:text-green-500"
+                }`}
               >
                 {l.label}
               </Link>
             ))}
-            <div className="border-t border-white/10 mt-2 pt-3 flex flex-col gap-2">
-              {user ? (
-                <>
-                  <Link to={getDashboardLink()} onClick={close}>
-                    <Button variant="outline" size="sm" className="w-full">Dashboard</Button>
+            {user && menu.length > 0 && (
+              <>
+                <div className="border-t border-white/10 my-2" />
+                {menu.map((m) => (
+                  <Link key={m.label} to={m.to} onClick={close} className="px-3 py-3 text-sm text-zinc-200 hover:text-green-500 hover:bg-white/5 rounded-md">
+                    {m.label}
                   </Link>
-                  <Button variant="default" size="sm" className="w-full" onClick={handleSignOut}>Log Out</Button>
-                </>
-              ) : (
-                <>
-                  <Link to="/auth" onClick={close}>
-                    <Button variant="outline" size="sm" className="w-full">Login</Button>
-                  </Link>
-                  <Link to="/auth" onClick={close}>
-                    <Button variant="default" size="sm" className="w-full">Get Started</Button>
-                  </Link>
-                </>
-              )}
-            </div>
+                ))}
+              </>
+            )}
+            <div className="border-t border-white/10 my-2" />
+            {user ? (
+              <button onClick={handleSignOut} className="px-3 py-3 text-sm text-red-500 hover:bg-white/5 rounded-md text-left">
+                Log Out
+              </button>
+            ) : (
+              <div className="flex flex-col gap-2 p-2">
+                <Link to="/auth" onClick={close}>
+                  <Button variant="outline" size="sm" className="w-full border-green-500 text-green-500">Log In</Button>
+                </Link>
+                <Link to="/auth" onClick={close}>
+                  <Button size="sm" className="w-full bg-green-600 hover:bg-green-500 text-white">Get Started</Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}

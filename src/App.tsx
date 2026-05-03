@@ -17,6 +17,7 @@ import AdminNewsletterDashboard from "./pages/AdminNewsletterDashboard";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminOrders from "./pages/AdminOrders";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
 import AdvertiserSettings from "./pages/AdvertiserSettings";
@@ -71,6 +72,9 @@ import AdvertiserExplore from "./pages/advertiser/AdvertiserExplore";
 import AdvertiserCityOverview from "./pages/advertiser/AdvertiserCityOverview";
 import AdvertiserAreaDetails from "./pages/advertiser/AdvertiserAreaDetails";
 import AdvertiserCampaignCreate from "./pages/advertiser/AdvertiserCampaignCreate";
+import AOOHCampaignCreate from "./pages/advertiser/AOOHCampaignCreate";
+import AOOHCampaignReport from "./pages/advertiser/AOOHCampaignReport";
+import AOOHPlayer from "./pages/player/AOOHPlayer";
 import TalentProfileSubmission from "./pages/TalentProfileSubmission";
 import TalentDashboard from "./pages/TalentDashboard";
 import BookTalent from "./pages/BookTalent";
@@ -90,7 +94,7 @@ const App = () => (
           
           <Route path="/insights" element={<Insights />} />
           <Route path="/insights/:id" element={<BlogPost />} />
-          <Route path="/explore" element={<Marketplace />} />
+          <Route path="/explore" element={<RoleProtectedRoute requireAuth><Marketplace /></RoleProtectedRoute>} />
           <Route path="/inventory" element={<VenueInventory />} />
           <Route path="/venue-inventory" element={<VenueInventory />} />
           <Route path="/venue/:id" element={<VenueDetail />} />
@@ -129,7 +133,7 @@ const App = () => (
           <Route path="/venue-info" element={<Venue />} />
           <Route path="/venue/register" element={<VenueRegistration />} />
           <Route path="/venue/verify" element={<VenueVerification />} />
-          <Route path="/explore-all" element={<ExploreAll />} />
+          <Route path="/explore-all" element={<RoleProtectedRoute requireAuth><ExploreAll /></RoleProtectedRoute>} />
           <Route path="/campaign-submit" element={<CampaignSubmission />} />
           <Route path="/qr/:shortCode" element={<QRRedirect />} />
           <Route path="/contact" element={<Contact />} />
@@ -182,10 +186,14 @@ const App = () => (
             </ProtectedAdminRoute>
           } />
           {/* Advertiser inventory explorer (aggregated, no venue names exposed) */}
-          <Route path="/advertiser/explore" element={<AdvertiserExplore />} />
-          <Route path="/advertiser/explore/:city" element={<AdvertiserCityOverview />} />
-          <Route path="/advertiser/explore/:city/:area" element={<AdvertiserAreaDetails />} />
-          <Route path="/advertiser/campaigns/create" element={<AdvertiserCampaignCreate />} />
+          <Route path="/advertiser/explore" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AdvertiserExplore /></RoleProtectedRoute>} />
+          <Route path="/advertiser/explore/:city" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AdvertiserCityOverview /></RoleProtectedRoute>} />
+          <Route path="/advertiser/explore/:city/:area" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AdvertiserAreaDetails /></RoleProtectedRoute>} />
+          <Route path="/advertiser/campaigns/create" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AdvertiserCampaignCreate /></RoleProtectedRoute>} />
+          <Route path="/advertiser/campaigns/aooh/create" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AOOHCampaignCreate /></RoleProtectedRoute>} />
+          <Route path="/advertiser/campaigns/aooh/:id" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AOOHCampaignReport /></RoleProtectedRoute>} />
+          {/* AOOH player (token-based public) */}
+          <Route path="/player/audio" element={<AOOHPlayer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

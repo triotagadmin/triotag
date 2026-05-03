@@ -67,3 +67,9 @@ verify_jwt = false
 
 [functions.create-checkout]
 verify_jwt = false
+
+[functions.aooh-log-play]
+verify_jwt = false
+
+[functions.aooh-get-schedule]
+verify_jwt = false
