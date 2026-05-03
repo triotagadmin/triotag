@@ -645,6 +645,67 @@ const VenueRegistration = () => {
                 </Card>
 
 
+                {/* Available Ad Formats */}
+                <Card className="rounded-[20px]">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Available Ad Formats *</CardTitle>
+                    <p className="text-xs text-muted-foreground">Select all formats your venue can host. A separate listing is created per format.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {([
+                        { k: "OOH", title: "OOH — Print Advertising", desc: "Static print formats — table tents, posters, stickers, shelf signage, floor graphics." },
+                        { k: "DOOH", title: "DOOH — Digital Screens", desc: "Digital screen formats — LED displays, TV screens, menu boards, video walls." },
+                        { k: "AOOH", title: "AOOH — Audio Advertising", desc: "In-venue audio — branded jingles, promotional spots, announcements, queue audio." },
+                      ] as const).map(f => {
+                        const on = selectedFormats.includes(f.k);
+                        return (
+                          <button key={f.k} type="button" onClick={() => toggleFormat(f.k)}
+                            className={`text-left p-4 rounded-[14px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
+                            <div className="font-semibold mb-1">{f.title}</div>
+                            <div className="text-xs text-muted-foreground">{f.desc}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selectedFormats.includes("OOH") && (
+                      <div className="border-t pt-4 grid sm:grid-cols-2 gap-3">
+                        <div><Label>Print Format Type</Label>
+                          <Select value={oohPrintFormat} onValueChange={setOohPrintFormat}>
+                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectContent>{["Table Tent","Poster/Wall","Floor Sticker","Shelf Signage","Counter Display","Aisle Signage","Entrance Banner","Other"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div><Label># Print Placements</Label><Input type="number" value={oohPlacementCount} onChange={e=>setOohPlacementCount(e.target.value)} /></div>
+                      </div>
+                    )}
+                    {selectedFormats.includes("DOOH") && (
+                      <div className="border-t pt-4 grid sm:grid-cols-2 gap-3">
+                        <div className="sm:col-span-2"><Label>Screen Description</Label><Input value={doohScreenDescription} onChange={e=>setDoohScreenDescription(e.target.value)} placeholder="e.g. 55-inch LED at entrance" /></div>
+                        <div><Label>Screen Type</Label>
+                          <Select value={doohScreenType} onValueChange={setDoohScreenType}>
+                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectContent>{["Indoor Screen","Outdoor Screen","Menu Board","Video Wall","Checkout Screen"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div><Label># Screens</Label><Input type="number" value={doohScreenCount} onChange={e=>setDoohScreenCount(e.target.value)} /></div>
+                      </div>
+                    )}
+                    {selectedFormats.includes("AOOH") && (
+                      <div className="border-t pt-4 grid sm:grid-cols-3 gap-3">
+                        <div><Label>Spot Duration</Label>
+                          <Select value={aoohSpotDuration} onValueChange={setAoohSpotDuration}>
+                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectContent>{["15 seconds","30 seconds","60 seconds"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div><Label>Play Frequency (min)</Label><Input type="number" value={aoohPlayFrequency} onChange={e=>setAoohPlayFrequency(e.target.value)} placeholder="e.g. 30" /></div>
+                        <div><Label># Audio Zones</Label><Input type="number" value={aoohAudioZones} onChange={e=>setAoohAudioZones(e.target.value)} /></div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
                 {/* Ad Unit Materials */}
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
