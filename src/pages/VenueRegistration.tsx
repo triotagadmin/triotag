@@ -155,7 +155,22 @@ const VenueRegistration = () => {
   // Listing toggle (edit mode)
   const [isListedOnExplore, setIsListedOnExplore] = useState(true);
 
+  // Available Ad Formats (multi-select)
+  const [selectedFormats, setSelectedFormats] = useState<("OOH" | "DOOH" | "AOOH")[]>([]);
+  // OOH details
+  const [oohPrintFormat, setOohPrintFormat] = useState("");
+  const [oohPlacementCount, setOohPlacementCount] = useState("");
+  // DOOH details
+  const [doohScreenDescription, setDoohScreenDescription] = useState("");
+  const [doohScreenType, setDoohScreenType] = useState("");
+  const [doohScreenCount, setDoohScreenCount] = useState("");
+  // AOOH details
+  const [aoohSpotDuration, setAoohSpotDuration] = useState("");
+  const [aoohPlayFrequency, setAoohPlayFrequency] = useState("");
+  const [aoohAudioZones, setAoohAudioZones] = useState("");
 
+  const toggleFormat = (f: "OOH" | "DOOH" | "AOOH") =>
+    setSelectedFormats(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([
     { type: "business_license", label: "Business/Venue License", description: "Official business registration or venue operating license", file: null, uploaded: false },
     { type: "government_id", label: "Government-Issued ID", description: "Valid ID of business owner (passport, driver's license, national ID)", file: null, uploaded: false },
