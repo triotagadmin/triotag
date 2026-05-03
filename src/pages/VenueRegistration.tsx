@@ -337,7 +337,14 @@ const VenueRegistration = () => {
     return true;
   };
 
-  const handleNextStep = () => { if (validateStep1()) { setCurrentStep(2); window.scrollTo(0, 0); } };
+  const handleNextStep = () => {
+    if (!validateStep1()) return;
+    if (selectedFormats.length === 0) {
+      toast({ title: "Error", description: "Please select at least one ad format", variant: "destructive" });
+      return;
+    }
+    setCurrentStep(2); window.scrollTo(0, 0);
+  };
   const handlePrevStep = () => { setCurrentStep(1); window.scrollTo(0, 0); };
 
   const buildVenueData = () => {
@@ -473,17 +480,25 @@ const VenueRegistration = () => {
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
-        const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert([{
+        const formatDetails: Record<string, any> = {
+          OOH: { print_format: oohPrintFormat, placement_count: oohPlacementCount ? parseInt(oohPlacementCount) : null },
+          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenType, screen_count: doohScreenCount ? parseInt(doohScreenCount) : null },
+          AOOH: { spot_duration: aoohSpotDuration, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: aoohAudioZones ? parseInt(aoohAudioZones) : null },
+        };
+        const rows = selectedFormats.map(fmt => ({
           ...venueData,
+          specifications: { ...(venueData.specifications as any), format_details: formatDetails[fmt] },
+          media_type: fmt,
           advertiser_id: null,
           pending_advertiser_email: normalizedContactEmail || null,
           approval_status: "pending" as const,
           availability_status: "unavailable",
-        }]).select("id").single();
+        }));
+        const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert(rows).select("id");
         if (insertError) throw insertError;
 
-        if (normalizedContactEmail) {
-          await requestOwnershipWorkflow(insertedData.id, normalizedContactEmail);
+        if (normalizedContactEmail && insertedData?.[0]) {
+          await requestOwnershipWorkflow(insertedData[0].id, normalizedContactEmail);
         }
 
 
