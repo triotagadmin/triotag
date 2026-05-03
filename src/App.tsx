@@ -17,6 +17,7 @@ import AdminNewsletterDashboard from "./pages/AdminNewsletterDashboard";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminOrders from "./pages/AdminOrders";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
 import AdvertiserSettings from "./pages/AdvertiserSettings";
