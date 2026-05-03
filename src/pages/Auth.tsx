@@ -389,7 +389,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "Successfully signed in.",
         });
-        navigate("/");
+        goAfterAuth("/advertiser-dashboard");
       } else if (roles?.role === "print_partner") {
         const { data: profile } = await supabase
           .from("print_partner_profiles")
@@ -438,9 +438,9 @@ const Auth = () => {
             title: "Welcome back!",
             description: "Successfully signed in.",
           });
-          navigate("/");
+          goAfterAuth("/venue-publishers");
         } else {
-          navigate("/");
+          goAfterAuth("/venue-publishers");
         }
       } else if (roles?.role === "talent") {
         // Check talent profile status to route correctly
@@ -456,9 +456,9 @@ const Auth = () => {
         });
 
         if (talentProfile?.status === "approved") {
-          navigate("/talent-dashboard");
+          goAfterAuth("/talent-dashboard");
         } else {
-          navigate("/talent-profile");
+          goAfterAuth("/talent-profile");
         }
       } else {
         navigate("/");
