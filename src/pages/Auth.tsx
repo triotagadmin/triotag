@@ -50,6 +50,15 @@ const Auth = () => {
   const [resendEmail, setResendEmail] = useState("");
   const [activeTab, setActiveTab] = useState("signin");
 
+  // Read ?redirect=... once so post-auth flows can honor it
+  const redirectTo = (() => {
+    if (typeof window === "undefined") return null;
+    const r = new URLSearchParams(window.location.search).get("redirect");
+    if (!r || !r.startsWith("/")) return null;
+    return r;
+  })();
+  const goAfterAuth = (fallback: string) => navigate(redirectTo || fallback);
+
   // Handle post-OAuth redirect: detect session, create profile if needed, route to dashboard
   useEffect(() => {
     const handleOAuthRedirect = async () => {
