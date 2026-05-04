@@ -62,6 +62,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
     case "admin":
       return [
         { label: "Home", to: "/" },
+        { label: "Inventory", to: "/explore" },
         { label: "Admin Dashboard", to: "/admin/dashboard" },
       ];
     default:
