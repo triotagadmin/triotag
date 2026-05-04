@@ -94,7 +94,7 @@ const App = () => (
           
           <Route path="/insights" element={<Insights />} />
           <Route path="/insights/:id" element={<BlogPost />} />
-          <Route path="/explore" element={<RoleProtectedRoute requireAuth><Marketplace /></RoleProtectedRoute>} />
+          <Route path="/explore" element={<RoleProtectedRoute allowedRoles={["admin"]}><Marketplace /></RoleProtectedRoute>} />
           <Route path="/inventory" element={<VenueInventory />} />
           <Route path="/venue-inventory" element={<VenueInventory />} />
           <Route path="/venue/:id" element={<VenueDetail />} />
@@ -133,7 +133,7 @@ const App = () => (
           <Route path="/venue-info" element={<Venue />} />
           <Route path="/venue/register" element={<VenueRegistration />} />
           <Route path="/venue/verify" element={<VenueVerification />} />
-          <Route path="/explore-all" element={<RoleProtectedRoute requireAuth><ExploreAll /></RoleProtectedRoute>} />
+          <Route path="/explore-all" element={<RoleProtectedRoute allowedRoles={["admin"]}><ExploreAll /></RoleProtectedRoute>} />
           <Route path="/campaign-submit" element={<CampaignSubmission />} />
           <Route path="/qr/:shortCode" element={<QRRedirect />} />
           <Route path="/contact" element={<Contact />} />
