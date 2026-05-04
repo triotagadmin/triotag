@@ -185,13 +185,14 @@ const App = () => (
               <AdminOrders />
             </ProtectedAdminRoute>
           } />
-          {/* Advertiser inventory explorer (aggregated, no venue names exposed) */}
-          <Route path="/advertiser/explore" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AdvertiserExplore /></RoleProtectedRoute>} />
-          <Route path="/advertiser/explore/:city" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AdvertiserCityOverview /></RoleProtectedRoute>} />
-          <Route path="/advertiser/explore/:city/:area" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AdvertiserAreaDetails /></RoleProtectedRoute>} />
-          <Route path="/advertiser/campaigns/create" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AdvertiserCampaignCreate /></RoleProtectedRoute>} />
-          <Route path="/advertiser/campaigns/aooh/create" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AOOHCampaignCreate /></RoleProtectedRoute>} />
-          <Route path="/advertiser/campaigns/aooh/:id" element={<RoleProtectedRoute allowedRoles={["advertiser"]}><AOOHCampaignReport /></RoleProtectedRoute>} />
+          {/* Advertiser inventory explorer — PUBLIC, no auth required */}
+          <Route path="/advertiser/explore" element={<AdvertiserExplore />} />
+          <Route path="/advertiser/explore/:city" element={<AdvertiserCityOverview />} />
+          <Route path="/advertiser/explore/:city/:area" element={<AdvertiserAreaDetails />} />
+          {/* Protected — login required */}
+          <Route path="/advertiser/campaigns/create" element={<RoleProtectedRoute requireAuth><AdvertiserCampaignCreate /></RoleProtectedRoute>} />
+          <Route path="/advertiser/campaigns/aooh/create" element={<RoleProtectedRoute requireAuth><AOOHCampaignCreate /></RoleProtectedRoute>} />
+          <Route path="/advertiser/campaigns/aooh/:id" element={<RoleProtectedRoute requireAuth><AOOHCampaignReport /></RoleProtectedRoute>} />
           {/* AOOH player (token-based public) */}
           <Route path="/player/audio" element={<AOOHPlayer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
