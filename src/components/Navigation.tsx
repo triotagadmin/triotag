@@ -17,11 +17,13 @@ type Role = "advertiser" | "publisher" | "print_partner" | "talent" | "admin" | 
 
 interface NavLinkDef { label: string; to: string; gated?: boolean; }
 
+const INVENTORY_LINK: NavLinkDef = { label: "Inventory", to: "/advertiser/explore" };
+
 const PUBLIC_LINKS: NavLinkDef[] = [
   { label: "Home", to: "/" },
   { label: "For Retailers", to: "/list-space" },
   { label: "For Advertisers", to: "/campaign-submit" },
-  { label: "Inventory", to: "/advertiser/explore", gated: true },
+  INVENTORY_LINK,
   { label: "Resources", to: "/insights" },
   { label: "Company", to: "/contact" },
 ];
@@ -34,7 +36,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
         { label: "Home", to: "/" },
         { label: "For Retailers", to: "/list-space" },
         { label: "For Advertisers", to: "/campaign-submit" },
-        { label: "Inventory", to: "/advertiser/explore" },
+        INVENTORY_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -43,6 +45,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
         { label: "Home", to: "/" },
         { label: "For Retailers", to: "/list-space" },
         { label: "For Advertisers", to: "/campaign-submit" },
+        INVENTORY_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -50,19 +53,21 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         { label: "For Retailers", to: "/list-space" },
+        INVENTORY_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
     case "talent":
       return [
         { label: "Home", to: "/" },
+        INVENTORY_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
     case "admin":
       return [
         { label: "Home", to: "/" },
-        { label: "Inventory", to: "/explore" },
+        INVENTORY_LINK,
         { label: "Admin Dashboard", to: "/admin/dashboard" },
       ];
     default:
