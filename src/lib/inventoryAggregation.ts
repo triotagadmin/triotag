@@ -171,12 +171,13 @@ export interface AreaSummary {
 }
 
 // Display labels only — no pct/spaces hardcoded.
+// Display labels only — `pct` is 0 (no fake percentages). Real counts come from queries.
 export const MEDIA_TYPE_BREAKDOWN: Array<{
-  channel: Channel; label: string; desc: string; color: string;
+  channel: Channel; label: string; desc: string; color: string; pct: number;
 }> = [
-  { channel: "OOH",  label: "OOH (Print)",    desc: "Posters, Billboards, Table Tents, Stickers, etc.", color: "bg-green-600" },
-  { channel: "DOOH", label: "DOOH (Screens)", desc: "Digital Screens, TV, LED Displays",                color: "bg-blue-500" },
-  { channel: "AOOH", label: "AOOH (Audio)",   desc: "In-store Audio Ads, Announcements",                color: "bg-red-500" },
+  { channel: "OOH",  label: "OOH (Print)",    desc: "Posters, Billboards, Table Tents, Stickers, etc.", color: "bg-green-600", pct: 0 },
+  { channel: "DOOH", label: "DOOH (Screens)", desc: "Digital Screens, TV, LED Displays",                color: "bg-blue-500",  pct: 0 },
+  { channel: "AOOH", label: "AOOH (Audio)",   desc: "In-store Audio Ads, Announcements",                color: "bg-red-500",   pct: 0 },
 ];
 
 // Built from real DB data; populated by callers.
