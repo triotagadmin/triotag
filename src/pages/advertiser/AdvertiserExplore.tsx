@@ -322,6 +322,7 @@ export default function AdvertiserExplore() {
           </div>
         </section>
       </main>
+      </div>
     </div>
   );
 }
