@@ -144,7 +144,7 @@ export async function fetchLandingTotals(): Promise<{ approvedSpaces: number; ac
   const [{ count: approvedSpaces }, spacesRes, campaignsRes] = await Promise.all([
     supabase.from("ad_spaces").select("id", { count: "exact", head: true }).eq("approval_status", "approved"),
     supabase.from("ad_spaces").select("publisher_id").eq("approval_status", "approved"),
-    supabase.from("activations").select("id", { count: "exact", head: true }).eq("status", "active" as any),
+    supabase.from("activations").select("id", { count: "exact", head: true }).in("status", ["approved", "printing", "completed"] as any),
   ]);
   const publishers = new Set<string>();
   for (const r of (spacesRes.data ?? []) as any[]) if (r.publisher_id) publishers.add(r.publisher_id);
