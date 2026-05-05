@@ -88,8 +88,10 @@ export default function AdvertiserExplore() {
   );
 
   return (
-    <div className="min-h-screen flex bg-white text-gray-900 font-sans">
-      <AdvertiserSidebar />
+    <div className="min-h-screen bg-white text-gray-900 font-sans">
+      <Navigation />
+      <div className="flex">
+        <AdvertiserSidebar />
 
       <main className="flex-1 min-w-0">
         {/* Top bar */}
