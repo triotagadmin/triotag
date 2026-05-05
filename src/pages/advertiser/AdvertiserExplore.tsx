@@ -127,7 +127,7 @@ export default function AdvertiserExplore() {
           <div className="flex items-center gap-3 mt-5 flex-wrap">
             <Select defaultValue="all">
               <SelectTrigger className="w-40 h-10 bg-white border-gray-200 rounded-lg"><SelectValue placeholder="Media Type" /></SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[1000]">
                 <SelectItem value="all">Media Type: All</SelectItem>
                 <SelectItem value="ooh">OOH</SelectItem>
                 <SelectItem value="dooh">DOOH</SelectItem>
@@ -136,7 +136,7 @@ export default function AdvertiserExplore() {
             </Select>
             <Select defaultValue="all">
               <SelectTrigger className="w-44 h-10 bg-white border-gray-200 rounded-lg"><SelectValue placeholder="Venue Type" /></SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[1000]">
                 <SelectItem value="all">Venue Type: All</SelectItem>
                 <SelectItem value="cafes">Cafés & Coffee Shops</SelectItem>
                 <SelectItem value="retail">Retail Stores</SelectItem>
@@ -147,7 +147,7 @@ export default function AdvertiserExplore() {
             </Select>
             <Select defaultValue="all">
               <SelectTrigger className="w-40 h-10 bg-white border-gray-200 rounded-lg"><SelectValue placeholder="Audience" /></SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[1000]">
                 <SelectItem value="all">Audience: All</SelectItem>
                 <SelectItem value="prof">Professionals</SelectItem>
                 <SelectItem value="stud">Students</SelectItem>
@@ -157,7 +157,7 @@ export default function AdvertiserExplore() {
             </Select>
             <Select defaultValue="any">
               <SelectTrigger className="w-44 h-10 bg-white border-gray-200 rounded-lg"><SelectValue placeholder="Reach (Daily)" /></SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[1000]">
                 <SelectItem value="any">Reach: Any</SelectItem>
                 <SelectItem value="10k">10K+</SelectItem>
                 <SelectItem value="50k">50K+</SelectItem>
