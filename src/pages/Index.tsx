@@ -34,126 +34,128 @@ import {
 } from "lucide-react";
 
 /* --------------------------------- HERO --------------------------------- */
-const Hero = () => (
-  <section className="relative bg-[#0c0c0c] text-white overflow-hidden">
-    <div className="absolute inset-0 opacity-30">
-      <img
-        src="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=1920&q=80"
-        alt=""
-        className="w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/40" />
-    </div>
-    <div className="absolute inset-0 bg-grid-dark opacity-40 pointer-events-none" />
+import { useEffect } from "react";
+import { fetchLandingTotals } from "@/lib/inventoryAggregation";
 
-    <div className="container mx-auto px-4 md:px-6 py-16 md:py-24 lg:py-32 relative grid lg:grid-cols-2 gap-12 items-center">
-      <div className="space-y-6">
-        <span className="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase text-green-500 bg-green-500/10 border border-green-500/30 rounded-full">
-          Retail Media Supply Platform
-        </span>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1]">
-          Retail Media Inventory for{" "}
-          <span className="text-green-500">OOH</span>,{" "}
-          <span className="text-green-500">DOOH</span>, and{" "}
-          <span className="text-green-500">AOOH</span>
-        </h1>
-        <p className="text-lg text-zinc-400 max-w-xl leading-relaxed">
-          Triotag connects brands with high-intent shoppers through retail media inventory across physical, digital, and audio formats.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Link to="/list-space">
-            <Button variant="default" size="lg" className="w-full sm:w-auto">
-              Become a Retail Media Partner <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link to="/campaign-submit">
-            <Button variant="outline" size="lg" className="w-full sm:w-auto">
-              Request Inventory Access
-            </Button>
-          </Link>
-        </div>
+const Hero = () => {
+  const [totals, setTotals] = useState<{ approvedSpaces: number | null; activeVenues: number | null; activeCampaigns: number | null }>({
+    approvedSpaces: null, activeVenues: null, activeCampaigns: null,
+  });
+  useEffect(() => {
+    fetchLandingTotals().then((t) => setTotals(t));
+  }, []);
+  const fmt = (v: number | null) => (v === null ? "—" : v.toLocaleString());
 
-        <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
-          {[
-            { stat: "3X", label: "Closer to purchase decisions" },
-            { stat: "High", label: "Engagement in retail environments" },
-            { stat: "New", label: "Revenue stream for retailers" },
-          ].map((s) => (
-            <div key={s.label}>
-              <div className="text-2xl md:text-3xl font-extrabold text-green-500">{s.stat}</div>
-              <div className="text-xs md:text-sm text-zinc-400 mt-1">{s.label}</div>
-            </div>
-          ))}
-        </div>
+  return (
+    <section className="relative bg-[#0c0c0c] text-white overflow-hidden">
+      <div className="absolute inset-0 opacity-30">
+        <img
+          src="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=1920&q=80"
+          alt=""
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/40" />
       </div>
+      <div className="absolute inset-0 bg-grid-dark opacity-40 pointer-events-none" />
 
-      {/* Dashboard mockup */}
-      <div className="relative">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur shadow-2xl">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <div className="text-xs text-zinc-400 uppercase tracking-wider">Overview</div>
-              <div className="text-lg font-bold text-white">Campaign Performance</div>
-            </div>
-            <span className="px-2 py-1 text-[10px] font-semibold rounded-full bg-green-500/20 text-green-400">LIVE</span>
+      <div className="container mx-auto px-4 md:px-6 py-16 md:py-24 lg:py-32 relative grid lg:grid-cols-2 gap-12 items-center">
+        <div className="space-y-6">
+          <span className="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase text-green-500 bg-green-500/10 border border-green-500/30 rounded-full">
+            Retail Media Supply Platform
+          </span>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1]">
+            Retail Media Inventory for{" "}
+            <span className="text-green-500">OOH</span>,{" "}
+            <span className="text-green-500">DOOH</span>, and{" "}
+            <span className="text-green-500">AOOH</span>
+          </h1>
+          <p className="text-lg text-zinc-400 max-w-xl leading-relaxed">
+            Triotag connects brands with high-intent shoppers through retail media inventory across physical, digital, and audio formats.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link to="/list-space">
+              <Button variant="default" size="lg" className="w-full sm:w-auto">
+                Become a Retail Media Partner <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to="/campaign-submit">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                Request Inventory Access
+              </Button>
+            </Link>
           </div>
-          <div className="grid grid-cols-2 gap-3 mb-5">
+
+          <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
             {[
-              { label: "Total Impressions", value: "2.4M", icon: BarChart3 },
-              { label: "Active Campaigns", value: "128", icon: Target },
-              { label: "Retail Partners", value: "342", icon: Store },
-              { label: "Revenue", value: "₱18.6M", icon: DollarSign },
-            ].map((m) => {
-              const I = m.icon;
-              return (
-                <div key={m.label} className="bg-black/40 border border-white/10 rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <I className="w-3.5 h-3.5 text-green-500" />
-                    <span className="text-[10px] text-zinc-400 uppercase">{m.label}</span>
-                  </div>
-                  <div className="text-lg font-bold text-white">{m.value}</div>
-                </div>
-              );
-            })}
-          </div>
-          {/* Mini chart */}
-          <div className="bg-black/40 border border-white/10 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-zinc-400">Last 7 days</span>
-              <span className="text-xs text-green-500 font-semibold">+24.5%</span>
-            </div>
-            <div className="flex items-end gap-1.5 h-20">
-              {[40, 65, 50, 78, 60, 88, 95].map((h, i) => (
-                <div key={i} className="flex-1 bg-gradient-to-t from-green-600 to-green-400 rounded-t" style={{ height: `${h}%` }} />
-              ))}
-            </div>
+              { stat: "3X", label: "Closer to purchase decisions" },
+              { stat: "High", label: "Engagement in retail environments" },
+              { stat: "New", label: "Revenue stream for retailers" },
+            ].map((s) => (
+              <div key={s.label}>
+                <div className="text-2xl md:text-3xl font-extrabold text-green-500">{s.stat}</div>
+                <div className="text-xs md:text-sm text-zinc-400 mt-1">{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="absolute -top-4 -right-4 w-24 h-24 bg-green-500/20 rounded-full blur-2xl" />
-        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-green-600/20 rounded-full blur-2xl" />
+
+        {/* Dashboard mockup */}
+        <div className="relative">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur shadow-2xl">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <div className="text-xs text-zinc-400 uppercase tracking-wider">Overview</div>
+                <div className="text-lg font-bold text-white">Network Snapshot</div>
+              </div>
+              <span className="px-2 py-1 text-[10px] font-semibold rounded-full bg-green-500/20 text-green-400">LIVE</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              {[
+                { label: "Ad Spaces", value: fmt(totals.approvedSpaces), icon: BarChart3 },
+                { label: "Active Campaigns", value: fmt(totals.activeCampaigns), icon: Target },
+                { label: "Retail Partners", value: fmt(totals.activeVenues), icon: Store },
+                { label: "Reach (Daily)", value: "—", icon: TrendingUp },
+              ].map((m) => {
+                const I = m.icon;
+                return (
+                  <div key={m.label} className="bg-black/40 border border-white/10 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <I className="w-3.5 h-3.5 text-green-500" />
+                      <span className="text-[10px] text-zinc-400 uppercase">{m.label}</span>
+                    </div>
+                    <div className="text-lg font-bold text-white">{m.value}</div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Mini chart — illustrative only */}
+            <div className="bg-black/40 border border-white/10 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-zinc-400">Last 7 days</span>
+                <span className="text-xs text-green-500 font-semibold">—</span>
+              </div>
+              <div className="flex items-end gap-1.5 h-20">
+                {[40, 65, 50, 78, 60, 88, 95].map((h, i) => (
+                  <div key={i} className="flex-1 bg-gradient-to-t from-green-600 to-green-400 rounded-t opacity-60" style={{ height: `${h}%` }} />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="absolute -top-4 -right-4 w-24 h-24 bg-green-500/20 rounded-full blur-2xl" />
+          <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-green-600/20 rounded-full blur-2xl" />
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* ------------------------------- LOGO STRIP ------------------------------ */
 const LogoStrip = () => (
   <section className="bg-white py-10 border-b border-zinc-100">
     <div className="container mx-auto px-4 md:px-6">
-      <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-        <p className="text-sm text-zinc-500 font-medium lg:w-64 shrink-0">
-          Trusted by leading retailers and brands
-        </p>
-        <div className="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
-          {["7-Eleven", "Robinsons Retail", "Puregold", "Watsons", "SM Supermarket", "AllDay Supermarket"].map(
-            (n) => (
-              <span key={n} className="text-zinc-400 font-bold text-base md:text-lg tracking-tight">
-                {n}
-              </span>
-            )
-          )}
-        </div>
-      </div>
+      <p className="text-center text-sm text-zinc-500 font-medium">
+        Trusted by leading retailers and brands
+      </p>
     </div>
   </section>
 );
