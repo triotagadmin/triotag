@@ -39,12 +39,6 @@ export function AdvertiserSidebar() {
   return (
     <>
       <aside className="hidden lg:flex flex-col w-64 bg-[#0c0c0c] text-white min-h-screen sticky top-0">
-        <div className="px-6 py-5 border-b border-white/10 flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center">
-            <ChevronRight className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-bold text-lg tracking-tight">Triotag</span>
-        </div>
 
         <nav className="flex-1 py-4 px-3 space-y-1">
           {items.map((it) => {
