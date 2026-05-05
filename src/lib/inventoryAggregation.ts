@@ -154,3 +154,64 @@ export async function fetchLandingTotals(): Promise<{ approvedSpaces: number; ac
     activeCampaigns: campaignsRes.count ?? 0,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Compatibility shims for pages still using legacy imports.
+// These intentionally return EMPTY/STATIC labels with NO hardcoded counts.
+// ---------------------------------------------------------------------------
+
+export interface AreaSummary {
+  name: string;
+  description: string;
+  traffic: "High" | "Medium" | "Low";
+  reachDaily: number | null;
+  activeVenues: number;
+  inventory: number;
+  photo: string;
+}
+
+// Display labels only — no pct/spaces hardcoded.
+export const MEDIA_TYPE_BREAKDOWN: Array<{
+  channel: Channel; label: string; desc: string; color: string;
+}> = [
+  { channel: "OOH",  label: "OOH (Print)",    desc: "Posters, Billboards, Table Tents, Stickers, etc.", color: "bg-green-600" },
+  { channel: "DOOH", label: "DOOH (Screens)", desc: "Digital Screens, TV, LED Displays",                color: "bg-blue-500" },
+  { channel: "AOOH", label: "AOOH (Audio)",   desc: "In-store Audio Ads, Announcements",                color: "bg-red-500" },
+];
+
+// Built from real DB data; populated by callers.
+export const VENUE_TYPE_BREAKDOWN: Array<{ name: string; emoji: string; pct: number; spaces: number }> = [];
+
+export const SEED_CITIES: CityMarker[] = [];
+
+export async function fetchLiveCityCounts(): Promise<Record<string, number>> {
+  const spaces = await fetchApprovedSpaces();
+  const out: Record<string, number> = {};
+  for (const s of spaces) {
+    const c = detectCity(s.location);
+    if (c) out[c] = (out[c] ?? 0) + 1;
+  }
+  return out;
+}
+
+export function getCity(slug: string): CityMarker | undefined {
+  const name = findCityBySlug(slug);
+  if (!name) return undefined;
+  const meta = CITY_COORDS[name];
+  return {
+    city: name,
+    country: meta.country,
+    lat: meta.lat,
+    lng: meta.lng,
+    flag: meta.flag,
+    region: meta.region ?? "",
+    timezone: meta.timezone ?? "",
+    currency: meta.currency ?? "",
+    inventory: 0,
+    activeVenues: 0,
+    reachDaily: null,
+  };
+}
+
+export function getAreasForCity(_city: string): AreaSummary[] { return []; }
+export function getArea(_citySlug: string, _areaSlug: string): { city: CityMarker; area: AreaSummary } | undefined { return undefined; }
