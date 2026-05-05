@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AdvertiserSidebar } from "@/components/advertiser/AdvertiserSidebar";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -87,8 +88,10 @@ export default function AdvertiserExplore() {
   );
 
   return (
-    <div className="min-h-screen flex bg-white text-gray-900 font-sans">
-      <AdvertiserSidebar />
+    <div className="min-h-screen bg-white text-gray-900 font-sans">
+      <Navigation />
+      <div className="flex">
+        <AdvertiserSidebar />
 
       <main className="flex-1 min-w-0">
         {/* Top bar */}
@@ -319,6 +322,7 @@ export default function AdvertiserExplore() {
           </div>
         </section>
       </main>
+      </div>
     </div>
   );
 }
