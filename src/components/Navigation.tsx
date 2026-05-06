@@ -21,7 +21,7 @@ const INVENTORY_LINK: NavLinkDef = { label: "Inventory", to: "/advertiser/explor
 
 const PUBLIC_LINKS: NavLinkDef[] = [
   { label: "Home", to: "/" },
-  { label: "For Retailers", to: "/list-space" },
+  { label: "For Retailers", to: "/#for-retailers" },
   { label: "For Advertisers", to: "/campaign-submit" },
   INVENTORY_LINK,
   { label: "Resources", to: "/insights" },
@@ -30,11 +30,15 @@ const PUBLIC_LINKS: NavLinkDef[] = [
 
 const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
   if (!loggedIn) return PUBLIC_LINKS;
+  const retailerLink: NavLinkDef =
+    role === "publisher"
+      ? { label: "For Retailers", to: "/retailer/dashboard" }
+      : { label: "For Retailers", to: "/#for-retailers" };
   switch (role) {
     case "advertiser":
       return [
         { label: "Home", to: "/" },
-        { label: "For Retailers", to: "/list-space" },
+        retailerLink,
         { label: "For Advertisers", to: "/campaign-submit" },
         INVENTORY_LINK,
         { label: "Resources", to: "/insights" },
@@ -43,7 +47,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
     case "publisher":
       return [
         { label: "Home", to: "/" },
-        { label: "For Retailers", to: "/list-space" },
+        retailerLink,
         { label: "For Advertisers", to: "/campaign-submit" },
         INVENTORY_LINK,
         { label: "Resources", to: "/insights" },
@@ -52,7 +56,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
     case "print_partner":
       return [
         { label: "Home", to: "/" },
-        { label: "For Retailers", to: "/list-space" },
+        retailerLink,
         INVENTORY_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
