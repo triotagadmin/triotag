@@ -1221,6 +1221,112 @@ export type Database = {
         }
         Relationships: []
       }
+      dooh_play_logs: {
+        Row: {
+          ad_space_id: string | null
+          completed: boolean
+          creative_source: string
+          duration_sec: number | null
+          id: string
+          played_at: string
+          player_session_id: string | null
+          source_id: string | null
+        }
+        Insert: {
+          ad_space_id?: string | null
+          completed?: boolean
+          creative_source?: string
+          duration_sec?: number | null
+          id?: string
+          played_at?: string
+          player_session_id?: string | null
+          source_id?: string | null
+        }
+        Update: {
+          ad_space_id?: string | null
+          completed?: boolean
+          creative_source?: string
+          duration_sec?: number | null
+          id?: string
+          played_at?: string
+          player_session_id?: string | null
+          source_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dooh_play_logs_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dooh_play_logs_player_session_id_fkey"
+            columns: ["player_session_id"]
+            isOneToOne: false
+            referencedRelation: "dooh_player_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dooh_player_sessions: {
+        Row: {
+          access_token: string
+          ad_space_id: string | null
+          created_at: string
+          id: string
+          is_online: boolean
+          label: string | null
+          last_active_at: string | null
+          resolution: string | null
+          venue_id: string | null
+        }
+        Insert: {
+          access_token?: string
+          ad_space_id?: string | null
+          created_at?: string
+          id?: string
+          is_online?: boolean
+          label?: string | null
+          last_active_at?: string | null
+          resolution?: string | null
+          venue_id?: string | null
+        }
+        Update: {
+          access_token?: string
+          ad_space_id?: string | null
+          created_at?: string
+          id?: string
+          is_online?: boolean
+          label?: string | null
+          last_active_at?: string | null
+          resolution?: string | null
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dooh_player_sessions_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dooh_player_sessions_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dooh_player_sessions_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_purchases: {
         Row: {
           buyer_email: string
@@ -1564,6 +1670,89 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      house_ad_schedules: {
+        Row: {
+          ad_space_id: string
+          created_at: string
+          creative_id: string
+          dayparts: Json
+          end_date: string | null
+          id: string
+          media_type: string
+          play_count: number
+          player_session_id: string | null
+          priority: number
+          publisher_id: string
+          start_date: string
+          status: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          ad_space_id: string
+          created_at?: string
+          creative_id: string
+          dayparts?: Json
+          end_date?: string | null
+          id?: string
+          media_type: string
+          play_count?: number
+          player_session_id?: string | null
+          priority?: number
+          publisher_id: string
+          start_date?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ad_space_id?: string
+          created_at?: string
+          creative_id?: string
+          dayparts?: Json
+          end_date?: string | null
+          id?: string
+          media_type?: string
+          play_count?: number
+          player_session_id?: string | null
+          priority?: number
+          publisher_id?: string
+          start_date?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_ad_schedules_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_ad_schedules_creative_id_fkey"
+            columns: ["creative_id"]
+            isOneToOne: false
+            referencedRelation: "retailer_creatives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_ad_schedules_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_ad_schedules_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       issue_reports: {
         Row: {
@@ -2615,6 +2804,192 @@ export type Database = {
           short_code?: string
         }
         Relationships: []
+      }
+      retailer_audience_data: {
+        Row: {
+          age_ranges: Json
+          created_at: string
+          daily_visitors: number | null
+          demographics: Json
+          gender_split: Json
+          id: string
+          peak_hours: Json
+          publisher_id: string
+          updated_at: string
+          visibility_score: number
+        }
+        Insert: {
+          age_ranges?: Json
+          created_at?: string
+          daily_visitors?: number | null
+          demographics?: Json
+          gender_split?: Json
+          id?: string
+          peak_hours?: Json
+          publisher_id: string
+          updated_at?: string
+          visibility_score?: number
+        }
+        Update: {
+          age_ranges?: Json
+          created_at?: string
+          daily_visitors?: number | null
+          demographics?: Json
+          gender_split?: Json
+          id?: string
+          peak_hours?: Json
+          publisher_id?: string
+          updated_at?: string
+          visibility_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retailer_audience_data_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: true
+            referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retailer_audience_data_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: true
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retailer_creatives: {
+        Row: {
+          aspect_ratio: string | null
+          created_at: string
+          creative_type: string
+          description: string | null
+          duration_sec: number | null
+          file_format: string | null
+          file_name: string | null
+          file_size_bytes: number | null
+          file_url: string
+          height_px: number | null
+          id: string
+          last_deployed_at: string | null
+          publisher_id: string
+          status: string
+          tags: Json
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          used_in_count: number
+          width_px: number | null
+        }
+        Insert: {
+          aspect_ratio?: string | null
+          created_at?: string
+          creative_type: string
+          description?: string | null
+          duration_sec?: number | null
+          file_format?: string | null
+          file_name?: string | null
+          file_size_bytes?: number | null
+          file_url: string
+          height_px?: number | null
+          id?: string
+          last_deployed_at?: string | null
+          publisher_id: string
+          status?: string
+          tags?: Json
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          used_in_count?: number
+          width_px?: number | null
+        }
+        Update: {
+          aspect_ratio?: string | null
+          created_at?: string
+          creative_type?: string
+          description?: string | null
+          duration_sec?: number | null
+          file_format?: string | null
+          file_name?: string | null
+          file_size_bytes?: number | null
+          file_url?: string
+          height_px?: number | null
+          id?: string
+          last_deployed_at?: string | null
+          publisher_id?: string
+          status?: string
+          tags?: Json
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          used_in_count?: number
+          width_px?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retailer_creatives_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retailer_creatives_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retailer_payout_details: {
+        Row: {
+          account_name: string | null
+          account_number: string | null
+          bank_name: string | null
+          created_at: string
+          id: string
+          publisher_id: string
+          revenue_share_pct: number
+          updated_at: string
+        }
+        Insert: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          publisher_id: string
+          revenue_share_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          publisher_id?: string
+          revenue_share_pct?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retailer_payout_details_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: true
+            referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retailer_payout_details_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: true
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       talent_bookings: {
         Row: {
