@@ -21,7 +21,7 @@ const INVENTORY_LINK: NavLinkDef = { label: "Inventory", to: "/advertiser/explor
 
 const PUBLIC_LINKS: NavLinkDef[] = [
   { label: "Home", to: "/" },
-  { label: "For Retailers", to: "/list-space" },
+  { label: "For Retailers", to: "/#for-retailers" },
   { label: "For Advertisers", to: "/campaign-submit" },
   INVENTORY_LINK,
   { label: "Resources", to: "/insights" },
@@ -30,11 +30,15 @@ const PUBLIC_LINKS: NavLinkDef[] = [
 
 const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
   if (!loggedIn) return PUBLIC_LINKS;
+  const retailerLink: NavLinkDef =
+    role === "publisher"
+      ? { label: "For Retailers", to: "/retailer/dashboard" }
+      : { label: "For Retailers", to: "/#for-retailers" };
   switch (role) {
     case "advertiser":
       return [
         { label: "Home", to: "/" },
-        { label: "For Retailers", to: "/list-space" },
+        retailerLink,
         { label: "For Advertisers", to: "/campaign-submit" },
         INVENTORY_LINK,
         { label: "Resources", to: "/insights" },
@@ -43,7 +47,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
     case "publisher":
       return [
         { label: "Home", to: "/" },
-        { label: "For Retailers", to: "/list-space" },
+        retailerLink,
         { label: "For Advertisers", to: "/campaign-submit" },
         INVENTORY_LINK,
         { label: "Resources", to: "/insights" },
@@ -52,7 +56,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
     case "print_partner":
       return [
         { label: "Home", to: "/" },
-        { label: "For Retailers", to: "/list-space" },
+        retailerLink,
         INVENTORY_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
@@ -212,25 +216,36 @@ export const Navigation = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-56 bg-white border border-gray-100 rounded-xl shadow-lg p-2"
+                  className="w-60 rounded-xl shadow-2xl p-2 border border-white/10 backdrop-blur-md"
+                  style={{ background: "rgba(17,17,17,0.92)" }}
                 >
                   <DropdownMenuLabel className="px-2 pt-1 pb-2">
-                    <div className="text-sm font-bold text-zinc-900 truncate">{userName}</div>
+                    <div className="text-sm font-semibold text-white truncate">{userName}</div>
                     {userRole && (
-                      <span className="inline-block mt-1 px-2 py-0.5 text-[11px] rounded-full bg-green-100 text-green-700 font-medium">
+                      <span
+                        className="inline-block mt-1.5 px-2 py-0.5 text-[11px] rounded-full font-semibold"
+                        style={{ background: "rgba(34,197,94,0.18)", color: "#22C55E" }}
+                      >
                         {ROLE_LABEL[userRole] || userRole}
                       </span>
                     )}
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator className="bg-white/10" />
                   {menu.map((m) => (
-                    <DropdownMenuItem key={m.label} onClick={() => navigate(m.to)} className="cursor-pointer">
-                      <UserIcon className="w-4 h-4 mr-2 text-zinc-500" />
+                    <DropdownMenuItem
+                      key={m.label}
+                      onClick={() => navigate(m.to)}
+                      className="cursor-pointer text-zinc-100 font-medium focus:bg-white/10 focus:text-white"
+                    >
+                      <UserIcon className="w-4 h-4 mr-2 text-zinc-300" />
                       {m.label}
                     </DropdownMenuItem>
                   ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="text-red-600 cursor-pointer focus:text-red-600">
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="text-red-400 cursor-pointer font-medium focus:text-red-300 focus:bg-white/10"
+                  >
                     <LogOut className="w-4 h-4 mr-2" /> Log Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>

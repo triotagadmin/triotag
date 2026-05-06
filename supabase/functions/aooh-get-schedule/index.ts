@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
         && (!a.aooh_campaigns.end_date || a.aooh_campaigns.end_date >= today))
       .map((a: any) => ({
         aooh_campaign_id: a.aooh_campaign_id,
+        source: "paid",
         campaign_name: a.aooh_campaigns.campaign_name,
         audio_file_url: a.aooh_campaigns.audio_file_url,
         audio_duration_sec: a.aooh_campaigns.audio_duration_sec,
@@ -43,7 +44,26 @@ Deno.serve(async (req) => {
         dayparts: a.dayparts,
       }));
 
-    return new Response(JSON.stringify({ session: { id: session.id, label: session.label, venue_id: session.venue_id, ad_space_id: session.ad_space_id }, schedule }), {
+    // Fill empty slots with active house ads (paid always wins; house only fills empties)
+    const { data: houseRows } = await supabase
+      .from("house_ad_schedules")
+      .select("id, title, dayparts, retailer_creatives!inner(file_url, duration_sec, creative_type)")
+      .eq("ad_space_id", session.ad_space_id)
+      .eq("media_type", "aooh")
+      .eq("status", "active")
+      .lte("start_date", today);
+    const house = (houseRows || [])
+      .filter((r: any) => !r.end_date || r.end_date >= today)
+      .map((r: any) => ({
+        source: "house",
+        schedule_id: r.id,
+        campaign_name: r.title,
+        audio_file_url: r.retailer_creatives.file_url,
+        audio_duration_sec: r.retailer_creatives.duration_sec || 30,
+        dayparts: r.dayparts,
+      }));
+
+    return new Response(JSON.stringify({ session: { id: session.id, label: session.label, venue_id: session.venue_id, ad_space_id: session.ad_space_id }, schedule: [...schedule, ...house] }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {

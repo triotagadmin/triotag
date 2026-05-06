@@ -78,6 +78,16 @@ import AOOHPlayer from "./pages/player/AOOHPlayer";
 import TalentProfileSubmission from "./pages/TalentProfileSubmission";
 import TalentDashboard from "./pages/TalentDashboard";
 import BookTalent from "./pages/BookTalent";
+import RetailerDashboard from "./pages/retailer/RetailerDashboard";
+import CreativeLibrary from "./pages/retailer/CreativeLibrary";
+import HouseAds from "./pages/retailer/HouseAds";
+import CampaignCalendar from "./pages/retailer/CampaignCalendar";
+import Inventory from "./pages/retailer/Inventory";
+import BookingRequests from "./pages/retailer/BookingRequests";
+import AudienceInsights from "./pages/retailer/AudienceInsights";
+import Revenue from "./pages/retailer/Revenue";
+import ScreenMonitor from "./pages/retailer/ScreenMonitor";
+import RetailerSettings from "./pages/retailer/RetailerSettings";
 
 const queryClient = new QueryClient();
 
@@ -195,6 +205,17 @@ const App = () => (
           <Route path="/advertiser/campaigns/aooh/:id" element={<RoleProtectedRoute requireAuth><AOOHCampaignReport /></RoleProtectedRoute>} />
           {/* AOOH player (token-based public) */}
           <Route path="/player/audio" element={<AOOHPlayer />} />
+          {/* Retailer Portal — publisher only, all guarded inside RetailerLayout */}
+          <Route path="/retailer/dashboard" element={<RetailerDashboard />} />
+          <Route path="/retailer/creative-library" element={<CreativeLibrary />} />
+          <Route path="/retailer/house-ads" element={<HouseAds />} />
+          <Route path="/retailer/campaign-calendar" element={<CampaignCalendar />} />
+          <Route path="/retailer/inventory" element={<Inventory />} />
+          <Route path="/retailer/booking-requests" element={<BookingRequests />} />
+          <Route path="/retailer/audience-insights" element={<AudienceInsights />} />
+          <Route path="/retailer/revenue" element={<Revenue />} />
+          <Route path="/retailer/screen-monitor" element={<ScreenMonitor />} />
+          <Route path="/retailer/settings" element={<RetailerSettings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

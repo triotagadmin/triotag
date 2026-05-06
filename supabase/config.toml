@@ -73,3 +73,13 @@ verify_jwt = false
 
 [functions.aooh-get-schedule]
 verify_jwt = false
+
+[functions.dooh-get-schedule]
+verify_jwt = false
+
+[functions.deploy-creative]
+verify_jwt = false
+
+[functions.respond-booking-request]
+verify_jwt = false
+
