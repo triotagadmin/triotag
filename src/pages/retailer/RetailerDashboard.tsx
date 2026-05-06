@@ -36,7 +36,7 @@ const RetailerDashboard = () => {
   useEffect(() => {
     if (!pubId) return;
     (async () => {
-      const { data: spaceRows } = await supabase.from("ad_spaces").select("id, title, location, ad_format").eq("publisher_id", pubId);
+      const { data: spaceRows } = await supabase.from("ad_spaces").select("id, title, location").eq("publisher_id", pubId);
       const ids = (spaceRows || []).map((s) => s.id);
       const today = new Date(); today.setHours(0, 0, 0, 0);
 

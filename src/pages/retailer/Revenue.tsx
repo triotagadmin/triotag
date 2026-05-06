@@ -10,7 +10,7 @@ const Revenue = () => {
   useEffect(() => {
     if (!pubId) return;
     (async () => {
-      const { data: spaces } = await supabase.from("ad_spaces").select("id, title, ad_format").eq("publisher_id", pubId);
+      const { data: spaces } = await supabase.from("ad_spaces").select("id, title").eq("publisher_id", pubId);
       const ids = (spaces || []).map((s) => s.id);
       if (ids.length) {
         const { data } = await supabase.from("activations").select("*").in("ad_space_id", ids).in("status", ["approved", "completed", "printing"] as any);

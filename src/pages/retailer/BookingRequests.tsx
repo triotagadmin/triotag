@@ -12,7 +12,7 @@ const BookingRequests = () => {
 
   const load = async () => {
     if (!pubId) return;
-    const { data: spaces } = await supabase.from("ad_spaces").select("id, title, ad_format, location").eq("publisher_id", pubId);
+    const { data: spaces } = await supabase.from("ad_spaces").select("id, title, location").eq("publisher_id", pubId);
     const ids = (spaces || []).map((s) => s.id);
     if (!ids.length) return setItems([]);
     const statusMap: any = { pending: "pending_publisher_approval", approved: "approved", rejected: "rejected" };
