@@ -26,10 +26,16 @@ export default function RetailerCampaigns() {
       if (!pub) { setLoading(false); return; }
       const { data } = await supabase
         .from("activations")
-        .select("id, status, start_date, end_date, estimated_publisher_payout, advertiser_id, ad_spaces(title, location), advertiser_profiles!activations_advertiser_id_fkey(company_name)")
+        .select("id, status, start_date, end_date, estimated_publisher_payout, advertiser_id, ad_spaces(title, location)")
         .eq("publisher_id", pub.id)
         .order("created_at", { ascending: false });
-      setRows(data || []);
+      const advIds = Array.from(new Set((data || []).map((d: any) => d.advertiser_id).filter(Boolean)));
+      let advMap: Record<string, string> = {};
+      if (advIds.length) {
+        const { data: advs } = await supabase.from("advertiser_profiles").select("user_id, company_name").in("user_id", advIds);
+        advMap = Object.fromEntries((advs || []).map((a: any) => [a.user_id, a.company_name]));
+      }
+      setRows((data || []).map((r: any) => ({ ...r, advertiser_name: advMap[r.advertiser_id] || "—" })));
       setLoading(false);
     })();
   }, []);
