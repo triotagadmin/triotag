@@ -96,6 +96,7 @@ export const RetailerLayout = ({ children, title }: { children: ReactNode; title
     { label: "Overview", to: "/retailer/dashboard", icon: Home },
     { label: "Creative Library", to: "/retailer/creative-library", icon: PlayCircle, badge: counts.creatives },
     { label: "House Ads", to: "/retailer/house-ads", icon: Megaphone, badge: counts.houseAds },
+    { label: "Campaigns", to: "/retailer/campaigns", icon: Megaphone },
     { label: "Campaign Calendar", to: "/retailer/campaign-calendar", icon: Calendar },
     { label: "My Inventory", to: "/retailer/inventory", icon: Grid3x3 },
     { label: "Booking Requests", to: "/retailer/booking-requests", icon: Inbox, badge: counts.pendingBookings, badgeColor: "bg-orange-500" },

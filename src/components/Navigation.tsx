@@ -85,13 +85,14 @@ const dropdownForRole = (role: Role): MenuItem[] => {
   switch (role) {
     case "advertiser": return [
       { label: "Dashboard", to: "/advertiser-dashboard" },
-      { label: "My Campaigns", to: "/advertiser-dashboard" },
+      { label: "My Campaigns", to: "/advertiser/campaigns" },
       { label: "Wallet", to: "/advertiser-settings" },
       { label: "Settings", to: "/advertiser-settings" },
     ];
     case "publisher": return [
       { label: "My Dashboard", to: "/venue-publishers" },
       { label: "My Ad Spaces", to: "/venue-inventory" },
+      { label: "Campaigns", to: "/publisher/campaigns" },
       { label: "Earnings", to: "/venue-publishers" },
       { label: "Settings", to: "/publisher/settings" },
     ];
@@ -104,6 +105,7 @@ const dropdownForRole = (role: Role): MenuItem[] => {
     ];
     case "talent": return [
       { label: "My Dashboard", to: "/talent-dashboard" },
+      { label: "My Campaigns", to: "/talent/campaigns" },
       { label: "Campaign Invites", to: "/talent-dashboard" },
       { label: "Submissions", to: "/talent-dashboard" },
       { label: "Earnings", to: "/talent-dashboard" },
@@ -111,6 +113,7 @@ const dropdownForRole = (role: Role): MenuItem[] => {
     ];
     case "admin": return [
       { label: "Admin Dashboard", to: "/admin/dashboard" },
+      { label: "All Campaigns", to: "/admin/campaigns" },
       { label: "Settings", to: "/admin/dashboard" },
     ];
     default: return [];
