@@ -206,20 +206,73 @@ export const Navigation = () => {
         </Link>
 
         <div className="hidden lg:flex items-center gap-1">
-          {links.map((l) => (
-            <Link
-              key={l.label}
-              to={l.to}
-              onClick={(e) => handleGatedClick(l, e)}
-              className={`px-3 py-2 text-sm transition-colors border-b-2 ${
-                isActive(l.to)
-                  ? "text-green-500 border-green-500"
-                  : "text-zinc-300 border-transparent hover:text-green-500"
-              }`}
-            >
-              {l.label}
-            </Link>
-          ))}
+          {user ? (
+            links.map((l) => (
+              <Link
+                key={l.label}
+                to={l.to}
+                onClick={(e) => handleGatedClick(l, e)}
+                className={`px-3 py-2 text-sm transition-colors border-b-2 ${
+                  isActive(l.to)
+                    ? "text-green-500 border-green-500"
+                    : "text-zinc-300 border-transparent hover:text-green-500"
+                }`}
+              >
+                {l.label}
+              </Link>
+            ))
+          ) : (
+            <>
+              {NAV_ITEMS.map((item) =>
+                item.children ? (
+                  <DropdownMenu key={item.label}>
+                    <DropdownMenuTrigger asChild>
+                      <button className="px-3 py-2 text-sm transition-colors border-b-2 border-transparent text-zinc-300 hover:text-green-500 inline-flex items-center gap-1 outline-none">
+                        {item.label}
+                        <ChevronDown className="w-3.5 h-3.5 transition-transform data-[state=open]:rotate-180" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="min-w-[12rem] rounded-xl shadow-2xl p-2 border border-white/10 bg-[#0c0c0c]"
+                    >
+                      {item.children.map((c) => (
+                        <DropdownMenuItem
+                          key={c.label}
+                          onClick={() => navigate(c.to)}
+                          className="cursor-pointer text-zinc-100 font-medium hover:text-green-400 hover:bg-white/5 focus:bg-white/5 focus:text-green-400"
+                        >
+                          {c.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Link
+                    key={item.label}
+                    to={item.to!}
+                    className={`px-3 py-2 text-sm transition-colors border-b-2 ${
+                      isActive(item.to!)
+                        ? "text-green-500 border-green-500"
+                        : "text-zinc-300 border-transparent hover:text-green-500"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              )}
+              <Link
+                to={INVENTORY_LINK.to}
+                className={`px-3 py-2 text-sm transition-colors border-b-2 ${
+                  isActive(INVENTORY_LINK.to)
+                    ? "text-green-500 border-green-500"
+                    : "text-zinc-300 border-transparent hover:text-green-500"
+                }`}
+              >
+                {INVENTORY_LINK.label}
+              </Link>
+            </>
+          )}
         </div>
 
         <div className="hidden lg:flex items-center gap-2">
@@ -307,18 +360,64 @@ export const Navigation = () => {
             </div>
           )}
           <div className="flex flex-col p-2">
-            {links.map((l) => (
-              <Link
-                key={l.label}
-                to={l.to}
-                onClick={(e) => { handleGatedClick(l, e); close(); }}
-                className={`px-3 py-3 text-sm rounded-md ${
-                  isActive(l.to) ? "text-green-500 bg-white/5" : "text-zinc-200 hover:bg-white/5 hover:text-green-500"
-                }`}
-              >
-                {l.label}
-              </Link>
-            ))}
+            {user ? (
+              links.map((l) => (
+                <Link
+                  key={l.label}
+                  to={l.to}
+                  onClick={(e) => { handleGatedClick(l, e); close(); }}
+                  className={`px-3 py-3 text-sm rounded-md ${
+                    isActive(l.to) ? "text-green-500 bg-white/5" : "text-zinc-200 hover:bg-white/5 hover:text-green-500"
+                  }`}
+                >
+                  {l.label}
+                </Link>
+              ))
+            ) : (
+              <>
+                {NAV_ITEMS.map((item) =>
+                  item.children ? (
+                    <div key={item.label}>
+                      <div className="text-xs text-zinc-400 uppercase tracking-wider px-3 pt-3 pb-1">
+                        {item.label}
+                      </div>
+                      {item.children.map((c) => (
+                        <Link
+                          key={c.label}
+                          to={c.to}
+                          onClick={close}
+                          className={`block pl-6 pr-3 py-2 text-sm rounded-md ${
+                            isActive(c.to) ? "text-green-500 bg-white/5" : "text-zinc-200 hover:bg-white/5 hover:text-green-500"
+                          }`}
+                        >
+                          {c.label}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <Link
+                      key={item.label}
+                      to={item.to!}
+                      onClick={close}
+                      className={`px-3 py-3 text-sm rounded-md ${
+                        isActive(item.to!) ? "text-green-500 bg-white/5" : "text-zinc-200 hover:bg-white/5 hover:text-green-500"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                )}
+                <Link
+                  to={INVENTORY_LINK.to}
+                  onClick={close}
+                  className={`px-3 py-3 text-sm rounded-md ${
+                    isActive(INVENTORY_LINK.to) ? "text-green-500 bg-white/5" : "text-zinc-200 hover:bg-white/5 hover:text-green-500"
+                  }`}
+                >
+                  {INVENTORY_LINK.label}
+                </Link>
+              </>
+            )}
             {user && menu.length > 0 && (
               <>
                 <div className="border-t border-white/10 my-2" />
