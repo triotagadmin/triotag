@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { Menu, X, TrendingUp, LogOut, User as UserIcon } from "lucide-react";
+import { Menu, X, TrendingUp, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MessengerBell } from "@/components/MessengerBell";
@@ -16,16 +16,35 @@ import { Badge } from "@/components/ui/badge";
 type Role = "advertiser" | "publisher" | "print_partner" | "talent" | "admin" | null;
 
 interface NavLinkDef { label: string; to: string; gated?: boolean; }
+interface NavItemDef { label: string; to?: string; children?: { label: string; to: string }[]; }
 
 const INVENTORY_LINK: NavLinkDef = { label: "Inventory", to: "/advertiser/explore" };
 
-const PUBLIC_LINKS: NavLinkDef[] = [
-  { label: "Home", to: "/" },
-  { label: "For Retailers", to: "/#for-retailers" },
-  { label: "For Advertisers", to: "/campaign-submit" },
-  INVENTORY_LINK,
-  { label: "Resources", to: "/insights" },
+const NAV_ITEMS: NavItemDef[] = [
+  {
+    label: "Industries",
+    children: [
+      { label: "Brands", to: "/industries/brands" },
+      { label: "Retailers", to: "/industries/retailers" },
+      { label: "Social", to: "/industries/social" },
+    ],
+  },
+  {
+    label: "Solutions",
+    children: [
+      { label: "OOH", to: "/solutions/ooh" },
+      { label: "DOOH", to: "/solutions/dooh" },
+      { label: "AOOH", to: "/solutions/aooh" },
+      { label: "Social", to: "/solutions/social" },
+      { label: "Media Truck", to: "/solutions/media-truck" },
+    ],
+  },
+  { label: "Insights", to: "/insights" },
   { label: "Company", to: "/contact" },
+];
+
+const PUBLIC_LINKS: NavLinkDef[] = [
+  INVENTORY_LINK,
 ];
 
 const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
