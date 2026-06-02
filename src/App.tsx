@@ -94,7 +94,6 @@ import RetailerCampaigns from "./pages/retailer/RetailerCampaigns";
 import VenueCampaigns from "./pages/VenueCampaigns";
 import TalentCampaigns from "./pages/talent/TalentCampaigns";
 import AdminCampaigns from "./pages/AdminCampaigns";
-import IndustriesSocial from "./pages/industries/Social";
 
 const queryClient = new QueryClient();
 
@@ -108,7 +107,6 @@ const App = () => (
         <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/industries/social" element={<IndustriesSocial />} />
           
           <Route path="/insights" element={<Insights />} />
           <Route path="/insights/:id" element={<BlogPost />} />
