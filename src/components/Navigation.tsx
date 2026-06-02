@@ -35,7 +35,7 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "OOH", to: "/solutions/ooh" },
       { label: "DOOH", to: "/solutions/dooh" },
       { label: "AOOH", to: "/solutions/aooh" },
-      { label: "Social", to: "/solutions/social" },
+      { label: "Social Video", to: "/solutions/social" },
       { label: "Media Truck", to: "/solutions/media-truck" },
     ],
   },
