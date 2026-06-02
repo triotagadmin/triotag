@@ -108,6 +108,7 @@ const App = () => (
         <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/industries/social" element={<IndustriesSocial />} />
           
           <Route path="/insights" element={<Insights />} />
           <Route path="/insights/:id" element={<BlogPost />} />
