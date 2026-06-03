@@ -26,7 +26,6 @@ const NAV_ITEMS: NavItemDef[] = [
     children: [
       { label: "Brands", to: "/industries/brands" },
       { label: "Retailers", to: "/industries/retailers" },
-      { label: "Social", to: "/industries/social" },
     ],
   },
   {
@@ -35,7 +34,6 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "OOH", to: "/solutions/ooh" },
       { label: "DOOH", to: "/solutions/dooh" },
       { label: "AOOH", to: "/solutions/aooh" },
-      { label: "Social", to: "/solutions/social" },
       { label: "Media Truck", to: "/solutions/media-truck" },
     ],
   },
