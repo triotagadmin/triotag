@@ -94,6 +94,10 @@ import RetailerCampaigns from "./pages/retailer/RetailerCampaigns";
 import VenueCampaigns from "./pages/VenueCampaigns";
 import TalentCampaigns from "./pages/talent/TalentCampaigns";
 import AdminCampaigns from "./pages/AdminCampaigns";
+import SolutionsOOH from "./pages/solutions/OOH";
+import SolutionsDOOH from "./pages/solutions/DOOH";
+import SolutionsAOOH from "./pages/solutions/AOOH";
+import SolutionsMediaTruck from "./pages/solutions/MediaTruck";
 
 const queryClient = new QueryClient();
 
@@ -229,6 +233,10 @@ const App = () => (
           <Route path="/venue/campaigns" element={<RoleProtectedRoute requireAuth><VenueCampaigns /></RoleProtectedRoute>} />
           <Route path="/talent/campaigns" element={<RoleProtectedRoute requireAuth><TalentCampaigns /></RoleProtectedRoute>} />
           <Route path="/admin/campaigns" element={<ProtectedAdminRoute><AdminCampaigns /></ProtectedAdminRoute>} />
+          <Route path="/solutions/ooh" element={<SolutionsOOH />} />
+          <Route path="/solutions/dooh" element={<SolutionsDOOH />} />
+          <Route path="/solutions/aooh" element={<SolutionsAOOH />} />
+          <Route path="/solutions/media-truck" element={<SolutionsMediaTruck />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

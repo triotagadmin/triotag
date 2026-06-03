@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Volume2,
   Monitor,
-  Sign,
   Megaphone,
   Star,
   Users,
