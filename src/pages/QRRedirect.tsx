@@ -63,8 +63,23 @@ const QRRedirect = () => {
           referrer: document.referrer || null
         });
 
+      // Block dangerous URL schemes to prevent XSS / malicious redirects
+      const dest = String(qrCode.destination_url || "");
+      const BLOCKED = /^(javascript|data|vbscript|file):/i;
+      let parsed: URL;
+      try {
+        parsed = new URL(dest);
+      } catch {
+        setError("Invalid destination URL");
+        return;
+      }
+      if (BLOCKED.test(dest) || !/^https?:$/i.test(parsed.protocol)) {
+        setError("Blocked URL scheme — only http(s) destinations are permitted");
+        return;
+      }
+
       // Redirect to destination
-      window.location.href = qrCode.destination_url;
+      window.location.href = dest;
     } catch (err) {
       console.error("Error processing QR redirect:", err);
       setError("An error occurred while processing the QR code");
