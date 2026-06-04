@@ -178,9 +178,9 @@ const Brands = () => {
               </h2>
               <p className="text-white/70 mb-8">
                 TrioTag gives brands direct access to hyper-local OOH, DOOH,
-                AOOH, and Social Video inventory — all from one platform. No
-                agencies. No middlemen. Browse available spaces, build your
-                campaign, and go live in days.
+                and AOOH inventory — all from one platform. No agencies. No
+                middlemen. Browse available spaces, build your campaign, and
+                go live in days.
               </p>
 
               <div className="space-y-4 mb-8">
