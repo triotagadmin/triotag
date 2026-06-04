@@ -39,20 +39,11 @@ const TicketValidation = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
-      // First, get the ticket and check ownership
-      const { data: ticket, error: ticketError } = await supabase
-        .from("venue_tickets")
-        .select(`
-          *,
-          venue_events (
-            title,
-            venues (
-              owner_id
-            )
-          )
-        `)
-        .eq("unique_code", uniqueCode)
-        .single();
+      // First, get the ticket via secure RPC (token-scoped by unique_code)
+      const { data: rpcRows, error: ticketError } = await supabase
+        .rpc("get_venue_ticket_by_code", { _unique_code: uniqueCode });
+
+      const ticket: any = Array.isArray(rpcRows) ? rpcRows[0] : null;
 
       if (ticketError || !ticket) {
         setResult({
@@ -63,7 +54,7 @@ const TicketValidation = () => {
       }
 
       // Check if current user is the venue owner
-      const venueOwnerId = ticket.venue_events?.venues?.owner_id;
+      const venueOwnerId = ticket.venue_owner_id;
       const isVenueOwner = session?.user?.id === venueOwnerId;
       setIsOwner(isVenueOwner);
 
