@@ -40,9 +40,9 @@ const Brands = () => {
               <span className="text-green-500">already are</span>
             </h1>
             <p className="text-lg text-white/70 mb-8 max-w-xl">
-              TrioTag is your one-stop platform for hyper-local OOH, DOOH, AOOH,
-              and Social Video campaigns across the Philippines. Browse, book,
-              and launch in days.
+              TrioTag is your one-stop platform for hyper-local OOH, DOOH, and
+              AOOH campaigns across the Philippines. Browse, book, and launch
+              in days.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button size="lg" variant="cyber" onClick={goAdvertiserSignup}>
