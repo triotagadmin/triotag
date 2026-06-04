@@ -98,6 +98,8 @@ import SolutionsOOH from "./pages/solutions/OOH";
 import SolutionsDOOH from "./pages/solutions/DOOH";
 import SolutionsAOOH from "./pages/solutions/AOOH";
 import SolutionsMediaTruck from "./pages/solutions/MediaTruck";
+import IndustriesRetailers from "./pages/industries/Retailers";
+import IndustriesBrands from "./pages/industries/Brands";
 
 const queryClient = new QueryClient();
 
