@@ -6,7 +6,7 @@ import {
   Image as ImageIcon,
   Monitor,
   Volume2,
-  Play,
+  
   Shield,
   DollarSign,
   MapPin,
@@ -40,9 +40,9 @@ const Brands = () => {
               <span className="text-green-500">already are</span>
             </h1>
             <p className="text-lg text-white/70 mb-8 max-w-xl">
-              TrioTag is your one-stop platform for hyper-local OOH, DOOH, AOOH,
-              and Social Video campaigns across the Philippines. Browse, book,
-              and launch in days.
+              TrioTag is your one-stop platform for hyper-local OOH, DOOH, and
+              AOOH campaigns across the Philippines. Browse, book, and launch
+              in days.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button size="lg" variant="cyber" onClick={goAdvertiserSignup}>
@@ -102,18 +102,17 @@ const Brands = () => {
       <section className="container mx-auto px-4 md:px-6 py-20 md:py-28">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Four formats. One platform.
+            Three formats. One platform.
           </h2>
           <p className="text-white/70">
             Mix and match formats to build the perfect omnichannel campaign.
           </p>
         </div>
-        <div className="grid md:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
           {[
             { icon: ImageIcon, title: "OOH Print", desc: "Stickers, posters, table tents." },
             { icon: Monitor, title: "DOOH Screens", desc: "TVs and LED displays in-venue." },
             { icon: Volume2, title: "AOOH Audio", desc: "In-store audio spots." },
-            { icon: Play, title: "Social Video", desc: "Short-form social-ready creative." },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-6">
               <Icon className="h-8 w-8 text-green-500 mb-4" />
@@ -139,7 +138,7 @@ const Brands = () => {
             {[
               ["500+", "Active Ad Spaces Available"],
               ["18+", "Publisher Venue Partners"],
-              ["4", "Ad Formats (OOH, DOOH, AOOH, Social Video)"],
+              ["3", "Ad Formats (OOH, DOOH & AOOH)"],
               ["₱5K", "Minimum Campaign Budget"],
             ].map(([n, l]) => (
               <div key={l}>
@@ -154,7 +153,7 @@ const Brands = () => {
             retail media spaces across the Philippines.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            {["OOH Print", "DOOH Screens", "AOOH Audio", "Social Video", "Media Truck"].map((b) => (
+            {["OOH Print", "DOOH Screens", "AOOH Audio", "Media Truck"].map((b) => (
               <span
                 key={b}
                 className="bg-black border border-white/10 rounded-full px-4 py-2 text-sm text-white/80"
@@ -179,9 +178,9 @@ const Brands = () => {
               </h2>
               <p className="text-white/70 mb-8">
                 TrioTag gives brands direct access to hyper-local OOH, DOOH,
-                AOOH, and Social Video inventory — all from one platform. No
-                agencies. No middlemen. Browse available spaces, build your
-                campaign, and go live in days.
+                and AOOH inventory — all from one platform. No agencies. No
+                middlemen. Browse available spaces, build your campaign, and
+                go live in days.
               </p>
 
               <div className="space-y-4 mb-8">
@@ -202,12 +201,11 @@ const Brands = () => {
                 ))}
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {[
                   { icon: ImageIcon, title: "OOH Print", price: "From ₱5K" },
                   { icon: Monitor, title: "DOOH Screen", price: "From ₱8K" },
                   { icon: Volume2, title: "AOOH Audio", price: "From ₱5K" },
-                  { icon: Play, title: "Social Video", price: "From ₱10K" },
                 ].map(({ icon: Icon, title, price }) => (
                   <div
                     key={title}
