@@ -138,7 +138,7 @@ const Brands = () => {
             {[
               ["500+", "Active Ad Spaces Available"],
               ["18+", "Publisher Venue Partners"],
-              ["4", "Ad Formats (OOH, DOOH, AOOH, Social Video)"],
+              ["3", "Ad Formats (OOH, DOOH & AOOH)"],
               ["₱5K", "Minimum Campaign Budget"],
             ].map(([n, l]) => (
               <div key={l}>
