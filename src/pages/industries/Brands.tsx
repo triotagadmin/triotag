@@ -201,12 +201,11 @@ const Brands = () => {
                 ))}
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {[
                   { icon: ImageIcon, title: "OOH Print", price: "From ₱5K" },
                   { icon: Monitor, title: "DOOH Screen", price: "From ₱8K" },
                   { icon: Volume2, title: "AOOH Audio", price: "From ₱5K" },
-                  { icon: Play, title: "Social Video", price: "From ₱10K" },
                 ].map(({ icon: Icon, title, price }) => (
                   <div
                     key={title}
