@@ -50,6 +50,15 @@ const Auth = () => {
   const [resendEmail, setResendEmail] = useState("");
   const [activeTab, setActiveTab] = useState("signin");
 
+  useEffect(() => {
+    const intendedRole = localStorage.getItem("intended_role");
+    if (intendedRole) {
+      setUserType(intendedRole);
+      setActiveTab("signup");
+      localStorage.removeItem("intended_role");
+    }
+  }, []);
+
   // Read ?redirect=... once so post-auth flows can honor it
   const redirectTo = (() => {
     if (typeof window === "undefined") return null;
