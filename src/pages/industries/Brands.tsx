@@ -153,7 +153,7 @@ const Brands = () => {
             retail media spaces across the Philippines.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            {["OOH Print", "DOOH Screens", "AOOH Audio", "Social Video", "Media Truck"].map((b) => (
+            {["OOH Print", "DOOH Screens", "AOOH Audio", "Media Truck"].map((b) => (
               <span
                 key={b}
                 className="bg-black border border-white/10 rounded-full px-4 py-2 text-sm text-white/80"
