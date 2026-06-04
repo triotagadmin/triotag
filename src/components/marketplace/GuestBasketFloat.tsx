@@ -122,11 +122,11 @@ export const GuestBasketFloat = () => {
       if (checkoutErr) throw checkoutErr;
 
       if (checkoutData?.checkoutUrl) {
-        // Save checkout session ref
-        await supabase
-          .from("guest_bookings")
-          .update({ paymongo_checkout_session_id: checkoutData.checkoutSessionId || null, booking_status: "awaiting_payment" })
-          .eq("id", booking.id);
+        // Save checkout session ref via secure RPC (validates pending state server-side)
+        await supabase.rpc("set_guest_booking_session", {
+          _booking_id: booking.id,
+          _session_id: checkoutData.checkoutSessionId || null,
+        });
 
         clearBasket();
         window.location.href = checkoutData.checkoutUrl;
