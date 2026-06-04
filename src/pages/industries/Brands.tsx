@@ -102,18 +102,17 @@ const Brands = () => {
       <section className="container mx-auto px-4 md:px-6 py-20 md:py-28">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Four formats. One platform.
+            Three formats. One platform.
           </h2>
           <p className="text-white/70">
             Mix and match formats to build the perfect omnichannel campaign.
           </p>
         </div>
-        <div className="grid md:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
           {[
             { icon: ImageIcon, title: "OOH Print", desc: "Stickers, posters, table tents." },
             { icon: Monitor, title: "DOOH Screens", desc: "TVs and LED displays in-venue." },
             { icon: Volume2, title: "AOOH Audio", desc: "In-store audio spots." },
-            { icon: Play, title: "Social Video", desc: "Short-form social-ready creative." },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-6">
               <Icon className="h-8 w-8 text-green-500 mb-4" />
