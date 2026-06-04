@@ -87,7 +87,10 @@ const BlogPost = () => {
       .map(para => para.trim() ? `<p class="mb-4 leading-relaxed">${para}</p>` : '')
       .join('');
 
-    return html;
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'br'],
+      ALLOWED_ATTR: ['href', 'class', 'target', 'rel'],
+    });
   };
 
   if (isLoading) {
