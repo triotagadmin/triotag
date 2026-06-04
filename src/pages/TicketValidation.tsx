@@ -68,7 +68,7 @@ const TicketValidation = () => {
           ticketData: {
             customer_name: ticket.customer_name,
             customer_email: ticket.customer_email,
-            event_title: ticket.venue_events?.title || "Unknown Event",
+            event_title: ticket.event_title || "Unknown Event",
             scanned_at: ticket.scanned_at
           }
         });
@@ -83,7 +83,7 @@ const TicketValidation = () => {
           ticketData: {
             customer_name: ticket.customer_name,
             customer_email: ticket.customer_email,
-            event_title: ticket.venue_events?.title || "Unknown Event",
+            event_title: ticket.event_title || "Unknown Event",
             scanned_at: ticket.scanned_at
           }
         });
@@ -109,7 +109,7 @@ const TicketValidation = () => {
         ticketData: {
           customer_name: ticket.customer_name,
           customer_email: ticket.customer_email,
-          event_title: ticket.venue_events?.title || "Unknown Event",
+          event_title: ticket.event_title || "Unknown Event",
           scanned_at: now
         }
       });
