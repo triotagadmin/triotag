@@ -197,6 +197,7 @@ export type Database = {
           availability_status: string | null
           created_at: string | null
           description: string | null
+          has_pending_advertiser: boolean | null
           id: string
           latitude: number | null
           leased_advertiser_ids: string[]
@@ -224,6 +225,7 @@ export type Database = {
           availability_status?: string | null
           created_at?: string | null
           description?: string | null
+          has_pending_advertiser?: boolean | null
           id?: string
           latitude?: number | null
           leased_advertiser_ids?: string[]
@@ -251,6 +253,7 @@ export type Database = {
           availability_status?: string | null
           created_at?: string | null
           description?: string | null
+          has_pending_advertiser?: boolean | null
           id?: string
           latitude?: number | null
           leased_advertiser_ids?: string[]
@@ -3617,6 +3620,38 @@ export type Database = {
         }[]
       }
       get_auth_email: { Args: never; Returns: string }
+      get_client_checkout_by_token: {
+        Args: { _token: string }
+        Returns: {
+          activation_id: string | null
+          ad_space_id: string | null
+          campaign_dates: string | null
+          client_company: string | null
+          client_email: string
+          client_name: string
+          created_at: string | null
+          currency: string | null
+          grand_total: number | null
+          id: string
+          lease_total: number | null
+          line_items: Json
+          listing_title: string | null
+          material_total: number | null
+          paid_at: string | null
+          payment_method: string | null
+          paymongo_checkout_session_id: string | null
+          print_partner_id: string
+          status: string | null
+          token: string
+          updated_at: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "client_checkouts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_listing_branch_cities: {
         Args: { _listing_ids: string[] }
         Returns: {
@@ -3631,6 +3666,22 @@ export type Database = {
         Returns: {
           branch_count: number
           listing_id: string
+        }[]
+      }
+      get_venue_ticket_by_code: {
+        Args: { _unique_code: string }
+        Returns: {
+          created_at: string
+          customer_email: string
+          customer_name: string
+          event_id: string
+          event_title: string
+          id: string
+          scanned_at: string
+          scanned_by: string
+          status: string
+          unique_code: string
+          venue_owner_id: string
         }[]
       }
       has_role: {
@@ -3666,6 +3717,10 @@ export type Database = {
           specifications: Json
           title: string
         }[]
+      }
+      set_guest_booking_session: {
+        Args: { _booking_id: string; _session_id: string }
+        Returns: undefined
       }
       set_own_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
