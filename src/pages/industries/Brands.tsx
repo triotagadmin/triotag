@@ -6,7 +6,7 @@ import {
   Image as ImageIcon,
   Monitor,
   Volume2,
-  Play,
+  
   Shield,
   DollarSign,
   MapPin,
