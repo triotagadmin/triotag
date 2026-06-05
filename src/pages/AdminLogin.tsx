@@ -64,14 +64,38 @@ export default function AdminLogin() {
 
       console.log(`[Admin Login] User authenticated: ${authData.user.id}`);
 
-      // Verify admin role
+      // Verify role (admin or print_partner)
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", authData.user.id)
         .single();
 
-      if (roleError || roleData?.role !== "admin") {
+      if (roleError || (roleData?.role !== "admin" && roleData?.role !== "print_partner")) {
+        console.error("[Admin Login Error] User does not have admin or print_partner role:", roleError);
+        await supabase.auth.signOut();
+        toast.error("Access denied. Admin or Print Partner credentials required.");
+        return;
+      }
+
+      // Handle print_partner login
+      if (roleData.role === "print_partner") {
+        const { data: ppProfile } = await supabase
+          .from("print_partner_profiles")
+          .select("verified, company_name")
+          .eq("user_id", authData.user.id)
+          .single();
+
+        if (!ppProfile?.verified) {
+          await supabase.auth.signOut();
+          toast.warning("Your print partner account is pending super admin approval.");
+          return;
+        }
+
+        toast.success(`Welcome back, ${ppProfile.company_name}!`);
+        navigate("/print-partner/dashboard");
+        return;
+      }
         console.error("[Admin Login Error] User does not have admin role:", roleError);
         await supabase.auth.signOut();
         toast.error("Access denied. Admin credentials required.");
