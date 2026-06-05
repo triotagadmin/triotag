@@ -43,6 +43,7 @@ export default function AdvertiserCampaigns() {
   const [loading, setLoading] = useState(true);
   const [camps, setCamps] = useState<Camp[]>([]);
   const [tab, setTab] = useState<"all" | "OOH" | "DOOH" | "AOOH">("all");
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
