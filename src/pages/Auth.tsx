@@ -400,29 +400,13 @@ const Auth = () => {
         });
         goAfterAuth("/advertiser-dashboard");
       } else if (roles?.role === "print_partner") {
-        const { data: profile } = await supabase
-          .from("print_partner_profiles")
-          .select("verified")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-        
-        if (profile && !profile.verified) {
-          toast({
-            title: "Email not verified",
-            description: "Please verify your email before logging in.",
-            variant: "destructive",
-          });
-          setShowResendVerification(true);
-          setResendEmail(validatedData.email);
-          await supabase.auth.signOut();
-          return;
-        }
-
         toast({
-          title: "Welcome back!",
-          description: "Successfully signed in as Print Partner.",
+          title: "Wrong portal",
+          description: "Print Partners must sign in at /admin",
+          variant: "destructive",
         });
-        goAfterAuth("/print-partner/dashboard");
+        await supabase.auth.signOut();
+        return;
       } else if (roles?.role === "publisher") {
         const { data: profile } = await supabase
           .from("publisher_profiles")
