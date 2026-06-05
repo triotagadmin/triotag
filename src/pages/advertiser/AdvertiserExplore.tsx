@@ -22,6 +22,7 @@ export default function AdvertiserExplore() {
   const [spaces, setSpaces] = useState<ApprovedAdSpaceLite[] | null>(null);
   const [selected, setSelected] = useState<CityMarker | null>(null);
   const [search, setSearch] = useState("");
+  const [wizardOpen, setWizardOpen] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
 
