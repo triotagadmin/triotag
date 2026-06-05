@@ -21,6 +21,10 @@ interface AdminRegistrationRequest {
   email: string;
   phoneNumber?: string;
   userId: string;
+  registrationType?: "admin" | "print_partner";
+  companyName?: string;
+  businessAddress?: string;
+  capabilities?: string[];
 }
 
 const handler = async (req: Request): Promise<Response> => {
