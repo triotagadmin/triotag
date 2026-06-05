@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Megaphone, Plus, Calendar, DollarSign, Loader2, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
+import { CampaignWizard } from "@/components/advertiser/CampaignWizard";
 
 type Camp = {
   id: string;
