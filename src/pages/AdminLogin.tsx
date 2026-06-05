@@ -96,11 +96,6 @@ export default function AdminLogin() {
         navigate("/print-partner/dashboard");
         return;
       }
-        console.error("[Admin Login Error] User does not have admin role:", roleError);
-        await supabase.auth.signOut();
-        toast.error("Access denied. Admin credentials required.");
-        return;
-      }
 
       console.log(`[Admin Login] Admin role verified for user: ${authData.user.id}`);
 
