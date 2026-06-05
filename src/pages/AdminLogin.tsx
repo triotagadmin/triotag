@@ -64,17 +64,36 @@ export default function AdminLogin() {
 
       console.log(`[Admin Login] User authenticated: ${authData.user.id}`);
 
-      // Verify admin role
+      // Verify role (admin or print_partner)
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", authData.user.id)
         .single();
 
-      if (roleError || roleData?.role !== "admin") {
-        console.error("[Admin Login Error] User does not have admin role:", roleError);
+      if (roleError || (roleData?.role !== "admin" && roleData?.role !== "print_partner")) {
+        console.error("[Admin Login Error] User does not have admin or print_partner role:", roleError);
         await supabase.auth.signOut();
-        toast.error("Access denied. Admin credentials required.");
+        toast.error("Access denied. Admin or Print Partner credentials required.");
+        return;
+      }
+
+      // Handle print_partner login
+      if (roleData.role === "print_partner") {
+        const { data: ppProfile } = await supabase
+          .from("print_partner_profiles")
+          .select("verified, company_name")
+          .eq("user_id", authData.user.id)
+          .single();
+
+        if (!ppProfile?.verified) {
+          await supabase.auth.signOut();
+          toast.warning("Your print partner account is pending super admin approval.");
+          return;
+        }
+
+        toast.success(`Welcome back, ${ppProfile.company_name}!`);
+        navigate("/print-partner/dashboard");
         return;
       }
 
@@ -189,10 +208,23 @@ export default function AdminLogin() {
             <div className="mt-6 text-center space-y-3">
               <p className="text-sm text-muted-foreground">
                 Need admin access?{" "}
-                <Link to="/admin/register" className="text-primary hover:underline font-medium">
+                <Link to="/admin/register?type=admin" className="text-primary hover:underline font-medium">
                   Request Registration
                 </Link>
               </p>
+
+              <div className="pt-3 border-t border-border/50">
+                <p className="text-xs text-muted-foreground mb-2">New here?</p>
+                <div className="flex gap-2">
+                  <Button asChild variant="outline" size="sm" className="flex-1">
+                    <Link to="/admin/register?type=admin">Register as Admin</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="flex-1">
+                    <Link to="/admin/register?type=print_partner">Register as Print Partner</Link>
+                  </Button>
+                </div>
+              </div>
+
               <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
                 <p className="font-semibold mb-1">🔒 Secure Authentication</p>
                 <p>Your session is protected with industry-standard JWT tokens and encrypted connections.</p>

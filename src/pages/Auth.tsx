@@ -400,29 +400,13 @@ const Auth = () => {
         });
         goAfterAuth("/advertiser-dashboard");
       } else if (roles?.role === "print_partner") {
-        const { data: profile } = await supabase
-          .from("print_partner_profiles")
-          .select("verified")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-        
-        if (profile && !profile.verified) {
-          toast({
-            title: "Email not verified",
-            description: "Please verify your email before logging in.",
-            variant: "destructive",
-          });
-          setShowResendVerification(true);
-          setResendEmail(validatedData.email);
-          await supabase.auth.signOut();
-          return;
-        }
-
         toast({
-          title: "Welcome back!",
-          description: "Successfully signed in as Print Partner.",
+          title: "Wrong portal",
+          description: "Print Partners must sign in at /admin",
+          variant: "destructive",
         });
-        goAfterAuth("/print-partner/dashboard");
+        await supabase.auth.signOut();
+        return;
       } else if (roles?.role === "publisher") {
         const { data: profile } = await supabase
           .from("publisher_profiles")
@@ -675,32 +659,11 @@ const Auth = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="advertiser">Brand Advertiser</SelectItem>
-                      <SelectItem value="print_partner">Print Partner</SelectItem>
+                      <SelectItem value="advertiser">Publisher</SelectItem>
                       <SelectItem value="venue">Agent</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                {userType === "print_partner" && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="company-name">Company Name</Label>
-                      <Input id="company-name" placeholder="Your printing company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="contact-name">Contact Person</Label>
-                      <Input id="contact-name" placeholder="Full name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="contact-phone">Phone Number</Label>
-                      <Input id="contact-phone" placeholder="+63..." value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="business-address">Business Address</Label>
-                      <Input id="business-address" placeholder="Full address" value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} />
-                    </div>
-                  </>
-                )}
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input

@@ -78,9 +78,40 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`[Verify Admin] Processing verification for admin: ${adminUserId} at ${timestamp}`);
     console.log(`[Verify Admin] Token purpose: ${payload.purpose}`);
 
-    // Update admin profile status
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
+
+    // Check role — handle print_partner separately
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", adminUserId)
+      .single();
+
+    if (roleData?.role === "print_partner") {
+      const { error: ppError } = await supabase
+        .from("print_partner_profiles")
+        .update({ verified: true })
+        .eq("user_id", adminUserId);
+
+      if (ppError) {
+        console.error("[Verify Admin Error] Failed to verify print partner:", ppError);
+        return new Response(null, {
+          status: 302,
+          headers: { Location: `${FRONTEND_URL}/admin/verify?verified=error`, ...corsHeaders },
+        });
+      }
+
+      console.log(`[Verify Admin Success] Print partner ${adminUserId} verified at ${timestamp}`);
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: `${FRONTEND_URL}/admin/verify?verified=success&type=print_partner`,
+          ...corsHeaders,
+        },
+      });
+    }
+
+    // Admin verification flow
     const { data: adminProfile, error: fetchError } = await supabase
       .from("admin_profiles")
       .select("*")
