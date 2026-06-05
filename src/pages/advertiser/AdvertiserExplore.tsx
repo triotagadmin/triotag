@@ -113,6 +113,9 @@ export default function AdvertiserExplore() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <Button onClick={() => setWizardOpen(true)} className="h-10 bg-green-600 hover:bg-green-500 text-white rounded-lg">
+                  <Plus className="w-4 h-4 mr-1" /> Create Campaign
+                </Button>
                 <div className="relative">
                   <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
                   <Input
