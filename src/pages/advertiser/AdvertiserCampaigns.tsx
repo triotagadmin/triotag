@@ -190,6 +190,7 @@ export default function AdvertiserCampaigns() {
           </Tabs>
         </main>
       </div>
+      <CampaignWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
     </div>
   );
 }
