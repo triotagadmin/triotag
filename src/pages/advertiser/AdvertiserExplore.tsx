@@ -9,18 +9,20 @@ import {
 } from "@/components/ui/select";
 import {
   Search, Bell, X, Users, Building2, LayoutGrid, ChevronLeft, ChevronRight,
-  Globe, Layers, ShieldCheck, BadgeCheck, SlidersHorizontal, MapPin,
+  Globe, Layers, ShieldCheck, BadgeCheck, SlidersHorizontal, MapPin, Plus,
 } from "lucide-react";
 import {
   fetchApprovedSpaces, aggregateByCity, aggregateMediaTypes,
   citySlug, type CityMarker, type ApprovedAdSpaceLite,
 } from "@/lib/inventoryAggregation";
+import { CampaignWizard } from "@/components/advertiser/CampaignWizard";
 
 export default function AdvertiserExplore() {
   const navigate = useNavigate();
   const [spaces, setSpaces] = useState<ApprovedAdSpaceLite[] | null>(null);
   const [selected, setSelected] = useState<CityMarker | null>(null);
   const [search, setSearch] = useState("");
+  const [wizardOpen, setWizardOpen] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
 
@@ -111,6 +113,9 @@ export default function AdvertiserExplore() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <Button onClick={() => setWizardOpen(true)} className="h-10 bg-green-600 hover:bg-green-500 text-white rounded-lg">
+                  <Plus className="w-4 h-4 mr-1" /> Create Campaign
+                </Button>
                 <div className="relative">
                   <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
                   <Input
@@ -295,6 +300,7 @@ export default function AdvertiserExplore() {
           </section>
         </main>
       </div>
+      <CampaignWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
     </div>
   );
 }
