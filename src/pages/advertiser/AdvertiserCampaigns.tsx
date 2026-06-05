@@ -98,7 +98,7 @@ export default function AdvertiserCampaigns() {
               </h1>
               <p className="text-zinc-400 text-sm mt-1">Manage and monitor all your campaigns</p>
             </div>
-            <Button onClick={() => navigate("/advertiser/campaigns/create")} className="bg-green-600 hover:bg-green-500 text-white">
+            <Button onClick={() => setWizardOpen(true)} className="bg-green-600 hover:bg-green-500 text-white">
               <Plus className="w-4 h-4 mr-1" /> New Campaign
             </Button>
           </div>
