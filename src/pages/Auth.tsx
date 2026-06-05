@@ -675,32 +675,11 @@ const Auth = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="advertiser">Brand Advertiser</SelectItem>
-                      <SelectItem value="print_partner">Print Partner</SelectItem>
+                      <SelectItem value="advertiser">Publisher</SelectItem>
                       <SelectItem value="venue">Agent</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                {userType === "print_partner" && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="company-name">Company Name</Label>
-                      <Input id="company-name" placeholder="Your printing company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="contact-name">Contact Person</Label>
-                      <Input id="contact-name" placeholder="Full name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="contact-phone">Phone Number</Label>
-                      <Input id="contact-phone" placeholder="+63..." value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="business-address">Business Address</Label>
-                      <Input id="business-address" placeholder="Full address" value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} />
-                    </div>
-                  </>
-                )}
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
