@@ -9,12 +9,13 @@ import {
 } from "@/components/ui/select";
 import {
   Search, Bell, X, Users, Building2, LayoutGrid, ChevronLeft, ChevronRight,
-  Globe, Layers, ShieldCheck, BadgeCheck, SlidersHorizontal, MapPin,
+  Globe, Layers, ShieldCheck, BadgeCheck, SlidersHorizontal, MapPin, Plus,
 } from "lucide-react";
 import {
   fetchApprovedSpaces, aggregateByCity, aggregateMediaTypes,
   citySlug, type CityMarker, type ApprovedAdSpaceLite,
 } from "@/lib/inventoryAggregation";
+import { CampaignWizard } from "@/components/advertiser/CampaignWizard";
 
 export default function AdvertiserExplore() {
   const navigate = useNavigate();
