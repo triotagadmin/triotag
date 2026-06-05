@@ -208,10 +208,23 @@ export default function AdminLogin() {
             <div className="mt-6 text-center space-y-3">
               <p className="text-sm text-muted-foreground">
                 Need admin access?{" "}
-                <Link to="/admin/register" className="text-primary hover:underline font-medium">
+                <Link to="/admin/register?type=admin" className="text-primary hover:underline font-medium">
                   Request Registration
                 </Link>
               </p>
+
+              <div className="pt-3 border-t border-border/50">
+                <p className="text-xs text-muted-foreground mb-2">New here?</p>
+                <div className="flex gap-2">
+                  <Button asChild variant="outline" size="sm" className="flex-1">
+                    <Link to="/admin/register?type=admin">Register as Admin</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="flex-1">
+                    <Link to="/admin/register?type=print_partner">Register as Print Partner</Link>
+                  </Button>
+                </div>
+              </div>
+
               <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
                 <p className="font-semibold mb-1">🔒 Secure Authentication</p>
                 <p>Your session is protected with industry-standard JWT tokens and encrypted connections.</p>
