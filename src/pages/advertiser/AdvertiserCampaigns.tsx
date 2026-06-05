@@ -139,7 +139,7 @@ export default function AdvertiserCampaigns() {
                     <Megaphone className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No campaigns yet</h3>
                     <p className="text-zinc-400 mb-4">Start reaching audiences with your first campaign.</p>
-                    <Button onClick={() => navigate("/advertiser/campaigns/create")} className="bg-green-600 hover:bg-green-500">
+                    <Button onClick={() => setWizardOpen(true)} className="bg-green-600 hover:bg-green-500">
                       <Plus className="w-4 h-4 mr-1" /> Create Your First Campaign
                     </Button>
                   </CardContent>
