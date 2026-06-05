@@ -300,6 +300,7 @@ export default function AdvertiserExplore() {
           </section>
         </main>
       </div>
+      <CampaignWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
     </div>
   );
 }
