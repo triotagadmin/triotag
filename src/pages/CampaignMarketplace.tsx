@@ -567,8 +567,11 @@ const CampaignMarketplace = () => {
               </div>
               <DialogFooter className="gap-2">
                 <Button variant="outline" onClick={() => setDetail(null)} className="border-white/15">Close</Button>
-                <Button asChild className="bg-green-600 hover:bg-green-500 text-white">
-                  <Link to={`/contact?campaign=${detail.id}`}>Submit a Proposal</Link>
+                <Button
+                  className="bg-green-600 hover:bg-green-500 text-white"
+                  onClick={() => { setProposalFor(detail); setDetail(null); }}
+                >
+                  Submit a Proposal
                 </Button>
               </DialogFooter>
             </>
