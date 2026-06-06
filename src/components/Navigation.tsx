@@ -19,6 +19,7 @@ interface NavLinkDef { label: string; to: string; gated?: boolean; }
 interface NavItemDef { label: string; to?: string; children?: { label: string; to: string }[]; }
 
 const INVENTORY_LINK: NavLinkDef = { label: "Inventory", to: "/advertiser/explore" };
+const CAMPAIGNS_LINK: NavLinkDef = { label: "Campaigns", to: "/campaigns" };
 
 const NAV_ITEMS: NavItemDef[] = [
   {
@@ -43,6 +44,7 @@ const NAV_ITEMS: NavItemDef[] = [
 
 const PUBLIC_LINKS: NavLinkDef[] = [
   INVENTORY_LINK,
+  CAMPAIGNS_LINK,
 ];
 
 const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
@@ -58,6 +60,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
         retailerLink,
         { label: "For Advertisers", to: "/campaign-submit" },
         INVENTORY_LINK,
+        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -67,6 +70,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
         retailerLink,
         { label: "For Advertisers", to: "/campaign-submit" },
         INVENTORY_LINK,
+        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -75,6 +79,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
         { label: "Home", to: "/" },
         retailerLink,
         INVENTORY_LINK,
+        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -82,6 +87,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         INVENTORY_LINK,
+        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -89,6 +95,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         INVENTORY_LINK,
+        CAMPAIGNS_LINK,
         { label: "Admin Dashboard", to: "/admin/dashboard" },
       ];
     default:
@@ -269,6 +276,16 @@ export const Navigation = () => {
               >
                 {INVENTORY_LINK.label}
               </Link>
+              <Link
+                to={CAMPAIGNS_LINK.to}
+                className={`px-3 py-2 text-sm transition-colors border-b-2 ${
+                  isActive(CAMPAIGNS_LINK.to)
+                    ? "text-green-500 border-green-500"
+                    : "text-zinc-300 border-transparent hover:text-green-500"
+                }`}
+              >
+                {CAMPAIGNS_LINK.label}
+              </Link>
             </>
           )}
         </div>
@@ -413,6 +430,15 @@ export const Navigation = () => {
                   }`}
                 >
                   {INVENTORY_LINK.label}
+                </Link>
+                <Link
+                  to={CAMPAIGNS_LINK.to}
+                  onClick={close}
+                  className={`px-3 py-3 text-sm rounded-md ${
+                    isActive(CAMPAIGNS_LINK.to) ? "text-green-500 bg-white/5" : "text-zinc-200 hover:bg-white/5 hover:text-green-500"
+                  }`}
+                >
+                  {CAMPAIGNS_LINK.label}
                 </Link>
               </>
             )}
