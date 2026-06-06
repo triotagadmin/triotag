@@ -10,6 +10,7 @@ import {
 import {
   Search, Bell, X, Users, Building2, LayoutGrid, ChevronLeft, ChevronRight,
   Globe, Layers, ShieldCheck, BadgeCheck, SlidersHorizontal, MapPin, Plus,
+  Map as MapIcon, MapPinOff as MapOff,
 } from "lucide-react";
 import {
   fetchApprovedSpaces, aggregateByCity, aggregateMediaTypes,
@@ -23,6 +24,7 @@ export default function AdvertiserExplore() {
   const [selected, setSelected] = useState<CityMarker | null>(null);
   const [search, setSearch] = useState("");
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [mapVisible, setMapVisible] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
 
@@ -32,6 +34,7 @@ export default function AdvertiserExplore() {
 
   // Init Leaflet map
   useEffect(() => {
+    if (!mapVisible) return;
     let cancelled = false;
     (async () => {
       const L = await import("leaflet");
@@ -51,7 +54,7 @@ export default function AdvertiserExplore() {
       cancelled = true;
       if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
     };
-  }, []);
+  }, [mapVisible]);
 
   // Render bubbles when cities update
   useEffect(() => {
@@ -151,6 +154,17 @@ export default function AdvertiserExplore() {
               <button className="h-10 px-4 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 inline-flex items-center gap-2 hover:bg-gray-50">
                 <SlidersHorizontal className="w-4 h-4" /> More Filters
               </button>
+              <button
+                onClick={() => setMapVisible((p) => !p)}
+                className={`h-10 px-4 rounded-lg border text-sm font-medium inline-flex items-center gap-2 transition-colors ${
+                  mapVisible
+                    ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100"
+                    : "border-gray-200 text-gray-700 hover:border-green-500 hover:text-green-600"
+                }`}
+              >
+                {mapVisible ? <MapOff className="w-4 h-4" /> : <MapIcon className="w-4 h-4" />}
+                {mapVisible ? "Hide Map" : "Show Map"}
+              </button>
               <button className="h-10 ml-auto text-green-600 hover:text-green-700 text-sm font-medium" onClick={() => setSearch("")}>
                 Reset Filters
               </button>
@@ -158,19 +172,20 @@ export default function AdvertiserExplore() {
           </header>
 
           {/* Map + side panel */}
-          <section className="relative flex">
-            <div className="flex-1 min-h-[520px] bg-[#f0faf0] relative">
-              <div ref={mapRef} className="w-full h-[520px]" />
-              {isEmpty && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="bg-white/90 backdrop-blur border border-gray-200 rounded-2xl px-6 py-5 text-center shadow-md max-w-sm">
-                    <MapPin className="w-6 h-6 text-green-600 mx-auto mb-2" />
-                    <div className="font-bold text-gray-900">No inventory yet</div>
-                    <div className="text-sm text-gray-500 mt-1">Inventory is being onboarded. Check back soon.</div>
+          {mapVisible && (
+            <section className="relative flex transition-all duration-300 ease-in-out">
+              <div className="flex-1 min-h-[520px] bg-[#f0faf0] relative">
+                <div ref={mapRef} className="w-full h-[520px]" />
+                {isEmpty && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-white/90 backdrop-blur border border-gray-200 rounded-2xl px-6 py-5 text-center shadow-md max-w-sm">
+                      <MapPin className="w-6 h-6 text-green-600 mx-auto mb-2" />
+                      <div className="font-bold text-gray-900">No inventory yet</div>
+                      <div className="text-sm text-gray-500 mt-1">Inventory is being onboarded. Check back soon.</div>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
             {selected && (
               <aside className="w-[340px] bg-white border-l border-gray-100 p-5 overflow-y-auto max-h-[520px]">
@@ -226,7 +241,8 @@ export default function AdvertiserExplore() {
                 </Button>
               </aside>
             )}
-          </section>
+            </section>
+          )}
 
           {/* City strip */}
           <section className="px-6 lg:px-8 py-6 bg-white">
