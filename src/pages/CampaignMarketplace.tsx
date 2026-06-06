@@ -182,6 +182,10 @@ const CampaignMarketplace = () => {
     setRequestOpen(true);
   };
 
+  // NOTE: To fully remove the "Log In" button from the email, go to:
+  // Supabase Dashboard → Authentication → Email Templates → "Magic Link"
+  // Change the template to only show the OTP token: {{ .Token }}
+  // Remove the {{ .ConfirmationURL }} button entirely
   const handleSendOtp = async () => {
     if (!guestEmail || !/^\S+@\S+\.\S+$/.test(guestEmail)) {
       toast.error("Please enter a valid email address.");
@@ -191,7 +195,10 @@ const CampaignMarketplace = () => {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: guestEmail,
-        options: { shouldCreateUser: true },
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: undefined, // prevents magic link, forces OTP code
+        },
       });
       if (error) throw error;
       setStep(2);
@@ -215,7 +222,13 @@ const CampaignMarketplace = () => {
         token: otpValue,
         type: "email",
       });
-      if (error) throw error;
+      if (error) {
+        toast.error("Invalid or expired code. Please try again.");
+        return;
+      }
+      // Immediately sign out so they don't get a full session
+      // They are just email-verified guests, not logged-in users
+      await supabase.auth.signOut();
       setEmailVerified(true);
       setStep(3);
       toast.success("Email verified! Now fill in your campaign details.");
@@ -570,10 +583,17 @@ const CampaignMarketplace = () => {
               {step === 2 && "Check your email"}
               {step === 3 && "Campaign Details"}
             </DialogTitle>
-            <DialogDescription className="text-white/60">
-              {step === 1 && "Enter your email to get started. We'll send you a verification code."}
-              {step === 2 && `We sent a 6-digit code to ${guestEmail}.`}
-              {step === 3 && "Post your campaign so retailers and ad space owners can respond."}
+            <DialogDescription className="text-white/60" asChild>
+              <div>
+                {step === 1 && "Enter your email to get started. We'll send you a verification code."}
+                {step === 2 && (
+                  <p className="text-zinc-400 text-sm">
+                    We sent a 6-digit verification code to <span className="text-white font-medium">{guestEmail}</span>.
+                    Enter it below to verify your email. <strong>Do not click the Log In button</strong> — just copy the 6-digit code from the email.
+                  </p>
+                )}
+                {step === 3 && "Post your campaign so retailers and ad space owners can respond."}
+              </div>
             </DialogDescription>
           </DialogHeader>
 
@@ -590,6 +610,9 @@ const CampaignMarketplace = () => {
                   className="bg-black border-white/10"
                 />
               </div>
+              <p className="text-xs text-zinc-500 text-center mt-2">
+                Check your inbox for a 6-digit number code from Triotag
+              </p>
               <DialogFooter className="gap-2">
                 <Button type="button" variant="outline" onClick={resetWizard} className="border-white/15">
                   Cancel
