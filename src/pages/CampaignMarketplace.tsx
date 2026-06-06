@@ -112,15 +112,20 @@ const CampaignMarketplace = () => {
     fetchCampaigns();
   }, []);
 
+  const displayCampaigns = useMemo(
+    () => (campaigns.length > 0 ? [...campaigns, ...FAUX_CAMPAIGNS] : FAUX_CAMPAIGNS),
+    [campaigns]
+  );
+
   const counts = useMemo(() => {
     const t = (k: string) =>
-      campaigns.filter((c) => (c.campaign_type || "").toLowerCase() === k).length;
-    return { total: campaigns.length, ooh: t("ooh"), dooh: t("dooh"), aooh: t("aooh") };
-  }, [campaigns]);
+      displayCampaigns.filter((c) => (c.campaign_type || "").toLowerCase() === k).length;
+    return { total: displayCampaigns.length, ooh: t("ooh"), dooh: t("dooh"), aooh: t("aooh") };
+  }, [displayCampaigns]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return campaigns.filter((c) => {
+    return displayCampaigns.filter((c) => {
       if (typeFilter !== "all" && (c.campaign_type || "").toLowerCase() !== typeFilter) return false;
       if (!matchBudget(c.budget_amount, budgetFilter)) return false;
       if (q) {
@@ -129,7 +134,8 @@ const CampaignMarketplace = () => {
       }
       return true;
     });
-  }, [campaigns, search, typeFilter, budgetFilter]);
+  }, [displayCampaigns, search, typeFilter, budgetFilter]);
+
 
   const openRequest = async () => {
     const { data: { session } } = await supabase.auth.getSession();
