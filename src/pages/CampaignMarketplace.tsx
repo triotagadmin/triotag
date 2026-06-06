@@ -45,7 +45,18 @@ const TYPE_BADGE: Record<string, string> = {
 const STATUS_BADGE: Record<string, string> = {
   pending: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
   approved: "bg-green-500/20 text-green-400 border-green-500/30",
+  inactive: "bg-zinc-500/20 text-zinc-400 border-zinc-500/40",
 };
+
+const FAUX_CAMPAIGNS: Campaign[] = [
+  { id: "faux-1", campaign_name: "SM Mall OOH Rollout", campaign_type: "OOH", status: "inactive", start_date: "2025-08-01", end_date: "2025-08-31", budget_amount: 45000, budget_currency: "PHP", location: "SM Mall of Asia, Pasay City", campaign_description: null, created_at: "2025-07-01T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "FreshBev Philippines" } },
+  { id: "faux-2", campaign_name: "Gym Network DOOH Campaign", campaign_type: "DOOH", status: "inactive", start_date: "2025-09-01", end_date: "2025-09-30", budget_amount: 80000, budget_currency: "PHP", location: "Makati & BGC Gyms", campaign_description: null, created_at: "2025-07-05T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "ActiveLife Supplements" } },
+  { id: "faux-3", campaign_name: "In-Store Audio — Back to School", campaign_type: "AOOH", status: "inactive", start_date: "2025-07-15", end_date: "2025-08-15", budget_amount: 25000, budget_currency: "PHP", location: "Quezon City Supermarkets", campaign_description: null, created_at: "2025-07-08T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "Schoolhouse PH" } },
+  { id: "faux-4", campaign_name: "Salon Network Skincare Launch", campaign_type: "DOOH", status: "inactive", start_date: "2025-10-01", end_date: "2025-10-31", budget_amount: 60000, budget_currency: "PHP", location: "Metro Manila Salons", campaign_description: null, created_at: "2025-07-10T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "GlowUp Cosmetics" } },
+  { id: "faux-5", campaign_name: "Cebu Retail OOH — New Flavor", campaign_type: "OOH", status: "inactive", start_date: "2025-08-15", end_date: "2025-09-15", budget_amount: 30000, budget_currency: "PHP", location: "Cebu City Retail Stores", campaign_description: null, created_at: "2025-07-12T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "TasteWave Snacks" } },
+  { id: "faux-6", campaign_name: "AOOH Wellness Campaign", campaign_type: "AOOH", status: "inactive", start_date: "2025-09-15", end_date: "2025-10-15", budget_amount: 20000, budget_currency: "PHP", location: "Taguig & Pasig Pharmacies", campaign_description: null, created_at: "2025-07-14T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "VitalCare Health" } },
+];
+
 
 const formatBudget = (amt: number | null, ccy: string | null) => {
   if (!amt) return "Budget: Flexible";
@@ -101,15 +112,20 @@ const CampaignMarketplace = () => {
     fetchCampaigns();
   }, []);
 
+  const displayCampaigns = useMemo(
+    () => (campaigns.length > 0 ? [...campaigns, ...FAUX_CAMPAIGNS] : FAUX_CAMPAIGNS),
+    [campaigns]
+  );
+
   const counts = useMemo(() => {
     const t = (k: string) =>
-      campaigns.filter((c) => (c.campaign_type || "").toLowerCase() === k).length;
-    return { total: campaigns.length, ooh: t("ooh"), dooh: t("dooh"), aooh: t("aooh") };
-  }, [campaigns]);
+      displayCampaigns.filter((c) => (c.campaign_type || "").toLowerCase() === k).length;
+    return { total: displayCampaigns.length, ooh: t("ooh"), dooh: t("dooh"), aooh: t("aooh") };
+  }, [displayCampaigns]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return campaigns.filter((c) => {
+    return displayCampaigns.filter((c) => {
       if (typeFilter !== "all" && (c.campaign_type || "").toLowerCase() !== typeFilter) return false;
       if (!matchBudget(c.budget_amount, budgetFilter)) return false;
       if (q) {
@@ -118,7 +134,8 @@ const CampaignMarketplace = () => {
       }
       return true;
     });
-  }, [campaigns, search, typeFilter, budgetFilter]);
+  }, [displayCampaigns, search, typeFilter, budgetFilter]);
+
 
   const openRequest = async () => {
     const { data: { session } } = await supabase.auth.getSession();
