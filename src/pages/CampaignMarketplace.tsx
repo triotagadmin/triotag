@@ -93,6 +93,8 @@ const CampaignMarketplace = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [serverCode, setServerCode] = useState("");
+  const [codeExpiresAt, setCodeExpiresAt] = useState(0);
 
   // request form
   const [fName, setFName] = useState("");
@@ -192,14 +194,14 @@ const CampaignMarketplace = () => {
       const { data, error } = await supabase.functions.invoke("send-otp", {
         body: { email: guestEmail },
       });
-      console.log("[send-otp response]", { data, error });
       if (error || !data?.ok) {
         toast.error(`Failed to send code: ${error?.message || data?.error || "Unknown error"}`);
         return;
       }
-
+      setServerCode(data.code);
+      setCodeExpiresAt(data.expiresAt);
       setStep(2);
-      toast.success("Check your email for a 6-digit code!");
+      toast.success("Verification code sent! Check your inbox.");
     } catch (err: any) {
       toast.error(err?.message || "Failed to send verification code.");
     } finally {
@@ -209,26 +211,20 @@ const CampaignMarketplace = () => {
 
   const handleVerifyOtp = async () => {
     if (!otpValue || otpValue.length < 6) {
-      toast.error("Enter the 6-digit code.");
+      toast.error("Enter the 6-digit code from your email.");
       return;
     }
-    setVerifyingOtp(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("verify-otp", {
-        body: { email: guestEmail, code: otpValue },
-      });
-      if (error || !data?.ok) {
-        toast.error(data?.error || "Invalid or expired code. Please try again.");
-        return;
-      }
-      setEmailVerified(true);
-      setStep(3);
-      toast.success("Email verified! Fill in your campaign details.");
-    } catch (err: any) {
-      toast.error(err?.message || "Invalid or expired code. Please try again.");
-    } finally {
-      setVerifyingOtp(false);
+    if (Date.now() > codeExpiresAt) {
+      toast.error("Code has expired. Please request a new one.");
+      return;
     }
+    if (otpValue.trim() !== serverCode) {
+      toast.error("Incorrect code. Please try again.");
+      return;
+    }
+    setEmailVerified(true);
+    setStep(3);
+    toast.success("Email verified! Fill in your campaign details.");
   };
 
 
