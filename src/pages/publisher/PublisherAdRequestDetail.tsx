@@ -751,7 +751,7 @@ export default function PublisherAdRequestDetail() {
                   </>
                 ) : (
                   <div className="text-sm text-muted-foreground">
-                    <p>Advertiser ID: {request.advertiser_id.slice(0, 8).toUpperCase()}</p>
+                    <p>Retailer ID: {request.advertiser_id.slice(0, 8).toUpperCase()}</p>
                     <p className="mt-1 text-xs">Profile not available</p>
                   </div>
                 )}

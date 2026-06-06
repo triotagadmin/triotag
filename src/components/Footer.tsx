@@ -40,7 +40,7 @@ export const Footer = () => {
 
           {linkCol("Platform", [
             { label: "For Retailers", href: "/list-space" },
-            { label: "For Advertisers", href: "/campaign-submit" },
+            { label: "For Retailers", href: "/campaign-submit" },
             { label: "Inventory Formats", href: "/explore" },
             { label: "Resources", href: "/insights" },
           ])}

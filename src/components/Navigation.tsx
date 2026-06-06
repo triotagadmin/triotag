@@ -58,7 +58,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         retailerLink,
-        { label: "For Advertisers", to: "/campaign-submit" },
+        { label: "For Retailers", to: "/campaign-submit" },
         INVENTORY_LINK,
         CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
@@ -68,7 +68,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         retailerLink,
-        { label: "For Advertisers", to: "/campaign-submit" },
+        { label: "For Retailers", to: "/campaign-submit" },
         INVENTORY_LINK,
         CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },

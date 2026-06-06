@@ -25,7 +25,7 @@ const formatCards = [
 
 const flowSteps = [
   { n: 1, title: "Retailers list spaces", desc: "Venues upload their available surfaces: walls, windows, counters, tables" },
-  { n: 2, title: "Spaces go live on marketplace", desc: "Advertisers browse inventory filtered by location, venue type, footfall" },
+  { n: 2, title: "Spaces go live on marketplace", desc: "Retailers browse inventory filtered by location, venue type, footfall" },
   { n: 3, title: "Retailer books & pays", desc: "Campaign confirmed, payment processed, print materials deployed" },
   { n: 4, title: "Proof of run", desc: "Photo documentation and post-campaign reporting delivered" },
 ];
@@ -97,7 +97,7 @@ export default function SolutionsOOH() {
             <div className="text-xs font-semibold tracking-widest text-green-500 uppercase">Supply-Side Platform</div>
             <h2 className="text-3xl md:text-4xl font-bold">We connect ad spaces to advertisers — programmatically</h2>
             <p className="text-zinc-400 leading-relaxed">
-              TrioTag operates as an SSP for out-of-home media. Retailer venues list their physical ad spaces on the TrioTag platform. Advertisers browse, book, and activate campaigns across our verified network — all managed through one dashboard. No cold calls. No manual negotiations. Just efficient, targeted OOH.
+              TrioTag operates as an SSP for out-of-home media. Retailer venues list their physical ad spaces on the TrioTag platform. Retailers browse, book, and activate campaigns across our verified network — all managed through one dashboard. No cold calls. No manual negotiations. Just efficient, targeted OOH.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <span className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-sm">18+ Retailer Partners</span>
