@@ -192,10 +192,12 @@ const CampaignMarketplace = () => {
       const { data, error } = await supabase.functions.invoke("send-otp", {
         body: { email: guestEmail },
       });
+      console.log("[send-otp response]", { data, error });
       if (error || !data?.ok) {
-        toast.error("Failed to send code. Please try again.");
+        toast.error(`Failed to send code: ${error?.message || data?.error || "Unknown error"}`);
         return;
       }
+
       setStep(2);
       toast.success("Check your email for a 6-digit code!");
     } catch (err: any) {
