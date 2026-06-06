@@ -431,6 +431,15 @@ export const Navigation = () => {
                 >
                   {INVENTORY_LINK.label}
                 </Link>
+                <Link
+                  to={CAMPAIGNS_LINK.to}
+                  onClick={close}
+                  className={`px-3 py-3 text-sm rounded-md ${
+                    isActive(CAMPAIGNS_LINK.to) ? "text-green-500 bg-white/5" : "text-zinc-200 hover:bg-white/5 hover:text-green-500"
+                  }`}
+                >
+                  {CAMPAIGNS_LINK.label}
+                </Link>
               </>
             )}
             {user && menu.length > 0 && (
