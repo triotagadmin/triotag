@@ -9,7 +9,11 @@ export interface TemplateEntry {
 }
 
 import { template as otpVerification } from './otp-verification.tsx'
+import { template as campaignConfirmation } from './campaign-confirmation.tsx'
+import { template as proposalReceived } from './proposal-received.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'otp-verification': otpVerification,
+  'campaign-confirmation': campaignConfirmation,
+  'proposal-received': proposalReceived,
 }
