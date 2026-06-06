@@ -10,7 +10,7 @@ import {
 import {
   Search, Bell, X, Users, Building2, LayoutGrid, ChevronLeft, ChevronRight,
   Globe, Layers, ShieldCheck, BadgeCheck, SlidersHorizontal, MapPin, Plus,
-  Map as MapIcon, MapOff,
+  Map as MapIcon, MapPinOff as MapOff,
 } from "lucide-react";
 import {
   fetchApprovedSpaces, aggregateByCity, aggregateMediaTypes,
