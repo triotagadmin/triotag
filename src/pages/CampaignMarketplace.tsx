@@ -182,6 +182,10 @@ const CampaignMarketplace = () => {
     setRequestOpen(true);
   };
 
+  // NOTE: To fully remove the "Log In" button from the email, go to:
+  // Supabase Dashboard → Authentication → Email Templates → "Magic Link"
+  // Change the template to only show the OTP token: {{ .Token }}
+  // Remove the {{ .ConfirmationURL }} button entirely
   const handleSendOtp = async () => {
     if (!guestEmail || !/^\S+@\S+\.\S+$/.test(guestEmail)) {
       toast.error("Please enter a valid email address.");
@@ -191,7 +195,10 @@ const CampaignMarketplace = () => {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: guestEmail,
-        options: { shouldCreateUser: true },
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: undefined, // prevents magic link, forces OTP code
+        },
       });
       if (error) throw error;
       setStep(2);
@@ -215,7 +222,13 @@ const CampaignMarketplace = () => {
         token: otpValue,
         type: "email",
       });
-      if (error) throw error;
+      if (error) {
+        toast.error("Invalid or expired code. Please try again.");
+        return;
+      }
+      // Immediately sign out so they don't get a full session
+      // They are just email-verified guests, not logged-in users
+      await supabase.auth.signOut();
       setEmailVerified(true);
       setStep(3);
       toast.success("Email verified! Now fill in your campaign details.");
