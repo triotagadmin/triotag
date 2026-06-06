@@ -178,61 +178,145 @@ const CampaignMarketplace = () => {
   }, [displayCampaigns, search, typeFilter, budgetFilter]);
 
 
-  const openRequest = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast("Sign in required", {
-        description: "Please sign in to submit a campaign request.",
-      });
-      navigate("/auth?redirect=/campaigns");
+  const openRequest = () => {
+    setRequestOpen(true);
+  };
+
+  const handleSendOtp = async () => {
+    if (!guestEmail || !/^\S+@\S+\.\S+$/.test(guestEmail)) {
+      toast.error("Please enter a valid email address.");
       return;
     }
-    setRequestOpen(true);
+    setSendingOtp(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: guestEmail,
+        options: { shouldCreateUser: true },
+      });
+      if (error) throw error;
+      setStep(2);
+      toast.success("Verification code sent! Check your inbox.");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to send verification code.");
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpValue || otpValue.length < 6) {
+      toast.error("Enter the 6-digit code.");
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: guestEmail,
+        token: otpValue,
+        type: "email",
+      });
+      if (error) throw error;
+      setEmailVerified(true);
+      setStep(3);
+      toast.success("Email verified! Now fill in your campaign details.");
+    } catch (err: any) {
+      toast.error(err?.message || "Invalid or expired code. Please try again.");
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
+  const resetWizard = () => {
+    setRequestOpen(false);
+    setStep(1);
+    setGuestEmail("");
+    setOtpValue("");
+    setEmailVerified(false);
+    setFName(""); setFType("ooh"); setFLocation("");
+    setFStart(""); setFEnd(""); setFBudget(""); setFNotes("");
   };
 
   const handleSubmitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth?redirect=/campaigns");
-      return;
-    }
     if (!fName || !fType || !fLocation || !fStart || !fEnd) {
       toast.error("Please fill all required fields.");
       return;
     }
     setSubmitting(true);
     try {
-      // Resolve advertiser_profiles.id for current user (FK target)
-      const { data: profile } = await supabase
-        .from("advertiser_profiles")
-        .select("id")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-      if (!profile?.id) {
-        toast.error("Advertiser profile not found. Please complete your profile first.");
-        setSubmitting(false);
-        return;
+      const { data: { session } } = await supabase.auth.getSession();
+      const isGuest = !session || !isLoggedIn;
+
+      if (session && isLoggedIn) {
+        const { data: profile } = await supabase
+          .from("advertiser_profiles")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (profile?.id) {
+          const { error } = await supabase.from("campaigns").insert({
+            advertiser_id: profile.id,
+            campaign_name: fName,
+            campaign_type: fType,
+            location: fLocation,
+            start_date: fStart,
+            end_date: fEnd,
+            budget_amount: fBudget ? Number(fBudget) : null,
+            budget_currency: "PHP",
+            campaign_description: fNotes || null,
+            status: "pending",
+          });
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from("guest_campaigns").insert({
+            email: session.user.email,
+            email_verified: true,
+            campaign_name: fName,
+            campaign_type: fType,
+            location: fLocation,
+            start_date: fStart,
+            end_date: fEnd,
+            budget_amount: fBudget ? Number(fBudget) : null,
+            campaign_description: fNotes || null,
+            status: "pending",
+          });
+          if (error) throw error;
+        }
+      } else {
+        const { error } = await supabase.from("guest_campaigns").insert({
+          email: guestEmail,
+          email_verified: true,
+          campaign_name: fName,
+          campaign_type: fType,
+          location: fLocation,
+          start_date: fStart,
+          end_date: fEnd,
+          budget_amount: fBudget ? Number(fBudget) : null,
+          campaign_description: fNotes || null,
+          status: "pending",
+        });
+        if (error) throw error;
       }
-      const { error } = await supabase.from("campaigns").insert({
-        advertiser_id: profile.id,
-        campaign_name: fName,
-        campaign_type: fType,
-        location: fLocation,
-        start_date: fStart,
-        end_date: fEnd,
-        budget_amount: fBudget ? Number(fBudget) : null,
-        budget_currency: "PHP",
-        campaign_description: fNotes || null,
-        status: "pending",
+
+      await supabase.functions.invoke("notify-campaign-submission", {
+        body: {
+          toEmail: session?.user?.email || guestEmail,
+          campaignName: fName,
+          campaignType: fType.toUpperCase(),
+          location: fLocation,
+          startDate: fStart,
+          endDate: fEnd,
+          budget: fBudget || "Flexible",
+          isGuest,
+        },
       });
-      if (error) throw error;
+
       toast.success("Campaign request submitted!", {
-        description: "It will appear on the marketplace shortly.",
+        description: "Check your email for confirmation. Your listing will appear on the marketplace shortly.",
       });
-      setRequestOpen(false);
-      setFName(""); setFType("ooh"); setFLocation(""); setFStart("");
-      setFEnd(""); setFBudget(""); setFNotes("");
+
+      resetWizard();
       fetchCampaigns();
     } catch (err: any) {
       console.error(err);
