@@ -149,8 +149,8 @@ const Messages = () => {
                 .maybeSingle();
 
               if (publisherProfile) {
-                name = publisherProfile.business_name || "Publisher";
-                role = "Publisher";
+                name = publisherProfile.business_name || "Retailer";
+                role = "Retailer";
               }
             }
           }

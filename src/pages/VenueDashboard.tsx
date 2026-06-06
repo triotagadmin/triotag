@@ -334,7 +334,7 @@ const VenueDashboard = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <User className="h-5 w-5 text-primary" />
-              Publisher Profile
+              Retailer Profile
             </DialogTitle>
             <DialogDescription>Your business profile information</DialogDescription>
           </DialogHeader>
@@ -356,7 +356,7 @@ const VenueDashboard = () => {
               </div>
           }
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Publisher Type</p>
+              <p className="text-sm font-medium text-muted-foreground">Retailer Type</p>
               <p className="text-base capitalize">{profile?.publisher_type}</p>
             </div>
             <div>

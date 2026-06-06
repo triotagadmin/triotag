@@ -24,7 +24,7 @@ const formatCards = [
 ];
 
 const flowSteps = [
-  { n: 1, title: "Publishers list spaces", desc: "Venues upload their available surfaces: walls, windows, counters, tables" },
+  { n: 1, title: "Retailers list spaces", desc: "Venues upload their available surfaces: walls, windows, counters, tables" },
   { n: 2, title: "Spaces go live on marketplace", desc: "Advertisers browse inventory filtered by location, venue type, footfall" },
   { n: 3, title: "Advertiser books & pays", desc: "Campaign confirmed, payment processed, print materials deployed" },
   { n: 4, title: "Proof of run", desc: "Photo documentation and post-campaign reporting delivered" },
@@ -34,7 +34,7 @@ const whyCards = [
   { icon: MapPin, title: "Hyper-Local Precision", desc: "Choose exact venues, streets, and barangays. Your ad appears only where your target customers shop and spend time." },
   { icon: DollarSign, title: "Affordable Entry Point", desc: "OOH campaigns start from ₱5,000. Accessible for SMEs and national brands alike — no minimum fleet required." },
   { icon: Eye, title: "High Dwell Time", desc: "Placed inside venues where customers spend 5–30 minutes. Not a passing glance — sustained brand exposure at point of purchase." },
-  { icon: ShieldCheck, title: "Verified Publisher Network", desc: "Every publisher venue is reviewed and approved by the TrioTag team. Brand-safe, quality environments only." },
+  { icon: ShieldCheck, title: "Verified Retailer Network", desc: "Every retailer venue is reviewed and approved by the TrioTag team. Brand-safe, quality environments only." },
   { icon: BarChart2, title: "Campaign Reporting", desc: "Photo proof of placement, impression estimates, and post-campaign summary reports included with every booking." },
   { icon: RefreshCw, title: "Flexible Duration", desc: "Run for 7 days, 30 days, or 90 days. Scale up or pause anytime based on campaign performance." },
 ];
@@ -70,7 +70,7 @@ export default function SolutionsOOH() {
               <Button asChild size="lg" variant="outline"><Link to="/campaign-submit">Start a Campaign</Link></Button>
             </div>
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
-              {[["18+", "Retail Publisher Partners"], ["100+", "OOH Assets"], ["500+", "Active Placements"]].map(([n, l]) => (
+              {[["18+", "Retailer Partners"], ["100+", "OOH Assets"], ["500+", "Active Placements"]].map(([n, l]) => (
                 <div key={l}>
                   <div className="text-2xl md:text-3xl font-bold text-green-500">{n}</div>
                   <div className="text-xs text-zinc-400 mt-1">{l}</div>
@@ -97,10 +97,10 @@ export default function SolutionsOOH() {
             <div className="text-xs font-semibold tracking-widest text-green-500 uppercase">Supply-Side Platform</div>
             <h2 className="text-3xl md:text-4xl font-bold">We connect ad spaces to advertisers — programmatically</h2>
             <p className="text-zinc-400 leading-relaxed">
-              TrioTag operates as an SSP for out-of-home media. Publisher venues list their physical ad spaces on the TrioTag platform. Advertisers browse, book, and activate campaigns across our verified network — all managed through one dashboard. No cold calls. No manual negotiations. Just efficient, targeted OOH.
+              TrioTag operates as an SSP for out-of-home media. Retailer venues list their physical ad spaces on the TrioTag platform. Advertisers browse, book, and activate campaigns across our verified network — all managed through one dashboard. No cold calls. No manual negotiations. Just efficient, targeted OOH.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
-              <span className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-sm">18+ Publisher Partners</span>
+              <span className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-sm">18+ Retailer Partners</span>
               <span className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-sm">Real-time booking</span>
             </div>
           </div>

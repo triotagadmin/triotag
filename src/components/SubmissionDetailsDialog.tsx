@@ -211,7 +211,7 @@ function VerificationDocumentDetails({ details }: { details: any }) {
     <div className="space-y-4">
       <DetailRow label="Document Type" value={details.document_type?.replace("_", " ")} />
       <DetailRow label="File Name" value={details.file_name} />
-      <DetailRow label="Publisher" value={details.publisher_profiles?.business_name} />
+      <DetailRow label="Retailer" value={details.publisher_profiles?.business_name} />
       <DetailRow label="Contact Email" value={details.publisher_profiles?.contact_email} />
       <DetailRow label="Verification Status" value={details.publisher_profiles?.verification_status} />
       <DetailRow label="Uploaded At" value={new Date(details.uploaded_at).toLocaleString()} />
