@@ -30,7 +30,7 @@ const CampaignBuilder = () => {
     contact_number: "",
   });
 
-  const selectedProduct = PRINT_PRODUCTS.find(p => p.id === formData.ad_unit_type);
+  const selectedProduct = PRINT_PRODUCTS.find((p) => p.id === formData.ad_unit_type);
   const adUnitPrice = selectedProduct?.pricePerUnit ?? null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +38,9 @@ const CampaignBuilder = () => {
     setLoading(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
@@ -61,23 +63,21 @@ const CampaignBuilder = () => {
         return;
       }
 
-      const { error: campaignError } = await supabase
-        .from("campaigns")
-        .insert({
-          advertiser_id: profile.id,
-          campaign_name: formData.campaign_name,
-          campaign_description: formData.campaign_description,
-          campaign_type: formData.campaign_type,
-          location: formData.location,
-          budget_amount: parseFloat(formData.budget_amount),
-          budget_currency: formData.budget_currency,
-          start_date: formData.start_date,
-          end_date: formData.end_date,
-          target_audience: formData.target_audience,
-          ad_unit_type: formData.ad_unit_type,
-          ad_unit_price: adUnitPrice,
-          status: "pending",
-        });
+      const { error: campaignError } = await supabase.from("campaigns").insert({
+        advertiser_id: profile.id,
+        campaign_name: formData.campaign_name,
+        campaign_description: formData.campaign_description,
+        campaign_type: formData.campaign_type,
+        location: formData.location,
+        budget_amount: parseFloat(formData.budget_amount),
+        budget_currency: formData.budget_currency,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        target_audience: formData.target_audience,
+        ad_unit_type: formData.ad_unit_type,
+        ad_unit_price: adUnitPrice,
+        status: "pending",
+      });
 
       if (campaignError) throw campaignError;
 
@@ -133,7 +133,8 @@ const CampaignBuilder = () => {
             Create Campaign
           </h1>
           <p className="text-muted-foreground">
-            Build your brand advertising campaign and reach your target audience with curated ad spaces for products, services, or events.
+            Build your brand advertising campaign and reach your target audience with curated ad spaces for products,
+            services, or events.
           </p>
         </div>
 
@@ -141,9 +142,7 @@ const CampaignBuilder = () => {
           <Card>
             <CardHeader>
               <CardTitle>Campaign Details</CardTitle>
-              <CardDescription>
-                Provide information about your campaign
-              </CardDescription>
+              <CardDescription>Provide information about your campaign</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Contact Number */}
@@ -153,7 +152,7 @@ const CampaignBuilder = () => {
                 <Input
                   id="contact_number"
                   type="tel"
-                  placeholder="+1 (555) 123-4567"
+                  placeholder="+63 945 664 0894"
                   value={formData.contact_number}
                   onChange={(e) => setFormData({ ...formData, contact_number: e.target.value })}
                   required
@@ -202,7 +201,9 @@ const CampaignBuilder = () => {
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">Indicate whether this is a product/service promotion, an event, or both.</p>
+                <p className="text-xs text-muted-foreground">
+                  Indicate whether this is a product/service promotion, an event, or both.
+                </p>
               </div>
 
               {/* Ad Unit Type & Price */}
@@ -259,7 +260,9 @@ const CampaignBuilder = () => {
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 />
-                <p className="text-xs text-muted-foreground">Specify where you want your campaign to appear in curated ad spaces.</p>
+                <p className="text-xs text-muted-foreground">
+                  Specify where you want your campaign to appear in curated ad spaces.
+                </p>
               </div>
 
               {/* Budget */}
@@ -343,10 +346,19 @@ const CampaignBuilder = () => {
               </div>
 
               <div className="rounded-md bg-muted/50 border border-border p-4 space-y-2">
-                <p className="text-xs text-muted-foreground">• The Campaign Type allows you to indicate whether this is a product/service promotion, an event, or both.</p>
-                <p className="text-xs text-muted-foreground">• Ad Unit Types are physical formats used in curated ad spaces.</p>
-                <p className="text-xs text-muted-foreground">• Target Location determines which ad spaces your campaign will appear in.</p>
-                <p className="text-xs text-muted-foreground">• Include clear campaign objectives to ensure proper placement and visibility.</p>
+                <p className="text-xs text-muted-foreground">
+                  • The Campaign Type allows you to indicate whether this is a product/service promotion, an event, or
+                  both.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  • Ad Unit Types are physical formats used in curated ad spaces.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  • Target Location determines which ad spaces your campaign will appear in.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  • Include clear campaign objectives to ensure proper placement and visibility.
+                </p>
               </div>
             </CardContent>
           </Card>
