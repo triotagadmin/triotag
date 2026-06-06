@@ -560,87 +560,170 @@ const CampaignMarketplace = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Request Modal */}
-      <Dialog open={requestOpen} onOpenChange={setRequestOpen}>
+      {/* Request Modal — 3-step wizard */}
+      <Dialog open={requestOpen} onOpenChange={(o) => (o ? setRequestOpen(true) : resetWizard())}>
         <DialogContent className="bg-[#0c0c0c] border-white/10 text-white max-w-lg">
           <DialogHeader>
-            <DialogTitle>Submit a Campaign Request</DialogTitle>
+            <div className="text-xs text-green-400 font-semibold mb-1">Step {step} of 3</div>
+            <DialogTitle>
+              {step === 1 && "Submit a Campaign Request"}
+              {step === 2 && "Check your email"}
+              {step === 3 && "Campaign Details"}
+            </DialogTitle>
             <DialogDescription className="text-white/60">
-              Post your campaign so retailers and ad space owners can respond.
+              {step === 1 && "Enter your email to get started. We'll send you a verification code."}
+              {step === 2 && `We sent a 6-digit code to ${guestEmail}.`}
+              {step === 3 && "Post your campaign so retailers and ad space owners can respond."}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmitRequest} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Campaign Name *</label>
-              <Input value={fName} onChange={(e) => setFName(e.target.value)} required className="bg-black border-white/10" />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Campaign Type *</label>
-              <div className="grid grid-cols-3 gap-2">
-                {["ooh", "dooh", "aooh"].map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setFType(t)}
-                    className={`px-3 py-2 rounded-lg border text-sm uppercase font-semibold ${
-                      fType === t
-                        ? "border-green-500 bg-green-500/10 text-green-400"
-                        : "border-white/15 text-white/70 hover:border-white/30"
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Target Location *</label>
-              <Input
-                value={fLocation}
-                onChange={(e) => setFLocation(e.target.value)}
-                placeholder="e.g. Makati, BGC, Cebu City"
-                required
-                className="bg-black border-white/10"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+
+          {step === 1 && (
+            <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">Start Date *</label>
-                <Input type="date" value={fStart} onChange={(e) => setFStart(e.target.value)} required className="bg-black border-white/10" />
+                <label className="text-sm font-medium mb-1 block">Email *</label>
+                <Input
+                  type="email"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                  className="bg-black border-white/10"
+                />
+              </div>
+              <DialogFooter className="gap-2">
+                <Button type="button" variant="outline" onClick={resetWizard} className="border-white/15">
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={sendingOtp}
+                  className="bg-green-600 hover:bg-green-500 text-white"
+                >
+                  {sendingOtp ? "Sending..." : "Send Verification Code"}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-4">
+              <div className="flex justify-center">
+                <Input
+                  type="text"
+                  value={otpValue}
+                  onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="000000"
+                  maxLength={6}
+                  className="bg-black border-white/10 text-center text-2xl tracking-widest font-mono max-w-[200px]"
+                />
+              </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={sendingOtp}
+                  className="text-xs text-green-400 hover:text-green-300 underline"
+                >
+                  {sendingOtp ? "Resending..." : "Resend code"}
+                </button>
+              </div>
+              <DialogFooter className="gap-2 sm:justify-between">
+                <Button type="button" variant="outline" onClick={() => setStep(1)} className="border-white/15">
+                  Back
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  disabled={verifyingOtp}
+                  className="bg-green-600 hover:bg-green-500 text-white"
+                >
+                  {verifyingOtp ? "Verifying..." : "Verify Code"}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+
+          {step === 3 && (
+            <form onSubmit={handleSubmitRequest} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Campaign Name *</label>
+                <Input value={fName} onChange={(e) => setFName(e.target.value)} required className="bg-black border-white/10" />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1 block">End Date *</label>
-                <Input type="date" value={fEnd} onChange={(e) => setFEnd(e.target.value)} required className="bg-black border-white/10" />
+                <label className="text-sm font-medium mb-2 block">Campaign Type *</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {["ooh", "dooh", "aooh"].map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setFType(t)}
+                      className={`px-3 py-2 rounded-lg border text-sm uppercase font-semibold ${
+                        fType === t
+                          ? "border-green-500 bg-green-500/10 text-green-400"
+                          : "border-white/15 text-white/70 hover:border-white/30"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Budget (₱)</label>
-              <Input
-                type="number"
-                value={fBudget}
-                onChange={(e) => setFBudget(e.target.value)}
-                placeholder="e.g. 15000"
-                className="bg-black border-white/10"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Additional Notes</label>
-              <Textarea
-                value={fNotes}
-                onChange={(e) => setFNotes(e.target.value)}
-                rows={3}
-                className="bg-black border-white/10"
-              />
-            </div>
-            <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setRequestOpen(false)} className="border-white/15">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={submitting} className="bg-green-600 hover:bg-green-500 text-white">
-                {submitting ? "Submitting..." : "Submit Request"}
-              </Button>
-            </DialogFooter>
-          </form>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Target Location *</label>
+                <Input
+                  value={fLocation}
+                  onChange={(e) => setFLocation(e.target.value)}
+                  placeholder="e.g. Makati, BGC, Cebu City"
+                  required
+                  className="bg-black border-white/10"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Start Date *</label>
+                  <Input type="date" value={fStart} onChange={(e) => setFStart(e.target.value)} required className="bg-black border-white/10" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">End Date *</label>
+                  <Input type="date" value={fEnd} onChange={(e) => setFEnd(e.target.value)} required className="bg-black border-white/10" />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Budget (₱)</label>
+                <Input
+                  type="number"
+                  value={fBudget}
+                  onChange={(e) => setFBudget(e.target.value)}
+                  placeholder="e.g. 15000"
+                  className="bg-black border-white/10"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Additional Notes</label>
+                <Textarea
+                  value={fNotes}
+                  onChange={(e) => setFNotes(e.target.value)}
+                  rows={3}
+                  className="bg-black border-white/10"
+                />
+              </div>
+              <DialogFooter className="gap-2 sm:justify-between">
+                {!isLoggedIn ? (
+                  <Button type="button" variant="outline" onClick={() => setStep(2)} className="border-white/15">
+                    Back
+                  </Button>
+                ) : (
+                  <Button type="button" variant="outline" onClick={resetWizard} className="border-white/15">
+                    Cancel
+                  </Button>
+                )}
+                <Button type="submit" disabled={submitting} className="bg-green-600 hover:bg-green-500 text-white">
+                  {submitting ? "Submitting..." : "Submit Request"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>
