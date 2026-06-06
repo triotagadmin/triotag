@@ -75,7 +75,7 @@ const TermsOfService = () => {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">6. Publisher Terms</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">6. Retailer Terms</h2>
             <p className="text-muted-foreground mb-4">As a publisher (venue, agent, or digital), you agree to:</p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
               <li>Provide accurate descriptions of your advertising inventory</li>

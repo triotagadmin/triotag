@@ -128,7 +128,7 @@ const VenuePublisherDashboard = () => {
         {/* Header */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Ad Space Publisher Dashboard</h1>
+            <h1 className="text-3xl font-bold">Ad Space Retailer Dashboard</h1>
             <p className="text-muted-foreground mt-1">Manage your ad spaces, events, and tickets</p>
           </div>
           <div className="flex md:justify-end items-start">

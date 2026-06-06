@@ -93,7 +93,7 @@ export default function SolutionsDOOH() {
             <div className="text-xs font-semibold tracking-widest text-green-500 uppercase">Supply-Side Platform</div>
             <h2 className="text-3xl md:text-4xl font-bold">One platform. Hundreds of screens. Full control.</h2>
             <p className="text-zinc-400 leading-relaxed">
-              TrioTag acts as the SSP layer between venue owners with digital screens and brands looking for premium digital placements. Publisher venues register their screens on our platform — advertisers book timeslots, upload creatives, and track performance — all from a single dashboard. Programmatic DOOH made accessible for the Philippine market.
+              TrioTag acts as the SSP layer between venue owners with digital screens and brands looking for premium digital placements. Retailer venues register their screens on our platform — advertisers book timeslots, upload creatives, and track performance — all from a single dashboard. Programmatic DOOH made accessible for the Philippine market.
             </p>
           </div>
           <div className="space-y-3">

@@ -1102,7 +1102,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="publishers" className="space-y-6">
-            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "publisher" || s.type === "ad_space"), "Publisher Submissions", "Manage venue, digital, and agent publisher submissions")}
+            {renderSubmissionsPanel(filteredSubmissions.filter(s => s.type === "publisher" || s.type === "ad_space"), "Retailer Submissions", "Manage venue, digital, and agent retailer submissions")}
           </TabsContent>
 
           <TabsContent value="advertisers" className="space-y-6">

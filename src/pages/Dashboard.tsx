@@ -121,7 +121,7 @@ const Dashboard = () => {
         )}
 
         <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4">Publisher Options</h3>
+          <h3 className="text-xl font-bold mb-4">Retailer Options</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
             <Card className="cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate("/venue")}>
               <CardHeader>

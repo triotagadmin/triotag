@@ -139,7 +139,7 @@ const dropdownForRole = (role: Role): MenuItem[] => {
 
 const ROLE_LABEL: Record<string, string> = {
   advertiser: "Advertiser",
-  publisher: "Publisher",
+  publisher: "Retailer",
   print_partner: "Print Partner",
   talent: "Talent",
   admin: "Admin",

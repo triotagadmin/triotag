@@ -54,7 +54,7 @@ const VenueInventory = () => {
       if (!profile) {
         toast({
           title: "Error",
-          description: "Publisher profile not found",
+          description: "Retailer profile not found",
           variant: "destructive",
         });
         return;
