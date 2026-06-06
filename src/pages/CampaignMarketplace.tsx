@@ -182,10 +182,6 @@ const CampaignMarketplace = () => {
     setRequestOpen(true);
   };
 
-  // NOTE: To fully remove the "Log In" button from the email, go to:
-  // Supabase Dashboard → Authentication → Email Templates → "Magic Link"
-  // Change the template to only show the OTP token: {{ .Token }}
-  // Remove the {{ .ConfirmationURL }} button entirely
   const handleSendOtp = async () => {
     if (!guestEmail || !/^\S+@\S+\.\S+$/.test(guestEmail)) {
       toast.error("Please enter a valid email address.");
@@ -193,16 +189,15 @@ const CampaignMarketplace = () => {
     }
     setSendingOtp(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: guestEmail,
-        options: {
-          shouldCreateUser: true,
-          emailRedirectTo: undefined, // prevents magic link, forces OTP code
-        },
+      const { data, error } = await supabase.functions.invoke("send-otp", {
+        body: { email: guestEmail },
       });
-      if (error) throw error;
+      if (error || !data?.ok) {
+        toast.error("Failed to send code. Please try again.");
+        return;
+      }
       setStep(2);
-      toast.success("Verification code sent! Check your inbox.");
+      toast.success("Check your email for a 6-digit code!");
     } catch (err: any) {
       toast.error(err?.message || "Failed to send verification code.");
     } finally {
@@ -217,27 +212,23 @@ const CampaignMarketplace = () => {
     }
     setVerifyingOtp(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: guestEmail,
-        token: otpValue,
-        type: "email",
+      const { data, error } = await supabase.functions.invoke("verify-otp", {
+        body: { email: guestEmail, code: otpValue },
       });
-      if (error) {
-        toast.error("Invalid or expired code. Please try again.");
+      if (error || !data?.ok) {
+        toast.error(data?.error || "Invalid or expired code. Please try again.");
         return;
       }
-      // Immediately sign out so they don't get a full session
-      // They are just email-verified guests, not logged-in users
-      await supabase.auth.signOut();
       setEmailVerified(true);
       setStep(3);
-      toast.success("Email verified! Now fill in your campaign details.");
+      toast.success("Email verified! Fill in your campaign details.");
     } catch (err: any) {
       toast.error(err?.message || "Invalid or expired code. Please try again.");
     } finally {
       setVerifyingOtp(false);
     }
   };
+
 
   const resetWizard = () => {
     setRequestOpen(false);
