@@ -257,6 +257,8 @@ const CampaignMarketplace = () => {
       const { data: { session } } = await supabase.auth.getSession();
       const isGuest = !session || !isLoggedIn;
 
+      let campaignId: string | null = null;
+
       if (session && isLoggedIn) {
         const { data: profile } = await supabase
           .from("advertiser_profiles")
@@ -265,7 +267,7 @@ const CampaignMarketplace = () => {
           .maybeSingle();
 
         if (profile?.id) {
-          const { error } = await supabase.from("campaigns").insert({
+          const { data: inserted, error } = await supabase.from("campaigns").insert({
             advertiser_id: profile.id,
             campaign_name: fName,
             campaign_type: fType,
@@ -276,10 +278,11 @@ const CampaignMarketplace = () => {
             budget_currency: "PHP",
             campaign_description: fNotes || null,
             status: "pending",
-          });
+          }).select("id").single();
           if (error) throw error;
+          campaignId = inserted?.id ?? null;
         } else {
-          const { error } = await supabase.from("guest_campaigns").insert({
+          const { data: inserted, error } = await supabase.from("guest_campaigns").insert({
             email: session.user.email,
             email_verified: true,
             campaign_name: fName,
@@ -290,11 +293,12 @@ const CampaignMarketplace = () => {
             budget_amount: fBudget ? Number(fBudget) : null,
             campaign_description: fNotes || null,
             status: "pending",
-          });
+          }).select("id").single();
           if (error) throw error;
+          campaignId = inserted?.id ?? null;
         }
       } else {
-        const { error } = await supabase.from("guest_campaigns").insert({
+        const { data: inserted, error } = await supabase.from("guest_campaigns").insert({
           email: guestEmail,
           email_verified: true,
           campaign_name: fName,
@@ -305,8 +309,9 @@ const CampaignMarketplace = () => {
           budget_amount: fBudget ? Number(fBudget) : null,
           campaign_description: fNotes || null,
           status: "pending",
-        });
+        }).select("id").single();
         if (error) throw error;
+        campaignId = inserted?.id ?? null;
       }
 
       await supabase.functions.invoke("notify-campaign-submission", {
@@ -319,6 +324,7 @@ const CampaignMarketplace = () => {
           endDate: fEnd,
           budget: fBudget || "Flexible",
           isGuest,
+          campaignId,
         },
       });
 
