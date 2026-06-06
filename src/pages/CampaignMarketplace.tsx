@@ -583,10 +583,17 @@ const CampaignMarketplace = () => {
               {step === 2 && "Check your email"}
               {step === 3 && "Campaign Details"}
             </DialogTitle>
-            <DialogDescription className="text-white/60">
-              {step === 1 && "Enter your email to get started. We'll send you a verification code."}
-              {step === 2 && `We sent a 6-digit code to ${guestEmail}.`}
-              {step === 3 && "Post your campaign so retailers and ad space owners can respond."}
+            <DialogDescription className="text-white/60" asChild>
+              <div>
+                {step === 1 && "Enter your email to get started. We'll send you a verification code."}
+                {step === 2 && (
+                  <p className="text-zinc-400 text-sm">
+                    We sent a 6-digit verification code to <span className="text-white font-medium">{guestEmail}</span>.
+                    Enter it below to verify your email. <strong>Do not click the Log In button</strong> — just copy the 6-digit code from the email.
+                  </p>
+                )}
+                {step === 3 && "Post your campaign so retailers and ad space owners can respond."}
+              </div>
             </DialogDescription>
           </DialogHeader>
 
