@@ -15,10 +15,19 @@ serve(async (req) => {
 
   try {
     const { email } = await req.json();
+    if (!email) {
+      return new Response(JSON.stringify({ ok: false, error: "Email required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await resend.emails.send({
-      from: "TrioTag <noreply@tinystickyads.com>",
+    // NOTE: Using Resend's universal onboarding sender so we don't depend on a verified domain.
+    // Switch to "TrioTag <noreply@tinystickyads.com>" once tinystickyads.com is verified in Resend.
+    const { data, error } = await resend.emails.send({
+      from: "TrioTag <onboarding@resend.dev>",
       to: [email],
       subject: `Your TrioTag code: ${code}`,
       html: `
@@ -33,6 +42,15 @@ serve(async (req) => {
       `,
     });
 
+    if (error) {
+      console.error("[send-otp] Resend error:", error);
+      return new Response(
+        JSON.stringify({ ok: false, error: error.message || "Email provider rejected the send." }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
+    console.log("[send-otp] Email sent:", data?.id);
     const expiresAt = Date.now() + 10 * 60 * 1000;
     return new Response(JSON.stringify({ ok: true, code, expiresAt }), {
       status: 200,
