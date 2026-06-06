@@ -241,7 +241,8 @@ export default function AdvertiserExplore() {
                 </Button>
               </aside>
             )}
-          </section>
+            </section>
+          )}
 
           {/* City strip */}
           <section className="px-6 lg:px-8 py-6 bg-white">
