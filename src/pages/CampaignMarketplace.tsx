@@ -610,6 +610,9 @@ const CampaignMarketplace = () => {
                   className="bg-black border-white/10"
                 />
               </div>
+              <p className="text-xs text-zinc-500 text-center mt-2">
+                Check your inbox for a 6-digit number code from Triotag
+              </p>
               <DialogFooter className="gap-2">
                 <Button type="button" variant="outline" onClick={resetWizard} className="border-white/15">
                   Cancel
