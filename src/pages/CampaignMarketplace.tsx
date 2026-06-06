@@ -8,17 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import {
-  Calendar, MapPin, DollarSign, Clock, Megaphone, Search, Plus,
-} from "lucide-react";
+import { Calendar, MapPin, DollarSign, Clock, Megaphone, Search, Plus } from "lucide-react";
 
 type Campaign = {
   id: string;
@@ -49,14 +50,97 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 const FAUX_CAMPAIGNS: Campaign[] = [
-  { id: "faux-1", campaign_name: "SM Mall OOH Rollout", campaign_type: "OOH", status: "inactive", start_date: "2025-08-01", end_date: "2025-08-31", budget_amount: 45000, budget_currency: "PHP", location: "SM Mall of Asia, Pasay City", campaign_description: null, created_at: "2025-07-01T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "FreshBev Philippines" } },
-  { id: "faux-2", campaign_name: "Gym Network DOOH Campaign", campaign_type: "DOOH", status: "inactive", start_date: "2025-09-01", end_date: "2025-09-30", budget_amount: 80000, budget_currency: "PHP", location: "Makati & BGC Gyms", campaign_description: null, created_at: "2025-07-05T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "ActiveLife Supplements" } },
-  { id: "faux-3", campaign_name: "In-Store Audio — Back to School", campaign_type: "AOOH", status: "inactive", start_date: "2025-07-15", end_date: "2025-08-15", budget_amount: 25000, budget_currency: "PHP", location: "Quezon City Supermarkets", campaign_description: null, created_at: "2025-07-08T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "Schoolhouse PH" } },
-  { id: "faux-4", campaign_name: "Salon Network Skincare Launch", campaign_type: "DOOH", status: "inactive", start_date: "2025-10-01", end_date: "2025-10-31", budget_amount: 60000, budget_currency: "PHP", location: "Metro Manila Salons", campaign_description: null, created_at: "2025-07-10T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "GlowUp Cosmetics" } },
-  { id: "faux-5", campaign_name: "Cebu Retail OOH — New Flavor", campaign_type: "OOH", status: "inactive", start_date: "2025-08-15", end_date: "2025-09-15", budget_amount: 30000, budget_currency: "PHP", location: "Cebu City Retail Stores", campaign_description: null, created_at: "2025-07-12T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "TasteWave Snacks" } },
-  { id: "faux-6", campaign_name: "AOOH Wellness Campaign", campaign_type: "AOOH", status: "inactive", start_date: "2025-09-15", end_date: "2025-10-15", budget_amount: 20000, budget_currency: "PHP", location: "Taguig & Pasig Pharmacies", campaign_description: null, created_at: "2025-07-14T00:00:00Z", advertiser_id: "faux", advertiser_profiles: { company_name: "VitalCare Health" } },
+  {
+    id: "faux-1",
+    campaign_name: "SM Mall OOH Rollout",
+    campaign_type: "OOH",
+    status: "inactive",
+    start_date: "2025-08-01",
+    end_date: "2025-08-31",
+    budget_amount: 45000,
+    budget_currency: "PHP",
+    location: "SM Mall of Asia, Pasay City",
+    campaign_description: null,
+    created_at: "2025-07-01T00:00:00Z",
+    advertiser_id: "faux",
+    advertiser_profiles: { company_name: "FreshBev Philippines" },
+  },
+  {
+    id: "faux-2",
+    campaign_name: "Gym Network DOOH Campaign",
+    campaign_type: "DOOH",
+    status: "inactive",
+    start_date: "2025-09-01",
+    end_date: "2025-09-30",
+    budget_amount: 80000,
+    budget_currency: "PHP",
+    location: "Makati & BGC Gyms",
+    campaign_description: null,
+    created_at: "2025-07-05T00:00:00Z",
+    advertiser_id: "faux",
+    advertiser_profiles: { company_name: "ActiveLife Supplements" },
+  },
+  {
+    id: "faux-3",
+    campaign_name: "In-Store Audio — Back to School",
+    campaign_type: "AOOH",
+    status: "inactive",
+    start_date: "2025-07-15",
+    end_date: "2025-08-15",
+    budget_amount: 25000,
+    budget_currency: "PHP",
+    location: "Quezon City Supermarkets",
+    campaign_description: null,
+    created_at: "2025-07-08T00:00:00Z",
+    advertiser_id: "faux",
+    advertiser_profiles: { company_name: "Schoolhouse PH" },
+  },
+  {
+    id: "faux-4",
+    campaign_name: "Salon Network Skincare Launch",
+    campaign_type: "DOOH",
+    status: "inactive",
+    start_date: "2025-10-01",
+    end_date: "2025-10-31",
+    budget_amount: 60000,
+    budget_currency: "PHP",
+    location: "Metro Manila Salons",
+    campaign_description: null,
+    created_at: "2025-07-10T00:00:00Z",
+    advertiser_id: "faux",
+    advertiser_profiles: { company_name: "GlowUp Cosmetics" },
+  },
+  {
+    id: "faux-5",
+    campaign_name: "Cebu Retail OOH — New Flavor",
+    campaign_type: "OOH",
+    status: "inactive",
+    start_date: "2025-08-15",
+    end_date: "2025-09-15",
+    budget_amount: 30000,
+    budget_currency: "PHP",
+    location: "Cebu City Retail Stores",
+    campaign_description: null,
+    created_at: "2025-07-12T00:00:00Z",
+    advertiser_id: "faux",
+    advertiser_profiles: { company_name: "TasteWave Snacks" },
+  },
+  {
+    id: "faux-6",
+    campaign_name: "AOOH Wellness Campaign",
+    campaign_type: "AOOH",
+    status: "inactive",
+    start_date: "2025-09-15",
+    end_date: "2025-10-15",
+    budget_amount: 20000,
+    budget_currency: "PHP",
+    location: "Taguig & Pasig Pharmacies",
+    campaign_description: null,
+    created_at: "2025-07-14T00:00:00Z",
+    advertiser_id: "faux",
+    advertiser_profiles: { company_name: "VitalCare Health" },
+  },
 ];
-
 
 const formatBudget = (amt: number | null, ccy: string | null) => {
   if (!amt) return "Budget: Flexible";
@@ -85,14 +169,6 @@ const CampaignMarketplace = () => {
   const [requestOpen, setRequestOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Proposal dialog
-  const [proposalFor, setProposalFor] = useState<Campaign | null>(null);
-  const [pName, setPName] = useState("");
-  const [pEmail, setPEmail] = useState("");
-  const [pVenue, setPVenue] = useState("");
-  const [pMessage, setPMessage] = useState("");
-  const [sendingProposal, setSendingProposal] = useState(false);
-
   // wizard
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [guestEmail, setGuestEmail] = useState("");
@@ -119,14 +195,14 @@ const CampaignMarketplace = () => {
       supabase
         .from("campaigns")
         .select(
-          "id, campaign_name, campaign_type, start_date, end_date, budget_amount, budget_currency, location, campaign_description, created_at, status, advertiser_id, advertiser_profiles(company_name)"
+          "id, campaign_name, campaign_type, start_date, end_date, budget_amount, budget_currency, location, campaign_description, created_at, status, advertiser_id, advertiser_profiles(company_name)",
         )
         .in("status", ["pending", "approved"])
         .order("created_at", { ascending: false }),
       supabase
         .from("guest_campaigns")
         .select(
-          "id, email, campaign_name, campaign_type, start_date, end_date, budget_amount, budget_currency, location, campaign_description, created_at, status"
+          "id, email, campaign_name, campaign_type, start_date, end_date, budget_amount, budget_currency, location, campaign_description, created_at, status",
         )
         .eq("email_verified", true)
         .in("status", ["pending", "approved"])
@@ -139,7 +215,7 @@ const CampaignMarketplace = () => {
       advertiser_profiles: { company_name: null },
     }));
 
-    setCampaigns([...(((realData as any[]) || [])), ...mapped]);
+    setCampaigns([...((realData as any[]) || []), ...mapped]);
     setLoading(false);
   };
 
@@ -165,12 +241,11 @@ const CampaignMarketplace = () => {
 
   const displayCampaigns = useMemo(
     () => (campaigns.length > 0 ? [...campaigns, ...FAUX_CAMPAIGNS] : FAUX_CAMPAIGNS),
-    [campaigns]
+    [campaigns],
   );
 
   const counts = useMemo(() => {
-    const t = (k: string) =>
-      displayCampaigns.filter((c) => (c.campaign_type || "").toLowerCase() === k).length;
+    const t = (k: string) => displayCampaigns.filter((c) => (c.campaign_type || "").toLowerCase() === k).length;
     return { total: displayCampaigns.length, ooh: t("ooh"), dooh: t("dooh"), aooh: t("aooh") };
   }, [displayCampaigns]);
 
@@ -186,7 +261,6 @@ const CampaignMarketplace = () => {
       return true;
     });
   }, [displayCampaigns, search, typeFilter, budgetFilter]);
-
 
   const openRequest = () => {
     setRequestOpen(true);
@@ -235,56 +309,19 @@ const CampaignMarketplace = () => {
     toast.success("Email verified! Fill in your campaign details.");
   };
 
-
   const resetWizard = () => {
     setRequestOpen(false);
     setStep(1);
     setGuestEmail("");
     setOtpValue("");
     setEmailVerified(false);
-    setFName(""); setFType("ooh"); setFLocation("");
-    setFStart(""); setFEnd(""); setFBudget(""); setFNotes("");
-  };
-
-  const resetProposal = () => {
-    setProposalFor(null);
-    setPName(""); setPEmail(""); setPVenue(""); setPMessage("");
-  };
-
-  const handleSubmitProposal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!proposalFor) return;
-    if (!pName || !pEmail || !pMessage) {
-      toast.error("Please fill in your name, email, and message.");
-      return;
-    }
-    if (!/^\S+@\S+\.\S+$/.test(pEmail)) {
-      toast.error("Please enter a valid email.");
-      return;
-    }
-    setSendingProposal(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("notify-proposal-submitted", {
-        body: {
-          campaignId: proposalFor.id,
-          campaignName: proposalFor.campaign_name,
-          proposerName: pName,
-          proposerEmail: pEmail,
-          proposerVenue: pVenue,
-          proposerMessage: pMessage,
-        },
-      });
-      if (error || (data && (data as any).error)) {
-        throw new Error(error?.message || (data as any)?.error || "Failed to send");
-      }
-      toast.success("Proposal sent! The campaign owner will be notified.");
-      resetProposal();
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.message || "Failed to send proposal.");
-    } finally {
-      setSendingProposal(false);
-    }
+    setFName("");
+    setFType("ooh");
+    setFLocation("");
+    setFStart("");
+    setFEnd("");
+    setFBudget("");
+    setFNotes("");
   };
 
   const handleSubmitRequest = async (e: React.FormEvent) => {
@@ -295,10 +332,10 @@ const CampaignMarketplace = () => {
     }
     setSubmitting(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const isGuest = !session || !isLoggedIn;
-
-      let campaignId: string | null = null;
 
       if (session && isLoggedIn) {
         const { data: profile } = await supabase
@@ -308,7 +345,7 @@ const CampaignMarketplace = () => {
           .maybeSingle();
 
         if (profile?.id) {
-          const { data: inserted, error } = await supabase.from("campaigns").insert({
+          const { error } = await supabase.from("campaigns").insert({
             advertiser_id: profile.id,
             campaign_name: fName,
             campaign_type: fType,
@@ -319,11 +356,10 @@ const CampaignMarketplace = () => {
             budget_currency: "PHP",
             campaign_description: fNotes || null,
             status: "pending",
-          }).select("id").single();
+          });
           if (error) throw error;
-          campaignId = inserted?.id ?? null;
         } else {
-          const { data: inserted, error } = await supabase.from("guest_campaigns").insert({
+          const { error } = await supabase.from("guest_campaigns").insert({
             email: session.user.email,
             email_verified: true,
             campaign_name: fName,
@@ -334,12 +370,11 @@ const CampaignMarketplace = () => {
             budget_amount: fBudget ? Number(fBudget) : null,
             campaign_description: fNotes || null,
             status: "pending",
-          }).select("id").single();
+          });
           if (error) throw error;
-          campaignId = inserted?.id ?? null;
         }
       } else {
-        const { data: inserted, error } = await supabase.from("guest_campaigns").insert({
+        const { error } = await supabase.from("guest_campaigns").insert({
           email: guestEmail,
           email_verified: true,
           campaign_name: fName,
@@ -350,9 +385,8 @@ const CampaignMarketplace = () => {
           budget_amount: fBudget ? Number(fBudget) : null,
           campaign_description: fNotes || null,
           status: "pending",
-        }).select("id").single();
+        });
         if (error) throw error;
-        campaignId = inserted?.id ?? null;
       }
 
       await supabase.functions.invoke("notify-campaign-submission", {
@@ -365,7 +399,6 @@ const CampaignMarketplace = () => {
           endDate: fEnd,
           budget: fBudget || "Flexible",
           isGuest,
-          campaignId,
         },
       });
 
@@ -413,10 +446,11 @@ const CampaignMarketplace = () => {
             Campaign Marketplace
           </span>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 max-w-3xl">
-            Open Campaigns Looking for Ad Spaces
+            Real-Time Campaigns Looking for Ad Inventory
           </h1>
           <p className="text-white/70 max-w-2xl mb-8">
-            Browse active campaign requests from brands and retailers. If you have the right ad space, submit a proposal directly.
+            Browse active campaign requests from brands and retailers. If you have the right ad space, submit a proposal
+            directly.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-3xl">
@@ -558,15 +592,10 @@ const CampaignMarketplace = () => {
                         Inactive
                       </Button>
                     ) : (
-                      <Button
-                        size="sm"
-                        className="flex-1 bg-green-600 hover:bg-green-500 text-white"
-                        onClick={() => setProposalFor(c)}
-                      >
-                        Submit Proposal
+                      <Button asChild size="sm" className="flex-1 bg-green-600 hover:bg-green-500 text-white">
+                        <Link to={`/contact?campaign=${c.id}`}>Submit Proposal</Link>
                       </Button>
                     )}
-
                   </div>
                 </div>
               ))}
@@ -594,12 +623,19 @@ const CampaignMarketplace = () => {
                   By <span className="text-white">{detail.advertiser_profiles?.company_name || "Anonymous Brand"}</span>
                 </div>
                 {(detail.start_date || detail.end_date) && (
-                  <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-green-500" /> {detail.start_date} → {detail.end_date}</div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-green-500" /> {detail.start_date} → {detail.end_date}
+                  </div>
                 )}
                 {detail.location && (
-                  <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-green-500" /> {detail.location}</div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-green-500" /> {detail.location}
+                  </div>
                 )}
-                <div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-green-500" /> {formatBudget(detail.budget_amount, detail.budget_currency)}</div>
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-green-500" />{" "}
+                  {formatBudget(detail.budget_amount, detail.budget_currency)}
+                </div>
                 {detail.campaign_description && (
                   <div className="pt-2 border-t border-white/10 text-white/80 whitespace-pre-wrap">
                     {detail.campaign_description}
@@ -607,12 +643,11 @@ const CampaignMarketplace = () => {
                 )}
               </div>
               <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={() => setDetail(null)} className="border-white/15">Close</Button>
-                <Button
-                  className="bg-green-600 hover:bg-green-500 text-white"
-                  onClick={() => { setProposalFor(detail); setDetail(null); }}
-                >
-                  Submit a Proposal
+                <Button variant="outline" onClick={() => setDetail(null)} className="border-white/15">
+                  Close
+                </Button>
+                <Button asChild className="bg-green-600 hover:bg-green-500 text-white">
+                  <Link to={`/contact?campaign=${detail.id}`}>Submit a Proposal</Link>
                 </Button>
               </DialogFooter>
             </>
@@ -636,7 +671,8 @@ const CampaignMarketplace = () => {
                 {step === 2 && (
                   <p className="text-zinc-400 text-sm">
                     We sent a 6-digit verification code to <span className="text-white font-medium">{guestEmail}</span>.
-                    Enter it below to verify your email. <strong>Do not click the Log In button</strong> — just copy the 6-digit code from the email.
+                    Enter it below to verify your email. <strong>Do not click the Log In button</strong> — just copy the
+                    6-digit code from the email.
                   </p>
                 )}
                 {step === 3 && "Post your campaign so retailers and ad space owners can respond."}
@@ -718,7 +754,12 @@ const CampaignMarketplace = () => {
             <form onSubmit={handleSubmitRequest} className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">Campaign Name *</label>
-                <Input value={fName} onChange={(e) => setFName(e.target.value)} required className="bg-black border-white/10" />
+                <Input
+                  value={fName}
+                  onChange={(e) => setFName(e.target.value)}
+                  required
+                  className="bg-black border-white/10"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">Campaign Type *</label>
@@ -752,11 +793,23 @@ const CampaignMarketplace = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium mb-1 block">Start Date *</label>
-                  <Input type="date" value={fStart} onChange={(e) => setFStart(e.target.value)} required className="bg-black border-white/10" />
+                  <Input
+                    type="date"
+                    value={fStart}
+                    onChange={(e) => setFStart(e.target.value)}
+                    required
+                    className="bg-black border-white/10"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block">End Date *</label>
-                  <Input type="date" value={fEnd} onChange={(e) => setFEnd(e.target.value)} required className="bg-black border-white/10" />
+                  <Input
+                    type="date"
+                    value={fEnd}
+                    onChange={(e) => setFEnd(e.target.value)}
+                    required
+                    className="bg-black border-white/10"
+                  />
                 </div>
               </div>
               <div>
@@ -790,60 +843,6 @@ const CampaignMarketplace = () => {
                 )}
                 <Button type="submit" disabled={submitting} className="bg-green-600 hover:bg-green-500 text-white">
                   {submitting ? "Submitting..." : "Submit Request"}
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Proposal Dialog */}
-      <Dialog open={!!proposalFor} onOpenChange={(o) => !o && resetProposal()}>
-        <DialogContent className="bg-[#0c0c0c] border-white/10 text-white max-w-lg">
-          {proposalFor && (
-            <form onSubmit={handleSubmitProposal}>
-              <DialogHeader>
-                <DialogTitle>Submit a Proposal</DialogTitle>
-                <DialogDescription className="text-white/60">
-                  Send your proposal to the owner of <span className="text-white font-medium">{proposalFor.campaign_name}</span>.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-2">
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Your Name *</label>
-                  <Input value={pName} onChange={(e) => setPName(e.target.value)} required className="bg-black border-white/10" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Your Email *</label>
-                  <Input type="email" value={pEmail} onChange={(e) => setPEmail(e.target.value)} required className="bg-black border-white/10" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Your Venue / Ad Space</label>
-                  <Input
-                    value={pVenue}
-                    onChange={(e) => setPVenue(e.target.value)}
-                    placeholder="e.g. Gym in Makati, Cafe in BGC"
-                    className="bg-black border-white/10"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Message *</label>
-                  <Textarea
-                    value={pMessage}
-                    onChange={(e) => setPMessage(e.target.value)}
-                    rows={4}
-                    placeholder="Describe your space and why it's a good fit..."
-                    required
-                    className="bg-black border-white/10"
-                  />
-                </div>
-              </div>
-              <DialogFooter className="gap-2">
-                <Button type="button" variant="outline" onClick={resetProposal} className="border-white/15">
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={sendingProposal} className="bg-green-600 hover:bg-green-500 text-white">
-                  {sendingProposal ? "Sending..." : "Send Proposal"}
                 </Button>
               </DialogFooter>
             </form>
