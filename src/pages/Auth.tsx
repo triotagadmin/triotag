@@ -659,7 +659,7 @@ const Auth = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="advertiser">Publisher</SelectItem>
+                      <SelectItem value="advertiser">Retailer</SelectItem>
                       <SelectItem value="venue">Agent</SelectItem>
                     </SelectContent>
                   </Select>
