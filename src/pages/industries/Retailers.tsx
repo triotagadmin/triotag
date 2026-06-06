@@ -171,7 +171,7 @@ const Retailers = () => {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             {[
-              ["18+", "Verified Publisher Partners"],
+              ["18+", "Verified Retailer Partners"],
               ["100+", "Active Ad Spaces Listed"],
               ["48hrs", "Average Approval Time"],
               ["₱0", "Cost to List Your Space"],
@@ -200,26 +200,26 @@ const Retailers = () => {
             ))}
           </div>
           <p className="max-w-2xl mx-auto text-white/70">
-            Publishers in our network earn passive income every month from
+            Retailers in our network earn passive income every month from
             surfaces they already own. Zero setup cost. Full control over which
             ads run.
           </p>
         </div>
       </section>
 
-      {/* Section 7: Publisher Sign-Up CTA */}
+      {/* Section 7: Retailer Sign-Up CTA */}
       <section className="bg-black py-20 md:py-28">
         <div className="border border-green-500/20 rounded-3xl mx-4 md:mx-12 p-8 md:p-12 bg-[#070707]">
           <div className="grid lg:grid-cols-2 gap-10">
             <div>
               <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold mb-5">
-                Join the TrioTag Publisher Network
+                Join the TrioTag Retailer Network
               </span>
               <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-5">
                 Start earning from your space — for free
               </h2>
               <p className="text-white/70 mb-6">
-                List your venue on TrioTag's publisher marketplace in under 10
+                List your venue on TrioTag's retailer marketplace in under 10
                 minutes. Brands and advertisers will find your space, book it,
                 and pay you directly. No sales calls. No chasing payments. Just
                 passive income from the surfaces you already have.
@@ -254,7 +254,7 @@ const Retailers = () => {
                   "Free to list — no upfront cost",
                   "You approve every ad booking",
                   "Monthly GCash or bank payouts",
-                  "Dedicated publisher support team",
+                  "Dedicated retailer support team",
                   "Real-time earnings dashboard",
                   "Pause or remove listings anytime",
                 ].map((c) => (
@@ -270,10 +270,10 @@ const Retailers = () => {
             <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-8 self-start">
               <h3 className="text-2xl font-bold mb-2">List Your Space Today</h3>
               <p className="text-white/70 text-sm mb-6">
-                Create your free publisher account and submit your first space in minutes.
+                Create your free retailer account and submit your first space in minutes.
               </p>
               <Button size="lg" variant="cyber" className="w-full" onClick={goPublisherSignup}>
-                Sign Up as a Publisher
+                Sign Up as a Retailer
               </Button>
 
               <div className="flex items-center gap-3 my-5 text-white/40 text-xs">
