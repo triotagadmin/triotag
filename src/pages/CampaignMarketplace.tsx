@@ -518,11 +518,11 @@ const CampaignMarketplace = () => {
                       </Button>
                     ) : (
                       <Button
-                        asChild
                         size="sm"
                         className="flex-1 bg-green-600 hover:bg-green-500 text-white"
+                        onClick={() => setProposalFor(c)}
                       >
-                        <Link to={`/contact?campaign=${c.id}`}>Submit Proposal</Link>
+                        Submit Proposal
                       </Button>
                     )}
 
