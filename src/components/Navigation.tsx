@@ -38,6 +38,8 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "Media Truck", to: "/solutions/media-truck" },
     ],
   },
+  { label: "Inventory", to: "/advertiser/explore" },
+  { label: "Campaigns", to: "/campaigns" },
   { label: "Insights", to: "/insights" },
   { label: "Company", to: "/contact" },
 ];
@@ -211,82 +213,43 @@ export const Navigation = () => {
         </Link>
 
         <div className="hidden lg:flex items-center gap-1">
-          {user ? (
-            links.map((l) => (
-              <Link
-                key={l.label}
-                to={l.to}
-                onClick={(e) => handleGatedClick(l, e)}
-                className={`px-3 py-2 text-sm transition-colors border-b-2 ${
-                  isActive(l.to)
-                    ? "text-green-500 border-green-500"
-                    : "text-zinc-300 border-transparent hover:text-green-500"
-                }`}
-              >
-                {l.label}
-              </Link>
-            ))
-          ) : (
-            <>
-              {NAV_ITEMS.map((item) =>
-                item.children ? (
-                  <DropdownMenu key={item.label}>
-                    <DropdownMenuTrigger asChild>
-                      <button className="px-3 py-2 text-sm transition-colors border-b-2 border-transparent text-zinc-300 hover:text-green-500 inline-flex items-center gap-1 outline-none">
-                        {item.label}
-                        <ChevronDown className="w-3.5 h-3.5 transition-transform data-[state=open]:rotate-180" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      className="min-w-[12rem] rounded-xl shadow-2xl p-2 border border-white/10 bg-[#0c0c0c]"
-                    >
-                      {item.children.map((c) => (
-                        <DropdownMenuItem
-                          key={c.label}
-                          onClick={() => navigate(c.to)}
-                          className="cursor-pointer text-zinc-100 font-medium hover:text-green-400 hover:bg-white/5 focus:bg-white/5 focus:text-green-400"
-                        >
-                          {c.label}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <Link
-                    key={item.label}
-                    to={item.to!}
-                    className={`px-3 py-2 text-sm transition-colors border-b-2 ${
-                      isActive(item.to!)
-                        ? "text-green-500 border-green-500"
-                        : "text-zinc-300 border-transparent hover:text-green-500"
-                    }`}
-                  >
+          {NAV_ITEMS.map((item) =>
+            item.children ? (
+              <DropdownMenu key={item.label}>
+                <DropdownMenuTrigger asChild>
+                  <button className="px-3 py-2 text-sm transition-colors border-b-2 border-transparent text-zinc-300 hover:text-green-500 inline-flex items-center gap-1 outline-none">
                     {item.label}
-                  </Link>
-                )
-              )}
+                    <ChevronDown className="w-3.5 h-3.5 transition-transform data-[state=open]:rotate-180" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="min-w-[12rem] rounded-xl shadow-2xl p-2 border border-white/10 bg-[#0c0c0c]"
+                >
+                  {item.children.map((c) => (
+                    <DropdownMenuItem
+                      key={c.label}
+                      onClick={() => navigate(c.to)}
+                      className="cursor-pointer text-zinc-100 font-medium hover:text-green-400 hover:bg-white/5 focus:bg-white/5 focus:text-green-400"
+                    >
+                      {c.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
               <Link
-                to={INVENTORY_LINK.to}
+                key={item.label}
+                to={item.to!}
                 className={`px-3 py-2 text-sm transition-colors border-b-2 ${
-                  isActive(INVENTORY_LINK.to)
+                  isActive(item.to!)
                     ? "text-green-500 border-green-500"
                     : "text-zinc-300 border-transparent hover:text-green-500"
                 }`}
               >
-                {INVENTORY_LINK.label}
+                {item.label}
               </Link>
-              <Link
-                to={CAMPAIGNS_LINK.to}
-                className={`px-3 py-2 text-sm transition-colors border-b-2 ${
-                  isActive(CAMPAIGNS_LINK.to)
-                    ? "text-green-500 border-green-500"
-                    : "text-zinc-300 border-transparent hover:text-green-500"
-                }`}
-              >
-                {CAMPAIGNS_LINK.label}
-              </Link>
-            </>
+            )
           )}
         </div>
 
