@@ -992,6 +992,33 @@ export type Database = {
           },
         ]
       }
+      campaign_subscriptions: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          email: string
+          id: string
+          subscribe_token: string
+          subscribed: boolean
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          email: string
+          id?: string
+          subscribe_token: string
+          subscribed?: boolean
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          subscribe_token?: string
+          subscribed?: boolean
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           ad_unit_price: number | null
