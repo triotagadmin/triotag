@@ -85,6 +85,14 @@ const CampaignMarketplace = () => {
   const [requestOpen, setRequestOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Proposal dialog
+  const [proposalFor, setProposalFor] = useState<Campaign | null>(null);
+  const [pName, setPName] = useState("");
+  const [pEmail, setPEmail] = useState("");
+  const [pVenue, setPVenue] = useState("");
+  const [pMessage, setPMessage] = useState("");
+  const [sendingProposal, setSendingProposal] = useState(false);
+
   // wizard
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [guestEmail, setGuestEmail] = useState("");
