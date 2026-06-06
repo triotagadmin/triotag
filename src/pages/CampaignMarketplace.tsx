@@ -246,6 +246,47 @@ const CampaignMarketplace = () => {
     setFStart(""); setFEnd(""); setFBudget(""); setFNotes("");
   };
 
+  const resetProposal = () => {
+    setProposalFor(null);
+    setPName(""); setPEmail(""); setPVenue(""); setPMessage("");
+  };
+
+  const handleSubmitProposal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!proposalFor) return;
+    if (!pName || !pEmail || !pMessage) {
+      toast.error("Please fill in your name, email, and message.");
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(pEmail)) {
+      toast.error("Please enter a valid email.");
+      return;
+    }
+    setSendingProposal(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("notify-proposal-submitted", {
+        body: {
+          campaignId: proposalFor.id,
+          campaignName: proposalFor.campaign_name,
+          proposerName: pName,
+          proposerEmail: pEmail,
+          proposerVenue: pVenue,
+          proposerMessage: pMessage,
+        },
+      });
+      if (error || (data && (data as any).error)) {
+        throw new Error(error?.message || (data as any)?.error || "Failed to send");
+      }
+      toast.success("Proposal sent! The campaign owner will be notified.");
+      resetProposal();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message || "Failed to send proposal.");
+    } finally {
+      setSendingProposal(false);
+    }
+  };
+
   const handleSubmitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fName || !fType || !fLocation || !fStart || !fEnd) {
