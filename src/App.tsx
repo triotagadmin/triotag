@@ -40,6 +40,7 @@ import ActivateListing from "./pages/ActivateListing";
 import NotFound from "./pages/NotFound";
 import ExploreAll from "./pages/ExploreAll";
 import CampaignSubmission from "./pages/CampaignSubmission";
+import CampaignMarketplace from "./pages/CampaignMarketplace";
 import CampaignBuilder from "./pages/CampaignBuilder";
 import HabitTracker from "./pages/HabitTracker";
 import TradingAI from "./pages/TradingAI";
@@ -115,6 +116,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           
           <Route path="/insights" element={<Insights />} />
+          <Route path="/campaigns" element={<CampaignMarketplace />} />
           <Route path="/insights/:id" element={<BlogPost />} />
           <Route path="/explore" element={<RoleProtectedRoute allowedRoles={["admin"]}><Marketplace /></RoleProtectedRoute>} />
           <Route path="/inventory" element={<VenueInventory />} />
