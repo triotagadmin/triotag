@@ -1,7 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "https://esm.sh/resend@4.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,33 +22,29 @@ serve(async (req) => {
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // NOTE: Using Resend's universal onboarding sender so we don't depend on a verified domain.
-    // Switch to "TrioTag <noreply@tinystickyads.com>" once tinystickyads.com is verified in Resend.
-    const { data, error } = await resend.emails.send({
-      from: "TrioTag <onboarding@resend.dev>",
-      to: [email],
-      subject: `Your TrioTag code: ${code}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
-          <h2 style="color: #111;">TrioTag Verification</h2>
-          <p>Your 6-digit verification code for campaign submission:</p>
-          <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; text-align: center; padding: 16px; background: #f4f4f5; border-radius: 8px; margin: 16px 0;">
-            ${code}
-          </div>
-          <p style="color: #666; font-size: 13px;">Expires in 10 minutes. If you didn't request this, ignore this email.</p>
-        </div>
-      `,
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    const { data, error } = await supabase.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "otp-verification",
+        recipientEmail: email,
+        idempotencyKey: `otp-${email}-${Date.now()}`,
+        templateData: { code },
+      },
     });
 
     if (error) {
-      console.error("[send-otp] Resend error:", error);
+      console.error("[send-otp] send-transactional-email error:", error);
       return new Response(
-        JSON.stringify({ ok: false, error: error.message || "Email provider rejected the send." }),
+        JSON.stringify({ ok: false, error: error.message || "Failed to send email." }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
       );
     }
 
-    console.log("[send-otp] Email sent:", data?.id);
+    console.log("[send-otp] enqueued:", data);
     const expiresAt = Date.now() + 10 * 60 * 1000;
     return new Response(JSON.stringify({ ok: true, code, expiresAt }), {
       status: 200,
