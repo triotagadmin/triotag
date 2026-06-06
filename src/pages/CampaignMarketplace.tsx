@@ -796,6 +796,60 @@ const CampaignMarketplace = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Proposal Dialog */}
+      <Dialog open={!!proposalFor} onOpenChange={(o) => !o && resetProposal()}>
+        <DialogContent className="bg-[#0c0c0c] border-white/10 text-white max-w-lg">
+          {proposalFor && (
+            <form onSubmit={handleSubmitProposal}>
+              <DialogHeader>
+                <DialogTitle>Submit a Proposal</DialogTitle>
+                <DialogDescription className="text-white/60">
+                  Send your proposal to the owner of <span className="text-white font-medium">{proposalFor.campaign_name}</span>.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Your Name *</label>
+                  <Input value={pName} onChange={(e) => setPName(e.target.value)} required className="bg-black border-white/10" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Your Email *</label>
+                  <Input type="email" value={pEmail} onChange={(e) => setPEmail(e.target.value)} required className="bg-black border-white/10" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Your Venue / Ad Space</label>
+                  <Input
+                    value={pVenue}
+                    onChange={(e) => setPVenue(e.target.value)}
+                    placeholder="e.g. Gym in Makati, Cafe in BGC"
+                    className="bg-black border-white/10"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Message *</label>
+                  <Textarea
+                    value={pMessage}
+                    onChange={(e) => setPMessage(e.target.value)}
+                    rows={4}
+                    placeholder="Describe your space and why it's a good fit..."
+                    required
+                    className="bg-black border-white/10"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="gap-2">
+                <Button type="button" variant="outline" onClick={resetProposal} className="border-white/15">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={sendingProposal} className="bg-green-600 hover:bg-green-500 text-white">
+                  {sendingProposal ? "Sending..." : "Send Proposal"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
