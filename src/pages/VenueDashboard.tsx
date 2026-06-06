@@ -274,7 +274,7 @@ const VenueDashboard = () => {
                             )}
                             {(space as any).pending_advertiser_email && !(space as any).advertiser_id && (
                               <Badge variant="outline" className="text-xs gap-1 border-destructive/40 text-destructive">
-                                <Clock className="w-3 h-3" /> Pending Advertiser
+                                <Clock className="w-3 h-3" /> Pending Retailer
                               </Badge>
                             )}
                           </div>

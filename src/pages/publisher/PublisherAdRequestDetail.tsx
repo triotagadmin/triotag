@@ -427,7 +427,7 @@ export default function PublisherAdRequestDetail() {
                 )}
                 {request.competitive_conflict_declaration && (
                   <div className="p-3 bg-muted/50 rounded-lg border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">Advertiser Notes / Competitive Conflict</p>
+                    <p className="text-xs text-muted-foreground mb-1">Retailer Notes / Competitive Conflict</p>
                     <p className="text-sm">{request.competitive_conflict_declaration}</p>
                   </div>
                 )}
@@ -670,7 +670,7 @@ export default function PublisherAdRequestDetail() {
                   <Separator />
                   <Button variant="outline" className="w-full" onClick={handleMessageAdvertiser}>
                     <MessageSquare className="h-4 w-4 mr-2" />
-                    Message Advertiser
+                    Message Retailer
                   </Button>
                 </CardContent>
               </Card>
@@ -681,7 +681,7 @@ export default function PublisherAdRequestDetail() {
                 <CardContent className="pt-6">
                   <Button variant="outline" className="w-full" onClick={handleMessageAdvertiser}>
                     <MessageSquare className="h-4 w-4 mr-2" />
-                    Message Advertiser
+                    Message Retailer
                   </Button>
                 </CardContent>
               </Card>

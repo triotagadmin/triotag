@@ -18,7 +18,7 @@ import {
 
 const flowSteps = [
   { n: 1, title: "Screen Owner Lists Display", desc: "Venue registers screen specs, location, operating hours, and audience footfall" },
-  { n: 2, title: "Advertiser Books Timeslot", desc: "Select daypart, duration, creative format, and target locations" },
+  { n: 2, title: "Retailer Books Timeslot", desc: "Select daypart, duration, creative format, and target locations" },
   { n: 3, title: "Creative Goes Live", desc: "Video or static content displayed during booked timeslot on venue screen" },
   { n: 4, title: "Performance Report", desc: "Proof of play, estimated impressions, and campaign summary delivered" },
 ];

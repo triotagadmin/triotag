@@ -594,7 +594,7 @@ const FranchiseEdit = () => {
             <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="text-2xl md:text-3xl">Edit Franchise</CardTitle>
               <Badge variant="outline" className="text-xs">
-                {userRole === "publisher" ? "Agent View" : "Advertiser View"}
+                {userRole === "publisher" ? "Agent View" : "Retailer View"}
               </Badge>
             </div>
             <p className="text-muted-foreground mt-2">
@@ -798,13 +798,13 @@ const FranchiseEdit = () => {
                           advertiserLinked ? (
                             <div className="flex items-center gap-1.5 mt-1.5">
                               <CheckCircle className="h-3.5 w-3.5 text-primary" />
-                              <span className="text-xs text-primary font-medium">Advertiser Linked</span>
+                              <span className="text-xs text-primary font-medium">Retailer Linked</span>
                             </div>
                           ) : (pendingAdvertiserEmail || !advertiserLinked) && (
                             <div className="mt-2 space-y-2">
                               <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
                                 <Clock className="h-3 w-3" />
-                                {ownershipWorkflow === "verification" ? "Pending Advertiser Verification" : "Pending Advertiser Registration"}
+                                {ownershipWorkflow === "verification" ? "Pending Retailer Verification" : "Pending Retailer Registration"}
                               </Badge>
                               {franchiseId && (
                                 <Button

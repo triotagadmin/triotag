@@ -64,7 +64,7 @@ const TermsOfService = () => {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">5. Advertiser Terms</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">5. Retailer Terms</h2>
             <p className="text-muted-foreground mb-4">As an advertiser, you agree to:</p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
               <li>Ensure all advertising content complies with applicable laws</li>

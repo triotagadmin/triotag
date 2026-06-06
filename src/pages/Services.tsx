@@ -37,7 +37,7 @@ const coreServices = [
 ];
 
 const roadmapSteps = [
-  { num: "01", title: "Campaign Submission", description: "Advertiser submits campaign details through the campaign submission form.", details: ["Campaign name", "Contact information", "Campaign description", "Ad format preference", "Target locations"] },
+  { num: "01", title: "Campaign Submission", description: "Retailer submits campaign details through the campaign submission form.", details: ["Campaign name", "Contact information", "Campaign description", "Ad format preference", "Target locations"] },
   { num: "02", title: "Campaign Review", description: "Our team reviews the campaign brief to determine best ad spaces, best ad formats, and bundle recommendations. We may contact the advertiser for clarification." },
   { num: "03", title: "Location Bundling", description: "We curate a strategic placement bundle that includes selected ad spaces, placement quantities, and geographic targeting. Advertisers receive a proposed campaign plan." },
   { num: "04", title: "Creative Development", description: "Our design team prepares the advertising materials including ad layout design, format optimization, and advertiser approval. Final files are prepared for printing." },

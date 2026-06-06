@@ -28,7 +28,7 @@ const why = [
 
 const flowSteps = [
   { n: 1, title: "Venue connects audio system", desc: "Store registers their speaker setup, location, operating hours, and daily foot traffic" },
-  { n: 2, title: "Advertiser selects venues & daypart", desc: "Choose stores by location, venue type, and time of day" },
+  { n: 2, title: "Retailer selects venues & daypart", desc: "Choose stores by location, venue type, and time of day" },
   { n: 3, title: "Audio ad goes live", desc: "15 or 30-second spot plays at scheduled intervals during operating hours" },
   { n: 4, title: "Proof of play & report", desc: "Play count, estimated reach, and campaign summary delivered post-campaign" },
 ];

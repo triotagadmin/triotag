@@ -221,13 +221,13 @@ const Brands = () => {
 
             {/* Right: sign-up card */}
             <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-8 self-start">
-              <h3 className="text-2xl font-bold mb-2">Create Your Free Advertiser Account</h3>
+              <h3 className="text-2xl font-bold mb-2">Create Your Free Retailer Account</h3>
               <p className="text-white/70 text-sm mb-6">
                 Access the full TrioTag inventory marketplace and start building
                 your first campaign.
               </p>
               <Button size="lg" variant="cyber" className="w-full" onClick={goAdvertiserSignup}>
-                Sign Up as an Advertiser
+                Sign Up as a Retailer
               </Button>
 
               <div className="flex items-center gap-3 my-5 text-white/40 text-xs">

@@ -26,7 +26,7 @@ const formatCards = [
 const flowSteps = [
   { n: 1, title: "Retailers list spaces", desc: "Venues upload their available surfaces: walls, windows, counters, tables" },
   { n: 2, title: "Spaces go live on marketplace", desc: "Advertisers browse inventory filtered by location, venue type, footfall" },
-  { n: 3, title: "Advertiser books & pays", desc: "Campaign confirmed, payment processed, print materials deployed" },
+  { n: 3, title: "Retailer books & pays", desc: "Campaign confirmed, payment processed, print materials deployed" },
   { n: 4, title: "Proof of run", desc: "Photo documentation and post-campaign reporting delivered" },
 ];
 
