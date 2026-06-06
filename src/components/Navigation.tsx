@@ -40,8 +40,6 @@ const NAV_ITEMS: NavItemDef[] = [
   },
   { label: "Inventory", to: "/advertiser/explore" },
   { label: "Campaigns", to: "/campaigns" },
-  { label: "Insights", to: "/insights" },
-  { label: "Company", to: "/contact" },
 ];
 
 const PUBLIC_LINKS: NavLinkDef[] = [
