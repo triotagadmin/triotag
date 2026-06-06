@@ -1674,6 +1674,57 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_campaigns: {
+        Row: {
+          budget_amount: number | null
+          budget_currency: string | null
+          campaign_description: string | null
+          campaign_name: string
+          campaign_type: string
+          created_at: string
+          email: string
+          email_verified: boolean
+          end_date: string | null
+          id: string
+          location: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          campaign_description?: string | null
+          campaign_name: string
+          campaign_type: string
+          created_at?: string
+          email: string
+          email_verified?: boolean
+          end_date?: string | null
+          id?: string
+          location?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          campaign_description?: string | null
+          campaign_name?: string
+          campaign_type?: string
+          created_at?: string
+          email?: string
+          email_verified?: boolean
+          end_date?: string | null
+          id?: string
+          location?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       house_ad_schedules: {
         Row: {
           ad_space_id: string

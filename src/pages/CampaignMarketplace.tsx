@@ -85,6 +85,15 @@ const CampaignMarketplace = () => {
   const [requestOpen, setRequestOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // wizard
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [guestEmail, setGuestEmail] = useState("");
+  const [otpValue, setOtpValue] = useState("");
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+
   // request form
   const [fName, setFName] = useState("");
   const [fType, setFType] = useState("ooh");
@@ -96,21 +105,53 @@ const CampaignMarketplace = () => {
 
   const fetchCampaigns = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("campaigns")
-      .select(
-        "id, campaign_name, campaign_type, start_date, end_date, budget_amount, budget_currency, location, campaign_description, created_at, status, advertiser_id, advertiser_profiles(company_name)"
-      )
-      .in("status", ["pending", "approved"])
-      .order("created_at", { ascending: false });
-    if (error) console.error(error);
-    setCampaigns((data as any) || []);
+    const [{ data: realData }, { data: guestData }] = await Promise.all([
+      supabase
+        .from("campaigns")
+        .select(
+          "id, campaign_name, campaign_type, start_date, end_date, budget_amount, budget_currency, location, campaign_description, created_at, status, advertiser_id, advertiser_profiles(company_name)"
+        )
+        .in("status", ["pending", "approved"])
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("guest_campaigns")
+        .select(
+          "id, email, campaign_name, campaign_type, start_date, end_date, budget_amount, budget_currency, location, campaign_description, created_at, status"
+        )
+        .eq("email_verified", true)
+        .in("status", ["pending", "approved"])
+        .order("created_at", { ascending: false }),
+    ]);
+
+    const mapped = ((guestData || []) as any[]).map((g) => ({
+      ...g,
+      advertiser_id: "guest",
+      advertiser_profiles: { company_name: null },
+    }));
+
+    setCampaigns([...(((realData as any[]) || [])), ...mapped]);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchCampaigns();
   }, []);
+
+  useEffect(() => {
+    if (!requestOpen) return;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setIsLoggedIn(true);
+        setEmailVerified(true);
+        setGuestEmail(session.user.email || "");
+        setStep(3);
+      } else {
+        setIsLoggedIn(false);
+        setEmailVerified(false);
+        setStep(1);
+      }
+    });
+  }, [requestOpen]);
 
   const displayCampaigns = useMemo(
     () => (campaigns.length > 0 ? [...campaigns, ...FAUX_CAMPAIGNS] : FAUX_CAMPAIGNS),
@@ -137,61 +178,145 @@ const CampaignMarketplace = () => {
   }, [displayCampaigns, search, typeFilter, budgetFilter]);
 
 
-  const openRequest = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast("Sign in required", {
-        description: "Please sign in to submit a campaign request.",
-      });
-      navigate("/auth?redirect=/campaigns");
+  const openRequest = () => {
+    setRequestOpen(true);
+  };
+
+  const handleSendOtp = async () => {
+    if (!guestEmail || !/^\S+@\S+\.\S+$/.test(guestEmail)) {
+      toast.error("Please enter a valid email address.");
       return;
     }
-    setRequestOpen(true);
+    setSendingOtp(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: guestEmail,
+        options: { shouldCreateUser: true },
+      });
+      if (error) throw error;
+      setStep(2);
+      toast.success("Verification code sent! Check your inbox.");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to send verification code.");
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpValue || otpValue.length < 6) {
+      toast.error("Enter the 6-digit code.");
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: guestEmail,
+        token: otpValue,
+        type: "email",
+      });
+      if (error) throw error;
+      setEmailVerified(true);
+      setStep(3);
+      toast.success("Email verified! Now fill in your campaign details.");
+    } catch (err: any) {
+      toast.error(err?.message || "Invalid or expired code. Please try again.");
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
+  const resetWizard = () => {
+    setRequestOpen(false);
+    setStep(1);
+    setGuestEmail("");
+    setOtpValue("");
+    setEmailVerified(false);
+    setFName(""); setFType("ooh"); setFLocation("");
+    setFStart(""); setFEnd(""); setFBudget(""); setFNotes("");
   };
 
   const handleSubmitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth?redirect=/campaigns");
-      return;
-    }
     if (!fName || !fType || !fLocation || !fStart || !fEnd) {
       toast.error("Please fill all required fields.");
       return;
     }
     setSubmitting(true);
     try {
-      // Resolve advertiser_profiles.id for current user (FK target)
-      const { data: profile } = await supabase
-        .from("advertiser_profiles")
-        .select("id")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-      if (!profile?.id) {
-        toast.error("Advertiser profile not found. Please complete your profile first.");
-        setSubmitting(false);
-        return;
+      const { data: { session } } = await supabase.auth.getSession();
+      const isGuest = !session || !isLoggedIn;
+
+      if (session && isLoggedIn) {
+        const { data: profile } = await supabase
+          .from("advertiser_profiles")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (profile?.id) {
+          const { error } = await supabase.from("campaigns").insert({
+            advertiser_id: profile.id,
+            campaign_name: fName,
+            campaign_type: fType,
+            location: fLocation,
+            start_date: fStart,
+            end_date: fEnd,
+            budget_amount: fBudget ? Number(fBudget) : null,
+            budget_currency: "PHP",
+            campaign_description: fNotes || null,
+            status: "pending",
+          });
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from("guest_campaigns").insert({
+            email: session.user.email,
+            email_verified: true,
+            campaign_name: fName,
+            campaign_type: fType,
+            location: fLocation,
+            start_date: fStart,
+            end_date: fEnd,
+            budget_amount: fBudget ? Number(fBudget) : null,
+            campaign_description: fNotes || null,
+            status: "pending",
+          });
+          if (error) throw error;
+        }
+      } else {
+        const { error } = await supabase.from("guest_campaigns").insert({
+          email: guestEmail,
+          email_verified: true,
+          campaign_name: fName,
+          campaign_type: fType,
+          location: fLocation,
+          start_date: fStart,
+          end_date: fEnd,
+          budget_amount: fBudget ? Number(fBudget) : null,
+          campaign_description: fNotes || null,
+          status: "pending",
+        });
+        if (error) throw error;
       }
-      const { error } = await supabase.from("campaigns").insert({
-        advertiser_id: profile.id,
-        campaign_name: fName,
-        campaign_type: fType,
-        location: fLocation,
-        start_date: fStart,
-        end_date: fEnd,
-        budget_amount: fBudget ? Number(fBudget) : null,
-        budget_currency: "PHP",
-        campaign_description: fNotes || null,
-        status: "pending",
+
+      await supabase.functions.invoke("notify-campaign-submission", {
+        body: {
+          toEmail: session?.user?.email || guestEmail,
+          campaignName: fName,
+          campaignType: fType.toUpperCase(),
+          location: fLocation,
+          startDate: fStart,
+          endDate: fEnd,
+          budget: fBudget || "Flexible",
+          isGuest,
+        },
       });
-      if (error) throw error;
+
       toast.success("Campaign request submitted!", {
-        description: "It will appear on the marketplace shortly.",
+        description: "Check your email for confirmation. Your listing will appear on the marketplace shortly.",
       });
-      setRequestOpen(false);
-      setFName(""); setFType("ooh"); setFLocation(""); setFStart("");
-      setFEnd(""); setFBudget(""); setFNotes("");
+
+      resetWizard();
       fetchCampaigns();
     } catch (err: any) {
       console.error(err);
@@ -435,87 +560,170 @@ const CampaignMarketplace = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Request Modal */}
-      <Dialog open={requestOpen} onOpenChange={setRequestOpen}>
+      {/* Request Modal — 3-step wizard */}
+      <Dialog open={requestOpen} onOpenChange={(o) => (o ? setRequestOpen(true) : resetWizard())}>
         <DialogContent className="bg-[#0c0c0c] border-white/10 text-white max-w-lg">
           <DialogHeader>
-            <DialogTitle>Submit a Campaign Request</DialogTitle>
+            <div className="text-xs text-green-400 font-semibold mb-1">Step {step} of 3</div>
+            <DialogTitle>
+              {step === 1 && "Submit a Campaign Request"}
+              {step === 2 && "Check your email"}
+              {step === 3 && "Campaign Details"}
+            </DialogTitle>
             <DialogDescription className="text-white/60">
-              Post your campaign so retailers and ad space owners can respond.
+              {step === 1 && "Enter your email to get started. We'll send you a verification code."}
+              {step === 2 && `We sent a 6-digit code to ${guestEmail}.`}
+              {step === 3 && "Post your campaign so retailers and ad space owners can respond."}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmitRequest} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Campaign Name *</label>
-              <Input value={fName} onChange={(e) => setFName(e.target.value)} required className="bg-black border-white/10" />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Campaign Type *</label>
-              <div className="grid grid-cols-3 gap-2">
-                {["ooh", "dooh", "aooh"].map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setFType(t)}
-                    className={`px-3 py-2 rounded-lg border text-sm uppercase font-semibold ${
-                      fType === t
-                        ? "border-green-500 bg-green-500/10 text-green-400"
-                        : "border-white/15 text-white/70 hover:border-white/30"
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Target Location *</label>
-              <Input
-                value={fLocation}
-                onChange={(e) => setFLocation(e.target.value)}
-                placeholder="e.g. Makati, BGC, Cebu City"
-                required
-                className="bg-black border-white/10"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+
+          {step === 1 && (
+            <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">Start Date *</label>
-                <Input type="date" value={fStart} onChange={(e) => setFStart(e.target.value)} required className="bg-black border-white/10" />
+                <label className="text-sm font-medium mb-1 block">Email *</label>
+                <Input
+                  type="email"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                  className="bg-black border-white/10"
+                />
+              </div>
+              <DialogFooter className="gap-2">
+                <Button type="button" variant="outline" onClick={resetWizard} className="border-white/15">
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={sendingOtp}
+                  className="bg-green-600 hover:bg-green-500 text-white"
+                >
+                  {sendingOtp ? "Sending..." : "Send Verification Code"}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-4">
+              <div className="flex justify-center">
+                <Input
+                  type="text"
+                  value={otpValue}
+                  onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="000000"
+                  maxLength={6}
+                  className="bg-black border-white/10 text-center text-2xl tracking-widest font-mono max-w-[200px]"
+                />
+              </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={sendingOtp}
+                  className="text-xs text-green-400 hover:text-green-300 underline"
+                >
+                  {sendingOtp ? "Resending..." : "Resend code"}
+                </button>
+              </div>
+              <DialogFooter className="gap-2 sm:justify-between">
+                <Button type="button" variant="outline" onClick={() => setStep(1)} className="border-white/15">
+                  Back
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  disabled={verifyingOtp}
+                  className="bg-green-600 hover:bg-green-500 text-white"
+                >
+                  {verifyingOtp ? "Verifying..." : "Verify Code"}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+
+          {step === 3 && (
+            <form onSubmit={handleSubmitRequest} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Campaign Name *</label>
+                <Input value={fName} onChange={(e) => setFName(e.target.value)} required className="bg-black border-white/10" />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1 block">End Date *</label>
-                <Input type="date" value={fEnd} onChange={(e) => setFEnd(e.target.value)} required className="bg-black border-white/10" />
+                <label className="text-sm font-medium mb-2 block">Campaign Type *</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {["ooh", "dooh", "aooh"].map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setFType(t)}
+                      className={`px-3 py-2 rounded-lg border text-sm uppercase font-semibold ${
+                        fType === t
+                          ? "border-green-500 bg-green-500/10 text-green-400"
+                          : "border-white/15 text-white/70 hover:border-white/30"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Budget (₱)</label>
-              <Input
-                type="number"
-                value={fBudget}
-                onChange={(e) => setFBudget(e.target.value)}
-                placeholder="e.g. 15000"
-                className="bg-black border-white/10"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Additional Notes</label>
-              <Textarea
-                value={fNotes}
-                onChange={(e) => setFNotes(e.target.value)}
-                rows={3}
-                className="bg-black border-white/10"
-              />
-            </div>
-            <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setRequestOpen(false)} className="border-white/15">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={submitting} className="bg-green-600 hover:bg-green-500 text-white">
-                {submitting ? "Submitting..." : "Submit Request"}
-              </Button>
-            </DialogFooter>
-          </form>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Target Location *</label>
+                <Input
+                  value={fLocation}
+                  onChange={(e) => setFLocation(e.target.value)}
+                  placeholder="e.g. Makati, BGC, Cebu City"
+                  required
+                  className="bg-black border-white/10"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Start Date *</label>
+                  <Input type="date" value={fStart} onChange={(e) => setFStart(e.target.value)} required className="bg-black border-white/10" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">End Date *</label>
+                  <Input type="date" value={fEnd} onChange={(e) => setFEnd(e.target.value)} required className="bg-black border-white/10" />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Budget (₱)</label>
+                <Input
+                  type="number"
+                  value={fBudget}
+                  onChange={(e) => setFBudget(e.target.value)}
+                  placeholder="e.g. 15000"
+                  className="bg-black border-white/10"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Additional Notes</label>
+                <Textarea
+                  value={fNotes}
+                  onChange={(e) => setFNotes(e.target.value)}
+                  rows={3}
+                  className="bg-black border-white/10"
+                />
+              </div>
+              <DialogFooter className="gap-2 sm:justify-between">
+                {!isLoggedIn ? (
+                  <Button type="button" variant="outline" onClick={() => setStep(2)} className="border-white/15">
+                    Back
+                  </Button>
+                ) : (
+                  <Button type="button" variant="outline" onClick={resetWizard} className="border-white/15">
+                    Cancel
+                  </Button>
+                )}
+                <Button type="submit" disabled={submitting} className="bg-green-600 hover:bg-green-500 text-white">
+                  {submitting ? "Submitting..." : "Submit Request"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>
