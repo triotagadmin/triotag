@@ -367,13 +367,24 @@ const CampaignMarketplace = () => {
                     >
                       View Details
                     </Button>
-                    <Button
-                      asChild
-                      size="sm"
-                      className="flex-1 bg-green-600 hover:bg-green-500 text-white"
-                    >
-                      <Link to={`/contact?campaign=${c.id}`}>Submit Proposal</Link>
-                    </Button>
+                    {c.status === "inactive" ? (
+                      <Button
+                        size="sm"
+                        disabled
+                        className="flex-1 bg-zinc-500/20 text-zinc-400 border border-zinc-500/40 cursor-not-allowed hover:bg-zinc-500/20"
+                      >
+                        Inactive
+                      </Button>
+                    ) : (
+                      <Button
+                        asChild
+                        size="sm"
+                        className="flex-1 bg-green-600 hover:bg-green-500 text-white"
+                      >
+                        <Link to={`/contact?campaign=${c.id}`}>Submit Proposal</Link>
+                      </Button>
+                    )}
+
                   </div>
                 </div>
               ))}
