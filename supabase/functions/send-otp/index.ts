@@ -24,12 +24,19 @@ serve(async (req) => {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-    await supabaseAdmin.from("otp_verifications").upsert({
-      email,
-      code,
-      expires_at: expiresAt,
-      verified: false,
-    }, { onConflict: "email" });
+    // Try to store code — log error but don't block email sending
+    try {
+      const { error: dbError } = await supabaseAdmin.from("otp_verifications").upsert({
+        email,
+        code,
+        expires_at: expiresAt,
+        verified: false,
+      }, { onConflict: "email" });
+      if (dbError) console.error("[send-otp] DB upsert error:", dbError);
+    } catch (dbErr) {
+      console.error("[send-otp] DB error (non-fatal):", dbErr);
+    }
+
 
     const emailResponse = await resend.emails.send({
       from: "TrioTag <noreply@tinystickyads.com>",
