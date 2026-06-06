@@ -113,7 +113,7 @@ export default function AdvertiserCampaignCreate() {
     const { data: profile } = await supabase
       .from("advertiser_profiles").select("id").eq("user_id", user.id).maybeSingle();
     if (!profile) {
-      toast({ title: "Advertiser profile missing", description: "Complete your advertiser profile first.", variant: "destructive" });
+      toast({ title: "Retailer profile missing", description: "Complete your retailer profile first.", variant: "destructive" });
       return;
     }
     const { error } = await supabase.from("campaigns").insert({

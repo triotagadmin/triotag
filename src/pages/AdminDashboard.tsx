@@ -331,7 +331,7 @@ export default function AdminDashboard() {
           status: c.status,
           location: c.location,
           createdAt: c.created_at || "",
-          ownerName: (c.advertiser_profiles as any)?.company_name || "Advertiser",
+          ownerName: (c.advertiser_profiles as any)?.company_name || "Retailer",
           table: "campaigns"
         })),
         ...(adSpaces || []).map(v => ({
@@ -828,7 +828,7 @@ export default function AdminDashboard() {
 
   const getTypeBadge = (type: string, publisherType?: string) => {
     const displayNames: Record<string, string> = {
-      advertiser: "Brand Advertiser",
+      advertiser: "Retailer",
       print_partner: "Print Partner",
       publisher: "Agent",
       admin: "Admin",

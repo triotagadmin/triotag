@@ -54,7 +54,7 @@ export default function RetailerCampaigns() {
                 <div>
                   <div className="flex items-center gap-2 mb-1"><Badge variant="outline" className={statusColor(r.status)}>{r.status}</Badge></div>
                   <div className="font-semibold text-white">{r.ad_spaces?.title || "Booking"}</div>
-                  <div className="text-xs text-zinc-400 mt-1">Advertiser: {(r as any).advertiser_name || "—"} · {r.ad_spaces?.location || ""}</div>
+                  <div className="text-xs text-zinc-400 mt-1">Retailer: {(r as any).advertiser_name || "—"} · {r.ad_spaces?.location || ""}</div>
                   <div className="text-xs text-zinc-400 mt-1 flex gap-3 flex-wrap">
                     {r.start_date && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(r.start_date), "MMM d")} – {r.end_date ? format(new Date(r.end_date), "MMM d, yyyy") : "—"}</span>}
                     {r.estimated_publisher_payout && <span className="flex items-center gap-1 text-green-400"><DollarSign className="w-3 h-3" />₱{Number(r.estimated_publisher_payout).toLocaleString()}</span>}

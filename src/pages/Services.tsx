@@ -13,7 +13,7 @@ const coreServices = [
     description: "Location Bundling allows advertisers to combine multiple ad placements across strategic ad spaces into one unified campaign. Instead of booking individual placements manually, advertisers deploy campaigns across curated ad space bundles designed for maximum exposure.",
     howItWorks: [
       "Ad spaces are grouped by location, audience type, or campaign goal",
-      "Advertisers choose bundles instead of individual placements",
+      "Retailers choose bundles instead of individual placements",
       "Campaigns scale efficiently across multiple ad spaces",
     ],
     bundles: ["Coffee Shop Network Bundle", "University District Bundle", "Business District Bundle", "Community Lifestyle Bundle"],
@@ -37,13 +37,13 @@ const coreServices = [
 ];
 
 const roadmapSteps = [
-  { num: "01", title: "Campaign Submission", description: "Advertiser submits campaign details through the campaign submission form.", details: ["Campaign name", "Contact information", "Campaign description", "Ad format preference", "Target locations"] },
+  { num: "01", title: "Campaign Submission", description: "Retailer submits campaign details through the campaign submission form.", details: ["Campaign name", "Contact information", "Campaign description", "Ad format preference", "Target locations"] },
   { num: "02", title: "Campaign Review", description: "Our team reviews the campaign brief to determine best ad spaces, best ad formats, and bundle recommendations. We may contact the advertiser for clarification." },
-  { num: "03", title: "Location Bundling", description: "We curate a strategic placement bundle that includes selected ad spaces, placement quantities, and geographic targeting. Advertisers receive a proposed campaign plan." },
+  { num: "03", title: "Location Bundling", description: "We curate a strategic placement bundle that includes selected ad spaces, placement quantities, and geographic targeting. Retailers receive a proposed campaign plan." },
   { num: "04", title: "Creative Development", description: "Our design team prepares the advertising materials including ad layout design, format optimization, and advertiser approval. Final files are prepared for printing." },
   { num: "05", title: "Production & Deployment", description: "Ad materials are printed and deployed across selected ad spaces. Deployment includes installation coordination, placement verification, and coordination with ad space operators." },
-  { num: "06", title: "Campaign Activation", description: "Once placements are installed, the campaign becomes active. Advertisers receive confirmation that their ads are live across the selected ad spaces." },
-  { num: "07", title: "Campaign Completion", description: "At the end of the campaign, placements are removed or renewed. Advertisers can launch follow-up campaigns." },
+  { num: "06", title: "Campaign Activation", description: "Once placements are installed, the campaign becomes active. Retailers receive confirmation that their ads are live across the selected ad spaces." },
+  { num: "07", title: "Campaign Completion", description: "At the end of the campaign, placements are removed or renewed. Retailers can launch follow-up campaigns." },
 ];
 
 const Services = () => {
