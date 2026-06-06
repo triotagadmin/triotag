@@ -15,7 +15,7 @@ const Contact = () => {
     name: "",
     email: "",
     subject: "",
-    message: ""
+    message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const lastSubmitRef = useRef<number>(0);
@@ -62,26 +62,22 @@ const Contact = () => {
     }
   };
 
-  const handleChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-  {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <main className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Contact Us
-            </h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Contact Us</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Have questions about TrioTag? We'd love to hear from you. 
-              Send us a message and we'll respond as soon as possible.
+              Have questions about TrioTag? We'd love to hear from you. Send us a message and we'll respond as soon as
+              possible.
             </p>
           </div>
 
@@ -97,8 +93,8 @@ const Contact = () => {
                     <h3 className="font-semibold text-foreground">Email</h3>
                     <a
                       href="mailto:tinystickyads@gmail.com"
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors">
-
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                    >
                       tinystickyads@gmail.com
                     </a>
                   </div>
@@ -112,9 +108,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground">Phone</h3>
-                    <p className="text-sm text-muted-foreground">
-                      +1 (555) 123-4567
-                    </p>
+                    <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
                   </div>
                 </CardContent>
               </Card>
@@ -126,9 +120,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground">Location</h3>
-                    <p className="text-sm text-muted-foreground">
-                      San Francisco, CA
-                    </p>
+                    <p className="text-sm text-muted-foreground">BGC, Taguig City, PH</p>
                   </div>
                 </CardContent>
               </Card>
@@ -150,8 +142,8 @@ const Contact = () => {
                         placeholder="Your name"
                         value={formData.name}
                         onChange={handleChange}
-                        required />
-
+                        required
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
@@ -162,11 +154,11 @@ const Contact = () => {
                         placeholder="your@email.com"
                         value={formData.email}
                         onChange={handleChange}
-                        required />
-
+                        required
+                      />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="subject">Subject</Label>
                     <Input
@@ -175,10 +167,10 @@ const Contact = () => {
                       placeholder="How can we help?"
                       value={formData.subject}
                       onChange={handleChange}
-                      required />
-
+                      required
+                    />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="message">Message</Label>
                     <Textarea
@@ -188,19 +180,19 @@ const Contact = () => {
                       rows={5}
                       value={formData.message}
                       onChange={handleChange}
-                      required />
-
+                      required
+                    />
                   </div>
-                  
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ?
-                    "Sending..." :
 
-                    <>
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      "Sending..."
+                    ) : (
+                      <>
                         <Send className="h-4 w-4 mr-2" />
                         Send Message
                       </>
-                    }
+                    )}
                   </Button>
                 </form>
               </CardContent>
@@ -210,8 +202,8 @@ const Contact = () => {
       </main>
 
       <Footer />
-    </div>);
-
+    </div>
+  );
 };
 
 export default Contact;
