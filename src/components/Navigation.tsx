@@ -276,6 +276,16 @@ export const Navigation = () => {
               >
                 {INVENTORY_LINK.label}
               </Link>
+              <Link
+                to={CAMPAIGNS_LINK.to}
+                className={`px-3 py-2 text-sm transition-colors border-b-2 ${
+                  isActive(CAMPAIGNS_LINK.to)
+                    ? "text-green-500 border-green-500"
+                    : "text-zinc-300 border-transparent hover:text-green-500"
+                }`}
+              >
+                {CAMPAIGNS_LINK.label}
+              </Link>
             </>
           )}
         </div>
