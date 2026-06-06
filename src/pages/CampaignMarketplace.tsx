@@ -85,6 +85,15 @@ const CampaignMarketplace = () => {
   const [requestOpen, setRequestOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // wizard
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [guestEmail, setGuestEmail] = useState("");
+  const [otpValue, setOtpValue] = useState("");
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+
   // request form
   const [fName, setFName] = useState("");
   const [fType, setFType] = useState("ooh");
@@ -96,21 +105,53 @@ const CampaignMarketplace = () => {
 
   const fetchCampaigns = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("campaigns")
-      .select(
-        "id, campaign_name, campaign_type, start_date, end_date, budget_amount, budget_currency, location, campaign_description, created_at, status, advertiser_id, advertiser_profiles(company_name)"
-      )
-      .in("status", ["pending", "approved"])
-      .order("created_at", { ascending: false });
-    if (error) console.error(error);
-    setCampaigns((data as any) || []);
+    const [{ data: realData }, { data: guestData }] = await Promise.all([
+      supabase
+        .from("campaigns")
+        .select(
+          "id, campaign_name, campaign_type, start_date, end_date, budget_amount, budget_currency, location, campaign_description, created_at, status, advertiser_id, advertiser_profiles(company_name)"
+        )
+        .in("status", ["pending", "approved"])
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("guest_campaigns")
+        .select(
+          "id, email, campaign_name, campaign_type, start_date, end_date, budget_amount, budget_currency, location, campaign_description, created_at, status"
+        )
+        .eq("email_verified", true)
+        .in("status", ["pending", "approved"])
+        .order("created_at", { ascending: false }),
+    ]);
+
+    const mapped = ((guestData || []) as any[]).map((g) => ({
+      ...g,
+      advertiser_id: "guest",
+      advertiser_profiles: { company_name: null },
+    }));
+
+    setCampaigns([...(((realData as any[]) || [])), ...mapped]);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchCampaigns();
   }, []);
+
+  useEffect(() => {
+    if (!requestOpen) return;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setIsLoggedIn(true);
+        setEmailVerified(true);
+        setGuestEmail(session.user.email || "");
+        setStep(3);
+      } else {
+        setIsLoggedIn(false);
+        setEmailVerified(false);
+        setStep(1);
+      }
+    });
+  }, [requestOpen]);
 
   const displayCampaigns = useMemo(
     () => (campaigns.length > 0 ? [...campaigns, ...FAUX_CAMPAIGNS] : FAUX_CAMPAIGNS),
