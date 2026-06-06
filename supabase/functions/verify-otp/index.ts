@@ -13,40 +13,36 @@ const corsHeaders = {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { email, code } = await req.json();
-    if (!email || !code) {
-      return new Response(JSON.stringify({ ok: false, error: "Email and code required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
-    const { data } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("otp_verifications")
       .select("code, expires_at, verified")
       .eq("email", email)
-      .maybeSingle();
+      .single();
 
-    if (!data) {
-      return new Response(JSON.stringify({ ok: false, error: "No code found" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (error || !data) {
+      return new Response(JSON.stringify({ ok: false, error: "No verification code found. Please request a new one." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
+
     if (new Date(data.expires_at) < new Date()) {
-      return new Response(JSON.stringify({ ok: false, error: "Code expired" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ ok: false, error: "Code has expired. Please request a new one." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
-    if (data.code !== code) {
-      return new Response(JSON.stringify({ ok: false, error: "Invalid code" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+    if (data.code !== code.trim()) {
+      return new Response(JSON.stringify({ ok: false, error: "Incorrect code. Please try again." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
@@ -56,13 +52,14 @@ serve(async (req) => {
       .eq("email", email);
 
     return new Response(JSON.stringify({ ok: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
-  } catch (err: any) {
-    console.error("verify-otp error", err);
-    return new Response(JSON.stringify({ ok: false, error: err?.message || "unknown" }), {
+  } catch (error: any) {
+    console.error("[verify-otp] Error:", error);
+    return new Response(JSON.stringify({ ok: false, error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
 });
