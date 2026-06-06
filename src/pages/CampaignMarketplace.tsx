@@ -449,8 +449,8 @@ const CampaignMarketplace = () => {
             Real-Time Campaigns Looking for Ad Inventory
           </h1>
           <p className="text-white/70 max-w-2xl mb-8">
-            Browse active campaign requests from brands and retailers. If you have the right ad space, submit a proposal
-            directly.
+            Browse active campaign requests from brands and retailers. If you have the right ad inventory, submit a
+            proposal directly.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-3xl">
