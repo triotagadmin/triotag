@@ -38,8 +38,14 @@ import { useEffect } from "react";
 import { fetchLandingTotals } from "@/lib/inventoryAggregation";
 
 const Hero = () => {
-  const [totals, setTotals] = useState<{ approvedSpaces: number | null; activeVenues: number | null; activeCampaigns: number | null }>({
-    approvedSpaces: null, activeVenues: null, activeCampaigns: null,
+  const [totals, setTotals] = useState<{
+    approvedSpaces: number | null;
+    activeVenues: number | null;
+    activeCampaigns: number | null;
+  }>({
+    approvedSpaces: null,
+    activeVenues: null,
+    activeCampaigns: null,
   });
   useEffect(() => {
     fetchLandingTotals().then((t) => setTotals(t));
@@ -64,13 +70,12 @@ const Hero = () => {
             Retail Media Supply Platform
           </span>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1]">
-            Retail Media Inventory for{" "}
-            <span className="text-green-500">OOH</span>,{" "}
-            <span className="text-green-500">DOOH</span>, and{" "}
-            <span className="text-green-500">AOOH</span>
+            Retail Media SSP Platform for <span className="text-green-500">OOH</span>,{" "}
+            <span className="text-green-500">DOOH</span>, and <span className="text-green-500">AOOH</span>
           </h1>
           <p className="text-lg text-zinc-400 max-w-xl leading-relaxed">
-            Triotag connects brands with high-intent shoppers through retail media inventory across physical, digital, and audio formats.
+            Triotag is a Retail Media SSP platform built to help retailers, media owners, and location-based businesses
+            monetize OOH, DOOH, and AOOH inventory.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link to="/list-space">
@@ -80,7 +85,7 @@ const Hero = () => {
             </Link>
             <Link to="/campaign-submit">
               <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Request Inventory Access
+                Request an Ad Campaign
               </Button>
             </Link>
           </div>
@@ -107,7 +112,9 @@ const Hero = () => {
                 <div className="text-xs text-zinc-400 uppercase tracking-wider">Overview</div>
                 <div className="text-lg font-bold text-white">Network Snapshot</div>
               </div>
-              <span className="px-2 py-1 text-[10px] font-semibold rounded-full bg-green-500/20 text-green-400">LIVE</span>
+              <span className="px-2 py-1 text-[10px] font-semibold rounded-full bg-green-500/20 text-green-400">
+                LIVE
+              </span>
             </div>
             <div className="grid grid-cols-2 gap-3 mb-5">
               {[
@@ -136,7 +143,11 @@ const Hero = () => {
               </div>
               <div className="flex items-end gap-1.5 h-20">
                 {[40, 65, 50, 78, 60, 88, 95].map((h, i) => (
-                  <div key={i} className="flex-1 bg-gradient-to-t from-green-600 to-green-400 rounded-t opacity-60" style={{ height: `${h}%` }} />
+                  <div
+                    key={i}
+                    className="flex-1 bg-gradient-to-t from-green-600 to-green-400 rounded-t opacity-60"
+                    style={{ height: `${h}%` }}
+                  />
                 ))}
               </div>
             </div>
@@ -153,9 +164,7 @@ const Hero = () => {
 const LogoStrip = () => (
   <section className="bg-white py-10 border-b border-zinc-100">
     <div className="container mx-auto px-4 md:px-6">
-      <p className="text-center text-sm text-zinc-500 font-medium">
-        Trusted by leading retailers and brands
-      </p>
+      <p className="text-center text-sm text-zinc-500 font-medium">Trusted by leading retailers and brands</p>
     </div>
   </section>
 );
@@ -267,11 +276,10 @@ const WhyRetailMedia = () => {
     <section className="bg-white py-20 md:py-24 border-t border-zinc-100">
       <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
         <div>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-zinc-900 mb-4">
-            Why Retail Media?
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-zinc-900 mb-4">Why Retail Media?</h2>
           <p className="text-zinc-500 text-base md:text-lg leading-relaxed max-w-lg">
-            Reach shoppers when they are most attentive and most likely to buy. Retail media closes the gap between awareness and conversion.
+            Reach shoppers when they are most attentive and most likely to buy. Retail media closes the gap between
+            awareness and conversion.
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -324,7 +332,9 @@ const ValueProps = () => {
         ))}
       </ul>
       <Link to={to}>
-        <Button variant="default">{cta} <ArrowRight className="w-4 h-4" /></Button>
+        <Button variant="default">
+          {cta} <ArrowRight className="w-4 h-4" />
+        </Button>
       </Link>
     </div>
   );
@@ -399,18 +409,14 @@ const PopularFormats = () => {
     <section className="bg-white py-20 md:py-24 border-t border-zinc-100">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-zinc-900">
-            Popular Retail Media Formats
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-zinc-900">Popular Retail Media Formats</h2>
           <div className="flex gap-2">
             {(Object.keys(groups) as (keyof typeof groups)[]).map((g) => (
               <button
                 key={g}
                 onClick={() => setActive(g)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
-                  active === g
-                    ? "bg-green-600 text-white"
-                    : "bg-green-50 text-green-700 hover:bg-green-100"
+                  active === g ? "bg-green-600 text-white" : "bg-green-50 text-green-700 hover:bg-green-100"
                 }`}
               >
                 {g} Formats
@@ -465,7 +471,10 @@ const PlatformFeatures = () => {
           {features.map((f) => {
             const I = f.icon;
             return (
-              <div key={f.title} className="bg-white rounded-2xl shadow-sm border border-zinc-100 p-6 hover:border-green-200 hover:shadow-md transition">
+              <div
+                key={f.title}
+                className="bg-white rounded-2xl shadow-sm border border-zinc-100 p-6 hover:border-green-200 hover:shadow-md transition"
+              >
                 <div className="w-11 h-11 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center mb-4">
                   <I className="w-5 h-5 text-green-600" />
                 </div>
@@ -492,10 +501,14 @@ const CTABanner = () => (
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
         <Link to="/list-space">
-          <Button variant="secondary" size="lg" className="w-full sm:w-auto">Partner With Triotag</Button>
+          <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+            Partner With Triotag
+          </Button>
         </Link>
         <Link to="/contact">
-          <Button variant="outline" size="lg" className="w-full sm:w-auto">Request Media Kit</Button>
+          <Button variant="outline" size="lg" className="w-full sm:w-auto">
+            Request Media Kit
+          </Button>
         </Link>
       </div>
     </div>
