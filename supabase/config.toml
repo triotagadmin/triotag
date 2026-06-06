@@ -63,6 +63,15 @@ project_id = "jungfmgsxbayxzptvpky"
 [functions.send-otp]
 verify_jwt = false
 
+[functions.subscribe-campaign]
+verify_jwt = false
+
+[functions.notify-proposal-submitted]
+verify_jwt = false
+
+[functions.notify-campaign-submission]
+verify_jwt = false
+
 [functions.send-transactional-email]
 verify_jwt = true
 

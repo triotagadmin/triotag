@@ -85,6 +85,14 @@ const CampaignMarketplace = () => {
   const [requestOpen, setRequestOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Proposal dialog
+  const [proposalFor, setProposalFor] = useState<Campaign | null>(null);
+  const [pName, setPName] = useState("");
+  const [pEmail, setPEmail] = useState("");
+  const [pVenue, setPVenue] = useState("");
+  const [pMessage, setPMessage] = useState("");
+  const [sendingProposal, setSendingProposal] = useState(false);
+
   // wizard
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [guestEmail, setGuestEmail] = useState("");
@@ -238,6 +246,47 @@ const CampaignMarketplace = () => {
     setFStart(""); setFEnd(""); setFBudget(""); setFNotes("");
   };
 
+  const resetProposal = () => {
+    setProposalFor(null);
+    setPName(""); setPEmail(""); setPVenue(""); setPMessage("");
+  };
+
+  const handleSubmitProposal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!proposalFor) return;
+    if (!pName || !pEmail || !pMessage) {
+      toast.error("Please fill in your name, email, and message.");
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(pEmail)) {
+      toast.error("Please enter a valid email.");
+      return;
+    }
+    setSendingProposal(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("notify-proposal-submitted", {
+        body: {
+          campaignId: proposalFor.id,
+          campaignName: proposalFor.campaign_name,
+          proposerName: pName,
+          proposerEmail: pEmail,
+          proposerVenue: pVenue,
+          proposerMessage: pMessage,
+        },
+      });
+      if (error || (data && (data as any).error)) {
+        throw new Error(error?.message || (data as any)?.error || "Failed to send");
+      }
+      toast.success("Proposal sent! The campaign owner will be notified.");
+      resetProposal();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message || "Failed to send proposal.");
+    } finally {
+      setSendingProposal(false);
+    }
+  };
+
   const handleSubmitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fName || !fType || !fLocation || !fStart || !fEnd) {
@@ -249,6 +298,8 @@ const CampaignMarketplace = () => {
       const { data: { session } } = await supabase.auth.getSession();
       const isGuest = !session || !isLoggedIn;
 
+      let campaignId: string | null = null;
+
       if (session && isLoggedIn) {
         const { data: profile } = await supabase
           .from("advertiser_profiles")
@@ -257,7 +308,7 @@ const CampaignMarketplace = () => {
           .maybeSingle();
 
         if (profile?.id) {
-          const { error } = await supabase.from("campaigns").insert({
+          const { data: inserted, error } = await supabase.from("campaigns").insert({
             advertiser_id: profile.id,
             campaign_name: fName,
             campaign_type: fType,
@@ -268,10 +319,11 @@ const CampaignMarketplace = () => {
             budget_currency: "PHP",
             campaign_description: fNotes || null,
             status: "pending",
-          });
+          }).select("id").single();
           if (error) throw error;
+          campaignId = inserted?.id ?? null;
         } else {
-          const { error } = await supabase.from("guest_campaigns").insert({
+          const { data: inserted, error } = await supabase.from("guest_campaigns").insert({
             email: session.user.email,
             email_verified: true,
             campaign_name: fName,
@@ -282,11 +334,12 @@ const CampaignMarketplace = () => {
             budget_amount: fBudget ? Number(fBudget) : null,
             campaign_description: fNotes || null,
             status: "pending",
-          });
+          }).select("id").single();
           if (error) throw error;
+          campaignId = inserted?.id ?? null;
         }
       } else {
-        const { error } = await supabase.from("guest_campaigns").insert({
+        const { data: inserted, error } = await supabase.from("guest_campaigns").insert({
           email: guestEmail,
           email_verified: true,
           campaign_name: fName,
@@ -297,8 +350,9 @@ const CampaignMarketplace = () => {
           budget_amount: fBudget ? Number(fBudget) : null,
           campaign_description: fNotes || null,
           status: "pending",
-        });
+        }).select("id").single();
         if (error) throw error;
+        campaignId = inserted?.id ?? null;
       }
 
       await supabase.functions.invoke("notify-campaign-submission", {
@@ -311,6 +365,7 @@ const CampaignMarketplace = () => {
           endDate: fEnd,
           budget: fBudget || "Flexible",
           isGuest,
+          campaignId,
         },
       });
 
@@ -504,11 +559,11 @@ const CampaignMarketplace = () => {
                       </Button>
                     ) : (
                       <Button
-                        asChild
                         size="sm"
                         className="flex-1 bg-green-600 hover:bg-green-500 text-white"
+                        onClick={() => setProposalFor(c)}
                       >
-                        <Link to={`/contact?campaign=${c.id}`}>Submit Proposal</Link>
+                        Submit Proposal
                       </Button>
                     )}
 
@@ -553,8 +608,11 @@ const CampaignMarketplace = () => {
               </div>
               <DialogFooter className="gap-2">
                 <Button variant="outline" onClick={() => setDetail(null)} className="border-white/15">Close</Button>
-                <Button asChild className="bg-green-600 hover:bg-green-500 text-white">
-                  <Link to={`/contact?campaign=${detail.id}`}>Submit a Proposal</Link>
+                <Button
+                  className="bg-green-600 hover:bg-green-500 text-white"
+                  onClick={() => { setProposalFor(detail); setDetail(null); }}
+                >
+                  Submit a Proposal
                 </Button>
               </DialogFooter>
             </>
@@ -732,6 +790,60 @@ const CampaignMarketplace = () => {
                 )}
                 <Button type="submit" disabled={submitting} className="bg-green-600 hover:bg-green-500 text-white">
                   {submitting ? "Submitting..." : "Submit Request"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Proposal Dialog */}
+      <Dialog open={!!proposalFor} onOpenChange={(o) => !o && resetProposal()}>
+        <DialogContent className="bg-[#0c0c0c] border-white/10 text-white max-w-lg">
+          {proposalFor && (
+            <form onSubmit={handleSubmitProposal}>
+              <DialogHeader>
+                <DialogTitle>Submit a Proposal</DialogTitle>
+                <DialogDescription className="text-white/60">
+                  Send your proposal to the owner of <span className="text-white font-medium">{proposalFor.campaign_name}</span>.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Your Name *</label>
+                  <Input value={pName} onChange={(e) => setPName(e.target.value)} required className="bg-black border-white/10" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Your Email *</label>
+                  <Input type="email" value={pEmail} onChange={(e) => setPEmail(e.target.value)} required className="bg-black border-white/10" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Your Venue / Ad Space</label>
+                  <Input
+                    value={pVenue}
+                    onChange={(e) => setPVenue(e.target.value)}
+                    placeholder="e.g. Gym in Makati, Cafe in BGC"
+                    className="bg-black border-white/10"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Message *</label>
+                  <Textarea
+                    value={pMessage}
+                    onChange={(e) => setPMessage(e.target.value)}
+                    rows={4}
+                    placeholder="Describe your space and why it's a good fit..."
+                    required
+                    className="bg-black border-white/10"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="gap-2">
+                <Button type="button" variant="outline" onClick={resetProposal} className="border-white/15">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={sendingProposal} className="bg-green-600 hover:bg-green-500 text-white">
+                  {sendingProposal ? "Sending..." : "Send Proposal"}
                 </Button>
               </DialogFooter>
             </form>
