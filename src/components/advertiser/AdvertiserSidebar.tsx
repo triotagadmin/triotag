@@ -76,7 +76,7 @@ export function AdvertiserSidebar() {
           <div className="px-4 py-4 border-t border-white/10 flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-sm">A</div>
             <div className="flex-1 min-w-0">
-              <div className="text-white text-sm font-medium truncate">Brand Advertiser</div>
+              <div className="text-white text-sm font-medium truncate">Retailer</div>
               <div className="text-gray-400 text-xs">Advertiser</div>
             </div>
             <ChevronRight className="w-4 h-4 text-gray-400" />
