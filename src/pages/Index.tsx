@@ -86,7 +86,7 @@ const Hero = () => {
             </Link>
             <Link to="/campaign-submit">
               <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Request an Ad Campaign
+                Book a Retail Media Inventory
               </Button>
             </Link>
           </div>
