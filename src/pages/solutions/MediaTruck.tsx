@@ -472,7 +472,7 @@ export default function SolutionsMediaTruck() {
             <div className="h-px bg-green-500/40 my-2" />
             <p className="text-green-400 font-semibold text-center">Brands on the move.</p>
             <Button asChild size="lg" className="w-full">
-              <Link to="/contact">Book a Campaign</Link>
+              <Link to="/contact">Custom Brand Truck</Link>
             </Button>
           </div>
         </div>
