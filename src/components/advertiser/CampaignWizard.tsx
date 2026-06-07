@@ -113,55 +113,16 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
     })();
   }, [open]);
 
-  useEffect(() => {
-    if (step !== 2 || !campaignType) return;
-    setLoadingVenues(true);
-    supabase
-      .from("ad_spaces")
-      .select("id, title, location, media_type, specifications, pricing, monthly_subscription_fee, publisher_id")
-      .eq("approval_status", "approved")
-      .eq("media_type", campaignType)
-      .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) {
-          toast({ title: "Error", description: error.message, variant: "destructive" });
-        }
-        setVenues((data as any) || []);
-        setLoadingVenues(false);
-      });
-  }, [step, campaignType]);
-
   const months = useMemo(() => monthsBetween(startDate, endDate), [startDate, endDate]);
-  const selectedVenues = useMemo(() => venues.filter(v => selectedIds.has(v.id)), [venues, selectedIds]);
-  const venueCost = (v: Venue) => venueMonthly(v) * months;
-  const grandTotal = useMemo(
-    () => selectedVenues.reduce((s, v) => s + venueCost(v), 0),
-    [selectedVenues, months]
-  );
-
-  const cities = useMemo(() => {
-    const set = new Set<string>();
-    venues.forEach(v => { if (v.location) set.add(v.location); });
-    return Array.from(set);
-  }, [venues]);
-
-  const filteredVenues = useMemo(() => {
-    const q = search.toLowerCase();
-    return venues.filter(v => {
-      if (cityFilter !== "all" && v.location !== cityFilter) return false;
-      if (!q) return true;
-      return (v.title || "").toLowerCase().includes(q) || (v.location || "").toLowerCase().includes(q);
-    });
-  }, [venues, search, cityFilter]);
 
   const step1Valid = !!(campaignName && campaignType && startDate && endDate && budget);
-  const step2Valid = selectedIds.size > 0;
+  const step2Valid = pinnedLocations.length >= MIN_PINS && pinnedLocations.length <= MAX_PINS;
   const billingValid = !!(buyerName && buyerEmail && billingAddress && billingCity && billingCountry && billingZip);
 
   const reset = () => {
     setStep(1); setCampaignName(""); setCampaignType(""); setStartDate(""); setEndDate("");
-    setBudget(""); setDescription(""); setIndustry(""); setVenues([]); setSelectedIds(new Set());
-    setSearch(""); setCityFilter("all"); setProcessing(false);
+    setBudget(""); setDescription(""); setIndustry(""); setPinnedLocations([]);
+    setProcessing(false);
   };
 
   const handleClose = () => { onClose(); setTimeout(reset, 200); };
