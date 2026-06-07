@@ -17,6 +17,8 @@ import {
   DollarSign,
   Play,
 } from "lucide-react";
+import supertruckMediakit2 from "@/assets/supertruck-mediakit-2.png.asset.json";
+
 
 const features = [
   {
