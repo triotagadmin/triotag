@@ -54,10 +54,13 @@ const TYPE_OPTIONS: { value: MediaType; icon: any; title: string; desc: string }
 
 const STEPS = [
   { id: 1, label: "Campaign Details" },
-  { id: 2, label: "Select Venues" },
+  { id: 2, label: "Select Location" },
   { id: 3, label: "Review" },
   { id: 4, label: "Payment" },
 ];
+
+const MIN_PINS = 1;
+const MAX_PINS = 15;
 
 function monthsBetween(start: string, end: string): number {
   if (!start || !end) return 1;
