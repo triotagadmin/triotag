@@ -16,6 +16,7 @@ import {
   X, ArrowRight, ArrowLeft, CheckCircle, CheckCircle2, Image as ImageIcon,
   Monitor, Volume2, MapPin, Search, Loader2, Shield, Lock,
 } from "lucide-react";
+import { MultiPinLocationMap, type PinnedLocation } from "./MultiPinLocationMap";
 
 type MediaType = "OOH" | "DOOH" | "AOOH";
 type Step = 1 | 2 | 3 | 4;
@@ -54,10 +55,13 @@ const TYPE_OPTIONS: { value: MediaType; icon: any; title: string; desc: string }
 
 const STEPS = [
   { id: 1, label: "Campaign Details" },
-  { id: 2, label: "Select Venues" },
+  { id: 2, label: "Select Location" },
   { id: 3, label: "Review" },
   { id: 4, label: "Payment" },
 ];
+
+const MIN_PINS = 1;
+const MAX_PINS = 15;
 
 function monthsBetween(start: string, end: string): number {
   if (!start || !end) return 1;
@@ -85,12 +89,8 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
   const [description, setDescription] = useState("");
   const [industry, setIndustry] = useState("");
 
-  // Step 2
-  const [venues, setVenues] = useState<Venue[]>([]);
-  const [loadingVenues, setLoadingVenues] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [search, setSearch] = useState("");
-  const [cityFilter, setCityFilter] = useState<string>("all");
+  // Step 2 — pinned target locations
+  const [pinnedLocations, setPinnedLocations] = useState<PinnedLocation[]>([]);
 
   // Step 3 billing
   const [buyerName, setBuyerName] = useState("");
@@ -113,55 +113,16 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
     })();
   }, [open]);
 
-  useEffect(() => {
-    if (step !== 2 || !campaignType) return;
-    setLoadingVenues(true);
-    supabase
-      .from("ad_spaces")
-      .select("id, title, location, media_type, specifications, pricing, monthly_subscription_fee, publisher_id")
-      .eq("approval_status", "approved")
-      .eq("media_type", campaignType)
-      .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) {
-          toast({ title: "Error", description: error.message, variant: "destructive" });
-        }
-        setVenues((data as any) || []);
-        setLoadingVenues(false);
-      });
-  }, [step, campaignType]);
-
   const months = useMemo(() => monthsBetween(startDate, endDate), [startDate, endDate]);
-  const selectedVenues = useMemo(() => venues.filter(v => selectedIds.has(v.id)), [venues, selectedIds]);
-  const venueCost = (v: Venue) => venueMonthly(v) * months;
-  const grandTotal = useMemo(
-    () => selectedVenues.reduce((s, v) => s + venueCost(v), 0),
-    [selectedVenues, months]
-  );
-
-  const cities = useMemo(() => {
-    const set = new Set<string>();
-    venues.forEach(v => { if (v.location) set.add(v.location); });
-    return Array.from(set);
-  }, [venues]);
-
-  const filteredVenues = useMemo(() => {
-    const q = search.toLowerCase();
-    return venues.filter(v => {
-      if (cityFilter !== "all" && v.location !== cityFilter) return false;
-      if (!q) return true;
-      return (v.title || "").toLowerCase().includes(q) || (v.location || "").toLowerCase().includes(q);
-    });
-  }, [venues, search, cityFilter]);
 
   const step1Valid = !!(campaignName && campaignType && startDate && endDate && budget);
-  const step2Valid = selectedIds.size > 0;
+  const step2Valid = pinnedLocations.length >= MIN_PINS && pinnedLocations.length <= MAX_PINS;
   const billingValid = !!(buyerName && buyerEmail && billingAddress && billingCity && billingCountry && billingZip);
 
   const reset = () => {
     setStep(1); setCampaignName(""); setCampaignType(""); setStartDate(""); setEndDate("");
-    setBudget(""); setDescription(""); setIndustry(""); setVenues([]); setSelectedIds(new Set());
-    setSearch(""); setCityFilter("all"); setProcessing(false);
+    setBudget(""); setDescription(""); setIndustry(""); setPinnedLocations([]);
+    setProcessing(false);
   };
 
   const handleClose = () => { onClose(); setTimeout(reset, 200); };
@@ -171,32 +132,36 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
       if (!step1Valid) return toast({ title: "Missing fields", description: "Complete all required fields.", variant: "destructive" });
       setStep(2);
     } else if (step === 2) {
-      if (!step2Valid) return toast({ title: "Select at least one venue", variant: "destructive" });
+      if (!step2Valid) return toast({ title: `Pin ${MIN_PINS}–${MAX_PINS} locations`, variant: "destructive" });
       setStep(3);
     } else if (step === 3) {
       if (!billingValid) return toast({ title: "Missing billing info", variant: "destructive" });
       setStep(4);
-      handlePayment();
+      handleSubmit();
     }
   };
 
-  const handlePayment = async () => {
+  const handleSubmit = async () => {
     setProcessing(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not signed in");
       const uid = session.user.id;
 
-      // Lookup advertiser_profiles.id (campaigns.advertiser_id FK)
       const { data: profile } = await supabase
         .from("advertiser_profiles").select("id").eq("user_id", uid).maybeSingle();
 
-      // Create parent campaign
-      await supabase.from("campaigns").insert({
+      const locationsSummary = pinnedLocations
+        .map((p, i) => `${i + 1}. ${p.address} (${p.lat.toFixed(5)}, ${p.lng.toFixed(5)})`)
+        .join("\n");
+      const fullDescription = [description, "", "Target Locations:", locationsSummary]
+        .filter(Boolean).join("\n");
+
+      const { error: campErr } = await supabase.from("campaigns").insert({
         advertiser_id: profile?.id || uid,
         campaign_name: campaignName,
         campaign_type: (campaignType as string).toLowerCase(),
-        campaign_description: description || null,
+        campaign_description: fullDescription,
         start_date: startDate,
         end_date: endDate,
         budget_amount: Number(budget),
@@ -204,44 +169,14 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
         status: "pending",
         target_audience: industry || null,
       } as any);
+      if (campErr) throw campErr;
 
-      // Map UI type to activation_type enum
-      const activationType = campaignType === "OOH" ? "poster" : "other";
-
-      // Create activation rows
-      const rows = selectedVenues.map(v => ({
-        advertiser_id: uid,
-        ad_space_id: v.id,
-        publisher_id: v.publisher_id,
-        activation_type: activationType,
-        status: "pending_approval",
-        start_date: startDate,
-        end_date: endDate,
-        total_amount: venueCost(v),
-      }));
-
-      const { data: inserted, error: insErr } = await supabase
-        .from("activations").insert(rows as any).select("id");
-      if (insErr) throw insErr;
-      if (!inserted?.length) throw new Error("Failed to create activations");
-
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: {
-          activationId: inserted[0].id,
-          buyerName, buyerEmail, buyerPhone, companyName,
-          billingAddress, billingCity, billingCountry, billingZip,
-          successUrl: `${window.location.origin}/payment-success`,
-          cancelUrl: window.location.href,
-        },
-      });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
-      const checkoutUrl = data?.checkoutUrl || data?.checkout_url;
-      if (!checkoutUrl) throw new Error("No checkout URL returned");
-      window.location.href = checkoutUrl;
+      toast({ title: "Campaign submitted", description: "Your campaign is pending review." });
+      setProcessing(false);
+      handleClose();
     } catch (err: any) {
-      console.error("Campaign payment error:", err);
-      toast({ title: "Checkout failed", description: err.message, variant: "destructive" });
+      console.error("Campaign submit error:", err);
+      toast({ title: "Submission failed", description: err.message, variant: "destructive" });
       setProcessing(false);
       setStep(3);
     }
@@ -358,75 +293,20 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
 
         {step === 2 && (
           <div className="space-y-4">
-            <div className="flex flex-wrap gap-3">
-              <div className="relative flex-1 min-w-[240px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                <Input className="pl-9" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search venues by name or location..." />
-              </div>
-              <Select value={cityFilter} onValueChange={setCityFilter}>
-                <SelectTrigger className="w-56"><SelectValue placeholder="All cities" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All cities</SelectItem>
-                  {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            <div>
+              <h3 className="font-bold text-lg mb-1">Pin your target locations</h3>
+              <p className="text-sm text-zinc-400">
+                Tap the map, search, or use your current location to drop pins. The pinned areas
+                will serve as the basis for where your advertisement will run.
+                Minimum {MIN_PINS}, maximum {MAX_PINS} pins.
+              </p>
             </div>
-
-            <div className="text-sm text-green-400 font-medium">
-              {selectedIds.size} venue{selectedIds.size !== 1 ? "s" : ""} selected
-            </div>
-
-            {loadingVenues ? (
-              <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-green-400" /></div>
-            ) : filteredVenues.length === 0 ? (
-              <Card className="bg-[#0c0c0c] border-white/10">
-                <CardContent className="py-12 text-center text-zinc-400">
-                  No approved {campaignType} venues available.
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filteredVenues.map(v => {
-                  const selected = selectedIds.has(v.id);
-                  const monthly = venueMonthly(v);
-                  return (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedIds(prev => {
-                          const next = new Set(prev);
-                          next.has(v.id) ? next.delete(v.id) : next.add(v.id);
-                          return next;
-                        });
-                      }}
-                      className={`relative text-left rounded-2xl border-2 p-4 transition ${
-                        selected ? "border-green-500 bg-green-500/5" : "border-white/10 bg-[#0c0c0c] hover:border-white/20"
-                      }`}
-                    >
-                      {selected && <CheckCircle2 className="absolute top-3 right-3 w-5 h-5 text-green-400" />}
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="font-bold text-white pr-6">{v.title}</div>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-green-400 mb-3">
-                        <MapPin className="w-3 h-3" />
-                        <span className="truncate">{v.location || "Unknown"}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="border-green-500/40 text-green-400 text-[10px]">{v.media_type}</Badge>
-                        {monthly > 0 && (
-                          <span className="text-xs text-zinc-300">₱{monthly.toLocaleString()}/mo</span>
-                        )}
-                      </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        <Checkbox checked={selected} />
-                        <span className="text-xs text-zinc-400">{selected ? "Selected" : "Select venue"}</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <MultiPinLocationMap
+              pins={pinnedLocations}
+              onChange={setPinnedLocations}
+              min={MIN_PINS}
+              max={MAX_PINS}
+            />
           </div>
         )}
 
@@ -448,28 +328,26 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
 
             <Card className="bg-[#0c0c0c] border-white/10 rounded-2xl">
               <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-3">Selected Venues ({selectedVenues.length})</h3>
+                <h3 className="font-bold text-lg mb-3">Pinned Locations ({pinnedLocations.length})</h3>
                 <div className="divide-y divide-white/5">
-                  {selectedVenues.map(v => (
-                    <div key={v.id} className="py-2 flex items-center justify-between text-sm">
-                      <div>
-                        <div className="font-medium">{v.title}</div>
-                        <div className="text-xs text-zinc-400 flex items-center gap-1"><MapPin className="w-3 h-3" />{v.location}</div>
+                  {pinnedLocations.map((p, i) => (
+                    <div key={p.id} className="py-2 flex items-start gap-3 text-sm">
+                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-green-600 text-white text-xs font-bold shrink-0 mt-0.5">
+                        {i + 1}
                       </div>
-                      <div className="text-green-400 font-semibold">₱{venueCost(v).toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium line-clamp-2">{p.address}</div>
+                        <div className="text-xs text-zinc-400 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {p.lat.toFixed(5)}, {p.lng.toFixed(5)}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-white/10 mt-3 pt-3 flex items-center justify-between">
-                  <span className="text-zinc-400">Venue lease fees</span>
-                  <span className="font-bold">₱{grandTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                </div>
-                {campaignType === "OOH" && (
-                  <p className="text-xs text-zinc-500 mt-2">Print materials billed separately after booking confirmation.</p>
-                )}
                 <div className="border-t border-green-500/30 mt-3 pt-3 flex items-center justify-between">
-                  <span className="font-semibold text-lg">Grand Total</span>
-                  <span className="text-2xl font-bold text-green-400">₱{grandTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                  <span className="font-semibold text-lg">Campaign Budget</span>
+                  <span className="text-2xl font-bold text-green-400">₱{Number(budget || 0).toLocaleString()}</span>
                 </div>
               </CardContent>
             </Card>
