@@ -190,7 +190,7 @@ const Retailers = () => {
                   {[
                     { icon: Utensils, label: "Cafe / Restaurant", amt: "₱1,500 – ₱4,000 / month" },
                     { icon: Dumbbell, label: "Gym / Fitness", amt: "₱2,000 – ₱5,000 / month" },
-                    { icon: Store, label: "Sari-sari / Retail", amt: "₱800 – ₱2,000 / month" },
+                    { icon: Store, label: "Retail", amt: "₱8,000 – ₱20,000 / month" },
                   ].map(({ icon: Icon, label, amt }) => (
                     <div key={label} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2 text-white/80">
