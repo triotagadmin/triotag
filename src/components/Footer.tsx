@@ -42,7 +42,7 @@ export const Footer = () => {
             { label: "For Retailers", href: "/list-space" },
             { label: "For Retailers", href: "/campaign-submit" },
             { label: "Inventory Formats", href: "/explore" },
-            { label: "Resources", href: "/insights" },
+            
           ])}
 
           {linkCol("Company", [
