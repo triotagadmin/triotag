@@ -36,7 +36,7 @@ import {
 /* --------------------------------- HERO --------------------------------- */
 import { useEffect } from "react";
 import { fetchLandingTotals } from "@/lib/inventoryAggregation";
-import mediaTruckBg from "@/assets/supertruck-media-kit.png.asset.json";
+import mediaTruckBg from "@/assets/mediatruck-bg-clean.png.asset.json";
 
 const Hero = () => {
   const [totals, setTotals] = useState<{
