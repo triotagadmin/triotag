@@ -18,6 +18,7 @@ import {
   Play,
 } from "lucide-react";
 import truckFeaturesBg from "@/assets/supertruck-mediakit-features.png.asset.json";
+import superTruckVideo from "@/assets/supertruckmediakit.mp4.asset.json";
 
 const features = [
   {
@@ -179,26 +180,16 @@ export default function SolutionsMediaTruck() {
               </Button>
             </div>
           </div>
-          <div className="bg-[#0c0c0c] border border-green-500/30 rounded-2xl p-8 text-center">
-            <div className="text-xs font-semibold tracking-widest text-green-500 uppercase mb-6">
-              Mobile Advertising Fleet
-            </div>
-            <Truck className="w-32 h-32 text-green-500 mx-auto mb-6" />
-            <div className="flex flex-wrap justify-center gap-2 mb-4">
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-black border border-white/10 text-xs text-zinc-300">
-                <Eye className="w-3 h-3 text-green-500" /> High Visibility
-              </span>
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-black border border-white/10 text-xs text-zinc-300">
-                <MapPin className="w-3 h-3 text-green-500" /> Targeted Routes
-              </span>
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-black border border-white/10 text-xs text-zinc-300">
-                <Zap className="w-3 h-3 text-green-500" /> Real-time Impact
-              </span>
-            </div>
-            <p className="text-sm text-zinc-400">
-              Our mobile LED fleet brings your brand closer to your audience. Highly visible. Fully digital. Always on
-              the move.
-            </p>
+          <div className="bg-[#0c0c0c] border border-green-500/30 rounded-2xl p-3 overflow-hidden">
+            <video
+              src={superTruckVideo.url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls
+              className="w-full h-auto rounded-xl object-contain"
+            />
           </div>
         </div>
       </section>
