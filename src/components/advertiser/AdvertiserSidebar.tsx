@@ -11,7 +11,7 @@ const items: Item[] = [
   { to: "/advertiser/explore", label: "Explore Inventory", icon: Globe },
   { to: "/advertiser/campaigns", label: "Campaigns", icon: Megaphone, protected: true },
   
-  { to: "/advertiser/reports", label: "Reports", icon: BarChart3, protected: true },
+  { to: "/advertiser/reports", label: "Active Media", icon: BarChart3, protected: true },
   { to: "/advertiser/wallet", label: "Wallet", icon: Wallet, protected: true },
   { to: "/advertiser/creative", label: "Creative Hub", icon: Palette, protected: true },
 ];
