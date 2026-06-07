@@ -76,11 +76,11 @@ const whyCards = [
 ];
 
 const specs = [
-  ["Sticker", "3R / 4R / A5", "All venue types", "7 days", "Custom quote"],
-  ["Poster", "A4 / A3", "F&B, Retail, Gyms", "14 days", "Custom quote"],
-  ["Table Tent", "A5 / DL", "Cafes, Restaurants", "30 days", "Custom quote"],
-  ["Window Cling", "Custom", "Retail, Salons", "14 days", "Custom quote"],
-  ["Flyer Distribution", "DL / A5", "Events, Stores", "Per event", "Custom quote"],
+  ["Sticker", "100 pieces", "All venue types", "7 days", "Custom quote"],
+  ["Poster", "100 pieces", "F&B, Retail, Gyms", "14 days", "Custom quote"],
+  ["Table Tent", "100 pieces", "Cafes, Restaurants", "30 days", "Custom quote"],
+  ["Window Cling", "10 pieces", "Retail, Salons", "14 days", "Custom quote"],
+  ["Flyer Distribution", "500 pieces", "Events, Stores", "Per event", "Custom quote"],
 ];
 
 export default function SolutionsOOH() {
@@ -212,7 +212,7 @@ export default function SolutionsOOH() {
             <table className="w-full text-sm">
               <thead className="bg-green-500/10 border-b border-green-500/30">
                 <tr>
-                  {["Format", "Size", "Venue Types", "Min. Duration", "Starting Rate"].map((h) => (
+                  {["Format", "Minimum Quantity", "Venue Types", "Min. Duration", "Starting Rate"].map((h) => (
                     <th key={h} className="text-left p-4 text-green-400 font-semibold">
                       {h}
                     </th>
