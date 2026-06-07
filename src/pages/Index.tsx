@@ -571,12 +571,70 @@ const MediaTruckSection = () => (
   </section>
 );
 
+/* ----------------------------- EXCHANGE INTRO ---------------------------- */
+const ExchangeIntro = () => (
+  <section className="relative bg-black text-white overflow-hidden border-b border-white/10">
+    <div className="absolute inset-0 bg-grid-dark opacity-30 pointer-events-none" />
+    <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-green-500/10 blur-3xl" />
+    <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-green-500/10 blur-3xl" />
+
+    <div className="container mx-auto px-4 md:px-6 py-16 md:py-20 relative">
+      <div className="max-w-3xl mx-auto text-center space-y-5">
+        <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold tracking-wider uppercase text-green-500 bg-green-500/10 border border-green-500/30 rounded-full">
+          <Network className="w-3.5 h-3.5" /> Outdoor Advertising Exchange
+        </span>
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1]">
+          The Central Hub for <span className="text-green-500">Outdoor Retail Advertising</span>
+        </h2>
+        <p className="text-base md:text-lg text-zinc-400 leading-relaxed">
+          Triotag is an advertising exchange that connects brands, agencies, and retail media owners in a single
+          marketplace. Discover, plan, and activate OOH, DOOH, and AOOH inventory across stores, streets, and
+          high-traffic locations — all from one platform.
+        </p>
+      </div>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-12 max-w-5xl mx-auto">
+        {[
+          {
+            icon: Store,
+            title: "Unified Retail Inventory",
+            desc: "Aggregate ad spaces from retailers, supermarkets, and location-based businesses into one searchable network.",
+          },
+          {
+            icon: Crosshair,
+            title: "Targeted Activation",
+            desc: "Match campaigns to the right districts, audiences, and store environments with precision planning tools.",
+          },
+          {
+            icon: ShieldCheck,
+            title: "Transparent Exchange",
+            desc: "Verified spaces, real proof-of-run reporting, and clear pricing for every booking on the platform.",
+          },
+        ].map((f) => (
+          <div
+            key={f.title}
+            className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur hover:border-green-500/40 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-lg bg-green-500/15 text-green-500 flex items-center justify-center mb-4">
+              <f.icon className="w-5 h-5" />
+            </div>
+            <div className="text-base font-bold text-white mb-1">{f.title}</div>
+            <p className="text-sm text-zinc-400 leading-relaxed">{f.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 /* --------------------------------- PAGE ---------------------------------- */
 const Index = () => {
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
+      <ExchangeIntro />
       <Hero />
+
       <LogoStrip />
       <ThreeChannels />
       <WhyRetailMedia />
