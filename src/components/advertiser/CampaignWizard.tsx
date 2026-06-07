@@ -328,28 +328,26 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
 
             <Card className="bg-[#0c0c0c] border-white/10 rounded-2xl">
               <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-3">Selected Venues ({selectedVenues.length})</h3>
+                <h3 className="font-bold text-lg mb-3">Pinned Locations ({pinnedLocations.length})</h3>
                 <div className="divide-y divide-white/5">
-                  {selectedVenues.map(v => (
-                    <div key={v.id} className="py-2 flex items-center justify-between text-sm">
-                      <div>
-                        <div className="font-medium">{v.title}</div>
-                        <div className="text-xs text-zinc-400 flex items-center gap-1"><MapPin className="w-3 h-3" />{v.location}</div>
+                  {pinnedLocations.map((p, i) => (
+                    <div key={p.id} className="py-2 flex items-start gap-3 text-sm">
+                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-green-600 text-white text-xs font-bold shrink-0 mt-0.5">
+                        {i + 1}
                       </div>
-                      <div className="text-green-400 font-semibold">₱{venueCost(v).toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium line-clamp-2">{p.address}</div>
+                        <div className="text-xs text-zinc-400 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {p.lat.toFixed(5)}, {p.lng.toFixed(5)}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-white/10 mt-3 pt-3 flex items-center justify-between">
-                  <span className="text-zinc-400">Venue lease fees</span>
-                  <span className="font-bold">₱{grandTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                </div>
-                {campaignType === "OOH" && (
-                  <p className="text-xs text-zinc-500 mt-2">Print materials billed separately after booking confirmation.</p>
-                )}
                 <div className="border-t border-green-500/30 mt-3 pt-3 flex items-center justify-between">
-                  <span className="font-semibold text-lg">Grand Total</span>
-                  <span className="text-2xl font-bold text-green-400">₱{grandTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                  <span className="font-semibold text-lg">Campaign Budget</span>
+                  <span className="text-2xl font-bold text-green-400">₱{Number(budget || 0).toLocaleString()}</span>
                 </div>
               </CardContent>
             </Card>
