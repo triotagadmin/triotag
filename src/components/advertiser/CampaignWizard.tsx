@@ -89,12 +89,8 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
   const [description, setDescription] = useState("");
   const [industry, setIndustry] = useState("");
 
-  // Step 2
-  const [venues, setVenues] = useState<Venue[]>([]);
-  const [loadingVenues, setLoadingVenues] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [search, setSearch] = useState("");
-  const [cityFilter, setCityFilter] = useState<string>("all");
+  // Step 2 — pinned target locations
+  const [pinnedLocations, setPinnedLocations] = useState<PinnedLocation[]>([]);
 
   // Step 3 billing
   const [buyerName, setBuyerName] = useState("");
