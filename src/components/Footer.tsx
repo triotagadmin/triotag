@@ -50,7 +50,7 @@ export const Footer = () => {
             { label: "Careers", href: "/careers" },
             { label: "News & Press", href: "/insights" },
             { label: "Contact Us", href: "/contact" },
-            { label: "Media Partners", href: "/list-space" },
+            { label: "Media Partners", href: "/media-partners" },
           ])}
 
           {linkCol("Legal", [

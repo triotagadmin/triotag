@@ -101,6 +101,7 @@ import SolutionsAOOH from "./pages/solutions/AOOH";
 import SolutionsMediaTruck from "./pages/solutions/MediaTruck";
 import IndustriesRetailers from "./pages/industries/Retailers";
 import IndustriesBrands from "./pages/industries/Brands";
+import MediaPartners from "./pages/MediaPartners";
 
 const queryClient = new QueryClient();
 
@@ -243,6 +244,7 @@ const App = () => (
           <Route path="/solutions/media-truck" element={<SolutionsMediaTruck />} />
           <Route path="/industries/retailers" element={<IndustriesRetailers />} />
           <Route path="/industries/brands" element={<IndustriesBrands />} />
+          <Route path="/media-partners" element={<MediaPartners />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
