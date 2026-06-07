@@ -56,8 +56,54 @@ const TYPE_OPTIONS: { value: MediaType; icon: any; title: string; desc: string }
 const STEPS = [
   { id: 1, label: "Campaign Details" },
   { id: 2, label: "Select Location" },
-  { id: 3, label: "Review" },
+  { id: 3, label: "Activation" },
   { id: 4, label: "Payment" },
+];
+
+type ActivationSubStep = 1 | 2 | 3;
+type CampaignMode = "packaged" | "custom" | "";
+
+const PACKAGED_OPTIONS: Record<MediaType, { name: string; price: number; includes: string[] }> = {
+  OOH: {
+    name: "OOH Starter Pack",
+    price: 25000,
+    includes: [
+      "200 vinyl stickers (A5)",
+      "50 table tent cards",
+      "20 coroplast A-frame posters",
+      "Distribution to 10 retail venues",
+      "30-day campaign run",
+    ],
+  },
+  DOOH: {
+    name: "DOOH Starter Pack",
+    price: 35000,
+    includes: [
+      "15-second loop on 25 digital screens",
+      "8 plays per hour, 12 hours/day",
+      "30-day campaign run",
+      "Performance dashboard",
+    ],
+  },
+  AOOH: {
+    name: "AOOH Starter Pack",
+    price: 18000,
+    includes: [
+      "20-second audio spot",
+      "20 in-store audio networks",
+      "6 plays per hour, 10 hours/day",
+      "30-day campaign run",
+    ],
+  },
+};
+
+const OOH_MATERIALS = [
+  "Vinyl Sticker (A5)",
+  "Table Tent Card",
+  "Acrylic Table Tent",
+  "Coroplast A-Frame",
+  "Poster Frame",
+  "Wall Decal",
 ];
 
 const MIN_PINS = 1;
