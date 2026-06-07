@@ -184,13 +184,32 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
   const step2Valid = pinnedLocations.length >= MIN_PINS && pinnedLocations.length <= MAX_PINS;
   const billingValid = !!(buyerName && buyerEmail && billingAddress && billingCity && billingCountry && billingZip);
 
+  const customSpecsValid = (() => {
+    if (campaignType === "OOH") return !!(oohMaterial && Number(oohQuantity) > 0);
+    if (campaignType === "DOOH") return !!(doohDuration && doohResolution);
+    if (campaignType === "AOOH") return !!(aoohDuration);
+    return false;
+  })();
+
   const reset = () => {
     setStep(1); setCampaignName(""); setCampaignType(""); setStartDate(""); setEndDate("");
     setBudget(""); setDescription(""); setIndustry(""); setPinnedLocations([]);
+    setActivationSubStep(1); setCampaignMode("");
+    setOohMaterial(""); setOohQuantity(""); setOohSize(""); setOohNotes("");
+    setDoohDuration(""); setDoohResolution("1920x1080"); setDoohPlaysPerHour("");
+    setAoohDuration(""); setAoohScript(""); setAoohPlaysPerHour("");
+    setCreativeFile(null);
     setProcessing(false);
   };
 
   const handleClose = () => { onClose(); setTimeout(reset, 200); };
+
+  const creativeAcceptHint = campaignType === "DOOH" ? "Video file (MP4/MOV)"
+    : campaignType === "AOOH" ? "Audio file (MP3/WAV)"
+    : "Image file (PNG/JPG/PDF)";
+  const creativeAccept = campaignType === "DOOH" ? "video/*"
+    : campaignType === "AOOH" ? "audio/*"
+    : "image/*,application/pdf";
 
   const handleNext = () => {
     if (step === 1) {
@@ -200,10 +219,47 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
       if (!step2Valid) return toast({ title: `Pin ${MIN_PINS}–${MAX_PINS} locations`, variant: "destructive" });
       setStep(3);
     } else if (step === 3) {
+      // Multi sub-step within Activation
+      if (activationSubStep === 1) {
+        if (!campaignMode) return toast({ title: "Choose Packaged or Custom", variant: "destructive" });
+        if (campaignMode === "packaged") {
+          // Skip specs step for packaged → go straight to creative upload
+          setActivationSubStep(3);
+        } else {
+          setActivationSubStep(2);
+        }
+        return;
+      }
+      if (activationSubStep === 2) {
+        if (!customSpecsValid) return toast({ title: "Complete the ad specifications", variant: "destructive" });
+        setActivationSubStep(3);
+        return;
+      }
+      if (activationSubStep === 3) {
+        if (!creativeFile) return toast({ title: `Upload your ${creativeAcceptHint.toLowerCase()}`, variant: "destructive" });
+        setStep(4);
+        return;
+      }
+    } else if (step === 4) {
       if (!billingValid) return toast({ title: "Missing billing info", variant: "destructive" });
-      setStep(4);
       handleSubmit();
     }
+  };
+
+  const handleBack = () => {
+    if (step === 3) {
+      if (activationSubStep === 3) {
+        setActivationSubStep(campaignMode === "packaged" ? 1 : 2);
+        return;
+      }
+      if (activationSubStep === 2) {
+        setActivationSubStep(1);
+        return;
+      }
+      setStep(2);
+      return;
+    }
+    setStep((step - 1) as Step);
   };
 
   const handleSubmit = async () => {
