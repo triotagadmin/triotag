@@ -279,7 +279,7 @@ const WhyRetailMedia = () => {
         <div>
           <h2 className="text-3xl md:text-4xl font-extrabold text-zinc-900 mb-4">Why Retail Media?</h2>
           <p className="text-zinc-500 text-base md:text-lg leading-relaxed max-w-lg">
-            Reach shoppers when they are most attentive and most likely to buy. Retail media closes the gap between
+            Reach customers when they are most attentive and most likely to buy. Triotag closes the gap between
             awareness and conversion.
           </p>
         </div>
