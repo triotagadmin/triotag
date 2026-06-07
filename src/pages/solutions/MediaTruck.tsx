@@ -177,21 +177,6 @@ export default function SolutionsMediaTruck() {
                 <a href="#packages">View Packages</a>
               </Button>
             </div>
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
-              {[
-                ["50M+", "Monthly Reach"],
-                ["250M+", "Monthly Impressions"],
-                ["20+", "Major Cities"],
-                ["1,000+", "Premium Assets"],
-                ["500+", "Successful Campaigns"],
-                ["100+", "Brand Partners"],
-              ].map(([n, l]) => (
-                <div key={l}>
-                  <div className="text-xl md:text-2xl font-bold text-green-500">{n}</div>
-                  <div className="text-xs text-zinc-400 mt-1">{l}</div>
-                </div>
-              ))}
-            </div>
           </div>
           <div className="bg-[#0c0c0c] border border-green-500/30 rounded-2xl p-8 text-center">
             <div className="text-xs font-semibold tracking-widest text-green-500 uppercase mb-6">
