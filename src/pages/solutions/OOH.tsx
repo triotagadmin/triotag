@@ -63,7 +63,7 @@ export default function SolutionsOOH() {
               Register your retail company today.
             </h1>
             <p className="text-zinc-400 text-lg leading-relaxed">
-              TrioTag is an SSP (Supply-Side Platform) for out-of-home advertising — connecting brands to verified retail publisher spaces across the Philippines. OOH print placements inside sari-sari stores, cafes, salons, gyms, and high-footfall venues.
+              TrioTag is an SSP (Supply-Side Platform) for retail advertising — connecting brands to verified retail publisher spaces across the Philippines. OOH print placements inside sari-sari stores, cafes, salons, gyms, and high-footfall venues.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg"><Link to="/advertiser/explore">Browse Inventory</Link></Button>
