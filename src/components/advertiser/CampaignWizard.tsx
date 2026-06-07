@@ -293,75 +293,20 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
 
         {step === 2 && (
           <div className="space-y-4">
-            <div className="flex flex-wrap gap-3">
-              <div className="relative flex-1 min-w-[240px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                <Input className="pl-9" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search venues by name or location..." />
-              </div>
-              <Select value={cityFilter} onValueChange={setCityFilter}>
-                <SelectTrigger className="w-56"><SelectValue placeholder="All cities" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All cities</SelectItem>
-                  {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            <div>
+              <h3 className="font-bold text-lg mb-1">Pin your target locations</h3>
+              <p className="text-sm text-zinc-400">
+                Tap the map, search, or use your current location to drop pins. The pinned areas
+                will serve as the basis for where your advertisement will run.
+                Minimum {MIN_PINS}, maximum {MAX_PINS} pins.
+              </p>
             </div>
-
-            <div className="text-sm text-green-400 font-medium">
-              {selectedIds.size} venue{selectedIds.size !== 1 ? "s" : ""} selected
-            </div>
-
-            {loadingVenues ? (
-              <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-green-400" /></div>
-            ) : filteredVenues.length === 0 ? (
-              <Card className="bg-[#0c0c0c] border-white/10">
-                <CardContent className="py-12 text-center text-zinc-400">
-                  No approved {campaignType} venues available.
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filteredVenues.map(v => {
-                  const selected = selectedIds.has(v.id);
-                  const monthly = venueMonthly(v);
-                  return (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedIds(prev => {
-                          const next = new Set(prev);
-                          next.has(v.id) ? next.delete(v.id) : next.add(v.id);
-                          return next;
-                        });
-                      }}
-                      className={`relative text-left rounded-2xl border-2 p-4 transition ${
-                        selected ? "border-green-500 bg-green-500/5" : "border-white/10 bg-[#0c0c0c] hover:border-white/20"
-                      }`}
-                    >
-                      {selected && <CheckCircle2 className="absolute top-3 right-3 w-5 h-5 text-green-400" />}
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="font-bold text-white pr-6">{v.title}</div>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-green-400 mb-3">
-                        <MapPin className="w-3 h-3" />
-                        <span className="truncate">{v.location || "Unknown"}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="border-green-500/40 text-green-400 text-[10px]">{v.media_type}</Badge>
-                        {monthly > 0 && (
-                          <span className="text-xs text-zinc-300">₱{monthly.toLocaleString()}/mo</span>
-                        )}
-                      </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        <Checkbox checked={selected} />
-                        <span className="text-xs text-zinc-400">{selected ? "Selected" : "Select venue"}</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <MultiPinLocationMap
+              pins={pinnedLocations}
+              onChange={setPinnedLocations}
+              min={MIN_PINS}
+              max={MAX_PINS}
+            />
           </div>
         )}
 
