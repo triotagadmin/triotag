@@ -3,7 +3,6 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import {
-  Monitor,
   Dumbbell,
   Sparkles,
   Heart,
@@ -15,6 +14,7 @@ import {
   Image as ImageIcon,
   ArrowDown,
 } from "lucide-react";
+import doohVideo from "@/assets/doohmediakit.mp4.asset.json";
 
 const flowSteps = [
   { n: 1, title: "Screen Owner Lists Display", desc: "Venue registers screen specs, location, operating hours, and audience footfall" },
@@ -72,17 +72,16 @@ export default function SolutionsDOOH() {
               ))}
             </div>
           </div>
-          <div className="bg-[#0c0c0c] border-2 border-green-500/30 rounded-2xl p-10 text-center animate-pulse-glow">
-            <Monitor className="w-32 h-32 text-green-500 mx-auto mb-6" />
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-semibold mb-3">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> LIVE
-            </div>
-            <p className="text-zinc-300 mb-6">Your brand on screen</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {["Video ✓", "Animated ✓", "Static ✓"].map((p) => (
-                <span key={p} className="px-3 py-1 rounded-full bg-black border border-white/10 text-xs text-zinc-300">{p}</span>
-              ))}
-            </div>
+          <div className="bg-[#0c0c0c] border-4 border-green-500/30 rounded-2xl p-3 overflow-hidden">
+            <video
+              src={doohVideo.url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls
+              className="w-full h-auto rounded-xl object-contain"
+            />
           </div>
         </div>
       </section>
