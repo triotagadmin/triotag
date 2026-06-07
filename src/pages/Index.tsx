@@ -37,6 +37,7 @@ import {
 import { useEffect } from "react";
 import { fetchLandingTotals } from "@/lib/inventoryAggregation";
 import mediaTruckBg from "@/assets/mediatruck-bg-clean.png.asset.json";
+import retailMediaKitVideo from "@/assets/retailmediakit.mp4.asset.json";
 
 const Hero = () => {
   const [totals, setTotals] = useState<{
