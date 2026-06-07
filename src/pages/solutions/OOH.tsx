@@ -15,12 +15,16 @@ import {
   RefreshCw,
   ArrowDown,
 } from "lucide-react";
+import stickersBg from "@/assets/ooh-stickers.jpg";
+import postersBg from "@/assets/ooh-posters.jpg";
+import tableTentsBg from "@/assets/ooh-tabletents.jpg";
+import flyersBg from "@/assets/ooh-flyers.jpg";
 
 const formatCards = [
-  { icon: ScanLine, title: "Stickers", desc: "High-visibility adhesive placements on counters, walls, and windows" },
-  { icon: ImageIcon, title: "Posters", desc: "A3/A4 printed posters in high-dwell areas" },
-  { icon: Square, title: "Table Tents", desc: "Countertop placements at F&B venues and cafes" },
-  { icon: FileText, title: "Flyers & Takeaways", desc: "Printed collateral distributed at point of purchase" },
+  { icon: ScanLine, title: "Stickers", desc: "High-visibility adhesive placements on counters, walls, and windows", bg: stickersBg },
+  { icon: ImageIcon, title: "Posters", desc: "A3/A4 printed posters in high-dwell areas", bg: postersBg },
+  { icon: Square, title: "Table Tents", desc: "Countertop placements at F&B venues and cafes", bg: tableTentsBg },
+  { icon: FileText, title: "Flyers & Takeaways", desc: "Printed collateral distributed at point of purchase", bg: flyersBg },
 ];
 
 const flowSteps = [
@@ -121,10 +125,17 @@ export default function SolutionsOOH() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             {formatCards.map((c) => (
-              <div key={c.title} className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-6">
-                <c.icon className="w-8 h-8 text-green-500 mb-4" />
-                <h3 className="font-bold text-lg mb-2">{c.title}</h3>
-                <p className="text-sm text-zinc-400">{c.desc}</p>
+              <div
+                key={c.title}
+                className="relative overflow-hidden border border-white/10 rounded-2xl p-6 min-h-[180px] bg-cover bg-center"
+                style={{ backgroundImage: `url(${c.bg})` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/70 to-black/40" />
+                <div className="relative">
+                  <c.icon className="w-8 h-8 text-green-500 mb-4" />
+                  <h3 className="font-bold text-lg mb-2 text-white">{c.title}</h3>
+                  <p className="text-sm text-zinc-300">{c.desc}</p>
+                </div>
               </div>
             ))}
           </div>
