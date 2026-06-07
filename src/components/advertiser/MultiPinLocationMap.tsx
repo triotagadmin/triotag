@@ -243,11 +243,7 @@ export const MultiPinLocationMap = ({
         style={{ height: mapHeight, zIndex: 0 }}
       />
 
-      <div className="flex items-center justify-between text-sm">
-        <span className={belowMin ? "text-amber-400" : "text-green-400"}>
-          {pins.length} / {max} location{pins.length !== 1 ? "s" : ""} pinned
-          {belowMin && ` (minimum ${min} required)`}
-        </span>
+      <div className="flex items-center justify-end text-sm">
         <span className="text-xs text-zinc-500">Tap the map to add a pin</span>
       </div>
 
