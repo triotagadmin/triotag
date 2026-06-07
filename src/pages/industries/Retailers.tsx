@@ -163,49 +163,6 @@ const Retailers = () => {
         </div>
       </section>
 
-      {/* Section 6: Social Proof */}
-      <section className="bg-[#0c0c0c] py-20 md:py-28">
-        <div className="container mx-auto px-4 md:px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12">
-            Trusted by venues across the Philippines
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-            {[
-              ["18+", "Verified Retailer Partners"],
-              ["100+", "Active Ad Spaces Listed"],
-              ["48hrs", "Average Approval Time"],
-              ["₱0", "Cost to List Your Space"],
-            ].map(([n, l]) => (
-              <div key={l}>
-                <div className="text-4xl md:text-5xl font-bold text-green-500 mb-2">{n}</div>
-                <div className="text-sm text-white/70">{l}</div>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
-            {[
-              "Sari-sari Stores",
-              "Cafes & Restaurants",
-              "Gyms",
-              "Salons",
-              "Supermarkets",
-              "Co-working Spaces",
-            ].map((p) => (
-              <span
-                key={p}
-                className="px-4 py-2 rounded-full border border-white/15 bg-black text-sm text-white/80"
-              >
-                {p}
-              </span>
-            ))}
-          </div>
-          <p className="max-w-2xl mx-auto text-white/70">
-            Retailers in our network earn passive income every month from
-            surfaces they already own. Zero setup cost. Full control over which
-            ads run.
-          </p>
-        </div>
-      </section>
 
       {/* Section 7: Retailer Sign-Up CTA */}
       <section className="bg-black py-20 md:py-28">
