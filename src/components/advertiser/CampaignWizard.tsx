@@ -16,6 +16,7 @@ import {
   X, ArrowRight, ArrowLeft, CheckCircle, CheckCircle2, Image as ImageIcon,
   Monitor, Volume2, MapPin, Search, Loader2, Shield, Lock,
 } from "lucide-react";
+import { MultiPinLocationMap, type PinnedLocation } from "./MultiPinLocationMap";
 
 type MediaType = "OOH" | "DOOH" | "AOOH";
 type Step = 1 | 2 | 3 | 4;
