@@ -15,16 +15,12 @@ import {
   RefreshCw,
   ArrowDown,
 } from "lucide-react";
-import stickersBg from "@/assets/ooh-stickers.jpg";
-import postersBg from "@/assets/ooh-posters.jpg";
-import tableTentsBg from "@/assets/ooh-tabletents.jpg";
-import flyersBg from "@/assets/ooh-flyers.jpg";
 
 const formatCards = [
-  { icon: ScanLine, title: "Stickers", desc: "High-visibility adhesive placements on counters, walls, and windows", bg: stickersBg },
-  { icon: ImageIcon, title: "Posters", desc: "A3/A4 printed posters in high-dwell areas", bg: postersBg },
-  { icon: Square, title: "Table Tents", desc: "Countertop placements at F&B venues and cafes", bg: tableTentsBg },
-  { icon: FileText, title: "Flyers & Takeaways", desc: "Printed collateral distributed at point of purchase", bg: flyersBg },
+  { icon: ScanLine, title: "Stickers", desc: "High-visibility adhesive placements on counters, walls, and windows" },
+  { icon: ImageIcon, title: "Posters", desc: "A3/A4 printed posters in high-dwell areas" },
+  { icon: Square, title: "Table Tents", desc: "Countertop placements at F&B venues and cafes" },
+  { icon: FileText, title: "Flyers & Takeaways", desc: "Printed collateral distributed at point of purchase" },
 ];
 
 const flowSteps = [
@@ -76,11 +72,11 @@ const whyCards = [
 ];
 
 const specs = [
-  ["Sticker", "100 pieces", "All venue types", "7 days", "Custom quote"],
-  ["Poster", "100 pieces", "F&B, Retail, Gyms", "14 days", "Custom quote"],
-  ["Table Tent", "100 pieces", "Cafes, Restaurants", "30 days", "Custom quote"],
-  ["Window Cling", "10 pieces", "Retail, Salons", "14 days", "Custom quote"],
-  ["Flyer Distribution", "500 pieces", "Events, Stores", "Per event", "Custom quote"],
+  ["Sticker", "3R / 4R / A5", "All venue types", "7 days", "Custom quote"],
+  ["Poster", "A4 / A3", "F&B, Retail, Gyms", "14 days", "Custom quote"],
+  ["Table Tent", "A5 / DL", "Cafes, Restaurants", "7 days", "Custom quote"],
+  ["Window Cling", "Custom", "Retail, Salons", "14 days", "Custom quote"],
+  ["Flyer Distribution", "DL / A5", "Events, Stores", "Per event", "Custom quote"],
 ];
 
 export default function SolutionsOOH() {
@@ -95,9 +91,7 @@ export default function SolutionsOOH() {
             <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30">
               Retail Advertising
             </span>
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-              Register your retail business today.
-            </h1>
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight">Register your retail business today.</h1>
             <p className="text-zinc-400 text-lg leading-relaxed">
               TrioTag is an SSP (Supply-Side Platform) for retail advertising — we connect retail advertising inventory
               with brands and companies.
@@ -125,17 +119,10 @@ export default function SolutionsOOH() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             {formatCards.map((c) => (
-              <div
-                key={c.title}
-                className="relative overflow-hidden border border-white/10 rounded-2xl p-6 min-h-[180px] bg-cover bg-center"
-                style={{ backgroundImage: `url(${c.bg})` }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/70 to-black/40" />
-                <div className="relative">
-                  <c.icon className="w-8 h-8 text-green-500 mb-4" />
-                  <h3 className="font-bold text-lg mb-2 text-white">{c.title}</h3>
-                  <p className="text-sm text-zinc-300">{c.desc}</p>
-                </div>
+              <div key={c.title} className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-6">
+                <c.icon className="w-8 h-8 text-green-500 mb-4" />
+                <h3 className="font-bold text-lg mb-2">{c.title}</h3>
+                <p className="text-sm text-zinc-400">{c.desc}</p>
               </div>
             ))}
           </div>
@@ -212,7 +199,7 @@ export default function SolutionsOOH() {
             <table className="w-full text-sm">
               <thead className="bg-green-500/10 border-b border-green-500/30">
                 <tr>
-                  {["Format", "Minimum Quantity", "Venue Types", "Min. Duration", "Starting Rate"].map((h) => (
+                  {["Format", "Size", "Venue Types", "Min. Duration", "Starting Rate"].map((h) => (
                     <th key={h} className="text-left p-4 text-green-400 font-semibold">
                       {h}
                     </th>
