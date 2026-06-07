@@ -95,8 +95,8 @@ export default function SolutionsOOH() {
               Register your retail company today.
             </h1>
             <p className="text-zinc-400 text-lg leading-relaxed">
-              TrioTag is an SSP (Supply-Side Platform) for retail advertising — connecting brands to verified retail
-              advertising inventory across the Philippines.
+              TrioTag is an SSP (Supply-Side Platform) for retail advertising — we connect retail advertising inventory
+              with brands and companies.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
