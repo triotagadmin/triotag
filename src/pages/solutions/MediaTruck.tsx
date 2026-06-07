@@ -17,8 +17,6 @@ import {
   DollarSign,
   Play,
 } from "lucide-react";
-import supertruckMediakit2 from "@/assets/supertruck-mediakit-2.png.asset.json";
-
 
 const features = [
   {
@@ -179,6 +177,21 @@ export default function SolutionsMediaTruck() {
                 <a href="#packages">View Packages</a>
               </Button>
             </div>
+            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
+              {[
+                ["50M+", "Monthly Reach"],
+                ["250M+", "Monthly Impressions"],
+                ["20+", "Major Cities"],
+                ["1,000+", "Premium Assets"],
+                ["500+", "Successful Campaigns"],
+                ["100+", "Brand Partners"],
+              ].map(([n, l]) => (
+                <div key={l}>
+                  <div className="text-xl md:text-2xl font-bold text-green-500">{n}</div>
+                  <div className="text-xs text-zinc-400 mt-1">{l}</div>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="bg-[#0c0c0c] border border-green-500/30 rounded-2xl p-8 text-center">
             <div className="text-xs font-semibold tracking-widest text-green-500 uppercase mb-6">
@@ -280,46 +293,25 @@ export default function SolutionsMediaTruck() {
               </div>
             ))}
           </div>
-          <div className="relative border border-white/10 rounded-2xl overflow-hidden">
-            <img
-              src={supertruckMediakit2.url}
-              alt="TrioTag Media Truck showing AOOH, DOOH, OOH and Mobile Experiential touchpoints"
-              className="w-full h-auto block"
-            />
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 text-xs font-semibold tracking-widest text-green-500 uppercase bg-black/60 px-3 py-1 rounded-full">
+          <div className="bg-black border border-white/10 rounded-2xl p-8">
+            <div className="text-xs font-semibold tracking-widest text-green-500 uppercase mb-6 text-center">
               Media Truck Features
             </div>
-          </div>
-
-        </div>
-      </section>
-
-
-      {/* New Media Strategies */}
-      <section className="py-20 md:py-28 bg-[#0c0c0c]">
-        <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-5">
-            <h2 className="text-3xl md:text-4xl font-bold text-green-500">New Media Strategies</h2>
-            <div className="text-xs font-semibold tracking-widest text-zinc-400 uppercase">
-              Livestream Event Brand Takeover
+            <div className="relative h-80 flex items-center justify-center">
+              <Truck className="w-32 h-32 text-green-500" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 py-1 rounded-full bg-[#0c0c0c] border border-green-500/40 text-xs">
+                <Volume2 className="w-3 h-3 text-green-500" /> AOOH
+              </div>
+              <div className="absolute top-1/2 right-0 -translate-y-1/2 flex items-center gap-1 px-3 py-1 rounded-full bg-[#0c0c0c] border border-green-500/40 text-xs">
+                <Monitor className="w-3 h-3 text-green-500" /> DOOH
+              </div>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 py-1 rounded-full bg-[#0c0c0c] border border-green-500/40 text-xs">
+                <MapPin className="w-3 h-3 text-green-500" /> OOH
+              </div>
+              <div className="absolute top-1/2 left-0 -translate-y-1/2 flex items-center gap-1 px-3 py-1 rounded-full bg-[#0c0c0c] border border-green-500/40 text-xs">
+                <Megaphone className="w-3 h-3 text-green-500" /> MOBILE
+              </div>
             </div>
-            <div className="h-px bg-green-500/40" />
-            <p className="text-xl font-bold text-green-400">Launch Your Brand on Video Streaming Platforms</p>
-            <div className="grid grid-cols-2 gap-5 pt-4">
-              {newMedia.map((m) => (
-                <div key={m.title}>
-                  <m.icon className="w-7 h-7 text-green-500 mb-3" />
-                  <h3 className="font-bold mb-1">{m.title}</h3>
-                  <p className="text-sm text-zinc-400">{m.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="bg-black/60 border border-white/10 rounded-2xl p-12 text-center">
-            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Play className="w-10 h-10 text-black ml-1" />
-            </div>
-            <p className="text-xl font-bold">Live. Loud. Everywhere.</p>
           </div>
         </div>
       </section>
@@ -407,6 +399,34 @@ export default function SolutionsMediaTruck() {
         </div>
       </section>
 
+      {/* New Media Strategies */}
+      <section className="py-20 md:py-28 bg-[#0c0c0c]">
+        <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-5">
+            <h2 className="text-3xl md:text-4xl font-bold text-green-500">New Media Strategies</h2>
+            <div className="text-xs font-semibold tracking-widest text-zinc-400 uppercase">
+              Livestream Event Brand Takeover
+            </div>
+            <div className="h-px bg-green-500/40" />
+            <p className="text-xl font-bold text-green-400">Launch Your Brand on Video Streaming Platforms</p>
+            <div className="grid grid-cols-2 gap-5 pt-4">
+              {newMedia.map((m) => (
+                <div key={m.title}>
+                  <m.icon className="w-7 h-7 text-green-500 mb-3" />
+                  <h3 className="font-bold mb-1">{m.title}</h3>
+                  <p className="text-sm text-zinc-400">{m.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-black/60 border border-white/10 rounded-2xl p-12 text-center">
+            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Play className="w-10 h-10 text-black ml-1" />
+            </div>
+            <p className="text-xl font-bold">Live. Loud. Everywhere.</p>
+          </div>
+        </div>
+      </section>
 
       {/* CTA Contact */}
       <section className="py-20 md:py-28 bg-gradient-to-br from-green-900/40 to-black">
@@ -446,13 +466,13 @@ export default function SolutionsMediaTruck() {
               <div>www.TrioTag.com</div>
             </div>
             <div>
-              <div className="text-xs text-zinc-400">Prepared for</div>
-              <div>FMCG & Brand Partners</div>
+              <div className="text-xs text-zinc-400">Address</div>
+              <div>BGC, Taguig City</div>
             </div>
             <div className="h-px bg-green-500/40 my-2" />
             <p className="text-green-400 font-semibold text-center">Brands on the move.</p>
             <Button asChild size="lg" className="w-full">
-              <Link to="/contact">Custom Brand Truck</Link>
+              <Link to="/contact">Book a Campaign</Link>
             </Button>
           </div>
         </div>
