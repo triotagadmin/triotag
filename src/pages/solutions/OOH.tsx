@@ -92,7 +92,7 @@ export default function SolutionsOOH() {
               Retail Advertising
             </span>
             <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-              Register your retail company today.
+              Register your retail business today.
             </h1>
             <p className="text-zinc-400 text-lg leading-relaxed">
               TrioTag is an SSP (Supply-Side Platform) for retail advertising — we connect retail advertising inventory
