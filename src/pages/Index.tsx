@@ -359,7 +359,7 @@ const ValueProps = () => {
         />
         <Card
           icon={Megaphone}
-          title="For Brands & Agencies"
+          title="For Brands & Companies"
           desc="Reach the right shoppers across thousands of curated retail touchpoints."
           bullets={[
             "Reach the right audience",
@@ -534,11 +534,13 @@ const MediaTruckSection = () => (
           New · Mobile Truck Media Kit
         </span>
         <h2 className="text-4xl md:text-6xl font-extrabold leading-[1.05]">
-          <span className="text-green-500">TRIOTAG</span> Mobile<br />Truck Media
+          <span className="text-green-500">TRIOTAG</span> Mobile
+          <br />
+          Truck Media
         </h2>
         <p className="text-zinc-200 text-lg max-w-xl">
-          Triangulate locations. Activate attention. Deploy high-impact Retail Media trucks across
-          your target districts with route-based campaign planning and full proof-of-run reporting.
+          Triangulate locations. Activate attention. Deploy high-impact Retail Media trucks across your target districts
+          with route-based campaign planning and full proof-of-run reporting.
         </p>
         <ul className="grid sm:grid-cols-2 gap-2 text-sm text-zinc-200 max-w-xl">
           {["Route-based deployment", "Digital LED display", "Campaign documentation", "Retail-area focus"].map((f) => (
@@ -550,10 +552,16 @@ const MediaTruckSection = () => (
         </ul>
         <div className="flex flex-wrap gap-3 pt-2">
           <Link to="/solutions/media-truck">
-            <Button size="lg">Explore Media Truck <ArrowRight className="w-4 h-4" /></Button>
+            <Button size="lg">
+              Explore Media Truck <ArrowRight className="w-4 h-4" />
+            </Button>
           </Link>
           <Link to="/contact">
-            <Button size="lg" variant="outline" className="bg-black/40 backdrop-blur border-white/30 text-white hover:bg-black/60 hover:text-white">
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-black/40 backdrop-blur border-white/30 text-white hover:bg-black/60 hover:text-white"
+            >
               Custom Brand Truck
             </Button>
           </Link>
