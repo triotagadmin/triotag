@@ -279,24 +279,16 @@ export default function SolutionsMediaTruck() {
               </div>
             ))}
           </div>
-          <div className="bg-black border border-white/10 rounded-2xl p-8">
-            <div className="text-xs font-semibold tracking-widest text-green-500 uppercase mb-6 text-center">
+          <div
+            className="relative border border-white/10 rounded-2xl p-8 bg-black bg-no-repeat bg-center overflow-hidden min-h-[420px]"
+            style={{
+              backgroundImage: `url(${truckFeaturesBg.url})`,
+              backgroundSize: "contain",
+            }}
+          >
+            <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+            <div className="relative text-xs font-semibold tracking-widest text-green-500 uppercase mb-6 text-center">
               Media Truck Features
-            </div>
-            <div className="relative h-80 flex items-center justify-center">
-              <Truck className="w-32 h-32 text-green-500" />
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 py-1 rounded-full bg-[#0c0c0c] border border-green-500/40 text-xs">
-                <Volume2 className="w-3 h-3 text-green-500" /> AOOH
-              </div>
-              <div className="absolute top-1/2 right-0 -translate-y-1/2 flex items-center gap-1 px-3 py-1 rounded-full bg-[#0c0c0c] border border-green-500/40 text-xs">
-                <Monitor className="w-3 h-3 text-green-500" /> DOOH
-              </div>
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 py-1 rounded-full bg-[#0c0c0c] border border-green-500/40 text-xs">
-                <MapPin className="w-3 h-3 text-green-500" /> OOH
-              </div>
-              <div className="absolute top-1/2 left-0 -translate-y-1/2 flex items-center gap-1 px-3 py-1 rounded-full bg-[#0c0c0c] border border-green-500/40 text-xs">
-                <Megaphone className="w-3 h-3 text-green-500" /> MOBILE
-              </div>
             </div>
           </div>
         </div>
