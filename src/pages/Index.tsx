@@ -36,6 +36,7 @@ import {
 /* --------------------------------- HERO --------------------------------- */
 import { useEffect } from "react";
 import { fetchLandingTotals } from "@/lib/inventoryAggregation";
+import mediaTruckBg from "@/assets/supertruck-media-kit.png.asset.json";
 
 const Hero = () => {
   const [totals, setTotals] = useState<{
@@ -515,6 +516,53 @@ const CTABanner = () => (
   </section>
 );
 
+/* ----------------------------- MEDIA TRUCK ------------------------------- */
+const MediaTruckSection = () => (
+  <section className="relative overflow-hidden">
+    <div className="absolute inset-0">
+      <img
+        src={mediaTruckBg.url}
+        alt="TrioTag mobile LED truck at city skyline"
+        className="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black/30" />
+    </div>
+    <div className="container mx-auto px-4 md:px-6 relative py-20 md:py-32 grid lg:grid-cols-2 gap-12 items-center">
+      <div className="space-y-6 text-white">
+        <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30 tracking-widest uppercase">
+          New · Mobile Truck Media Kit
+        </span>
+        <h2 className="text-4xl md:text-6xl font-extrabold leading-[1.05]">
+          <span className="text-green-500">TRIOTAG</span> Mobile<br />Truck Media
+        </h2>
+        <p className="text-zinc-200 text-lg max-w-xl">
+          Triangulate locations. Activate attention. Deploy high-impact LED trucks across
+          your target districts with route-based campaign planning and full proof-of-run reporting.
+        </p>
+        <ul className="grid sm:grid-cols-2 gap-2 text-sm text-zinc-200 max-w-xl">
+          {["Route-based deployment", "Digital LED display", "Campaign documentation", "Retail-area focus"].map((f) => (
+            <li key={f} className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              {f}
+            </li>
+          ))}
+        </ul>
+        <div className="flex flex-wrap gap-3 pt-2">
+          <Link to="/solutions/media-truck">
+            <Button size="lg">Explore Media Truck <ArrowRight className="w-4 h-4" /></Button>
+          </Link>
+          <Link to="/contact">
+            <Button size="lg" variant="outline" className="bg-black/40 backdrop-blur border-white/30 text-white hover:bg-black/60 hover:text-white">
+              Book a Campaign
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
 /* --------------------------------- PAGE ---------------------------------- */
 const Index = () => {
   return (
@@ -527,6 +575,7 @@ const Index = () => {
       <ValueProps />
       <PopularFormats />
       <PlatformFeatures />
+      <MediaTruckSection />
       <CTABanner />
       <Footer />
     </div>
