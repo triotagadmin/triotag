@@ -132,7 +132,7 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
       if (!step1Valid) return toast({ title: "Missing fields", description: "Complete all required fields.", variant: "destructive" });
       setStep(2);
     } else if (step === 2) {
-      if (!step2Valid) return toast({ title: `Pin ${MIN_PINS}–${MAX_PINS} location${MAX_PINS !== 1 ? "s" : ""}`, variant: "destructive" });
+      if (!step2Valid) return toast({ title: `Pin ${MIN_PINS}–${MAX_PINS} locations`, variant: "destructive" });
       setStep(3);
     } else if (step === 3) {
       if (!billingValid) return toast({ title: "Missing billing info", variant: "destructive" });
