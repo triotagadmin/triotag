@@ -57,7 +57,7 @@ export default function SolutionsAOOH() {
         <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30">
-              Audio Out-of-Home Advertising
+              Audio Retail Advertising
             </span>
             <h1 className="text-4xl md:text-6xl font-bold leading-tight">The Ad They Hear at the Exact Moment They're Ready to Buy</h1>
             <p className="text-zinc-400 text-lg">
