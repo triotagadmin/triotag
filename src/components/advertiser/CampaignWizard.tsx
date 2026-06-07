@@ -132,32 +132,36 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
       if (!step1Valid) return toast({ title: "Missing fields", description: "Complete all required fields.", variant: "destructive" });
       setStep(2);
     } else if (step === 2) {
-      if (!step2Valid) return toast({ title: "Select at least one venue", variant: "destructive" });
+      if (!step2Valid) return toast({ title: `Pin ${MIN_PINS}–${MAX_PINS} location${MAX_PINS !== 1 ? "s" : ""}`, variant: "destructive" });
       setStep(3);
     } else if (step === 3) {
       if (!billingValid) return toast({ title: "Missing billing info", variant: "destructive" });
       setStep(4);
-      handlePayment();
+      handleSubmit();
     }
   };
 
-  const handlePayment = async () => {
+  const handleSubmit = async () => {
     setProcessing(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not signed in");
       const uid = session.user.id;
 
-      // Lookup advertiser_profiles.id (campaigns.advertiser_id FK)
       const { data: profile } = await supabase
         .from("advertiser_profiles").select("id").eq("user_id", uid).maybeSingle();
 
-      // Create parent campaign
-      await supabase.from("campaigns").insert({
+      const locationsSummary = pinnedLocations
+        .map((p, i) => `${i + 1}. ${p.address} (${p.lat.toFixed(5)}, ${p.lng.toFixed(5)})`)
+        .join("\n");
+      const fullDescription = [description, "", "Target Locations:", locationsSummary]
+        .filter(Boolean).join("\n");
+
+      const { error: campErr } = await supabase.from("campaigns").insert({
         advertiser_id: profile?.id || uid,
         campaign_name: campaignName,
         campaign_type: (campaignType as string).toLowerCase(),
-        campaign_description: description || null,
+        campaign_description: fullDescription,
         start_date: startDate,
         end_date: endDate,
         budget_amount: Number(budget),
@@ -165,44 +169,14 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
         status: "pending",
         target_audience: industry || null,
       } as any);
+      if (campErr) throw campErr;
 
-      // Map UI type to activation_type enum
-      const activationType = campaignType === "OOH" ? "poster" : "other";
-
-      // Create activation rows
-      const rows = selectedVenues.map(v => ({
-        advertiser_id: uid,
-        ad_space_id: v.id,
-        publisher_id: v.publisher_id,
-        activation_type: activationType,
-        status: "pending_approval",
-        start_date: startDate,
-        end_date: endDate,
-        total_amount: venueCost(v),
-      }));
-
-      const { data: inserted, error: insErr } = await supabase
-        .from("activations").insert(rows as any).select("id");
-      if (insErr) throw insErr;
-      if (!inserted?.length) throw new Error("Failed to create activations");
-
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: {
-          activationId: inserted[0].id,
-          buyerName, buyerEmail, buyerPhone, companyName,
-          billingAddress, billingCity, billingCountry, billingZip,
-          successUrl: `${window.location.origin}/payment-success`,
-          cancelUrl: window.location.href,
-        },
-      });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
-      const checkoutUrl = data?.checkoutUrl || data?.checkout_url;
-      if (!checkoutUrl) throw new Error("No checkout URL returned");
-      window.location.href = checkoutUrl;
+      toast({ title: "Campaign submitted", description: "Your campaign is pending review." });
+      setProcessing(false);
+      handleClose();
     } catch (err: any) {
-      console.error("Campaign payment error:", err);
-      toast({ title: "Checkout failed", description: err.message, variant: "destructive" });
+      console.error("Campaign submit error:", err);
+      toast({ title: "Submission failed", description: err.message, variant: "destructive" });
       setProcessing(false);
       setStep(3);
     }
