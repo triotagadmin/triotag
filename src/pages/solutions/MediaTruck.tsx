@@ -17,6 +17,7 @@ import {
   DollarSign,
   Play,
 } from "lucide-react";
+import truckFeaturesBg from "@/assets/supertruck-mediakit-features.png.asset.json";
 
 const features = [
   {
