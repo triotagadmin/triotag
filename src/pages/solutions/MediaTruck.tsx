@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
+import superTruckAsset from "@/assets/supertruck-media-kit.png.asset.json";
 import { Button } from "@/components/ui/button";
 import {
   Truck,
