@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
+import superTruckAsset from "@/assets/supertruck-media-kit.png.asset.json";
 import { Button } from "@/components/ui/button";
 import {
   Truck,
@@ -305,42 +306,60 @@ export default function SolutionsMediaTruck() {
       </section>
 
       {/* CTA Contact */}
-      <section className="py-20 md:py-28 bg-gradient-to-br from-green-900/40 to-black">
-        <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-start">
-          <div className="space-y-5">
-            <div className="text-xs font-semibold tracking-widest text-green-500 uppercase">Mobile Advertising Fleet</div>
-            <h2 className="text-3xl md:text-5xl font-bold">Let's map your next campaign.</h2>
-            <p className="text-zinc-300">Share your campaign objective, target city, target retail areas, preferred duration, creative format, and estimated budget range. TrioTag will recommend a deployment plan and package quotation.</p>
-            <div className="bg-black/60 border border-green-500/30 rounded-xl p-6">
-              <div className="text-xs font-semibold text-green-500 mb-2">Next Step</div>
-              <p className="text-sm text-zinc-300">Send your campaign brief and preferred launch date so we can prepare a custom route plan and quotation.</p>
+      <section className="relative py-20 md:py-32 overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src={superTruckAsset.url}
+            alt="TrioTag mobile LED truck driving past city skyline at dusk"
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+        </div>
+
+        <div className="container mx-auto px-4 md:px-6 relative grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30 tracking-widest uppercase">
+              Mobile Truck Media Kit
+            </span>
+            <h2 className="text-4xl md:text-6xl font-extrabold leading-[1.05]">
+              <span className="text-green-500">TRIOTAG</span><br />
+              <span className="text-white">Brands on the Move.</span>
+            </h2>
+            <p className="text-zinc-200 text-lg max-w-xl">
+              Triangulate locations. Activate attention. Send your campaign brief, target city, and launch date — we'll prepare a custom route plan and quotation.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <Link to="/contact">Book a Campaign</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="bg-black/40 backdrop-blur border-white/20 hover:bg-black/60">
+                <a href="#packages">View Packages</a>
+              </Button>
             </div>
           </div>
-          <div className="bg-black/60 border border-green-500/30 rounded-2xl p-8 space-y-4">
-            <h3 className="text-2xl font-bold">Contact</h3>
+
+          <div className="bg-black/70 backdrop-blur-md border border-green-500/40 rounded-2xl p-8 space-y-4 shadow-2xl shadow-green-500/10">
+            <h3 className="text-2xl font-bold text-white">Contact</h3>
             <div>
-              <div className="text-xs text-zinc-400">Company</div>
+              <div className="text-xs text-zinc-400 uppercase tracking-wider">Company</div>
               <div className="text-green-400 font-bold">TRIOTAG</div>
             </div>
             <div>
-              <div className="text-xs text-zinc-400">Email</div>
-              <div>ayelortiz108@gmail.com</div>
+              <div className="text-xs text-zinc-400 uppercase tracking-wider">Email</div>
+              <div className="text-white">tinystickyads@gmail.com</div>
             </div>
             <div>
-              <div className="text-xs text-zinc-400">Phone / Viber / WhatsApp</div>
-              <div>+63 945 664 0894</div>
+              <div className="text-xs text-zinc-400 uppercase tracking-wider">Phone / Viber / WhatsApp</div>
+              <div className="text-white">+63 945 664 0894</div>
             </div>
             <div>
-              <div className="text-xs text-zinc-400">Website</div>
-              <div>www.TrioTag.com</div>
-            </div>
-            <div>
-              <div className="text-xs text-zinc-400">Prepared for</div>
-              <div>FMCG & Brand Partners</div>
+              <div className="text-xs text-zinc-400 uppercase tracking-wider">Website</div>
+              <div className="text-white">www.TrioTag.com</div>
             </div>
             <div className="h-px bg-green-500/40 my-2" />
-            <p className="text-green-400 font-semibold text-center">Brands on the move.</p>
-            <Button asChild size="lg" className="w-full"><Link to="/contact">Book a Campaign</Link></Button>
+            <p className="text-green-400 font-semibold text-center text-sm tracking-wider">TRIANGULATE LOCATIONS · ACTIVATE ATTENTION</p>
           </div>
         </div>
       </section>
