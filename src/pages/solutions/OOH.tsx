@@ -89,10 +89,10 @@ export default function SolutionsOOH() {
         <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30">
-              Out-of-Home Advertising
+              Retail Advertising
             </span>
             <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-              Put Your Brand Inside the Spaces Where Consumers Actually Buy
+              Register your retail company today.
             </h1>
             <p className="text-zinc-400 text-lg leading-relaxed">
               TrioTag is an SSP (Supply-Side Platform) for retail advertising — connecting brands to verified retail
