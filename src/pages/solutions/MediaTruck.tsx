@@ -280,17 +280,17 @@ export default function SolutionsMediaTruck() {
               </div>
             ))}
           </div>
-          <div
-            className="relative border border-white/10 rounded-2xl overflow-hidden min-h-[400px] bg-cover bg-center"
-            style={{ backgroundImage: `url(${supertruckMediakit2.url})` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="relative p-8">
-              <div className="text-xs font-semibold tracking-widest text-green-500 uppercase text-center">
-                Media Truck Features
-              </div>
+          <div className="relative border border-white/10 rounded-2xl overflow-hidden">
+            <img
+              src={supertruckMediakit2.url}
+              alt="TrioTag Media Truck showing AOOH, DOOH, OOH and Mobile Experiential touchpoints"
+              className="w-full h-auto block"
+            />
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 text-xs font-semibold tracking-widest text-green-500 uppercase bg-black/60 px-3 py-1 rounded-full">
+              Media Truck Features
             </div>
           </div>
+
         </div>
       </section>
 
