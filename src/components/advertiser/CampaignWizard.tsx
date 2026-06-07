@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import {
   X, ArrowRight, ArrowLeft, CheckCircle, CheckCircle2, Image as ImageIcon,
-  Monitor, Volume2, MapPin, Search, Loader2, Shield, Lock,
+  Monitor, Volume2, MapPin, Search, Loader2, Shield, Lock, Package, Settings2, Upload,
 } from "lucide-react";
 import { MultiPinLocationMap, type PinnedLocation } from "./MultiPinLocationMap";
 
@@ -56,8 +56,54 @@ const TYPE_OPTIONS: { value: MediaType; icon: any; title: string; desc: string }
 const STEPS = [
   { id: 1, label: "Campaign Details" },
   { id: 2, label: "Select Location" },
-  { id: 3, label: "Review" },
+  { id: 3, label: "Activation" },
   { id: 4, label: "Payment" },
+];
+
+type ActivationSubStep = 1 | 2 | 3;
+type CampaignMode = "packaged" | "custom" | "";
+
+const PACKAGED_OPTIONS: Record<MediaType, { name: string; price: number; includes: string[] }> = {
+  OOH: {
+    name: "OOH Starter Pack",
+    price: 25000,
+    includes: [
+      "200 vinyl stickers (A5)",
+      "50 table tent cards",
+      "20 coroplast A-frame posters",
+      "Distribution to 10 retail venues",
+      "30-day campaign run",
+    ],
+  },
+  DOOH: {
+    name: "DOOH Starter Pack",
+    price: 35000,
+    includes: [
+      "15-second loop on 25 digital screens",
+      "8 plays per hour, 12 hours/day",
+      "30-day campaign run",
+      "Performance dashboard",
+    ],
+  },
+  AOOH: {
+    name: "AOOH Starter Pack",
+    price: 18000,
+    includes: [
+      "20-second audio spot",
+      "20 in-store audio networks",
+      "6 plays per hour, 10 hours/day",
+      "30-day campaign run",
+    ],
+  },
+};
+
+const OOH_MATERIALS = [
+  "Vinyl Sticker (A5)",
+  "Table Tent Card",
+  "Acrylic Table Tent",
+  "Coroplast A-Frame",
+  "Poster Frame",
+  "Wall Decal",
 ];
 
 const MIN_PINS = 1;
@@ -92,7 +138,26 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
   // Step 2 — pinned target locations
   const [pinnedLocations, setPinnedLocations] = useState<PinnedLocation[]>([]);
 
-  // Step 3 billing
+  // Step 3 — Activation (multi sub-step)
+  const [activationSubStep, setActivationSubStep] = useState<ActivationSubStep>(1);
+  const [campaignMode, setCampaignMode] = useState<CampaignMode>("");
+  // OOH specs
+  const [oohMaterial, setOohMaterial] = useState("");
+  const [oohQuantity, setOohQuantity] = useState("");
+  const [oohSize, setOohSize] = useState("");
+  const [oohNotes, setOohNotes] = useState("");
+  // DOOH specs
+  const [doohDuration, setDoohDuration] = useState("");
+  const [doohResolution, setDoohResolution] = useState("1920x1080");
+  const [doohPlaysPerHour, setDoohPlaysPerHour] = useState("");
+  // AOOH specs
+  const [aoohDuration, setAoohDuration] = useState("");
+  const [aoohScript, setAoohScript] = useState("");
+  const [aoohPlaysPerHour, setAoohPlaysPerHour] = useState("");
+  // Creative upload
+  const [creativeFile, setCreativeFile] = useState<File | null>(null);
+
+  // Step 4 billing
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -119,13 +184,32 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
   const step2Valid = pinnedLocations.length >= MIN_PINS && pinnedLocations.length <= MAX_PINS;
   const billingValid = !!(buyerName && buyerEmail && billingAddress && billingCity && billingCountry && billingZip);
 
+  const customSpecsValid = (() => {
+    if (campaignType === "OOH") return !!(oohMaterial && Number(oohQuantity) > 0);
+    if (campaignType === "DOOH") return !!(doohDuration && doohResolution);
+    if (campaignType === "AOOH") return !!(aoohDuration);
+    return false;
+  })();
+
   const reset = () => {
     setStep(1); setCampaignName(""); setCampaignType(""); setStartDate(""); setEndDate("");
     setBudget(""); setDescription(""); setIndustry(""); setPinnedLocations([]);
+    setActivationSubStep(1); setCampaignMode("");
+    setOohMaterial(""); setOohQuantity(""); setOohSize(""); setOohNotes("");
+    setDoohDuration(""); setDoohResolution("1920x1080"); setDoohPlaysPerHour("");
+    setAoohDuration(""); setAoohScript(""); setAoohPlaysPerHour("");
+    setCreativeFile(null);
     setProcessing(false);
   };
 
   const handleClose = () => { onClose(); setTimeout(reset, 200); };
+
+  const creativeAcceptHint = campaignType === "DOOH" ? "Video file (MP4/MOV)"
+    : campaignType === "AOOH" ? "Audio file (MP3/WAV)"
+    : "Image file (PNG/JPG/PDF)";
+  const creativeAccept = campaignType === "DOOH" ? "video/*"
+    : campaignType === "AOOH" ? "audio/*"
+    : "image/*,application/pdf";
 
   const handleNext = () => {
     if (step === 1) {
@@ -135,10 +219,47 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
       if (!step2Valid) return toast({ title: `Pin ${MIN_PINS}–${MAX_PINS} locations`, variant: "destructive" });
       setStep(3);
     } else if (step === 3) {
+      // Multi sub-step within Activation
+      if (activationSubStep === 1) {
+        if (!campaignMode) return toast({ title: "Choose Packaged or Custom", variant: "destructive" });
+        if (campaignMode === "packaged") {
+          // Skip specs step for packaged → go straight to creative upload
+          setActivationSubStep(3);
+        } else {
+          setActivationSubStep(2);
+        }
+        return;
+      }
+      if (activationSubStep === 2) {
+        if (!customSpecsValid) return toast({ title: "Complete the ad specifications", variant: "destructive" });
+        setActivationSubStep(3);
+        return;
+      }
+      if (activationSubStep === 3) {
+        if (!creativeFile) return toast({ title: `Upload your ${creativeAcceptHint.toLowerCase()}`, variant: "destructive" });
+        setStep(4);
+        return;
+      }
+    } else if (step === 4) {
       if (!billingValid) return toast({ title: "Missing billing info", variant: "destructive" });
-      setStep(4);
       handleSubmit();
     }
+  };
+
+  const handleBack = () => {
+    if (step === 3) {
+      if (activationSubStep === 3) {
+        setActivationSubStep(campaignMode === "packaged" ? 1 : 2);
+        return;
+      }
+      if (activationSubStep === 2) {
+        setActivationSubStep(1);
+        return;
+      }
+      setStep(2);
+      return;
+    }
+    setStep((step - 1) as Step);
   };
 
   const handleSubmit = async () => {
@@ -312,46 +433,200 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
 
         {step === 3 && (
           <div className="space-y-6">
+            {/* Detected format banner */}
             <Card className="bg-[#0c0c0c] border-white/10 rounded-2xl">
-              <CardContent className="p-6 space-y-4">
-                <h3 className="font-bold text-lg">Campaign Summary</h3>
-                <div className="grid sm:grid-cols-2 gap-3 text-sm">
-                  <div><div className="text-zinc-400 text-xs">Name</div><div className="font-medium">{campaignName}</div></div>
-                  <div><div className="text-zinc-400 text-xs">Type</div><Badge className="bg-green-500/20 text-green-400 border-green-500/40">{campaignType}</Badge></div>
-                  <div><div className="text-zinc-400 text-xs">Dates</div><div>{startDate} → {endDate}</div></div>
-                  <div><div className="text-zinc-400 text-xs">Industry</div><div>{industry || "—"}</div></div>
-                  <div><div className="text-zinc-400 text-xs">Budget</div><div>₱{Number(budget || 0).toLocaleString()}</div></div>
-                  <div><div className="text-zinc-400 text-xs">Duration</div><div>{months.toFixed(1)} months</div></div>
+              <CardContent className="p-4 flex items-center gap-3">
+                {campaignType === "OOH" && <ImageIcon className="w-5 h-5 text-green-400" />}
+                {campaignType === "DOOH" && <Monitor className="w-5 h-5 text-green-400" />}
+                {campaignType === "AOOH" && <Volume2 className="w-5 h-5 text-green-400" />}
+                <div className="flex-1">
+                  <div className="text-xs text-zinc-400">Detected ad format</div>
+                  <div className="font-bold">{campaignType || "—"}</div>
                 </div>
+                <Badge className="bg-green-500/20 text-green-400 border-green-500/40">
+                  Activation step {activationSubStep} of 3
+                </Badge>
               </CardContent>
             </Card>
 
-            <Card className="bg-[#0c0c0c] border-white/10 rounded-2xl">
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-3">Pinned Locations ({pinnedLocations.length})</h3>
-                <div className="divide-y divide-white/5">
-                  {pinnedLocations.map((p, i) => (
-                    <div key={p.id} className="py-2 flex items-start gap-3 text-sm">
-                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-green-600 text-white text-xs font-bold shrink-0 mt-0.5">
-                        {i + 1}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium line-clamp-2">{p.address}</div>
-                        <div className="text-xs text-zinc-400 flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {p.lat.toFixed(5)}, {p.lng.toFixed(5)}
+            {/* Sub-step 1: Packaged vs Custom */}
+            {activationSubStep === 1 && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-bold text-lg mb-1">Choose your campaign type</h3>
+                  <p className="text-sm text-zinc-400">
+                    Pick a ready-made package or build a custom {campaignType} campaign.
+                  </p>
+                </div>
+                <RadioGroup
+                  value={campaignMode}
+                  onValueChange={(v) => setCampaignMode(v as CampaignMode)}
+                  className="grid md:grid-cols-2 gap-3"
+                >
+                  <label className={`cursor-pointer rounded-2xl border-2 p-4 transition ${
+                    campaignMode === "packaged" ? "border-green-500 bg-green-500/5" : "border-white/10 bg-[#0c0c0c] hover:border-white/20"
+                  }`}>
+                    <div className="flex items-start gap-3">
+                      <RadioGroupItem value="packaged" className="mt-1" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Package className="w-5 h-5 text-green-400" />
+                          <span className="font-bold">Packaged Campaign</span>
                         </div>
+                        {campaignType && (
+                          <>
+                            <div className="text-sm font-semibold text-green-400 mb-1">
+                              {PACKAGED_OPTIONS[campaignType as MediaType].name}
+                            </div>
+                            <div className="text-xs text-zinc-400 mb-2">
+                              ₱{PACKAGED_OPTIONS[campaignType as MediaType].price.toLocaleString()} · pre-set inventory
+                            </div>
+                            <ul className="text-xs text-zinc-400 space-y-1">
+                              {PACKAGED_OPTIONS[campaignType as MediaType].includes.map((line) => (
+                                <li key={line} className="flex items-start gap-1">
+                                  <CheckCircle2 className="w-3 h-3 text-green-400 mt-0.5 shrink-0" />
+                                  <span>{line}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-                <div className="border-t border-green-500/30 mt-3 pt-3 flex items-center justify-between">
-                  <span className="font-semibold text-lg">Campaign Budget</span>
-                  <span className="text-2xl font-bold text-green-400">₱{Number(budget || 0).toLocaleString()}</span>
-                </div>
-              </CardContent>
-            </Card>
+                  </label>
 
+                  <label className={`cursor-pointer rounded-2xl border-2 p-4 transition ${
+                    campaignMode === "custom" ? "border-green-500 bg-green-500/5" : "border-white/10 bg-[#0c0c0c] hover:border-white/20"
+                  }`}>
+                    <div className="flex items-start gap-3">
+                      <RadioGroupItem value="custom" className="mt-1" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Settings2 className="w-5 h-5 text-green-400" />
+                          <span className="font-bold">Custom Campaign</span>
+                        </div>
+                        <p className="text-xs text-zinc-400">
+                          Specify your own {campaignType} requirements — material, quantity, specs, and creative.
+                        </p>
+                      </div>
+                    </div>
+                  </label>
+                </RadioGroup>
+              </div>
+            )}
+
+            {/* Sub-step 2: Custom specs (format-specific) */}
+            {activationSubStep === 2 && campaignMode === "custom" && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-bold text-lg mb-1">{campaignType} specifications</h3>
+                  <p className="text-sm text-zinc-400">Tell us the details of your custom campaign.</p>
+                </div>
+
+                {campaignType === "OOH" && (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-white mb-2 block">Print Material *</Label>
+                      <Select value={oohMaterial} onValueChange={setOohMaterial}>
+                        <SelectTrigger><SelectValue placeholder="Select material" /></SelectTrigger>
+                        <SelectContent>
+                          {OOH_MATERIALS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-white mb-2 block">Quantity *</Label>
+                      <Input type="number" value={oohQuantity} onChange={(e) => setOohQuantity(e.target.value)} placeholder="e.g. 200" />
+                    </div>
+                    <div>
+                      <Label className="text-white mb-2 block">Size / Dimensions</Label>
+                      <Input value={oohSize} onChange={(e) => setOohSize(e.target.value)} placeholder="e.g. A5 (148 × 210 mm)" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label className="text-white mb-2 block">Material / Finishing Notes</Label>
+                      <Textarea value={oohNotes} onChange={(e) => setOohNotes(e.target.value)} placeholder="Lamination, finish, color profile, etc."
+                        className="bg-[#0c0c0c] border-white/10 text-white" />
+                    </div>
+                  </div>
+                )}
+
+                {campaignType === "DOOH" && (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-white mb-2 block">Spot Duration (seconds) *</Label>
+                      <Input type="number" value={doohDuration} onChange={(e) => setDoohDuration(e.target.value)} placeholder="e.g. 15" />
+                    </div>
+                    <div>
+                      <Label className="text-white mb-2 block">Resolution *</Label>
+                      <Select value={doohResolution} onValueChange={setDoohResolution}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1920x1080">1920 × 1080 (Full HD)</SelectItem>
+                          <SelectItem value="3840x2160">3840 × 2160 (4K)</SelectItem>
+                          <SelectItem value="1080x1920">1080 × 1920 (Portrait FHD)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label className="text-white mb-2 block">Plays per hour (target)</Label>
+                      <Input type="number" value={doohPlaysPerHour} onChange={(e) => setDoohPlaysPerHour(e.target.value)} placeholder="e.g. 8" />
+                    </div>
+                  </div>
+                )}
+
+                {campaignType === "AOOH" && (
+                  <div className="space-y-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-white mb-2 block">Spot Duration (seconds) *</Label>
+                        <Input type="number" value={aoohDuration} onChange={(e) => setAoohDuration(e.target.value)} placeholder="e.g. 20" />
+                      </div>
+                      <div>
+                        <Label className="text-white mb-2 block">Plays per hour (target)</Label>
+                        <Input type="number" value={aoohPlaysPerHour} onChange={(e) => setAoohPlaysPerHour(e.target.value)} placeholder="e.g. 6" />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-white mb-2 block">Voiceover Script / Notes</Label>
+                      <Textarea value={aoohScript} onChange={(e) => setAoohScript(e.target.value)} placeholder="Script, voice tone, language, music preferences..."
+                        className="bg-[#0c0c0c] border-white/10 text-white" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Sub-step 3: Creative upload */}
+            {activationSubStep === 3 && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-bold text-lg mb-1">Upload your creative</h3>
+                  <p className="text-sm text-zinc-400">
+                    {creativeAcceptHint} required for your {campaignType} campaign.
+                  </p>
+                </div>
+                <label className="block cursor-pointer rounded-2xl border-2 border-dashed border-white/20 hover:border-green-500/60 bg-[#0c0c0c] p-8 text-center transition">
+                  <input
+                    type="file"
+                    accept={creativeAccept}
+                    className="hidden"
+                    onChange={(e) => setCreativeFile(e.target.files?.[0] || null)}
+                  />
+                  <Upload className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                  <div className="font-medium">
+                    {creativeFile ? creativeFile.name : `Click to upload ${creativeAcceptHint.toLowerCase()}`}
+                  </div>
+                  <div className="text-xs text-zinc-500 mt-1">
+                    {creativeFile ? `${(creativeFile.size / 1024 / 1024).toFixed(2)} MB` : "or drag and drop"}
+                  </div>
+                </label>
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="space-y-6">
             <Card className="bg-[#0c0c0c] border-white/10 rounded-2xl">
               <CardContent className="p-6 space-y-4">
                 <h3 className="font-bold text-lg">Billing Information</h3>
@@ -375,13 +650,9 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
 
-        {step === 4 && (
-          <div className="space-y-6">
             <Card className="bg-[#0c0c0c] border-white/10 rounded-2xl">
-              <CardContent className="p-8 text-center">
+              <CardContent className="p-6 text-center">
                 {processing ? (
                   <>
                     <Loader2 className="w-10 h-10 animate-spin text-green-400 mx-auto mb-4" />
@@ -391,8 +662,8 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
                 ) : (
                   <>
                     <Shield className="w-10 h-10 text-green-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold mb-2">Redirecting to secure payment...</h3>
-                    <p className="text-zinc-400 text-sm">If you are not redirected, please go back and try again.</p>
+                    <h3 className="text-xl font-bold mb-2">Ready for secure payment</h3>
+                    <p className="text-zinc-400 text-sm">Complete your billing details, then submit to continue to checkout.</p>
                   </>
                 )}
                 <div className="flex items-center justify-center gap-4 mt-6 text-xs text-zinc-500">
@@ -408,17 +679,21 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
       {/* Footer */}
       <div className="fixed bottom-0 left-0 right-0 z-10 bg-black/95 backdrop-blur border-t border-white/10 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          {step > 1 && step < 4 ? (
-            <Button variant="ghost" onClick={() => setStep((step - 1) as Step)} className="text-zinc-300 hover:bg-white/10">
+          {step > 1 ? (
+            <Button variant="ghost" onClick={handleBack} className="text-zinc-300 hover:bg-white/10" disabled={processing}>
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>
           ) : <div />}
-          {step < 4 && (
-            <Button onClick={handleNext} className="bg-green-600 hover:bg-green-500 text-white">
-              {step === 3 ? "Proceed to Payment" : step === 2 ? "Review Campaign" : "Next"}
-              <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          )}
+          <Button onClick={handleNext} className="bg-green-600 hover:bg-green-500 text-white" disabled={processing}>
+            {step === 4
+              ? (processing ? "Processing..." : "Submit & Pay")
+              : step === 3 && activationSubStep === 3
+                ? "Proceed to Payment"
+                : step === 2
+                  ? "Continue to Activation"
+                  : "Next"}
+            <ArrowRight className="w-4 h-4 ml-1" />
+          </Button>
         </div>
       </div>
     </div>
