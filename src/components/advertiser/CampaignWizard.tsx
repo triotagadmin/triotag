@@ -138,7 +138,26 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
   // Step 2 — pinned target locations
   const [pinnedLocations, setPinnedLocations] = useState<PinnedLocation[]>([]);
 
-  // Step 3 billing
+  // Step 3 — Activation (multi sub-step)
+  const [activationSubStep, setActivationSubStep] = useState<ActivationSubStep>(1);
+  const [campaignMode, setCampaignMode] = useState<CampaignMode>("");
+  // OOH specs
+  const [oohMaterial, setOohMaterial] = useState("");
+  const [oohQuantity, setOohQuantity] = useState("");
+  const [oohSize, setOohSize] = useState("");
+  const [oohNotes, setOohNotes] = useState("");
+  // DOOH specs
+  const [doohDuration, setDoohDuration] = useState("");
+  const [doohResolution, setDoohResolution] = useState("1920x1080");
+  const [doohPlaysPerHour, setDoohPlaysPerHour] = useState("");
+  // AOOH specs
+  const [aoohDuration, setAoohDuration] = useState("");
+  const [aoohScript, setAoohScript] = useState("");
+  const [aoohPlaysPerHour, setAoohPlaysPerHour] = useState("");
+  // Creative upload
+  const [creativeFile, setCreativeFile] = useState<File | null>(null);
+
+  // Step 4 billing
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [companyName, setCompanyName] = useState("");
