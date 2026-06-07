@@ -24,19 +24,51 @@ const formatCards = [
 ];
 
 const flowSteps = [
-  { n: 1, title: "Retailers list spaces", desc: "Venues upload their available surfaces: walls, windows, counters, tables" },
-  { n: 2, title: "Spaces go live on marketplace", desc: "Retailers browse inventory filtered by location, venue type, footfall" },
-  { n: 3, title: "Retailer books & pays", desc: "Campaign confirmed, payment processed, print materials deployed" },
+  {
+    n: 1,
+    title: "Retailers list spaces",
+    desc: "Venues upload their available surfaces: walls, windows, counters, tables",
+  },
+  {
+    n: 2,
+    title: "Spaces go live on marketplace",
+    desc: "Advertisers browse inventory filtered by location, venue type, footfall",
+  },
+  { n: 3, title: "Advertiser books & pays", desc: "Campaign confirmed, payment processed, print materials deployed" },
   { n: 4, title: "Proof of run", desc: "Photo documentation and post-campaign reporting delivered" },
 ];
 
 const whyCards = [
-  { icon: MapPin, title: "Hyper-Local Precision", desc: "Choose exact venues, streets, and barangays. Your ad appears only where your target customers shop and spend time." },
-  { icon: DollarSign, title: "Affordable Entry Point", desc: "OOH campaigns start from ₱5,000. Accessible for SMEs and national brands alike — no minimum fleet required." },
-  { icon: Eye, title: "High Dwell Time", desc: "Placed inside venues where customers spend 5–30 minutes. Not a passing glance — sustained brand exposure at point of purchase." },
-  { icon: ShieldCheck, title: "Verified Retailer Network", desc: "Every retailer venue is reviewed and approved by the TrioTag team. Brand-safe, quality environments only." },
-  { icon: BarChart2, title: "Campaign Reporting", desc: "Photo proof of placement, impression estimates, and post-campaign summary reports included with every booking." },
-  { icon: RefreshCw, title: "Flexible Duration", desc: "Run for 7 days, 30 days, or 90 days. Scale up or pause anytime based on campaign performance." },
+  {
+    icon: MapPin,
+    title: "Hyper-Local Precision",
+    desc: "Choose exact venues, streets, and barangays. Your ad appears only where your target customers shop and spend time.",
+  },
+  {
+    icon: DollarSign,
+    title: "Affordable Entry Point",
+    desc: "OOH campaigns start from ₱5,000. Accessible for SMEs and national brands alike — no minimum fleet required.",
+  },
+  {
+    icon: Eye,
+    title: "High Dwell Time",
+    desc: "Placed inside venues where customers spend 5–30 minutes. Not a passing glance — sustained brand exposure at point of purchase.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Verified Retailer Network",
+    desc: "Every retailer venue is reviewed and approved by the TrioTag team. Brand-safe, quality environments only.",
+  },
+  {
+    icon: BarChart2,
+    title: "Campaign Reporting",
+    desc: "Photo proof of placement, impression estimates, and post-campaign summary reports included with every booking.",
+  },
+  {
+    icon: RefreshCw,
+    title: "Flexible Duration",
+    desc: "Run for 7 days, 30 days, or 90 days. Scale up or pause anytime based on campaign performance.",
+  },
 ];
 
 const specs = [
@@ -57,20 +89,29 @@ export default function SolutionsOOH() {
         <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30">
-              Retail Advertising
+              Out-of-Home Advertising
             </span>
             <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-              Register your retail company today.
+              Put Your Brand Inside the Spaces Where Consumers Actually Buy
             </h1>
             <p className="text-zinc-400 text-lg leading-relaxed">
-              TrioTag is an SSP (Supply-Side Platform) for retail advertising — connecting brands to verified retail publisher spaces across the Philippines. OOH print placements inside sari-sari stores, cafes, salons, gyms, and high-footfall venues.
+              TrioTag is an SSP (Supply-Side Platform) for retail advertising — connecting brands to verified retail
+              advertising inventory across the Philippines.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg"><Link to="/advertiser/explore">Browse Inventory</Link></Button>
-              <Button asChild size="lg" variant="outline"><Link to="/campaign-submit">Start a Campaign</Link></Button>
+              <Button asChild size="lg">
+                <Link to="/advertiser/explore">Browse Inventory</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/campaign-submit">Start a Campaign</Link>
+              </Button>
             </div>
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
-              {[["18+", "Retailer Partners"], ["100+", "OOH Assets"], ["500+", "Active Placements"]].map(([n, l]) => (
+              {[
+                ["18+", "Retailer Partners"],
+                ["100+", "OOH Assets"],
+                ["500+", "Active Placements"],
+              ].map(([n, l]) => (
                 <div key={l}>
                   <div className="text-2xl md:text-3xl font-bold text-green-500">{n}</div>
                   <div className="text-xs text-zinc-400 mt-1">{l}</div>
@@ -97,25 +138,35 @@ export default function SolutionsOOH() {
             <div className="text-xs font-semibold tracking-widest text-green-500 uppercase">Supply-Side Platform</div>
             <h2 className="text-3xl md:text-4xl font-bold">We connect ad spaces to advertisers — programmatically</h2>
             <p className="text-zinc-400 leading-relaxed">
-              TrioTag operates as an SSP for out-of-home media. Retailer venues list their physical ad spaces on the TrioTag platform. Retailers browse, book, and activate campaigns across our verified network — all managed through one dashboard. No cold calls. No manual negotiations. Just efficient, targeted OOH.
+              TrioTag operates as an SSP for out-of-home media. Retailer venues list their physical ad spaces on the
+              TrioTag platform. Advertisers browse, book, and activate campaigns across our verified network — all
+              managed through one dashboard. No cold calls. No manual negotiations. Just efficient, targeted OOH.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
-              <span className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-sm">18+ Retailer Partners</span>
-              <span className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-sm">Real-time booking</span>
+              <span className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
+                18+ Retailer Partners
+              </span>
+              <span className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
+                Real-time booking
+              </span>
             </div>
           </div>
           <div className="space-y-3">
             {flowSteps.map((s, i) => (
               <div key={s.n}>
                 <div className="bg-black border border-white/10 rounded-2xl p-5 flex gap-4 items-start">
-                  <div className="w-10 h-10 rounded-full bg-green-500 text-black font-bold flex items-center justify-center shrink-0">{s.n}</div>
+                  <div className="w-10 h-10 rounded-full bg-green-500 text-black font-bold flex items-center justify-center shrink-0">
+                    {s.n}
+                  </div>
                   <div>
                     <h4 className="font-semibold">{s.title}</h4>
                     <p className="text-sm text-zinc-400 mt-1">{s.desc}</p>
                   </div>
                 </div>
                 {i < flowSteps.length - 1 && (
-                  <div className="flex justify-center py-1"><ArrowDown className="w-5 h-5 text-green-500" /></div>
+                  <div className="flex justify-center py-1">
+                    <ArrowDown className="w-5 h-5 text-green-500" />
+                  </div>
                 )}
               </div>
             ))}
@@ -129,7 +180,10 @@ export default function SolutionsOOH() {
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Why OOH with TrioTag</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {whyCards.map((c) => (
-              <div key={c.title} className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-6 hover:border-green-500/40 transition">
+              <div
+                key={c.title}
+                className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-6 hover:border-green-500/40 transition"
+              >
                 <c.icon className="w-8 h-8 text-green-500 mb-4" />
                 <h3 className="font-bold text-lg mb-2">{c.title}</h3>
                 <p className="text-sm text-zinc-400 leading-relaxed">{c.desc}</p>
@@ -148,7 +202,9 @@ export default function SolutionsOOH() {
               <thead className="bg-green-500/10 border-b border-green-500/30">
                 <tr>
                   {["Format", "Size", "Venue Types", "Min. Duration", "Starting Rate"].map((h) => (
-                    <th key={h} className="text-left p-4 text-green-400 font-semibold">{h}</th>
+                    <th key={h} className="text-left p-4 text-green-400 font-semibold">
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -156,14 +212,19 @@ export default function SolutionsOOH() {
                 {specs.map((row, i) => (
                   <tr key={i} className="border-b border-white/5 last:border-0">
                     {row.map((c, j) => (
-                      <td key={j} className={`p-4 ${j === 4 ? "text-green-400 font-semibold" : "text-zinc-300"}`}>{c}</td>
+                      <td key={j} className={`p-4 ${j === 4 ? "text-green-400 font-semibold" : "text-zinc-300"}`}>
+                        {c}
+                      </td>
                     ))}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-zinc-500 mt-4">*All rates subject to venue location, foot traffic tier, and campaign duration. Contact us for a custom quote.</p>
+          <p className="text-xs text-zinc-500 mt-4">
+            *All rates subject to venue location, foot traffic tier, and campaign duration. Contact us for a custom
+            quote.
+          </p>
         </div>
       </section>
 
@@ -171,10 +232,16 @@ export default function SolutionsOOH() {
       <section className="py-20 md:py-28 bg-gradient-to-br from-green-900/40 to-black">
         <div className="container mx-auto px-4 md:px-6 text-center max-w-3xl">
           <h2 className="text-3xl md:text-5xl font-bold mb-4">Ready to get your brand into the right spaces?</h2>
-          <p className="text-zinc-400 text-lg mb-8">Browse available OOH inventory across our publisher network or talk to our team for a custom campaign plan.</p>
+          <p className="text-zinc-400 text-lg mb-8">
+            Browse available OOH inventory across our publisher network or talk to our team for a custom campaign plan.
+          </p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Button asChild size="lg"><Link to="/advertiser/explore">Browse OOH Inventory</Link></Button>
-            <Button asChild size="lg" variant="outline"><Link to="/contact">Get a Custom Quote</Link></Button>
+            <Button asChild size="lg">
+              <Link to="/advertiser/explore">Browse OOH Inventory</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/contact">Get a Custom Quote</Link>
+            </Button>
           </div>
         </div>
       </section>
