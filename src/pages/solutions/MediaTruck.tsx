@@ -294,6 +294,35 @@ export default function SolutionsMediaTruck() {
         </div>
       </section>
 
+      {/* New Media Strategies */}
+      <section className="py-20 md:py-28 bg-[#0c0c0c]">
+        <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-5">
+            <h2 className="text-3xl md:text-4xl font-bold text-green-500">New Media Strategies</h2>
+            <div className="text-xs font-semibold tracking-widest text-zinc-400 uppercase">
+              Livestream Event Brand Takeover
+            </div>
+            <div className="h-px bg-green-500/40" />
+            <p className="text-xl font-bold text-green-400">Launch Your Brand on Video Streaming Platforms</p>
+            <div className="grid grid-cols-2 gap-5 pt-4">
+              {newMedia.map((m) => (
+                <div key={m.title}>
+                  <m.icon className="w-7 h-7 text-green-500 mb-3" />
+                  <h3 className="font-bold mb-1">{m.title}</h3>
+                  <p className="text-sm text-zinc-400">{m.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-black/60 border border-white/10 rounded-2xl p-12 text-center">
+            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Play className="w-10 h-10 text-black ml-1" />
+            </div>
+            <p className="text-xl font-bold">Live. Loud. Everywhere.</p>
+          </div>
+        </div>
+      </section>
+
       {/* Use Cases */}
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
