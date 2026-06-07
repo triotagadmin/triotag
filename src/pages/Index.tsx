@@ -574,9 +574,19 @@ const MediaTruckSection = () => (
 /* ----------------------------- EXCHANGE INTRO ---------------------------- */
 const ExchangeIntro = () => (
   <section className="relative bg-black text-white overflow-hidden border-b border-white/10">
-    <div className="absolute inset-0 bg-grid-dark opacity-30 pointer-events-none" />
+    <video
+      src={retailMediaKitVideo.url}
+      autoPlay
+      loop
+      muted
+      playsInline
+      className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none"
+    />
+    <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80 pointer-events-none" />
+    <div className="absolute inset-0 bg-grid-dark opacity-20 pointer-events-none" />
     <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-green-500/10 blur-3xl" />
     <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-green-500/10 blur-3xl" />
+
 
     <div className="container mx-auto px-4 md:px-6 py-16 md:py-20 relative">
       <div className="max-w-3xl mx-auto text-center space-y-5">
