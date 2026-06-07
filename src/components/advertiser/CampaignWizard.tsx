@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import {
   X, ArrowRight, ArrowLeft, CheckCircle, CheckCircle2, Image as ImageIcon,
-  Monitor, Volume2, MapPin, Search, Loader2, Shield, Lock,
+  Monitor, Volume2, MapPin, Search, Loader2, Shield, Lock, Package, Settings2, Upload,
 } from "lucide-react";
 import { MultiPinLocationMap, type PinnedLocation } from "./MultiPinLocationMap";
 
