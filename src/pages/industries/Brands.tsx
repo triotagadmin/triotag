@@ -135,18 +135,25 @@ const Brands = () => {
             Brands already growing with TrioTag
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-            {[
-              ["500+", "Active Ad Spaces Available"],
-              ["18+", "Publisher Venue Partners"],
-              ["3", "Ad Formats (OOH, DOOH & AOOH)"],
-              ["₱5K", "Minimum Campaign Budget"],
-            ].map(([n, l]) => (
-              <div key={l}>
-                <div className="text-4xl md:text-5xl font-bold text-green-500 mb-2">{n}</div>
-                <div className="text-sm text-white/70">{l}</div>
+            {([
+              { start: 500, format: (n: number) => `${Math.floor(n).toLocaleString()}+`, minStep: 1, maxStep: 3, minDelay: 2500, maxDelay: 6000, label: "Active Ad Spaces Available" },
+              { start: 18, format: (n: number) => `${Math.floor(n).toLocaleString()}+`, minStep: 1, maxStep: 1, minDelay: 12000, maxDelay: 30000, label: "Publisher Venue Partners" },
+              { start: 3, format: (n: number) => `${Math.floor(n)}`, minStep: 0, maxStep: 0, minDelay: 60000, maxDelay: 60000, label: "Ad Formats (OOH, DOOH & AOOH)" },
+              { start: 5000, format: (n: number) => `₱${(n / 1000).toFixed(n < 10000 ? 1 : 0)}K`, minStep: 50, maxStep: 250, minDelay: 3000, maxDelay: 7000, label: "Minimum Campaign Budget" },
+            ]).map((cfg) => (
+              <div key={cfg.label}>
+                <div className="text-4xl md:text-5xl font-bold text-green-500 mb-2 flex items-center justify-center gap-2">
+                  <LiveCounter {...cfg} />
+                  <span className="relative inline-flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                  </span>
+                </div>
+                <div className="text-sm text-white/70">{cfg.label}</div>
               </div>
             ))}
           </div>
+
           <p className="max-w-2xl mx-auto text-white/70 mb-8">
             From sari-sari stores to gyms, salons, supermarkets, and digital
             screens — TrioTag gives you access to a growing network of verified
