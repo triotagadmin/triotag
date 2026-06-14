@@ -167,3 +167,14 @@
   background: hsl(142 71% 45% / 0.3);
   color: hsl(0 0% 100%);
 }
+
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee-x {
+  animation: marquee-x 40s linear infinite;
+}
+.animate-marquee-x:hover {
+  animation-play-state: paused;
+}
