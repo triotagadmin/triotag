@@ -599,8 +599,8 @@ const ExchangeIntro = () => (
         </h2>
         <p className="text-base md:text-lg text-zinc-400 leading-relaxed">
           Triotag is an advertising exchange that connects brands, agencies, and retail media owners in a single
-          marketplace. Discover, plan, and activate OOH, DOOH, and AOOH inventory across stores, streets, and
-          high-traffic locations — all from one platform.
+          platform. Discover, plan, and activate OOH, DOOH, and AOOH inventory across stores, shops, cafe, studio,
+          hotel and other types of high-traffic locations — all from one centralized platform.
         </p>
       </div>
 
