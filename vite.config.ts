@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'icon-192x192.png', 'icon-512x512.png'],
       manifest: {
-        name: 'TrioTag - Micro Advertising',
+        name: 'TrioTag - Retail Advertising',
         short_name: 'TrioTag',
         description: 'Track your ad campaigns and choose the ads you want to see',
         theme_color: '#39FF14',

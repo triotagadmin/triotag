@@ -525,7 +525,7 @@ const MediaTruckSection = () => (
           Truck Media
         </h2>
         <p className="text-zinc-200 text-lg max-w-xl">
-          Triangulate locations. Activate attention. Deploy high-impact Retail Media trucks across your target districts
+          Retail Media. Real Results. Deploy high-impact Retail Media trucks across your target districts
           with route-based campaign planning and full proof-of-run reporting.
         </p>
         <ul className="grid sm:grid-cols-2 gap-2 text-sm text-zinc-200 max-w-xl">
