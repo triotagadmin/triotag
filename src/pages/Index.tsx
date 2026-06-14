@@ -109,8 +109,8 @@ const Hero = () => {
           </div>
           <div className="absolute -top-4 -right-4 w-24 h-24 bg-green-500/20 rounded-full blur-2xl" />
           <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-green-600/20 rounded-full blur-2xl" />
+          </div>
         </div>
-      </div>
     </section>
   );
 };
