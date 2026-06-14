@@ -135,12 +135,10 @@ const Brands = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-12">
             Brands already growing with TrioTag
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+          <div className="grid grid-cols-2 gap-8 mb-10">
             {([
               { start: 500, format: (n: number) => `${Math.floor(n).toLocaleString()}+`, minStep: 1, maxStep: 3, minDelay: 2500, maxDelay: 6000, label: "Active Ad Spaces Available" },
               { start: 18, format: (n: number) => `${Math.floor(n).toLocaleString()}+`, minStep: 1, maxStep: 1, minDelay: 12000, maxDelay: 30000, label: "Publisher Venue Partners" },
-              { start: 3, format: (n: number) => `${Math.floor(n)}`, minStep: 0, maxStep: 0, minDelay: 60000, maxDelay: 60000, label: "Ad Formats (OOH, DOOH & AOOH)" },
-              { start: 5000, format: (n: number) => `₱${(n / 1000).toFixed(n < 10000 ? 1 : 0)}K`, minStep: 50, maxStep: 250, minDelay: 3000, maxDelay: 7000, label: "Minimum Campaign Budget" },
             ]).map((cfg) => (
               <div key={cfg.label}>
                 <div className="text-4xl md:text-5xl font-bold text-green-500 mb-2 flex items-center justify-center gap-2">
