@@ -93,9 +93,9 @@ const Brands = () => {
 
               <div className="space-y-4 mb-8">
                 {[
-                  ["1", "Create your account", "Sign up free as a brand advertiser. No credit card required."],
-                  ["2", "Browse inventory", "Explore available ad spaces filtered by location, format, and venue type."],
-                  ["3", "Launch your campaign", "Book, pay, and go live. Track performance from your advertiser dashboard."],
+                  ["1", "Subscribe to Retail Media Campaign", "With just an email you can activate a packaged or custom campaign."],
+                  ["2", "Activate additional inventory", "Explore additional ad spaces filtered by location, format, and venue type."],
+                  ["3", "Launch your campaign", "Book, pay, and go live.\u00a0\u00a0Track your campaign with live reports directly sent to your email."],
                 ].map(([n, t, d]) => (
                   <div key={n} className="flex gap-4">
                     <div className="h-9 w-9 shrink-0 rounded-full bg-green-500 text-black font-bold flex items-center justify-center">
