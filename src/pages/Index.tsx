@@ -92,19 +92,6 @@ const Hero = () => {
               </Button>
             </Link>
           </div>
-
-          <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
-            {[
-              { stat: "3X", label: "Closer to purchase decisions" },
-              { stat: "High", label: "Engagement in retail environments" },
-              { stat: "New", label: "Revenue stream for retailers" },
-            ].map((s) => (
-              <div key={s.label}>
-                <div className="text-2xl md:text-3xl font-extrabold text-green-500">{s.stat}</div>
-                <div className="text-xs md:text-sm text-zinc-400 mt-1">{s.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Dashboard mockup */}
@@ -121,8 +108,8 @@ const Hero = () => {
           </div>
           <div className="absolute -top-4 -right-4 w-24 h-24 bg-green-500/20 rounded-full blur-2xl" />
           <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-green-600/20 rounded-full blur-2xl" />
+          </div>
         </div>
-      </div>
     </section>
   );
 };
