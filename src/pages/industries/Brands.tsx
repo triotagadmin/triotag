@@ -79,7 +79,7 @@ const Brands = () => {
               Why brands choose TrioTag
             </h2>
             <p className="text-white/70">
-              Skip the agencies. Skip the middlemen. Go direct to the spaces that matter.
+              Skip the agencies. Choose local areas with high traffic. Launch campaign directly on your dashboard.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
