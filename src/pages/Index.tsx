@@ -92,7 +92,6 @@ const Hero = () => {
               </Button>
             </Link>
           </div>
-
         </div>
 
         {/* Dashboard mockup */}
