@@ -93,18 +93,6 @@ const Hero = () => {
             </Link>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
-            {[
-              { stat: "3X", label: "Closer to purchase decisions" },
-              { stat: "High", label: "Engagement in retail environments" },
-              { stat: "New", label: "Revenue stream for retailers" },
-            ].map((s) => (
-              <div key={s.label}>
-                <div className="text-2xl md:text-3xl font-extrabold text-green-500">{s.stat}</div>
-                <div className="text-xs md:text-sm text-zinc-400 mt-1">{s.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Dashboard mockup */}
