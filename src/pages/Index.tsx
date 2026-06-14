@@ -109,51 +109,15 @@ const Hero = () => {
 
         {/* Dashboard mockup */}
         <div className="relative">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur shadow-2xl">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <div className="text-xs text-zinc-400 uppercase tracking-wider">Overview</div>
-                <div className="text-lg font-bold text-white">Network Snapshot</div>
-              </div>
-              <span className="px-2 py-1 text-[10px] font-semibold rounded-full bg-green-500/20 text-green-400">
-                LIVE
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              {[
-                { label: "Ad Spaces", value: fmt(totals.approvedSpaces), icon: BarChart3 },
-                { label: "Active Campaigns", value: fmt(totals.activeCampaigns), icon: Target },
-                { label: "Retail Partners", value: fmt(totals.activeVenues), icon: Store },
-                { label: "Reach (Daily)", value: "—", icon: TrendingUp },
-              ].map((m) => {
-                const I = m.icon;
-                return (
-                  <div key={m.label} className="bg-black/40 border border-white/10 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <I className="w-3.5 h-3.5 text-green-500" />
-                      <span className="text-[10px] text-zinc-400 uppercase">{m.label}</span>
-                    </div>
-                    <div className="text-lg font-bold text-white">{m.value}</div>
-                  </div>
-                );
-              })}
-            </div>
-            {/* Mini chart — illustrative only */}
-            <div className="bg-black/40 border border-white/10 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-zinc-400">Last 7 days</span>
-                <span className="text-xs text-green-500 font-semibold">—</span>
-              </div>
-              <div className="flex items-end gap-1.5 h-20">
-                {[40, 65, 50, 78, 60, 88, 95].map((h, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 bg-gradient-to-t from-green-600 to-green-400 rounded-t opacity-60"
-                    style={{ height: `${h}%` }}
-                  />
-                ))}
-              </div>
-            </div>
+          <div className="bg-white/5 border-2 border-white/10 rounded-2xl p-3 backdrop-blur shadow-2xl">
+            <video
+              src={retailMediaKitVideo.url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto rounded-xl block"
+            />
           </div>
           <div className="absolute -top-4 -right-4 w-24 h-24 bg-green-500/20 rounded-full blur-2xl" />
           <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-green-600/20 rounded-full blur-2xl" />
