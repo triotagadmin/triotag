@@ -94,7 +94,7 @@ const Hero = () => {
             <span className="text-green-500">DOOH</span>, and <span className="text-green-500">AOOH</span>
           </h1>
           <p className="text-lg text-zinc-400 max-w-xl leading-relaxed">
-            Triotag is a Retail Media SSP platform built to help retailers, media owners, and location-based businesses
+            Triotag is a Retail Media SSP platform built to help location-based businesses
             monetize their vacant space, blank walls, digital screens and audio system into OOH, DOOH, and AOOH
             inventory.
           </p>
