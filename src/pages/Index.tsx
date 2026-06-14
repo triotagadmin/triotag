@@ -351,31 +351,34 @@ const ValueProps = () => {
 const PopularFormats = () => {
   const groups = {
     OOH: [
-      { label: "Table Tents", icon: Square },
-      { label: "Shelf Signage", icon: Tag },
-      { label: "Floor Stickers", icon: ScanLine },
-      { label: "Counter Displays", icon: ImageIcon },
-      { label: "Aisle Signage", icon: MapPin },
-      { label: "Entrance Banners", icon: Layers },
+      { label: "Table Tents", icon: Square, img: oohTableTent },
+      { label: "Shelf Signage", icon: Tag, img: oohShelfSignage },
+      { label: "Floor Stickers", icon: ScanLine, img: oohFloorSticker },
+      { label: "Counter Displays", icon: ImageIcon, img: oohCounterDisplay },
+      { label: "Aisle Signage", icon: MapPin, img: oohAisleSignage },
+      { label: "Entrance Banners", icon: Layers, img: oohEntranceBanner },
     ],
     DOOH: [
-      { label: "In-store Screens", icon: Monitor },
-      { label: "Checkout Screens", icon: ShoppingCart },
-      { label: "LED Displays", icon: Layers },
-      { label: "Menu Boards", icon: Square },
-      { label: "Video Walls", icon: Network },
-      { label: "Mall Directories", icon: MapPin },
+      { label: "In-store Screens", icon: Monitor, img: doohInstoreScreen },
+      { label: "Checkout Screens", icon: ShoppingCart, img: doohCheckoutScreen },
+      { label: "LED Displays", icon: Layers, img: doohLedDisplay },
+      { label: "Menu Boards", icon: Square, img: doohMenuBoard },
+      { label: "Video Walls", icon: Network, img: doohVideoWall },
+      { label: "Mall Directories", icon: MapPin, img: doohMallDirectory },
     ],
     AOOH: [
-      { label: "Branded Jingles", icon: Music },
-      { label: "Audio Announcements", icon: Mic },
-      { label: "In-store Audio Ads", icon: Speaker },
-      { label: "Queue Line Audio", icon: Volume2 },
-      { label: "Playlist Sponsorships", icon: Music },
-      { label: "Promotional Spots", icon: Volume2 },
+      { label: "Branded Jingles", icon: Music, img: aoohBrandedJingles },
+      { label: "Audio Announcements", icon: Mic, img: aoohAnnouncements },
+      { label: "In-store Audio Ads", icon: Speaker, img: aoohInstoreAudio },
+      { label: "Queue Line Audio", icon: Volume2, img: aoohQueueAudio },
+      { label: "Playlist Sponsorships", icon: Music, img: aoohPlaylist },
+      { label: "Promotional Spots", icon: Volume2, img: aoohPromoSpots },
     ],
   } as const;
   const [active, setActive] = useState<keyof typeof groups>("OOH");
+  const items = groups[active];
+  // Duplicate items for seamless marquee loop
+  const looped = [...items, ...items];
 
   return (
     <section className="bg-white py-20 md:py-24 border-t border-zinc-100">
@@ -396,23 +399,35 @@ const PopularFormats = () => {
             ))}
           </div>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
-          {groups[active].map((f) => {
-            const I = f.icon;
-            return (
-              <div
-                key={f.label}
-                className="snap-start shrink-0 w-56 bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden"
-              >
-                <div className="aspect-[4/3] bg-gradient-to-br from-green-500/10 to-green-600/20 flex items-center justify-center">
-                  <I className="w-16 h-16 text-green-600" />
+        <div className="overflow-hidden relative" style={{ maskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)" }}>
+          <div key={active} className="flex gap-4 w-max animate-marquee-x">
+            {looped.map((f, idx) => {
+              const I = f.icon;
+              return (
+                <div
+                  key={`${f.label}-${idx}`}
+                  className="shrink-0 w-56 bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden"
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-green-500/10 to-green-600/20 relative overflow-hidden">
+                    <img
+                      src={f.img}
+                      alt={f.label}
+                      loading="lazy"
+                      width={1024}
+                      height={1024}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center">
+                      <I className="w-4 h-4 text-green-600" />
+                    </div>
+                  </div>
+                  <div className="p-4 text-center">
+                    <div className="text-sm font-semibold text-zinc-800">{f.label}</div>
+                  </div>
                 </div>
-                <div className="p-4 text-center">
-                  <div className="text-sm font-semibold text-zinc-800">{f.label}</div>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
