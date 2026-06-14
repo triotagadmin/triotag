@@ -135,7 +135,7 @@ const Brands = () => {
                 your first campaign.
               </p>
               <Button size="lg" variant="cyber" className="w-full" onClick={goAdvertiserSignup}>
-                Sign Up as a Retailer
+                Download our Media Kit{"\n"}
               </Button>
 
               <div className="flex items-center gap-3 my-5 text-white/40 text-xs">
