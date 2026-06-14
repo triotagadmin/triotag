@@ -136,7 +136,7 @@ const Hero = () => {
 const LogoStrip = () => (
   <section className="bg-white py-10 border-b border-zinc-100">
     <div className="container mx-auto px-4 md:px-6">
-      <p className="text-center text-sm text-zinc-500 font-medium">Trusted by leading retailers and brands</p>
+      <p className="text-center text-sm text-zinc-500 font-medium"></p>
     </div>
   </section>
 );
