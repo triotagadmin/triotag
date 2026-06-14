@@ -173,13 +173,13 @@ const Retailers = () => {
                 Join the TrioTag Retailer Network
               </span>
               <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-5">
-                Start earning from your space — for free
+                Start earning from your space today!
               </h2>
               <p className="text-white/70 mb-6">
                 List your venue on TrioTag's retailer marketplace in under 10
-                minutes. Brands and advertisers will find your space, book it,
-                and pay you directly. No sales calls. No chasing payments. Just
-                passive income from the surfaces you already have.
+                minutes. Brands will find your space, book it, and pay you
+                directly. No sales calls. No chasing payments. Just passive
+                income directly paid to your account.
               </p>
 
               <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mt-4">
@@ -188,9 +188,9 @@ const Retailers = () => {
                 </div>
                 <div className="space-y-2">
                   {[
-                    { icon: Utensils, label: "Cafe / Restaurant", amt: "₱1,500 – ₱4,000 / month" },
-                    { icon: Dumbbell, label: "Gym / Fitness", amt: "₱2,000 – ₱5,000 / month" },
-                    { icon: Store, label: "Retail", amt: "₱8,000 – ₱20,000 / month" },
+                    { icon: Utensils, label: "Cafe / Restaurant", amt: "₱13,500 – ₱19,000 / month" },
+                    { icon: Dumbbell, label: "Gym / Fitness", amt: "₱19,000 – ₱25,000 / month" },
+                    { icon: Store, label: "Retail", amt: "₱18,000 – ₱30,000 / month" },
                   ].map(({ icon: Icon, label, amt }) => (
                     <div key={label} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2 text-white/80">
