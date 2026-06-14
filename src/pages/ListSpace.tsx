@@ -195,7 +195,7 @@ const ListSpace = () => {
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-4">List Your Ad Space</h1>
             <p className="text-xl text-muted-foreground">
-              Submit your micro advertising space to our marketplace
+              Submit your retail advertising space to our marketplace
             </p>
           </div>
 

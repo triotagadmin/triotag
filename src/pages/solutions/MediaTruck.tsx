@@ -169,7 +169,7 @@ export default function SolutionsMediaTruck() {
               TrioTag's media truck fleet brings your brand directly to where FMCG shoppers already move.
             </p>
             <div className="text-xs font-semibold tracking-widest text-green-500 uppercase">
-              Triangulate Locations. Activate Attention.
+              Retail Media. Real Results.
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
