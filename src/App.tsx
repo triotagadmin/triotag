@@ -118,7 +118,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           
           <Route path="/insights" element={<Insights />} />
-          <Route path="/campaigns" element={<CampaignMarketplace />} />
+          <Route path="/campaigns" element={<RoleProtectedRoute requireAuth><CampaignMarketplace /></RoleProtectedRoute>} />
           <Route path="/insights/:id" element={<BlogPost />} />
           <Route path="/explore" element={<RoleProtectedRoute allowedRoles={["admin"]}><Marketplace /></RoleProtectedRoute>} />
           <Route path="/inventory" element={<VenueInventory />} />
