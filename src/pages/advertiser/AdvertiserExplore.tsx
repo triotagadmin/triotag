@@ -9,9 +9,10 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2,
+  Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2, AlertTriangle,
 } from "lucide-react";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
+import { getActiveAreaNamesText, isWithinServiceArea } from "@/lib/serviceAreas";
 import {
   calculateMediaPlanEstimate,
   MAX_RADIUS_METERS,
