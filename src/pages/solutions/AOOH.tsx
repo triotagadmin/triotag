@@ -117,7 +117,7 @@ export default function SolutionsAOOH() {
             <div className="text-xs font-semibold tracking-widest text-green-500 uppercase">Supply-Side Platform</div>
             <h2 className="text-3xl md:text-4xl font-bold">We manage the network. You manage the message.</h2>
             <p className="text-zinc-400 leading-relaxed">
-              Venue owners connect their in-store audio systems to TrioTag's AOOH network. Advertisers select venues, upload their audio creative, set their schedule, and go live — all through the TrioTag dashboard. No direct vendor negotiations, no manual scheduling.
+              Retail media owners connect their in-store audio systems to TrioTag's AOOH audio playlist and earn whenever audio ads are played and verified. &nbsp;— all through the TrioTag dashboard.&nbsp;
             </p>
           </div>
           <div className="space-y-3">
