@@ -1,19 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AdvertiserSidebar } from "@/components/advertiser/AdvertiserSidebar";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2,
-  Image as ImageIcon, Monitor, Volume2,
 } from "lucide-react";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
 import {
-  calculateMediaPlanEstimate, MAX_RADIUS_METERS, MAX_RADIUS_FEE,
+  calculateMediaPlanEstimate,
+  MAX_RADIUS_METERS,
+  ALL_VARIANTS,
+  OOH_VARIANTS,
+  DOOH_VARIANTS,
+  AOOH_VARIANTS,
+  FormatVariant,
 } from "@/lib/mediaPlanPricing";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -21,26 +27,28 @@ import { toast } from "@/hooks/use-toast";
 const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
 
 export default function AdvertiserExplore() {
-  // ------- Radius planner state -------
   const [center, setCenter] = useState(DEFAULT_CENTER);
   const [radiusMeters, setRadiusMeters] = useState(1000);
 
-  // ------- Unit counts -------
-  const [oohCount, setOohCount] = useState(0);
-  const [doohCount, setDoohCount] = useState(0);
-  const [aoohCount, setAoohCount] = useState(0);
+  // variantId -> qty
+  const [selections, setSelections] = useState<Record<string, number>>({});
 
-  const totalUnits = oohCount + doohCount + aoohCount;
+  const updateQty = (variantId: string, qty: number) => {
+    setSelections((prev) => ({ ...prev, [variantId]: Math.max(0, qty) }));
+  };
 
-  const estimate = useMemo(
-    () => calculateMediaPlanEstimate(
-      { ooh: oohCount, dooh: doohCount, aooh: aoohCount },
-      radiusMeters,
-    ),
-    [oohCount, doohCount, aoohCount, radiusMeters],
+  const selectionsArray = useMemo(
+    () => Object.entries(selections).map(([variantId, quantity]) => ({ variantId, quantity })),
+    [selections],
   );
 
-  // ------- Request dialog -------
+  const estimate = useMemo(
+    () => calculateMediaPlanEstimate(selectionsArray, radiusMeters),
+    [selectionsArray, radiusMeters],
+  );
+
+  const activeSelections = selectionsArray.filter((s) => s.quantity > 0);
+
   const [requestOpen, setRequestOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -58,11 +66,11 @@ export default function AdvertiserExplore() {
     setSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const campaignType = [
-        oohCount > 0 && "OOH",
-        doohCount > 0 && "DOOH",
-        aoohCount > 0 && "AOOH",
-      ].filter(Boolean).join(", ");
+      const enriched = activeSelections.map((s) => {
+        const v = ALL_VARIANTS.find((vv) => vv.id === s.variantId);
+        return { ...s, label: v?.label, price: v?.price, category: v?.category, specs: v?.specs };
+      });
+      const campaignType = [...new Set(enriched.map((s) => s.category).filter(Boolean))].join(", ");
 
       const { error } = await supabase.from("media_plan_requests" as any).insert({
         advertiser_id: user?.id ?? null,
@@ -71,9 +79,7 @@ export default function AdvertiserExplore() {
         center_lat: center.lat,
         center_lng: center.lng,
         radius_meters: radiusMeters,
-        ooh_units: oohCount,
-        dooh_units: doohCount,
-        aooh_units: aoohCount,
+        selections: enriched,
         estimated_price: estimate.totalEstimate,
         preferred_start_date: form.preferredStartDate,
         notes: form.notes || null,
@@ -88,9 +94,7 @@ export default function AdvertiserExplore() {
           centerLat: center.lat,
           centerLng: center.lng,
           radiusMeters,
-          oohUnits: oohCount,
-          doohUnits: doohCount,
-          aoohUnits: aoohCount,
+          selections: enriched,
           estimatedPrice: estimate.totalEstimate,
           preferredStartDate: form.preferredStartDate,
           notes: form.notes,
@@ -109,7 +113,7 @@ export default function AdvertiserExplore() {
   function saveForLater() {
     const plan = {
       center, radiusMeters,
-      unitCounts: { ooh: oohCount, dooh: doohCount, aooh: aoohCount },
+      selections: activeSelections,
       estimate, savedAt: new Date().toISOString(),
     };
     const existing = JSON.parse(localStorage.getItem("saved_media_plans") || "[]");
@@ -124,11 +128,52 @@ export default function AdvertiserExplore() {
     ? "bg-blue-100 text-blue-700 border-blue-300"
     : "bg-green-100 text-green-700 border-green-300";
 
-  const unitRows = [
-    { key: "ooh", label: "OOH Units", price: 1500, Icon: ImageIcon, count: oohCount, setCount: setOohCount },
-    { key: "dooh", label: "DOOH Units", price: 4500, Icon: Monitor, count: doohCount, setCount: setDoohCount },
-    { key: "aooh", label: "AOOH Units", price: 1200, Icon: Volume2, count: aoohCount, setCount: setAoohCount },
-  ] as const;
+  function renderVariantRow(variant: FormatVariant) {
+    const qty = selections[variant.id] || 0;
+    const selected = qty > 0;
+    return (
+      <div
+        key={variant.id}
+        className={`rounded-xl p-4 transition-colors border ${
+          selected ? "border-green-500 bg-green-50/30" : "border-gray-100 hover:border-green-300"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="font-semibold text-gray-900 text-sm">{variant.label}</div>
+            <div className="text-green-600 font-medium text-xs mt-0.5">
+              ₱{variant.price.toLocaleString()} / unit
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => updateQty(variant.id, qty - 1)}
+              disabled={qty === 0}
+              className="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed text-gray-700 flex items-center justify-center"
+            >
+              −
+            </button>
+            <span className="w-8 text-center font-medium text-sm">{qty}</span>
+            <button
+              type="button"
+              onClick={() => updateQty(variant.id, qty + 1)}
+              className="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-700 flex items-center justify-center"
+            >
+              +
+            </button>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {Object.entries(variant.specs).map(([key, val]) => (
+            <span key={key} className="text-[11px] bg-gray-50 border border-gray-200 rounded-full px-2.5 py-1 text-gray-600">
+              <strong className="text-gray-800">{key}:</strong> {val}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans">
@@ -142,7 +187,7 @@ export default function AdvertiserExplore() {
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-[#111827]">Map Your Campaign Area</h1>
                 <p className="text-gray-500 mt-1 text-sm">
-                  Pick your coverage area, choose how many units you need, and get an instant media plan estimate.
+                  Pick your coverage area, choose your ad formats, and get an instant media plan estimate.
                 </p>
               </div>
               <button className="w-10 h-10 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50">
@@ -153,7 +198,7 @@ export default function AdvertiserExplore() {
 
           <div className="px-6 lg:px-8 pt-5">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-              {/* Map (60%) */}
+              {/* Map */}
               <div className="lg:col-span-3 space-y-4">
                 <RadiusMapPlanner
                   center={center}
@@ -167,57 +212,43 @@ export default function AdvertiserExplore() {
                     Coverage Radius — affects campaign reach pricing
                   </div>
                   <div className="text-sm text-gray-700">
-                    {estimate.radiusPercent}% coverage = <span className="font-semibold text-green-700">₱{estimate.radiusFee.toLocaleString()}</span>
+                    {estimate.radiusPercent}% coverage ={" "}
+                    <span className="font-semibold text-green-700">₱{estimate.radiusFee.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Results panel (40%) */}
+              {/* Right panel */}
               <div className="lg:col-span-2">
                 <div className="lg:sticky lg:top-6 space-y-5">
-                  {/* Unit selector */}
+                  {/* Format selector */}
                   <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">How many units do you need?</h3>
-                    <p className="text-xs text-gray-500 mb-3">Pick the mix of placements for your campaign.</p>
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Choose Your Ad Formats</h3>
+                    <p className="text-xs text-gray-500 mb-4">Pick the formats and quantities for your campaign.</p>
 
-                    {unitRows.map(({ key, label, price, Icon, count, setCount }) => (
-                      <div key={key} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                            <Icon className="w-5 h-5 text-green-600" />
-                          </div>
-                          <div>
-                            <div className="font-medium text-gray-900">{label}</div>
-                            <div className="text-xs text-gray-500">₱{price.toLocaleString()} / unit</div>
-                          </div>
+                    <Tabs defaultValue="OOH">
+                      <TabsList className="grid grid-cols-3 w-full">
+                        <TabsTrigger value="OOH">OOH</TabsTrigger>
+                        <TabsTrigger value="DOOH">DOOH</TabsTrigger>
+                        <TabsTrigger value="AOOH">AOOH</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="OOH" className="mt-4">
+                        <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
+                          {OOH_VARIANTS.map(renderVariantRow)}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setCount(Math.max(0, count - 1))}
-                            disabled={count === 0}
-                            className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed text-gray-700"
-                          >
-                            −
-                          </button>
-                          <Input
-                            type="number"
-                            min={0}
-                            max={200}
-                            value={count}
-                            onChange={(e) => setCount(Math.max(0, Math.min(200, Number(e.target.value) || 0)))}
-                            className="w-14 h-8 text-center px-1"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setCount(Math.min(200, count + 1))}
-                            className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-700"
-                          >
-                            +
-                          </button>
+                      </TabsContent>
+                      <TabsContent value="DOOH" className="mt-4">
+                        <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
+                          {DOOH_VARIANTS.map(renderVariantRow)}
                         </div>
-                      </div>
-                    ))}
+                      </TabsContent>
+                      <TabsContent value="AOOH" className="mt-4">
+                        <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
+                          {AOOH_VARIANTS.map(renderVariantRow)}
+                        </div>
+                      </TabsContent>
+                    </Tabs>
                   </div>
 
                   {/* Estimate */}
@@ -231,16 +262,24 @@ export default function AdvertiserExplore() {
                     </div>
 
                     <div className="mt-4 space-y-1.5 text-sm">
-                      <div className="flex justify-between text-gray-700">
-                        <span>Unit Cost ({oohCount} OOH + {doohCount} DOOH + {aoohCount} AOOH)</span>
-                        <span className="font-medium">₱{estimate.unitCost.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-gray-700">
+                      {activeSelections.length === 0 ? (
+                        <div className="text-gray-500 italic text-xs">No formats selected yet.</div>
+                      ) : (
+                        activeSelections.map((s) => {
+                          const v = ALL_VARIANTS.find((vv) => vv.id === s.variantId)!;
+                          return (
+                            <div key={s.variantId} className="flex justify-between text-gray-700">
+                              <span className="truncate pr-2">{v.label} × {s.quantity}</span>
+                              <span className="font-medium shrink-0">₱{(v.price * s.quantity).toLocaleString()}</span>
+                            </div>
+                          );
+                        })
+                      )}
+                      <div className="flex justify-between text-gray-700 pt-1.5 border-t border-green-200">
                         <span>Coverage Radius ({estimate.radiusPercent}% of {MAX_RADIUS_METERS / 1000}km)</span>
                         <span className="font-medium">₱{estimate.radiusFee.toLocaleString()}</span>
                       </div>
-                      <div className="border-t border-green-200 my-2" />
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center pt-2 border-t border-green-200">
                         <span className="font-bold text-gray-900">Total Estimate</span>
                         <span className="font-bold text-lg text-green-700">₱{estimate.totalEstimate.toLocaleString()}</span>
                       </div>
@@ -253,12 +292,12 @@ export default function AdvertiserExplore() {
                     <div className="mt-4 space-y-2">
                       <Button
                         onClick={() => { setSubmitted(false); setRequestOpen(true); }}
-                        disabled={totalUnits === 0}
+                        disabled={estimate.totalUnits === 0}
                         className="w-full bg-green-600 hover:bg-green-500 text-white h-11 text-base font-semibold"
                       >
                         Request This Media Plan
                       </Button>
-                      {totalUnits === 0 && (
+                      {estimate.totalUnits === 0 && (
                         <div className="text-xs text-gray-500 text-center">Add at least 1 unit to continue</div>
                       )}
                       <Button
@@ -301,7 +340,7 @@ export default function AdvertiserExplore() {
 
       {/* Request dialog */}
       <Dialog open={requestOpen} onOpenChange={(o) => { setRequestOpen(o); if (!o) setSubmitted(false); }}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           {submitted ? (
             <div className="text-center py-6">
               <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
@@ -324,18 +363,33 @@ export default function AdvertiserExplore() {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm space-y-1">
-                {oohCount > 0 && (
-                  <div className="flex justify-between"><span className="text-gray-600">OOH units</span><span className="font-semibold">{oohCount}</span></div>
-                )}
-                {doohCount > 0 && (
-                  <div className="flex justify-between"><span className="text-gray-600">DOOH units</span><span className="font-semibold">{doohCount}</span></div>
-                )}
-                {aoohCount > 0 && (
-                  <div className="flex justify-between"><span className="text-gray-600">AOOH units</span><span className="font-semibold">{aoohCount}</span></div>
-                )}
-                <div className="flex justify-between"><span className="text-gray-600">Coverage radius</span><span className="font-semibold">{estimate.radiusKm}km ({estimate.radiusPercent}%)</span></div>
-                <div className="flex justify-between"><span className="text-gray-600">Estimated</span><span className="font-bold text-green-700">₱{estimate.totalEstimate.toLocaleString()}</span></div>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm space-y-2">
+                {activeSelections.map((s) => {
+                  const v = ALL_VARIANTS.find((vv) => vv.id === s.variantId)!;
+                  return (
+                    <div key={s.variantId} className="pb-2 border-b border-green-200 last:border-0 last:pb-0">
+                      <div className="flex justify-between font-semibold text-gray-900">
+                        <span>{v.label} × {s.quantity}</span>
+                        <span>₱{(v.price * s.quantity).toLocaleString()}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {Object.entries(v.specs).map(([k, val]) => (
+                          <span key={k} className="text-[10px] bg-white border border-gray-200 rounded-full px-2 py-0.5 text-gray-600">
+                            <strong>{k}:</strong> {val}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="flex justify-between pt-1">
+                  <span className="text-gray-600">Coverage radius</span>
+                  <span className="font-semibold">{estimate.radiusKm}km ({estimate.radiusPercent}%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Estimated total</span>
+                  <span className="font-bold text-green-700">₱{estimate.totalEstimate.toLocaleString()}</span>
+                </div>
               </div>
 
               <div className="space-y-3">
