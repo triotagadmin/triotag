@@ -64,6 +64,14 @@ export default function AdvertiserExplore() {
   });
 
   async function handleSubmitRequest() {
+    if (!withinServiceArea) {
+      toast({
+        title: "Selected location is outside our service area",
+        description: `TrioTag currently only operates in ${getActiveAreaNamesText()}. Please choose a location within our service area to continue.`,
+        variant: "destructive",
+      });
+      return;
+    }
     if (!form.campaignName.trim() || !form.preferredStartDate) {
       toast({ title: "Missing info", description: "Campaign name and start date are required.", variant: "destructive" });
       return;
