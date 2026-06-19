@@ -9,9 +9,10 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2,
+  Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2, AlertTriangle,
 } from "lucide-react";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
+import { getActiveAreaNamesText, isWithinServiceArea } from "@/lib/serviceAreas";
 import {
   calculateMediaPlanEstimate,
   MAX_RADIUS_METERS,
@@ -29,6 +30,10 @@ const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
 export default function AdvertiserExplore() {
   const [center, setCenter] = useState(DEFAULT_CENTER);
   const [radiusMeters, setRadiusMeters] = useState(1000);
+  const [withinServiceArea, setWithinServiceArea] = useState(
+    isWithinServiceArea(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
+  );
+
 
   // variantId -> qty
   const [selections, setSelections] = useState<Record<string, number>>({});
@@ -59,6 +64,14 @@ export default function AdvertiserExplore() {
   });
 
   async function handleSubmitRequest() {
+    if (!withinServiceArea) {
+      toast({
+        title: "Selected location is outside our service area",
+        description: `TrioTag currently only operates in ${getActiveAreaNamesText()}. Please choose a location within our service area to continue.`,
+        variant: "destructive",
+      });
+      return;
+    }
     if (!form.campaignName.trim() || !form.preferredStartDate) {
       toast({ title: "Missing info", description: "Campaign name and start date are required.", variant: "destructive" });
       return;
@@ -205,7 +218,9 @@ export default function AdvertiserExplore() {
                   radiusMeters={radiusMeters}
                   onCenterChange={setCenter}
                   onRadiusChange={setRadiusMeters}
+                  onServiceAreaChange={setWithinServiceArea}
                 />
+
 
                 <div className="bg-white border border-gray-200 rounded-xl p-4">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
@@ -292,12 +307,20 @@ export default function AdvertiserExplore() {
                     <div className="mt-4 space-y-2">
                       <Button
                         onClick={() => { setSubmitted(false); setRequestOpen(true); }}
-                        disabled={estimate.totalUnits === 0}
+                        disabled={estimate.totalUnits === 0 || !withinServiceArea}
                         className="w-full bg-green-600 hover:bg-green-500 text-white h-11 text-base font-semibold"
                       >
                         Request This Ad Campaign
                       </Button>
-                      {estimate.totalUnits === 0 && (
+                      {!withinServiceArea && (
+                        <div className="flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-2">
+                          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                          <span>
+                            This location is outside our current service area. TrioTag currently only operates in {getActiveAreaNamesText()}.
+                          </span>
+                        </div>
+                      )}
+                      {withinServiceArea && estimate.totalUnits === 0 && (
                         <div className="text-xs text-gray-500 text-center">Add at least 1 unit to continue</div>
                       )}
                       <Button
