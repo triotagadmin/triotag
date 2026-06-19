@@ -64,7 +64,7 @@ export default function SolutionsAOOH() {
               TrioTag's AOOH network delivers in-store audio ads through venue speaker systems at the point of purchase. Reach shoppers inside supermarkets, convenience stores, gyms, and retail venues with targeted audio messaging — managed through TrioTag's SSP platform.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg"><Link to="/advertiser/explore">Browse AOOH Inventory</Link></Button>
+              <Button asChild size="lg"><Link to="/advertiser/explore">Register AOOH Inventory</Link></Button>
               <Button asChild size="lg" variant="outline"><Link to="/campaign-submit">Start a Campaign</Link></Button>
             </div>
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
