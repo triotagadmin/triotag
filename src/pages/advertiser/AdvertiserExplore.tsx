@@ -307,12 +307,20 @@ export default function AdvertiserExplore() {
                     <div className="mt-4 space-y-2">
                       <Button
                         onClick={() => { setSubmitted(false); setRequestOpen(true); }}
-                        disabled={estimate.totalUnits === 0}
+                        disabled={estimate.totalUnits === 0 || !withinServiceArea}
                         className="w-full bg-green-600 hover:bg-green-500 text-white h-11 text-base font-semibold"
                       >
                         Request This Ad Campaign
                       </Button>
-                      {estimate.totalUnits === 0 && (
+                      {!withinServiceArea && (
+                        <div className="flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-2">
+                          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                          <span>
+                            This location is outside our current service area. TrioTag currently only operates in {getActiveAreaNamesText()}.
+                          </span>
+                        </div>
+                      )}
+                      {withinServiceArea && estimate.totalUnits === 0 && (
                         <div className="text-xs text-gray-500 text-center">Add at least 1 unit to continue</div>
                       )}
                       <Button
