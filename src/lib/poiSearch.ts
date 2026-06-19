@@ -58,37 +58,30 @@ function mapTagsToCategory(tags: Record<string, string>): string {
   return "Retail";
 }
 
+import { supabase } from "@/integrations/supabase/client";
+
 export async function searchPOIsInRadius(
   lat: number,
   lng: number,
   radiusMeters: number,
 ): Promise<POI[]> {
-  const tagFilters = [
-    "amenity=cafe", "shop=coffee", "shop=supermarket", "shop=convenience",
-    "amenity=nightclub", "amenity=bar", "amenity=restaurant", "amenity=fast_food",
-    "leisure=fitness_centre", "shop=hairdresser", "amenity=pharmacy",
-    "shop=mall", "shop=clothes", "shop=department_store",
-  ];
-
-  const query = `
-    [out:json][timeout:25];
-    (
-      ${tagFilters.map((tag) => {
-        const [key, value] = tag.split("=");
-        return `node["${key}"="${value}"](around:${radiusMeters},${lat},${lng});`;
-      }).join("\n")}
-    );
-    out body;
-  `;
-
-  const res = await fetch("https://overpass-api.de/api/interpreter", {
-    method: "POST",
-    body: query,
+  const { data, error } = await supabase.functions.invoke("search-poi", {
+    body: { lat, lng, radiusMeters },
   });
-  if (!res.ok) throw new Error(`Overpass error: ${res.status}`);
-  const data = await res.json();
 
-  return (data.elements || [])
+  if (error) {
+    console.error("[searchPOIsInRadius] Edge function error:", error);
+    throw new Error(`Failed to search venues: ${error.message}`);
+  }
+
+  if (data?.error) {
+    console.error("[searchPOIsInRadius] Overpass error:", data.error);
+  }
+
+  const elements = data?.elements || [];
+  console.log("[searchPOIsInRadius] Raw elements:", elements.length);
+
+  const mapped: POI[] = elements
     .filter((el: any) => el.tags?.name)
     .map((el: any) => ({
       id: String(el.id),
@@ -98,7 +91,11 @@ export async function searchPOIsInRadius(
       lng: el.lon,
       address: el.tags["addr:street"] || "",
     }));
+
+  console.log("[searchPOIsInRadius] Mapped POIs:", mapped.length);
+  return mapped;
 }
+
 
 export function haversineMeters(
   lat1: number, lng1: number, lat2: number, lng2: number,
