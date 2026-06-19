@@ -61,7 +61,7 @@ export default function SolutionsAOOH() {
             </span>
             <h1 className="text-4xl md:text-6xl font-bold leading-tight">We provide programmatic OOH for audio ads.</h1>
             <p className="text-zinc-400 text-lg">
-              TrioTag's AOOH network delivers in-store audio ads through venue speaker systems at the point of purchase. Reach shoppers inside supermarkets, convenience stores, gyms, and retail venues with targeted audio messaging — managed through TrioTag's SSP platform.
+              TrioTag's AOOH network is equipped with audio proof of play technology, we also provide audio publisher partnerships with retail media owners &nbsp;— managed through TrioTag's SSP platform.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg"><Link to="/advertiser/explore">Register AOOH Inventory</Link></Button>
