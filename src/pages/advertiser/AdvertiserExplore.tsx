@@ -28,7 +28,7 @@ import { toast } from "@/hooks/use-toast";
 const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
 
 export default function AdvertiserExplore() {
-  const navigate = useNavigate();
+
 
   // ------- Radius planner state -------
   const [center, setCenter] = useState(DEFAULT_CENTER);
