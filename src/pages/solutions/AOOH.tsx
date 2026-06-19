@@ -59,7 +59,7 @@ export default function SolutionsAOOH() {
             <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30">
               Audio Retail Advertising
             </span>
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">The Ad They Hear at the Exact Moment They're Ready to Buy</h1>
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight">We provide programmatic OOH for audio ads.</h1>
             <p className="text-zinc-400 text-lg">
               TrioTag's AOOH network delivers in-store audio ads through venue speaker systems at the point of purchase. Reach shoppers inside supermarkets, convenience stores, gyms, and retail venues with targeted audio messaging — managed through TrioTag's SSP platform.
             </p>
