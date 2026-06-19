@@ -55,7 +55,7 @@ export default function SolutionsDOOH() {
             <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30">
               Digital Retail Advertising
             </span>
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">Dynamic Digital Screens. Real Venues. Real Audiences.</h1>
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight">Dynamic Digital Screens inside Retail Stores.</h1>
             <p className="text-zinc-400 text-lg">
               TrioTag's DOOH network connects DOOH media owners to Global Brands as well as MSME businesses across the Philippines.Launch Retal media campaiagns in Print, Video, Animated, and Aduio creatives — all managed through TrioTag's SSP platform.
             </p>
