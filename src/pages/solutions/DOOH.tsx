@@ -60,7 +60,7 @@ export default function SolutionsDOOH() {
               TrioTag's DOOH network connects advertisers to digital screens inside gyms, salons, waiting rooms, clinics, and high-dwell retail venues across the Philippines. Video, animated, and static creatives — all managed through TrioTag's SSP platform.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg"><Link to="/advertiser/explore">Browse DOOH Inventory</Link></Button>
+              <Button asChild size="lg"><Link to="/advertiser/explore">Register DOOH Inventory</Link></Button>
               <Button asChild size="lg" variant="outline"><Link to="/campaign-submit">Start a Campaign</Link></Button>
             </div>
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
