@@ -2021,15 +2021,18 @@ export type Database = {
       media_plan_requests: {
         Row: {
           advertiser_id: string | null
+          aooh_units: number | null
           budget_confirmation: number | null
           campaign_name: string
           campaign_type: string
           center_lat: number
           center_lng: number
           created_at: string
+          dooh_units: number | null
           estimated_price: number
           id: string
           notes: string | null
+          ooh_units: number | null
           preferred_start_date: string | null
           radius_meters: number
           status: string
@@ -2038,15 +2041,18 @@ export type Database = {
         }
         Insert: {
           advertiser_id?: string | null
+          aooh_units?: number | null
           budget_confirmation?: number | null
           campaign_name: string
           campaign_type: string
           center_lat: number
           center_lng: number
           created_at?: string
+          dooh_units?: number | null
           estimated_price: number
           id?: string
           notes?: string | null
+          ooh_units?: number | null
           preferred_start_date?: string | null
           radius_meters: number
           status?: string
@@ -2055,15 +2061,18 @@ export type Database = {
         }
         Update: {
           advertiser_id?: string | null
+          aooh_units?: number | null
           budget_confirmation?: number | null
           campaign_name?: string
           campaign_type?: string
           center_lat?: number
           center_lng?: number
           created_at?: string
+          dooh_units?: number | null
           estimated_price?: number
           id?: string
           notes?: string | null
+          ooh_units?: number | null
           preferred_start_date?: string | null
           radius_meters?: number
           status?: string
