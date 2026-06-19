@@ -150,6 +150,13 @@ export default function SolutionsAOOH() {
               </div>
             ))}
           </div>
+          <div className="mt-12 bg-gradient-to-r from-green-500/10 to-green-500/5 border border-green-500/40 rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 className="text-2xl md:text-3xl font-bold mb-2">Register your venue for a partnership</h3>
+              <p className="text-zinc-400">Get a free Sound System and Digital Screen installation when you join the TrioTag retail media network.</p>
+            </div>
+            <Button asChild size="lg" className="shrink-0"><Link to="/contact">Register Your Venue</Link></Button>
+          </div>
         </div>
       </section>
 
