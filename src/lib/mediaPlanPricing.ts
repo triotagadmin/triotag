@@ -62,7 +62,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     id: "ooh_flyer",
     label: "Flyer",
     category: "OOH",
-    price: 150,
+    price: 1500,
     specs: { Size: "DL (99 × 210mm)", Material: "150gsm gloss", Print: "Full color, single-sided" },
   },
 ];
