@@ -166,67 +166,9 @@ export default function AdvertiserExplore() {
     toast({ title: "Saved", description: "Media plan saved locally on this device." });
   }
 
-  // ------- Legacy inventory tab state -------
-  const [spaces, setSpaces] = useState<ApprovedAdSpaceLite[] | null>(null);
-  const [selected, setSelected] = useState<CityMarker | null>(null);
-  const [search, setSearch] = useState("");
   const [wizardOpen, setWizardOpen] = useState(false);
-  const [legacyTab, setLegacyTab] = useState(false);
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
 
-  useEffect(() => { if (legacyTab && !spaces) fetchApprovedSpaces().then(setSpaces); }, [legacyTab, spaces]);
-  const cities = useMemo(() => spaces ? aggregateByCity(spaces) : [], [spaces]);
 
-  useEffect(() => {
-    if (!legacyTab) return;
-    let cancelled = false;
-    (async () => {
-      const L = await import("leaflet");
-      if (cancelled || !mapRef.current || mapInstanceRef.current) return;
-      const map = L.map(mapRef.current, {
-        center: [20, 30], zoom: 2, minZoom: 2,
-        worldCopyJump: true, zoomControl: true, scrollWheelZoom: true,
-      });
-      mapInstanceRef.current = map;
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-        attribution: "© OpenStreetMap, © CARTO", maxZoom: 19,
-      }).addTo(map);
-    })();
-    return () => {
-      cancelled = true;
-      if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
-    };
-  }, [legacyTab]);
-
-  useEffect(() => {
-    const map = mapInstanceRef.current;
-    if (!map || cities.length === 0) return;
-    (async () => {
-      const L = await import("leaflet");
-      const layer = L.layerGroup().addTo(map);
-      cities.forEach((c) => {
-        const size = Math.max(34, Math.min(70, 28 + Math.sqrt(c.inventory) * 6));
-        const html = `<div style="width:${size}px;height:${size}px;border-radius:9999px;background:#16a34a;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:${Math.max(11, size * 0.32)}px;box-shadow:0 0 0 4px rgba(22,163,74,0.18),0 6px 18px rgba(22,163,74,0.45);border:2px solid #fff;cursor:pointer;">${c.inventory}</div>`;
-        const icon = L.divIcon({ html, className: "", iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
-        L.marker([c.lat, c.lng], { icon }).addTo(layer).on("click", () => setSelected(c));
-      });
-      if (cities.length > 0) {
-        const bounds = L.latLngBounds(cities.map((c) => [c.lat, c.lng] as [number, number]));
-        map.fitBounds(bounds.pad(0.3), { maxZoom: 6 });
-      }
-      return () => { layer.remove(); };
-    })();
-  }, [cities]);
-
-  const filtered = cities.filter((c) =>
-    !search || c.city.toLowerCase().includes(search.toLowerCase()) || c.country.toLowerCase().includes(search.toLowerCase())
-  );
-  const selectedSpaces = useMemo(
-    () => selected && spaces ? spaces.filter((s) => (s.location ?? "").toLowerCase().includes(selected.city.toLowerCase())) : [],
-    [selected, spaces]
-  );
-  const selectedMedia = useMemo(() => aggregateMediaTypes(selectedSpaces), [selectedSpaces]);
 
   const tierColor = estimate.tier === "Domination"
     ? "bg-purple-100 text-purple-700 border-purple-300"
