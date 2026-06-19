@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2, MapPin } from "lucide-react";
-import { POI, POI_CATEGORY_COLORS } from "@/lib/poiSearch";
 
 interface Suggestion {
   display_name: string;
@@ -15,7 +14,6 @@ interface Suggestion {
 interface RadiusMapPlannerProps {
   center: { lat: number; lng: number };
   radiusMeters: number;
-  pois: POI[];
   onCenterChange: (c: { lat: number; lng: number }) => void;
   onRadiusChange: (r: number) => void;
 }
@@ -23,7 +21,7 @@ interface RadiusMapPlannerProps {
 const PRESETS = [500, 1000, 2000, 5000];
 
 export function RadiusMapPlanner({
-  center, radiusMeters, pois, onCenterChange, onRadiusChange,
+  center, radiusMeters, onCenterChange, onRadiusChange,
 }: RadiusMapPlannerProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
