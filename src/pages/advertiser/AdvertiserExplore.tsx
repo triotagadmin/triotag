@@ -119,7 +119,7 @@ export default function AdvertiserExplore() {
     const existing = JSON.parse(localStorage.getItem("saved_media_plans") || "[]");
     existing.unshift(plan);
     localStorage.setItem("saved_media_plans", JSON.stringify(existing.slice(0, 10)));
-    toast({ title: "Saved", description: "Media plan saved locally on this device." });
+    toast({ title: "Saved", description: "Ad campaign saved locally on this device." });
   }
 
   const tierColor = estimate.tier === "Domination"
@@ -187,7 +187,7 @@ export default function AdvertiserExplore() {
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-[#111827]">Map Your Campaign Area</h1>
                 <p className="text-gray-500 mt-1 text-sm">
-                  Pick your coverage area, choose your ad formats, and get an instant media plan estimate.
+                  Pick your coverage area, choose your ad formats, and get an instant ad campaign estimate.
                 </p>
               </div>
               <button className="w-10 h-10 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50">
@@ -254,7 +254,7 @@ export default function AdvertiserExplore() {
                   {/* Estimate */}
                   <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-6">
                     <div className="flex items-center justify-between">
-                      <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Estimated Media Plan</div>
+                      <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Estimated Ad Campaign</div>
                       <Badge className={`${tierColor} border`}>{estimate.tier}</Badge>
                     </div>
                     <div className="text-3xl font-bold text-gray-900 mt-1">
@@ -295,7 +295,7 @@ export default function AdvertiserExplore() {
                         disabled={estimate.totalUnits === 0}
                         className="w-full bg-green-600 hover:bg-green-500 text-white h-11 text-base font-semibold"
                       >
-                        Request This Media Plan
+                        Request This Ad Campaign
                       </Button>
                       {estimate.totalUnits === 0 && (
                         <div className="text-xs text-gray-500 text-center">Add at least 1 unit to continue</div>
@@ -348,7 +348,7 @@ export default function AdvertiserExplore() {
               </div>
               <h3 className="text-xl font-bold text-gray-900">Request submitted!</h3>
               <p className="text-sm text-gray-600 mt-2 max-w-sm mx-auto">
-                Your media plan request has been submitted. Our team will confirm final pricing and reach out within 24 hours to activate your campaign.
+                Your ad campaign request has been submitted. Our team will confirm final pricing and reach out within 24 hours to activate your campaign.
               </p>
               <Button className="mt-5 bg-green-600 hover:bg-green-500 text-white" onClick={() => setRequestOpen(false)}>
                 Done
@@ -357,7 +357,7 @@ export default function AdvertiserExplore() {
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle>Request Your Media Plan</DialogTitle>
+                <DialogTitle>Request Your Ad Campaign</DialogTitle>
                 <DialogDescription>
                   We'll confirm final pricing and reach out within 24 hours.
                 </DialogDescription>
