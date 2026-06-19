@@ -180,9 +180,9 @@ export default function SolutionsAOOH() {
       <section className="py-20 md:py-28 bg-gradient-to-br from-green-900/40 to-black">
         <div className="container mx-auto px-4 md:px-6 text-center max-w-3xl">
           <h2 className="text-3xl md:text-5xl font-bold mb-4">Be the voice inside the store</h2>
-          <p className="text-zinc-400 text-lg mb-8">Connect with in-store shoppers through TrioTag's AOOH network. Book venues, upload your audio, and go live in days.</p>
+          <p className="text-zinc-400 text-lg mb-8">We also produce audio advertisements.</p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Button asChild size="lg"><Link to="/advertiser/explore">Browse AOOH Venues</Link></Button>
+            <Button asChild size="lg"><Link to="/advertiser/explore">Produce an Audio Advertisement</Link></Button>
             <Button asChild size="lg" variant="outline"><Link to="/contact">Get a Quote</Link></Button>
           </div>
         </div>
