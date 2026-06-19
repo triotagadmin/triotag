@@ -2,7 +2,14 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, MapPin } from "lucide-react";
+import { Search, Loader2, MapPin, AlertTriangle } from "lucide-react";
+import {
+  isWithinServiceArea,
+  getCombinedMaxBounds,
+  getDefaultMapView,
+  getActiveAreaNamesText,
+} from "@/lib/serviceAreas";
+import { toast } from "@/hooks/use-toast";
 
 interface Suggestion {
   display_name: string;
@@ -16,24 +23,37 @@ interface RadiusMapPlannerProps {
   radiusMeters: number;
   onCenterChange: (c: { lat: number; lng: number }) => void;
   onRadiusChange: (r: number) => void;
+  onServiceAreaChange?: (withinServiceArea: boolean) => void;
 }
 
 const PRESETS = [500, 1000, 2000, 5000];
 
 export function RadiusMapPlanner({
-  center, radiusMeters, onCenterChange, onRadiusChange,
+  center, radiusMeters, onCenterChange, onRadiusChange, onServiceAreaChange,
 }: RadiusMapPlannerProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   const circleRef = useRef<any>(null);
-  const poiLayerRef = useRef<any>(null);
   const LRef = useRef<any>(null);
 
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [searching, setSearching] = useState(false);
+  const [isOutsideServiceArea, setIsOutsideServiceArea] = useState(
+    !isWithinServiceArea(center.lat, center.lng),
+  );
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const reportPin = useCallback(
+    (lat: number, lng: number) => {
+      const within = isWithinServiceArea(lat, lng);
+      setIsOutsideServiceArea(!within);
+      onServiceAreaChange?.(within);
+      onCenterChange({ lat, lng });
+    },
+    [onCenterChange, onServiceAreaChange],
+  );
 
   // Init map once
   useEffect(() => {
@@ -44,10 +64,19 @@ export function RadiusMapPlanner({
       if (cancelled || !mapContainerRef.current || mapRef.current) return;
       LRef.current = L;
 
+      const defaultView = getDefaultMapView();
+      const within = isWithinServiceArea(center.lat, center.lng);
+      const initialCenter: [number, number] = within
+        ? [center.lat, center.lng]
+        : defaultView.center;
+
       const map = L.map(mapContainerRef.current, {
-        center: [center.lat, center.lng],
-        zoom: 13,
+        center: initialCenter,
+        zoom: within ? 13 : defaultView.zoom,
         scrollWheelZoom: true,
+        minZoom: 5,
+        maxBounds: getCombinedMaxBounds() as any,
+        maxBoundsViscosity: 1.0,
       });
       mapRef.current = map;
 
@@ -69,7 +98,7 @@ export function RadiusMapPlanner({
       markerRef.current = marker;
       marker.on("dragend", () => {
         const p = marker.getLatLng();
-        onCenterChange({ lat: p.lat, lng: p.lng });
+        reportPin(p.lat, p.lng);
       });
 
       const circle = L.circle([center.lat, center.lng], {
@@ -82,8 +111,11 @@ export function RadiusMapPlanner({
       circleRef.current = circle;
 
       map.on("click", (e: any) => {
-        onCenterChange({ lat: e.latlng.lat, lng: e.latlng.lng });
+        reportPin(e.latlng.lat, e.latlng.lng);
       });
+
+      // Report initial state
+      onServiceAreaChange?.(within);
     })();
     return () => {
       cancelled = true;
@@ -97,6 +129,8 @@ export function RadiusMapPlanner({
     if (!markerRef.current || !circleRef.current) return;
     markerRef.current.setLatLng([center.lat, center.lng]);
     circleRef.current.setLatLng([center.lat, center.lng]);
+    const within = isWithinServiceArea(center.lat, center.lng);
+    setIsOutsideServiceArea(!within);
   }, [center.lat, center.lng]);
 
   useEffect(() => {
@@ -104,14 +138,12 @@ export function RadiusMapPlanner({
     circleRef.current.setRadius(radiusMeters);
   }, [radiusMeters]);
 
-  // Fit bounds when radius or center changes (gently)
   useEffect(() => {
     if (!mapRef.current || !circleRef.current) return;
     const bounds = circleRef.current.getBounds();
     mapRef.current.fitBounds(bounds.pad(0.2));
   }, [radiusMeters, center.lat, center.lng]);
 
-  // Nominatim search
   const handleSearchChange = useCallback((v: string) => {
     setSearchText(v);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -133,7 +165,16 @@ export function RadiusMapPlanner({
   const pickSuggestion = (s: Suggestion) => {
     const lat = parseFloat(s.lat);
     const lng = parseFloat(s.lon);
-    onCenterChange({ lat, lng });
+    if (!isWithinServiceArea(lat, lng)) {
+      toast({
+        title: "Location not available",
+        description: `TrioTag currently only operates in ${getActiveAreaNamesText()}. Please search for a location within our service area.`,
+        variant: "destructive",
+      });
+      setSuggestions([]);
+      return;
+    }
+    reportPin(lat, lng);
     setSearchText(s.display_name);
     setSuggestions([]);
   };
@@ -169,10 +210,21 @@ export function RadiusMapPlanner({
         )}
       </div>
 
-      <div
-        ref={mapContainerRef}
-        className="w-full h-[480px] rounded-xl border border-gray-200 overflow-hidden z-0"
-      />
+      <div className="relative">
+        <div
+          ref={mapContainerRef}
+          className="w-full h-[480px] rounded-xl border border-gray-200 overflow-hidden z-0"
+        />
+        {isOutsideServiceArea && (
+          <div className="absolute top-3 left-3 right-3 z-[500] bg-amber-50 border border-amber-300 rounded-lg shadow-md px-4 py-3 flex items-start gap-2.5">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-900">
+              <strong className="font-semibold">Outside service area.</strong>{" "}
+              TrioTag currently only operates in {getActiveAreaNamesText()}. Please select a location within our service area.
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="bg-white border border-gray-200 rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
