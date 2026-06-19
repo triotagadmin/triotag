@@ -218,7 +218,9 @@ export default function AdvertiserExplore() {
                   radiusMeters={radiusMeters}
                   onCenterChange={setCenter}
                   onRadiusChange={setRadiusMeters}
+                  onServiceAreaChange={setWithinServiceArea}
                 />
+
 
                 <div className="bg-white border border-gray-200 rounded-xl p-4">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
