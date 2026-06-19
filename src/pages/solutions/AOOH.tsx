@@ -66,14 +66,6 @@ export default function SolutionsAOOH() {
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg"><Link to="/advertiser/explore">Register AOOH Inventory</Link></Button>
             </div>
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
-              {[["Point-of-Purchase", "Placement"], ["15–30 sec", "Ad format"], ["Hyper-local", "Targeting"]].map(([n, l]) => (
-                <div key={l}>
-                  <div className="text-xl md:text-2xl font-bold text-green-500">{n}</div>
-                  <div className="text-xs text-zinc-400 mt-1">{l}</div>
-                </div>
-              ))}
-            </div>
           </div>
           <div className="bg-[#0c0c0c] border border-green-500/30 rounded-2xl p-10 text-center relative overflow-hidden">
             <div className="relative h-56 flex items-center justify-center">
