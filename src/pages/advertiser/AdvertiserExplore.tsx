@@ -254,7 +254,7 @@ export default function AdvertiserExplore() {
                   {/* Estimate */}
                   <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-6">
                     <div className="flex items-center justify-between">
-                      <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Estimated Ad Campaign</div>
+                      <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">ESTIMATED AD CAMPAIGN FEE</div>
                       <Badge className={`${tierColor} border`}>{estimate.tier}</Badge>
                     </div>
                     <div className="text-3xl font-bold text-gray-900 mt-1">
