@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2, MapPin } from "lucide-react";
-import { POI, POI_CATEGORY_COLORS } from "@/lib/poiSearch";
 
 interface Suggestion {
   display_name: string;
@@ -15,7 +14,6 @@ interface Suggestion {
 interface RadiusMapPlannerProps {
   center: { lat: number; lng: number };
   radiusMeters: number;
-  pois: POI[];
   onCenterChange: (c: { lat: number; lng: number }) => void;
   onRadiusChange: (r: number) => void;
 }
@@ -23,7 +21,7 @@ interface RadiusMapPlannerProps {
 const PRESETS = [500, 1000, 2000, 5000];
 
 export function RadiusMapPlanner({
-  center, radiusMeters, pois, onCenterChange, onRadiusChange,
+  center, radiusMeters, onCenterChange, onRadiusChange,
 }: RadiusMapPlannerProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -86,8 +84,6 @@ export function RadiusMapPlanner({
       map.on("click", (e: any) => {
         onCenterChange({ lat: e.latlng.lat, lng: e.latlng.lng });
       });
-
-      poiLayerRef.current = L.layerGroup().addTo(map);
     })();
     return () => {
       cancelled = true;
@@ -114,27 +110,6 @@ export function RadiusMapPlanner({
     const bounds = circleRef.current.getBounds();
     mapRef.current.fitBounds(bounds.pad(0.2));
   }, [radiusMeters, center.lat, center.lng]);
-
-  // Render POI dots
-  useEffect(() => {
-    const L = LRef.current;
-    if (!L || !poiLayerRef.current) return;
-    poiLayerRef.current.clearLayers();
-    pois.forEach((p) => {
-      const color = POI_CATEGORY_COLORS[p.category] || "#6b7280";
-      const icon = L.divIcon({
-        className: "",
-        html: `<div style="
-          width:14px;height:14px;border-radius:9999px;
-          background:${color};border:2px solid #fff;
-          box-shadow:0 2px 4px rgba(0,0,0,0.25);
-        "></div>`,
-        iconSize: [14, 14], iconAnchor: [7, 7],
-      });
-      L.marker([p.lat, p.lng], { icon }).addTo(poiLayerRef.current)
-        .bindTooltip(`<strong>${p.name}</strong><br/>${p.category}`, { direction: "top" });
-    });
-  }, [pois]);
 
   // Nominatim search
   const handleSearchChange = useCallback((v: string) => {
