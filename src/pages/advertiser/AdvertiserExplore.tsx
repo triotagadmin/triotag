@@ -30,6 +30,10 @@ const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
 export default function AdvertiserExplore() {
   const [center, setCenter] = useState(DEFAULT_CENTER);
   const [radiusMeters, setRadiusMeters] = useState(1000);
+  const [withinServiceArea, setWithinServiceArea] = useState(
+    isWithinServiceArea(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
+  );
+
 
   // variantId -> qty
   const [selections, setSelections] = useState<Record<string, number>>({});
