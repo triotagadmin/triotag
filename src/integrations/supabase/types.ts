@@ -2018,6 +2018,60 @@ export type Database = {
         }
         Relationships: []
       }
+      media_plan_requests: {
+        Row: {
+          advertiser_id: string | null
+          budget_confirmation: number | null
+          campaign_name: string
+          campaign_type: string
+          center_lat: number
+          center_lng: number
+          created_at: string
+          estimated_price: number
+          id: string
+          notes: string | null
+          preferred_start_date: string | null
+          radius_meters: number
+          status: string
+          updated_at: string
+          venue_count: number
+        }
+        Insert: {
+          advertiser_id?: string | null
+          budget_confirmation?: number | null
+          campaign_name: string
+          campaign_type: string
+          center_lat: number
+          center_lng: number
+          created_at?: string
+          estimated_price: number
+          id?: string
+          notes?: string | null
+          preferred_start_date?: string | null
+          radius_meters: number
+          status?: string
+          updated_at?: string
+          venue_count: number
+        }
+        Update: {
+          advertiser_id?: string | null
+          budget_confirmation?: number | null
+          campaign_name?: string
+          campaign_type?: string
+          center_lat?: number
+          center_lng?: number
+          created_at?: string
+          estimated_price?: number
+          id?: string
+          notes?: string | null
+          preferred_start_date?: string | null
+          radius_meters?: number
+          status?: string
+          updated_at?: string
+          venue_count?: number
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
