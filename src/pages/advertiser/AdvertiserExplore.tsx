@@ -255,291 +255,160 @@ export default function AdvertiserExplore() {
             </div>
           </header>
 
-          <Tabs defaultValue="planner" onValueChange={(v) => setLegacyTab(v === "browse")} className="px-6 lg:px-8 pt-5">
-            <TabsList className="bg-gray-100">
-              <TabsTrigger value="planner">Map My Area</TabsTrigger>
-              <TabsTrigger value="browse">Browse Listed Inventory</TabsTrigger>
-            </TabsList>
+          <div className="px-6 lg:px-8 pt-5">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+              {/* Map (60%) */}
+              <div className="lg:col-span-3 space-y-4">
+                <RadiusMapPlanner
+                  center={center}
+                  radiusMeters={radiusMeters}
+                  pois={pois}
+                  onCenterChange={setCenter}
+                  onRadiusChange={setRadiusMeters}
+                />
 
-            {/* ============ PLANNER TAB ============ */}
-            <TabsContent value="planner" className="mt-5">
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                {/* Map (60%) */}
-                <div className="lg:col-span-3 space-y-4">
-                  <RadiusMapPlanner
-                    center={center}
-                    radiusMeters={radiusMeters}
-                    pois={pois}
-                    onCenterChange={setCenter}
-                    onRadiusChange={setRadiusMeters}
-                  />
-
-                  {/* Category legend */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Category Legend</div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-2">
-                      {Object.entries(POI_CATEGORY_COLORS).map(([cat, color]) => (
-                        <div key={cat} className="flex items-center gap-1.5 text-xs text-gray-700">
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
-                          {cat}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Results panel (40%) */}
-                <div className="lg:col-span-2">
-                  <div className="bg-white border border-gray-200 rounded-2xl p-6 lg:sticky lg:top-6 space-y-5">
-                    {/* Campaign type */}
-                    <div>
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Campaign Type</div>
-                      <div className="grid grid-cols-3 gap-2">
-                        {(["OOH", "DOOH", "AOOH"] as CampaignType[]).map((t) => (
-                          <button
-                            key={t}
-                            onClick={() => setCampaignType(t)}
-                            className={`h-10 rounded-lg border text-sm font-semibold transition ${
-                              campaignType === t
-                                ? "border-green-500 bg-green-50 text-green-700"
-                                : "border-gray-200 text-gray-700 hover:border-green-300"
-                            }`}
-                          >
-                            {t}
-                          </button>
-                        ))}
+                {/* Category legend */}
+                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Category Legend</div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-2">
+                    {Object.entries(POI_CATEGORY_COLORS).map(([cat, color]) => (
+                      <div key={cat} className="flex items-center gap-1.5 text-xs text-gray-700">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
+                        {cat}
                       </div>
-                    </div>
-
-                    {/* Venues found */}
-                    <div>
-                      <div className="flex items-baseline justify-between">
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Venues Found</div>
-                        {poiLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />}
-                      </div>
-                      <div className="text-4xl font-bold text-gray-900 mt-1">{totalVenueCount}</div>
-                      {poiError && <div className="text-xs text-red-600 mt-1">{poiError}</div>}
-
-                      {poiLoading && pois.length === 0 ? (
-                        <div className="mt-3 space-y-2">
-                          <Skeleton className="h-5 w-32" />
-                          <Skeleton className="h-5 w-40" />
-                          <div className="text-xs text-gray-500">Scanning the area...</div>
-                        </div>
-                      ) : totalVenueCount === 0 ? (
-                        <div className="mt-3 text-sm text-gray-500">
-                          No venues found. Try a larger radius or different location.
-                        </div>
-                      ) : (
-                        <>
-                          <div className="flex flex-wrap gap-1.5 mt-3">
-                            {breakdown.map(([cat, n]) => (
-                              <Badge
-                                key={cat}
-                                variant="outline"
-                                className="text-xs"
-                                style={{ borderColor: POI_CATEGORY_COLORS[cat] || "#16a34a" }}
-                              >
-                                {POI_CATEGORY_EMOJI[cat] || "📍"} {cat} ({n})
-                              </Badge>
-                            ))}
-                          </div>
-
-                          <div className="mt-3 border border-gray-100 rounded-lg overflow-y-auto" style={{ maxHeight: 240 }}>
-                            {spacesInRadius.map((s: any) => {
-                              const d = haversineMeters(center.lat, center.lng, s.latitude, s.longitude);
-                              return (
-                                <div key={`s-${s.id}`} className="flex items-center justify-between px-3 py-2 border-b border-gray-50 text-xs">
-                                  <div className="min-w-0">
-                                    <div className="font-semibold text-gray-900 truncate">{s.title}</div>
-                                    <Badge className="bg-green-100 text-green-700 border-green-200 text-[10px] mt-0.5">TrioTag Listed</Badge>
-                                  </div>
-                                  <div className="text-gray-400 text-[10px] whitespace-nowrap pl-2">{Math.round(d)}m</div>
-                                </div>
-                              );
-                            })}
-                            {pois.map((p) => {
-                              const d = haversineMeters(center.lat, center.lng, p.lat, p.lng);
-                              return (
-                                <div key={`p-${p.id}`} className="flex items-center justify-between px-3 py-2 border-b border-gray-50 last:border-0 text-xs">
-                                  <div className="min-w-0">
-                                    <div className="font-semibold text-gray-900 truncate">{p.name}</div>
-                                    <div className="flex items-center gap-1 mt-0.5">
-                                      <span className="w-2 h-2 rounded-full" style={{ background: POI_CATEGORY_COLORS[p.category] || "#6b7280" }} />
-                                      <span className="text-gray-500">{p.category}</span>
-                                    </div>
-                                  </div>
-                                  <div className="text-gray-400 text-[10px] whitespace-nowrap pl-2">{Math.round(d)}m</div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Estimate */}
-                    <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-5">
-                      <div className="flex items-center justify-between">
-                        <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Estimated Media Plan</div>
-                        <Badge className={`${tierColor} border`}>{estimate.tier}</Badge>
-                      </div>
-                      <div className="text-3xl font-bold text-gray-900 mt-1">
-                        ₱{estimate.totalEstimate.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">
-                        Coverage: {estimate.radiusKm}km radius · {totalVenueCount} venues · {campaignType}
-                      </div>
-                      <div className="text-[10px] text-gray-500 mt-2 italic">
-                        *Planning estimate. Final pricing confirmed after campaign request. Service begins after payment.
-                      </div>
-
-                      <div className="mt-4 space-y-2">
-                        <Button
-                          onClick={() => { setSubmitted(false); setRequestOpen(true); }}
-                          disabled={totalVenueCount === 0}
-                          className="w-full bg-green-600 hover:bg-green-500 text-white h-11 text-base font-semibold"
-                        >
-                          Request This Media Plan
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={saveForLater}
-                          className="w-full border-green-300 text-green-700 hover:bg-green-50"
-                        >
-                          Save for Later
-                        </Button>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
-            </TabsContent>
 
-            {/* ============ BROWSE TAB (legacy) ============ */}
-            <TabsContent value="browse" className="mt-5">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-                  <Input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search for a location..."
-                    className="pl-9 w-72 h-10 bg-white border-gray-200 rounded-lg"
-                  />
-                </div>
-              </div>
-
-              <section className="relative flex transition-all duration-300">
-                <div className="flex-1 min-h-[520px] bg-[#f0faf0] relative rounded-xl overflow-hidden border border-gray-200">
-                  <div ref={mapRef} className="w-full h-[520px]" />
-                </div>
-
-                {selected && (
-                  <aside className="w-[340px] bg-white border-l border-gray-100 p-5 overflow-y-auto max-h-[520px]">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">{selected.flag}</span>
-                          <h2 className="text-xl font-bold text-gray-900">{selected.city}</h2>
-                        </div>
-                        <p className="text-gray-500 text-sm mt-0.5">{selected.region} · {selected.country}</p>
-                      </div>
-                      <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-700">
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 mt-4">
-                      <div className="bg-green-50 rounded-xl p-3">
-                        <Users className="w-4 h-4 text-green-600 mb-1" />
-                        <div className="text-[10px] text-gray-500 uppercase tracking-wide">Reach/day</div>
-                        <div className="text-green-700 font-bold text-base">—</div>
-                      </div>
-                      <div className="bg-green-50 rounded-xl p-3">
-                        <Building2 className="w-4 h-4 text-green-600 mb-1" />
-                        <div className="text-[10px] text-gray-500 uppercase tracking-wide">Active Venues</div>
-                        <div className="text-green-700 font-bold text-base">{selected.activeVenues}</div>
-                      </div>
-                      <div className="bg-green-50 rounded-xl p-3">
-                        <LayoutGrid className="w-4 h-4 text-green-600 mb-1" />
-                        <div className="text-[10px] text-gray-500 uppercase tracking-wide">Inventory</div>
-                        <div className="text-green-700 font-bold text-base">{selected.inventory}</div>
-                      </div>
-                    </div>
-
-                    <h3 className="font-bold text-gray-900 mt-5 mb-2 text-sm">Inventory by Media Type</h3>
-                    <div className="space-y-2">
-                      {selectedMedia.map((m) => (
-                        <div key={m.channel} className="flex items-center gap-3">
-                          <span className={`w-2.5 h-2.5 rounded-full ${m.channel === "OOH" ? "bg-green-600" : m.channel === "DOOH" ? "bg-blue-500" : "bg-red-500"}`} />
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold text-gray-900">{m.channel}</div>
-                          </div>
-                          <div className="text-green-600 font-bold text-sm">{m.count}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <Button
-                      onClick={() => navigate(`/advertiser/explore/${citySlug(selected.city)}`)}
-                      className="w-full mt-5 bg-green-600 hover:bg-green-500 text-white rounded-lg"
-                    >
-                      View Inventory in {selected.city} →
-                    </Button>
-                  </aside>
-                )}
-              </section>
-
-              <section className="py-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50">
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <h3 className="font-bold text-gray-900">Explore Cities</h3>
-                  <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 ml-auto">
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-                {cities.length === 0 ? (
-                  <div className="text-sm text-gray-500 py-6 text-center border border-dashed border-gray-200 rounded-xl">
-                    Inventory is being onboarded. Check back soon.
-                  </div>
-                ) : (
-                  <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
-                    {filtered.map((c) => {
-                      const isActive = selected?.city === c.city;
-                      return (
+              {/* Results panel (40%) */}
+              <div className="lg:col-span-2">
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 lg:sticky lg:top-6 space-y-5">
+                  {/* Campaign type */}
+                  <div>
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Campaign Type</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(["OOH", "DOOH", "AOOH"] as CampaignType[]).map((t) => (
                         <button
-                          key={c.city}
-                          onClick={() => setSelected(c)}
-                          className={
-                            "min-w-[220px] text-left rounded-xl p-4 transition-all bg-white " +
-                            (isActive ? "border-2 border-green-500 bg-green-50" : "border border-gray-200 hover:border-green-300")
-                          }
+                          key={t}
+                          onClick={() => setCampaignType(t)}
+                          className={`h-10 rounded-lg border text-sm font-semibold transition ${
+                            campaignType === t
+                              ? "border-green-500 bg-green-50 text-green-700"
+                              : "border-gray-200 text-gray-700 hover:border-green-300"
+                          }`}
                         >
-                          <div className="text-2xl">{c.flag}</div>
-                          <div className="mt-1 font-bold text-gray-900">{c.city}</div>
-                          <div className="text-xs text-gray-500 mb-3">{c.country}</div>
-                          <div className="space-y-1 text-xs">
-                            <div className="flex justify-between"><span className="text-gray-500">Reach/day</span><span className="text-green-600 font-bold">—</span></div>
-                            <div className="flex justify-between"><span className="text-gray-500">Active Venues</span><span className="text-green-600 font-bold">{c.activeVenues}</span></div>
-                            <div className="flex justify-between"><span className="text-gray-500">Ad Inventory</span><span className="text-green-600 font-bold">{c.inventory}</span></div>
-                          </div>
-                          <Link
-                            to={`/advertiser/explore/${citySlug(c.city)}`}
-                            className="block mt-3 text-green-600 font-medium text-sm hover:text-green-700"
-                          >
-                            View Location →
-                          </Link>
+                          {t}
                         </button>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
-                )}
-              </section>
-            </TabsContent>
-          </Tabs>
+
+                  {/* Venues found */}
+                  <div>
+                    <div className="flex items-baseline justify-between">
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Venues Found</div>
+                      {poiLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />}
+                    </div>
+                    <div className="text-4xl font-bold text-gray-900 mt-1">{totalVenueCount}</div>
+                    {poiError && <div className="text-xs text-red-600 mt-1">{poiError}</div>}
+
+                    {poiLoading && pois.length === 0 ? (
+                      <div className="mt-3 space-y-2">
+                        <Skeleton className="h-5 w-32" />
+                        <Skeleton className="h-5 w-40" />
+                        <div className="text-xs text-gray-500">Scanning the area...</div>
+                      </div>
+                    ) : totalVenueCount === 0 ? (
+                      <div className="mt-3 text-sm text-gray-500">
+                        No venues found. Try a larger radius or different location.
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {breakdown.map(([cat, n]) => (
+                            <Badge
+                              key={cat}
+                              variant="outline"
+                              className="text-xs"
+                              style={{ borderColor: POI_CATEGORY_COLORS[cat] || "#16a34a" }}
+                            >
+                              {POI_CATEGORY_EMOJI[cat] || "📍"} {cat} ({n})
+                            </Badge>
+                          ))}
+                        </div>
+
+                        <div className="mt-3 border border-gray-100 rounded-lg overflow-y-auto" style={{ maxHeight: 240 }}>
+                          {spacesInRadius.map((s: any) => {
+                            const d = haversineMeters(center.lat, center.lng, s.latitude, s.longitude);
+                            return (
+                              <div key={`s-${s.id}`} className="flex items-center justify-between px-3 py-2 border-b border-gray-50 text-xs">
+                                <div className="min-w-0">
+                                  <div className="font-semibold text-gray-900 truncate">{s.title}</div>
+                                  <Badge className="bg-green-100 text-green-700 border-green-200 text-[10px] mt-0.5">TrioTag Listed</Badge>
+                                </div>
+                                <div className="text-gray-400 text-[10px] whitespace-nowrap pl-2">{Math.round(d)}m</div>
+                              </div>
+                            );
+                          })}
+                          {pois.map((p) => {
+                            const d = haversineMeters(center.lat, center.lng, p.lat, p.lng);
+                            return (
+                              <div key={`p-${p.id}`} className="flex items-center justify-between px-3 py-2 border-b border-gray-50 last:border-0 text-xs">
+                                <div className="min-w-0">
+                                  <div className="font-semibold text-gray-900 truncate">{p.name}</div>
+                                  <div className="flex items-center gap-1 mt-0.5">
+                                    <span className="w-2 h-2 rounded-full" style={{ background: POI_CATEGORY_COLORS[p.category] || "#6b7280" }} />
+                                    <span className="text-gray-500">{p.category}</span>
+                                  </div>
+                                </div>
+                                <div className="text-gray-400 text-[10px] whitespace-nowrap pl-2">{Math.round(d)}m</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Estimate */}
+                  <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-5">
+                    <div className="flex items-center justify-between">
+                      <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Estimated Media Plan</div>
+                      <Badge className={`${tierColor} border`}>{estimate.tier}</Badge>
+                    </div>
+                    <div className="text-3xl font-bold text-gray-900 mt-1">
+                      ₱{estimate.totalEstimate.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      Coverage: {estimate.radiusKm}km radius · {totalVenueCount} venues · {campaignType}
+                    </div>
+                    <div className="text-[10px] text-gray-500 mt-2 italic">
+                      *Planning estimate. Final pricing confirmed after campaign request. Service begins after payment.
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                      <Button
+                        onClick={() => { setSubmitted(false); setRequestOpen(true); }}
+                        disabled={totalVenueCount === 0}
+                        className="w-full bg-green-600 hover:bg-green-500 text-white h-11 text-base font-semibold"
+                      >
+                        Request This Media Plan
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={saveForLater}
+                        className="w-full border-green-300 text-green-700 hover:bg-green-50"
+                      >
+                        Save for Later
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
 
           {/* Trust bar */}
           <section className="bg-green-50 border-t border-green-100 px-6 lg:px-8 py-6 mt-8">
