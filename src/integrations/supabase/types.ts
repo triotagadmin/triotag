@@ -2035,6 +2035,7 @@ export type Database = {
           ooh_units: number | null
           preferred_start_date: string | null
           radius_meters: number
+          selections: Json | null
           status: string
           updated_at: string
           venue_count: number
@@ -2055,6 +2056,7 @@ export type Database = {
           ooh_units?: number | null
           preferred_start_date?: string | null
           radius_meters: number
+          selections?: Json | null
           status?: string
           updated_at?: string
           venue_count: number
@@ -2075,6 +2077,7 @@ export type Database = {
           ooh_units?: number | null
           preferred_start_date?: string | null
           radius_meters?: number
+          selections?: Json | null
           status?: string
           updated_at?: string
           venue_count?: number
