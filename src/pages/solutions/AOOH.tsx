@@ -137,30 +137,6 @@ export default function SolutionsAOOH() {
         </div>
       </section>
 
-      <section className="py-20 md:py-28 bg-[#0c0c0c]">
-        <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center">AOOH Creative Specs</h2>
-          <div className="bg-black border border-white/10 rounded-2xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-green-500/10 border-b border-green-500/30">
-                <tr>
-                  {["Format", "Duration", "File Type", "Max File Size", "Voice-Over"].map((h) => (
-                    <th key={h} className="text-left p-4 text-green-400 font-semibold">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {specs.map((row, i) => (
-                  <tr key={i} className="border-b border-white/5 last:border-0">
-                    {row.map((c, j) => <td key={j} className="p-4 text-zinc-300">{c}</td>)}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-zinc-500 mt-4">*TrioTag can connect you with voice-over and audio production partners if you need help creating your spot.</p>
-        </div>
-      </section>
 
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
