@@ -1,22 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { AdvertiserSidebar } from "@/components/advertiser/AdvertiserSidebar";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Search, Bell, X, Users, Building2, LayoutGrid, ChevronLeft, ChevronRight,
-  Globe, Layers, ShieldCheck, BadgeCheck, MapPin, Loader2, CheckCircle2,
+  Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2,
 } from "lucide-react";
 import {
-  fetchApprovedSpaces, aggregateByCity, aggregateMediaTypes,
-  citySlug, type CityMarker, type ApprovedAdSpaceLite,
+  fetchApprovedSpaces, type ApprovedAdSpaceLite,
 } from "@/lib/inventoryAggregation";
 import { CampaignWizard } from "@/components/advertiser/CampaignWizard";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
@@ -27,6 +23,7 @@ import {
 import { calculateMediaPlanEstimate, type CampaignType } from "@/lib/mediaPlanPricing";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+
 
 const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
 
