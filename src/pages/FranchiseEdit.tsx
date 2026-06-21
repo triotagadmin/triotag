@@ -147,6 +147,7 @@ const FranchiseEdit = () => {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [materialUnits, setMaterialUnits] = useState<Record<string, number>>({});
   const [weeklyLeasePrice, setWeeklyLeasePrice] = useState("");
   const [monthlyLeasePrice, setMonthlyLeasePrice] = useState("");
   const [leaseCurrency, setLeaseCurrency] = useState("USD");
