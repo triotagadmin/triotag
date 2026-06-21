@@ -1,14 +1,18 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
 import { create } from "https://deno.land/x/djwt@v3.0.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-// SECURITY: JWT_SECRET must be provided via environment variable - no fallbacks allowed
 const JWT_SECRET = Deno.env.get("JWT_SECRET");
 if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required. Token operations cannot proceed without a secure secret.");
+  throw new Error("JWT_SECRET environment variable is required.");
 }
+
+const supabaseAdmin = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,10 +32,37 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { email, userId, userType }: VerificationEmailRequest = await req.json();
+    console.log(`[send-verification-email] START email=${email} userId=${userId} userType=${userType}`);
 
-    console.log(`[Send Verification] Sending verification email to ${email} for user ${userId} (${userType})`);
+    if (!Deno.env.get("RESEND_API_KEY")) {
+      console.error("[send-verification-email] MISSING RESEND_API_KEY secret");
+      return new Response(JSON.stringify({ error: "Email service not configured (missing RESEND_API_KEY)." }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
-    // Generate JWT token
+    // Check suppression list before attempting to send
+    try {
+      const { data: suppressed } = await supabaseAdmin
+        .from("suppressed_emails")
+        .select("email, reason")
+        .eq("email", email.toLowerCase())
+        .maybeSingle();
+
+      if (suppressed) {
+        console.error(`[send-verification-email] BLOCKED — ${email} is suppressed. Reason: ${suppressed.reason}`);
+        return new Response(JSON.stringify({
+          error: `This email address cannot receive emails right now (${suppressed.reason || "previously bounced or unsubscribed"}). Please use a different email or contact support.`,
+        }), {
+          status: 422,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+    } catch (suppressionCheckErr) {
+      console.warn("[send-verification-email] Suppression check failed (non-fatal):", suppressionCheckErr);
+    }
+
     const key = await crypto.subtle.importKey(
       "raw",
       new TextEncoder().encode(JWT_SECRET),
@@ -44,15 +75,17 @@ const handler = async (req: Request): Promise<Response> => {
       { alg: "HS256", typ: "JWT" },
       {
         sub: userId,
-        email: email,
-        userType: userType,
+        email,
+        userType,
         purpose: "email_verification",
-        exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
+        exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60),
       },
       key
     );
 
     const verificationUrl = `https://tinystickyads.com/verify?token=${token}`;
+
+    console.log(`[send-verification-email] Calling Resend API for ${email}...`);
 
     const emailResponse = await resend.emails.send({
       from: "TrioTag <noreply@tinystickyads.com>",
@@ -71,23 +104,29 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("[Send Verification] Email sent successfully:", emailResponse);
+    // Resend SDK can return 200 with an error inside the body — check explicitly.
+    if ((emailResponse as any).error) {
+      const err = (emailResponse as any).error;
+      console.error("[send-verification-email] Resend API returned an error:", JSON.stringify(err));
+      return new Response(JSON.stringify({
+        error: `Resend failed to send: ${err.message || JSON.stringify(err)}`,
+      }), {
+        status: 502,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log("[send-verification-email] SUCCESS — Resend response:", JSON.stringify(emailResponse));
 
     return new Response(
       JSON.stringify({ success: true, token, emailResponse }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {
-    console.error("[Send Verification Error]:", error);
+    console.error("[send-verification-email] FATAL ERROR:", error?.message, error?.stack);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      JSON.stringify({ error: error?.message || "Unknown error sending verification email" }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
 };
