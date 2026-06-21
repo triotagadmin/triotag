@@ -575,7 +575,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
         <div className="flex items-center gap-3">
           <h3 className="text-2xl font-bold flex items-center gap-2">
             <Store className="h-6 w-6" />
-            My Franchises
+            My Inventory
           </h3>
           <Popover>
             <PopoverTrigger asChild>
