@@ -65,6 +65,31 @@ const INDUSTRY_CATEGORIES = [
   "Professional Services", "Beauty & Personal Care", "Real Estate & Property Management", "Other",
 ];
 
+const OOH_FORMAT_DETAILS: Record<string, { size: string; material: string; printStyle: string }> = {
+  "Table Tent": { size: "4×6 in (10×15 cm), double-sided", material: "300gsm matte card or acrylic stand", printStyle: "Full-color offset/digital print" },
+  "Poster/Wall": { size: "A3–A2 (29×42 to 42×59 cm)", material: "200gsm gloss/matte poster paper", printStyle: "Full-color digital print, framed or mounted" },
+  "Floor Sticker": { size: "Up to 60×60 cm round/square", material: "Anti-slip laminated vinyl", printStyle: "UV-cured eco-solvent print" },
+  "Shelf Signage": { size: "Shelf strip 3×30 cm or wobbler 8×8 cm", material: "PVC strip or coated card", printStyle: "Full-color digital print" },
+  "Counter Display": { size: "A5–A4 standee (15–21 cm tall)", material: "Acrylic or foam-board stand", printStyle: "Full-color digital print" },
+  "Aisle Signage": { size: "Hanging blade 20×30 cm or aisle banner 30×90 cm", material: "Coroplast / PVC banner", printStyle: "UV-cured digital print" },
+  "Entrance Banner": { size: "60×90 cm or 90×180 cm", material: "13oz vinyl tarpaulin", printStyle: "Eco-solvent large-format print" },
+  "Other": { size: "Custom — confirm with publisher", material: "Various", printStyle: "Custom production" },
+};
+
+const DOOH_FORMAT_DETAILS: Record<string, { size: string; resolution: string; spotStyle: string }> = {
+  "Indoor Screen": { size: "32–55 in landscape/portrait", resolution: "Full HD 1920×1080", spotStyle: "10–15s MP4 spot, ~240 plays/day" },
+  "Outdoor Screen": { size: "55–86 in weather-proof", resolution: "Full HD / 4K", spotStyle: "10s spot, ~480 plays/day" },
+  "Menu Board": { size: "43 in landscape", resolution: "Full HD 1920×1080", spotStyle: "10s looped, integrated with menu" },
+  "Video Wall": { size: "2×2 to 3×3 tiled (110–165 in)", resolution: "4K combined", spotStyle: "15–30s premium spot" },
+  "Checkout Screen": { size: "15–21 in at point-of-sale", resolution: "HD 1280×720", spotStyle: "5–10s checkout-line spot" },
+};
+
+const AOOH_FORMAT_DETAILS: Record<string, { duration: string; format: string; placement: string }> = {
+  "15 seconds": { duration: "15s spot", format: "MP3/WAV, 128 kbps+ stereo", placement: "High-frequency rotation, ~120 plays/day" },
+  "30 seconds": { duration: "30s spot", format: "MP3/WAV, 128 kbps+ stereo", placement: "Standard rotation, ~60 plays/day" },
+  "60 seconds": { duration: "60s feature", format: "MP3/WAV, 192 kbps+ stereo", placement: "Premium placement, ~30 plays/day" },
+};
+
 const AD_UNIT_MATERIALS = [
   { value: "vinyl_sticker", label: "Vinyl Sticker" },
   { value: "table_tent_card", label: "Table Tent Card" },
