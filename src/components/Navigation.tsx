@@ -197,8 +197,10 @@ export const Navigation = () => {
 
   const isActive = (to: string) => location.pathname === to || (to !== "/" && location.pathname.startsWith(to));
 
+  if (user) return null;
+
   return (
-    <nav className={`sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10 ${user ? "lg:hidden" : ""}`}>
+    <nav className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
       <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         <Link to="/" onClick={close} className="flex items-center gap-2 group">
           <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-green-600 text-white">
