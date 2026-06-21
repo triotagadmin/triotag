@@ -132,16 +132,22 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const load = async (userId: string | undefined) => {
+    const load = async (session: any) => {
+      const userId = session?.user?.id;
       if (!userId) { setRole(null); setReady(true); return; }
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
-      setRole((data?.role as string) || null);
+      let resolved = (data?.role as string) || null;
+      // Agents are stored as publisher role but should see Inventory like advertisers.
+      if (resolved === "publisher" && session?.user?.user_metadata?.user_type === "agent") {
+        resolved = "agent";
+      }
+      setRole(resolved);
       setReady(true);
     };
-    supabase.auth.getSession().then(({ data: { session } }) => load(session?.user?.id));
+    supabase.auth.getSession().then(({ data: { session } }) => load(session));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
       setReady(false);
-      load(s?.user?.id);
+      load(s);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -154,3 +160,4 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
     </>
   );
 }
+
