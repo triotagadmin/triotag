@@ -24,6 +24,14 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
   ],
+  agent: [
+    { to: "/venue-publishers", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/venue-inventory", label: "My Ad Spaces", icon: Globe },
+    { to: "/advertiser/explore", label: "Inventory", icon: Globe },
+    { to: "/publisher/campaigns", label: "Campaigns", icon: Megaphone },
+    { to: "/messages", label: "Messages", icon: MessageSquare },
+    { to: "/notifications", label: "Notifications", icon: Bell },
+  ],
   print_partner: [
     { to: "/print-partner/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/print-partner/clients", label: "My Clients", icon: Globe },
@@ -49,6 +57,7 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
 const ROLE_SETTINGS_PATH: Record<string, string> = {
   advertiser: "/advertiser-settings",
   publisher: "/publisher/settings",
+  agent: "/publisher/settings",
   print_partner: "/print-partner/settings",
   talent: "/talent-profile",
   admin: "/admin/dashboard",
