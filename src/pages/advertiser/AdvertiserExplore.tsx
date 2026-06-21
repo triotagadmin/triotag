@@ -413,7 +413,26 @@ export default function AdvertiserExplore() {
                         <span>{v.label} × {s.quantity}</span>
                         <span>₱{(v.price * s.quantity).toLocaleString()}</span>
                       </div>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        {v.billingType === "monthly" ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2 py-0.5">
+                            <RefreshCw className="w-2.5 h-2.5" />
+                            Monthly Subscription
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-gray-50 text-gray-600 border border-gray-200 rounded-full px-2 py-0.5">
+                            <Package className="w-2.5 h-2.5" />
+                            Per Campaign
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-wrap gap-1 mt-1">
+                        {v.airTime && (
+                          <span className="text-[10px] bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5 text-amber-700 inline-flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" />
+                            <strong className="text-amber-800">Air Time:</strong> {v.airTime}
+                          </span>
+                        )}
                         {Object.entries(v.specs).map(([k, val]) => (
                           <span key={k} className="text-[10px] bg-white border border-gray-200 rounded-full px-2 py-0.5 text-gray-600">
                             <strong>{k}:</strong> {val}
