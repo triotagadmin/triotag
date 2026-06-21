@@ -704,7 +704,6 @@ const Auth = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="retailer">Retailer</SelectItem>
-                      <SelectItem value="venue">Agent</SelectItem>
                       <SelectItem value="brand_advertiser">Brand Advertiser</SelectItem>
                     </SelectContent>
                   </Select>
