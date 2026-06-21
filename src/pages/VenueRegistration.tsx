@@ -112,7 +112,8 @@ const VenueRegistration = () => {
 
   // Step 1: Brand Details
   const [title, setTitle] = useState("");
-  const [venueType, setVenueType] = useState("");
+  const [venueTypes, setVenueTypes] = useState<string[]>([]);
+  const toggleVenueType = (v: string) => setVenueTypes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   const [customVenueType, setCustomVenueType] = useState("");
   const [industryCategory, setIndustryCategory] = useState("");
   const [description, setDescription] = useState(DEFAULT_DESCRIPTION);
@@ -158,11 +159,13 @@ const VenueRegistration = () => {
   // Available Ad Formats (multi-select)
   const [selectedFormats, setSelectedFormats] = useState<("OOH" | "DOOH" | "AOOH")[]>([]);
   // OOH details
-  const [oohPrintFormat, setOohPrintFormat] = useState("");
+  const [oohPrintFormats, setOohPrintFormats] = useState<string[]>([]);
+  const toggleOohPrintFormat = (v: string) => setOohPrintFormats(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   const [oohPlacementCount, setOohPlacementCount] = useState("");
   // DOOH details
   const [doohScreenDescription, setDoohScreenDescription] = useState("");
-  const [doohScreenType, setDoohScreenType] = useState("");
+  const [doohScreenTypes, setDoohScreenTypes] = useState<string[]>([]);
+  const toggleDoohScreenType = (v: string) => setDoohScreenTypes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   const [doohScreenCount, setDoohScreenCount] = useState("");
   // AOOH details
   const [aoohSpotDuration, setAoohSpotDuration] = useState("");
@@ -229,7 +232,8 @@ const VenueRegistration = () => {
       setUploadedImages(Array.isArray(venue.media_urls) ? venue.media_urls as string[] : []);
       setIsListedOnExplore(venue.availability_status !== "unlisted");
       const specs = venue.specifications as any || {};
-      setVenueType(specs.venue_type || "");
+      const vt = specs.venue_type;
+      setVenueTypes(Array.isArray(vt) ? vt : (typeof vt === "string" && vt ? vt.split(",").map((s: string) => s.trim()).filter(Boolean) : []));
       if (specs.custom_venue_type) setCustomVenueType(specs.custom_venue_type);
       setIndustryCategory(specs.industry_category || "");
       setOperatingHours(specs.operating_hours || "");
@@ -324,7 +328,7 @@ const VenueRegistration = () => {
 
   const validateStep1 = () => {
     if (!title.trim()) { toast({ title: "Error", description: "Franchise/brand name is required", variant: "destructive" }); return false; }
-    if (!venueType) { toast({ title: "Error", description: "Venue type is required", variant: "destructive" }); return false; }
+    if (venueTypes.length === 0) { toast({ title: "Error", description: "Ad space type is required", variant: "destructive" }); return false; }
     if (!industryCategory) { toast({ title: "Error", description: "Industry category is required", variant: "destructive" }); return false; }
     if (!description.trim()) { toast({ title: "Error", description: "Brand description is required", variant: "destructive" }); return false; }
     if (!contactPerson.trim()) { toast({ title: "Error", description: "Contact person is required", variant: "destructive" }); return false; }
@@ -348,7 +352,9 @@ const VenueRegistration = () => {
   const handlePrevStep = () => { setCurrentStep(1); window.scrollTo(0, 0); };
 
   const buildVenueData = () => {
-    const actualVenueType = venueType === "other" ? customVenueType : venueType;
+    const actualVenueTypes = venueTypes.includes("other") && customVenueType
+      ? [...venueTypes.filter(v => v !== "other"), customVenueType]
+      : venueTypes;
     const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
     const locsJson: any[] = [];
     const envJson = {
@@ -364,8 +370,9 @@ const VenueRegistration = () => {
       description: description.trim(),
       latitude: latitude, longitude: longitude,
       specifications: {
-        venue_type: actualVenueType,
-        custom_venue_type: venueType === "other" ? customVenueType : null,
+        venue_type: actualVenueTypes.join(", "),
+        venue_types: actualVenueTypes,
+        custom_venue_type: venueTypes.includes("other") ? customVenueType : null,
         industry_category: industryCategory,
         is_franchise: true,
         head_office_address: { street: street.trim(), city: city.trim(), state: state.trim(), postal_code: postalCode.trim(), country: country.trim() },
@@ -481,8 +488,8 @@ const VenueRegistration = () => {
         navigate("/venue-inventory");
       } else {
         const formatDetails: Record<string, any> = {
-          OOH: { print_format: oohPrintFormat, placement_count: oohPlacementCount ? parseInt(oohPlacementCount) : null },
-          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenType, screen_count: doohScreenCount ? parseInt(doohScreenCount) : null },
+          OOH: { print_format: oohPrintFormats.join(", "), print_formats: oohPrintFormats, placement_count: oohPlacementCount ? parseInt(oohPlacementCount) : null },
+          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenTypes.join(", "), screen_types: doohScreenTypes, screen_count: doohScreenCount ? parseInt(doohScreenCount) : null },
           AOOH: { spot_duration: aoohSpotDuration, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: aoohAudioZones ? parseInt(aoohAudioZones) : null },
         };
         const rows = selectedFormats.map(fmt => ({
