@@ -20,7 +20,6 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
   publisher: [
     { to: "/venue-publishers", label: "Dashboard", icon: LayoutDashboard },
     { to: "/venue-inventory", label: "My Ad Spaces", icon: Globe },
-    { to: "/advertiser/explore", label: "Inventory", icon: Globe },
     { to: "/publisher/campaigns", label: "Campaigns", icon: Megaphone },
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
