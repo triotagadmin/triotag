@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight, Upload, X, CheckCircle, AlertCircle, Building2, Megaphone, Loader2, Plus, Trash2, MapPin, Clock, Mail } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, X, CheckCircle, AlertCircle, Building2, Megaphone, Loader2, Plus, Trash2, MapPin, Clock, Mail, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
@@ -63,6 +64,31 @@ const INDUSTRY_CATEGORIES = [
   "Entertainment & Leisure", "Automotive & Transport", "Education & Training",
   "Professional Services", "Beauty & Personal Care", "Real Estate & Property Management", "Other",
 ];
+
+const OOH_FORMAT_DETAILS: Record<string, { size: string; material: string; printStyle: string }> = {
+  "Table Tent": { size: "4×6 in (10×15 cm), double-sided", material: "300gsm matte card or acrylic stand", printStyle: "Full-color offset/digital print" },
+  "Poster/Wall": { size: "A3–A2 (29×42 to 42×59 cm)", material: "200gsm gloss/matte poster paper", printStyle: "Full-color digital print, framed or mounted" },
+  "Floor Sticker": { size: "Up to 60×60 cm round/square", material: "Anti-slip laminated vinyl", printStyle: "UV-cured eco-solvent print" },
+  "Shelf Signage": { size: "Shelf strip 3×30 cm or wobbler 8×8 cm", material: "PVC strip or coated card", printStyle: "Full-color digital print" },
+  "Counter Display": { size: "A5–A4 standee (15–21 cm tall)", material: "Acrylic or foam-board stand", printStyle: "Full-color digital print" },
+  "Aisle Signage": { size: "Hanging blade 20×30 cm or aisle banner 30×90 cm", material: "Coroplast / PVC banner", printStyle: "UV-cured digital print" },
+  "Entrance Banner": { size: "60×90 cm or 90×180 cm", material: "13oz vinyl tarpaulin", printStyle: "Eco-solvent large-format print" },
+  "Other": { size: "Custom — confirm with publisher", material: "Various", printStyle: "Custom production" },
+};
+
+const DOOH_FORMAT_DETAILS: Record<string, { size: string; resolution: string; spotStyle: string }> = {
+  "Indoor Screen": { size: "32–55 in landscape/portrait", resolution: "Full HD 1920×1080", spotStyle: "10–15s MP4 spot, ~240 plays/day" },
+  "Outdoor Screen": { size: "55–86 in weather-proof", resolution: "Full HD / 4K", spotStyle: "10s spot, ~480 plays/day" },
+  "Menu Board": { size: "43 in landscape", resolution: "Full HD 1920×1080", spotStyle: "10s looped, integrated with menu" },
+  "Video Wall": { size: "2×2 to 3×3 tiled (110–165 in)", resolution: "4K combined", spotStyle: "15–30s premium spot" },
+  "Checkout Screen": { size: "15–21 in at point-of-sale", resolution: "HD 1280×720", spotStyle: "5–10s checkout-line spot" },
+};
+
+const AOOH_FORMAT_DETAILS: Record<string, { duration: string; format: string; placement: string }> = {
+  "15 seconds": { duration: "15s spot", format: "MP3/WAV, 128 kbps+ stereo", placement: "High-frequency rotation, ~120 plays/day" },
+  "30 seconds": { duration: "30s spot", format: "MP3/WAV, 128 kbps+ stereo", placement: "Standard rotation, ~60 plays/day" },
+  "60 seconds": { duration: "60s feature", format: "MP3/WAV, 192 kbps+ stereo", placement: "Premium placement, ~30 plays/day" },
+};
 
 const AD_UNIT_MATERIALS = [
   { value: "vinyl_sticker", label: "Vinyl Sticker" },
@@ -696,6 +722,18 @@ const VenueRegistration = () => {
                                 <button type="button" onClick={() => toggleOohPrintFormat(o)} className="flex items-center gap-2 text-xs flex-1 text-left">
                                   <span className={`inline-block w-3 h-3 rounded-sm border ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
                                 </button>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button type="button" aria-label={`${o} details`} className="text-muted-foreground hover:text-primary transition-colors">
+                                      <Info className="h-3.5 w-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs text-xs space-y-1">
+                                    <div><span className="font-semibold">Size:</span> {OOH_FORMAT_DETAILS[o]?.size}</div>
+                                    <div><span className="font-semibold">Material:</span> {OOH_FORMAT_DETAILS[o]?.material}</div>
+                                    <div><span className="font-semibold">Print style:</span> {OOH_FORMAT_DETAILS[o]?.printStyle}</div>
+                                  </TooltipContent>
+                                </Tooltip>
                                 <Input type="number" min={0} disabled={!on} value={oohUnits[o] ?? ""} onChange={e => setOohUnits(prev => ({ ...prev, [o]: Math.max(0, Number(e.target.value) || 0) }))} placeholder="units" className="h-7 w-20 text-xs" />
                               </div>
                             );
@@ -715,6 +753,18 @@ const VenueRegistration = () => {
                                 <button type="button" onClick={() => toggleDoohScreenType(o)} className="flex items-center gap-2 text-xs flex-1 text-left">
                                   <span className={`inline-block w-3 h-3 rounded-sm border ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
                                 </button>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button type="button" aria-label={`${o} details`} className="text-muted-foreground hover:text-primary transition-colors">
+                                      <Info className="h-3.5 w-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs text-xs space-y-1">
+                                    <div><span className="font-semibold">Size:</span> {DOOH_FORMAT_DETAILS[o]?.size}</div>
+                                    <div><span className="font-semibold">Resolution:</span> {DOOH_FORMAT_DETAILS[o]?.resolution}</div>
+                                    <div><span className="font-semibold">Spot style:</span> {DOOH_FORMAT_DETAILS[o]?.spotStyle}</div>
+                                  </TooltipContent>
+                                </Tooltip>
                                 <Input type="number" min={0} disabled={!on} value={doohUnits[o] ?? ""} onChange={e => setDoohUnits(prev => ({ ...prev, [o]: Math.max(0, Number(e.target.value) || 0) }))} placeholder="screens" className="h-7 w-20 text-xs" />
                               </div>
                             );
@@ -733,6 +783,18 @@ const VenueRegistration = () => {
                                 <button type="button" onClick={() => toggleAoohSpotDuration(o)} className="flex items-center gap-2 text-xs flex-1 text-left">
                                   <span className={`inline-block w-3 h-3 rounded-sm border ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
                                 </button>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button type="button" aria-label={`${o} details`} className="text-muted-foreground hover:text-primary transition-colors">
+                                      <Info className="h-3.5 w-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs text-xs space-y-1">
+                                    <div><span className="font-semibold">Duration:</span> {AOOH_FORMAT_DETAILS[o]?.duration}</div>
+                                    <div><span className="font-semibold">Audio format:</span> {AOOH_FORMAT_DETAILS[o]?.format}</div>
+                                    <div><span className="font-semibold">Placement:</span> {AOOH_FORMAT_DETAILS[o]?.placement}</div>
+                                  </TooltipContent>
+                                </Tooltip>
                                 <Input type="number" min={0} disabled={!on} value={aoohUnits[o] ?? ""} onChange={e => setAoohUnits(prev => ({ ...prev, [o]: Math.max(0, Number(e.target.value) || 0) }))} placeholder="zones" className="h-7 w-20 text-xs" />
                               </div>
                             );
