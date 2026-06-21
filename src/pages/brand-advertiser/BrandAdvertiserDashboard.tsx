@@ -1,19 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Megaphone, CheckCircle2, Wallet, Clock } from "lucide-react";
-import { format } from "date-fns";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CalendarIcon, Plus, Search } from "lucide-react";
+import { format, subDays, eachDayOfInterval } from "date-fns";
+import { Link } from "react-router-dom";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import BrandCampaignWizard from "@/components/brand-advertiser/BrandCampaignWizard";
+import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 
 export default function BrandAdvertiserDashboard() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState("My Brand");
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState<Date>(subDays(new Date(), 6));
+  const [dateTo, setDateTo] = useState<Date>(new Date());
 
   const fetchData = async () => {
     setLoading(true);
@@ -22,25 +32,21 @@ export default function BrandAdvertiserDashboard() {
 
     let { data: profile } = await supabase
       .from("brand_advertiser_profiles")
-      .select("id")
+      .select("id, company_name")
       .eq("user_id", session.user.id)
       .maybeSingle();
 
     if (!profile) {
       const { data: created } = await supabase
         .from("brand_advertiser_profiles")
-        .insert({
-          user_id: session.user.id,
-          contact_email: session.user.email,
-          verified: true,
-        })
-        .select("id")
+        .insert({ user_id: session.user.id, contact_email: session.user.email, verified: true })
+        .select("id, company_name")
         .single();
       profile = created;
     }
-
     if (!profile) { setLoading(false); return; }
     setProfileId(profile.id);
+    setCompanyName(profile.company_name || session.user.email?.split("@")[0] || "My Brand");
 
     const { data: camps } = await supabase
       .from("brand_campaigns")
@@ -53,108 +59,189 @@ export default function BrandAdvertiserDashboard() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const total = campaigns.length;
-  const active = campaigns.filter(c => c.status === "active").length;
-  const pending = campaigns.filter(c => c.status === "pending_review").length;
   const totalBudget = campaigns.reduce((s, c) => s + Number(c.budget || 0), 0);
 
-  const stats = [
-    { label: "Total Campaigns", value: total, icon: Megaphone, color: "text-blue-600 bg-blue-50" },
-    { label: "Active Campaigns", value: active, icon: CheckCircle2, color: "text-green-600 bg-green-50" },
-    { label: "Total Budget Committed", value: `₱${totalBudget.toLocaleString()}`, icon: Wallet, color: "text-purple-600 bg-purple-50" },
-    { label: "Pending Review", value: pending, icon: Clock, color: "text-amber-600 bg-amber-50" },
-  ];
+  // NOTE: Wire up to real ad-serving stats once campaigns go live.
+  // For now we show honest zero placeholders.
+  const impressions = 0;
+  const clicks = 0;
+  const conversions = 0;
+  const ecpm = 0;
+  const ecpc = 0;
+  const winRate = 0;
+  const ctr = 0;
+  const ecpa = 0;
+
+  const chartData = useMemo(() => {
+    const days = eachDayOfInterval({ start: dateFrom, end: dateTo });
+    return days.map((d) => ({
+      date: format(d, "MMM d"),
+      impressions: 0,
+      clicks: 0,
+    }));
+  }, [dateFrom, dateTo]);
+
+  const filteredCampaigns = useMemo(
+    () =>
+      campaigns.filter((c) =>
+        (c.campaign_name || "").toLowerCase().includes(search.toLowerCase())
+      ),
+    [campaigns, search]
+  );
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Brand Advertiser Dashboard</h1>
-            <p className="text-sm text-gray-500 mt-1">Plan, launch, and track programmatic campaigns.</p>
+    <div className="min-h-screen bg-gray-50">
+      <BrandAdvertiserTopBar companyName={companyName} totalBudget={totalBudget} />
+
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">Overview</h1>
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="bg-white">
+                  <CalendarIcon className="w-4 h-4 mr-2" />
+                  {format(dateFrom, "d MMM, yyyy")} - {format(dateTo, "d MMM, yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0 bg-white" align="end">
+                <Calendar
+                  mode="range"
+                  selected={{ from: dateFrom, to: dateTo }}
+                  onSelect={(r: any) => {
+                    if (r?.from) setDateFrom(r.from);
+                    if (r?.to) setDateTo(r.to);
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            <Button onClick={() => setWizardOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Plus className="w-4 h-4 mr-2" /> New Campaign
+            </Button>
           </div>
-          <Button
-            onClick={() => setWizardOpen(true)}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" /> New Campaign
-          </Button>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((s) => {
-            const Icon = s.icon;
-            return (
-              <Card key={s.label} className="border border-gray-200">
-                <CardContent className="p-4">
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${s.color}`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div className="text-xs text-gray-500">{s.label}</div>
-                  <div className="text-xl font-bold text-gray-900 mt-1">{s.value}</div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          <div className="bg-blue-600 text-white rounded-xl p-6">
+            <div className="text-sm opacity-80">Impressions</div>
+            <div className="text-4xl font-bold mt-1">{impressions.toLocaleString()}</div>
+            <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
+              <div>
+                <div className="opacity-70">eCPM</div>
+                <div className="font-semibold mt-0.5">₱{ecpm.toFixed(2)}</div>
+              </div>
+              <div>
+                <div className="opacity-70">Win rate</div>
+                <div className="font-semibold mt-0.5">{winRate.toFixed(2)}%</div>
+              </div>
+            </div>
+          </div>
 
-        <div className="mb-3">
-          <h2 className="text-lg font-semibold text-gray-900">Campaigns</h2>
-        </div>
+          <div className="bg-purple-600 text-white rounded-xl p-6">
+            <div className="text-sm opacity-80">Clicks</div>
+            <div className="text-4xl font-bold mt-1">{clicks.toLocaleString()}</div>
+            <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
+              <div>
+                <div className="opacity-70">eCPC</div>
+                <div className="font-semibold mt-0.5">₱{ecpc.toFixed(2)}</div>
+              </div>
+              <div>
+                <div className="opacity-70">CTR</div>
+                <div className="font-semibold mt-0.5">{ctr.toFixed(2)}%</div>
+              </div>
+            </div>
+          </div>
 
-        {loading ? (
-          <div className="text-gray-500 text-sm">Loading...</div>
-        ) : campaigns.length === 0 ? (
-          <Card className="border-dashed border-2 border-gray-200">
-            <CardContent className="py-12 text-center">
-              <Megaphone className="w-10 h-10 mx-auto text-gray-300 mb-3" />
-              <div className="text-gray-700 font-medium">No campaigns yet</div>
-              <p className="text-sm text-gray-500 mt-1 mb-4">Launch your first programmatic campaign in minutes.</p>
-              <Button onClick={() => setWizardOpen(true)} className="bg-green-600 hover:bg-green-700 text-white">
-                <Plus className="w-4 h-4 mr-2" /> Create Your First Campaign
-              </Button>
-            </CardContent>
+          <Card className="p-6 bg-white border border-gray-200">
+            <div className="text-sm text-gray-500">Conversions</div>
+            <div className="text-4xl font-bold mt-1 text-gray-900">{conversions.toLocaleString()}</div>
+            <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
+              <div>
+                <div className="text-gray-500">eCPA</div>
+                <div className="font-semibold mt-0.5 text-gray-900">₱{ecpa.toFixed(2)}</div>
+              </div>
+              <div>
+                <div className="text-gray-500">Win rate</div>
+                <div className="font-semibold mt-0.5 text-gray-900">{winRate.toFixed(2)}%</div>
+              </div>
+            </div>
           </Card>
-        ) : (
-          <div className="grid gap-3">
-            {campaigns.map((c) => (
-              <Card key={c.id} className="border border-gray-200 hover:border-green-300 transition-colors">
-                <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex-1 min-w-[200px]">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="font-semibold text-gray-900">{c.campaign_name}</div>
-                      <Badge
-                        variant="outline"
-                        className={
-                          c.status === "active" ? "bg-green-50 text-green-700 border-green-200" :
-                          c.status === "pending_review" ? "bg-amber-50 text-amber-700 border-amber-200" :
-                          "bg-gray-50 text-gray-700 border-gray-200"
-                        }
-                      >
-                        {String(c.status).replace("_", " ")}
-                      </Badge>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {c.start_date && c.end_date
-                        ? `${format(new Date(c.start_date), "MMM d, yyyy")} – ${format(new Date(c.end_date), "MMM d, yyyy")}`
-                        : "Dates TBD"}
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {(c.environments || []).map((env: string) => (
-                        <span key={env} className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">{env}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500">Budget</div>
-                    <div className="font-bold text-gray-900">₱{Number(c.budget).toLocaleString()}</div>
-                  </div>
-                  <Button variant="outline" size="sm">View</Button>
-                </CardContent>
-              </Card>
-            ))}
+        </div>
+
+        <Card className="p-6 bg-white border border-gray-200 mb-6">
+          <div className="text-sm font-semibold text-gray-900 mb-4">Performance</div>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
+                <YAxis stroke="#9ca3af" fontSize={12} />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="impressions" stroke="#2563eb" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="clicks" stroke="#9333ea" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
-        )}
+        </Card>
+
+        <Card className="bg-white border border-gray-200">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="text-sm font-semibold text-gray-900">Campaigns</div>
+            <div className="relative w-64">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search campaigns..."
+                className="pl-9 h-9"
+              />
+            </div>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Campaign</TableHead>
+                <TableHead>Bids</TableHead>
+                <TableHead>Impressions</TableHead>
+                <TableHead>Win rate</TableHead>
+                <TableHead>Reach</TableHead>
+                <TableHead>Clicks</TableHead>
+                <TableHead>CTR</TableHead>
+                <TableHead>CPM</TableHead>
+                <TableHead>Spent</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={10} className="text-center text-gray-500 py-8">Loading...</TableCell></TableRow>
+              ) : filteredCampaigns.length === 0 ? (
+                <TableRow><TableCell colSpan={10} className="text-center text-gray-500 py-8">No campaigns yet</TableCell></TableRow>
+              ) : (
+                filteredCampaigns.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell className="font-mono text-xs">{String(c.id).slice(0, 8)}</TableCell>
+                    <TableCell>
+                      <Link to="/brand-advertiser/campaigns" className="text-blue-600 hover:underline font-medium">
+                        {c.campaign_name}
+                      </Link>
+                    </TableCell>
+                    <TableCell>0</TableCell>
+                    <TableCell>0</TableCell>
+                    <TableCell>0%</TableCell>
+                    <TableCell>0</TableCell>
+                    <TableCell>0</TableCell>
+                    <TableCell>0%</TableCell>
+                    <TableCell>₱0</TableCell>
+                    <TableCell>₱0</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </Card>
       </div>
 
       {profileId && (
