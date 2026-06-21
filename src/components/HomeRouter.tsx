@@ -9,6 +9,7 @@ const ROLE_HOME: Record<string, string> = {
   print_partner: "/print-partner/dashboard",
   talent: "/talent-dashboard",
   admin: "/admin/dashboard",
+  brand_advertiser: "/brand-advertiser/dashboard",
 };
 
 export default function HomeRouter() {

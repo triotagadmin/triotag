@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
-type Role = "retailer" | "agent" | "print_partner" | "talent" | "admin";
+type Role = "retailer" | "agent" | "print_partner" | "talent" | "admin" | "brand_advertiser";
 
 interface Props {
   children: React.ReactNode;
@@ -25,6 +25,7 @@ export const getDashboardByRole = (role: Role | null | undefined): string => {
     case "agent": return "/venue-publishers";
     case "print_partner": return "/print-partner/dashboard";
     case "talent": return "/talent-dashboard";
+    case "brand_advertiser": return "/brand-advertiser/dashboard";
     default: return "/";
   }
 };
