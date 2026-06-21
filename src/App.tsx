@@ -109,6 +109,11 @@ import Notifications from "./pages/Notifications";
 import { AppSidebarShell } from "./components/shared/AppSidebar";
 import BrandAdvertiserDashboard from "./pages/brand-advertiser/BrandAdvertiserDashboard";
 import BrandAdvertiserSettings from "./pages/brand-advertiser/BrandAdvertiserSettings";
+import BrandAdvertiserCampaignsList from "./pages/brand-advertiser/BrandAdvertiserCampaignsList";
+import BrandAdvertiserCreatives from "./pages/brand-advertiser/BrandAdvertiserCreatives";
+import BrandAdvertiserAudiences from "./pages/brand-advertiser/BrandAdvertiserAudiences";
+import BrandAdvertiserReports from "./pages/brand-advertiser/BrandAdvertiserReports";
+import BrandAdvertiserChangelog from "./pages/brand-advertiser/BrandAdvertiserChangelog";
 
 const queryClient = new QueryClient();
 
