@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { AdvertiserSidebar } from "@/components/advertiser/AdvertiserSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -144,7 +143,6 @@ export default function AdvertiserCampaignCreate() {
 
   return (
     <div className="min-h-screen flex bg-white text-gray-900 font-sans">
-      <AdvertiserSidebar />
       <main className="flex-1 min-w-0 flex flex-col">
         <div className="px-6 lg:px-8 py-5 border-b border-gray-100 flex items-start justify-between gap-4 flex-wrap">
           <div>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { AdvertiserSidebar } from "@/components/advertiser/AdvertiserSidebar";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,7 +88,6 @@ export default function AdvertiserCampaigns() {
     <div className="min-h-screen bg-black text-white">
       <Navigation />
       <div className="flex">
-        <AdvertiserSidebar />
         <main className="flex-1 p-6 max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>

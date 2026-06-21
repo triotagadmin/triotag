@@ -1,5 +1,4 @@
 import { Link, useParams } from "react-router-dom";
-import { AdvertiserSidebar } from "@/components/advertiser/AdvertiserSidebar";
 import { Navigation } from "@/components/Navigation";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { findCityBySlug, CITY_COORDS, citySlug } from "@/lib/inventoryAggregation";
@@ -25,7 +24,6 @@ export default function AdvertiserAreaDetails() {
     <div className="min-h-screen bg-white text-gray-900 font-sans">
       <Navigation />
       <div className="flex">
-        <AdvertiserSidebar />
         <main className="flex-1 min-w-0">
           <div className="px-6 lg:px-8 py-6 border-b border-gray-100">
             <Link to={`/advertiser/explore/${citySlug(cityName)}`} className="text-green-600 text-sm font-medium inline-flex items-center gap-1">
