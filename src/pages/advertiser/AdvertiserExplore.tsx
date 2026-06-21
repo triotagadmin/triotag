@@ -9,8 +9,11 @@ import {
 } from "@/components/ui/dialog";
 import {
   Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2, AlertTriangle,
-  RefreshCw, Package, Clock,
+  RefreshCw, Package, Clock, Calendar as CalendarIcon,
 } from "lucide-react";
+import { addMonths, format, startOfDay, isBefore } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
 import { getActiveAreaNamesText, isWithinServiceArea } from "@/lib/serviceAreas";
 import {
@@ -26,6 +29,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
+
+// Earliest selectable campaign start date — gives TrioTag 1 month to prepare
+const MIN_LAUNCH_DATE = startOfDay(addMonths(new Date(), 1));
 
 export default function AdvertiserExplore() {
   const [center, setCenter] = useState(DEFAULT_CENTER);
@@ -74,6 +80,14 @@ export default function AdvertiserExplore() {
     }
     if (!form.campaignName.trim() || !form.preferredStartDate) {
       toast({ title: "Missing info", description: "Campaign name and start date are required.", variant: "destructive" });
+      return;
+    }
+    if (isBefore(new Date(form.preferredStartDate), MIN_LAUNCH_DATE)) {
+      toast({
+        title: "Start date too soon",
+        description: `Campaigns require at least 1 month lead time. Earliest available date is ${format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}.`,
+        variant: "destructive",
+      });
       return;
     }
     setSubmitting(true);
@@ -459,7 +473,38 @@ export default function AdvertiserExplore() {
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-gray-700">Preferred Start Date *</label>
-                  <Input type="date" value={form.preferredStartDate} onChange={(e) => setForm({ ...form, preferredStartDate: e.target.value })} />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={`w-full justify-start text-left font-normal ${!form.preferredStartDate ? "text-muted-foreground" : ""}`}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {form.preferredStartDate
+                          ? format(new Date(form.preferredStartDate), "PPP")
+                          : "Pick your campaign start date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={form.preferredStartDate ? new Date(form.preferredStartDate) : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            setForm({ ...form, preferredStartDate: format(date, "yyyy-MM-dd") });
+                          }
+                        }}
+                        disabled={(date) => isBefore(date, MIN_LAUNCH_DATE)}
+                        defaultMonth={MIN_LAUNCH_DATE}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <p className="text-[11px] text-gray-500 mt-1.5 inline-flex items-start gap-1">
+                    <Clock className="w-3 h-3 mt-0.5 shrink-0" />
+                    <span>Earliest available start date: <strong className="text-gray-700">{format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}</strong> — TrioTag requires 1 month lead time to prepare your campaign.</span>
+                  </p>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-gray-700">Notes (optional)</label>
