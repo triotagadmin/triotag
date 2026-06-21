@@ -666,7 +666,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
                             onClick={(e) => { e.stopPropagation(); navigate(`/franchise-registration/${editId}`); }}
                           >
                             <Edit className="h-3.5 w-3.5" />
-                            <span className="hidden sm:inline">Edit Franchise</span>
+                            <span className="hidden sm:inline">Edit Inventory</span>
                             <span className="sm:hidden">Edit</span>
                           </Button>
                         ) : null;
