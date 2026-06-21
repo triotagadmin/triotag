@@ -757,18 +757,45 @@ const FranchiseEdit = () => {
                 {/* Ad Unit Materials */}
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Ad Unit Materials</CardTitle>
-                    <p className="text-xs text-muted-foreground">Select the types of advertising materials that can be installed.</p>
+                    <CardTitle className="text-lg">Ad Formats & Inventory</CardTitle>
+                    <p className="text-xs text-muted-foreground">Select formats grouped by OOH, DOOH, and AOOH, and set how many units are available for each.</p>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-3">
-                      {AD_UNIT_MATERIALS.map(mat => (
-                        <div key={mat.value} className="flex items-center space-x-2">
-                          <Checkbox id={`mat-${mat.value}`} checked={selectedMaterials.includes(mat.value)} onCheckedChange={() => toggleMaterial(mat.value)} />
-                          <Label htmlFor={`mat-${mat.value}`} className="text-sm font-normal cursor-pointer">{mat.label}</Label>
+                  <CardContent className="space-y-5">
+                    {AD_UNIT_CATEGORIES.map(cat => {
+                      const items = AD_UNIT_MATERIALS.filter(m => m.category === cat.key);
+                      const badgeColor = cat.key === "OOH" ? "bg-blue-500/15 text-blue-400 border-blue-500/30"
+                        : cat.key === "DOOH" ? "bg-purple-500/15 text-purple-400 border-purple-500/30"
+                        : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+                      return (
+                        <div key={cat.key} className="rounded-[14px] border border-border/60 bg-muted/20 p-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className={`text-[10px] ${badgeColor}`}>{cat.key}</Badge>
+                            <h4 className="text-sm font-semibold">{cat.label}</h4>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-3">{cat.description}</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {items.map(mat => {
+                              const checked = selectedMaterials.includes(mat.value);
+                              return (
+                                <div key={mat.value} className="flex items-center gap-2 py-1.5 px-2 rounded-[10px] hover:bg-muted/40">
+                                  <Checkbox id={`mat-${mat.value}`} checked={checked} onCheckedChange={() => toggleMaterial(mat.value)} />
+                                  <Label htmlFor={`mat-${mat.value}`} className="text-sm font-normal cursor-pointer flex-1">{mat.label}</Label>
+                                  <Input
+                                    type="number"
+                                    min={0}
+                                    disabled={!checked}
+                                    value={materialUnits[mat.value] ?? ""}
+                                    onChange={e => setMaterialUnits(prev => ({ ...prev, [mat.value]: Math.max(0, Number(e.target.value) || 0) }))}
+                                    placeholder="Units"
+                                    className="h-8 w-20 text-xs"
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </CardContent>
                 </Card>
 
