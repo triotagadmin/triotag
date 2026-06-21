@@ -103,6 +103,9 @@ import IndustriesRetailers from "./pages/industries/Retailers";
 import IndustriesBrands from "./pages/industries/Brands";
 import MediaPartners from "./pages/MediaPartners";
 import UnderConstruction from "./pages/UnderConstruction";
+import HomeRouter from "./components/HomeRouter";
+import Notifications from "./pages/Notifications";
+import { AppSidebarShell } from "./components/shared/AppSidebar";
 
 const queryClient = new QueryClient();
 
@@ -114,11 +117,13 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+        <AppSidebarShell>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<HomeRouter />} />
           
           <Route path="/insights" element={<Insights />} />
-          <Route path="/campaigns" element={<RoleProtectedRoute requireAuth><CampaignMarketplace /></RoleProtectedRoute>} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/campaigns" element={<RoleProtectedRoute requireAuth allowedRoles={["admin"]}><CampaignMarketplace /></RoleProtectedRoute>} />
           <Route path="/insights/:id" element={<BlogPost />} />
           <Route path="/explore" element={<RoleProtectedRoute allowedRoles={["admin"]}><Marketplace /></RoleProtectedRoute>} />
           <Route path="/inventory" element={<VenueInventory />} />
@@ -251,6 +256,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </AppSidebarShell>
         </BrowserRouter>
       </TooltipProvider>
       </GuestBasketProvider>

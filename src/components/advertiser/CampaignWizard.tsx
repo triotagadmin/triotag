@@ -292,7 +292,7 @@ export function CampaignWizard({ open, onClose }: { open: boolean; onClose: () =
       } as any);
       if (campErr) throw campErr;
 
-      toast({ title: "Campaign submitted", description: "Your campaign is pending review." });
+      toast({ title: "Campaign added", description: "Your campaign has been added to our advertiser database. Our team will review and reach out to activate." });
       setProcessing(false);
       handleClose();
     } catch (err: any) {
