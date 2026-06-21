@@ -760,8 +760,8 @@ const FranchiseEdit = () => {
                 {/* Ad Unit Materials */}
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Ad Formats & Inventory</CardTitle>
-                    <p className="text-xs text-muted-foreground">Select formats grouped by OOH, DOOH, and AOOH, and set how many units are available for each.</p>
+                    <CardTitle className="text-lg">Ad Formats, Pricing & Inventory</CardTitle>
+                    <p className="text-xs text-muted-foreground">Grouped by OOH, DOOH, and AOOH. Set units available and your monthly price per unit. Suggested prices reflect typical PH retail benchmarks.</p>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     {AD_UNIT_CATEGORIES.map(cat => {
@@ -776,22 +776,55 @@ const FranchiseEdit = () => {
                             <h4 className="text-sm font-semibold">{cat.label}</h4>
                           </div>
                           <p className="text-xs text-muted-foreground mb-3">{cat.description}</p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div className="space-y-2">
                             {items.map(mat => {
                               const checked = selectedMaterials.includes(mat.value);
+                              const units = materialUnits[mat.value] ?? 0;
+                              const price = materialPrices[mat.value] ?? mat.suggested;
+                              const lineProfit = checked ? units * price : 0;
                               return (
-                                <div key={mat.value} className="flex items-center gap-2 py-1.5 px-2 rounded-[10px] hover:bg-muted/40">
-                                  <Checkbox id={`mat-${mat.value}`} checked={checked} onCheckedChange={() => toggleMaterial(mat.value)} />
-                                  <Label htmlFor={`mat-${mat.value}`} className="text-sm font-normal cursor-pointer flex-1">{mat.label}</Label>
-                                  <Input
-                                    type="number"
-                                    min={0}
-                                    disabled={!checked}
-                                    value={materialUnits[mat.value] ?? ""}
-                                    onChange={e => setMaterialUnits(prev => ({ ...prev, [mat.value]: Math.max(0, Number(e.target.value) || 0) }))}
-                                    placeholder="Units"
-                                    className="h-8 w-20 text-xs"
-                                  />
+                                <div key={mat.value} className="rounded-[12px] border border-border/40 bg-background/40 p-2.5">
+                                  <div className="flex items-center gap-2">
+                                    <Checkbox id={`mat-${mat.value}`} checked={checked} onCheckedChange={() => toggleMaterial(mat.value)} />
+                                    <Label htmlFor={`mat-${mat.value}`} className="text-sm font-medium cursor-pointer flex-1">{mat.label}</Label>
+                                    <span className="text-[10px] text-muted-foreground hidden sm:inline">Suggested ₱{mat.suggested.toLocaleString()}/mo</span>
+                                  </div>
+                                  <div className="flex flex-wrap gap-2 mt-1 ml-6 text-[10px] text-muted-foreground">
+                                    <span className="px-1.5 py-0.5 rounded bg-muted/50">📐 {mat.spec}</span>
+                                    <span className="px-1.5 py-0.5 rounded bg-muted/50">⏱ {mat.duration}</span>
+                                  </div>
+                                  <div className="grid grid-cols-3 gap-2 mt-2 ml-6">
+                                    <div>
+                                      <Label className="text-[10px] text-muted-foreground">Units</Label>
+                                      <Input
+                                        type="number"
+                                        min={0}
+                                        disabled={!checked}
+                                        value={materialUnits[mat.value] ?? ""}
+                                        onChange={e => setMaterialUnits(prev => ({ ...prev, [mat.value]: Math.max(0, Number(e.target.value) || 0) }))}
+                                        placeholder="0"
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label className="text-[10px] text-muted-foreground">Price/unit (₱/mo)</Label>
+                                      <Input
+                                        type="number"
+                                        min={0}
+                                        disabled={!checked}
+                                        value={materialPrices[mat.value] ?? ""}
+                                        onChange={e => setMaterialPrices(prev => ({ ...prev, [mat.value]: Math.max(0, Number(e.target.value) || 0) }))}
+                                        placeholder={String(mat.suggested)}
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label className="text-[10px] text-muted-foreground">Monthly</Label>
+                                      <div className={`h-8 px-2 flex items-center text-xs font-semibold rounded-[10px] border ${checked && lineProfit > 0 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-muted/30 border-border/40 text-muted-foreground"}`}>
+                                        ₱{lineProfit.toLocaleString()}
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                               );
                             })}
@@ -799,6 +832,44 @@ const FranchiseEdit = () => {
                         </div>
                       );
                     })}
+
+                    {/* Potential Monthly Profit Summary */}
+                    {(() => {
+                      const totals = AD_UNIT_CATEGORIES.map(cat => {
+                        const sum = AD_UNIT_MATERIALS.filter(m => m.category === cat.key && selectedMaterials.includes(m.value))
+                          .reduce((s, m) => s + (materialUnits[m.value] ?? 0) * (materialPrices[m.value] ?? m.suggested), 0);
+                        return { key: cat.key, total: sum };
+                      });
+                      const grand = totals.reduce((s, t) => s + t.total, 0);
+                      const branchCount = Math.max(1, branches.length || 1);
+                      return (
+                        <div className="rounded-[14px] border border-primary/40 bg-primary/5 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold">Potential Monthly Revenue</h4>
+                            <Badge variant="outline" className="text-[10px]">Estimate</Badge>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 mb-3">
+                            {totals.map(t => (
+                              <div key={t.key} className="text-center p-2 rounded-[10px] bg-background/40">
+                                <div className="text-[10px] text-muted-foreground">{t.key}</div>
+                                <div className="text-sm font-semibold">₱{t.total.toLocaleString()}</div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex items-end justify-between border-t border-border/40 pt-3">
+                            <div>
+                              <div className="text-[10px] text-muted-foreground">Per branch / month</div>
+                              <div className="text-xl font-bold text-primary">₱{grand.toLocaleString()}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-[10px] text-muted-foreground">Across {branchCount} branch{branchCount !== 1 ? "es" : ""}</div>
+                              <div className="text-lg font-semibold">₱{(grand * branchCount).toLocaleString()}/mo</div>
+                              <div className="text-[10px] text-muted-foreground">≈ ₱{(grand * branchCount * 12).toLocaleString()}/yr</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
 
