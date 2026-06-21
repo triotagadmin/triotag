@@ -61,7 +61,7 @@ export default function SolutionsDOOH() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg"><Link to="/advertiser/explore">Register DOOH Inventory</Link></Button>
-              <Button asChild size="lg" variant="outline"><Link to="/campaign-submit">Start a Campaign</Link></Button>
+              
             </div>
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
               {[["100+", "Digital Screens"], ["5–30 min", "Avg. dwell time"], ["HD", "Display quality"]].map(([n, l]) => (
