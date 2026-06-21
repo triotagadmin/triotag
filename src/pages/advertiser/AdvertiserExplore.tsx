@@ -30,6 +30,9 @@ import { toast } from "@/hooks/use-toast";
 
 const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
 
+// Earliest selectable campaign start date — gives TrioTag 1 month to prepare
+const MIN_LAUNCH_DATE = startOfDay(addMonths(new Date(), 1));
+
 export default function AdvertiserExplore() {
   const [center, setCenter] = useState(DEFAULT_CENTER);
   const [radiusMeters, setRadiusMeters] = useState(1000);
