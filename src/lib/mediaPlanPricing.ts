@@ -6,6 +6,8 @@ export interface FormatVariant {
   category: CampaignType;
   price: number; // per unit, per campaign run
   specs: Record<string, string>;
+  airTime?: string; // DOOH/AOOH only
+  billingType: "monthly" | "per_campaign";
 }
 
 export const OOH_VARIANTS: FormatVariant[] = [
@@ -15,6 +17,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     category: "OOH",
     price: 350,
     specs: { Size: "A5 (148 × 210mm)", Material: "300gsm matte cardstock", Print: "Full color, double-sided" },
+    billingType: "per_campaign",
   },
   {
     id: "ooh_sticker",
@@ -22,6 +25,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     category: "OOH",
     price: 250,
     specs: { Size: "4R (4 × 6in)", Material: "Vinyl, waterproof", Print: "Full color, gloss/matte" },
+    billingType: "per_campaign",
   },
   {
     id: "ooh_sticker_large",
@@ -29,6 +33,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     category: "OOH",
     price: 450,
     specs: { Size: "A4 (210 × 297mm)", Material: "Vinyl, waterproof", Print: "Full color, gloss/matte" },
+    billingType: "per_campaign",
   },
   {
     id: "ooh_poster",
@@ -36,6 +41,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     category: "OOH",
     price: 600,
     specs: { Size: "A3 (297 × 420mm)", Material: "150gsm art paper", Print: "Full color" },
+    billingType: "per_campaign",
   },
   {
     id: "ooh_tarpaulin_small",
@@ -43,6 +49,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     category: "OOH",
     price: 900,
     specs: { Size: "2ft × 3ft", Material: "13oz tarpaulin, UV resistant", Print: "Full color, outdoor grade" },
+    billingType: "per_campaign",
   },
   {
     id: "ooh_tarpaulin_medium",
@@ -50,6 +57,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     category: "OOH",
     price: 1800,
     specs: { Size: "4ft × 6ft", Material: "13oz tarpaulin, UV resistant", Print: "Full color, outdoor grade" },
+    billingType: "per_campaign",
   },
   {
     id: "ooh_tarpaulin_large",
@@ -57,6 +65,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     category: "OOH",
     price: 3200,
     specs: { Size: "8ft × 10ft", Material: "13oz tarpaulin, UV resistant", Print: "Full color, outdoor grade, grommets included" },
+    billingType: "per_campaign",
   },
   {
     id: "ooh_flyer",
@@ -64,6 +73,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     category: "OOH",
     price: 1500,
     specs: { Size: "DL (99 × 210mm)", Material: "150gsm gloss", Print: "Full color, single-sided" },
+    billingType: "per_campaign",
   },
 ];
 
@@ -74,6 +84,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 2500,
     specs: { Resolution: "1920×1080 (16:9)", Format: "JPG / PNG", "Loop Duration": "15 seconds" },
+    airTime: "12 minutes total air time / day",
+    billingType: "monthly",
   },
   {
     id: "dooh_static_30",
@@ -81,6 +93,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 3500,
     specs: { Resolution: "1920×1080 (16:9)", Format: "JPG / PNG", "Loop Duration": "30 seconds" },
+    airTime: "24 minutes total air time / day",
+    billingType: "monthly",
   },
   {
     id: "dooh_video_15",
@@ -88,6 +102,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 4500,
     specs: { Resolution: "1920×1080 (16:9)", Format: "MP4, H.264", "Video Duration": "15 seconds" },
+    airTime: "12 minutes total air time / day",
+    billingType: "monthly",
   },
   {
     id: "dooh_video_30",
@@ -95,6 +111,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 6500,
     specs: { Resolution: "1920×1080 (16:9)", Format: "MP4, H.264", "Video Duration": "30 seconds" },
+    airTime: "24 minutes total air time / day",
+    billingType: "monthly",
   },
   {
     id: "dooh_video_60",
@@ -102,6 +120,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 9500,
     specs: { Resolution: "1920×1080 (16:9)", Format: "MP4, H.264", "Video Duration": "60 seconds" },
+    airTime: "48 minutes total air time / day",
+    billingType: "monthly",
   },
   {
     id: "dooh_vertical_video_15",
@@ -109,6 +129,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 4800,
     specs: { Resolution: "1080×1920 (9:16)", Format: "MP4, H.264", "Video Duration": "15 seconds" },
+    airTime: "12 minutes total air time / day",
+    billingType: "monthly",
   },
 ];
 
@@ -119,6 +141,8 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     category: "AOOH",
     price: 1200,
     specs: { Format: "MP3 / WAV", "Audio Duration": "15 seconds", "Voice-Over": "Required" },
+    airTime: "12 minutes total air time / day",
+    billingType: "monthly",
   },
   {
     id: "aooh_spot_30",
@@ -126,6 +150,8 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     category: "AOOH",
     price: 2000,
     specs: { Format: "MP3 / WAV", "Audio Duration": "30 seconds", "Voice-Over": "Required" },
+    airTime: "24 minutes total air time / day",
+    billingType: "monthly",
   },
   {
     id: "aooh_jingle_15",
@@ -133,6 +159,8 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     category: "AOOH",
     price: 1600,
     specs: { Format: "MP3 / WAV", "Audio Duration": "15 seconds", "Voice-Over": "Optional, jingle included" },
+    airTime: "12 minutes total air time / day",
+    billingType: "monthly",
   },
   {
     id: "aooh_jingle_30",
@@ -140,6 +168,8 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     category: "AOOH",
     price: 2600,
     specs: { Format: "MP3 / WAV", "Audio Duration": "30 seconds", "Voice-Over": "Optional, jingle included" },
+    airTime: "24 minutes total air time / day",
+    billingType: "monthly",
   },
 ];
 
