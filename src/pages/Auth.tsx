@@ -321,7 +321,7 @@ const Auth = () => {
       await supabase.auth.signOut();
 
       // Send verification email via edge function
-      const { error: emailError } = await supabase.functions.invoke("send-verification-email", {
+      const { data: emailResult, error: emailError } = await supabase.functions.invoke("send-verification-email", {
         body: {
           email: validatedData.email,
           userId: authData.user.id,
@@ -329,9 +329,12 @@ const Auth = () => {
         },
       });
 
-      if (emailError) {
-        console.error("Error sending verification email:", emailError);
-        throw new Error("Failed to send verification email. Please contact support.");
+      console.log("[handleSignUp] send-verification-email response:", { emailResult, emailError });
+
+      if (emailError || emailResult?.error) {
+        const detailedMessage = emailResult?.error || emailError?.message || "Failed to send verification email.";
+        console.error("Error sending verification email:", detailedMessage);
+        throw new Error(detailedMessage);
       }
 
       toast({
