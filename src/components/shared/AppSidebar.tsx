@@ -10,7 +10,6 @@ type Item = { to: string; label: string; icon: any };
 
 const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
   advertiser: [
-    { to: "/advertiser/explore", label: "Explore Inventory", icon: Globe },
     { to: "/advertiser-dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/advertiser/campaigns", label: "Campaigns", icon: Megaphone },
     { to: "/advertiser/reports", label: "Active Media", icon: BarChart3 },
