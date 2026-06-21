@@ -169,46 +169,6 @@ const AdvertiserDashboard = () => {
             <TrendingUp className="h-6 w-6" />
             Overview
           </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <BarChart3 className="h-5 w-5" />
-                  Active Campaigns
-                </CardTitle>
-                <CardDescription>Currently running ads</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">0</p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Calendar className="h-5 w-5" />
-                  Pending Approval
-                </CardTitle>
-                <CardDescription>Awaiting publisher response</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">0</p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Receipt className="h-5 w-5" />
-                  Total Spent
-                </CardTitle>
-                <CardDescription>This month</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">$0</p>
-              </CardContent>
-            </Card>
-          </div>
 
           <div className="mt-6 flex gap-4 flex-wrap">
             <Button onClick={() => navigate("/campaign-builder")} size="lg" className="gap-2">
