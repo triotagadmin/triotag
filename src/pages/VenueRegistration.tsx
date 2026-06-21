@@ -691,7 +691,7 @@ const VenueRegistration = () => {
                 {/* Available Ad Formats */}
                 <Card className="rounded-[20px]">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Available Ad Formats *</CardTitle>
+                    <CardTitle className="text-lg">Available Ad Space:</CardTitle>
                     <p className="text-xs text-muted-foreground">Select all formats your venue can host. A separate listing is created per format.</p>
                   </CardHeader>
                   <CardContent className="space-y-4">
