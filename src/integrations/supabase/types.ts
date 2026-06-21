@@ -992,6 +992,110 @@ export type Database = {
           },
         ]
       }
+      brand_advertiser_profiles: {
+        Row: {
+          company_name: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          industry: string | null
+          updated_at: string | null
+          user_id: string
+          verified: boolean | null
+        }
+        Insert: {
+          company_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          updated_at?: string | null
+          user_id: string
+          verified?: boolean | null
+        }
+        Update: {
+          company_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          updated_at?: string | null
+          user_id?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      brand_campaigns: {
+        Row: {
+          brand_advertiser_id: string
+          budget: number
+          campaign_name: string
+          countries: string[] | null
+          created_at: string | null
+          creative_format: string | null
+          end_date: string | null
+          environments: string[] | null
+          id: string
+          notes: string | null
+          start_date: string | null
+          status: string | null
+          target_age_max: number | null
+          target_age_min: number | null
+          target_gender: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          brand_advertiser_id: string
+          budget: number
+          campaign_name: string
+          countries?: string[] | null
+          created_at?: string | null
+          creative_format?: string | null
+          end_date?: string | null
+          environments?: string[] | null
+          id?: string
+          notes?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_age_max?: number | null
+          target_age_min?: number | null
+          target_gender?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          brand_advertiser_id?: string
+          budget?: number
+          campaign_name?: string
+          countries?: string[] | null
+          created_at?: string | null
+          creative_format?: string | null
+          end_date?: string | null
+          environments?: string[] | null
+          id?: string
+          notes?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_age_max?: number | null
+          target_age_min?: number | null
+          target_gender?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_campaigns_brand_advertiser_id_fkey"
+            columns: ["brand_advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "brand_advertiser_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_subscriptions: {
         Row: {
           campaign_id: string
@@ -4095,6 +4199,7 @@ export type Database = {
         | "print_partner"
         | "agent"
         | "retailer"
+        | "brand_advertiser"
       approval_status: "pending" | "approved" | "rejected"
       booking_status:
         | "pending"
@@ -4270,6 +4375,7 @@ export const Constants = {
         "print_partner",
         "agent",
         "retailer",
+        "brand_advertiser",
       ],
       approval_status: ["pending", "approved", "rejected"],
       booking_status: [
