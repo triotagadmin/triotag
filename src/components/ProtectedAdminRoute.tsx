@@ -41,10 +41,9 @@ export default function ProtectedAdminRoute({ children }: ProtectedAdminRoutePro
         .single();
 
       if (roleError || roleData?.role !== "admin") {
-        console.error("[Protected Route] Admin role verification failed:", roleError);
-        toast.error("Access denied. Admin credentials required.");
-        await supabase.auth.signOut();
-        navigate("/admin");
+        console.warn("[Protected Route] Non-admin user hit admin route — redirecting to their dashboard");
+        const target = getDashboardByRole((roleData?.role as any) ?? null);
+        navigate(target === "/" ? "/auth" : target, { replace: true });
         return;
       }
 
