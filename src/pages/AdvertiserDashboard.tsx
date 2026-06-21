@@ -193,28 +193,7 @@ const AdvertiserDashboard = () => {
           </div>
         </div>
 
-        {/* Quick Action Cards */}
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
-
-          {/* Messages */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                Messages
-              </CardTitle>
-              <CardDescription>
-                Communication with publishers
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">No new messages</p>
-              <Button variant="outline" className="mt-4" disabled>
-                View Inbox
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Messages card removed */}
 
 {/* Bookmarked Ad Spaces section removed */}
 
