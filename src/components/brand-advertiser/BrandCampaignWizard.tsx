@@ -21,7 +21,7 @@ interface Props {
   onCreated?: () => void;
 }
 
-const ENVIRONMENTS = ["OOH", "DOOH", "AOOH", "App", "Site"];
+const ENVIRONMENTS = ["OOH", "DOOH", "AOOH"];
 const TOTAL_STEPS = 4;
 
 export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertiserId, onCreated }: Props) {

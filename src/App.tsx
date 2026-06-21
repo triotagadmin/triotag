@@ -109,6 +109,11 @@ import Notifications from "./pages/Notifications";
 import { AppSidebarShell } from "./components/shared/AppSidebar";
 import BrandAdvertiserDashboard from "./pages/brand-advertiser/BrandAdvertiserDashboard";
 import BrandAdvertiserSettings from "./pages/brand-advertiser/BrandAdvertiserSettings";
+import BrandAdvertiserCampaignsList from "./pages/brand-advertiser/BrandAdvertiserCampaignsList";
+import BrandAdvertiserCreatives from "./pages/brand-advertiser/BrandAdvertiserCreatives";
+import BrandAdvertiserAudiences from "./pages/brand-advertiser/BrandAdvertiserAudiences";
+import BrandAdvertiserReports from "./pages/brand-advertiser/BrandAdvertiserReports";
+import BrandAdvertiserChangelog from "./pages/brand-advertiser/BrandAdvertiserChangelog";
 
 const queryClient = new QueryClient();
 
@@ -257,8 +262,13 @@ const App = () => (
           <Route path="/media-partners" element={<MediaPartners />} />
           {/* Brand Advertiser portal */}
           <Route path="/brand-advertiser/dashboard" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserDashboard /></RoleProtectedRoute>} />
-          <Route path="/brand-advertiser/campaigns" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserDashboard /></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/campaigns" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserCampaignsList /></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/creatives" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserCreatives /></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/audiences" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserAudiences /></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/reports" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserReports /></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/changelog" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserChangelog /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/settings" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserSettings /></RoleProtectedRoute>} />
+
           <Route path="/under-construction" element={<UnderConstruction />} />
           <Route path="/careers" element={<UnderConstruction />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

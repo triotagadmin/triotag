@@ -1031,6 +1031,54 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_campaign_changelog: {
+        Row: {
+          action: string
+          brand_advertiser_id: string
+          campaign_id: string | null
+          campaign_name: string | null
+          changed_by: string | null
+          created_at: string
+          description: string | null
+          id: string
+        }
+        Insert: {
+          action: string
+          brand_advertiser_id: string
+          campaign_id?: string | null
+          campaign_name?: string | null
+          changed_by?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+        }
+        Update: {
+          action?: string
+          brand_advertiser_id?: string
+          campaign_id?: string | null
+          campaign_name?: string | null
+          changed_by?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_campaign_changelog_brand_advertiser_id_fkey"
+            columns: ["brand_advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "brand_advertiser_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_campaign_changelog_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_campaigns: {
         Row: {
           brand_advertiser_id: string
@@ -1089,6 +1137,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "brand_campaigns_brand_advertiser_id_fkey"
+            columns: ["brand_advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "brand_advertiser_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brand_creative_sets: {
+        Row: {
+          brand_advertiser_id: string
+          created_at: string
+          creative_count: number
+          creative_format: string
+          file_url: string | null
+          id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          brand_advertiser_id: string
+          created_at?: string
+          creative_count?: number
+          creative_format: string
+          file_url?: string | null
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          brand_advertiser_id?: string
+          created_at?: string
+          creative_count?: number
+          creative_format?: string
+          file_url?: string | null
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_creative_sets_brand_advertiser_id_fkey"
             columns: ["brand_advertiser_id"]
             isOneToOne: false
             referencedRelation: "brand_advertiser_profiles"
