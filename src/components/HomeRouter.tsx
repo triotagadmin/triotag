@@ -1,0 +1,39 @@
+import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import Index from "@/pages/Index";
+
+const ROLE_HOME: Record<string, string> = {
+  advertiser: "/advertiser-dashboard",
+  publisher: "/venue-publishers",
+  print_partner: "/print-partner/dashboard",
+  talent: "/talent-dashboard",
+  admin: "/admin/dashboard",
+};
+
+export default function HomeRouter() {
+  const [loading, setLoading] = useState(true);
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) {
+        setLoading(false);
+        return;
+      }
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      const home = roleData?.role ? ROLE_HOME[roleData.role as string] : null;
+      setRedirectTo(home || null);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return null;
+  if (redirectTo) return <Navigate to={redirectTo} replace />;
+  return <Index />;
+}
