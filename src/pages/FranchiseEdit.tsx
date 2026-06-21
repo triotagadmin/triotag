@@ -66,12 +66,30 @@ const INDUSTRY_CATEGORIES = [
 ];
 
 const AD_UNIT_MATERIALS = [
-  { value: "vinyl_sticker", label: "Vinyl Sticker" },
-  { value: "table_tent_card", label: "Table Tent Card" },
-  { value: "acrylic_table_tent", label: "Acrylic Table Tent" },
-  { value: "coroplast_stand", label: "Coroplast Stand" },
-  { value: "poster_frame", label: "Poster Frame" },
-  { value: "wall_decal", label: "Wall Decal" },
+  // OOH — Static / Print
+  { value: "vinyl_sticker", label: "Vinyl Sticker", category: "OOH" },
+  { value: "table_tent_card", label: "Table Tent Card", category: "OOH" },
+  { value: "acrylic_table_tent", label: "Acrylic Table Tent", category: "OOH" },
+  { value: "coroplast_stand", label: "Coroplast Stand", category: "OOH" },
+  { value: "poster_frame", label: "Poster Frame", category: "OOH" },
+  { value: "wall_decal", label: "Wall Decal", category: "OOH" },
+  { value: "billboard_static", label: "Static Billboard", category: "OOH" },
+  { value: "transit_poster", label: "Transit Poster", category: "OOH" },
+  // DOOH — Digital screens
+  { value: "digital_screen", label: "Digital Display Screen", category: "DOOH" },
+  { value: "led_billboard", label: "LED Billboard", category: "DOOH" },
+  { value: "digital_menu_board", label: "Digital Menu Board", category: "DOOH" },
+  { value: "interactive_kiosk", label: "Interactive Kiosk", category: "DOOH" },
+  // AOOH — Audio
+  { value: "audio_playlist", label: "In-Store Audio Playlist", category: "AOOH" },
+  { value: "audio_spot", label: "Audio Spot / Jingle", category: "AOOH" },
+  { value: "podcast_insert", label: "Podcast Insert", category: "AOOH" },
+];
+
+const AD_UNIT_CATEGORIES: { key: "OOH" | "DOOH" | "AOOH"; label: string; description: string }[] = [
+  { key: "OOH", label: "OOH — Out-of-Home (Print)", description: "Static printed materials installed on-site." },
+  { key: "DOOH", label: "DOOH — Digital Out-of-Home", description: "Digital screens and interactive displays." },
+  { key: "AOOH", label: "AOOH — Audio Out-of-Home", description: "In-store audio, jingles, and podcast inserts." },
 ];
 
 const CUSTOMER_ACTIVITY_OPTIONS = [
