@@ -1,7 +1,7 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
-  Globe, Megaphone, BarChart3, MessageSquare, Bell, User, LayoutDashboard, TrendingUp,
+  Globe, Megaphone, BarChart3, MessageSquare, Bell, User, LayoutDashboard, TrendingUp, Package,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
@@ -20,7 +20,7 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
   publisher: [
     { to: "/venue-publishers", label: "Dashboard", icon: LayoutDashboard },
     { to: "/venue-inventory", label: "My Ad Spaces", icon: Globe },
-    { to: "/advertiser/explore", label: "Inventory", icon: Globe },
+    { to: "/advertiser/explore", label: "Inventory", icon: Package },
     { to: "/publisher/campaigns", label: "Campaigns", icon: Megaphone },
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
