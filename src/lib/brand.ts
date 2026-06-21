@@ -9,9 +9,9 @@ export const BRAND_PHONE = "+639456640894";
 
 // Role display names mapping
 export const ROLE_DISPLAY_NAMES: Record<string, string> = {
-  advertiser: "Retailer",
+  retailer: "Retailer",
   print_partner: "Print Partner",
-  publisher: "Agent",
+  agent: "Agent",
   admin: "Admin",
   talent: "Talent",
 };

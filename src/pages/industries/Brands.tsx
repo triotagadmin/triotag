@@ -21,7 +21,7 @@ const Brands = () => {
   const navigate = useNavigate();
 
   const goAdvertiserSignup = () => {
-    localStorage.setItem("intended_role", "advertiser");
+    localStorage.setItem("intended_role", "retailer");
     navigate("/auth");
   };
 

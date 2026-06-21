@@ -219,8 +219,8 @@ export default function AdminDashboard() {
         ...(advertisers || [])
           .filter((a) => {
             const role = roleMap.get(a.user_id);
-            // Only show accounts with a matching advertiser or print_partner role
-            return role === "advertiser" || role === "print_partner";
+            // Only show accounts with a matching retailer or print_partner role
+            return role === "retailer" || role === "print_partner";
           })
           .map((a) => {
             const role = roleMap.get(a.user_id)!;
@@ -254,11 +254,11 @@ export default function AdminDashboard() {
             details: p,
           })),
         ...(publisherProfiles || [])
-          .filter((p) => roleMap.get(p.user_id) === "publisher")
+          .filter((p) => roleMap.get(p.user_id) === "agent")
           .map((p) => ({
             id: p.id,
             type: "publisher" as const,
-            actualRole: "publisher",
+            actualRole: "agent",
             name: p.business_name || "Unnamed Agent",
             email: p.contact_email,
             status: p.verification_status || "pending",

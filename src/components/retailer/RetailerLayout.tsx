@@ -41,10 +41,10 @@ export const RetailerLayout = ({ children, title }: { children: ReactNode; title
       }
       const { data: roleRow } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).maybeSingle();
       const role = roleRow?.role;
-      if (role !== "publisher") {
+      if (role !== "agent") {
         const map: Record<string, string> = {
           admin: "/admin/dashboard",
-          advertiser: "/advertiser-dashboard",
+          retailer: "/advertiser-dashboard",
           print_partner: "/print-partner/dashboard",
           talent: "/talent-dashboard",
         };

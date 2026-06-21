@@ -42,7 +42,7 @@ const AdvertiserDashboard = () => {
       const {
         data: roles
       } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
-      if (!roles || roles.role !== "advertiser") {
+      if (!roles || roles.role !== "retailer") {
         navigate("/dashboard");
         return;
       }

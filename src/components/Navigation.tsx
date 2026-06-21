@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 
-type Role = "advertiser" | "publisher" | "print_partner" | "talent" | "admin" | null;
+type Role = "retailer" | "agent" | "print_partner" | "talent" | "admin" | null;
 
 interface NavLinkDef { label: string; to: string; gated?: boolean; }
 interface NavItemDef { label: string; to?: string; children?: { label: string; to: string }[]; }
@@ -53,11 +53,11 @@ const PUBLIC_LINKS: NavLinkDef[] = [
 const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
   if (!loggedIn) return PUBLIC_LINKS;
   const retailerLink: NavLinkDef =
-    role === "publisher"
+    role === "agent"
       ? { label: "For Retailers", to: "/retailer/dashboard" }
       : { label: "For Retailers", to: "/#for-retailers" };
   switch (role) {
-    case "advertiser":
+    case "retailer":
       return [
         { label: "Home", to: "/" },
         retailerLink,
@@ -65,7 +65,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
-    case "publisher":
+    case "agent":
       return [
         { label: "Home", to: "/" },
         retailerLink,
@@ -104,13 +104,13 @@ interface MenuItem { label: string; to: string; }
 
 const dropdownForRole = (role: Role): MenuItem[] => {
   switch (role) {
-    case "advertiser": return [
+    case "retailer": return [
       { label: "Dashboard", to: "/advertiser-dashboard" },
       { label: "My Campaigns", to: "/advertiser/campaigns" },
       { label: "Wallet", to: "/advertiser-settings" },
       { label: "Settings", to: "/advertiser-settings" },
     ];
-    case "publisher": return [
+    case "agent": return [
       { label: "My Dashboard", to: "/venue-publishers" },
       { label: "My Ad Spaces", to: "/venue-inventory" },
       { label: "Campaigns", to: "/publisher/campaigns" },
@@ -142,8 +142,8 @@ const dropdownForRole = (role: Role): MenuItem[] => {
 };
 
 const ROLE_LABEL: Record<string, string> = {
-  advertiser: "Retailer",
-  publisher: "Retailer",
+  retailer: "Retailer",
+  agent: "Agent",
   print_partner: "Print Partner",
   talent: "Talent",
   admin: "Admin",
