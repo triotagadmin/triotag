@@ -65,26 +65,28 @@ const INDUSTRY_CATEGORIES = [
   "Professional Services", "Beauty & Personal Care", "Other",
 ];
 
+// Suggested monthly lease price (PHP) reflects typical PH retail/OOH benchmarks per unit.
 const AD_UNIT_MATERIALS = [
   // OOH — Static / Print
-  { value: "vinyl_sticker", label: "Vinyl Sticker", category: "OOH" },
-  { value: "table_tent_card", label: "Table Tent Card", category: "OOH" },
-  { value: "acrylic_table_tent", label: "Acrylic Table Tent", category: "OOH" },
-  { value: "coroplast_stand", label: "Coroplast Stand", category: "OOH" },
-  { value: "poster_frame", label: "Poster Frame", category: "OOH" },
-  { value: "wall_decal", label: "Wall Decal", category: "OOH" },
-  { value: "billboard_static", label: "Static Billboard", category: "OOH" },
-  { value: "transit_poster", label: "Transit Poster", category: "OOH" },
+  { value: "vinyl_sticker", label: "Vinyl Sticker", category: "OOH", spec: "A5–A4 (15–21 cm)", duration: "30-day display", suggested: 250 },
+  { value: "table_tent_card", label: "Table Tent Card", category: "OOH", spec: "4×6 in, double-sided", duration: "30-day display", suggested: 400 },
+  { value: "acrylic_table_tent", label: "Acrylic Table Tent", category: "OOH", spec: "4×6 in acrylic stand", duration: "30-day display", suggested: 600 },
+  { value: "coroplast_stand", label: "Coroplast Stand", category: "OOH", spec: "24×36 in A-frame", duration: "30-day display", suggested: 1200 },
+  { value: "poster_frame", label: "Poster Frame", category: "OOH", spec: "A3 / A2 framed", duration: "30-day display", suggested: 800 },
+  { value: "wall_decal", label: "Wall Decal", category: "OOH", spec: "Up to 60×90 cm", duration: "30-day display", suggested: 700 },
+  { value: "billboard_static", label: "Static Billboard", category: "OOH", spec: "10×20 ft tarpaulin", duration: "Monthly lease", suggested: 15000 },
+  { value: "transit_poster", label: "Transit Poster", category: "OOH", spec: "Bus/jeepney panel", duration: "Monthly lease", suggested: 2500 },
   // DOOH — Digital screens
-  { value: "digital_screen", label: "Digital Display Screen", category: "DOOH" },
-  { value: "led_billboard", label: "LED Billboard", category: "DOOH" },
-  { value: "digital_menu_board", label: "Digital Menu Board", category: "DOOH" },
-  { value: "interactive_kiosk", label: "Interactive Kiosk", category: "DOOH" },
+  { value: "digital_screen", label: "Digital Display Screen", category: "DOOH", spec: "32–55 in FHD", duration: "15s spot, ~240 plays/day", suggested: 3500 },
+  { value: "led_billboard", label: "LED Billboard", category: "DOOH", spec: "P4–P6 outdoor LED", duration: "10s spot, ~480 plays/day", suggested: 25000 },
+  { value: "digital_menu_board", label: "Digital Menu Board", category: "DOOH", spec: "43 in landscape", duration: "10s spot, looped", suggested: 2200 },
+  { value: "interactive_kiosk", label: "Interactive Kiosk", category: "DOOH", spec: "21 in touchscreen", duration: "Full-screen takeover", suggested: 4500 },
   // AOOH — Audio
-  { value: "audio_playlist", label: "In-Store Audio Playlist", category: "AOOH" },
-  { value: "audio_spot", label: "Audio Spot / Jingle", category: "AOOH" },
-  { value: "podcast_insert", label: "Podcast Insert", category: "AOOH" },
+  { value: "audio_playlist", label: "In-Store Audio Playlist", category: "AOOH", spec: "Branded playlist slot", duration: "8 hrs/day rotation", suggested: 1800 },
+  { value: "audio_spot", label: "Audio Spot / Jingle", category: "AOOH", spec: "15–30s audio ad", duration: "~60 plays/day", suggested: 1200 },
+  { value: "podcast_insert", label: "Podcast Insert", category: "AOOH", spec: "30s mid-roll", duration: "Per episode", suggested: 900 },
 ];
+
 
 const AD_UNIT_CATEGORIES: { key: "OOH" | "DOOH" | "AOOH"; label: string; description: string }[] = [
   { key: "OOH", label: "OOH — Out-of-Home (Print)", description: "Static printed materials installed on-site." },
