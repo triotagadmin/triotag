@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { AdvertiserSidebar } from "@/components/advertiser/AdvertiserSidebar";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -192,7 +191,6 @@ export default function AdvertiserExplore() {
     <div className="min-h-screen bg-white text-gray-900 font-sans">
       <Navigation />
       <div className="flex">
-        <AdvertiserSidebar />
 
         <main className="flex-1 min-w-0">
           <header className="px-6 lg:px-8 pt-6 pb-4 border-b border-gray-100 bg-white">

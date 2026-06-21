@@ -1,5 +1,4 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AdvertiserSidebar } from "@/components/advertiser/AdvertiserSidebar";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,7 +61,6 @@ export default function AdvertiserCityOverview() {
     <div className="min-h-screen bg-white text-gray-900 font-sans">
       <Navigation />
       <div className="flex">
-        <AdvertiserSidebar />
         <main className="flex-1 min-w-0">
           <div className="px-6 lg:px-8 py-6 border-b border-gray-100">
             <Link to="/advertiser/explore" className="text-green-600 hover:text-green-700 text-sm font-medium inline-flex items-center gap-1">

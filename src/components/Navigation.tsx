@@ -21,7 +21,7 @@ interface NavItemDef { label: string; to?: string; children?: { label: string; t
 const INVENTORY_LINK: NavLinkDef = { label: "Inventory", to: "/advertiser/explore" };
 const CAMPAIGNS_LINK: NavLinkDef = { label: "Campaigns", to: "/campaigns" };
 
-const NAV_ITEMS: NavItemDef[] = [
+const NAV_ITEMS_PUBLIC: NavItemDef[] = [
   {
     label: "Industries",
     children: [
@@ -39,12 +39,15 @@ const NAV_ITEMS: NavItemDef[] = [
     ],
   },
   { label: "Inventory", to: "/advertiser/explore" },
+];
+
+const NAV_ITEMS_ADMIN: NavItemDef[] = [
+  ...NAV_ITEMS_PUBLIC,
   { label: "Campaigns", to: "/campaigns" },
 ];
 
 const PUBLIC_LINKS: NavLinkDef[] = [
   INVENTORY_LINK,
-  CAMPAIGNS_LINK,
 ];
 
 const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
@@ -58,9 +61,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         retailerLink,
-        { label: "For Retailers", to: "/campaign-submit" },
         INVENTORY_LINK,
-        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -68,9 +69,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         retailerLink,
-        { label: "For Retailers", to: "/campaign-submit" },
         INVENTORY_LINK,
-        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -79,7 +78,6 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
         { label: "Home", to: "/" },
         retailerLink,
         INVENTORY_LINK,
-        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -87,7 +85,6 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         INVENTORY_LINK,
-        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -201,7 +198,7 @@ export const Navigation = () => {
   const isActive = (to: string) => location.pathname === to || (to !== "/" && location.pathname.startsWith(to));
 
   return (
-    <nav className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
+    <nav className={`sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10 ${user ? "lg:hidden" : ""}`}>
       <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         <Link to="/" onClick={close} className="flex items-center gap-2 group">
           <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-green-600 text-white">
@@ -211,7 +208,7 @@ export const Navigation = () => {
         </Link>
 
         <div className="hidden lg:flex items-center gap-1">
-          {NAV_ITEMS.map((item) =>
+          {(userRole === "admin" ? NAV_ITEMS_ADMIN : NAV_ITEMS_PUBLIC).map((item) =>
             item.children ? (
               <DropdownMenu key={item.label}>
                 <DropdownMenuTrigger asChild>
@@ -336,7 +333,7 @@ export const Navigation = () => {
             </div>
           )}
           <div className="flex flex-col p-2">
-            {NAV_ITEMS.map((item) =>
+            {(userRole === "admin" ? NAV_ITEMS_ADMIN : NAV_ITEMS_PUBLIC).map((item) =>
               item.children ? (
                 <div key={item.label}>
                   <div className="text-xs text-zinc-400 uppercase tracking-wider px-3 pt-3 pb-1">
