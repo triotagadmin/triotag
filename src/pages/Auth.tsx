@@ -305,8 +305,18 @@ const Auth = () => {
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error("User creation failed");
 
-      // Profile is automatically created by database trigger
-      
+      // Profile is automatically created by database trigger for most roles.
+      // Brand Advertiser profile must be created explicitly (no trigger).
+      if (userType === "brand_advertiser") {
+        await supabase.from("brand_advertiser_profiles").insert({
+          user_id: authData.user.id,
+          company_name: companyName || "",
+          contact_name: contactName || "",
+          contact_email: validatedData.email,
+          verified: false,
+        });
+      }
+
       // Sign out the user immediately (they must verify email first)
       await supabase.auth.signOut();
 
@@ -484,6 +494,9 @@ const Auth = () => {
         } else {
           goAfterAuth("/talent-profile");
         }
+      } else if (roles?.role === "brand_advertiser") {
+        toast({ title: "Welcome back!", description: "Successfully signed in." });
+        goAfterAuth("/brand-advertiser/dashboard");
       } else {
         navigate("/");
       }
