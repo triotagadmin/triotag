@@ -50,7 +50,7 @@ const Brands = () => {
                 Launch a Campaign
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate("/advertiser/explore")}>
-                Browse Inventory
+                Register Inventory
               </Button>
             </div>
           </div>
