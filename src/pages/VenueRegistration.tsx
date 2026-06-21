@@ -112,7 +112,8 @@ const VenueRegistration = () => {
 
   // Step 1: Brand Details
   const [title, setTitle] = useState("");
-  const [venueType, setVenueType] = useState("");
+  const [venueTypes, setVenueTypes] = useState<string[]>([]);
+  const toggleVenueType = (v: string) => setVenueTypes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   const [customVenueType, setCustomVenueType] = useState("");
   const [industryCategory, setIndustryCategory] = useState("");
   const [description, setDescription] = useState(DEFAULT_DESCRIPTION);
@@ -158,11 +159,13 @@ const VenueRegistration = () => {
   // Available Ad Formats (multi-select)
   const [selectedFormats, setSelectedFormats] = useState<("OOH" | "DOOH" | "AOOH")[]>([]);
   // OOH details
-  const [oohPrintFormat, setOohPrintFormat] = useState("");
+  const [oohPrintFormats, setOohPrintFormats] = useState<string[]>([]);
+  const toggleOohPrintFormat = (v: string) => setOohPrintFormats(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   const [oohPlacementCount, setOohPlacementCount] = useState("");
   // DOOH details
   const [doohScreenDescription, setDoohScreenDescription] = useState("");
-  const [doohScreenType, setDoohScreenType] = useState("");
+  const [doohScreenTypes, setDoohScreenTypes] = useState<string[]>([]);
+  const toggleDoohScreenType = (v: string) => setDoohScreenTypes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   const [doohScreenCount, setDoohScreenCount] = useState("");
   // AOOH details
   const [aoohSpotDuration, setAoohSpotDuration] = useState("");
@@ -229,7 +232,8 @@ const VenueRegistration = () => {
       setUploadedImages(Array.isArray(venue.media_urls) ? venue.media_urls as string[] : []);
       setIsListedOnExplore(venue.availability_status !== "unlisted");
       const specs = venue.specifications as any || {};
-      setVenueType(specs.venue_type || "");
+      const vt = specs.venue_type;
+      setVenueTypes(Array.isArray(vt) ? vt : (typeof vt === "string" && vt ? vt.split(",").map((s: string) => s.trim()).filter(Boolean) : []));
       if (specs.custom_venue_type) setCustomVenueType(specs.custom_venue_type);
       setIndustryCategory(specs.industry_category || "");
       setOperatingHours(specs.operating_hours || "");
@@ -324,7 +328,7 @@ const VenueRegistration = () => {
 
   const validateStep1 = () => {
     if (!title.trim()) { toast({ title: "Error", description: "Franchise/brand name is required", variant: "destructive" }); return false; }
-    if (!venueType) { toast({ title: "Error", description: "Venue type is required", variant: "destructive" }); return false; }
+    if (venueTypes.length === 0) { toast({ title: "Error", description: "Ad space type is required", variant: "destructive" }); return false; }
     if (!industryCategory) { toast({ title: "Error", description: "Industry category is required", variant: "destructive" }); return false; }
     if (!description.trim()) { toast({ title: "Error", description: "Brand description is required", variant: "destructive" }); return false; }
     if (!contactPerson.trim()) { toast({ title: "Error", description: "Contact person is required", variant: "destructive" }); return false; }
@@ -348,7 +352,9 @@ const VenueRegistration = () => {
   const handlePrevStep = () => { setCurrentStep(1); window.scrollTo(0, 0); };
 
   const buildVenueData = () => {
-    const actualVenueType = venueType === "other" ? customVenueType : venueType;
+    const actualVenueTypes = venueTypes.includes("other") && customVenueType
+      ? [...venueTypes.filter(v => v !== "other"), customVenueType]
+      : venueTypes;
     const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
     const locsJson: any[] = [];
     const envJson = {
@@ -364,8 +370,9 @@ const VenueRegistration = () => {
       description: description.trim(),
       latitude: latitude, longitude: longitude,
       specifications: {
-        venue_type: actualVenueType,
-        custom_venue_type: venueType === "other" ? customVenueType : null,
+        venue_type: actualVenueTypes.join(", "),
+        venue_types: actualVenueTypes,
+        custom_venue_type: venueTypes.includes("other") ? customVenueType : null,
         industry_category: industryCategory,
         is_franchise: true,
         head_office_address: { street: street.trim(), city: city.trim(), state: state.trim(), postal_code: postalCode.trim(), country: country.trim() },
@@ -481,8 +488,8 @@ const VenueRegistration = () => {
         navigate("/venue-inventory");
       } else {
         const formatDetails: Record<string, any> = {
-          OOH: { print_format: oohPrintFormat, placement_count: oohPlacementCount ? parseInt(oohPlacementCount) : null },
-          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenType, screen_count: doohScreenCount ? parseInt(doohScreenCount) : null },
+          OOH: { print_format: oohPrintFormats.join(", "), print_formats: oohPrintFormats, placement_count: oohPlacementCount ? parseInt(oohPlacementCount) : null },
+          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenTypes.join(", "), screen_types: doohScreenTypes, screen_count: doohScreenCount ? parseInt(doohScreenCount) : null },
           AOOH: { spot_duration: aoohSpotDuration, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: aoohAudioZones ? parseInt(aoohAudioZones) : null },
         };
         const rows = selectedFormats.map(fmt => ({
@@ -597,12 +604,20 @@ const VenueRegistration = () => {
 
                 {/* Venue Type */}
                 <div>
-                  <Label>Ad Space Type *</Label>
-                  <Select value={venueType} onValueChange={setVenueType}>
-                    <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select type" /></SelectTrigger>
-                    <SelectContent>{VENUE_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-                  </Select>
-                  {venueType === "other" && <Input className="mt-2" placeholder="Specify type" value={customVenueType} onChange={e => setCustomVenueType(e.target.value)} />}
+                  <Label>Ad Space Type * <span className="text-xs text-muted-foreground font-normal">(select all that apply)</span></Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                    {VENUE_TYPES.map(t => {
+                      const on = venueTypes.includes(t.value);
+                      return (
+                        <button key={t.value} type="button" onClick={() => toggleVenueType(t.value)}
+                          className={`text-left text-sm px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
+                          <Checkbox checked={on} className="mr-2 align-middle pointer-events-none" />
+                          {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {venueTypes.includes("other") && <Input className="mt-2" placeholder="Specify type" value={customVenueType} onChange={e => setCustomVenueType(e.target.value)} />}
                 </div>
 
                 {/* Industry */}
@@ -670,11 +685,18 @@ const VenueRegistration = () => {
                     </div>
                     {selectedFormats.includes("OOH") && (
                       <div className="border-t pt-4 grid sm:grid-cols-2 gap-3">
-                        <div><Label>Print Format Type</Label>
-                          <Select value={oohPrintFormat} onValueChange={setOohPrintFormat}>
-                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                            <SelectContent>{["Table Tent","Poster/Wall","Floor Sticker","Shelf Signage","Counter Display","Aisle Signage","Entrance Banner","Other"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                          </Select>
+                        <div className="sm:col-span-2"><Label>Print Format Types <span className="text-xs text-muted-foreground font-normal">(select all)</span></Label>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                            {["Table Tent","Poster/Wall","Floor Sticker","Shelf Signage","Counter Display","Aisle Signage","Entrance Banner","Other"].map(o => {
+                              const on = oohPrintFormats.includes(o);
+                              return (
+                                <button key={o} type="button" onClick={() => toggleOohPrintFormat(o)}
+                                  className={`text-left text-xs px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
+                                  <Checkbox checked={on} className="mr-2 align-middle pointer-events-none" />{o}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                         <div><Label># Print Placements</Label><Input type="number" value={oohPlacementCount} onChange={e=>setOohPlacementCount(e.target.value)} /></div>
                       </div>
@@ -682,11 +704,18 @@ const VenueRegistration = () => {
                     {selectedFormats.includes("DOOH") && (
                       <div className="border-t pt-4 grid sm:grid-cols-2 gap-3">
                         <div className="sm:col-span-2"><Label>Screen Description</Label><Input value={doohScreenDescription} onChange={e=>setDoohScreenDescription(e.target.value)} placeholder="e.g. 55-inch LED at entrance" /></div>
-                        <div><Label>Screen Type</Label>
-                          <Select value={doohScreenType} onValueChange={setDoohScreenType}>
-                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                            <SelectContent>{["Indoor Screen","Outdoor Screen","Menu Board","Video Wall","Checkout Screen"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                          </Select>
+                        <div className="sm:col-span-2"><Label>Screen Types <span className="text-xs text-muted-foreground font-normal">(select all)</span></Label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                            {["Indoor Screen","Outdoor Screen","Menu Board","Video Wall","Checkout Screen"].map(o => {
+                              const on = doohScreenTypes.includes(o);
+                              return (
+                                <button key={o} type="button" onClick={() => toggleDoohScreenType(o)}
+                                  className={`text-left text-xs px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
+                                  <Checkbox checked={on} className="mr-2 align-middle pointer-events-none" />{o}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                         <div><Label># Screens</Label><Input type="number" value={doohScreenCount} onChange={e=>setDoohScreenCount(e.target.value)} /></div>
                       </div>
