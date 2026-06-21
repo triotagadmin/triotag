@@ -5,7 +5,7 @@ import { verify } from "https://deno.land/x/djwt@v3.0.0/mod.ts";
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const jwtSecret = Deno.env.get("JWT_SECRET");
-const frontendUrl = "https://tinystickyads.com";
+const frontendUrl = "https://triotag.com";
 
 if (!jwtSecret) {
   throw new Error("JWT_SECRET environment variable is required.");

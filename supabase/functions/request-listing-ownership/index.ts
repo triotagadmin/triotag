@@ -8,7 +8,7 @@ const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
 const jwtSecret = Deno.env.get("JWT_SECRET");
-const frontendUrl = "https://tinystickyads.com";
+const frontendUrl = "https://triotag.com";
 
 if (!jwtSecret) {
   throw new Error("JWT_SECRET environment variable is required.");
@@ -169,7 +169,7 @@ serve(async (req) => {
       const verificationUrl = `${frontendUrl}/verify?listing_token=${token}`;
 
       await resend.emails.send({
-        from: "TinyStickyAds <noreply@tinystickyads.com>",
+        from: "TinyStickyAds <noreply@triotag.com>",
         to: [normalizedEmail],
         subject: "Confirm ad space ownership assignment",
         html: `
@@ -184,7 +184,7 @@ serve(async (req) => {
       const signupUrl = `${frontendUrl}/auth?account_type=advertiser`;
 
       await resend.emails.send({
-        from: "TinyStickyAds <noreply@tinystickyads.com>",
+        from: "TinyStickyAds <noreply@triotag.com>",
         to: [normalizedEmail],
         subject: "You've been invited to claim an ad space",
         html: `

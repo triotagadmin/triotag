@@ -83,12 +83,12 @@ const handler = async (req: Request): Promise<Response> => {
       key
     );
 
-    const verificationUrl = `https://tinystickyads.com/verify?token=${token}`;
+    const verificationUrl = `https://triotag.com/verify?token=${token}`;
 
     console.log(`[send-verification-email] Calling Resend API for ${email}...`);
 
     const emailResponse = await resend.emails.send({
-      from: "TrioTag <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@triotag.com>",
       to: [email],
       subject: "Verify your TrioTag Account",
       html: `

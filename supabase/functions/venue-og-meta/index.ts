@@ -31,7 +31,7 @@ Deno.serve(async (req: Request) => {
     .eq("id", venueId)
     .single();
 
-  const appUrl = "https://tinystickyads.com";
+  const appUrl = "https://triotag.com";
   const fallbackImage = `${appUrl}/favicon.png`;
 
   if (error || !venue) {
