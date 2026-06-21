@@ -106,9 +106,6 @@ export default function SolutionsOOH() {
               <Button asChild size="lg">
                 <Link to="/advertiser/explore">Register OOH Inventory</Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link to="/campaign-submit">Start a Campaign</Link>
-              </Button>
             </div>
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
               {[
