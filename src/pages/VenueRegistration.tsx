@@ -61,7 +61,7 @@ const VENUE_TYPES = [
 const INDUSTRY_CATEGORIES = [
   "Food & Beverage", "Health & Wellness", "Retail & Shopping", "Hospitality & Travel",
   "Entertainment & Leisure", "Automotive & Transport", "Education & Training",
-  "Professional Services", "Beauty & Personal Care", "Other",
+  "Professional Services", "Beauty & Personal Care", "Real Estate & Property Management", "Other",
 ];
 
 const AD_UNIT_MATERIALS = [
