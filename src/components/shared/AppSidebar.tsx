@@ -73,7 +73,7 @@ export function AppSidebar({ role }: { role: string }) {
     <aside
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
-      className={`hidden lg:flex flex-col ${expanded ? "w-60" : "w-[68px]"} bg-[#0c0c0c] text-white h-screen fixed left-0 top-0 transition-all duration-200 ease-in-out z-40 border-r border-white/5`}
+      className={`hidden md:flex flex-col ${expanded ? "w-60" : "w-[68px]"} bg-[#0c0c0c] text-white h-screen fixed left-0 top-0 transition-all duration-200 ease-in-out z-40 border-r border-white/5`}
     >
       <div className="flex items-center gap-2 px-4 py-4 border-b border-white/5">
         <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-green-600 text-white shrink-0">
@@ -150,7 +150,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       {role && <AppSidebar role={role} />}
-      <div className={role ? "lg:pl-[68px]" : ""}>{children}</div>
+      <div className={role ? "md:pl-[68px]" : ""}>{children}</div>
     </>
   );
 }
