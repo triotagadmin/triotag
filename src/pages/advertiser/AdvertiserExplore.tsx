@@ -82,6 +82,14 @@ export default function AdvertiserExplore() {
       toast({ title: "Missing info", description: "Campaign name and start date are required.", variant: "destructive" });
       return;
     }
+    if (isBefore(new Date(form.preferredStartDate), MIN_LAUNCH_DATE)) {
+      toast({
+        title: "Start date too soon",
+        description: `Campaigns require at least 1 month lead time. Earliest available date is ${format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}.`,
+        variant: "destructive",
+      });
+      return;
+    }
     setSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
