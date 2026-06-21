@@ -107,6 +107,8 @@ import UnderConstruction from "./pages/UnderConstruction";
 import HomeRouter from "./components/HomeRouter";
 import Notifications from "./pages/Notifications";
 import { AppSidebarShell } from "./components/shared/AppSidebar";
+import BrandAdvertiserDashboard from "./pages/brand-advertiser/BrandAdvertiserDashboard";
+import BrandAdvertiserSettings from "./pages/brand-advertiser/BrandAdvertiserSettings";
 
 const queryClient = new QueryClient();
 
@@ -253,6 +255,10 @@ const App = () => (
           <Route path="/industries/retailers" element={<IndustriesRetailers />} />
           <Route path="/industries/brands" element={<IndustriesBrands />} />
           <Route path="/media-partners" element={<MediaPartners />} />
+          {/* Brand Advertiser portal */}
+          <Route path="/brand-advertiser/dashboard" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserDashboard /></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/campaigns" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserDashboard /></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/settings" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserSettings /></RoleProtectedRoute>} />
           <Route path="/under-construction" element={<UnderConstruction />} />
           <Route path="/careers" element={<UnderConstruction />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

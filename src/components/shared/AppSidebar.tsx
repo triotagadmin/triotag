@@ -43,6 +43,12 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
   ],
+  brand_advertiser: [
+    { to: "/brand-advertiser/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/brand-advertiser/campaigns", label: "My Campaigns", icon: Megaphone },
+    { to: "/messages", label: "Messages", icon: MessageSquare },
+    { to: "/notifications", label: "Notifications", icon: Bell },
+  ],
 };
 
 const ROLE_SETTINGS_PATH: Record<string, string> = {
@@ -51,6 +57,7 @@ const ROLE_SETTINGS_PATH: Record<string, string> = {
   print_partner: "/print-partner/settings",
   talent: "/talent-profile",
   admin: "/admin/dashboard",
+  brand_advertiser: "/brand-advertiser/settings",
 };
 
 export function AppSidebar({ role }: { role: string }) {

@@ -101,6 +101,7 @@ const Auth = () => {
         const intendedRole =
           storedUserType === "venue" ? "agent" :
           storedUserType === "advertiser" ? "retailer" :
+          storedUserType === "brand_advertiser" ? "brand_advertiser" :
           storedUserType;
 
         if (existingRole) {
@@ -110,13 +111,14 @@ const Auth = () => {
             return;
           }
           // New Google user whose trigger defaulted to wrong role - fix it
-          await supabase.rpc("set_own_role", { _role: intendedRole as "admin" | "retailer" | "agent" });
+          await supabase.rpc("set_own_role", { _role: intendedRole as any });
         }
 
         // New Google user - create role and profile
         const mappedRole =
           storedUserType === "venue" ? "agent" :
           storedUserType === "advertiser" ? "retailer" :
+          storedUserType === "brand_advertiser" ? "brand_advertiser" :
           storedUserType;
 
         // The trigger handle_new_user_role should handle this, but ensure it exists
@@ -185,6 +187,27 @@ const Auth = () => {
               .update({ verified: true })
               .eq("user_id", userId);
           }
+        } else if (storedUserType === "brand_advertiser") {
+          const { data: existingProfile } = await supabase
+            .from("brand_advertiser_profiles")
+            .select("id")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+          if (!existingProfile) {
+            await supabase.from("brand_advertiser_profiles").insert({
+              user_id: userId,
+              company_name: session.user.user_metadata?.full_name || "",
+              contact_name: session.user.user_metadata?.full_name || "",
+              contact_email: userEmail,
+              verified: true,
+            });
+          } else {
+            await supabase
+              .from("brand_advertiser_profiles")
+              .update({ verified: true })
+              .eq("user_id", userId);
+          }
         } else if (storedUserType === "talent") {
           // Ensure the role is set to talent (trigger may have defaulted to advertiser)
           if (!existingRole || existingRole.role !== "talent") {
@@ -242,6 +265,8 @@ const Auth = () => {
         } else {
           navigate("/talent-profile");
         }
+      } else if (role === "brand_advertiser") {
+        goAfterAuth("/brand-advertiser/dashboard");
       } else {
         navigate("/");
       }
@@ -280,8 +305,18 @@ const Auth = () => {
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error("User creation failed");
 
-      // Profile is automatically created by database trigger
-      
+      // Profile is automatically created by database trigger for most roles.
+      // Brand Advertiser profile must be created explicitly (no trigger).
+      if (userType === "brand_advertiser") {
+        await supabase.from("brand_advertiser_profiles").insert({
+          user_id: authData.user.id,
+          company_name: companyName || "",
+          contact_name: contactName || "",
+          contact_email: validatedData.email,
+          verified: false,
+        });
+      }
+
       // Sign out the user immediately (they must verify email first)
       await supabase.auth.signOut();
 
@@ -459,6 +494,9 @@ const Auth = () => {
         } else {
           goAfterAuth("/talent-profile");
         }
+      } else if (roles?.role === "brand_advertiser") {
+        toast({ title: "Welcome back!", description: "Successfully signed in." });
+        goAfterAuth("/brand-advertiser/dashboard");
       } else {
         navigate("/");
       }
@@ -667,6 +705,7 @@ const Auth = () => {
                     <SelectContent>
                       <SelectItem value="retailer">Retailer</SelectItem>
                       <SelectItem value="venue">Agent</SelectItem>
+                      <SelectItem value="brand_advertiser">Brand Advertiser</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
