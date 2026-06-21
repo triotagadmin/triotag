@@ -161,16 +161,17 @@ const VenueRegistration = () => {
   // OOH details
   const [oohPrintFormats, setOohPrintFormats] = useState<string[]>([]);
   const toggleOohPrintFormat = (v: string) => setOohPrintFormats(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
-  const [oohPlacementCount, setOohPlacementCount] = useState("");
+  const [oohUnits, setOohUnits] = useState<Record<string, number>>({});
   // DOOH details
   const [doohScreenDescription, setDoohScreenDescription] = useState("");
   const [doohScreenTypes, setDoohScreenTypes] = useState<string[]>([]);
   const toggleDoohScreenType = (v: string) => setDoohScreenTypes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
-  const [doohScreenCount, setDoohScreenCount] = useState("");
+  const [doohUnits, setDoohUnits] = useState<Record<string, number>>({});
   // AOOH details
-  const [aoohSpotDuration, setAoohSpotDuration] = useState("");
+  const [aoohSpotDurations, setAoohSpotDurations] = useState<string[]>([]);
+  const toggleAoohSpotDuration = (v: string) => setAoohSpotDurations(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
+  const [aoohUnits, setAoohUnits] = useState<Record<string, number>>({});
   const [aoohPlayFrequency, setAoohPlayFrequency] = useState("");
-  const [aoohAudioZones, setAoohAudioZones] = useState("");
 
   const toggleFormat = (f: "OOH" | "DOOH" | "AOOH") =>
     setSelectedFormats(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
@@ -487,10 +488,11 @@ const VenueRegistration = () => {
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
+        const sumUnits = (m: Record<string, number>) => Object.values(m).reduce((s, n) => s + (Number(n) || 0), 0);
         const formatDetails: Record<string, any> = {
-          OOH: { print_format: oohPrintFormats.join(", "), print_formats: oohPrintFormats, placement_count: oohPlacementCount ? parseInt(oohPlacementCount) : null },
-          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenTypes.join(", "), screen_types: doohScreenTypes, screen_count: doohScreenCount ? parseInt(doohScreenCount) : null },
-          AOOH: { spot_duration: aoohSpotDuration, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: aoohAudioZones ? parseInt(aoohAudioZones) : null },
+          OOH: { print_format: oohPrintFormats.join(", "), print_formats: oohPrintFormats, units_by_format: oohUnits, placement_count: sumUnits(oohUnits) || null },
+          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenTypes.join(", "), screen_types: doohScreenTypes, units_by_type: doohUnits, screen_count: sumUnits(doohUnits) || null },
+          AOOH: { spot_duration: aoohSpotDurations.join(", "), spot_durations: aoohSpotDurations, zones_by_duration: aoohUnits, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: sumUnits(aoohUnits) || null },
         };
         const rows = selectedFormats.map(fmt => ({
           ...venueData,
