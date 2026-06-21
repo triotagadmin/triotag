@@ -41,7 +41,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState<string>("advertiser");
+  const [userType, setUserType] = useState<string>("retailer");
   const [companyName, setCompanyName] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -98,7 +98,10 @@ const Auth = () => {
           .eq("user_id", userId)
           .maybeSingle();
 
-        const intendedRole = storedUserType === "venue" ? "publisher" : storedUserType;
+        const intendedRole =
+          storedUserType === "venue" ? "agent" :
+          storedUserType === "advertiser" ? "retailer" :
+          storedUserType;
 
         if (existingRole) {
           if (existingRole.role === intendedRole) {
@@ -107,15 +110,18 @@ const Auth = () => {
             return;
           }
           // New Google user whose trigger defaulted to wrong role - fix it
-          await supabase.rpc("set_own_role", { _role: intendedRole as "admin" | "advertiser" | "publisher" });
+          await supabase.rpc("set_own_role", { _role: intendedRole as "admin" | "retailer" | "agent" });
         }
 
         // New Google user - create role and profile
-        const mappedRole = storedUserType === "venue" ? "publisher" : storedUserType;
+        const mappedRole =
+          storedUserType === "venue" ? "agent" :
+          storedUserType === "advertiser" ? "retailer" :
+          storedUserType;
 
         // The trigger handle_new_user_role should handle this, but ensure it exists
         // Create the appropriate profile and mark as verified
-        if (storedUserType === "advertiser") {
+        if (storedUserType === "advertiser" || storedUserType === "retailer") {
           const { data: existingProfile } = await supabase
             .from("advertiser_profiles")
             .select("id")
@@ -208,7 +214,7 @@ const Auth = () => {
     const routeByRole = async (role: string) => {
       if (role === "admin") {
         goAfterAuth("/admin/dashboard");
-      } else if (role === "advertiser") {
+      } else if (role === "retailer") {
         try {
           await supabase.functions.invoke("sync-pending-listing-ownership");
         } catch (syncError) {
@@ -217,7 +223,7 @@ const Auth = () => {
         goAfterAuth("/advertiser-dashboard");
       } else if (role === "print_partner") {
         goAfterAuth("/print-partner/dashboard");
-      } else if (role === "publisher") {
+      } else if (role === "agent") {
         goAfterAuth("/venue-publishers");
       } else if (role === "talent") {
         // Check talent profile status
@@ -369,7 +375,7 @@ const Auth = () => {
           description: "Successfully signed in as admin.",
         });
         goAfterAuth("/admin/dashboard");
-      } else if (roles?.role === "advertiser") {
+      } else if (roles?.role === "retailer") {
         const { data: profile } = await supabase
           .from("advertiser_profiles")
           .select("verified")
@@ -407,7 +413,7 @@ const Auth = () => {
         });
         await supabase.auth.signOut();
         return;
-      } else if (roles?.role === "publisher") {
+      } else if (roles?.role === "agent") {
         const { data: profile } = await supabase
           .from("publisher_profiles")
           .select("verified, publisher_type")
@@ -659,7 +665,7 @@ const Auth = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="advertiser">Retailer</SelectItem>
+                      <SelectItem value="retailer">Retailer</SelectItem>
                       <SelectItem value="venue">Agent</SelectItem>
                     </SelectContent>
                   </Select>
