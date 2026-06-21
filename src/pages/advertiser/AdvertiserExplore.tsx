@@ -154,8 +154,21 @@ export default function AdvertiserExplore() {
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="font-semibold text-gray-900 text-sm">{variant.label}</div>
-            <div className="text-green-600 font-medium text-xs mt-0.5">
-              ₱{variant.price.toLocaleString()} / unit
+            <div className="flex flex-wrap items-center gap-2 mt-0.5">
+              <span className="text-green-600 font-medium text-xs">
+                ₱{variant.price.toLocaleString()} / unit
+              </span>
+              {variant.billingType === "monthly" ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2 py-0.5">
+                  <RefreshCw className="w-3 h-3" />
+                  Monthly Subscription
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-gray-50 text-gray-600 border border-gray-200 rounded-full px-2 py-0.5">
+                  <Package className="w-3 h-3" />
+                  Per Campaign
+                </span>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -178,6 +191,12 @@ export default function AdvertiserExplore() {
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 mt-3">
+          {variant.airTime && (
+            <span className="text-[11px] bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 text-amber-700 inline-flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              <strong className="text-amber-800">Air Time:</strong> {variant.airTime}
+            </span>
+          )}
           {Object.entries(variant.specs).map(([key, val]) => (
             <span key={key} className="text-[11px] bg-gray-50 border border-gray-200 rounded-full px-2.5 py-1 text-gray-600">
               <strong className="text-gray-800">{key}:</strong> {val}
