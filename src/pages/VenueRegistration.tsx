@@ -611,7 +611,7 @@ const VenueRegistration = () => {
                       return (
                         <button key={t.value} type="button" onClick={() => toggleVenueType(t.value)}
                           className={`text-left text-sm px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
-                          <Checkbox checked={on} className="mr-2 align-middle pointer-events-none" />
+                          <span className={`inline-block w-3 h-3 mr-2 rounded-sm border align-middle ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />
                           {t.label}
                         </button>
                       );
@@ -692,7 +692,7 @@ const VenueRegistration = () => {
                               return (
                                 <button key={o} type="button" onClick={() => toggleOohPrintFormat(o)}
                                   className={`text-left text-xs px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
-                                  <Checkbox checked={on} className="mr-2 align-middle pointer-events-none" />{o}
+                                  <span className={`inline-block w-3 h-3 mr-2 rounded-sm border align-middle ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
                                 </button>
                               );
                             })}
@@ -711,7 +711,7 @@ const VenueRegistration = () => {
                               return (
                                 <button key={o} type="button" onClick={() => toggleDoohScreenType(o)}
                                   className={`text-left text-xs px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
-                                  <Checkbox checked={on} className="mr-2 align-middle pointer-events-none" />{o}
+                                  <span className={`inline-block w-3 h-3 mr-2 rounded-sm border align-middle ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
                                 </button>
                               );
                             })}
