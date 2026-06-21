@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getDashboardByRole } from "@/components/RoleProtectedRoute";
 
 interface ProtectedAdminRouteProps {
   children: React.ReactNode;
@@ -40,10 +41,9 @@ export default function ProtectedAdminRoute({ children }: ProtectedAdminRoutePro
         .single();
 
       if (roleError || roleData?.role !== "admin") {
-        console.error("[Protected Route] Admin role verification failed:", roleError);
-        toast.error("Access denied. Admin credentials required.");
-        await supabase.auth.signOut();
-        navigate("/admin");
+        console.warn("[Protected Route] Non-admin user hit admin route — redirecting to their dashboard");
+        const target = getDashboardByRole((roleData?.role as any) ?? null);
+        navigate(target === "/" ? "/auth" : target, { replace: true });
         return;
       }
 
