@@ -27,45 +27,60 @@ const AdvertiserDashboard = () => {
   const [bookingPage, setBookingPage] = useState(0);
   const BOOKINGS_PER_PAGE = 3;
   useEffect(() => {
+    let cancelled = false;
     const checkUser = async () => {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
       if (!session) {
-        navigate("/auth");
+        navigate("/auth", { replace: true });
         return;
       }
 
-      // Verify user has advertiser role
-      const {
-        data: roles
-      } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
-      if (!roles || roles.role !== "retailer") {
-        navigate("/dashboard");
+      // Verify user has advertiser (retailer) role. Use maybeSingle so a missing
+      // row doesn't throw, and fall back to user_metadata.user_type if needed.
+      const { data: roleRow, error: roleErr } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      if (roleErr) {
+        console.error("[AdvertiserDashboard] role fetch error:", roleErr);
+      }
+      const metaType = (session.user.user_metadata as any)?.user_type;
+      const effectiveRole = roleRow?.role ?? metaType ?? null;
+      console.log("[AdvertiserDashboard] role check", { roleRow, metaType, effectiveRole });
+
+      if (effectiveRole && effectiveRole !== "retailer") {
+        // Wrong role — route to their proper home instead of bouncing to "/".
+        const ROLE_HOME: Record<string, string> = {
+          agent: "/venue-publishers",
+          print_partner: "/print-partner/dashboard",
+          talent: "/talent-dashboard",
+          admin: "/admin/dashboard",
+          brand_advertiser: "/brand-advertiser/dashboard",
+        };
+        navigate(ROLE_HOME[effectiveRole] || "/", { replace: true });
         return;
       }
+
+      if (cancelled) return;
       setUser(session.user);
       setLoading(false);
 
-      // Fetch bookings
       const { data: activations } = await supabase
         .from("activations")
         .select("*, ad_spaces(title, location)")
         .eq("advertiser_id", session.user.id)
         .order("created_at", { ascending: false });
-      if (activations) setBookings(activations);
+      if (!cancelled && activations) setBookings(activations);
 
-      // Fetch listings leased by this advertiser
       const { data: leased } = await supabase
         .from("ad_spaces")
         .select("id, title, location, approval_status, specifications, created_at")
         .contains("leased_advertiser_ids", [session.user.id])
         .order("created_at", { ascending: false });
-      if (leased) {
+      if (!cancelled && leased) {
         setLeasedListings(leased);
-        // Fetch branch counts for each leased listing, excluding primary address
         const counts: Record<string, number> = {};
         await Promise.all(leased.map(async (l: any) => {
           const primaryAddress = (l.location || "").trim().toLowerCase();
@@ -78,22 +93,20 @@ const AdvertiserDashboard = () => {
           );
           counts[l.id] = filtered.length;
         }));
-        setBranchCounts(counts);
+        if (!cancelled) setBranchCounts(counts);
       }
     };
     checkUser();
-    const {
-      data: {
-        subscription
-      }
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // Only react to actual sign-outs; ignore INITIAL_SESSION / TOKEN_REFRESHED
+      // which were causing redirect loops.
+      if (event === "SIGNED_OUT" || (event === "USER_UPDATED" && !session)) {
+        navigate("/auth", { replace: true });
+      } else if (session) {
         setUser(session.user);
       }
     });
-    return () => subscription.unsubscribe();
+    return () => { cancelled = true; subscription.unsubscribe(); };
   }, [navigate]);
   const handleSignOut = async () => {
     await supabase.auth.signOut();
