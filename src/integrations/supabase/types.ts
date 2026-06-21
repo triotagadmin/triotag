@@ -4093,6 +4093,8 @@ export type Database = {
         | "advertiser"
         | "talent"
         | "print_partner"
+        | "agent"
+        | "retailer"
       approval_status: "pending" | "approved" | "rejected"
       booking_status:
         | "pending"
@@ -4260,7 +4262,15 @@ export const Constants = {
       ],
       admin_status: ["pending", "verified", "rejected"],
       agent_role: ["guerrilla", "influencer", "model", "artist"],
-      app_role: ["admin", "publisher", "advertiser", "talent", "print_partner"],
+      app_role: [
+        "admin",
+        "publisher",
+        "advertiser",
+        "talent",
+        "print_partner",
+        "agent",
+        "retailer",
+      ],
       approval_status: ["pending", "approved", "rejected"],
       booking_status: [
         "pending",

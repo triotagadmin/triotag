@@ -9,17 +9,9 @@ import { BRAND_NAME } from "@/lib/brand";
 type Item = { to: string; label: string; icon: any };
 
 const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
-  advertiser: [
+  retailer: [
     { to: "/advertiser-dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/advertiser/reports", label: "Active Media", icon: BarChart3 },
-    { to: "/messages", label: "Messages", icon: MessageSquare },
-    { to: "/notifications", label: "Notifications", icon: Bell },
-  ],
-  publisher: [
-    { to: "/venue-publishers", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/venue-inventory", label: "My Ad Spaces", icon: Globe },
-    
-    { to: "/publisher/campaigns", label: "Campaigns", icon: Megaphone },
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
   ],
@@ -54,8 +46,7 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
 };
 
 const ROLE_SETTINGS_PATH: Record<string, string> = {
-  advertiser: "/advertiser-settings",
-  publisher: "/publisher/settings",
+  retailer: "/advertiser-settings",
   agent: "/publisher/settings",
   print_partner: "/print-partner/settings",
   talent: "/talent-profile",
@@ -153,11 +144,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
       const userId = session?.user?.id;
       if (!userId) { setRole(null); setReady(true); return; }
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
-      let resolved = (data?.role as string) || null;
-      // Agents are stored as publisher role but should see Inventory like advertisers.
-      if (resolved === "publisher" && session?.user?.user_metadata?.user_type === "agent") {
-        resolved = "agent";
-      }
+      const resolved = (data?.role as string) || null;
       setRole(resolved);
       setReady(true);
     };

@@ -43,7 +43,7 @@ const FranchiseBranches = () => {
             .select("role")
             .eq("user_id", session.user.id)
             .single();
-          setIsAdvertiser(role?.role === "advertiser");
+          setIsAdvertiser(role?.role === "retailer");
           setIsAdmin(role?.role === "admin");
         }
 

@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import Index from "@/pages/Index";
 
 const ROLE_HOME: Record<string, string> = {
-  advertiser: "/advertiser-dashboard",
-  publisher: "/venue-publishers",
+  retailer: "/advertiser-dashboard",
+  agent: "/venue-publishers",
   print_partner: "/print-partner/dashboard",
   talent: "/talent-dashboard",
   admin: "/admin/dashboard",

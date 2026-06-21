@@ -103,7 +103,7 @@ const FranchiseEdit = () => {
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
-  const [userRole, setUserRole] = useState<"publisher" | "advertiser" | "admin" | null>(null);
+  const [userRole, setUserRole] = useState<"agent" | "retailer" | "admin" | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [publisherId, setPublisherId] = useState<string | null>(null);
   const submittedRef = useRef(false);
@@ -184,12 +184,12 @@ const FranchiseEdit = () => {
       if (currentRole === "admin") {
         setUserRole("admin");
         setIsAdmin(true);
-      } else if (currentRole === "publisher") {
-        setUserRole("publisher");
+      } else if (currentRole === "agent") {
+        setUserRole("agent");
         const { data: pubProfile } = await supabase.from("publisher_profiles").select("id").eq("user_id", session.user.id).maybeSingle();
         if (pubProfile) setPublisherId(pubProfile.id);
-      } else if (currentRole === "advertiser") {
-        setUserRole("advertiser");
+      } else if (currentRole === "retailer") {
+        setUserRole("retailer");
       } else {
         toast({ title: "Access denied", description: "You don't have permission to edit this franchise.", variant: "destructive" });
         navigate("/");
@@ -206,7 +206,7 @@ const FranchiseEdit = () => {
 
       // Verify access
       const isAdminUser = currentRole === "admin";
-      const isPublisher = currentRole === "publisher";
+      const isPublisher = currentRole === "agent";
       const isOwnerAdvertiser = venue.advertiser_id === session.user.id;
       const isLeasedAdvertiser = Array.isArray(venue.leased_advertiser_ids) && venue.leased_advertiser_ids.includes(session.user.id);
 
@@ -594,7 +594,7 @@ const FranchiseEdit = () => {
             <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="text-2xl md:text-3xl">Edit Franchise</CardTitle>
               <Badge variant="outline" className="text-xs">
-                {userRole === "publisher" ? "Agent View" : "Retailer View"}
+                {userRole === "agent" ? "Agent View" : "Retailer View"}
               </Badge>
             </div>
             <p className="text-muted-foreground mt-2">
@@ -676,7 +676,7 @@ const FranchiseEdit = () => {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {branches.length > 0 ? (
-                      (isAdmin || userRole === "advertiser") ? (
+                      (isAdmin || userRole === "retailer") ? (
                         <div className="space-y-1.5">
                           {branches.map((loc, idx) => (
                             <div key={loc.id} className="space-y-0">
@@ -707,7 +707,7 @@ const FranchiseEdit = () => {
                               )}
                             </div>
                           ))}
-                          {userRole === "advertiser" && (
+                          {userRole === "retailer" && (
                             <p className="text-xs text-muted-foreground italic mt-2">Branch locations can be edited from your dashboard.</p>
                           )}
                         </div>
