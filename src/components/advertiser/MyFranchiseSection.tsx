@@ -592,7 +592,7 @@ export const MyFranchiseSection = ({ userId, onSelectionChange }: MyFranchiseSec
         </div>
         <Button size="sm" onClick={() => navigate("/venue-registration")} className="gap-1">
           <Plus className="h-4 w-4" />
-          New Franchise
+          New Inventory
         </Button>
       </div>
 
