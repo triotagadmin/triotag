@@ -722,6 +722,18 @@ const VenueRegistration = () => {
                                 <button type="button" onClick={() => toggleOohPrintFormat(o)} className="flex items-center gap-2 text-xs flex-1 text-left">
                                   <span className={`inline-block w-3 h-3 rounded-sm border ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
                                 </button>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button type="button" aria-label={`${o} details`} className="text-muted-foreground hover:text-primary transition-colors">
+                                      <Info className="h-3.5 w-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs text-xs space-y-1">
+                                    <div><span className="font-semibold">Size:</span> {OOH_FORMAT_DETAILS[o]?.size}</div>
+                                    <div><span className="font-semibold">Material:</span> {OOH_FORMAT_DETAILS[o]?.material}</div>
+                                    <div><span className="font-semibold">Print style:</span> {OOH_FORMAT_DETAILS[o]?.printStyle}</div>
+                                  </TooltipContent>
+                                </Tooltip>
                                 <Input type="number" min={0} disabled={!on} value={oohUnits[o] ?? ""} onChange={e => setOohUnits(prev => ({ ...prev, [o]: Math.max(0, Number(e.target.value) || 0) }))} placeholder="units" className="h-7 w-20 text-xs" />
                               </div>
                             );
@@ -741,6 +753,18 @@ const VenueRegistration = () => {
                                 <button type="button" onClick={() => toggleDoohScreenType(o)} className="flex items-center gap-2 text-xs flex-1 text-left">
                                   <span className={`inline-block w-3 h-3 rounded-sm border ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
                                 </button>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button type="button" aria-label={`${o} details`} className="text-muted-foreground hover:text-primary transition-colors">
+                                      <Info className="h-3.5 w-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs text-xs space-y-1">
+                                    <div><span className="font-semibold">Size:</span> {DOOH_FORMAT_DETAILS[o]?.size}</div>
+                                    <div><span className="font-semibold">Resolution:</span> {DOOH_FORMAT_DETAILS[o]?.resolution}</div>
+                                    <div><span className="font-semibold">Spot style:</span> {DOOH_FORMAT_DETAILS[o]?.spotStyle}</div>
+                                  </TooltipContent>
+                                </Tooltip>
                                 <Input type="number" min={0} disabled={!on} value={doohUnits[o] ?? ""} onChange={e => setDoohUnits(prev => ({ ...prev, [o]: Math.max(0, Number(e.target.value) || 0) }))} placeholder="screens" className="h-7 w-20 text-xs" />
                               </div>
                             );
@@ -759,6 +783,18 @@ const VenueRegistration = () => {
                                 <button type="button" onClick={() => toggleAoohSpotDuration(o)} className="flex items-center gap-2 text-xs flex-1 text-left">
                                   <span className={`inline-block w-3 h-3 rounded-sm border ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
                                 </button>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button type="button" aria-label={`${o} details`} className="text-muted-foreground hover:text-primary transition-colors">
+                                      <Info className="h-3.5 w-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs text-xs space-y-1">
+                                    <div><span className="font-semibold">Duration:</span> {AOOH_FORMAT_DETAILS[o]?.duration}</div>
+                                    <div><span className="font-semibold">Audio format:</span> {AOOH_FORMAT_DETAILS[o]?.format}</div>
+                                    <div><span className="font-semibold">Placement:</span> {AOOH_FORMAT_DETAILS[o]?.placement}</div>
+                                  </TooltipContent>
+                                </Tooltip>
                                 <Input type="number" min={0} disabled={!on} value={aoohUnits[o] ?? ""} onChange={e => setAoohUnits(prev => ({ ...prev, [o]: Math.max(0, Number(e.target.value) || 0) }))} placeholder="zones" className="h-7 w-20 text-xs" />
                               </div>
                             );
