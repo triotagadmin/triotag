@@ -104,7 +104,7 @@ export default function SolutionsOOH() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/advertiser/explore">Register Inventory</Link>
+                <Link to="/advertiser/explore">Register OOH Inventory</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link to="/campaign-submit">Start a Campaign</Link>
