@@ -161,16 +161,17 @@ const VenueRegistration = () => {
   // OOH details
   const [oohPrintFormats, setOohPrintFormats] = useState<string[]>([]);
   const toggleOohPrintFormat = (v: string) => setOohPrintFormats(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
-  const [oohPlacementCount, setOohPlacementCount] = useState("");
+  const [oohUnits, setOohUnits] = useState<Record<string, number>>({});
   // DOOH details
   const [doohScreenDescription, setDoohScreenDescription] = useState("");
   const [doohScreenTypes, setDoohScreenTypes] = useState<string[]>([]);
   const toggleDoohScreenType = (v: string) => setDoohScreenTypes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
-  const [doohScreenCount, setDoohScreenCount] = useState("");
+  const [doohUnits, setDoohUnits] = useState<Record<string, number>>({});
   // AOOH details
-  const [aoohSpotDuration, setAoohSpotDuration] = useState("");
+  const [aoohSpotDurations, setAoohSpotDurations] = useState<string[]>([]);
+  const toggleAoohSpotDuration = (v: string) => setAoohSpotDurations(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
+  const [aoohUnits, setAoohUnits] = useState<Record<string, number>>({});
   const [aoohPlayFrequency, setAoohPlayFrequency] = useState("");
-  const [aoohAudioZones, setAoohAudioZones] = useState("");
 
   const toggleFormat = (f: "OOH" | "DOOH" | "AOOH") =>
     setSelectedFormats(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
@@ -487,10 +488,11 @@ const VenueRegistration = () => {
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
+        const sumUnits = (m: Record<string, number>) => Object.values(m).reduce((s, n) => s + (Number(n) || 0), 0);
         const formatDetails: Record<string, any> = {
-          OOH: { print_format: oohPrintFormats.join(", "), print_formats: oohPrintFormats, placement_count: oohPlacementCount ? parseInt(oohPlacementCount) : null },
-          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenTypes.join(", "), screen_types: doohScreenTypes, screen_count: doohScreenCount ? parseInt(doohScreenCount) : null },
-          AOOH: { spot_duration: aoohSpotDuration, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: aoohAudioZones ? parseInt(aoohAudioZones) : null },
+          OOH: { print_format: oohPrintFormats.join(", "), print_formats: oohPrintFormats, units_by_format: oohUnits, placement_count: sumUnits(oohUnits) || null },
+          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenTypes.join(", "), screen_types: doohScreenTypes, units_by_type: doohUnits, screen_count: sumUnits(doohUnits) || null },
+          AOOH: { spot_duration: aoohSpotDurations.join(", "), spot_durations: aoohSpotDurations, zones_by_duration: aoohUnits, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: sumUnits(aoohUnits) || null },
         };
         const rows = selectedFormats.map(fmt => ({
           ...venueData,
@@ -684,52 +686,59 @@ const VenueRegistration = () => {
                       })}
                     </div>
                     {selectedFormats.includes("OOH") && (
-                      <div className="border-t pt-4 grid sm:grid-cols-2 gap-3">
-                        <div className="sm:col-span-2"><Label>Print Format Types <span className="text-xs text-muted-foreground font-normal">(select all)</span></Label>
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
-                            {["Table Tent","Poster/Wall","Floor Sticker","Shelf Signage","Counter Display","Aisle Signage","Entrance Banner","Other"].map(o => {
-                              const on = oohPrintFormats.includes(o);
-                              return (
-                                <button key={o} type="button" onClick={() => toggleOohPrintFormat(o)}
-                                  className={`text-left text-xs px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
-                                  <span className={`inline-block w-3 h-3 mr-2 rounded-sm border align-middle ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
+                      <div className="border-t pt-4">
+                        <Label>Print Formats & Units <span className="text-xs text-muted-foreground font-normal">(select all, set units each)</span></Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                          {["Table Tent","Poster/Wall","Floor Sticker","Shelf Signage","Counter Display","Aisle Signage","Entrance Banner","Other"].map(o => {
+                            const on = oohPrintFormats.includes(o);
+                            return (
+                              <div key={o} className={`flex items-center gap-2 px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border"}`}>
+                                <button type="button" onClick={() => toggleOohPrintFormat(o)} className="flex items-center gap-2 text-xs flex-1 text-left">
+                                  <span className={`inline-block w-3 h-3 rounded-sm border ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
                                 </button>
-                              );
-                            })}
-                          </div>
+                                <Input type="number" min={0} disabled={!on} value={oohUnits[o] ?? ""} onChange={e => setOohUnits(prev => ({ ...prev, [o]: Math.max(0, Number(e.target.value) || 0) }))} placeholder="units" className="h-7 w-20 text-xs" />
+                              </div>
+                            );
+                          })}
                         </div>
-                        <div><Label># Print Placements</Label><Input type="number" value={oohPlacementCount} onChange={e=>setOohPlacementCount(e.target.value)} /></div>
                       </div>
                     )}
                     {selectedFormats.includes("DOOH") && (
-                      <div className="border-t pt-4 grid sm:grid-cols-2 gap-3">
-                        <div className="sm:col-span-2"><Label>Screen Description</Label><Input value={doohScreenDescription} onChange={e=>setDoohScreenDescription(e.target.value)} placeholder="e.g. 55-inch LED at entrance" /></div>
-                        <div className="sm:col-span-2"><Label>Screen Types <span className="text-xs text-muted-foreground font-normal">(select all)</span></Label>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
-                            {["Indoor Screen","Outdoor Screen","Menu Board","Video Wall","Checkout Screen"].map(o => {
-                              const on = doohScreenTypes.includes(o);
-                              return (
-                                <button key={o} type="button" onClick={() => toggleDoohScreenType(o)}
-                                  className={`text-left text-xs px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
-                                  <span className={`inline-block w-3 h-3 mr-2 rounded-sm border align-middle ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
+                      <div className="border-t pt-4 space-y-3">
+                        <div><Label>Screen Description</Label><Input value={doohScreenDescription} onChange={e=>setDoohScreenDescription(e.target.value)} placeholder="e.g. 55-inch LED at entrance" /></div>
+                        <Label>Screen Types & Units <span className="text-xs text-muted-foreground font-normal">(select all, set units each)</span></Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {["Indoor Screen","Outdoor Screen","Menu Board","Video Wall","Checkout Screen"].map(o => {
+                            const on = doohScreenTypes.includes(o);
+                            return (
+                              <div key={o} className={`flex items-center gap-2 px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border"}`}>
+                                <button type="button" onClick={() => toggleDoohScreenType(o)} className="flex items-center gap-2 text-xs flex-1 text-left">
+                                  <span className={`inline-block w-3 h-3 rounded-sm border ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
                                 </button>
-                              );
-                            })}
-                          </div>
+                                <Input type="number" min={0} disabled={!on} value={doohUnits[o] ?? ""} onChange={e => setDoohUnits(prev => ({ ...prev, [o]: Math.max(0, Number(e.target.value) || 0) }))} placeholder="screens" className="h-7 w-20 text-xs" />
+                              </div>
+                            );
+                          })}
                         </div>
-                        <div><Label># Screens</Label><Input type="number" value={doohScreenCount} onChange={e=>setDoohScreenCount(e.target.value)} /></div>
                       </div>
                     )}
                     {selectedFormats.includes("AOOH") && (
-                      <div className="border-t pt-4 grid sm:grid-cols-3 gap-3">
-                        <div><Label>Spot Duration</Label>
-                          <Select value={aoohSpotDuration} onValueChange={setAoohSpotDuration}>
-                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                            <SelectContent>{["15 seconds","30 seconds","60 seconds"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                          </Select>
+                      <div className="border-t pt-4 space-y-3">
+                        <Label>Spot Durations & Zones <span className="text-xs text-muted-foreground font-normal">(select all, set audio zones each)</span></Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {["15 seconds","30 seconds","60 seconds"].map(o => {
+                            const on = aoohSpotDurations.includes(o);
+                            return (
+                              <div key={o} className={`flex items-center gap-2 px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border"}`}>
+                                <button type="button" onClick={() => toggleAoohSpotDuration(o)} className="flex items-center gap-2 text-xs flex-1 text-left">
+                                  <span className={`inline-block w-3 h-3 rounded-sm border ${on ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`} />{o}
+                                </button>
+                                <Input type="number" min={0} disabled={!on} value={aoohUnits[o] ?? ""} onChange={e => setAoohUnits(prev => ({ ...prev, [o]: Math.max(0, Number(e.target.value) || 0) }))} placeholder="zones" className="h-7 w-20 text-xs" />
+                              </div>
+                            );
+                          })}
                         </div>
                         <div><Label>Play Frequency (min)</Label><Input type="number" value={aoohPlayFrequency} onChange={e=>setAoohPlayFrequency(e.target.value)} placeholder="e.g. 30" /></div>
-                        <div><Label># Audio Zones</Label><Input type="number" value={aoohAudioZones} onChange={e=>setAoohAudioZones(e.target.value)} /></div>
                       </div>
                     )}
                   </CardContent>
