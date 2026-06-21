@@ -819,7 +819,7 @@ const FranchiseEdit = () => {
                                       />
                                     </div>
                                     <div>
-                                      <Label className="text-[10px] text-muted-foreground">Monthly</Label>
+                                      <Label className="text-[10px] text-muted-foreground">Expected Monthly Profit</Label>
                                       <div className={`h-8 px-2 flex items-center text-xs font-semibold rounded-[10px] border ${checked && lineProfit > 0 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-muted/30 border-border/40 text-muted-foreground"}`}>
                                         ₱{lineProfit.toLocaleString()}
                                       </div>
