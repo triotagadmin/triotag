@@ -208,7 +208,7 @@ export const Navigation = () => {
         </Link>
 
         <div className="hidden lg:flex items-center gap-1">
-          {NAV_ITEMS.map((item) =>
+          {(userRole === "admin" ? NAV_ITEMS_ADMIN : NAV_ITEMS_PUBLIC).map((item) =>
             item.children ? (
               <DropdownMenu key={item.label}>
                 <DropdownMenuTrigger asChild>
@@ -333,7 +333,7 @@ export const Navigation = () => {
             </div>
           )}
           <div className="flex flex-col p-2">
-            {NAV_ITEMS.map((item) =>
+            {(userRole === "admin" ? NAV_ITEMS_ADMIN : NAV_ITEMS_PUBLIC).map((item) =>
               item.children ? (
                 <div key={item.label}>
                   <div className="text-xs text-zinc-400 uppercase tracking-wider px-3 pt-3 pb-1">
