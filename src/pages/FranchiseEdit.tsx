@@ -799,37 +799,6 @@ const FranchiseEdit = () => {
                   </CardContent>
                 </Card>
 
-                {/* Lease Pricing */}
-                <Card className="rounded-[20px]">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Ad Space Lease Pricing</CardTitle>
-                    <p className="text-xs text-muted-foreground">Set the lease price for advertisers.</p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label>Currency</Label>
-                      <Select value={leaseCurrency} onValueChange={setLeaseCurrency}>
-                        <SelectTrigger className="rounded-[14px]"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="PHP">PHP</SelectItem>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="GBP">GBP</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <Label>Weekly Lease Price</Label>
-                        <Input type="number" value={weeklyLeasePrice} onChange={e => setWeeklyLeasePrice(e.target.value)} placeholder="0.00" />
-                      </div>
-                      <div>
-                        <Label>Monthly Lease Price</Label>
-                        <Input type="number" value={monthlyLeasePrice} onChange={e => setMonthlyLeasePrice(e.target.value)} placeholder="0.00" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
 
                 {/* Contact Info */}
                 <Card className="rounded-[20px]">
