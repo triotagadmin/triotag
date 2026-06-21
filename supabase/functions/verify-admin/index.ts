@@ -4,7 +4,7 @@ import { create, verify } from "https://deno.land/x/djwt@v3.0.0/mod.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const FRONTEND_URL = "https://tinystickyads.com";
+const FRONTEND_URL = "https://triotag.com";
 
 // SECURITY: JWT_SECRET must be provided via environment variable - no fallbacks allowed
 const JWT_SECRET = Deno.env.get("JWT_SECRET");

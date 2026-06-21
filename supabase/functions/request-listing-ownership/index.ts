@@ -8,7 +8,7 @@ const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
 const jwtSecret = Deno.env.get("JWT_SECRET");
-const frontendUrl = "https://tinystickyads.com";
+const frontendUrl = "https://triotag.com";
 
 if (!jwtSecret) {
   throw new Error("JWT_SECRET environment variable is required.");
