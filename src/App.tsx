@@ -90,6 +90,7 @@ import Revenue from "./pages/retailer/Revenue";
 import ScreenMonitor from "./pages/retailer/ScreenMonitor";
 import RetailerSettings from "./pages/retailer/RetailerSettings";
 import AdvertiserCampaigns from "./pages/advertiser/AdvertiserCampaigns";
+import AdvertiserReports from "./pages/advertiser/AdvertiserReports";
 import PublisherCampaigns from "./pages/publisher/PublisherCampaigns";
 import RetailerCampaigns from "./pages/retailer/RetailerCampaigns";
 import VenueCampaigns from "./pages/VenueCampaigns";
@@ -240,6 +241,7 @@ const App = () => (
           <Route path="/retailer/campaigns" element={<RetailerCampaigns />} />
           {/* Campaigns dashboards per role */}
           <Route path="/advertiser/campaigns" element={<RoleProtectedRoute requireAuth><AdvertiserCampaigns /></RoleProtectedRoute>} />
+          <Route path="/advertiser/reports" element={<RoleProtectedRoute requireAuth><AdvertiserReports /></RoleProtectedRoute>} />
           <Route path="/publisher/campaigns" element={<RoleProtectedRoute requireAuth><PublisherCampaigns /></RoleProtectedRoute>} />
           <Route path="/venue/campaigns" element={<RoleProtectedRoute requireAuth><VenueCampaigns /></RoleProtectedRoute>} />
           <Route path="/talent/campaigns" element={<RoleProtectedRoute requireAuth><TalentCampaigns /></RoleProtectedRoute>} />
