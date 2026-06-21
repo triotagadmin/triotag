@@ -503,7 +503,7 @@ export default function AdvertiserExplore() {
                   </Popover>
                   <p className="text-[11px] text-gray-500 mt-1.5 inline-flex items-start gap-1">
                     <Clock className="w-3 h-3 mt-0.5 shrink-0" />
-                    <span>Earliest available start date: <strong className="text-gray-700">{format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}</strong> — TrioTag requires 1 month lead time to prepare your campaign.</span>
+                    <span>Earliest available start date: <strong className="text-gray-700">{format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}</strong> — TrioTag requires 1 week or up to 1 month lead time to prepare your campaign.</span>
                   </p>
                 </div>
                 <div>
