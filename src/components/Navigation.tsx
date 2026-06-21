@@ -21,7 +21,7 @@ interface NavItemDef { label: string; to?: string; children?: { label: string; t
 const INVENTORY_LINK: NavLinkDef = { label: "Inventory", to: "/advertiser/explore" };
 const CAMPAIGNS_LINK: NavLinkDef = { label: "Campaigns", to: "/campaigns" };
 
-const NAV_ITEMS: NavItemDef[] = [
+const NAV_ITEMS_PUBLIC: NavItemDef[] = [
   {
     label: "Industries",
     children: [
@@ -39,12 +39,15 @@ const NAV_ITEMS: NavItemDef[] = [
     ],
   },
   { label: "Inventory", to: "/advertiser/explore" },
+];
+
+const NAV_ITEMS_ADMIN: NavItemDef[] = [
+  ...NAV_ITEMS_PUBLIC,
   { label: "Campaigns", to: "/campaigns" },
 ];
 
 const PUBLIC_LINKS: NavLinkDef[] = [
   INVENTORY_LINK,
-  CAMPAIGNS_LINK,
 ];
 
 const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
@@ -58,9 +61,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         retailerLink,
-        { label: "For Retailers", to: "/campaign-submit" },
         INVENTORY_LINK,
-        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -68,9 +69,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         retailerLink,
-        { label: "For Retailers", to: "/campaign-submit" },
         INVENTORY_LINK,
-        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -79,7 +78,6 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
         { label: "Home", to: "/" },
         retailerLink,
         INVENTORY_LINK,
-        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
@@ -87,7 +85,6 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
       return [
         { label: "Home", to: "/" },
         INVENTORY_LINK,
-        CAMPAIGNS_LINK,
         { label: "Resources", to: "/insights" },
         { label: "Company", to: "/contact" },
       ];
