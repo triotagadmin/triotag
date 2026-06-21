@@ -251,7 +251,54 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(`[Verify Email Success] Print partner verified successfully`);
     } else if (userType === "talent") {
       console.log(`[Verify Email Success] Talent email verified successfully for user: ${userId}`);
+    } else if (userType === "brand_advertiser") {
+      const { data: profile, error: fetchError } = await supabase
+        .from("brand_advertiser_profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      if (fetchError || !profile) {
+        console.error("[Verify Email Error] Brand advertiser profile not found:", fetchError);
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${FRONTEND_URL}/verify?verified=failed`,
+            ...corsHeaders,
+          },
+        });
+      }
+
+      if (profile.verified) {
+        console.log(`[Verify Email] Brand advertiser already verified`);
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${FRONTEND_URL}/verify?verified=already`,
+            ...corsHeaders,
+          },
+        });
+      }
+
+      const { error: updateError } = await supabase
+        .from("brand_advertiser_profiles")
+        .update({ verified: true })
+        .eq("user_id", userId);
+
+      if (updateError) {
+        console.error("[Verify Email Error] Failed to update brand advertiser:", updateError);
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${FRONTEND_URL}/verify?verified=failed`,
+            ...corsHeaders,
+          },
+        });
+      }
+
+      console.log(`[Verify Email Success] Brand advertiser verified successfully`);
     } else {
+
       // Publisher (venue, digital, agent)
       const { data: profile, error: fetchError } = await supabase
         .from("publisher_profiles")
