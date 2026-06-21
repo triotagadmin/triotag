@@ -604,12 +604,20 @@ const VenueRegistration = () => {
 
                 {/* Venue Type */}
                 <div>
-                  <Label>Ad Space Type *</Label>
-                  <Select value={venueType} onValueChange={setVenueType}>
-                    <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select type" /></SelectTrigger>
-                    <SelectContent>{VENUE_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-                  </Select>
-                  {venueType === "other" && <Input className="mt-2" placeholder="Specify type" value={customVenueType} onChange={e => setCustomVenueType(e.target.value)} />}
+                  <Label>Ad Space Type * <span className="text-xs text-muted-foreground font-normal">(select all that apply)</span></Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                    {VENUE_TYPES.map(t => {
+                      const on = venueTypes.includes(t.value);
+                      return (
+                        <button key={t.value} type="button" onClick={() => toggleVenueType(t.value)}
+                          className={`text-left text-sm px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
+                          <Checkbox checked={on} className="mr-2 align-middle pointer-events-none" />
+                          {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {venueTypes.includes("other") && <Input className="mt-2" placeholder="Specify type" value={customVenueType} onChange={e => setCustomVenueType(e.target.value)} />}
                 </div>
 
                 {/* Industry */}
@@ -677,11 +685,18 @@ const VenueRegistration = () => {
                     </div>
                     {selectedFormats.includes("OOH") && (
                       <div className="border-t pt-4 grid sm:grid-cols-2 gap-3">
-                        <div><Label>Print Format Type</Label>
-                          <Select value={oohPrintFormat} onValueChange={setOohPrintFormat}>
-                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                            <SelectContent>{["Table Tent","Poster/Wall","Floor Sticker","Shelf Signage","Counter Display","Aisle Signage","Entrance Banner","Other"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                          </Select>
+                        <div className="sm:col-span-2"><Label>Print Format Types <span className="text-xs text-muted-foreground font-normal">(select all)</span></Label>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                            {["Table Tent","Poster/Wall","Floor Sticker","Shelf Signage","Counter Display","Aisle Signage","Entrance Banner","Other"].map(o => {
+                              const on = oohPrintFormats.includes(o);
+                              return (
+                                <button key={o} type="button" onClick={() => toggleOohPrintFormat(o)}
+                                  className={`text-left text-xs px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
+                                  <Checkbox checked={on} className="mr-2 align-middle pointer-events-none" />{o}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                         <div><Label># Print Placements</Label><Input type="number" value={oohPlacementCount} onChange={e=>setOohPlacementCount(e.target.value)} /></div>
                       </div>
@@ -689,11 +704,18 @@ const VenueRegistration = () => {
                     {selectedFormats.includes("DOOH") && (
                       <div className="border-t pt-4 grid sm:grid-cols-2 gap-3">
                         <div className="sm:col-span-2"><Label>Screen Description</Label><Input value={doohScreenDescription} onChange={e=>setDoohScreenDescription(e.target.value)} placeholder="e.g. 55-inch LED at entrance" /></div>
-                        <div><Label>Screen Type</Label>
-                          <Select value={doohScreenType} onValueChange={setDoohScreenType}>
-                            <SelectTrigger className="rounded-[14px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                            <SelectContent>{["Indoor Screen","Outdoor Screen","Menu Board","Video Wall","Checkout Screen"].map(o=><SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                          </Select>
+                        <div className="sm:col-span-2"><Label>Screen Types <span className="text-xs text-muted-foreground font-normal">(select all)</span></Label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                            {["Indoor Screen","Outdoor Screen","Menu Board","Video Wall","Checkout Screen"].map(o => {
+                              const on = doohScreenTypes.includes(o);
+                              return (
+                                <button key={o} type="button" onClick={() => toggleDoohScreenType(o)}
+                                  className={`text-left text-xs px-3 py-2 rounded-[12px] border-2 transition-all ${on ? "border-green-500 bg-green-500/10" : "border-border hover:border-green-500/50"}`}>
+                                  <Checkbox checked={on} className="mr-2 align-middle pointer-events-none" />{o}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                         <div><Label># Screens</Label><Input type="number" value={doohScreenCount} onChange={e=>setDoohScreenCount(e.target.value)} /></div>
                       </div>
