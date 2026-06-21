@@ -362,7 +362,7 @@ const VenueRegistration = () => {
     if (!contactEmail.trim()) { toast({ title: "Error", description: "Contact email is required", variant: "destructive" }); return false; }
     if (!contactPhone.trim()) { toast({ title: "Error", description: "Contact phone is required", variant: "destructive" }); return false; }
     if (uploadedImages.length === 0) { toast({ title: "Error", description: "Please upload at least one photo", variant: "destructive" }); return false; }
-    if (selectedMaterials.length === 0) { toast({ title: "Error", description: "Please select at least one ad unit material", variant: "destructive" }); return false; }
+    
     const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
     if (!isEditing && filledDocs.length === 0) { toast({ title: "Error", description: "Please upload at least one verification document", variant: "destructive" }); return false; }
     return true;
@@ -806,23 +806,6 @@ const VenueRegistration = () => {
                   </CardContent>
                 </Card>
 
-                {/* Ad Unit Materials */}
-                <Card className="rounded-[20px]">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Ad Unit Materials</CardTitle>
-                    <p className="text-xs text-muted-foreground">Select the types of advertising materials that can be installed.</p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-3">
-                      {AD_UNIT_MATERIALS.map(mat => (
-                        <div key={mat.value} className="flex items-center space-x-2">
-                          <Checkbox id={`mat-${mat.value}`} checked={selectedMaterials.includes(mat.value)} onCheckedChange={() => toggleMaterial(mat.value)} />
-                          <Label htmlFor={`mat-${mat.value}`} className="text-sm font-normal cursor-pointer">{mat.label}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
 
 
                 {/* Contact Info */}
