@@ -263,7 +263,54 @@ export default function AdvertiserExplore() {
                     <span className="font-semibold text-green-700">₱{estimate.radiusFee.toLocaleString()}</span>
                   </div>
                 </div>
+
+                <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700">Campaign Name *</label>
+                    <Input
+                      value={form.campaignName}
+                      onChange={(e) => setForm({ ...form, campaignName: e.target.value })}
+                      placeholder="Summer brand activation"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700">Preferred Start Date *</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={`w-full justify-start text-left font-normal ${!form.preferredStartDate ? "text-muted-foreground" : ""}`}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {form.preferredStartDate
+                            ? format(new Date(form.preferredStartDate), "PPP")
+                            : "Pick your campaign start date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={form.preferredStartDate ? new Date(form.preferredStartDate) : undefined}
+                          onSelect={(date) => {
+                            if (date) {
+                              setForm({ ...form, preferredStartDate: format(date, "yyyy-MM-dd") });
+                            }
+                          }}
+                          disabled={(date) => isBefore(date, MIN_LAUNCH_DATE)}
+                          defaultMonth={MIN_LAUNCH_DATE}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <p className="text-[11px] text-gray-500 mt-1.5 inline-flex items-start gap-1">
+                      <Clock className="w-3 h-3 mt-0.5 shrink-0" />
+                      <span>Earliest available start date: <strong className="text-gray-700">{format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}</strong> — TrioTag requires 1 week or up to 1 month lead time to prepare your campaign.</span>
+                    </p>
+                  </div>
+                </div>
               </div>
+
 
               {/* Right panel */}
               <div className="lg:col-span-2">
@@ -468,49 +515,11 @@ export default function AdvertiserExplore() {
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-700">Campaign Name *</label>
-                  <Input value={form.campaignName} onChange={(e) => setForm({ ...form, campaignName: e.target.value })} placeholder="Summer brand activation" />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-700">Preferred Start Date *</label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={`w-full justify-start text-left font-normal ${!form.preferredStartDate ? "text-muted-foreground" : ""}`}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {form.preferredStartDate
-                          ? format(new Date(form.preferredStartDate), "PPP")
-                          : "Pick your campaign start date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={form.preferredStartDate ? new Date(form.preferredStartDate) : undefined}
-                        onSelect={(date) => {
-                          if (date) {
-                            setForm({ ...form, preferredStartDate: format(date, "yyyy-MM-dd") });
-                          }
-                        }}
-                        disabled={(date) => isBefore(date, MIN_LAUNCH_DATE)}
-                        defaultMonth={MIN_LAUNCH_DATE}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <p className="text-[11px] text-gray-500 mt-1.5 inline-flex items-start gap-1">
-                    <Clock className="w-3 h-3 mt-0.5 shrink-0" />
-                    <span>Earliest available start date: <strong className="text-gray-700">{format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}</strong> — TrioTag requires 1 week or up to 1 month lead time to prepare your campaign.</span>
-                  </p>
-                </div>
-                <div>
                   <label className="text-xs font-semibold text-gray-700">Notes (optional)</label>
                   <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Any specific goals or constraints..." />
                 </div>
               </div>
+
 
               <DialogFooter>
                 <Button variant="outline" onClick={() => setRequestOpen(false)}>Cancel</Button>
