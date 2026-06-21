@@ -60,7 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
       key
     );
 
-    const verificationUrl = `https://tinystickyads.com/admin/verify?token=${token}`;
+    const verificationUrl = `https://triotag.com/admin/verify?token=${token}`;
 
     const subject = isPrintPartner
       ? `[TrioTag] New Print Partner Registration — ${fullName}${companyName ? ` (${companyName})` : ""}`
@@ -143,7 +143,7 @@ const handler = async (req: Request): Promise<Response> => {
       `;
 
     const emailResponse = await resend.emails.send({
-      from: "TrioTag <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@triotag.com>",
       to: ["tinystickyads@gmail.com"],
       subject,
       html,

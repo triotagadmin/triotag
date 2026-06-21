@@ -109,7 +109,7 @@ serve(async (req) => {
         // Send reminder email
         try {
           await resend.emails.send({
-            from: "TrioTag <noreply@tinystickyads.com>",
+            from: "TrioTag <noreply@triotag.com>",
             to: [advertiserProfile.contact_email],
             subject: `Payment Reminder - Order #${orderIdShort}`,
             html: `
@@ -175,7 +175,7 @@ serve(async (req) => {
 
     // Send email via Resend
     const emailResponse = await resend.emails.send({
-      from: "TrioTag <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@triotag.com>",
       to: [advertiserEmail],
       subject: `Payment Required - Order #${orderIdShort} Approved! 🎉`,
       html: `

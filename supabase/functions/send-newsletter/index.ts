@@ -36,7 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
     const results = await Promise.allSettled(
       recipients.map(async (recipient) => {
         const emailResponse = await resend.emails.send({
-          from: "TinyStickyAds Newsletter <noreply@tinystickyads.com>",
+          from: "TinyStickyAds Newsletter <noreply@triotag.com>",
           to: [recipient.email],
           subject: subject,
           html: `

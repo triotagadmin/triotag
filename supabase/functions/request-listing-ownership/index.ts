@@ -169,7 +169,7 @@ serve(async (req) => {
       const verificationUrl = `${frontendUrl}/verify?listing_token=${token}`;
 
       await resend.emails.send({
-        from: "TinyStickyAds <noreply@tinystickyads.com>",
+        from: "TinyStickyAds <noreply@triotag.com>",
         to: [normalizedEmail],
         subject: "Confirm ad space ownership assignment",
         html: `
@@ -184,7 +184,7 @@ serve(async (req) => {
       const signupUrl = `${frontendUrl}/auth?account_type=advertiser`;
 
       await resend.emails.send({
-        from: "TinyStickyAds <noreply@tinystickyads.com>",
+        from: "TinyStickyAds <noreply@triotag.com>",
         to: [normalizedEmail],
         subject: "You've been invited to claim an ad space",
         html: `

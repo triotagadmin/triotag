@@ -22,7 +22,7 @@ serve(async (req) => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: "TrioTag <noreply@tinystickyads.com>",
+      from: "TrioTag <noreply@triotag.com>",
       to: ["tinystickyads@gmail.com"],
       subject: `New Contact Form Submission – TrioTag: ${subject}`,
       html: `
