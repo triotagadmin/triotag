@@ -186,22 +186,22 @@ export default function AdvertiserExplore() {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => updateQty(variant.id, qty - 1)}
-              disabled={qty === 0}
-              className="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed text-gray-700 flex items-center justify-center"
+            <select
+              value={qty}
+              onChange={(e) => updateQty(variant.id, parseInt(e.target.value, 10))}
+              className="h-9 rounded-lg border border-gray-200 bg-white px-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              −
-            </button>
-            <span className="w-8 text-center font-medium text-sm">{qty}</span>
-            <button
-              type="button"
-              onClick={() => updateQty(variant.id, qty + 1)}
-              className="w-8 h-8 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-700 flex items-center justify-center"
-            >
-              +
-            </button>
+              <option value={0}>0 units</option>
+              <option value={1000}>1000 units</option>
+              <option value={2000}>2000 units</option>
+              <option value={3000}>3000 units</option>
+              <option value={4000}>4000 units</option>
+              <option value={5000}>5000 units</option>
+              <option value={6000}>6000 units</option>
+              <option value={7000}>7000 units</option>
+              <option value={8000}>8000 units</option>
+              <option value={9000}>9000 units</option>
+            </select>
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 mt-3">
