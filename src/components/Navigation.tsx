@@ -18,7 +18,7 @@ type Role = "retailer" | "agent" | "print_partner" | "talent" | "admin" | null;
 interface NavLinkDef { label: string; to: string; gated?: boolean; }
 interface NavItemDef { label: string; to?: string; children?: { label: string; to: string }[]; }
 
-const INVENTORY_LINK: NavLinkDef = { label: "Inventory", to: "/advertiser/explore" };
+const INVENTORY_LINK: NavLinkDef = { label: "Advertise Your Brand", to: "/advertiser/explore" };
 const CAMPAIGNS_LINK: NavLinkDef = { label: "Campaigns", to: "/campaigns" };
 
 const NAV_ITEMS_PUBLIC: NavItemDef[] = [
@@ -38,7 +38,7 @@ const NAV_ITEMS_PUBLIC: NavItemDef[] = [
       { label: "Media Truck", to: "/solutions/media-truck" },
     ],
   },
-  { label: "Inventory", to: "/advertiser/explore" },
+  { label: "Advertise Your Brand", to: "/advertiser/explore" },
 ];
 
 const NAV_ITEMS_ADMIN: NavItemDef[] = [
