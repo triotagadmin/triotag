@@ -70,6 +70,7 @@ export default function AdvertiserExplore() {
     campaignName: "",
     preferredStartDate: "",
     notes: "",
+    email: "",
   });
 
   async function handleSubmitRequest() {
@@ -83,6 +84,11 @@ export default function AdvertiserExplore() {
     }
     if (!form.campaignName.trim() || !form.preferredStartDate) {
       toast({ title: "Missing info", description: "Campaign name and start date are required.", variant: "destructive" });
+      return;
+    }
+    const emailTrimmed = form.email.trim();
+    if (!emailTrimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      toast({ title: "Email required", description: "Please enter a valid email so we can confirm your campaign.", variant: "destructive" });
       return;
     }
     if (isBefore(new Date(form.preferredStartDate), MIN_LAUNCH_DATE)) {
@@ -128,7 +134,7 @@ export default function AdvertiserExplore() {
           estimatedPrice: estimate.totalEstimate,
           preferredStartDate: form.preferredStartDate,
           notes: form.notes,
-          requesterEmail: user?.email,
+          requesterEmail: emailTrimmed,
         },
       }).catch(() => {});
 
@@ -552,6 +558,17 @@ export default function AdvertiserExplore() {
               </div>
 
               <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-700">Email *</label>
+                  <Input
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    placeholder="you@company.com"
+                  />
+                  <p className="text-[11px] text-gray-500 mt-1">We'll use this email to confirm pricing and activate your campaign.</p>
+                </div>
                 <div>
                   <label className="text-xs font-semibold text-gray-700">Notes (optional)</label>
                   <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Any specific goals or constraints..." />
