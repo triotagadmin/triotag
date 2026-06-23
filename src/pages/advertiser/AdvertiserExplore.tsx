@@ -559,6 +559,17 @@ export default function AdvertiserExplore() {
 
               <div className="space-y-3">
                 <div>
+                  <label className="text-xs font-semibold text-gray-700">Email *</label>
+                  <Input
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    placeholder="you@company.com"
+                  />
+                  <p className="text-[11px] text-gray-500 mt-1">We'll use this email to confirm pricing and activate your campaign.</p>
+                </div>
+                <div>
                   <label className="text-xs font-semibold text-gray-700">Notes (optional)</label>
                   <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Any specific goals or constraints..." />
                 </div>
