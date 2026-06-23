@@ -207,7 +207,7 @@ export default function SolutionsOOH() {
         <div className="container mx-auto px-4 md:px-6 text-center max-w-3xl">
           <h2 className="text-3xl md:text-5xl font-bold mb-4">Ready to get brands into your &nbsp;real estate spaces? Book an ad survey .</h2>
           <p className="text-zinc-400 text-lg mb-8">
-            Send us an email to onboard your retail media ad spaces or you can directly create and we can survey it remotely. Onboarding is fast and reliable.
+            Send us an email to onboard your retail media ad spaces or you can directly create on our website dashboard and we can survey it remotely. Onboarding is fast and reliable.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Button asChild size="lg">
