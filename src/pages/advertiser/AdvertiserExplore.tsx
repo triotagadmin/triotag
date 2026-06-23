@@ -185,22 +185,20 @@ export default function AdvertiserExplore() {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <select
+          <div className="flex items-center gap-3 shrink-0 min-w-[200px]">
+            <input
+              type="range"
+              min={0}
+              max={9999}
+              step={1}
               value={qty}
               onChange={(e) => updateQty(variant.id, parseInt(e.target.value, 10))}
-              className="h-9 rounded-lg border border-gray-200 bg-white px-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              {Array.from({ length: 11 }, (_, i) => {
-                const pct = i * 10;
-                const units = Math.round((pct / 100) * 9999);
-                return (
-                  <option key={pct} value={units}>
-                    {pct}% ({units.toLocaleString()} units)
-                  </option>
-                );
-              })}
-            </select>
+              className="flex-1 h-2 accent-green-600 cursor-pointer"
+            />
+            <div className="text-xs text-gray-700 font-medium whitespace-nowrap w-20 text-right">
+              {Math.round((qty / 9999) * 100)}%
+              <div className="text-[10px] text-gray-500">{qty.toLocaleString()} units</div>
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 mt-3">
