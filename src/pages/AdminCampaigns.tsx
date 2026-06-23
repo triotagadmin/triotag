@@ -38,10 +38,17 @@ export default function AdminCampaigns() {
 
   useEffect(() => {
     (async () => {
-      const [{ data: c1 }, { data: c2 }] = await Promise.all([
+      const [{ data: c1 }, { data: c2 }, { data: c3 }] = await Promise.all([
         supabase.from("campaigns").select("id, campaign_name, status, start_date, end_date, budget_amount, campaign_type, advertiser_id"),
         supabase.from("aooh_campaigns").select("id, campaign_name, status, start_date, end_date, advertiser_id"),
+        supabase.from("media_plan_requests" as any).select("id, campaign_name, status, preferred_start_date, estimated_price, campaign_type, advertiser_id, created_at"),
       ]);
+      const inferType = (t?: string): Row["type"] => {
+        const v = (t || "").toUpperCase();
+        if (v.includes("AOOH")) return "AOOH";
+        if (v.includes("DOOH")) return "DOOH";
+        return "OOH";
+      };
       const list: Row[] = [
         ...((c1 || []) as any[]).map((r) => ({
           id: r.id, name: r.campaign_name || "Untitled",
@@ -54,11 +61,19 @@ export default function AdminCampaigns() {
           type: "AOOH" as const, status: r.status || "draft",
           start_date: r.start_date, end_date: r.end_date, advertiser_id: r.advertiser_id,
         })),
+        ...((c3 || []) as any[]).map((r) => ({
+          id: r.id, name: r.campaign_name || "Untitled",
+          type: inferType(r.campaign_type),
+          status: r.status || "pending_review",
+          start_date: r.preferred_start_date, end_date: null,
+          budget: r.estimated_price, advertiser_id: r.advertiser_id,
+        })),
       ];
       setRows(list);
       setLoading(false);
     })();
   }, []);
+
 
   const filtered = useMemo(() => rows.filter((r) =>
     (type === "all" || r.type === type) &&
