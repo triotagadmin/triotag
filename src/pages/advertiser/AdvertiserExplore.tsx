@@ -196,8 +196,7 @@ export default function AdvertiserExplore() {
               className="flex-1 h-2 accent-green-600 cursor-pointer"
             />
             <div className="text-xs text-gray-700 font-medium whitespace-nowrap w-20 text-right">
-              {Math.round((qty / 9999) * 100)}%
-              <div className="text-[10px] text-gray-500">{qty.toLocaleString()} units</div>
+              {qty.toLocaleString()} units
             </div>
           </div>
         </div>
