@@ -211,7 +211,7 @@ export default function SolutionsOOH() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Button asChild size="lg">
-              <Link to="/advertiser/explore">Browse OOH Inventory</Link>
+              <Link to="/advertiser/explore">Register OOH Inventory</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link to="/contact">Get a Custom Quote</Link>
