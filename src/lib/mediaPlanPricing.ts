@@ -84,7 +84,7 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 2500,
     specs: { Resolution: "1920×1080 (16:9)", Format: "JPG / PNG", "Loop Duration": "15 seconds" },
-    airTime: "12 minutes total air time / unit",
+    airTime: "12 minutes total air time unit",
     billingType: "monthly",
   },
   {
@@ -93,7 +93,7 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 3500,
     specs: { Resolution: "1920×1080 (16:9)", Format: "JPG / PNG", "Loop Duration": "30 seconds" },
-    airTime: "24 minutes total air time / unit",
+    airTime: "24 minutes total air time unit",
     billingType: "monthly",
   },
   {
@@ -102,7 +102,7 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 4500,
     specs: { Resolution: "1920×1080 (16:9)", Format: "MP4, H.264", "Video Duration": "15 seconds" },
-    airTime: "12 minutes total air time / unit",
+    airTime: "12 minutes total air time unit",
     billingType: "monthly",
   },
   {
@@ -111,7 +111,7 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 6500,
     specs: { Resolution: "1920×1080 (16:9)", Format: "MP4, H.264", "Video Duration": "30 seconds" },
-    airTime: "24 minutes total air time / unit",
+    airTime: "24 minutes total air time unit",
     billingType: "monthly",
   },
   {
@@ -120,7 +120,7 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 9500,
     specs: { Resolution: "1920×1080 (16:9)", Format: "MP4, H.264", "Video Duration": "60 seconds" },
-    airTime: "48 minutes total air time / unit",
+    airTime: "48 minutes total air time unit",
     billingType: "monthly",
   },
   {
@@ -129,7 +129,7 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     category: "DOOH",
     price: 4800,
     specs: { Resolution: "1080×1920 (9:16)", Format: "MP4, H.264", "Video Duration": "15 seconds" },
-    airTime: "12 minutes total air time / unit",
+    airTime: "12 minutes total air time unit",
     billingType: "monthly",
   },
 ];
@@ -141,7 +141,7 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     category: "AOOH",
     price: 1200,
     specs: { Format: "MP3 / WAV", "Audio Duration": "15 seconds", "Voice-Over": "Required" },
-    airTime: "12 minutes total air time / unit",
+    airTime: "12 minutes total air time unit",
     billingType: "monthly",
   },
   {
@@ -150,7 +150,7 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     category: "AOOH",
     price: 2000,
     specs: { Format: "MP3 / WAV", "Audio Duration": "30 seconds", "Voice-Over": "Required" },
-    airTime: "24 minutes total air time / unit",
+    airTime: "24 minutes total air time unit",
     billingType: "monthly",
   },
   {
@@ -159,7 +159,7 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     category: "AOOH",
     price: 1600,
     specs: { Format: "MP3 / WAV", "Audio Duration": "15 seconds", "Voice-Over": "Optional, jingle included" },
-    airTime: "12 minutes total air time / unit",
+    airTime: "12 minutes total air time unit",
     billingType: "monthly",
   },
   {
@@ -168,7 +168,7 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     category: "AOOH",
     price: 2600,
     specs: { Format: "MP3 / WAV", "Audio Duration": "30 seconds", "Voice-Over": "Optional, jingle included" },
-    airTime: "24 minutes total air time / unit",
+    airTime: "24 minutes total air time unit",
     billingType: "monthly",
   },
 ];
