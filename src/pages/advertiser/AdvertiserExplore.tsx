@@ -35,7 +35,7 @@ const MIN_LAUNCH_DATE = startOfDay(addMonths(new Date(), 1));
 
 export default function AdvertiserExplore() {
   const [center, setCenter] = useState(DEFAULT_CENTER);
-  const [radiusMeters, setRadiusMeters] = useState(1000);
+  const [radiusMeters, setRadiusMeters] = useState(0);
   const [withinServiceArea, setWithinServiceArea] = useState(
     isWithinServiceArea(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
   );
