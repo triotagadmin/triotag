@@ -134,7 +134,7 @@ export default function AdvertiserExplore() {
           estimatedPrice: estimate.totalEstimate,
           preferredStartDate: form.preferredStartDate,
           notes: form.notes,
-          requesterEmail: user?.email,
+          requesterEmail: emailTrimmed,
         },
       }).catch(() => {});
 
