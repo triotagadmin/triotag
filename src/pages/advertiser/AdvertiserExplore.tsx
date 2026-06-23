@@ -86,6 +86,11 @@ export default function AdvertiserExplore() {
       toast({ title: "Missing info", description: "Campaign name and start date are required.", variant: "destructive" });
       return;
     }
+    const emailTrimmed = form.email.trim();
+    if (!emailTrimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      toast({ title: "Email required", description: "Please enter a valid email so we can confirm your campaign.", variant: "destructive" });
+      return;
+    }
     if (isBefore(new Date(form.preferredStartDate), MIN_LAUNCH_DATE)) {
       toast({
         title: "Start date too soon",
