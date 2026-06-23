@@ -25,6 +25,9 @@ import {
   AOOH_VARIANTS,
   FormatVariant,
 } from "@/lib/mediaPlanPricing";
+import oohVideo from "@/assets/retailmediakit.mp4.asset.json";
+import doohVideo from "@/assets/doohmediakit.mp4.asset.json";
+import aoohVideo from "@/assets/supertruckmediakit.mp4.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -433,6 +436,42 @@ export default function AdvertiserExplore() {
               ))}
             </div>
           </section>
+
+          {/* CTA: OOH, DOOH, AOOH videos */}
+          <section className="px-6 lg:px-8 py-12 mt-8">
+            <div className="max-w-6xl mx-auto text-center mb-8">
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">See TrioTag in Action</h2>
+              <p className="text-gray-600 mt-2">Explore our OOH, DOOH, and AOOH advertising formats.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {[
+                { title: "OOH", desc: "Out-of-Home print placements across retail and high-traffic locations.", video: oohVideo.url },
+                { title: "DOOH", desc: "Digital Out-of-Home screens with dynamic, scheduled creative.", video: doohVideo.url },
+                { title: "AOOH", desc: "Audio Out-of-Home reaching audiences through ambient sound networks.", video: aoohVideo.url },
+              ].map((c) => (
+                <div key={c.title} className="rounded-2xl overflow-hidden border border-green-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                  <div className="aspect-video bg-black">
+                    <video
+                      src={c.video}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xl font-bold text-gray-900">{c.title}</h3>
+                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Available</Badge>
+                    </div>
+                    <p className="text-sm text-gray-600">{c.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
         </main>
       </div>
 
