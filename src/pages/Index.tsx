@@ -325,7 +325,7 @@ const ValueProps = () => {
             "Grow non-product revenue",
             "Real-time reporting & insights",
           ]}
-          cta="Learn More"
+          cta="Learn more about listing your space"
           to="/list-space"
         />
         <Card

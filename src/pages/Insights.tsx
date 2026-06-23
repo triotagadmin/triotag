@@ -125,7 +125,7 @@ const Insights = () => {
                         <span>{post.author}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        {isAdmin && <Button variant="ghost" size="sm" onClick={() => handleEditPost(post.id)}>
+                        {isAdmin && <Button variant="ghost" size="sm" aria-label="Edit post" onClick={() => handleEditPost(post.id)}>
                             <Edit className="w-4 h-4" />
                           </Button>}
                         <ShareButtons
@@ -135,7 +135,7 @@ const Insights = () => {
                         />
                         <Link to={`/insights/${post.id}`}>
                           <Button variant="ghost" size="sm">
-                            Read More <ArrowRight className="ml-2 w-4 h-4" />
+                            Read the full insight <ArrowRight className="ml-2 w-4 h-4" />
                           </Button>
                         </Link>
                       </div>

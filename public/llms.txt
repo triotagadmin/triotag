@@ -1,0 +1,33 @@
+# TrioTag
+
+> TrioTag connects advertisers with out-of-home (OOH), digital (DOOH), and audio (AOOH) retail advertising spaces — affordable, hyper-local, and measurable campaigns across the Philippines.
+
+TrioTag (tinystickyads.com) is a retail media marketplace. Retailers list ad spaces (print stickers, in-store screens, audio loops, media trucks); brands and advertisers book and run campaigns; print partners fulfill physical materials.
+
+## Pages
+
+- [Home](/): Platform overview for advertisers, retailers, and print partners.
+- [Explore Ad Spaces](/advertiser/explore): Browse available retail ad inventory by city and area.
+- [List Your Space](/list-space): Onboarding for retailers to monetize their physical, digital, and audio surfaces.
+- [Services](/services): Overview of advertising formats and managed services.
+- [Insights](/insights): Articles on retail media, OOH advertising, and campaign strategy.
+- [Contact](/contact): Reach the TrioTag team.
+
+## Solutions
+
+- [OOH Print](/solutions/ooh): Sticker and print placements in retail venues.
+- [DOOH Screens](/solutions/dooh): Digital screen advertising in stores.
+- [AOOH Audio](/solutions/aooh): In-store audio jingles and voice-over spots.
+- [Media Truck](/solutions/media-truck): Mobile billboard campaigns.
+
+## Industries
+
+- [For Brands](/industries/brands): How brands and agencies run campaigns on TrioTag.
+- [For Retailers](/industries/retailers): How retailers earn from their footfall.
+
+## Optional
+
+- [Privacy Policy](/privacy)
+- [Terms of Service](/terms)
+- [Hire Talent](/hire-talent)
+- [Tickets](/tickets)
