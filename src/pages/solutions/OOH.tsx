@@ -109,9 +109,9 @@ export default function SolutionsOOH() {
             </div>
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
               {[
-                ["18+", "Retailer Partners"],
-                ["100+", "OOH Assets"],
-                ["500+", "Active Placements"],
+                ["180+", "Retailer Partners"],
+                ["1000+", "OOH Assets"],
+                ["5000+", "Active Placements"],
               ].map(([n, l]) => (
                 <div key={l}>
                   <div className="text-2xl md:text-3xl font-bold text-green-500">{n}</div>
