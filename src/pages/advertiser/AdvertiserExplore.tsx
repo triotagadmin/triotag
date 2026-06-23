@@ -205,9 +205,12 @@ export default function AdvertiserExplore() {
         </div>
         <div className="flex flex-wrap gap-1.5 mt-3">
           {variant.airTime && (
-            <span className="text-[11px] bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 text-amber-700 inline-flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              <strong className="text-amber-800">Air Time:</strong> {variant.airTime}
+            <span className="text-[11px] bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 text-amber-700 inline-flex flex-col items-start gap-0.5">
+              <div className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                <strong className="text-amber-800">Air Time:</strong>
+              </div>
+              <span className="pl-4">{variant.airTime}</span>
             </span>
           )}
           {Object.entries(variant.specs).map(([key, val]) => (
