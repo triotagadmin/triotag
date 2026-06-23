@@ -25,7 +25,7 @@ const NAV_ITEMS_PUBLIC: NavItemDef[] = [
   {
     label: "Industries",
     children: [
-      { label: "Brands", to: "/industries/brands" },
+      { label: "Outsource AdOps", to: "/industries/brands" },
       { label: "Retail SSP", to: "/industries/retailers" },
     ],
   },
