@@ -205,7 +205,7 @@ export default function SolutionsOOH() {
       {/* CTA */}
       <section className="py-20 md:py-28 bg-gradient-to-br from-green-900/40 to-black">
         <div className="container mx-auto px-4 md:px-6 text-center max-w-3xl">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">Ready to get your brand into the right spaces?</h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">Ready to get brands into your &nbsp;real estate spaces? Book an ad survey .</h2>
           <p className="text-zinc-400 text-lg mb-8">
             Browse available OOH inventory across our publisher network or talk to our team for a custom campaign plan.
           </p>
