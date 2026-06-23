@@ -193,7 +193,8 @@ export interface MediaPlanEstimate {
 }
 
 export const MAX_RADIUS_METERS = 5000;
-export const MAX_RADIUS_FEE = 65000;
+export const BASE_RADIUS_FEE = 65000;
+export const MAX_RADIUS_FEE = 3500000;
 
 export function calculateMediaPlanEstimate(
   selections: SelectedVariant[],
@@ -201,7 +202,8 @@ export function calculateMediaPlanEstimate(
 ): MediaPlanEstimate {
   const radiusKm = radiusMeters / 1000;
   const radiusPercent = Math.min(100, Math.round((radiusMeters / MAX_RADIUS_METERS) * 100));
-  const radiusFee = Math.round((radiusPercent / 100) * MAX_RADIUS_FEE);
+  const radiusFee = Math.round(BASE_RADIUS_FEE + (radiusPercent / 100) * (MAX_RADIUS_FEE - BASE_RADIUS_FEE));
+
 
   let unitCost = 0;
   let totalUnits = 0;
