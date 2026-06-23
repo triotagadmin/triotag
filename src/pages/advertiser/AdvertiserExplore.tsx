@@ -70,6 +70,7 @@ export default function AdvertiserExplore() {
     campaignName: "",
     preferredStartDate: "",
     notes: "",
+    email: "",
   });
 
   async function handleSubmitRequest() {
