@@ -16,6 +16,7 @@ import AdminBlogSubmission from "./pages/AdminBlogSubmission";
 import AdminNewsletterDashboard from "./pages/AdminNewsletterDashboard";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminOrders from "./pages/AdminOrders";
+import AdminTotalInventory from "./pages/AdminTotalInventory";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
@@ -222,6 +223,11 @@ const App = () => (
           <Route path="/admin/orders" element={
             <ProtectedAdminRoute>
               <AdminOrders />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/total-inventory" element={
+            <ProtectedAdminRoute>
+              <AdminTotalInventory />
             </ProtectedAdminRoute>
           } />
           {/* Advertiser inventory explorer — PUBLIC, no auth required */}
