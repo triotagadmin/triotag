@@ -605,6 +605,52 @@ export default function AdvertiserExplore() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Example Image Modal */}
+      <Dialog open={!!exampleModal} onOpenChange={(open) => { if (!open) setExampleModal(null); }}>
+        <DialogContent className="max-w-lg p-0 overflow-hidden">
+          {exampleModal && (
+            <>
+              <div className="relative">
+                <img
+                  src={exampleModal.image}
+                  alt={exampleModal.label}
+                  className="w-full object-cover h-64"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80";
+                  }}
+                />
+                <div className="absolute top-3 left-3">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/90 text-gray-900 border border-gray-200 shadow-sm">
+                    {exampleModal.label}
+                  </span>
+                </div>
+              </div>
+              <div className="p-5 space-y-3">
+                <h3 className="font-semibold text-gray-900 text-base">{exampleModal.label}</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">{exampleModal.caption}</p>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                  <span className="text-[11px] text-gray-500">Example placement — actual results may vary by venue</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setExampleModal(null)}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <style>{`
+        @keyframes subtlePulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.35); }
+          50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+        }
+      `}</style>
     </div>
   );
 }
