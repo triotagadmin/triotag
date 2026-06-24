@@ -16,7 +16,7 @@ import AdminBlogSubmission from "./pages/AdminBlogSubmission";
 import AdminNewsletterDashboard from "./pages/AdminNewsletterDashboard";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminOrders from "./pages/AdminOrders";
-import AdminTotalInventory from "./pages/AdminTotalInventory";
+import AdminTotalInventory from "./pages/admin/AdminTotalInventory";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
