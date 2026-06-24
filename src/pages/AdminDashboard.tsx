@@ -1046,6 +1046,26 @@ export default function AdminDashboard() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
+        <Card
+          className="mb-6 cursor-pointer hover:border-green-500 transition-colors"
+          onClick={() => navigate("/admin/total-inventory")}
+        >
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Package className="w-4 h-4" /> Total Inventory
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{inventoryStats.total}</div>
+            <p className="text-xs text-muted-foreground mt-1">Approved ad spaces across all retailers</p>
+            <div className="flex gap-3 mt-2 text-xs">
+              <span className="text-purple-600">OOH: {inventoryStats.ooh}</span>
+              <span className="text-cyan-600">DOOH: {inventoryStats.dooh}</span>
+              <span className="text-green-600">AOOH: {inventoryStats.aooh}</span>
+            </div>
+          </CardContent>
+        </Card>
+
         <Tabs defaultValue="bookings" className="space-y-6">
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="bookings"><Calendar className="w-4 h-4 mr-2" />Bookings</TabsTrigger>
