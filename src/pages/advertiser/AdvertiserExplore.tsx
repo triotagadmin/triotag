@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2, AlertTriangle,
-  RefreshCw, Package, Clock, Calendar as CalendarIcon,
+  RefreshCw, Package, Clock, Calendar as CalendarIcon, Eye,
 } from "lucide-react";
 import { addMonths, format, startOfDay, isBefore } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -46,6 +46,7 @@ export default function AdvertiserExplore() {
 
   // variantId -> qty
   const [selections, setSelections] = useState<Record<string, number>>({});
+  const [exampleModal, setExampleModal] = useState<{ label: string; image: string; caption: string } | null>(null);
 
   const updateQty = (variantId: string, qty: number) => {
     setSelections((prev) => ({ ...prev, [variantId]: Math.max(0, qty) }));
@@ -176,7 +177,25 @@ export default function AdvertiserExplore() {
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="font-semibold text-gray-900 text-sm">{variant.label}</div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="font-semibold text-gray-900 text-sm">{variant.label}</div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExampleModal({
+                    label: variant.label,
+                    image: variant.exampleImage,
+                    caption: variant.exampleCaption,
+                  });
+                }}
+                className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full border border-green-400 text-green-600 bg-green-50 hover:bg-green-100 hover:border-green-500 transition-all duration-200 cursor-pointer hover:[animation-play-state:paused]"
+                style={{ animation: "subtlePulse 3s ease-in-out infinite" }}
+              >
+                <Eye className="w-3 h-3" />
+                View Example
+              </button>
+            </div>
             <div className="flex flex-wrap items-center gap-2 mt-0.5">
               <span className="text-green-600 font-medium text-xs">
                 ₱{variant.price.toLocaleString()} / unit
@@ -586,6 +605,52 @@ export default function AdvertiserExplore() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Example Image Modal */}
+      <Dialog open={!!exampleModal} onOpenChange={(open) => { if (!open) setExampleModal(null); }}>
+        <DialogContent className="max-w-lg p-0 overflow-hidden">
+          {exampleModal && (
+            <>
+              <div className="relative">
+                <img
+                  src={exampleModal.image}
+                  alt={exampleModal.label}
+                  className="w-full object-cover h-64"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80";
+                  }}
+                />
+                <div className="absolute top-3 left-3">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/90 text-gray-900 border border-gray-200 shadow-sm">
+                    {exampleModal.label}
+                  </span>
+                </div>
+              </div>
+              <div className="p-5 space-y-3">
+                <h3 className="font-semibold text-gray-900 text-base">{exampleModal.label}</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">{exampleModal.caption}</p>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                  <span className="text-[11px] text-gray-500">Example placement — actual results may vary by venue</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setExampleModal(null)}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <style>{`
+        @keyframes subtlePulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.35); }
+          50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+        }
+      `}</style>
     </div>
   );
 }

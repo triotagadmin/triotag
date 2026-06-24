@@ -8,6 +8,8 @@ export interface FormatVariant {
   specs: Record<string, string>;
   airTime?: string; // DOOH/AOOH only
   billingType: "monthly" | "per_campaign";
+  exampleImage: string;
+  exampleCaption: string;
 }
 
 export const OOH_VARIANTS: FormatVariant[] = [
@@ -18,6 +20,8 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 350,
     specs: { Size: "A5 (148 × 210mm)", Material: "300gsm matte cardstock", Print: "Full color, double-sided" },
     billingType: "per_campaign",
+    exampleImage: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80",
+    exampleCaption: "Table tent card placed at cafe/restaurant table — high dwell-time placement at point of dining.",
   },
   {
     id: "ooh_sticker",
@@ -26,6 +30,8 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 250,
     specs: { Size: "4R (4 × 6in)", Material: "Vinyl, waterproof", Print: "Full color, gloss/matte" },
     billingType: "per_campaign",
+    exampleImage: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80",
+    exampleCaption: "Small format vinyl sticker on retail counter or window — waterproof, eye-level placement.",
   },
   {
     id: "ooh_sticker_large",
@@ -34,6 +40,8 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 450,
     specs: { Size: "A4 (210 × 297mm)", Material: "Vinyl, waterproof", Print: "Full color, gloss/matte" },
     billingType: "per_campaign",
+    exampleImage: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80",
+    exampleCaption: "Large format A4 sticker on wall or shopfront — maximum visibility, waterproof vinyl.",
   },
   {
     id: "ooh_poster",
@@ -42,6 +50,8 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 600,
     specs: { Size: "A3 (297 × 420mm)", Material: "150gsm art paper", Print: "Full color" },
     billingType: "per_campaign",
+    exampleImage: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+    exampleCaption: "A3 poster in high-traffic venue — full color print in waiting areas, corridors, and retail walls.",
   },
   {
     id: "ooh_tarpaulin_small",
@@ -50,6 +60,8 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 900,
     specs: { Size: "2ft × 3ft", Material: "13oz tarpaulin, UV resistant", Print: "Full color, outdoor grade" },
     billingType: "per_campaign",
+    exampleImage: "https://images.unsplash.com/photo-1586892477838-2b96e85e0f96?w=800&q=80",
+    exampleCaption: "Small tarpaulin (2×3ft) — outdoor-grade UV resistant print for storefronts and facades.",
   },
   {
     id: "ooh_tarpaulin_medium",
@@ -58,6 +70,8 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 1800,
     specs: { Size: "4ft × 6ft", Material: "13oz tarpaulin, UV resistant", Print: "Full color, outdoor grade" },
     billingType: "per_campaign",
+    exampleImage: "https://images.unsplash.com/photo-1586892477838-2b96e85e0f96?w=800&q=80",
+    exampleCaption: "Medium tarpaulin (4×6ft) — high-visibility print for exterior walls, gates, and event areas.",
   },
   {
     id: "ooh_tarpaulin_large",
@@ -66,6 +80,8 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 3200,
     specs: { Size: "8ft × 10ft", Material: "13oz tarpaulin, UV resistant", Print: "Full color, outdoor grade, grommets included" },
     billingType: "per_campaign",
+    exampleImage: "https://images.unsplash.com/photo-1586892477838-2b96e85e0f96?w=800&q=80",
+    exampleCaption: "Large tarpaulin (8×10ft) — maximum outdoor impact for high-footfall roads and event spaces.",
   },
   {
     id: "ooh_flyer",
@@ -74,6 +90,8 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 1500,
     specs: { Size: "DL (99 × 210mm)", Material: "150gsm gloss", Print: "Full color, single-sided" },
     billingType: "per_campaign",
+    exampleImage: "https://images.unsplash.com/photo-1572025442646-866d16c84a54?w=800&q=80",
+    exampleCaption: "DL flyer — distributed at checkout counters and venue entrances at point of purchase.",
   },
 ];
 
@@ -86,6 +104,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     specs: { Resolution: "1920×1080 (16:9)", Format: "JPG / PNG", "Loop Duration": "15 seconds" },
     airTime: "12 minutes total air time / unit",
     billingType: "monthly",
+    exampleImage: "https://images.unsplash.com/photo-1567967455389-e432b4a7e67c?w=800&q=80",
+    exampleCaption: "Static display on digital screen — 15-second loop shown inside gyms, salons, and retail venues.",
   },
   {
     id: "dooh_static_30",
@@ -95,6 +115,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     specs: { Resolution: "1920×1080 (16:9)", Format: "JPG / PNG", "Loop Duration": "30 seconds" },
     airTime: "24 minutes total air time / unit",
     billingType: "monthly",
+    exampleImage: "https://images.unsplash.com/photo-1567967455389-e432b4a7e67c?w=800&q=80",
+    exampleCaption: "Static display — 30-second extended loop with more brand messaging real estate per cycle.",
   },
   {
     id: "dooh_video_15",
@@ -104,6 +126,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     specs: { Resolution: "1920×1080 (16:9)", Format: "MP4, H.264", "Video Duration": "15 seconds" },
     airTime: "12 minutes total air time / unit",
     billingType: "monthly",
+    exampleImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80",
+    exampleCaption: "15-second video ad on venue digital screen — full motion creative in high-dwell environments.",
   },
   {
     id: "dooh_video_30",
@@ -113,6 +137,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     specs: { Resolution: "1920×1080 (16:9)", Format: "MP4, H.264", "Video Duration": "30 seconds" },
     airTime: "24 minutes total air time / unit",
     billingType: "monthly",
+    exampleImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80",
+    exampleCaption: "30-second video ad — longer brand story with more time to drive message recall.",
   },
   {
     id: "dooh_video_60",
@@ -122,6 +148,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     specs: { Resolution: "1920×1080 (16:9)", Format: "MP4, H.264", "Video Duration": "60 seconds" },
     airTime: "48 minutes total air time / unit",
     billingType: "monthly",
+    exampleImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80",
+    exampleCaption: "60-second video ad — premium long-form placement for brand awareness and product demos.",
   },
   {
     id: "dooh_vertical_video_15",
@@ -131,6 +159,8 @@ export const DOOH_VARIANTS: FormatVariant[] = [
     specs: { Resolution: "1080×1920 (9:16)", Format: "MP4, H.264", "Video Duration": "15 seconds" },
     airTime: "12 minutes total air time / unit",
     billingType: "monthly",
+    exampleImage: "https://images.unsplash.com/photo-1567967455389-e432b4a7e67c?w=800&q=80",
+    exampleCaption: "Vertical 9:16 video — optimised for portrait digital screens in salons, clinics, and waiting areas.",
   },
 ];
 
@@ -143,6 +173,8 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     specs: { Format: "MP3 / WAV", "Audio Duration": "15 seconds", "Voice-Over": "Required" },
     airTime: "12 minutes total air time / unit",
     billingType: "monthly",
+    exampleImage: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&q=80",
+    exampleCaption: "15-second in-store audio spot — played through venue speakers at point of purchase decision.",
   },
   {
     id: "aooh_spot_30",
@@ -152,6 +184,8 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     specs: { Format: "MP3 / WAV", "Audio Duration": "30 seconds", "Voice-Over": "Required" },
     airTime: "24 minutes total air time / unit",
     billingType: "monthly",
+    exampleImage: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&q=80",
+    exampleCaption: "30-second audio spot — extended message with voice-over, played in retail store playlists.",
   },
   {
     id: "aooh_jingle_15",
@@ -161,6 +195,8 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     specs: { Format: "MP3 / WAV", "Audio Duration": "15 seconds", "Voice-Over": "Optional, jingle included" },
     airTime: "12 minutes total air time / unit",
     billingType: "monthly",
+    exampleImage: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80",
+    exampleCaption: "15-second branded jingle with voice-over — memorable audio identity at the point of sale.",
   },
   {
     id: "aooh_jingle_30",
@@ -170,6 +206,8 @@ export const AOOH_VARIANTS: FormatVariant[] = [
     specs: { Format: "MP3 / WAV", "Audio Duration": "30 seconds", "Voice-Over": "Optional, jingle included" },
     airTime: "24 minutes total air time / unit",
     billingType: "monthly",
+    exampleImage: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80",
+    exampleCaption: "30-second jingle + voice-over — full brand audio experience inside supermarkets and pharmacies.",
   },
 ];
 
