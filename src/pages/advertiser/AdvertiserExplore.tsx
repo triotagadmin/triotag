@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2, AlertTriangle,
-  RefreshCw, Package, Clock, Calendar as CalendarIcon,
+  RefreshCw, Package, Clock, Calendar as CalendarIcon, Eye,
 } from "lucide-react";
 import { addMonths, format, startOfDay, isBefore } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
