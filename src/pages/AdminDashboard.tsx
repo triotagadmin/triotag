@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket, Package, Calendar, DollarSign } from "lucide-react";
+import { Shield, LogOut, Users, FileText, CheckCircle, XCircle, Clock, Filter, Bell, AlertCircle, Search, Eye, Building, Monitor, UserCircle, Edit, Trash2, ShoppingCart, ChevronLeft, ChevronRight, Ticket, Package, Calendar, DollarSign, BarChart3 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -1017,6 +1017,10 @@ export default function AdminDashboard() {
             <Button variant="default" onClick={() => navigate("/admin/orders")}>
               <Package className="w-4 h-4 mr-2" />
               Ad Orders
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/admin/total-inventory")}>
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Total Inventory
             </Button>
             <Button variant="outline" onClick={() => navigate("/admin/blog-submission")}>
               <FileText className="w-4 h-4 mr-2" />
