@@ -82,9 +82,9 @@ export default function AdminDashboard() {
   // Tickets state
   const [ticketSubmissions, setTicketSubmissions] = useState<any[]>([]);
   const [ticketSlide, setTicketSlide] = useState(0);
-  
-  
-  
+
+  // Inventory summary state
+  const [inventoryStats, setInventoryStats] = useState({ total: 0, ooh: 0, dooh: 0, aooh: 0 });
 
   useEffect(() => {
     checkAdminAccess();
@@ -92,7 +92,18 @@ export default function AdminDashboard() {
     loadMarketplaceListings();
     loadNotifications();
     loadTicketSubmissions();
+    loadInventoryStats();
   }, []);
+
+  const loadInventoryStats = async () => {
+    const { data } = await supabase
+      .from("ad_spaces")
+      .select("id, media_type")
+      .eq("approval_status", "approved");
+    const rows = data || [];
+    const by = (mt: string) => rows.filter((s: any) => String(s.media_type).toUpperCase() === mt).length;
+    setInventoryStats({ total: rows.length, ooh: by("OOH"), dooh: by("DOOH"), aooh: by("AOOH") });
+  };
 
   useEffect(() => {
     filterSubmissions();
