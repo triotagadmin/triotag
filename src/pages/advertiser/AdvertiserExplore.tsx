@@ -177,7 +177,25 @@ export default function AdvertiserExplore() {
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="font-semibold text-gray-900 text-sm">{variant.label}</div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="font-semibold text-gray-900 text-sm">{variant.label}</div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExampleModal({
+                    label: variant.label,
+                    image: variant.exampleImage,
+                    caption: variant.exampleCaption,
+                  });
+                }}
+                className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full border border-green-400 text-green-600 bg-green-50 hover:bg-green-100 hover:border-green-500 transition-all duration-200 cursor-pointer hover:[animation-play-state:paused]"
+                style={{ animation: "subtlePulse 3s ease-in-out infinite" }}
+              >
+                <Eye className="w-3 h-3" />
+                View Example
+              </button>
+            </div>
             <div className="flex flex-wrap items-center gap-2 mt-0.5">
               <span className="text-green-600 font-medium text-xs">
                 ₱{variant.price.toLocaleString()} / unit
