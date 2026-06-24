@@ -46,6 +46,7 @@ export default function AdvertiserExplore() {
 
   // variantId -> qty
   const [selections, setSelections] = useState<Record<string, number>>({});
+  const [exampleModal, setExampleModal] = useState<{ label: string; image: string; caption: string } | null>(null);
 
   const updateQty = (variantId: string, qty: number) => {
     setSelections((prev) => ({ ...prev, [variantId]: Math.max(0, qty) }));
