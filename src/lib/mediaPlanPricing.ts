@@ -1,3 +1,9 @@
+import oohTableTentAsset from "@/assets/ooh_1.png.asset.json";
+import oohStickerAsset from "@/assets/ooh_2.png.asset.json";
+import oohStickerLargeAsset from "@/assets/ooh_3.png.asset.json";
+import oohPosterAsset from "@/assets/ooh_4.png.asset.json";
+import oohFlyerAsset from "@/assets/ooh_5.png.asset.json";
+
 export type CampaignType = "OOH" | "DOOH" | "AOOH";
 
 export interface FormatVariant {
