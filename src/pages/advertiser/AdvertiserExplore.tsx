@@ -25,7 +25,7 @@ import {
   AOOH_VARIANTS,
   FormatVariant,
 } from "@/lib/mediaPlanPricing";
-import oohVideo from "@/assets/retailmediakit.mp4.asset.json";
+import oohImage from "@/assets/ooh_formats_grid.png.asset.json";
 import doohVideo from "@/assets/doohmediakit.mp4.asset.json";
 import aoohVideo from "@/assets/supertruckmediakit.mp4.asset.json";
 import { supabase } from "@/integrations/supabase/client";
@@ -473,20 +473,28 @@ export default function AdvertiserExplore() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {[
-                { title: "OOH", desc: "Out-of-Home print placements across retail and high-traffic locations.", video: oohVideo.url },
-                { title: "DOOH", desc: "Digital Out-of-Home screens with dynamic, scheduled creative.", video: doohVideo.url },
-                { title: "AOOH", desc: "Audio Out-of-Home reaching audiences through ambient sound networks.", video: aoohVideo.url },
+                { title: "OOH", desc: "Out-of-Home print placements across retail and high-traffic locations.", media: oohImage.url, isVideo: false },
+                { title: "DOOH", desc: "Digital Out-of-Home screens with dynamic, scheduled creative.", media: doohVideo.url, isVideo: true },
+                { title: "AOOH", desc: "Audio Out-of-Home reaching audiences through ambient sound networks.", media: aoohVideo.url, isVideo: true },
               ].map((c) => (
                 <div key={c.title} className="rounded-2xl overflow-hidden border border-green-100 bg-white shadow-sm hover:shadow-md transition-shadow">
                   <div className="aspect-video bg-black">
-                    <video
-                      src={c.video}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
+                    {c.isVideo ? (
+                      <video
+                        src={c.media}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={c.media}
+                        alt={`${c.title} format examples`}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
                   <div className="p-5">
                     <div className="flex items-center justify-between mb-2">
