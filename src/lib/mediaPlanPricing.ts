@@ -1,3 +1,9 @@
+import oohTableTentAsset from "@/assets/ooh_1.png.asset.json";
+import oohStickerAsset from "@/assets/ooh_2.png.asset.json";
+import oohStickerLargeAsset from "@/assets/ooh_3.png.asset.json";
+import oohPosterAsset from "@/assets/ooh_4.png.asset.json";
+import oohFlyerAsset from "@/assets/ooh_5.png.asset.json";
+
 export type CampaignType = "OOH" | "DOOH" | "AOOH";
 
 export interface FormatVariant {
@@ -20,7 +26,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 350,
     specs: { Size: "A5 (148 × 210mm)", Material: "300gsm matte cardstock", Print: "Full color, double-sided" },
     billingType: "per_campaign",
-    exampleImage: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80",
+    exampleImage: oohTableTentAsset.url,
     exampleCaption: "Table tent card placed at cafe/restaurant table — high dwell-time placement at point of dining.",
   },
   {
@@ -30,7 +36,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 250,
     specs: { Size: "4R (4 × 6in)", Material: "Vinyl, waterproof", Print: "Full color, gloss/matte" },
     billingType: "per_campaign",
-    exampleImage: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80",
+    exampleImage: oohStickerAsset.url,
     exampleCaption: "Small format vinyl sticker on retail counter or window — waterproof, eye-level placement.",
   },
   {
@@ -40,7 +46,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 450,
     specs: { Size: "A4 (210 × 297mm)", Material: "Vinyl, waterproof", Print: "Full color, gloss/matte" },
     billingType: "per_campaign",
-    exampleImage: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80",
+    exampleImage: oohStickerLargeAsset.url,
     exampleCaption: "Large format A4 sticker on wall or shopfront — maximum visibility, waterproof vinyl.",
   },
   {
@@ -50,7 +56,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 600,
     specs: { Size: "A3 (297 × 420mm)", Material: "150gsm art paper", Print: "Full color" },
     billingType: "per_campaign",
-    exampleImage: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+    exampleImage: oohPosterAsset.url,
     exampleCaption: "A3 poster in high-traffic venue — full color print in waiting areas, corridors, and retail walls.",
   },
   {
@@ -60,7 +66,7 @@ export const OOH_VARIANTS: FormatVariant[] = [
     price: 1500,
     specs: { Size: "DL (99 × 210mm)", Material: "150gsm gloss", Print: "Full color, single-sided" },
     billingType: "per_campaign",
-    exampleImage: "https://images.unsplash.com/photo-1572025442646-866d16c84a54?w=800&q=80",
+    exampleImage: oohFlyerAsset.url,
     exampleCaption: "DL flyer — distributed at checkout counters and venue entrances at point of purchase.",
   },
 ];
