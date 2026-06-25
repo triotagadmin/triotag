@@ -25,7 +25,7 @@ import {
   AOOH_VARIANTS,
   FormatVariant,
 } from "@/lib/mediaPlanPricing";
-import oohVideo from "@/assets/retailmediakit.mp4.asset.json";
+import oohImage from "@/assets/ooh_formats_grid.png.asset.json";
 import doohVideo from "@/assets/doohmediakit.mp4.asset.json";
 import aoohVideo from "@/assets/supertruckmediakit.mp4.asset.json";
 import { supabase } from "@/integrations/supabase/client";
