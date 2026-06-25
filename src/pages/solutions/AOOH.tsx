@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import aoohHardware from "@/assets/aooh_hardware.jpg.asset.json";
 import {
   Volume2,
   ShoppingCart,
@@ -67,16 +68,16 @@ export default function SolutionsAOOH() {
               <Button asChild size="lg"><Link to="/advertiser/explore">Register AOOH Inventory</Link></Button>
             </div>
           </div>
-          <div className="bg-[#0c0c0c] border border-green-500/30 rounded-2xl p-10 text-center relative overflow-hidden">
-            <div className="relative h-56 flex items-center justify-center">
-              <svg className="absolute inset-0 w-full h-full animate-pulse-glow" viewBox="0 0 200 200">
-                <circle cx="100" cy="100" r="90" fill="none" stroke="#22c55e" strokeWidth="1" className="opacity-10" />
-                <circle cx="100" cy="100" r="65" fill="none" stroke="#22c55e" strokeWidth="1" className="opacity-20" />
-                <circle cx="100" cy="100" r="40" fill="none" stroke="#22c55e" strokeWidth="1" className="opacity-30" />
-              </svg>
-              <Volume2 className="w-16 h-16 text-green-500 relative z-10" />
+          <div className="bg-[#0c0c0c] border border-green-500/30 rounded-2xl p-6 text-center relative overflow-hidden">
+            <div className="relative rounded-xl overflow-hidden bg-black">
+              <img
+                src={aoohHardware.url}
+                alt="TrioTag AOOH sound system hardware — ReSpeaker microphone array with networked audio board"
+                className="w-full h-auto object-cover"
+                loading="lazy"
+              />
             </div>
-            <p className="text-zinc-300 mt-6 mb-4">Audio ads playing in-store right now</p>
+            <p className="text-zinc-300 mt-6 mb-4">Featured AOOH sound system hardware</p>
             <div className="flex flex-wrap justify-center gap-2">
               {["Supermarket", "Gym", "Convenience Store"].map((p) => (
                 <span key={p} className="px-3 py-1 rounded-full bg-black border border-white/10 text-xs text-zinc-300">{p}</span>
