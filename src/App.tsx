@@ -66,6 +66,7 @@ import ValidateTicket from "./pages/ValidateTicket";
  
 import PublisherAdRequests from "./pages/publisher/PublisherAdRequests";
 import PublisherAdRequestDetail from "./pages/publisher/PublisherAdRequestDetail";
+import PublisherActiveInventory from "./pages/publisher/PublisherActiveInventory";
 import Messages from "./pages/Messages";
 import PublisherSettings from "./pages/PublisherSettings";
 
