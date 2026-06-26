@@ -66,6 +66,7 @@ import ValidateTicket from "./pages/ValidateTicket";
  
 import PublisherAdRequests from "./pages/publisher/PublisherAdRequests";
 import PublisherAdRequestDetail from "./pages/publisher/PublisherAdRequestDetail";
+import PublisherActiveInventory from "./pages/publisher/PublisherActiveInventory";
 import Messages from "./pages/Messages";
 import PublisherSettings from "./pages/PublisherSettings";
 
@@ -195,6 +196,7 @@ const App = () => (
           <Route path="/book-talent/:talentId" element={<BookTalent />} />
           {/* Publisher Ad Requests */}
           <Route path="/publisher/ad-requests" element={<PublisherAdRequests />} />
+          <Route path="/publisher/active" element={<PublisherActiveInventory />} />
            <Route path="/publisher/ad-requests/:id" element={<PublisherAdRequestDetail />} />
            <Route path="/publisher/settings" element={<PublisherSettings />} />
           <Route path="/admin" element={<AdminLogin />} />
