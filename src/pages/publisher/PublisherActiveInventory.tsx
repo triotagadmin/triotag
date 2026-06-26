@@ -43,26 +43,51 @@ export default function PublisherActiveInventory() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { navigate("/auth"); return; }
 
+      const userId = session.user.id;
+
       const { data: profile } = await supabase
         .from("publisher_profiles")
         .select("id, business_name")
-        .eq("user_id", session.user.id)
-        .single();
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      if (!profile) { navigate("/venue-publishers"); return; }
+      const SELECT_COLS = "id, title, location, media_type, availability_status, approval_status, monthly_subscription_fee, activation_fee, specifications, media_urls, created_at, approved_at, publisher_id, advertiser_id";
 
-      const { data } = await supabase
-        .from("ad_spaces")
-        .select("id, title, location, media_type, availability_status, approval_status, monthly_subscription_fee, activation_fee, specifications, media_urls, created_at, approved_at")
-        .eq("publisher_id", profile.id)
-        .eq("approval_status", "approved")
-        .eq("availability_status", "available")
-        .order("approved_at", { ascending: false });
+      // Fetch ad_spaces owned via either publisher_profile or advertiser_id (retailer self-listings)
+      const [pubRes, advRes] = await Promise.all([
+        profile?.id
+          ? supabase
+              .from("ad_spaces")
+              .select(SELECT_COLS)
+              .eq("publisher_id", profile.id)
+              .eq("approval_status", "approved")
+              .eq("availability_status", "available")
+          : Promise.resolve({ data: [] as any[] }),
+        supabase
+          .from("ad_spaces")
+          .select(SELECT_COLS)
+          .eq("advertiser_id", userId)
+          .eq("approval_status", "approved")
+          .eq("availability_status", "available"),
+      ]);
 
-      setSpaces(data || []);
+      const merged = [...(pubRes.data || []), ...(advRes.data || [])];
+      const seen = new Set<string>();
+      const unique = merged.filter((s: any) => {
+        if (seen.has(s.id)) return false;
+        seen.add(s.id);
+        return true;
+      }).sort((a: any, b: any) => {
+        const ad = a.approved_at || a.created_at;
+        const bd = b.approved_at || b.created_at;
+        return new Date(bd).getTime() - new Date(ad).getTime();
+      });
+
+      setSpaces(unique);
       setLoading(false);
     })();
   }, [navigate]);
+
 
   const counts = useMemo(() => ({
     total: spaces.length,
