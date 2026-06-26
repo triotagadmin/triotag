@@ -196,6 +196,7 @@ const App = () => (
           <Route path="/book-talent/:talentId" element={<BookTalent />} />
           {/* Publisher Ad Requests */}
           <Route path="/publisher/ad-requests" element={<PublisherAdRequests />} />
+          <Route path="/publisher/active" element={<PublisherActiveInventory />} />
            <Route path="/publisher/ad-requests/:id" element={<PublisherAdRequestDetail />} />
            <Route path="/publisher/settings" element={<PublisherSettings />} />
           <Route path="/admin" element={<AdminLogin />} />
