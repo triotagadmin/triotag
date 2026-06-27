@@ -184,7 +184,7 @@ const AdvertiserDashboard = () => {
           </h3>
 
           <div className="mt-6 flex gap-4 flex-wrap">
-            <Button onClick={() => navigate("/campaign-builder")} size="lg" className="gap-2">
+            <Button onClick={() => navigate("/venue/register")} size="lg" className="gap-2">
               <Plus className="h-4 w-4" />
               Register New Space
             </Button>
