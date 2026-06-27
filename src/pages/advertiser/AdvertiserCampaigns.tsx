@@ -175,7 +175,7 @@ export default function AdvertiserCampaigns() {
                           className="border-green-500/40 text-green-400 hover:bg-green-500/10"
                           asChild
                         >
-                          <Link to={c.type === "AOOH" ? `/advertiser/campaigns/aooh/${c.id}` : `/advertiser-dashboard`}>
+                          <Link to={c.type === "AOOH" ? `/advertiser/campaigns/aooh/${c.id}` : `/retailer-dashboard`}>
                             View {c.type === "AOOH" ? "Report" : "Details"}
                           </Link>
                         </Button>

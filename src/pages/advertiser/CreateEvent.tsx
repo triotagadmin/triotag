@@ -76,7 +76,7 @@ const CreateEvent = () => {
         description: "Please complete your advertiser profile first.",
         variant: "destructive"
       });
-      navigate("/advertiser-dashboard");
+      navigate("/retailer-dashboard");
       return;
     }
 

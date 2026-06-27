@@ -84,7 +84,7 @@ const BookTalent = () => {
         title: "Booking Submitted!",
         description: "The talent will be notified and can accept or decline your request.",
       });
-      navigate("/advertiser-dashboard");
+      navigate("/retailer-dashboard");
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {

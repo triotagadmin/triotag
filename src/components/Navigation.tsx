@@ -105,7 +105,7 @@ interface MenuItem { label: string; to: string; }
 const dropdownForRole = (role: Role): MenuItem[] => {
   switch (role) {
     case "retailer": return [
-      { label: "Dashboard", to: "/advertiser-dashboard" },
+      { label: "Dashboard", to: "/retailer-dashboard" },
       { label: "My Campaigns", to: "/advertiser/campaigns" },
       { label: "Wallet", to: "/advertiser-settings" },
       { label: "Settings", to: "/advertiser-settings" },

@@ -212,7 +212,7 @@ const PaymentSuccess = () => {
                   <Download className="h-4 w-4 mr-2" />
                   Download Receipt
                 </Button>
-                <Button onClick={() => navigate("/advertiser-dashboard")} className="w-full">
+                <Button onClick={() => navigate("/retailer-dashboard")} className="w-full">
                   <Receipt className="h-4 w-4 mr-2" />
                   View Booking Details
                 </Button>
@@ -241,7 +241,7 @@ const PaymentSuccess = () => {
                 <Button onClick={() => navigate(`/activate/${activationId}`)} className="w-full">
                   Try Again
                 </Button>
-                <Button variant="outline" onClick={() => navigate("/advertiser-dashboard")} className="w-full">
+                <Button variant="outline" onClick={() => navigate("/retailer-dashboard")} className="w-full">
                   Go to Dashboard
                 </Button>
               </div>

@@ -243,7 +243,7 @@ const Auth = () => {
         } catch (syncError) {
           console.error("Failed to sync pending listings after OAuth:", syncError);
         }
-        goAfterAuth("/advertiser-dashboard");
+        goAfterAuth("/retailer-dashboard");
       } else if (role === "print_partner") {
         goAfterAuth("/print-partner/dashboard");
       } else if (role === "agent") {
@@ -442,7 +442,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "Successfully signed in.",
         });
-        goAfterAuth("/advertiser-dashboard");
+        goAfterAuth("/retailer-dashboard");
       } else if (roles?.role === "print_partner") {
         toast({
           title: "Wrong portal",

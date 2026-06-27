@@ -167,7 +167,7 @@ const AdvertiserSettings = () => {
       <div className="container mx-auto px-4 md:px-6 py-6 md:py-10 pb-28 md:pb-10 max-w-3xl">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/advertiser-dashboard")} className="shrink-0">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/retailer-dashboard")} className="shrink-0">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
