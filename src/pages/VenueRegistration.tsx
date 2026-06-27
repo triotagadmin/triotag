@@ -483,9 +483,10 @@ const VenueRegistration = () => {
       const venueData = buildVenueData();
       const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
       const normalizedContactEmail = normalizeEmail(contactEmail);
-      const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
+      const combinedLegacyAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
+      const dedupeAddress = headOfficeAddress || combinedLegacyAddress;
 
-      const hasDuplicate = await checkDuplicateListing(headOfficeAddress || "", normalizedContactEmail, isEditing ? editId : null);
+      const hasDuplicate = await checkDuplicateListing(dedupeAddress || "", normalizedContactEmail, isEditing ? editId : null);
       if (hasDuplicate) {
         throw new Error("A listing with the same location and advertiser email already exists.");
       }
