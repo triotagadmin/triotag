@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, ShoppingCart, Mail, Receipt, Settings, Plus, MapPin, TrendingUp, Calendar, Printer, Ticket, Key, Info, Clock, CheckCircle2, Package, Eye, Hash } from "lucide-react";
+import { BarChart3, ShoppingCart, Mail, Receipt, Settings, Plus, MapPin, TrendingUp, Calendar, Printer, Ticket, Key, Info, Clock, CheckCircle2, Package, Eye, Hash, Building2 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { format } from "date-fns";
 import { AdvertiserBranchManager } from "@/components/advertiser/AdvertiserBranchManager";
@@ -25,6 +25,7 @@ const AdvertiserDashboard = () => {
   const [leasedListings, setLeasedListings] = useState<any[]>([]);
   const [branchCounts, setBranchCounts] = useState<Record<string, number>>({});
   const [bookingPage, setBookingPage] = useState(0);
+  const [adSpaces, setAdSpaces] = useState<any[]>([]);
   const BOOKINGS_PER_PAGE = 3;
   useEffect(() => {
     let cancelled = false;
@@ -94,6 +95,23 @@ const AdvertiserDashboard = () => {
           counts[l.id] = filtered.length;
         }));
         if (!cancelled) setBranchCounts(counts);
+      }
+
+      // Fetch submitted ad spaces for this retailer (publisher profile)
+      const { data: publisherProfile } = await supabase
+        .from("publisher_profiles")
+        .select("id, business_name")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (publisherProfile) {
+        const { data: spaces } = await supabase
+          .from("ad_spaces")
+          .select("id, title, location, media_type, approval_status, availability_status, monthly_subscription_fee, created_at, approved_at")
+          .eq("publisher_id", publisherProfile.id)
+          .order("created_at", { ascending: false });
+
+        if (!cancelled && spaces) setAdSpaces(spaces);
       }
     };
     checkUser();
@@ -184,7 +202,7 @@ const AdvertiserDashboard = () => {
           </h3>
 
           <div className="mt-6 flex gap-4 flex-wrap">
-            <Button onClick={() => navigate("/campaign-builder")} size="lg" className="gap-2">
+            <Button onClick={() => navigate("/venue/register")} size="lg" className="gap-2">
               <Plus className="h-4 w-4" />
               Register New Space
             </Button>
@@ -338,6 +356,102 @@ const AdvertiserDashboard = () => {
                   </Button>
                 </div>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* My Submitted Ad Spaces */}
+        <div className="mt-8 mb-12">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">My Submitted Ad Spaces</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/venue/register")}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Register New Space
+            </Button>
+          </div>
+
+          {adSpaces.length === 0 ? (
+            <Card className="text-center py-10">
+              <CardContent>
+                <Building2 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <p className="font-semibold text-gray-600 mb-1">No ad spaces submitted yet</p>
+                <p className="text-sm text-gray-400 mb-4">Register your venue to start earning from your ad spaces.</p>
+                <Button onClick={() => navigate("/venue/register")} size="sm">
+                  Register a Space
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {adSpaces.map((space) => (
+                <Card key={space.id} className="hover:border-green-400 transition-colors">
+                  <CardContent className="p-4">
+                    {/* Title + format badge */}
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="font-semibold text-gray-900 text-sm truncate flex-1 mr-2">
+                        {space.title}
+                      </div>
+                      <Badge className={
+                        space.media_type === "OOH" ? "bg-purple-100 text-purple-700 shrink-0" :
+                        space.media_type === "DOOH" ? "bg-cyan-100 text-cyan-700 shrink-0" :
+                        "bg-green-100 text-green-700 shrink-0"
+                      }>
+                        {space.media_type}
+                      </Badge>
+                    </div>
+
+                    {/* Location */}
+                    {space.location && (
+                      <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
+                        <MapPin className="w-3 h-3" />
+                        {space.location}
+                      </div>
+                    )}
+
+                    {/* Approval status */}
+                    <div className="mb-2">
+                      <Badge variant={
+                        space.approval_status === "approved" ? "default" :
+                        space.approval_status === "rejected" ? "destructive" :
+                        "secondary"
+                      }>
+                        {space.approval_status === "approved" ? "✓ Approved" :
+                         space.approval_status === "rejected" ? "✗ Rejected" :
+                         "⏳ Pending Review"}
+                      </Badge>
+                    </div>
+
+                    {/* Monthly fee */}
+                    {space.monthly_subscription_fee && (
+                      <div className="text-xs text-gray-500">
+                        ₱{Number(space.monthly_subscription_fee).toLocaleString()} / month
+                      </div>
+                    )}
+
+                    {/* Submitted date */}
+                    <div className="text-xs text-gray-400 mt-1">
+                      Submitted {new Date(space.created_at).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" })}
+                    </div>
+
+                    {/* Edit button — only for pending/rejected spaces */}
+                    {space.approval_status !== "approved" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-3"
+                        onClick={() => navigate(`/venue/register?edit=${space.id}`)}
+                      >
+                        Edit Submission
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </div>
