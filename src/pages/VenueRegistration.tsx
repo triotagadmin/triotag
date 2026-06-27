@@ -283,6 +283,10 @@ const VenueRegistration = () => {
       setState(fullAddress.state || "");
       setPostalCode(fullAddress.postal_code || "");
       setCountry(fullAddress.country || "");
+      const legacyJoined = [fullAddress.street, fullAddress.city, fullAddress.state, fullAddress.postal_code, fullAddress.country].filter(Boolean).join(", ");
+      const resolvedFullAddress = fullAddress.full_address || venue.location || legacyJoined || "";
+      setHeadOfficeAddress(resolvedFullAddress);
+      setHeadOfficeSearch(resolvedFullAddress);
 
       if (specs.environment_details) {
         setEnvDetails({ ...envDetails, ...specs.environment_details });
