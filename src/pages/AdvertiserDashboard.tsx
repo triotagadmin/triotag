@@ -96,6 +96,23 @@ const AdvertiserDashboard = () => {
         }));
         if (!cancelled) setBranchCounts(counts);
       }
+
+      // Fetch submitted ad spaces for this retailer (publisher profile)
+      const { data: publisherProfile } = await supabase
+        .from("publisher_profiles")
+        .select("id, business_name")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (publisherProfile) {
+        const { data: spaces } = await supabase
+          .from("ad_spaces")
+          .select("id, title, location, media_type, approval_status, availability_status, monthly_subscription_fee, created_at, approved_at")
+          .eq("publisher_id", publisherProfile.id)
+          .order("created_at", { ascending: false });
+
+        if (!cancelled && spaces) setAdSpaces(spaces);
+      }
     };
     checkUser();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
