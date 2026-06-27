@@ -176,17 +176,20 @@ export const LocationPickerMap = ({
     const lat = parseFloat(s.lat);
     const lng = parseFloat(s.lon);
     setSearchText(s.display_name);
+    onSearchChange?.(s.display_name);
     setSuggestions([]);
     const L = await import("leaflet");
     if (mapRef.current) {
       mapRef.current.setView([lat, lng], 16);
-      placePin(mapRef.current, L, lat, lng);
-      setLocation({
+      placePin(mapRef.current, L, lat, lng, true);
+      const loc = {
         lat,
         lng,
         address: s.display_name,
         place_name: s.display_name.split(",")[0],
-      });
+      };
+      setLocation(loc);
+      onLocationSelect?.(loc);
     }
   };
 
