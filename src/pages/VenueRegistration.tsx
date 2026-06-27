@@ -400,7 +400,7 @@ const VenueRegistration = () => {
     return {
       publisher_id: publisherId,
       title: title.trim(),
-      location: headOfficeAddress || null,
+      location: resolvedHeadOffice || null,
       description: description.trim(),
       latitude: latitude, longitude: longitude,
       specifications: {
@@ -409,7 +409,7 @@ const VenueRegistration = () => {
         custom_venue_type: venueTypes.includes("other") ? customVenueType : null,
         industry_category: industryCategory,
         is_franchise: true,
-        head_office_address: { street: street.trim(), city: city.trim(), state: state.trim(), postal_code: postalCode.trim(), country: country.trim() },
+        head_office_address: { full_address: resolvedHeadOffice, lat: latitude, lng: longitude },
         contact_person: contactPerson.trim(),
         contact_email: contactEmail.trim(),
         contact_number: contactPhone.trim(),
