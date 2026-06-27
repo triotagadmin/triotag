@@ -84,14 +84,18 @@ export const LocationPickerMap = ({
         markerRef.current.on("dragend", async () => {
           const pos = markerRef.current.getLatLng();
           const geo = await reverseGeocode(pos.lat, pos.lng);
-          setLocation({ lat: pos.lat, lng: pos.lng, ...geo });
+          const loc = { lat: pos.lat, lng: pos.lng, ...geo };
+          setLocation(loc);
           setConfirmed(false);
+          onLocationSelectRef.current?.(loc);
         });
       }
 
       if (!skipGeocode) {
         const geo = await reverseGeocode(lat, lng);
-        setLocation({ lat, lng, ...geo });
+        const loc = { lat, lng, ...geo };
+        setLocation(loc);
+        onLocationSelectRef.current?.(loc);
       }
       setConfirmed(false);
     },
