@@ -388,7 +388,8 @@ const VenueRegistration = () => {
     const actualVenueTypes = venueTypes.includes("other") && customVenueType
       ? [...venueTypes.filter(v => v !== "other"), customVenueType]
       : venueTypes;
-    const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
+    const combinedLegacyAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
+    const resolvedHeadOffice = headOfficeAddress || combinedLegacyAddress;
     const locsJson: any[] = [];
     const envJson = {
       venueType: envDetails.venueType, venueSize: envDetails.venueSize, seatingCapacity: envDetails.seatingCapacity,
