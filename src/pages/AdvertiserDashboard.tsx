@@ -25,6 +25,7 @@ const AdvertiserDashboard = () => {
   const [leasedListings, setLeasedListings] = useState<any[]>([]);
   const [branchCounts, setBranchCounts] = useState<Record<string, number>>({});
   const [bookingPage, setBookingPage] = useState(0);
+  const [adSpaces, setAdSpaces] = useState<any[]>([]);
   const BOOKINGS_PER_PAGE = 3;
   useEffect(() => {
     let cancelled = false;
