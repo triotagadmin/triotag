@@ -376,7 +376,7 @@ const OrderPrints = () => {
               <CardDescription>Only verified advertiser accounts can order print materials.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => navigate("/advertiser-dashboard")}>Back to Dashboard</Button>
+              <Button onClick={() => navigate("/retailer-dashboard")}>Back to Dashboard</Button>
             </CardContent>
           </Card>
         </div>
@@ -418,7 +418,7 @@ const OrderPrints = () => {
                 <Button onClick={() => { setOrderComplete(false); setSelectedFranchiseId(""); setBranches([]); }}>
                   Place Another Order
                 </Button>
-                <Button variant="outline" onClick={() => navigate("/advertiser-dashboard")}>
+                <Button variant="outline" onClick={() => navigate("/retailer-dashboard")}>
                   Back to Dashboard
                 </Button>
               </div>

@@ -62,7 +62,7 @@ export const OrderSuccessCard = ({ orderId, productName, quantity, onNewOrder }:
         <div className="flex flex-col gap-3">
           <Button
             variant="outline"
-            onClick={() => navigate("/advertiser-dashboard")}
+            onClick={() => navigate("/retailer-dashboard")}
             className="w-full"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

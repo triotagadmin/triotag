@@ -59,7 +59,7 @@ const CampaignBuilder = () => {
           description: "Please complete your advertiser profile first.",
           variant: "destructive",
         });
-        navigate("/advertiser-dashboard");
+        navigate("/retailer-dashboard");
         return;
       }
 
@@ -111,7 +111,7 @@ const CampaignBuilder = () => {
         description: "Your campaign has been submitted for review.",
       });
 
-      navigate("/advertiser-dashboard");
+      navigate("/retailer-dashboard");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -368,7 +368,7 @@ const CampaignBuilder = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate("/advertiser-dashboard")}
+              onClick={() => navigate("/retailer-dashboard")}
               disabled={loading}
             >
               Cancel

@@ -133,7 +133,7 @@ export default function AdvertiserCampaignCreate() {
       return;
     }
     toast({ title: "Campaign launched 🎉", description: "We'll notify you when it's reviewed." });
-    navigate("/advertiser-dashboard");
+    navigate("/retailer-dashboard");
   };
 
   const summarySpaces = (m: typeof MEDIA_TYPE_BREAKDOWN[number]) => {

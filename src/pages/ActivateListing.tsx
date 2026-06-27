@@ -1267,7 +1267,7 @@ const ActivateListing = () => {
                     <PrintOrderPaymentGate
                   orderId={orderId}
                   onProceedToPayment={() => setCurrentStep("payment")}
-                  onBackToDashboard={() => navigate("/advertiser-dashboard")} />
+                  onBackToDashboard={() => navigate("/retailer-dashboard")} />
                   </CardContent>
                 </Card>
               </div> :

@@ -21,7 +21,7 @@ const PageLoader = () => (
 export const getDashboardByRole = (role: Role | null | undefined): string => {
   switch (role) {
     case "admin": return "/admin/dashboard";
-    case "retailer": return "/advertiser-dashboard";
+    case "retailer": return "/retailer-dashboard";
     case "agent": return "/venue-publishers";
     case "print_partner": return "/print-partner/dashboard";
     case "talent": return "/talent-dashboard";

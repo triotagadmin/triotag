@@ -44,7 +44,7 @@ export const RetailerLayout = ({ children, title }: { children: ReactNode; title
       if (role !== "agent") {
         const map: Record<string, string> = {
           admin: "/admin/dashboard",
-          retailer: "/advertiser-dashboard",
+          retailer: "/retailer-dashboard",
           print_partner: "/print-partner/dashboard",
           talent: "/talent-dashboard",
         };
