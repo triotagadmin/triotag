@@ -32,6 +32,9 @@ export const LocationPickerMap = ({
   onConfirm,
   initialLocation,
   mapHeight = "450px",
+  searchValue,
+  onSearchChange,
+  onLocationSelect,
 }: LocationPickerMapProps) => {
   const [location, setLocation] = useState<LocationData | null>(null);
   const [searchText, setSearchText] = useState("");
@@ -39,6 +42,8 @@ export const LocationPickerMap = ({
   const [searching, setSearching] = useState(false);
   const [locating, setLocating] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const onLocationSelectRef = useRef(onLocationSelect);
+  useEffect(() => { onLocationSelectRef.current = onLocationSelect; }, [onLocationSelect]);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
