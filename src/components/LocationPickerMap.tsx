@@ -14,6 +14,9 @@ interface LocationPickerMapProps {
   onConfirm: (location: LocationData) => void;
   initialLocation?: { lat: number; lng: number } | null;
   mapHeight?: string;
+  searchValue?: string;
+  onSearchChange?: (val: string) => void;
+  onLocationSelect?: (location: LocationData) => void;
 }
 
 interface Suggestion {
@@ -29,6 +32,9 @@ export const LocationPickerMap = ({
   onConfirm,
   initialLocation,
   mapHeight = "450px",
+  searchValue,
+  onSearchChange,
+  onLocationSelect,
 }: LocationPickerMapProps) => {
   const [location, setLocation] = useState<LocationData | null>(null);
   const [searchText, setSearchText] = useState("");
@@ -36,6 +42,8 @@ export const LocationPickerMap = ({
   const [searching, setSearching] = useState(false);
   const [locating, setLocating] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const onLocationSelectRef = useRef(onLocationSelect);
+  useEffect(() => { onLocationSelectRef.current = onLocationSelect; }, [onLocationSelect]);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -76,14 +84,18 @@ export const LocationPickerMap = ({
         markerRef.current.on("dragend", async () => {
           const pos = markerRef.current.getLatLng();
           const geo = await reverseGeocode(pos.lat, pos.lng);
-          setLocation({ lat: pos.lat, lng: pos.lng, ...geo });
+          const loc = { lat: pos.lat, lng: pos.lng, ...geo };
+          setLocation(loc);
           setConfirmed(false);
+          onLocationSelectRef.current?.(loc);
         });
       }
 
       if (!skipGeocode) {
         const geo = await reverseGeocode(lat, lng);
-        setLocation({ lat, lng, ...geo });
+        const loc = { lat, lng, ...geo };
+        setLocation(loc);
+        onLocationSelectRef.current?.(loc);
       }
       setConfirmed(false);
     },
@@ -164,17 +176,20 @@ export const LocationPickerMap = ({
     const lat = parseFloat(s.lat);
     const lng = parseFloat(s.lon);
     setSearchText(s.display_name);
+    onSearchChange?.(s.display_name);
     setSuggestions([]);
     const L = await import("leaflet");
     if (mapRef.current) {
       mapRef.current.setView([lat, lng], 16);
-      placePin(mapRef.current, L, lat, lng);
-      setLocation({
+      placePin(mapRef.current, L, lat, lng, true);
+      const loc = {
         lat,
         lng,
         address: s.display_name,
         place_name: s.display_name.split(",")[0],
-      });
+      };
+      setLocation(loc);
+      onLocationSelect?.(loc);
     }
   };
 
@@ -212,8 +227,12 @@ export const LocationPickerMap = ({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
             placeholder="Search address, business name, or landmark..."
-            value={searchText}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            value={searchValue !== undefined ? searchValue : searchText}
+            onChange={(e) => {
+              const val = e.target.value;
+              onSearchChange?.(val);
+              handleSearchChange(val);
+            }}
             className="pl-9"
           />
           {searching && (

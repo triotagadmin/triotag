@@ -150,6 +150,8 @@ const VenueRegistration = () => {
   const [country, setCountry] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
+  const [headOfficeAddress, setHeadOfficeAddress] = useState("");
+  const [headOfficeSearch, setHeadOfficeSearch] = useState("");
   const [contactPerson, setContactPerson] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -281,6 +283,10 @@ const VenueRegistration = () => {
       setState(fullAddress.state || "");
       setPostalCode(fullAddress.postal_code || "");
       setCountry(fullAddress.country || "");
+      const legacyJoined = [fullAddress.street, fullAddress.city, fullAddress.state, fullAddress.postal_code, fullAddress.country].filter(Boolean).join(", ");
+      const resolvedFullAddress = fullAddress.full_address || venue.location || legacyJoined || "";
+      setHeadOfficeAddress(resolvedFullAddress);
+      setHeadOfficeSearch(resolvedFullAddress);
 
       if (specs.environment_details) {
         setEnvDetails({ ...envDetails, ...specs.environment_details });
@@ -382,7 +388,8 @@ const VenueRegistration = () => {
     const actualVenueTypes = venueTypes.includes("other") && customVenueType
       ? [...venueTypes.filter(v => v !== "other"), customVenueType]
       : venueTypes;
-    const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
+    const combinedLegacyAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
+    const resolvedHeadOffice = headOfficeAddress || combinedLegacyAddress;
     const locsJson: any[] = [];
     const envJson = {
       venueType: envDetails.venueType, venueSize: envDetails.venueSize, seatingCapacity: envDetails.seatingCapacity,
@@ -393,7 +400,7 @@ const VenueRegistration = () => {
     return {
       publisher_id: publisherId,
       title: title.trim(),
-      location: headOfficeAddress || null,
+      location: resolvedHeadOffice || null,
       description: description.trim(),
       latitude: latitude, longitude: longitude,
       specifications: {
@@ -402,7 +409,7 @@ const VenueRegistration = () => {
         custom_venue_type: venueTypes.includes("other") ? customVenueType : null,
         industry_category: industryCategory,
         is_franchise: true,
-        head_office_address: { street: street.trim(), city: city.trim(), state: state.trim(), postal_code: postalCode.trim(), country: country.trim() },
+        head_office_address: { full_address: resolvedHeadOffice, lat: latitude, lng: longitude },
         contact_person: contactPerson.trim(),
         contact_email: contactEmail.trim(),
         contact_number: contactPhone.trim(),
@@ -476,9 +483,10 @@ const VenueRegistration = () => {
       const venueData = buildVenueData();
       const filledDocs = verificationDocuments.filter(doc => doc.file !== null);
       const normalizedContactEmail = normalizeEmail(contactEmail);
-      const headOfficeAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
+      const combinedLegacyAddress = [street, city, state, postalCode, country].filter(Boolean).join(", ");
+      const dedupeAddress = headOfficeAddress || combinedLegacyAddress;
 
-      const hasDuplicate = await checkDuplicateListing(headOfficeAddress || "", normalizedContactEmail, isEditing ? editId : null);
+      const hasDuplicate = await checkDuplicateListing(dedupeAddress || "", normalizedContactEmail, isEditing ? editId : null);
       if (hasDuplicate) {
         throw new Error("A listing with the same location and advertiser email already exists.");
       }
@@ -669,22 +677,43 @@ const VenueRegistration = () => {
                     <CardTitle className="text-lg flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Head Office / Primary Location</CardTitle>
                     <p className="text-xs text-muted-foreground">Search for your location or click the map to place a pin. This address is private.</p>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-3">
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10">
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <Input
+                        placeholder="Type your venue address, barangay, or landmark..."
+                        value={headOfficeSearch}
+                        onChange={(e) => setHeadOfficeSearch(e.target.value)}
+                        className="pl-9 font-medium"
+                      />
+                      {headOfficeAddress && (
+                        <div className="mt-1.5 text-xs text-green-600 flex items-center gap-1 pl-1">
+                          <CheckCircle className="w-3 h-3" />
+                          Location saved: {headOfficeAddress}
+                        </div>
+                      )}
+                    </div>
                     <LocationPickerMap
                       initialLocation={latitude && longitude ? { lat: latitude, lng: longitude } : null}
-                      onConfirm={(loc: LocationData) => {
+                      searchValue={headOfficeSearch}
+                      onSearchChange={(val) => setHeadOfficeSearch(val)}
+                      onLocationSelect={(loc) => {
+                        setHeadOfficeAddress(loc.address);
+                        setHeadOfficeSearch(loc.address);
                         setLatitude(loc.lat);
                         setLongitude(loc.lng);
-                        // Parse address parts from the full address string
-                        const parts = loc.address.split(",").map(s => s.trim());
-                        if (parts.length >= 1) setStreet(parts[0]);
-                        if (parts.length >= 2) setCity(parts[1]);
-                        if (parts.length >= 3) setState(parts[2]);
-                        if (parts.length >= 4) setPostalCode(parts[3]);
-                        if (parts.length >= 5) setCountry(parts[parts.length - 1]);
+                      }}
+                      onConfirm={(loc: LocationData) => {
+                        setHeadOfficeAddress(loc.address);
+                        setHeadOfficeSearch(loc.address);
+                        setLatitude(loc.lat);
+                        setLongitude(loc.lng);
                       }}
                     />
                   </CardContent>
+
                 </Card>
 
 
