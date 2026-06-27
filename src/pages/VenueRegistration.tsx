@@ -671,22 +671,43 @@ const VenueRegistration = () => {
                     <CardTitle className="text-lg flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Head Office / Primary Location</CardTitle>
                     <p className="text-xs text-muted-foreground">Search for your location or click the map to place a pin. This address is private.</p>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-3">
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10">
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <Input
+                        placeholder="Type your venue address, barangay, or landmark..."
+                        value={headOfficeSearch}
+                        onChange={(e) => setHeadOfficeSearch(e.target.value)}
+                        className="pl-9 font-medium"
+                      />
+                      {headOfficeAddress && (
+                        <div className="mt-1.5 text-xs text-green-600 flex items-center gap-1 pl-1">
+                          <CheckCircle className="w-3 h-3" />
+                          Location saved: {headOfficeAddress}
+                        </div>
+                      )}
+                    </div>
                     <LocationPickerMap
                       initialLocation={latitude && longitude ? { lat: latitude, lng: longitude } : null}
-                      onConfirm={(loc: LocationData) => {
+                      searchValue={headOfficeSearch}
+                      onSearchChange={(val) => setHeadOfficeSearch(val)}
+                      onLocationSelect={(loc) => {
+                        setHeadOfficeAddress(loc.address);
+                        setHeadOfficeSearch(loc.address);
                         setLatitude(loc.lat);
                         setLongitude(loc.lng);
-                        // Parse address parts from the full address string
-                        const parts = loc.address.split(",").map(s => s.trim());
-                        if (parts.length >= 1) setStreet(parts[0]);
-                        if (parts.length >= 2) setCity(parts[1]);
-                        if (parts.length >= 3) setState(parts[2]);
-                        if (parts.length >= 4) setPostalCode(parts[3]);
-                        if (parts.length >= 5) setCountry(parts[parts.length - 1]);
+                      }}
+                      onConfirm={(loc: LocationData) => {
+                        setHeadOfficeAddress(loc.address);
+                        setHeadOfficeSearch(loc.address);
+                        setLatitude(loc.lat);
+                        setLongitude(loc.lng);
                       }}
                     />
                   </CardContent>
+
                 </Card>
 
 
