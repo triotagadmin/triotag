@@ -227,8 +227,12 @@ export const LocationPickerMap = ({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
             placeholder="Search address, business name, or landmark..."
-            value={searchText}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            value={searchValue !== undefined ? searchValue : searchText}
+            onChange={(e) => {
+              const val = e.target.value;
+              onSearchChange?.(val);
+              handleSearchChange(val);
+            }}
             className="pl-9"
           />
           {searching && (
