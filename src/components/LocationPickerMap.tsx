@@ -14,6 +14,9 @@ interface LocationPickerMapProps {
   onConfirm: (location: LocationData) => void;
   initialLocation?: { lat: number; lng: number } | null;
   mapHeight?: string;
+  searchValue?: string;
+  onSearchChange?: (val: string) => void;
+  onLocationSelect?: (location: LocationData) => void;
 }
 
 interface Suggestion {
