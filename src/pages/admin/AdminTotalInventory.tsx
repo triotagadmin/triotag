@@ -46,26 +46,29 @@ export default function AdminTotalInventory() {
   const [retailerFilter, setRetailerFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<any | null>(null);
+  const [queryError, setQueryError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
+      setQueryError(null);
       const { data, error } = await supabase
         .from("ad_spaces")
         .select(`
           id, title, location, media_type, approval_status, availability_status,
           monthly_subscription_fee, activation_fee, created_at, approved_at,
-          publisher_id, description, specifications, media_urls,
-          pending_advertiser_email, rejection_reason,
+          publisher_id,
           publisher_profiles (
-            id, business_name, contact_email, contact_phone,
-            business_type, address, user_id
+            business_name, contact_email, user_id
           )
         `)
         .eq("approval_status", "approved")
         .order("approved_at", { ascending: false });
 
-      if (error) console.error(error);
+      if (error) {
+        console.error("[AdminTotalInventory] Query error:", error.message, error.details, error.hint);
+        setQueryError(error.message);
+      }
       setSpaces(data || []);
       setLoading(false);
     })();
@@ -165,6 +168,12 @@ export default function AdminTotalInventory() {
             <Download className="w-4 h-4 mr-2" /> Export CSV
           </Button>
         </div>
+
+        {queryError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4 text-sm">
+            <strong>Failed to load inventory:</strong> {queryError}
+          </div>
+        )}
 
         {/* Stats row 1 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -369,23 +378,6 @@ export default function AdminTotalInventory() {
                 <Badge variant="outline">{selected.approval_status}</Badge>
               </div>
 
-              {/* Media preview */}
-              {selected.media_urls && Array.isArray(selected.media_urls) && selected.media_urls.length > 0 && (
-                <div>
-                  <div className="font-semibold text-muted-foreground mb-2">Media</div>
-                  <div className="flex flex-wrap gap-2">
-                    {selected.media_urls.map((url: string, i: number) => (
-                      <img
-                        key={i}
-                        src={url}
-                        alt={`Media ${i + 1}`}
-                        className="w-28 h-28 object-cover rounded-xl border border-border"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Core details */}
               <div>
@@ -410,37 +402,9 @@ export default function AdminTotalInventory() {
                       ? new Date(selected.created_at).toLocaleString("en-PH", { dateStyle: "long", timeStyle: "short" })
                       : "—"}
                   />
-                  {selected.rejection_reason && (
-                    <div className="col-span-2">
-                      <Detail label="Rejection Reason" value={
-                        <span className="text-red-600">{selected.rejection_reason}</span>
-                      } />
-                    </div>
-                  )}
-                  {selected.description && (
-                    <div className="col-span-2">
-                      <Detail label="Description" value={selected.description} />
-                    </div>
-                  )}
                 </div>
               </div>
 
-              {/* Specifications */}
-              {selected.specifications && typeof selected.specifications === "object" &&
-                Object.keys(selected.specifications).length > 0 && (
-                <div className="border-t pt-4">
-                  <div className="font-semibold text-muted-foreground mb-2">Specifications</div>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                    {Object.entries(selected.specifications).map(([key, val]) => (
-                      <Detail
-                        key={key}
-                        label={key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                        value={typeof val === "object" ? JSON.stringify(val) : String(val ?? "—")}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Retailer info */}
               <div className="border-t pt-4">
@@ -448,13 +412,6 @@ export default function AdminTotalInventory() {
                 <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                   <Detail label="Business Name" value={selected.publisher_profiles?.business_name || "—"} />
                   <Detail label="Contact Email" value={selected.publisher_profiles?.contact_email || "—"} />
-                  <Detail label="Contact Phone" value={selected.publisher_profiles?.contact_phone || "—"} />
-                  <Detail label="Business Type" value={selected.publisher_profiles?.business_type || "—"} />
-                  <Detail label="Address" value={
-                    typeof selected.publisher_profiles?.address === "object" && selected.publisher_profiles?.address !== null
-                      ? Object.values(selected.publisher_profiles.address).filter(Boolean).join(", ")
-                      : selected.publisher_profiles?.address || "—"
-                  } />
                   <Detail label="Publisher ID" value={
                     <span className="font-mono text-xs text-muted-foreground">{selected.publisher_id || "—"}</span>
                   } />
