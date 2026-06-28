@@ -55,8 +55,12 @@ export default function AdminTotalInventory() {
         .select(`
           id, title, location, media_type, approval_status, availability_status,
           monthly_subscription_fee, activation_fee, created_at, approved_at,
-          publisher_id,
-          publisher_profiles ( business_name, contact_email, user_id )
+          publisher_id, description, specifications, media_urls,
+          pending_advertiser_email, rejection_reason,
+          publisher_profiles (
+            id, business_name, contact_email, contact_phone,
+            business_type, address, user_id
+          )
         `)
         .eq("approval_status", "approved")
         .order("approved_at", { ascending: false });
