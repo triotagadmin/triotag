@@ -292,7 +292,6 @@ export default function AdminTotalInventory() {
                         <TableHead>Monthly Fee</TableHead>
                         <TableHead>Activation Fee</TableHead>
                         <TableHead>Approved</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
