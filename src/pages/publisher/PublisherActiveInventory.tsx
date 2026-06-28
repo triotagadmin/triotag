@@ -194,7 +194,11 @@ export default function PublisherActiveInventory() {
             {filtered.map((space) => (
               <div
                 key={space.id}
-                className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-green-400 transition-colors flex flex-col"
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedSpace(space)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedSpace(space); } }}
+                className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-green-400 hover:shadow-md transition-all flex flex-col cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-400"
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="min-w-0">
