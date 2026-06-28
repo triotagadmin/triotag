@@ -298,7 +298,11 @@ export default function AdminTotalInventory() {
                       {pageRows.map((s) => {
                         const mt = String(s.media_type || "").toUpperCase();
                         return (
-                          <TableRow key={s.id}>
+                          <TableRow
+                            key={s.id}
+                            onClick={() => setSelected(s)}
+                            className="cursor-pointer hover:bg-muted/50 transition-colors"
+                          >
                             <TableCell className="font-medium max-w-[200px] truncate">{s.title}</TableCell>
                             <TableCell className="max-w-[220px] truncate text-muted-foreground">{s.location || "—"}</TableCell>
                             <TableCell><Badge className={formatBadge(mt)}>{mt || "—"}</Badge></TableCell>
@@ -312,9 +316,6 @@ export default function AdminTotalInventory() {
                             <TableCell>{fmtPHP(s.activation_fee)}</TableCell>
                             <TableCell>
                               {s.approved_at ? new Date(s.approved_at).toLocaleDateString("en-PH") : "—"}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button variant="ghost" size="sm" onClick={() => setSelected(s)}>View</Button>
                             </TableCell>
                           </TableRow>
                         );
