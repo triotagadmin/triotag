@@ -20,7 +20,7 @@ import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell,
 } from "recharts";
 import {
-  Package, Download, Search, Users, CheckCircle2, ChevronLeft, ChevronRight, ExternalLink,
+  Package, Download, Search, Users, CheckCircle2, ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 type MediaType = "OOH" | "DOOH" | "AOOH";
