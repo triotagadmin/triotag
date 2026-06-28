@@ -20,7 +20,7 @@ import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell,
 } from "recharts";
 import {
-  Package, Download, Search, Users, CheckCircle2, ChevronLeft, ChevronRight, ExternalLink,
+  Package, Download, Search, Users, CheckCircle2, ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 type MediaType = "OOH" | "DOOH" | "AOOH";
@@ -55,8 +55,12 @@ export default function AdminTotalInventory() {
         .select(`
           id, title, location, media_type, approval_status, availability_status,
           monthly_subscription_fee, activation_fee, created_at, approved_at,
-          publisher_id,
-          publisher_profiles ( business_name, contact_email, user_id )
+          publisher_id, description, specifications, media_urls,
+          pending_advertiser_email, rejection_reason,
+          publisher_profiles (
+            id, business_name, contact_email, contact_phone,
+            business_type, address, user_id
+          )
         `)
         .eq("approval_status", "approved")
         .order("approved_at", { ascending: false });
@@ -288,14 +292,17 @@ export default function AdminTotalInventory() {
                         <TableHead>Monthly Fee</TableHead>
                         <TableHead>Activation Fee</TableHead>
                         <TableHead>Approved</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {pageRows.map((s) => {
                         const mt = String(s.media_type || "").toUpperCase();
                         return (
-                          <TableRow key={s.id}>
+                          <TableRow
+                            key={s.id}
+                            onClick={() => setSelected(s)}
+                            className="cursor-pointer hover:bg-muted/50 transition-colors"
+                          >
                             <TableCell className="font-medium max-w-[200px] truncate">{s.title}</TableCell>
                             <TableCell className="max-w-[220px] truncate text-muted-foreground">{s.location || "—"}</TableCell>
                             <TableCell><Badge className={formatBadge(mt)}>{mt || "—"}</Badge></TableCell>
@@ -309,9 +316,6 @@ export default function AdminTotalInventory() {
                             <TableCell>{fmtPHP(s.activation_fee)}</TableCell>
                             <TableCell>
                               {s.approved_at ? new Date(s.approved_at).toLocaleDateString("en-PH") : "—"}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button variant="ghost" size="sm" onClick={() => setSelected(s)}>View</Button>
                             </TableCell>
                           </TableRow>
                         );
@@ -343,36 +347,131 @@ export default function AdminTotalInventory() {
 
       {/* Detail dialog */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{selected?.title}</DialogTitle>
+            <DialogTitle className="flex items-center gap-3 text-xl">
+              {selected?.title}
+              {selected && (
+                <Badge className={formatBadge(String(selected.media_type).toUpperCase())}>
+                  {selected.media_type}
+                </Badge>
+              )}
+            </DialogTitle>
           </DialogHeader>
+
           {selected && (
-            <div className="space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-4">
-                <Detail label="Format" value={<Badge className={formatBadge(String(selected.media_type).toUpperCase())}>{selected.media_type}</Badge>} />
-                <Detail label="Availability" value={selected.availability_status || "—"} />
-                <Detail label="Location" value={selected.location || "—"} />
-                <Detail label="Monthly Fee" value={fmtPHP(selected.monthly_subscription_fee)} />
-                <Detail label="Activation Fee" value={fmtPHP(selected.activation_fee)} />
-                <Detail label="Approved" value={selected.approved_at ? new Date(selected.approved_at).toLocaleString("en-PH") : "—"} />
-                <Detail label="Created" value={selected.created_at ? new Date(selected.created_at).toLocaleString("en-PH") : "—"} />
-                <Detail label="Status" value={selected.approval_status} />
+            <div className="space-y-5 text-sm">
+              {/* Status row */}
+              <div className="flex flex-wrap gap-2">
+                <Badge variant={selected.availability_status === "available" ? "default" : "secondary"}>
+                  {selected.availability_status || "unknown"}
+                </Badge>
+                <Badge variant="outline">{selected.approval_status}</Badge>
               </div>
-              <div className="border-t pt-3">
-                <div className="font-semibold mb-2">Retailer</div>
-                <div className="grid grid-cols-2 gap-4">
+
+              {/* Media preview */}
+              {selected.media_urls && Array.isArray(selected.media_urls) && selected.media_urls.length > 0 && (
+                <div>
+                  <div className="font-semibold text-muted-foreground mb-2">Media</div>
+                  <div className="flex flex-wrap gap-2">
+                    {selected.media_urls.map((url: string, i: number) => (
+                      <img
+                        key={i}
+                        src={url}
+                        alt={`Media ${i + 1}`}
+                        className="w-28 h-28 object-cover rounded-xl border border-border"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Core details */}
+              <div>
+                <div className="font-semibold text-muted-foreground mb-2">Ad Space Details</div>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                  <Detail label="Title" value={selected.title || "—"} />
+                  <Detail label="Format" value={selected.media_type || "—"} />
+                  <Detail label="Location" value={selected.location || "—"} />
+                  <Detail label="Availability" value={selected.availability_status || "—"} />
+                  <Detail label="Approval Status" value={selected.approval_status || "—"} />
+                  <Detail label="Monthly Fee" value={fmtPHP(selected.monthly_subscription_fee)} />
+                  <Detail label="Activation Fee" value={fmtPHP(selected.activation_fee)} />
+                  <Detail
+                    label="Approved At"
+                    value={selected.approved_at
+                      ? new Date(selected.approved_at).toLocaleString("en-PH", { dateStyle: "long", timeStyle: "short" })
+                      : "—"}
+                  />
+                  <Detail
+                    label="Submitted At"
+                    value={selected.created_at
+                      ? new Date(selected.created_at).toLocaleString("en-PH", { dateStyle: "long", timeStyle: "short" })
+                      : "—"}
+                  />
+                  {selected.rejection_reason && (
+                    <div className="col-span-2">
+                      <Detail label="Rejection Reason" value={
+                        <span className="text-red-600">{selected.rejection_reason}</span>
+                      } />
+                    </div>
+                  )}
+                  {selected.description && (
+                    <div className="col-span-2">
+                      <Detail label="Description" value={selected.description} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Specifications */}
+              {selected.specifications && typeof selected.specifications === "object" &&
+                Object.keys(selected.specifications).length > 0 && (
+                <div className="border-t pt-4">
+                  <div className="font-semibold text-muted-foreground mb-2">Specifications</div>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                    {Object.entries(selected.specifications).map(([key, val]) => (
+                      <Detail
+                        key={key}
+                        label={key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                        value={typeof val === "object" ? JSON.stringify(val) : String(val ?? "—")}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Retailer info */}
+              <div className="border-t pt-4">
+                <div className="font-semibold text-muted-foreground mb-2">Retailer / Publisher</div>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                   <Detail label="Business Name" value={selected.publisher_profiles?.business_name || "—"} />
                   <Detail label="Contact Email" value={selected.publisher_profiles?.contact_email || "—"} />
+                  <Detail label="Contact Phone" value={selected.publisher_profiles?.contact_phone || "—"} />
+                  <Detail label="Business Type" value={selected.publisher_profiles?.business_type || "—"} />
+                  <Detail label="Address" value={
+                    typeof selected.publisher_profiles?.address === "object" && selected.publisher_profiles?.address !== null
+                      ? Object.values(selected.publisher_profiles.address).filter(Boolean).join(", ")
+                      : selected.publisher_profiles?.address || "—"
+                  } />
+                  <Detail label="Publisher ID" value={
+                    <span className="font-mono text-xs text-muted-foreground">{selected.publisher_id || "—"}</span>
+                  } />
                 </div>
+              </div>
+
+              {/* ID */}
+              <div className="border-t pt-3">
+                <Detail label="Ad Space ID" value={
+                  <span className="font-mono text-xs text-muted-foreground">{selected.id}</span>
+                } />
               </div>
             </div>
           )}
-          <DialogFooter>
+
+          <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setSelected(null)}>Close</Button>
-            <Button onClick={() => navigate("/admin/dashboard")}>
-              <ExternalLink className="w-4 h-4 mr-2" /> View Retailer Profile
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
