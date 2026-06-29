@@ -621,7 +621,7 @@ export default function AdvertiserExplore() {
               <DialogFooter>
                 <Button variant="outline" onClick={() => setRequestOpen(false)}>Cancel</Button>
                 <Button onClick={handleSubmitRequest} disabled={submitting} className="bg-green-600 hover:bg-green-500 text-white">
-                  {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : "Submit Request — We'll Confirm Pricing & Activate"}
+                  {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating payment session...</> : "Proceed to Payment"}
                 </Button>
               </DialogFooter>
             </>
