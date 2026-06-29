@@ -79,7 +79,7 @@ const PaymentSuccess = () => {
       }
     };
     verifyPayment();
-  }, [sessionId, activationId]);
+  }, [sessionId, activationId, type]);
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric" });
