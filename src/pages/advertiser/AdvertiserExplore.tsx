@@ -109,37 +109,49 @@ export default function AdvertiserExplore() {
       });
       const campaignType = [...new Set(enriched.map((s) => s.category).filter(Boolean))].join(", ");
 
-      const { error } = await supabase.from("media_plan_requests" as any).insert({
-        advertiser_id: user?.id ?? null,
-        campaign_name: form.campaignName,
-        campaign_type: campaignType,
-        center_lat: center.lat,
-        center_lng: center.lng,
-        radius_meters: radiusMeters,
-        selections: enriched,
-        estimated_price: estimate.totalEstimate,
-        preferred_start_date: form.preferredStartDate,
-        notes: form.notes || null,
-        status: "pending_review",
-      });
+      const { data: inserted, error } = await supabase
+        .from("media_plan_requests" as any)
+        .insert({
+          advertiser_id: user?.id ?? null,
+          campaign_name: form.campaignName,
+          campaign_type: campaignType,
+          center_lat: center.lat,
+          center_lng: center.lng,
+          radius_meters: radiusMeters,
+          selections: enriched,
+          estimated_price: estimate.totalEstimate,
+          preferred_start_date: form.preferredStartDate,
+          notes: form.notes || null,
+          status: "pending_payment",
+          requester_email: emailTrimmed,
+        })
+        .select("id")
+        .single();
       if (error) throw error;
 
-      supabase.functions.invoke("notify-media-plan-request", {
-        body: {
-          campaignName: form.campaignName,
-          campaignType,
-          centerLat: center.lat,
-          centerLng: center.lng,
-          radiusMeters,
-          selections: enriched,
-          estimatedPrice: estimate.totalEstimate,
-          preferredStartDate: form.preferredStartDate,
-          notes: form.notes,
-          requesterEmail: emailTrimmed,
-        },
-      }).catch(() => {});
+      const mediaPlanRequestId = (inserted as any).id;
 
-      setSubmitted(true);
+      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
+        "create-media-plan-checkout",
+        {
+          body: {
+            mediaPlanRequestId,
+            campaignName: form.campaignName,
+            campaignType,
+            estimatedPrice: estimate.totalEstimate,
+            requesterEmail: emailTrimmed,
+            requesterName: user?.user_metadata?.full_name || emailTrimmed,
+            successUrl: `${window.location.origin}/payment-success?type=media_plan&id=${mediaPlanRequestId}`,
+            cancelUrl: window.location.href,
+          },
+        }
+      );
+
+      if (checkoutError || !(checkoutData as any)?.checkoutUrl) {
+        throw new Error((checkoutData as any)?.error || checkoutError?.message || "Failed to create payment session.");
+      }
+
+      window.location.href = (checkoutData as any).checkoutUrl;
     } catch (e: any) {
       toast({ title: "Submission failed", description: e?.message ?? "Try again.", variant: "destructive" });
     } finally {
