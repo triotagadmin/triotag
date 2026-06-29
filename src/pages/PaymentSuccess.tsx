@@ -32,6 +32,7 @@ const PaymentSuccess = () => {
   const mediaPlanId = searchParams.get("id");
 
   useEffect(() => {
+    if (type === "media_plan") return;
     const verifyPayment = async () => {
       if (!sessionId || !activationId) {
         setStatus("failed");
