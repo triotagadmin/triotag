@@ -2229,8 +2229,11 @@ export type Database = {
           id: string
           notes: string | null
           ooh_units: number | null
+          paid_at: string | null
+          paymongo_checkout_id: string | null
           preferred_start_date: string | null
           radius_meters: number
+          requester_email: string | null
           selections: Json | null
           status: string
           updated_at: string
@@ -2250,8 +2253,11 @@ export type Database = {
           id?: string
           notes?: string | null
           ooh_units?: number | null
+          paid_at?: string | null
+          paymongo_checkout_id?: string | null
           preferred_start_date?: string | null
           radius_meters: number
+          requester_email?: string | null
           selections?: Json | null
           status?: string
           updated_at?: string
@@ -2271,8 +2277,11 @@ export type Database = {
           id?: string
           notes?: string | null
           ooh_units?: number | null
+          paid_at?: string | null
+          paymongo_checkout_id?: string | null
           preferred_start_date?: string | null
           radius_meters?: number
+          requester_email?: string | null
           selections?: Json | null
           status?: string
           updated_at?: string
