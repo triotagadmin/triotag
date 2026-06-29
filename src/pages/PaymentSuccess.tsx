@@ -28,6 +28,8 @@ const PaymentSuccess = () => {
 
   const sessionId = searchParams.get("session_id");
   const activationId = searchParams.get("activation_id");
+  const type = searchParams.get("type");
+  const mediaPlanId = searchParams.get("id");
 
   useEffect(() => {
     const verifyPayment = async () => {
