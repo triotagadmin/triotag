@@ -83,3 +83,9 @@ verify_jwt = false
 
 [functions.handle-email-suppression]
 verify_jwt = false
+
+[functions.create-media-plan-checkout]
+verify_jwt = false
+
+[functions.media-plan-payment-webhook]
+verify_jwt = false

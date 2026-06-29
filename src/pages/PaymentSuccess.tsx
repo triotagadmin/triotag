@@ -28,8 +28,11 @@ const PaymentSuccess = () => {
 
   const sessionId = searchParams.get("session_id");
   const activationId = searchParams.get("activation_id");
+  const type = searchParams.get("type");
+  const mediaPlanId = searchParams.get("id");
 
   useEffect(() => {
+    if (type === "media_plan") return;
     const verifyPayment = async () => {
       if (!sessionId || !activationId) {
         setStatus("failed");
@@ -76,7 +79,7 @@ const PaymentSuccess = () => {
       }
     };
     verifyPayment();
-  }, [sessionId, activationId]);
+  }, [sessionId, activationId, type]);
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric" });
@@ -116,6 +119,38 @@ const PaymentSuccess = () => {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  if (type === "media_plan") {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <Navigation />
+        <div className="container mx-auto px-6 py-12 max-w-xl">
+          <Card className="border-primary">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle className="h-10 w-10 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Payment Successful!</CardTitle>
+              <CardDescription className="text-base">
+                Your media plan payment has been confirmed. Our team will contact you within 24 hours to activate your campaign.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {mediaPlanId && (
+                <div className="text-center text-sm text-muted-foreground">
+                  Reference ID: <span className="font-mono font-semibold">{mediaPlanId.slice(0, 8).toUpperCase()}</span>
+                </div>
+              )}
+              <Button onClick={() => navigate("/retailer-dashboard")} className="w-full">
+                Go to Dashboard
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-muted/30">
