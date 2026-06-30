@@ -85,6 +85,7 @@ export default function AdminDashboard() {
 
   // Inventory summary state
   const [inventoryStats, setInventoryStats] = useState({ total: 0, ooh: 0, dooh: 0, aooh: 0 });
+  const [paidPlanCount, setPaidPlanCount] = useState(0);
 
   useEffect(() => {
     checkAdminAccess();
