@@ -17,6 +17,7 @@ import AdminNewsletterDashboard from "./pages/AdminNewsletterDashboard";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminOrders from "./pages/AdminOrders";
 import AdminTotalInventory from "./pages/admin/AdminTotalInventory";
+import AdminMediaPlans from "./pages/admin/AdminMediaPlans";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
@@ -230,6 +231,11 @@ const App = () => (
           <Route path="/admin/total-inventory" element={
             <ProtectedAdminRoute>
               <AdminTotalInventory />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/media-plans" element={
+            <ProtectedAdminRoute>
+              <AdminMediaPlans />
             </ProtectedAdminRoute>
           } />
           {/* Advertiser inventory explorer — PUBLIC, no auth required */}

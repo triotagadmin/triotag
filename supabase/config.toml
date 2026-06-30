@@ -89,3 +89,6 @@ verify_jwt = false
 
 [functions.media-plan-payment-webhook]
 verify_jwt = false
+
+[functions.notify-media-plan-status]
+verify_jwt = false

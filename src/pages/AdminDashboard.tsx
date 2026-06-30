@@ -85,6 +85,7 @@ export default function AdminDashboard() {
 
   // Inventory summary state
   const [inventoryStats, setInventoryStats] = useState({ total: 0, ooh: 0, dooh: 0, aooh: 0 });
+  const [paidPlanCount, setPaidPlanCount] = useState(0);
 
   useEffect(() => {
     checkAdminAccess();
@@ -93,7 +94,17 @@ export default function AdminDashboard() {
     loadNotifications();
     loadTicketSubmissions();
     loadInventoryStats();
+    loadInventoryStats();
+    loadPaidPlans();
   }, []);
+
+  const loadPaidPlans = async () => {
+    const { data } = await supabase
+      .from("media_plan_requests")
+      .select("id")
+      .eq("status", "paid");
+    setPaidPlanCount(data?.length || 0);
+  };
 
   const loadInventoryStats = async () => {
     const { data } = await supabase
@@ -1046,25 +1057,47 @@ export default function AdminDashboard() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        <Card
-          className="mb-6 cursor-pointer hover:border-green-500 transition-colors"
-          onClick={() => navigate("/admin/total-inventory")}
-        >
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Package className="w-4 h-4" /> Total Inventory
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{inventoryStats.total}</div>
-            <p className="text-xs text-muted-foreground mt-1">Approved ad spaces across all retailers</p>
-            <div className="flex gap-3 mt-2 text-xs">
-              <span className="text-purple-600">OOH: {inventoryStats.ooh}</span>
-              <span className="text-cyan-600">DOOH: {inventoryStats.dooh}</span>
-              <span className="text-green-600">AOOH: {inventoryStats.aooh}</span>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <Card
+            className="cursor-pointer hover:border-green-500 transition-colors"
+            onClick={() => navigate("/admin/total-inventory")}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Package className="w-4 h-4" /> Total Inventory
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{inventoryStats.total}</div>
+              <p className="text-xs text-muted-foreground mt-1">Approved ad spaces across all retailers</p>
+              <div className="flex gap-3 mt-2 text-xs">
+                <span className="text-purple-600">OOH: {inventoryStats.ooh}</span>
+                <span className="text-cyan-600">DOOH: {inventoryStats.dooh}</span>
+                <span className="text-green-600">AOOH: {inventoryStats.aooh}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            className={`cursor-pointer transition-colors ${paidPlanCount > 0 ? "border-yellow-400 bg-yellow-50 hover:border-yellow-500" : "hover:border-green-500"}`}
+            onClick={() => navigate("/admin/media-plans")}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <FileText className="w-4 h-4" /> Media Plans
+                {paidPlanCount > 0 && (
+                  <Badge className="bg-yellow-500 text-white hover:bg-yellow-500 ml-auto">
+                    {paidPlanCount} need action
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{paidPlanCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">Paid — awaiting review</p>
+            </CardContent>
+          </Card>
+        </div>
 
         <Tabs defaultValue="bookings" className="space-y-6">
           <TabsList className="grid w-full grid-cols-7">
