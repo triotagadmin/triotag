@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   Globe, Megaphone, BarChart3, MessageSquare, Bell, User, LayoutDashboard, TrendingUp, Package,
-  Image as ImageIcon, Users, History,
+  Image as ImageIcon, Users, History, ClipboardList,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
