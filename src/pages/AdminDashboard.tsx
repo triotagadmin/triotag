@@ -94,7 +94,17 @@ export default function AdminDashboard() {
     loadNotifications();
     loadTicketSubmissions();
     loadInventoryStats();
+    loadInventoryStats();
+    loadPaidPlans();
   }, []);
+
+  const loadPaidPlans = async () => {
+    const { data } = await supabase
+      .from("media_plan_requests")
+      .select("id")
+      .eq("status", "paid");
+    setPaidPlanCount(data?.length || 0);
+  };
 
   const loadInventoryStats = async () => {
     const { data } = await supabase
