@@ -10,6 +10,7 @@ import {
 import {
   Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2, AlertTriangle,
   RefreshCw, Package, Clock, Calendar as CalendarIcon, Eye,
+  Image as ImageIcon, Monitor, Volume2, ChevronRight, ChevronLeft,
 } from "lucide-react";
 import { addMonths, format, startOfDay, isBefore } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -44,9 +45,19 @@ export default function AdvertiserExplore() {
   );
 
 
-  // variantId -> qty
+  // Wizard state
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
+  const [chosenFormat, setChosenFormat] = useState<"OOH" | "DOOH" | "AOOH" | null>(null);
   const [selections, setSelections] = useState<Record<string, number>>({});
   const [exampleModal, setExampleModal] = useState<{ label: string; image: string; caption: string } | null>(null);
+
+  const resetWizard = () => {
+    setWizardStep(1);
+    setChosenFormat(null);
+    setSelections({});
+  };
+
+  const openRequestDialog = () => { setSubmitted(false); setRequestOpen(true); };
 
   const updateQty = (variantId: string, qty: number) => {
     setSelections((prev) => ({ ...prev, [variantId]: Math.max(0, qty) }));
@@ -397,102 +408,287 @@ export default function AdvertiserExplore() {
               {/* Right panel */}
               <div className="lg:col-span-2">
                 <div className="lg:sticky lg:top-6 space-y-5">
-                  {/* Format selector */}
+                  {/* Format selector — 3-step wizard */}
                   <div className="bg-white border border-gray-200 rounded-2xl p-6">
                     <h3 className="text-base font-bold text-gray-900 mb-1">Choose Your Ad Formats</h3>
                     <p className="text-xs text-gray-500 mb-4">Pick the formats and quantities for your campaign.</p>
 
-                    <Tabs defaultValue="OOH">
-                      <TabsList className="grid grid-cols-3 w-full">
-                        <TabsTrigger value="OOH">OOH</TabsTrigger>
-                        <TabsTrigger value="DOOH">DOOH</TabsTrigger>
-                        <TabsTrigger value="AOOH">AOOH</TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value="OOH" className="mt-4">
-                        <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
-                          {OOH_VARIANTS.map(renderVariantRow)}
+                    {/* Step progress — 3 dots */}
+                    <div className="flex items-center gap-2 mb-5">
+                      {[1, 2, 3].map((s) => (
+                        <div key={s} className="flex items-center gap-2">
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                            wizardStep > s ? "bg-green-500 text-white" :
+                            wizardStep === s ? "bg-black text-white" :
+                            "bg-gray-100 text-gray-400"
+                          }`}>
+                            {wizardStep > s ? <CheckCircle2 className="w-4 h-4" /> : s}
+                          </div>
+                          {s < 3 && <div className={`h-0.5 w-8 rounded ${wizardStep > s ? "bg-green-500" : "bg-gray-200"}`} />}
                         </div>
-                      </TabsContent>
-                      <TabsContent value="DOOH" className="mt-4">
-                        <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
-                          {DOOH_VARIANTS.map(renderVariantRow)}
-                        </div>
-                      </TabsContent>
-                      <TabsContent value="AOOH" className="mt-4">
-                        <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
-                          {AOOH_VARIANTS.map(renderVariantRow)}
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  </div>
-
-                  {/* Estimate */}
-                  <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">ESTIMATED AD CAMPAIGN FEE</div>
-                      <Badge className={`${tierColor} border`}>{estimate.tier}</Badge>
-                    </div>
-                    <div className="text-3xl font-bold text-gray-900 mt-1">
-                      ₱{estimate.totalEstimate.toLocaleString()}
+                      ))}
+                      <span className="ml-2 text-xs text-gray-400">
+                        {wizardStep === 1 ? "Choose format type" : wizardStep === 2 ? "Select units" : "Review"}
+                      </span>
                     </div>
 
-                    <div className="mt-4 space-y-1.5 text-sm">
-                      {activeSelections.length === 0 ? (
-                        <div className="text-gray-500 italic text-xs">No formats selected yet.</div>
-                      ) : (
-                        activeSelections.map((s) => {
-                          const v = ALL_VARIANTS.find((vv) => vv.id === s.variantId)!;
-                          return (
-                            <div key={s.variantId} className="flex justify-between text-gray-700">
-                              <span className="truncate pr-2">{v.label} × {s.quantity}</span>
-                              <span className="font-medium shrink-0">₱{(v.price * s.quantity).toLocaleString()}</span>
+                    {wizardStep === 1 && (
+                      <div className="space-y-3">
+                        <div className="font-semibold text-gray-900 mb-1">Which format do you want to run?</div>
+                        <p className="text-xs text-gray-500 mb-4">You can only book one format type per campaign. Choose the channel that best fits your goals.</p>
+
+                        {[
+                          {
+                            id: "OOH" as const,
+                            label: "OOH — Print",
+                            icon: <ImageIcon className="w-5 h-5" />,
+                            color: "border-purple-300 hover:border-purple-500 hover:bg-purple-50",
+                            badge: "bg-purple-100 text-purple-700",
+                            desc: "Stickers, table tents, posters, tarpaulins — physical print placed inside venues",
+                          },
+                          {
+                            id: "DOOH" as const,
+                            label: "DOOH — Digital Screen",
+                            icon: <Monitor className="w-5 h-5" />,
+                            color: "border-cyan-300 hover:border-cyan-500 hover:bg-cyan-50",
+                            badge: "bg-cyan-100 text-cyan-700",
+                            desc: "Static or video ads on digital screens inside gyms, salons, clinics, and retail venues",
+                          },
+                          {
+                            id: "AOOH" as const,
+                            label: "AOOH — In-Store Audio",
+                            icon: <Volume2 className="w-5 h-5" />,
+                            color: "border-green-300 hover:border-green-500 hover:bg-green-50",
+                            badge: "bg-green-100 text-green-700",
+                            desc: "Audio spots played through venue speaker systems at point of purchase",
+                          },
+                        ].map((fmt) => (
+                          <button
+                            key={fmt.id}
+                            onClick={() => {
+                              setChosenFormat(fmt.id);
+                              setSelections({});
+                              setWizardStep(2);
+                            }}
+                            className={`w-full text-left border-2 rounded-xl p-4 transition-all flex items-start gap-4 ${fmt.color}`}
+                          >
+                            <div className={`p-2 rounded-lg ${fmt.badge} shrink-0`}>
+                              {fmt.icon}
                             </div>
-                          );
-                        })
-                      )}
-                      <div className="flex justify-between text-gray-700 pt-1.5 border-t border-green-200">
-                        <span>Coverage Radius ({estimate.radiusPercent}% of {MAX_RADIUS_METERS / 1000}km)</span>
-                        <span className="font-medium">₱{estimate.radiusFee.toLocaleString()}</span>
+                            <div>
+                              <div className="font-semibold text-gray-900 text-sm">{fmt.label}</div>
+                              <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">{fmt.desc}</div>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-gray-400 ml-auto self-center shrink-0" />
+                          </button>
+                        ))}
                       </div>
-                      <div className="flex justify-between items-center pt-2 border-t border-green-200">
-                        <span className="font-bold text-gray-900">Total Estimate</span>
-                        <span className="font-bold text-lg text-green-700">₱{estimate.totalEstimate.toLocaleString()}</span>
-                      </div>
-                    </div>
+                    )}
 
-                    <div className="text-[10px] text-gray-500 mt-3 italic">
-                      *This is a planning estimate. Final pricing confirmed after campaign request. Service begins after payment.
-                    </div>
-
-                    <div className="mt-4 space-y-2">
-                      <Button
-                        onClick={() => { setSubmitted(false); setRequestOpen(true); }}
-                        disabled={estimate.totalUnits === 0 || !withinServiceArea}
-                        className="w-full bg-green-600 hover:bg-green-500 text-white h-11 text-base font-semibold"
-                      >
-                        Request This Ad Campaign
-                      </Button>
-                      {!withinServiceArea && (
-                        <div className="flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-2">
-                          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                          <span>
-                            This location is outside our current service area. TrioTag currently only operates in {getActiveAreaNamesText()}.
-                          </span>
+                    {wizardStep === 2 && chosenFormat && (
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <button
+                            onClick={() => { setWizardStep(1); setChosenFormat(null); setSelections({}); }}
+                            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+                          <Badge className={
+                            chosenFormat === "OOH" ? "bg-purple-100 text-purple-700" :
+                            chosenFormat === "DOOH" ? "bg-cyan-100 text-cyan-700" :
+                            "bg-green-100 text-green-700"
+                          }>
+                            {chosenFormat === "OOH" ? <ImageIcon className="w-3 h-3 mr-1" /> :
+                             chosenFormat === "DOOH" ? <Monitor className="w-3 h-3 mr-1" /> :
+                             <Volume2 className="w-3 h-3 mr-1" />}
+                            {chosenFormat}
+                          </Badge>
+                          <span className="text-sm text-gray-600 font-medium">Select your units</span>
                         </div>
-                      )}
-                      {withinServiceArea && estimate.totalUnits === 0 && (
-                        <div className="text-xs text-gray-500 text-center">Add at least 1 unit to continue</div>
-                      )}
-                      <Button
-                        variant="outline"
-                        onClick={saveForLater}
-                        className="w-full border-green-300 text-green-700 hover:bg-green-50"
-                      >
-                        Save for Later
-                      </Button>
-                    </div>
+
+                        <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                          {(chosenFormat === "OOH" ? OOH_VARIANTS :
+                            chosenFormat === "DOOH" ? DOOH_VARIANTS :
+                            AOOH_VARIANTS
+                          ).map(renderVariantRow)}
+                        </div>
+
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <Button
+                            className="w-full bg-black hover:bg-gray-800 text-white"
+                            disabled={!Object.values(selections).some(v => v > 0)}
+                            onClick={() => setWizardStep(3)}
+                          >
+                            Review Selection →
+                          </Button>
+                          {Object.values(selections).every(v => v === 0) && (
+                            <p className="text-xs text-gray-400 text-center mt-2">Select at least 1 unit to continue</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {wizardStep === 3 && chosenFormat && (
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <button
+                            onClick={() => setWizardStep(2)}
+                            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+                          <span className="text-sm font-medium text-gray-700">Review your campaign</span>
+                        </div>
+
+                        <div className="mb-4">
+                          <Badge className={
+                            chosenFormat === "OOH" ? "bg-purple-100 text-purple-700" :
+                            chosenFormat === "DOOH" ? "bg-cyan-100 text-cyan-700" :
+                            "bg-green-100 text-green-700"
+                          }>{chosenFormat} Campaign</Badge>
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                          {selectionsArray
+                            .filter((s) => s.quantity > 0)
+                            .map((s) => {
+                              const variant = ALL_VARIANTS.find((v) => v.id === s.variantId)!;
+                              return (
+                                <div key={s.variantId} className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2.5">
+                                  <div>
+                                    <div className="font-medium text-gray-900 text-sm">{variant.label}</div>
+                                    <div className="text-xs text-gray-500">₱{variant.price.toLocaleString()} / unit</div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="font-semibold text-gray-900">× {s.quantity}</div>
+                                    <div className="text-xs text-green-600">₱{(variant.price * s.quantity).toLocaleString()}</div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+
+                        <div className="bg-gray-50 rounded-xl p-4 text-sm space-y-1.5 mb-4">
+                          <div className="flex justify-between text-gray-600">
+                            <span>Unit costs</span>
+                            <span>₱{(estimate.totalEstimate - estimate.radiusFee).toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between text-gray-600">
+                            <span>Coverage radius ({estimate.radiusPercent}%)</span>
+                            <span>₱{estimate.radiusFee.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-gray-900 pt-1.5 border-t border-gray-200">
+                            <span>Total Estimate</span>
+                            <span className="text-green-600">₱{estimate.totalEstimate.toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={resetWizard}
+                            className="flex-1"
+                          >
+                            Start Over
+                          </Button>
+                          <Button
+                            className="flex-1 bg-green-600 hover:bg-green-500 text-white"
+                            disabled={!withinServiceArea || estimate.totalUnits === 0}
+                            onClick={openRequestDialog}
+                          >
+                            Proceed to Payment →
+                          </Button>
+                        </div>
+                        {!withinServiceArea && (
+                          <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            Location is outside our service area
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
+
+                  {wizardStep === 1 && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5">
+                      <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">How it works</div>
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">1.</span> Choose your ad format (OOH, DOOH, or AOOH)</div>
+                        <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">2.</span> Pick your units and quantities</div>
+                        <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">3.</span> Review your estimate and proceed to payment</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {wizardStep > 1 && (
+                    <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">ESTIMATED AD CAMPAIGN FEE</div>
+                        <Badge className={`${tierColor} border`}>{estimate.tier}</Badge>
+                      </div>
+                      <div className="text-3xl font-bold text-gray-900 mt-1">
+                        ₱{estimate.totalEstimate.toLocaleString()}
+                      </div>
+
+                      <div className="mt-4 space-y-1.5 text-sm">
+                        {activeSelections.length === 0 ? (
+                          <div className="text-gray-500 italic text-xs">No formats selected yet.</div>
+                        ) : (
+                          activeSelections.map((s) => {
+                            const v = ALL_VARIANTS.find((vv) => vv.id === s.variantId)!;
+                            return (
+                              <div key={s.variantId} className="flex justify-between text-gray-700">
+                                <span className="truncate pr-2">{v.label} × {s.quantity}</span>
+                                <span className="font-medium shrink-0">₱{(v.price * s.quantity).toLocaleString()}</span>
+                              </div>
+                            );
+                          })
+                        )}
+                        <div className="flex justify-between text-gray-700 pt-1.5 border-t border-green-200">
+                          <span>Coverage Radius ({estimate.radiusPercent}% of {MAX_RADIUS_METERS / 1000}km)</span>
+                          <span className="font-medium">₱{estimate.radiusFee.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-2 border-t border-green-200">
+                          <span className="font-bold text-gray-900">Total Estimate</span>
+                          <span className="font-bold text-lg text-green-700">₱{estimate.totalEstimate.toLocaleString()}</span>
+                        </div>
+                      </div>
+
+                      <div className="text-[10px] text-gray-500 mt-3 italic">
+                        *This is a planning estimate. Final pricing confirmed after campaign request. Service begins after payment.
+                      </div>
+
+                      <div className="mt-4 space-y-2">
+                        <Button
+                          onClick={openRequestDialog}
+                          disabled={estimate.totalUnits === 0 || !withinServiceArea}
+                          className="w-full bg-green-600 hover:bg-green-500 text-white h-11 text-base font-semibold"
+                        >
+                          Request This Ad Campaign
+                        </Button>
+                        {!withinServiceArea && (
+                          <div className="flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-2">
+                            <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                            <span>
+                              This location is outside our current service area. TrioTag currently only operates in {getActiveAreaNamesText()}.
+                            </span>
+                          </div>
+                        )}
+                        {withinServiceArea && estimate.totalUnits === 0 && (
+                          <div className="text-xs text-gray-500 text-center">Add at least 1 unit to continue</div>
+                        )}
+                        <Button
+                          variant="outline"
+                          onClick={saveForLater}
+                          className="w-full border-green-300 text-green-700 hover:bg-green-50"
+                        >
+                          Save for Later
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
