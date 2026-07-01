@@ -216,7 +216,13 @@ export function calculateMediaPlanEstimate(
 ): MediaPlanEstimate {
   const radiusKm = radiusMeters / 1000;
   const radiusPercent = Math.min(100, Math.round((radiusMeters / MAX_RADIUS_METERS) * 100));
-  const radiusFee = Math.round(BASE_RADIUS_FEE + (radiusPercent / 100) * (MAX_RADIUS_FEE - BASE_RADIUS_FEE));
+
+  let radiusFee: number;
+  if (radiusPercent <= 5) {
+    radiusFee = Math.round(BASE_RADIUS_FEE + (radiusPercent / 5) * (200000 - BASE_RADIUS_FEE));
+  } else {
+    radiusFee = Math.round(200000 + ((radiusPercent - 5) / 95) * (MAX_RADIUS_FEE - 200000));
+  }
 
 
   let unitCost = 0;
