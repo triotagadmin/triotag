@@ -50,7 +50,7 @@ export default function AdvertiserExplore() {
 
   // Wizard state
   const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
-  const [chosenFormat, setChosenFormat] = useState<"OOH" | "DOOH" | "AOOH" | null>(null);
+  const [chosenFormat, setChosenFormat] = useState<"OOH" | "DOOH" | "AOOH" | "MEDIA_TRUCK" | null>(null);
   const [selections, setSelections] = useState<Record<string, number>>({});
   const [exampleModal, setExampleModal] = useState<{ label: string; image: string; caption: string } | null>(null);
 
