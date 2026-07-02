@@ -345,6 +345,7 @@ export default function AdvertiserExplore() {
                   onCenterChange={setCenter}
                   onRadiusChange={setRadiusMeters}
                   onServiceAreaChange={setWithinServiceArea}
+                  onLocationSet={setSelectedLocationAddress}
                 />
 
 
