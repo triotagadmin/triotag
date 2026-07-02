@@ -87,10 +87,26 @@ export default function AdvertiserExplore() {
   });
 
   async function handleSubmitRequest() {
+    if (!selectedLocationAddress) {
+      toast({
+        title: "Location required",
+        description: "Search and select a location for your campaign before proceeding.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!withinServiceArea) {
       toast({
         title: "Selected location is outside our service area",
         description: `TrioTag currently only operates in ${getActiveAreaNamesText()}. Please choose a location within our service area to continue.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (radiusMeters < 250) {
+      toast({
+        title: "Minimum coverage required",
+        description: "The minimum campaign radius is 250 m (5% coverage).",
         variant: "destructive",
       });
       return;
