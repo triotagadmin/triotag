@@ -24,11 +24,13 @@ import {
   OOH_VARIANTS,
   DOOH_VARIANTS,
   AOOH_VARIANTS,
+  MEDIA_TRUCK_VARIANTS,
   FormatVariant,
 } from "@/lib/mediaPlanPricing";
 import oohImage from "@/assets/ooh_formats_grid.png.asset.json";
 import doohVideo from "@/assets/doohmediakit.mp4.asset.json";
 import aoohVideo from "@/assets/supertruckmediakit.mp4.asset.json";
+import mediaTruckVideo from "@/assets/supertruckmediakit.mp4.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
