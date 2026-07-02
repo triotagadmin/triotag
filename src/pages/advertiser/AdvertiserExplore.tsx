@@ -10,7 +10,7 @@ import {
 import {
   Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2, AlertTriangle,
   RefreshCw, Package, Clock, Calendar as CalendarIcon, Eye,
-  Image as ImageIcon, Monitor, Volume2, ChevronRight, ChevronLeft,
+  Image as ImageIcon, Monitor, Volume2, Truck, ChevronRight, ChevronLeft,
 } from "lucide-react";
 import { addMonths, format, startOfDay, isBefore } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -24,11 +24,13 @@ import {
   OOH_VARIANTS,
   DOOH_VARIANTS,
   AOOH_VARIANTS,
+  MEDIA_TRUCK_VARIANTS,
   FormatVariant,
 } from "@/lib/mediaPlanPricing";
 import oohImage from "@/assets/ooh_formats_grid.png.asset.json";
 import doohVideo from "@/assets/doohmediakit.mp4.asset.json";
 import aoohVideo from "@/assets/supertruckmediakit.mp4.asset.json";
+import mediaTruckVideo from "@/assets/supertruckmediakit.mp4.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -48,7 +50,7 @@ export default function AdvertiserExplore() {
 
   // Wizard state
   const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
-  const [chosenFormat, setChosenFormat] = useState<"OOH" | "DOOH" | "AOOH" | null>(null);
+  const [chosenFormat, setChosenFormat] = useState<"OOH" | "DOOH" | "AOOH" | "MEDIA_TRUCK" | null>(null);
   const [selections, setSelections] = useState<Record<string, number>>({});
   const [exampleModal, setExampleModal] = useState<{ label: string; image: string; caption: string } | null>(null);
 
@@ -308,11 +310,11 @@ export default function AdvertiserExplore() {
             </div>
           </header>
 
-          {/* CTA: OOH, DOOH, AOOH formats */}
+          {/* CTA: OOH, DOOH, AOOH, Media Truck formats */}
           <section className="px-6 lg:px-8 py-12">
             <div className="max-w-6xl mx-auto text-center mb-8">
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Customize your campaigns</h2>
-              <p className="text-gray-600 mt-2">Explore our OOH, DOOH, and AOOH advertising formats.</p>
+              <p className="text-gray-600 mt-2">Explore our OOH, DOOH, AOOH, and Media Truck advertising formats.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {[
@@ -480,6 +482,14 @@ export default function AdvertiserExplore() {
                             badge: "bg-green-100 text-green-700",
                             desc: "Audio spots played through venue speaker systems at point of purchase",
                           },
+                          {
+                            id: "MEDIA_TRUCK" as const,
+                            label: "Media Truck",
+                            icon: <Truck className="w-5 h-5" />,
+                            color: "border-amber-300 hover:border-amber-500 hover:bg-amber-50",
+                            badge: "bg-amber-100 text-amber-700",
+                            desc: "Mobile LED truck fleet deployed on planned retail and commuter routes",
+                          },
                         ].map((fmt) => (
                           <button
                             key={fmt.id}
@@ -515,12 +525,14 @@ export default function AdvertiserExplore() {
                           <Badge className={
                             chosenFormat === "OOH" ? "bg-purple-100 text-purple-700" :
                             chosenFormat === "DOOH" ? "bg-cyan-100 text-cyan-700" :
-                            "bg-green-100 text-green-700"
+                            chosenFormat === "AOOH" ? "bg-green-100 text-green-700" :
+                            "bg-amber-100 text-amber-700"
                           }>
                             {chosenFormat === "OOH" ? <ImageIcon className="w-3 h-3 mr-1" /> :
                              chosenFormat === "DOOH" ? <Monitor className="w-3 h-3 mr-1" /> :
-                             <Volume2 className="w-3 h-3 mr-1" />}
-                            {chosenFormat}
+                             chosenFormat === "AOOH" ? <Volume2 className="w-3 h-3 mr-1" /> :
+                             <Truck className="w-3 h-3 mr-1" />}
+                            {chosenFormat === "MEDIA_TRUCK" ? "Media Truck" : chosenFormat}
                           </Badge>
                           <span className="text-sm text-gray-600 font-medium">Select your units</span>
                         </div>
@@ -528,7 +540,8 @@ export default function AdvertiserExplore() {
                         <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                           {(chosenFormat === "OOH" ? OOH_VARIANTS :
                             chosenFormat === "DOOH" ? DOOH_VARIANTS :
-                            AOOH_VARIANTS
+                            chosenFormat === "AOOH" ? AOOH_VARIANTS :
+                            MEDIA_TRUCK_VARIANTS
                           ).map(renderVariantRow)}
                         </div>
 
@@ -563,8 +576,9 @@ export default function AdvertiserExplore() {
                           <Badge className={
                             chosenFormat === "OOH" ? "bg-purple-100 text-purple-700" :
                             chosenFormat === "DOOH" ? "bg-cyan-100 text-cyan-700" :
-                            "bg-green-100 text-green-700"
-                          }>{chosenFormat} Campaign</Badge>
+                            chosenFormat === "AOOH" ? "bg-green-100 text-green-700" :
+                            "bg-amber-100 text-amber-700"
+                          }>{chosenFormat === "MEDIA_TRUCK" ? "Media Truck" : chosenFormat} Campaign</Badge>
                         </div>
 
                         <div className="space-y-2 mb-4">
@@ -645,7 +659,7 @@ export default function AdvertiserExplore() {
                     <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5">
                       <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">How it works</div>
                       <div className="space-y-2 text-sm text-gray-600">
-                        <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">1.</span> Choose your ad format (OOH, DOOH, or AOOH)</div>
+                        <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">1.</span> Choose your ad format (OOH, DOOH, AOOH, or Media Truck)</div>
                         <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">2.</span> Pick your units and quantities</div>
                         <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">3.</span> Review your estimate and proceed to payment</div>
                       </div>
@@ -741,7 +755,7 @@ export default function AdvertiserExplore() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
               {[
                 { Icon: Globe, t: "Nationwide Coverage", d: "Plan campaigns anywhere our partners operate" },
-                { Icon: Layers, t: "Multi-Format Inventory", d: "OOH, DOOH, and AOOH placements" },
+                { Icon: Layers, t: "Multi-Format Inventory", d: "OOH, DOOH, AOOH, and Media Truck placements" },
                 { Icon: BadgeCheck, t: "Verified Venues", d: "Listings reviewed before activation" },
                 { Icon: ShieldCheck, t: "Brand-Safe Placement", d: "Locations pre-vetted for quality" },
               ].map((b) => (

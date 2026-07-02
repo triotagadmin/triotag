@@ -3,8 +3,9 @@ import oohStickerAsset from "@/assets/ooh_2.png.asset.json";
 import oohStickerLargeAsset from "@/assets/ooh_3.png.asset.json";
 import oohPosterAsset from "@/assets/ooh_4.png.asset.json";
 import oohFlyerAsset from "@/assets/ooh_5.png.asset.json";
+import mediaTruckImage from "@/assets/supertruck-mediakit-2.png.asset.json";
 
-export type CampaignType = "OOH" | "DOOH" | "AOOH";
+export type CampaignType = "OOH" | "DOOH" | "AOOH" | "MEDIA_TRUCK";
 
 export interface FormatVariant {
   id: string;
@@ -187,7 +188,50 @@ export const AOOH_VARIANTS: FormatVariant[] = [
   },
 ];
 
-export const ALL_VARIANTS: FormatVariant[] = [...OOH_VARIANTS, ...DOOH_VARIANTS, ...AOOH_VARIANTS];
+export const MEDIA_TRUCK_VARIANTS: FormatVariant[] = [
+  {
+    id: "media_truck_launch_drive",
+    label: "Launch Drive",
+    category: "MEDIA_TRUCK",
+    price: 75000,
+    specs: { Fleet: "1 truck", Duration: "1–2 campaign days", Display: "LED ad loop", Deliverables: "Route plan + proof photos" },
+    billingType: "per_campaign",
+    exampleImage: mediaTruckImage.url,
+    exampleCaption: "1-truck launch activation — 1-2 day route with high-visibility LED loop around target retail areas.",
+  },
+  {
+    id: "media_truck_retail_burst",
+    label: "Retail Burst",
+    category: "MEDIA_TRUCK",
+    price: 180000,
+    specs: { Fleet: "1–2 trucks", Duration: "3–7 campaign days", Display: "LED ad loop", Deliverables: "Priority routes, daypart schedule, post-report" },
+    billingType: "per_campaign",
+    exampleImage: mediaTruckImage.url,
+    exampleCaption: "Retail burst — 1-2 trucks deployed 3-7 days around store clusters, malls, and food courts.",
+  },
+  {
+    id: "media_truck_city_domination",
+    label: "City Domination",
+    category: "MEDIA_TRUCK",
+    price: 650000,
+    specs: { Fleet: "Multi-truck", Duration: "2–4 weeks", Display: "LED ad loop + creative rotation", Deliverables: "Multiple routes, proof video, post-report" },
+    billingType: "per_campaign",
+    exampleImage: mediaTruckImage.url,
+    exampleCaption: "High-visibility city-wide campaign — multi-truck fleet running 2-4 weeks across key districts.",
+  },
+  {
+    id: "media_truck_fmcg_roadshow",
+    label: "FMCG Roadshow",
+    category: "MEDIA_TRUCK",
+    price: 1200000,
+    specs: { Fleet: "Custom fleet", Duration: "Custom schedule", Display: "LED ad loop + activation", Deliverables: "Route + on-ground, optional add-ons, documentation" },
+    billingType: "per_campaign",
+    exampleImage: mediaTruckImage.url,
+    exampleCaption: "Custom fleet roadshow — scalable route plan, on-ground activation support, and full campaign documentation.",
+  },
+];
+
+export const ALL_VARIANTS: FormatVariant[] = [...OOH_VARIANTS, ...DOOH_VARIANTS, ...AOOH_VARIANTS, ...MEDIA_TRUCK_VARIANTS];
 
 export interface SelectedVariant {
   variantId: string;
