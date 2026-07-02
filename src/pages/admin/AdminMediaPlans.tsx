@@ -56,6 +56,7 @@ function typeBadge(t: string) {
   if (u === "OOH") return "bg-purple-100 text-purple-700";
   if (u === "DOOH") return "bg-cyan-100 text-cyan-700";
   if (u === "AOOH") return "bg-green-100 text-green-700";
+  if (u === "MEDIA_TRUCK") return "bg-amber-100 text-amber-700";
   return "bg-gray-100 text-gray-700";
 }
 
