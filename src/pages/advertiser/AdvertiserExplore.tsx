@@ -482,6 +482,14 @@ export default function AdvertiserExplore() {
                             badge: "bg-green-100 text-green-700",
                             desc: "Audio spots played through venue speaker systems at point of purchase",
                           },
+                          {
+                            id: "MEDIA_TRUCK" as const,
+                            label: "Media Truck",
+                            icon: <Truck className="w-5 h-5" />,
+                            color: "border-amber-300 hover:border-amber-500 hover:bg-amber-50",
+                            badge: "bg-amber-100 text-amber-700",
+                            desc: "Mobile LED truck fleet deployed on planned retail and commuter routes",
+                          },
                         ].map((fmt) => (
                           <button
                             key={fmt.id}
