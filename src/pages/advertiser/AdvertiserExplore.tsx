@@ -613,13 +613,25 @@ export default function AdvertiserExplore() {
                           </Button>
                           <Button
                             className="flex-1 bg-green-600 hover:bg-green-500 text-white"
-                            disabled={!withinServiceArea || estimate.totalUnits === 0}
+                            disabled={!selectedLocationAddress || radiusMeters < 250 || !withinServiceArea || estimate.totalUnits === 0}
                             onClick={openRequestDialog}
                           >
                             Proceed to Payment →
                           </Button>
                         </div>
-                        {!withinServiceArea && (
+                        {!selectedLocationAddress && (
+                          <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            Search and select a campaign location
+                          </p>
+                        )}
+                        {selectedLocationAddress && radiusMeters < 250 && (
+                          <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            Minimum radius is 250 m (5% coverage)
+                          </p>
+                        )}
+                        {selectedLocationAddress && radiusMeters >= 250 && !withinServiceArea && (
                           <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
                             <AlertTriangle className="w-3 h-3" />
                             Location is outside our service area
