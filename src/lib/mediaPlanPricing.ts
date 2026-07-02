@@ -4,7 +4,7 @@ import oohStickerLargeAsset from "@/assets/ooh_3.png.asset.json";
 import oohPosterAsset from "@/assets/ooh_4.png.asset.json";
 import oohFlyerAsset from "@/assets/ooh_5.png.asset.json";
 
-export type CampaignType = "OOH" | "DOOH" | "AOOH";
+export type CampaignType = "OOH" | "DOOH" | "AOOH" | "MEDIA_TRUCK";
 
 export interface FormatVariant {
   id: string;
