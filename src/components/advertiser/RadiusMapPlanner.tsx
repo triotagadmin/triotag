@@ -30,7 +30,7 @@ interface RadiusMapPlannerProps {
 const PRESETS = [250, 500, 1000, 2000, 5000];
 
 export function RadiusMapPlanner({
-  center, radiusMeters, onCenterChange, onRadiusChange, onServiceAreaChange,
+  center, radiusMeters, onCenterChange, onRadiusChange, onServiceAreaChange, onLocationSet,
 }: RadiusMapPlannerProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
