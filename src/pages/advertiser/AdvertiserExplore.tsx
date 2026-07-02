@@ -10,7 +10,7 @@ import {
 import {
   Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2, AlertTriangle,
   RefreshCw, Package, Clock, Calendar as CalendarIcon, Eye,
-  Image as ImageIcon, Monitor, Volume2, ChevronRight, ChevronLeft,
+  Image as ImageIcon, Monitor, Volume2, Truck, ChevronRight, ChevronLeft,
 } from "lucide-react";
 import { addMonths, format, startOfDay, isBefore } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
