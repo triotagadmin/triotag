@@ -24,12 +24,13 @@ interface RadiusMapPlannerProps {
   onCenterChange: (c: { lat: number; lng: number }) => void;
   onRadiusChange: (r: number) => void;
   onServiceAreaChange?: (withinServiceArea: boolean) => void;
+  onLocationSet?: (displayName: string) => void;
 }
 
-const PRESETS = [500, 1000, 2000, 5000];
+const PRESETS = [250, 500, 1000, 2000, 5000];
 
 export function RadiusMapPlanner({
-  center, radiusMeters, onCenterChange, onRadiusChange, onServiceAreaChange,
+  center, radiusMeters, onCenterChange, onRadiusChange, onServiceAreaChange, onLocationSet,
 }: RadiusMapPlannerProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -176,6 +177,7 @@ export function RadiusMapPlanner({
     }
     reportPin(lat, lng);
     setSearchText(s.display_name);
+    onLocationSet?.(s.display_name);
     setSuggestions([]);
   };
 
