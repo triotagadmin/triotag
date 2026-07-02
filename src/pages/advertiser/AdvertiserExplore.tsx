@@ -525,12 +525,14 @@ export default function AdvertiserExplore() {
                           <Badge className={
                             chosenFormat === "OOH" ? "bg-purple-100 text-purple-700" :
                             chosenFormat === "DOOH" ? "bg-cyan-100 text-cyan-700" :
-                            "bg-green-100 text-green-700"
+                            chosenFormat === "AOOH" ? "bg-green-100 text-green-700" :
+                            "bg-amber-100 text-amber-700"
                           }>
                             {chosenFormat === "OOH" ? <ImageIcon className="w-3 h-3 mr-1" /> :
                              chosenFormat === "DOOH" ? <Monitor className="w-3 h-3 mr-1" /> :
-                             <Volume2 className="w-3 h-3 mr-1" />}
-                            {chosenFormat}
+                             chosenFormat === "AOOH" ? <Volume2 className="w-3 h-3 mr-1" /> :
+                             <Truck className="w-3 h-3 mr-1" />}
+                            {chosenFormat === "MEDIA_TRUCK" ? "Media Truck" : chosenFormat}
                           </Badge>
                           <span className="text-sm text-gray-600 font-medium">Select your units</span>
                         </div>
@@ -538,7 +540,8 @@ export default function AdvertiserExplore() {
                         <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                           {(chosenFormat === "OOH" ? OOH_VARIANTS :
                             chosenFormat === "DOOH" ? DOOH_VARIANTS :
-                            AOOH_VARIANTS
+                            chosenFormat === "AOOH" ? AOOH_VARIANTS :
+                            MEDIA_TRUCK_VARIANTS
                           ).map(renderVariantRow)}
                         </div>
 
