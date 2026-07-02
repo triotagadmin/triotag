@@ -659,7 +659,7 @@ export default function AdvertiserExplore() {
                     <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5">
                       <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">How it works</div>
                       <div className="space-y-2 text-sm text-gray-600">
-                        <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">1.</span> Choose your ad format (OOH, DOOH, or AOOH)</div>
+                        <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">1.</span> Choose your ad format (OOH, DOOH, AOOH, or Media Truck)</div>
                         <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">2.</span> Pick your units and quantities</div>
                         <div className="flex items-start gap-2"><span className="text-green-500 font-bold shrink-0">3.</span> Review your estimate and proceed to payment</div>
                       </div>
@@ -755,7 +755,7 @@ export default function AdvertiserExplore() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
               {[
                 { Icon: Globe, t: "Nationwide Coverage", d: "Plan campaigns anywhere our partners operate" },
-                { Icon: Layers, t: "Multi-Format Inventory", d: "OOH, DOOH, and AOOH placements" },
+                { Icon: Layers, t: "Multi-Format Inventory", d: "OOH, DOOH, AOOH, and Media Truck placements" },
                 { Icon: BadgeCheck, t: "Verified Venues", d: "Listings reviewed before activation" },
                 { Icon: ShieldCheck, t: "Brand-Safe Placement", d: "Locations pre-vetted for quality" },
               ].map((b) => (
