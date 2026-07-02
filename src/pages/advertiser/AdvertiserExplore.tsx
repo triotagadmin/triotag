@@ -576,8 +576,9 @@ export default function AdvertiserExplore() {
                           <Badge className={
                             chosenFormat === "OOH" ? "bg-purple-100 text-purple-700" :
                             chosenFormat === "DOOH" ? "bg-cyan-100 text-cyan-700" :
-                            "bg-green-100 text-green-700"
-                          }>{chosenFormat} Campaign</Badge>
+                            chosenFormat === "AOOH" ? "bg-green-100 text-green-700" :
+                            "bg-amber-100 text-amber-700"
+                          }>{chosenFormat === "MEDIA_TRUCK" ? "Media Truck" : chosenFormat} Campaign</Badge>
                         </div>
 
                         <div className="space-y-2 mb-4">
