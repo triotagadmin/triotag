@@ -177,6 +177,7 @@ export function RadiusMapPlanner({
     }
     reportPin(lat, lng);
     setSearchText(s.display_name);
+    onLocationSet?.(s.display_name);
     setSuggestions([]);
   };
 
