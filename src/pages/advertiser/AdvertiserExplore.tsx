@@ -310,11 +310,11 @@ export default function AdvertiserExplore() {
             </div>
           </header>
 
-          {/* CTA: OOH, DOOH, AOOH formats */}
+          {/* CTA: OOH, DOOH, AOOH, Media Truck formats */}
           <section className="px-6 lg:px-8 py-12">
             <div className="max-w-6xl mx-auto text-center mb-8">
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Customize your campaigns</h2>
-              <p className="text-gray-600 mt-2">Explore our OOH, DOOH, and AOOH advertising formats.</p>
+              <p className="text-gray-600 mt-2">Explore our OOH, DOOH, AOOH, and Media Truck advertising formats.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {[
