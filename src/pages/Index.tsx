@@ -43,7 +43,7 @@ import oohShelfSignage from "@/assets/formats/ooh-shelf-signage.jpg";
 import oohFloorSticker from "@/assets/formats/ooh-floor-sticker.jpg";
 
 import oohAisleSignage from "@/assets/formats/ooh-aisle-signage.jpg";
-import oohEntranceBanner from "@/assets/formats/ooh-entrance-banner.jpg";
+import oohEntranceBanner from "@/assets/formats/ooh-entrance-banner.jpg.asset.json";
 import doohInstoreScreen from "@/assets/formats/dooh-instore-screen.jpg";
 import doohCheckoutScreen from "@/assets/formats/dooh-checkout-screen.jpg";
 import doohLedDisplay from "@/assets/formats/dooh-led-display.jpg";
