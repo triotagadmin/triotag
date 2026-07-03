@@ -38,7 +38,7 @@ import { useEffect } from "react";
 import { fetchLandingTotals } from "@/lib/inventoryAggregation";
 import mediaTruckBg from "@/assets/mediatruck-bg-clean.png.asset.json";
 import retailMediaKitVideo from "@/assets/retailmediakit.mp4.asset.json";
-import oohTableTent from "@/assets/formats/ooh-table-tent.jpg";
+import oohTableTent from "@/assets/formats/ooh-table-tent.jpg.asset.json";
 import oohShelfSignage from "@/assets/formats/ooh-shelf-signage.jpg";
 import oohFloorSticker from "@/assets/formats/ooh-floor-sticker.jpg";
 
