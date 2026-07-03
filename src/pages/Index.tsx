@@ -410,7 +410,7 @@ const PopularFormats = () => {
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-green-500/10 to-green-600/20 relative overflow-hidden">
                     <img
-                      src={f.img}
+                      src={typeof f.img === "string" ? f.img : f.img.url}
                       alt={f.label}
                       loading="lazy"
                       width={1024}
