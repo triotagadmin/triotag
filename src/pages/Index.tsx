@@ -38,7 +38,7 @@ import { useEffect } from "react";
 import { fetchLandingTotals } from "@/lib/inventoryAggregation";
 import mediaTruckBg from "@/assets/mediatruck-bg-clean.png.asset.json";
 import retailMediaKitVideo from "@/assets/retailmediakit.mp4.asset.json";
-import oohTableTent from "@/assets/formats/ooh-table-tent.jpg";
+import oohTableTent from "@/assets/formats/ooh-table-tent.jpg.asset.json";
 import oohShelfSignage from "@/assets/formats/ooh-shelf-signage.jpg";
 import oohFloorSticker from "@/assets/formats/ooh-floor-sticker.jpg";
 
@@ -410,7 +410,7 @@ const PopularFormats = () => {
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-green-500/10 to-green-600/20 relative overflow-hidden">
                     <img
-                      src={f.img}
+                      src={typeof f.img === "string" ? f.img : f.img.url}
                       alt={f.label}
                       loading="lazy"
                       width={1024}
