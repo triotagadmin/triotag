@@ -354,9 +354,9 @@ const PopularFormats = () => {
       { label: "Table Tents", icon: Square, img: oohTableTent },
       { label: "Shelf Signage", icon: Tag, img: oohShelfSignage },
       { label: "Floor Stickers", icon: ScanLine, img: oohFloorSticker },
-      { label: "Counter Displays", icon: ImageIcon, img: oohCounterDisplay },
       { label: "Aisle Signage", icon: MapPin, img: oohAisleSignage },
       { label: "Entrance Banners", icon: Layers, img: oohEntranceBanner },
+
     ],
     DOOH: [
       { label: "In-store Screens", icon: Monitor, img: doohInstoreScreen },
