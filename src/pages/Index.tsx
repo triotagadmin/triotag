@@ -41,7 +41,7 @@ import retailMediaKitVideo from "@/assets/retailmediakit.mp4.asset.json";
 import oohTableTent from "@/assets/formats/ooh-table-tent.jpg";
 import oohShelfSignage from "@/assets/formats/ooh-shelf-signage.jpg";
 import oohFloorSticker from "@/assets/formats/ooh-floor-sticker.jpg";
-import oohCounterDisplay from "@/assets/formats/ooh-counter-display.jpg";
+
 import oohAisleSignage from "@/assets/formats/ooh-aisle-signage.jpg";
 import oohEntranceBanner from "@/assets/formats/ooh-entrance-banner.jpg";
 import doohInstoreScreen from "@/assets/formats/dooh-instore-screen.jpg";
@@ -354,9 +354,9 @@ const PopularFormats = () => {
       { label: "Table Tents", icon: Square, img: oohTableTent },
       { label: "Shelf Signage", icon: Tag, img: oohShelfSignage },
       { label: "Floor Stickers", icon: ScanLine, img: oohFloorSticker },
-      { label: "Counter Displays", icon: ImageIcon, img: oohCounterDisplay },
       { label: "Aisle Signage", icon: MapPin, img: oohAisleSignage },
       { label: "Entrance Banners", icon: Layers, img: oohEntranceBanner },
+
     ],
     DOOH: [
       { label: "In-store Screens", icon: Monitor, img: doohInstoreScreen },
