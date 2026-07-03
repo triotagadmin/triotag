@@ -320,7 +320,7 @@ export default function AdvertiserExplore() {
               {[
                 { title: "OOH", desc: "Out-of-Home print placements across retail and high-traffic locations.", media: oohImage.url, isVideo: false },
                 { title: "DOOH", desc: "Digital Out-of-Home screens with dynamic, scheduled creative.", media: doohVideo.url, isVideo: true },
-                { title: "AOOH", desc: "Audio Out-of-Home reaching audiences through ambient sound networks.", media: aoohVideo.url, isVideo: true },
+                { title: "AOOH", desc: "Ambient Out-of-Home reaching audiences through ambiance.", media: aoohVideo.url, isVideo: true },
               ].map((c) => (
                 <div key={c.title} className="rounded-2xl overflow-hidden border border-green-100 bg-white shadow-sm hover:shadow-md transition-shadow">
                   <div className="aspect-video bg-black">
