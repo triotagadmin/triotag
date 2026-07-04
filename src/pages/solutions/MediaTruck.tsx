@@ -277,12 +277,8 @@ export default function SolutionsMediaTruck() {
               loop
               muted
               playsInline
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover brightness-125"
             />
-            <div className="absolute inset-0 bg-black/30 pointer-events-none" />
-            <div className="relative text-xs font-semibold tracking-widest text-green-500 uppercase pt-8 text-center">
-              Media Truck Features
-            </div>
           </div>
         </div>
       </section>
