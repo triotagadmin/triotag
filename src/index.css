@@ -4,7 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Triotag Retail Media SSP Design System
+/* Triotag Retail Media DSP Design System
  * Default theme stays dark so existing dashboard pages continue to render correctly.
  * The new public landing page uses explicit bg-white / text-zinc-900 utilities
  * for its light sections.
