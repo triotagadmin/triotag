@@ -221,7 +221,7 @@ const Brands = () => {
                 <PhoneCall className="h-4 w-4" /> Book a Discovery Call
               </Button>
               <Button size="lg" variant="outline" onClick={registerInventory}>
-                <ClipboardList className="h-4 w-4" /> Register your Ad Inventory
+                <ClipboardList className="h-4 w-4" /> Register your Ad Space
               </Button>
             </div>
 
