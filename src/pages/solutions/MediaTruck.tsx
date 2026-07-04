@@ -17,7 +17,7 @@ import {
   DollarSign,
   Play,
 } from "lucide-react";
-import truckFeaturesBg from "@/assets/supertruck-mediakit-features.png.asset.json";
+import truckFeaturesVideo from "@/assets/truck-features.mp4.asset.json";
 import superTruckVideo from "@/assets/supertruckmediakit.mp4.asset.json";
 
 const features = [
@@ -270,15 +270,17 @@ export default function SolutionsMediaTruck() {
               </div>
             ))}
           </div>
-          <div
-            className="relative border border-white/10 rounded-2xl p-8 bg-black bg-no-repeat bg-center overflow-hidden min-h-[420px]"
-            style={{
-              backgroundImage: `url(${truckFeaturesBg.url})`,
-              backgroundSize: "contain",
-            }}
-          >
+          <div className="relative border border-white/10 rounded-2xl overflow-hidden min-h-[420px] bg-black">
+            <video
+              src={truckFeaturesVideo.url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            />
             <div className="absolute inset-0 bg-black/30 pointer-events-none" />
-            <div className="relative text-xs font-semibold tracking-widest text-green-500 uppercase mb-6 text-center">
+            <div className="relative text-xs font-semibold tracking-widest text-green-500 uppercase pt-8 text-center">
               Media Truck Features
             </div>
           </div>
