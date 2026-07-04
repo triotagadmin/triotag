@@ -39,7 +39,7 @@ import { fetchLandingTotals } from "@/lib/inventoryAggregation";
 import mediaTruckBg from "@/assets/mediatruck-bg-clean.png.asset.json";
 import retailMediaKitVideo from "@/assets/retailmediakit.mp4.asset.json";
 import oohTableTent from "@/assets/formats/ooh-table-tent.jpg.asset.json";
-import oohShelfSignage from "@/assets/formats/ooh-shelf-signage.png.asset.json";
+import oohShelfSignage from "@/assets/formats/ooh-shelf-signage.jpg.asset.json";
 import oohFloorSticker from "@/assets/formats/ooh-floor-sticker.jpeg.asset.json";
 
 import oohAisleSignage from "@/assets/formats/ooh-aisle-signage.jpg";
