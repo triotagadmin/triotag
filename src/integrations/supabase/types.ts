@@ -3155,6 +3155,7 @@ export type Database = {
           description: string | null
           id: string
           location: string | null
+          managed_by_agent_id: string | null
           metrics: Json | null
           portfolio_media: Json | null
           publisher_type: Database["public"]["Enums"]["publisher_type"]
@@ -3162,7 +3163,7 @@ export type Database = {
           social_media: Json | null
           token_expires: string | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
           verification_status: Database["public"]["Enums"]["approval_status"]
           verification_token: string | null
           verified: boolean | null
@@ -3178,6 +3179,7 @@ export type Database = {
           description?: string | null
           id?: string
           location?: string | null
+          managed_by_agent_id?: string | null
           metrics?: Json | null
           portfolio_media?: Json | null
           publisher_type: Database["public"]["Enums"]["publisher_type"]
@@ -3185,7 +3187,7 @@ export type Database = {
           social_media?: Json | null
           token_expires?: string | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
           verification_status?: Database["public"]["Enums"]["approval_status"]
           verification_token?: string | null
           verified?: boolean | null
@@ -3201,6 +3203,7 @@ export type Database = {
           description?: string | null
           id?: string
           location?: string | null
+          managed_by_agent_id?: string | null
           metrics?: Json | null
           portfolio_media?: Json | null
           publisher_type?: Database["public"]["Enums"]["publisher_type"]
@@ -3208,7 +3211,7 @@ export type Database = {
           social_media?: Json | null
           token_expires?: string | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
           verification_status?: Database["public"]["Enums"]["approval_status"]
           verification_token?: string | null
           verified?: boolean | null
