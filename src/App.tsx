@@ -247,6 +247,11 @@ const App = () => (
               <AdminExternalInventory />
             </ProtectedAdminRoute>
           } />
+          <Route path="/admin/brand-campaigns" element={
+            <ProtectedAdminRoute>
+              <AdminBrandCampaigns />
+            </ProtectedAdminRoute>
+          } />
           {/* Advertiser inventory explorer — PUBLIC, no auth required */}
           <Route path="/advertiser/explore" element={<AdvertiserExplore />} />
           <Route path="/advertiser/explore/:city" element={<AdvertiserCityOverview />} />
