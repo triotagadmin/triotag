@@ -97,6 +97,7 @@ import AdvertiserCampaigns from "./pages/advertiser/AdvertiserCampaigns";
 import AdvertiserReports from "./pages/advertiser/AdvertiserReports";
 import PublisherCampaigns from "./pages/publisher/PublisherCampaigns";
 import RetailerCampaigns from "./pages/retailer/RetailerCampaigns";
+import MyClients from "./pages/retailer/MyClients";
 import VenueCampaigns from "./pages/VenueCampaigns";
 import TalentCampaigns from "./pages/talent/TalentCampaigns";
 import AdminCampaigns from "./pages/AdminCampaigns";
@@ -256,6 +257,7 @@ const App = () => (
           <Route path="/player/audio" element={<AOOHPlayer />} />
           {/* Retailer Portal — publisher only, all guarded inside RetailerLayout */}
           <Route path="/retailer/dashboard" element={<RetailerDashboard />} />
+          <Route path="/retailer/clients" element={<MyClients />} />
           <Route path="/retailer/creative-library" element={<CreativeLibrary />} />
           <Route path="/retailer/house-ads" element={<HouseAds />} />
           <Route path="/retailer/campaign-calendar" element={<CampaignCalendar />} />
