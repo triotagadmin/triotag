@@ -264,7 +264,7 @@ export const RetailerLayout = ({ children, title }: { children: ReactNode; title
                 <p className="text-sm text-zinc-600 mb-6">
                   You haven't been assigned any retailer clients. Add your first client to start managing their inventory, creatives, and campaigns.
                 </p>
-                <Link to="/retailer/add-client">
+                <Link to="/retailer/clients">
                   <button className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg">
                     <Plus className="w-4 h-4" /> Add Client
                   </button>
