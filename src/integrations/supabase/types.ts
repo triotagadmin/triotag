@@ -1094,6 +1094,7 @@ export type Database = {
           environments: string[] | null
           id: string
           notes: string | null
+          rejection_reason: string | null
           start_date: string | null
           status: string | null
           target_age_max: number | null
@@ -1112,6 +1113,7 @@ export type Database = {
           environments?: string[] | null
           id?: string
           notes?: string | null
+          rejection_reason?: string | null
           start_date?: string | null
           status?: string | null
           target_age_max?: number | null
@@ -1130,6 +1132,7 @@ export type Database = {
           environments?: string[] | null
           id?: string
           notes?: string | null
+          rejection_reason?: string | null
           start_date?: string | null
           status?: string | null
           target_age_max?: number | null
