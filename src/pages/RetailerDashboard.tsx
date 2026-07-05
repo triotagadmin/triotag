@@ -325,7 +325,7 @@ const RetailerDashboard = () => {
                 <div key={s.id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700 uppercase">{s.ad_format || "OOH"}</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700 uppercase">{s.media_type || "OOH"}</span>
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${s.approval_status === "approved" ? "bg-green-100 text-green-700" : s.approval_status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
                         {s.approval_status}
                       </span>
