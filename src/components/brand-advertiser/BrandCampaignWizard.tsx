@@ -25,7 +25,7 @@ interface Props {
 
 const MEDIA_TYPES = ["OOH", "DOOH", "AOOH"] as const;
 type MediaType = typeof MEDIA_TYPES[number];
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 interface AdSpaceRow {
   id: string;
