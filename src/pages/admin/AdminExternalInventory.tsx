@@ -353,6 +353,7 @@ export default function AdminExternalInventory() {
                       <TableHead>Screens</TableHead>
                       <TableHead>Base CPM</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Marketplace</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -366,6 +367,28 @@ export default function AdminExternalInventory() {
                         <TableCell>{fmt(r.screen_count)}</TableCell>
                         <TableCell>{fmtPHP(r.base_cpm)}</TableCell>
                         <TableCell><Badge className={statusBadge(r.status)}>{r.status}</Badge></TableCell>
+                        <TableCell>
+                          {r.published_ad_space_id ? (
+                            <div className="flex flex-col gap-1">
+                              <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 gap-1 w-fit">
+                                <CheckCircle2 className="w-3 h-3" /> Published
+                              </Badge>
+                              <span className="text-[10px] text-muted-foreground truncate max-w-[140px]" title={r.supply_source}>
+                                via {r.supply_source}
+                              </span>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => publish(r)}
+                              disabled={publishingId === r.id || r.status === "inactive"}
+                            >
+                              <Upload className="w-3.5 h-3.5 mr-1" />
+                              {publishingId === r.id ? "Publishing…" : "Publish"}
+                            </Button>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
                           <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>
                             <Pencil className="w-4 h-4" />
