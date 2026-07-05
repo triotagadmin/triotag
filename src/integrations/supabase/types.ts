@@ -1188,6 +1188,42 @@ export type Database = {
           },
         ]
       }
+      campaign_ad_space_targets: {
+        Row: {
+          ad_space_id: string
+          campaign_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          ad_space_id: string
+          campaign_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          ad_space_id?: string
+          campaign_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_ad_space_targets_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_ad_space_targets_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_subscriptions: {
         Row: {
           campaign_id: string
@@ -3154,6 +3190,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          is_house_account: boolean
           location: string | null
           managed_by_agent_id: string | null
           metrics: Json | null
@@ -3178,6 +3215,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_house_account?: boolean
           location?: string | null
           managed_by_agent_id?: string | null
           metrics?: Json | null
@@ -3202,6 +3240,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_house_account?: boolean
           location?: string | null
           managed_by_agent_id?: string | null
           metrics?: Json | null
