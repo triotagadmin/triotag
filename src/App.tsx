@@ -84,6 +84,7 @@ import TalentProfileSubmission from "./pages/TalentProfileSubmission";
 import TalentDashboard from "./pages/TalentDashboard";
 import BookTalent from "./pages/BookTalent";
 import RetailerDashboard from "./pages/retailer/RetailerDashboard";
+import RetailerSelfDashboard from "./pages/RetailerDashboard";
 import CreativeLibrary from "./pages/retailer/CreativeLibrary";
 import HouseAds from "./pages/retailer/HouseAds";
 import CampaignCalendar from "./pages/retailer/CampaignCalendar";
