@@ -43,10 +43,16 @@ export default function BrandAdvertiserSettings() {
   }, []);
 
   const save = async () => {
+    const err = validateDomain(profile.website_domain || "");
+    setDomainError(err);
+    if (err) {
+      toast({ title: "Invalid website domain", description: err, variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) { setSaving(false); return; }
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("brand_advertiser_profiles")
       .upsert({
         user_id: session.user.id,
@@ -54,6 +60,7 @@ export default function BrandAdvertiserSettings() {
         contact_name: profile.contact_name,
         contact_phone: profile.contact_phone,
         industry: profile.industry,
+        website_domain: (profile.website_domain || "").trim() || null,
         contact_email: session.user.email,
       }, { onConflict: "user_id" });
     setSaving(false);
