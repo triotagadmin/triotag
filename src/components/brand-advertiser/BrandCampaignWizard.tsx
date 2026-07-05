@@ -22,8 +22,25 @@ interface Props {
   onCreated?: () => void;
 }
 
-const ENVIRONMENTS = ["OOH", "DOOH", "AOOH"];
+const MEDIA_TYPES = ["OOH", "DOOH", "AOOH"] as const;
+type MediaType = typeof MEDIA_TYPES[number];
 const TOTAL_STEPS = 4;
+
+interface AdSpaceRow {
+  id: string;
+  title: string;
+  location: string | null;
+  media_type: string;
+  pricing: any;
+  monthly_subscription_fee: number | null;
+}
+
+const formatBadge = (mt: string) => {
+  const u = mt.toUpperCase();
+  if (u === "OOH") return "bg-purple-100 text-purple-700";
+  if (u === "DOOH") return "bg-cyan-100 text-cyan-700";
+  return "bg-green-100 text-green-700";
+};
 
 export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertiserId, onCreated }: Props) {
   const { toast } = useToast();
