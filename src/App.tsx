@@ -84,6 +84,7 @@ import TalentProfileSubmission from "./pages/TalentProfileSubmission";
 import TalentDashboard from "./pages/TalentDashboard";
 import BookTalent from "./pages/BookTalent";
 import RetailerDashboard from "./pages/retailer/RetailerDashboard";
+import RetailerSelfDashboard from "./pages/RetailerDashboard";
 import CreativeLibrary from "./pages/retailer/CreativeLibrary";
 import HouseAds from "./pages/retailer/HouseAds";
 import CampaignCalendar from "./pages/retailer/CampaignCalendar";
@@ -159,7 +160,7 @@ const App = () => (
           <Route path="/verify" element={<Verify />} />
           <Route path="/dashboard" element={<Dashboard />} />
           
-          <Route path="/retailer-dashboard" element={<AdvertiserDashboard />} />
+          <Route path="/retailer-dashboard" element={<RetailerSelfDashboard />} />
           <Route path="/advertiser-settings" element={<AdvertiserSettings />} />
           <Route path="/print-partner/dashboard" element={<PrintPartnerDashboard />} />
           <Route path="/print-partner/clients" element={<PrintPartnerDashboard />} />
