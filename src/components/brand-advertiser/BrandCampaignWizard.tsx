@@ -225,32 +225,91 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
 
         {step === 2 && (
           <div className="space-y-3 py-2">
-            <h3 className="font-semibold text-gray-900">Select Environment</h3>
+            <h3 className="font-semibold text-gray-900">Select Inventory</h3>
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <Input
-                value={envSearch}
-                onChange={(e) => setEnvSearch(e.target.value)}
-                placeholder="Search environments..."
+                value={invSearch}
+                onChange={(e) => setInvSearch(e.target.value)}
+                placeholder="Search by title or location..."
                 className="pl-9"
               />
             </div>
-            <div className="flex gap-2">
-              <Button type="button" onClick={() => setSelectedEnvs([...ENVIRONMENTS])} className="bg-blue-600 hover:bg-blue-700 text-white">Check All</Button>
-              <Button type="button" onClick={() => setSelectedEnvs([])} className="bg-gray-500 hover:bg-gray-600 text-white">Uncheck All</Button>
-            </div>
-            <div className="border border-gray-200 rounded-md divide-y divide-gray-100">
-              {filteredEnvs.map((env) => (
-                <label key={env} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50">
-                  <Checkbox checked={selectedEnvs.includes(env)} onCheckedChange={() => toggleEnv(env)} />
-                  <span className="text-sm font-medium text-gray-800">{env}</span>
-                </label>
+            <div className="flex flex-wrap gap-2">
+              {(["ALL", ...MEDIA_TYPES] as const).map((m) => (
+                <Button
+                  key={m}
+                  type="button"
+                  size="sm"
+                  variant={mediaFilter === m ? "default" : "outline"}
+                  className={mediaFilter === m ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+                  onClick={() => setMediaFilter(m)}
+                >
+                  {m === "ALL" ? "All" : m}
+                </Button>
               ))}
-              {filteredEnvs.length === 0 && (
-                <div className="px-4 py-6 text-center text-sm text-gray-400">No matches</div>
+              <div className="flex-1" />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setSelectedAdSpaceIds(filteredInventory.map((s) => s.id))}
+              >Select all</Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setSelectedAdSpaceIds([])}
+              >Clear</Button>
+            </div>
+            <div className="border border-gray-200 rounded-md divide-y divide-gray-100 max-h-[360px] overflow-y-auto">
+              {loadingInv ? (
+                <div className="px-4 py-8 text-center text-sm text-gray-400">Loading inventory…</div>
+              ) : adSpaces.length === 0 ? (
+                <div className="px-4 py-8 text-center text-sm text-gray-500">
+                  No approved inventory available yet — check back soon.
+                </div>
+              ) : filteredInventory.length === 0 ? (
+                <div className="px-4 py-6 text-center text-sm text-gray-400">No matches for your filters</div>
+              ) : (
+                filteredInventory.map((s) => {
+                  const mt = String(s.media_type || "").toUpperCase();
+                  const weekly = s.pricing?.weekly;
+                  const monthly = s.pricing?.monthly ?? s.monthly_subscription_fee;
+                  const checked = selectedAdSpaceIds.includes(s.id);
+                  return (
+                    <label
+                      key={s.id}
+                      className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 ${checked ? "bg-green-50/50" : ""}`}
+                    >
+                      <Checkbox checked={checked} onCheckedChange={() => toggleAdSpace(s.id)} className="mt-1" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-medium text-gray-900 truncate">{s.title}</span>
+                          <Badge className={formatBadge(mt)}>{mt || "—"}</Badge>
+                        </div>
+                        {s.location && (
+                          <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3" /> {s.location}
+                          </div>
+                        )}
+                        {(weekly || monthly) && (
+                          <div className="text-xs text-gray-600 mt-1">
+                            {weekly ? `₱${Number(weekly).toLocaleString()}/week` : ""}
+                            {weekly && monthly ? " • " : ""}
+                            {monthly ? `₱${Number(monthly).toLocaleString()}/month` : ""}
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  );
+                })
               )}
             </div>
-            <div className="text-xs text-gray-500">{selectedEnvs.length} environment(s) selected</div>
+            <div className="text-xs text-gray-500">
+              {selectedAdSpaceIds.length} ad space(s) selected
+              {selectedEnvs.length > 0 && ` • Environments: ${selectedEnvs.join(", ")}`}
+            </div>
           </div>
         )}
 
