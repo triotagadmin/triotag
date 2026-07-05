@@ -86,29 +86,79 @@ export default function AdminTotalInventory() {
   };
 
   useEffect(() => { loadInventory(); }, []);
-      setLoading(true);
-      setQueryError(null);
-      const { data, error } = await supabase
-        .from("ad_spaces")
-        .select(`
-          id, title, location, media_type, approval_status, availability_status,
-          monthly_subscription_fee, activation_fee, created_at, approved_at,
-          publisher_id,
-          publisher_profiles (
-            business_name, contact_email, user_id
-          )
-        `)
-        .eq("approval_status", "approved")
-        .order("approved_at", { ascending: false });
 
-      if (error) {
-        console.error("[AdminTotalInventory] Query error:", error.message, error.details, error.hint);
-        setQueryError(error.message);
+  const handleAdd = async () => {
+    if (!form.title.trim() || !form.location.trim()) {
+      toast.error("Title and location are required");
+      return;
+    }
+    let specs: any = {};
+    if (form.specifications.trim()) {
+      try {
+        specs = JSON.parse(form.specifications);
+      } catch {
+        toast.error("Specifications must be valid JSON");
+        return;
       }
-      setSpaces(data || []);
-      setLoading(false);
-    })();
-  }, []);
+    }
+    setSaving(true);
+    try {
+      // 1. Find or create house publisher_profiles row
+      const { data: existing, error: findErr } = await supabase
+        .from("publisher_profiles")
+        .select("id")
+        .eq("is_house_account", true)
+        .maybeSingle();
+      if (findErr) throw findErr;
+
+      let houseId = existing?.id;
+      if (!houseId) {
+        const { data: created, error: createErr } = await supabase
+          .from("publisher_profiles")
+          .insert({
+            business_name: "TrioTag",
+            contact_email: "tinystickyads@gmail.com",
+            publisher_type: "digital",
+            verification_status: "approved",
+            verified: true,
+            is_house_account: true,
+            user_id: null,
+          } as any)
+          .select("id")
+          .single();
+        if (createErr) throw createErr;
+        houseId = created.id;
+      }
+
+      const pricing: any = {};
+      if (form.weekly) pricing.weekly = parseFloat(form.weekly);
+      if (form.monthly) pricing.monthly = parseFloat(form.monthly);
+
+      const { error: insErr } = await supabase.from("ad_spaces").insert({
+        publisher_id: houseId,
+        title: form.title.trim(),
+        location: form.location.trim(),
+        media_type: form.media_type,
+        approval_status: "approved",
+        availability_status: "available",
+        approved_at: new Date().toISOString(),
+        pricing,
+        specifications: specs,
+      } as any);
+      if (insErr) throw insErr;
+
+      toast.success("Inventory added");
+      setAddOpen(false);
+      setForm({ title: "", location: "", media_type: "OOH", weekly: "", monthly: "", specifications: "" });
+      await loadInventory();
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e.message || "Failed to add inventory");
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   const totals = useMemo(() => {
     const by = (mt: string) => spaces.filter((s) => String(s.media_type).toUpperCase() === mt).length;
