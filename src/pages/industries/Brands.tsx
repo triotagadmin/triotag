@@ -88,6 +88,10 @@ const Brands = () => {
 
   const bookCall = () => navigate("/contact");
   const registerInventory = () => navigate("/list-space");
+  const goPublisherSignup = () => {
+    localStorage.setItem("intended_role", "venue");
+    navigate("/auth");
+  };
 
   const services = [
     {
