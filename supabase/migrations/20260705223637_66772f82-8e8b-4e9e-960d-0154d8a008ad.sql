@@ -1,0 +1,1 @@
+ALTER TABLE public.brand_campaigns ADD COLUMN IF NOT EXISTS rejection_reason text;
