@@ -11,8 +11,22 @@ export default function BrandAdvertiserSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<any>({
-    company_name: "", contact_name: "", contact_phone: "", industry: "",
+    company_name: "", contact_name: "", contact_phone: "", industry: "", website_domain: "",
   });
+  const [domainError, setDomainError] = useState<string | null>(null);
+
+  const validateDomain = (v: string): string | null => {
+    const trimmed = v.trim();
+    if (!trimmed) return null; // optional
+    if (/^https?:\/\//i.test(trimmed) || trimmed.includes("/")) {
+      return "Enter just the domain (e.g. example.com), not a full URL.";
+    }
+    // Basic domain regex: labels separated by dots, TLD 2+ chars
+    if (!/^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(trimmed)) {
+      return "Enter a valid domain like example.com.";
+    }
+    return null;
+  };
 
   useEffect(() => {
     (async () => {
