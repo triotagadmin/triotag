@@ -403,7 +403,14 @@ export default function AdminTotalInventory() {
                             onClick={() => setSelected(s)}
                             className="cursor-pointer hover:bg-muted/50 transition-colors"
                           >
-                            <TableCell className="font-medium max-w-[200px] truncate">{s.title}</TableCell>
+                            <TableCell className="font-medium max-w-[220px] truncate">
+                              <div className="flex items-center gap-2">
+                                <span className="truncate">{s.title}</span>
+                                {s.publisher_profiles?.is_house_account && (
+                                  <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-primary/20 shrink-0">TrioTag</Badge>
+                                )}
+                              </div>
+                            </TableCell>
                             <TableCell className="max-w-[220px] truncate text-muted-foreground">{s.location || "—"}</TableCell>
                             <TableCell><Badge className={formatBadge(mt)}>{mt || "—"}</Badge></TableCell>
                             <TableCell>
@@ -411,7 +418,14 @@ export default function AdminTotalInventory() {
                                 {s.availability_status || "unknown"}
                               </Badge>
                             </TableCell>
-                            <TableCell className="max-w-[160px] truncate">{s.publisher_profiles?.business_name || "—"}</TableCell>
+                            <TableCell className="max-w-[160px] truncate">
+                              {s.publisher_profiles?.is_house_account ? (
+                                <span className="inline-flex items-center gap-1">
+                                  {s.publisher_profiles?.business_name || "TrioTag"}
+                                  <Badge variant="outline" className="text-[10px] px-1 py-0">House</Badge>
+                                </span>
+                              ) : (s.publisher_profiles?.business_name || "—")}
+                            </TableCell>
                             <TableCell>{fmtPHP(s.monthly_subscription_fee)}</TableCell>
                             <TableCell>{fmtPHP(s.activation_fee)}</TableCell>
                             <TableCell>
