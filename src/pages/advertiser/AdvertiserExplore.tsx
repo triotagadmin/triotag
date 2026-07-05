@@ -438,7 +438,7 @@ export default function AdvertiserExplore() {
               <div className="lg:col-span-2">
                 <div className="lg:sticky lg:top-6 space-y-5">
                   {/* Format selector — 3-step wizard */}
-                  <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                  <div id="choose-ad-formats" className="bg-white border border-gray-200 rounded-2xl p-6">
                     <h3 className="text-base font-bold text-gray-900 mb-1">Choose Your Ad Formats</h3>
                     <p className="text-xs text-gray-500 mb-4">Pick the formats and quantities for your campaign.</p>
 
