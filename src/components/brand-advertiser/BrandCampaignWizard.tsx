@@ -81,7 +81,27 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
   const [gender, setGender] = useState("All");
   const [creativeFormat, setCreativeFormat] = useState("Image");
 
-  // Step 4
+  // Step 4 - creative selection
+  const [creativeSets, setCreativeSets] = useState<Array<{ id: string; title: string; creative_format: string | null; file_url: string | null }>>([]);
+  const [creativeSetId, setCreativeSetId] = useState<string | null>(null);
+  const [loadingCreatives, setLoadingCreatives] = useState(false);
+
+  useEffect(() => {
+    if (!open || !brandAdvertiserId) return;
+    (async () => {
+      setLoadingCreatives(true);
+      const { data } = await (supabase as any)
+        .from("brand_creative_sets")
+        .select("id,title,creative_format,file_url,status")
+        .eq("brand_advertiser_id", brandAdvertiserId)
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+      setCreativeSets(data || []);
+      setLoadingCreatives(false);
+    })();
+  }, [open, brandAdvertiserId]);
+
+  // Step 5
   const [notes, setNotes] = useState("");
 
   const filteredInventory = useMemo(() => {
