@@ -378,6 +378,76 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
 
         {step === 4 && (
           <div className="space-y-4 py-2">
+            <div>
+              <h3 className="font-semibold text-gray-900">Attach Creative</h3>
+              <p className="text-xs text-gray-500 mt-1">
+                Choose which creative set should serve on this campaign. You can skip this and add one later, but the campaign cannot be approved until a creative is attached.
+              </p>
+            </div>
+
+            {loadingCreatives ? (
+              <div className="text-sm text-gray-400 py-4 text-center">Loading creative sets…</div>
+            ) : creativeSets.length === 0 ? (
+              <div className="border border-dashed border-gray-300 rounded-md p-6 text-center space-y-3 bg-gray-50">
+                <ImageIcon className="w-8 h-8 mx-auto text-gray-400" />
+                <div className="text-sm text-gray-700">You don't have any active creative sets yet.</div>
+                <Link
+                  to="/brand-advertiser/creatives"
+                  className="inline-block text-sm text-green-700 hover:text-green-800 underline"
+                >
+                  Create a creative set →
+                </Link>
+                <div className="text-xs text-gray-500 pt-1">
+                  You can continue without attaching one — the campaign will save as a draft until creative is added.
+                </div>
+              </div>
+            ) : (
+              <div className="border border-gray-200 rounded-md divide-y divide-gray-100 max-h-[320px] overflow-y-auto">
+                <label className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 ${creativeSetId === null ? "bg-gray-50" : ""}`}>
+                  <input
+                    type="radio"
+                    name="creative-set"
+                    className="mt-1"
+                    checked={creativeSetId === null}
+                    onChange={() => setCreativeSetId(null)}
+                  />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">No creative yet</div>
+                    <div className="text-xs text-gray-500">Save as draft; attach later from the campaigns list.</div>
+                  </div>
+                </label>
+                {creativeSets.map((cs) => (
+                  <label
+                    key={cs.id}
+                    className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 ${creativeSetId === cs.id ? "bg-green-50/50" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="creative-set"
+                      className="mt-1"
+                      checked={creativeSetId === cs.id}
+                      onChange={() => setCreativeSetId(cs.id)}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-gray-900 truncate">{cs.title}</span>
+                        {cs.creative_format && (
+                          <Badge className="bg-gray-100 text-gray-700">{cs.creative_format}</Badge>
+                        )}
+                      </div>
+                      {cs.file_url && (
+                        <div className="text-xs text-gray-500 truncate mt-0.5">{cs.file_url}</div>
+                      )}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === 5 && (
+          <div className="space-y-4 py-2">
             <div className="border border-gray-200 rounded-md p-4 space-y-2 bg-gray-50">
               <Row label="Campaign" value={campaignName} />
               <Row label="Budget" value={`₱${Number(budget || 0).toLocaleString()}`} />
@@ -386,7 +456,11 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
               <Row label="Country" value="Philippines" />
               <Row label="Age" value={`${ageMin} – ${ageMax}`} />
               <Row label="Gender" value={gender} />
-              <Row label="Creative" value={creativeFormat} />
+              <Row label="Creative Format" value={creativeFormat} />
+              <Row
+                label="Creative Set"
+                value={creativeSetId ? (creativeSets.find(c => c.id === creativeSetId)?.title || "Selected") : "None (draft)"}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Notes (optional)</Label>
