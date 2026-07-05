@@ -28,6 +28,14 @@ import {
   ArrowRight,
   PhoneCall,
   ClipboardList,
+  Utensils,
+  Dumbbell,
+  CheckCircle2,
+  Shield,
+  Clock,
+  Wallet,
+  LayoutGrid,
+  Sparkles,
 } from "lucide-react";
 
 const CANONICAL = "https://tinystickyads.com/industries/brands";
