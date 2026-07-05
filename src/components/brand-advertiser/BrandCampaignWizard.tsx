@@ -123,7 +123,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
   const submit = async () => {
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("brand_campaigns").insert({
+      const { data: created, error } = await supabase.from("brand_campaigns").insert({
         brand_advertiser_id: brandAdvertiserId,
         campaign_name: campaignName,
         budget: Number(budget),
@@ -137,8 +137,17 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
         creative_format: creativeFormat,
         notes,
         status: "pending_review",
-      });
+      }).select("id").single();
       if (error) throw error;
+
+      if (created?.id && selectedAdSpaceIds.length > 0) {
+        const targetRows = selectedAdSpaceIds.map((ad_space_id) => ({
+          campaign_id: created.id,
+          ad_space_id,
+        }));
+        const { error: targetErr } = await supabase.from("campaign_ad_space_targets").insert(targetRows);
+        if (targetErr) throw targetErr;
+      }
 
       try {
         await supabase.functions.invoke("notify-brand-campaign-submission", {
