@@ -22,8 +22,8 @@ TrioTag (tinystickyads.com) is a retail media marketplace. Retailers list ad spa
 
 ## Industries
 
-- [For Brands](/industries/brands): How brands and agencies run campaigns on TrioTag.
-- [For Retailers](/industries/retailers): How retailers earn from their footfall.
+- [For Brands](/industries/sspsource): How brands and agencies run campaigns on TrioTag.
+- [For Retailers](/industries/retaildsp): How retailers earn from their footfall.
 
 ## Optional
 
