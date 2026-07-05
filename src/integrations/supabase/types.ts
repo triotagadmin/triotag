@@ -1866,6 +1866,7 @@ export type Database = {
           media_type: string
           min_spot_seconds: number | null
           notes: string | null
+          published_ad_space_id: string | null
           screen_count: number | null
           status: string
           supply_source: string
@@ -1886,6 +1887,7 @@ export type Database = {
           media_type: string
           min_spot_seconds?: number | null
           notes?: string | null
+          published_ad_space_id?: string | null
           screen_count?: number | null
           status?: string
           supply_source: string
@@ -1906,13 +1908,22 @@ export type Database = {
           media_type?: string
           min_spot_seconds?: number | null
           notes?: string | null
+          published_ad_space_id?: string | null
           screen_count?: number | null
           status?: string
           supply_source?: string
           updated_at?: string
           venue_name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "external_inventory_published_ad_space_id_fkey"
+            columns: ["published_ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       franchise_branches: {
         Row: {
@@ -3189,7 +3200,9 @@ export type Database = {
           contact_phone: string | null
           created_at: string | null
           description: string | null
+          external_source_name: string | null
           id: string
+          is_external_source: boolean
           is_house_account: boolean
           location: string | null
           managed_by_agent_id: string | null
@@ -3214,7 +3227,9 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
+          external_source_name?: string | null
           id?: string
+          is_external_source?: boolean
           is_house_account?: boolean
           location?: string | null
           managed_by_agent_id?: string | null
@@ -3239,7 +3254,9 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
+          external_source_name?: string | null
           id?: string
+          is_external_source?: boolean
           is_house_account?: boolean
           location?: string | null
           managed_by_agent_id?: string | null
