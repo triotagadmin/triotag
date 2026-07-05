@@ -97,6 +97,7 @@ import AdvertiserCampaigns from "./pages/advertiser/AdvertiserCampaigns";
 import AdvertiserReports from "./pages/advertiser/AdvertiserReports";
 import PublisherCampaigns from "./pages/publisher/PublisherCampaigns";
 import RetailerCampaigns from "./pages/retailer/RetailerCampaigns";
+import MyClients from "./pages/retailer/MyClients";
 import VenueCampaigns from "./pages/VenueCampaigns";
 import TalentCampaigns from "./pages/talent/TalentCampaigns";
 import AdminCampaigns from "./pages/AdminCampaigns";
