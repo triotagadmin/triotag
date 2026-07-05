@@ -50,6 +50,7 @@ const RetailerDashboard = () => {
   const [profile, setProfile] = useState<any>(null);
   const [spaces, setSpaces] = useState<any[]>([]);
   const [stats, setStats] = useState<Stats>({ totalSpaces: 0, approved: 0, pending: 0, playsToday: 0, revenueMonth: 0, creatives: 0 });
+  const [spaceStats, setSpaceStats] = useState<Record<string, { active: number; plays: number; revenue: number }>>({});
   const [revenueNote, setRevenueNote] = useState<string | null>(null);
   const [form, setForm] = useState({ business_name: "", contact_email: "", contact_phone: "", location: "", description: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
