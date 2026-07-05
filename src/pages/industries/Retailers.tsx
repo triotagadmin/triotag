@@ -25,7 +25,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 
-const CANONICAL = "https://tinystickyads.com/industries/retailers";
+const CANONICAL = "https://tinystickyads.com/industries/retaildsp";
 
 const setMeta = (selector: string, attr: string, value: string) => {
   let el = document.head.querySelector<HTMLMetaElement | HTMLLinkElement>(selector);
