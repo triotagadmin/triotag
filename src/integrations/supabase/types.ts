@@ -1815,6 +1815,69 @@ export type Database = {
           },
         ]
       }
+      external_inventory: {
+        Row: {
+          added_by: string | null
+          base_cpm: number | null
+          contact_info: string | null
+          contact_name: string | null
+          created_at: string
+          id: string
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          max_spot_seconds: number | null
+          media_type: string
+          min_spot_seconds: number | null
+          notes: string | null
+          screen_count: number | null
+          status: string
+          supply_source: string
+          updated_at: string
+          venue_name: string
+        }
+        Insert: {
+          added_by?: string | null
+          base_cpm?: number | null
+          contact_info?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          max_spot_seconds?: number | null
+          media_type: string
+          min_spot_seconds?: number | null
+          notes?: string | null
+          screen_count?: number | null
+          status?: string
+          supply_source: string
+          updated_at?: string
+          venue_name: string
+        }
+        Update: {
+          added_by?: string | null
+          base_cpm?: number | null
+          contact_info?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          max_spot_seconds?: number | null
+          media_type?: string
+          min_spot_seconds?: number | null
+          notes?: string | null
+          screen_count?: number | null
+          status?: string
+          supply_source?: string
+          updated_at?: string
+          venue_name?: string
+        }
+        Relationships: []
+      }
       franchise_branches: {
         Row: {
           ad_unit_quantity: number | null
