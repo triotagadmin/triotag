@@ -11,8 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, CalendarIcon, MapPin } from "lucide-react";
+import { Search, CalendarIcon, MapPin, ImageIcon } from "lucide-react";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 import { getActiveAreaNamesText } from "@/lib/serviceAreas";
 
 interface Props {
