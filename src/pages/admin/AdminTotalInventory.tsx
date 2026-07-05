@@ -20,8 +20,11 @@ import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell,
 } from "recharts";
 import {
-  Package, Download, Search, Users, CheckCircle2, ChevronLeft, ChevronRight,
+  Package, Download, Search, Users, CheckCircle2, ChevronLeft, ChevronRight, Plus,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 type MediaType = "OOH" | "DOOH" | "AOOH";
 
@@ -47,32 +50,115 @@ export default function AdminTotalInventory() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<any | null>(null);
   const [queryError, setQueryError] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    title: "",
+    location: "",
+    media_type: "OOH" as MediaType,
+    weekly: "",
+    monthly: "",
+    specifications: "",
+  });
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setQueryError(null);
-      const { data, error } = await supabase
-        .from("ad_spaces")
-        .select(`
-          id, title, location, media_type, approval_status, availability_status,
-          monthly_subscription_fee, activation_fee, created_at, approved_at,
-          publisher_id,
-          publisher_profiles (
-            business_name, contact_email, user_id
-          )
-        `)
-        .eq("approval_status", "approved")
-        .order("approved_at", { ascending: false });
+  const loadInventory = async () => {
+    setLoading(true);
+    setQueryError(null);
+    const { data, error } = await supabase
+      .from("ad_spaces")
+      .select(`
+        id, title, location, media_type, approval_status, availability_status,
+        monthly_subscription_fee, activation_fee, created_at, approved_at,
+        publisher_id,
+        publisher_profiles (
+          business_name, contact_email, user_id, is_house_account
+        )
+      `)
+      .eq("approval_status", "approved")
+      .order("approved_at", { ascending: false });
 
-      if (error) {
-        console.error("[AdminTotalInventory] Query error:", error.message, error.details, error.hint);
-        setQueryError(error.message);
+    if (error) {
+      console.error("[AdminTotalInventory] Query error:", error.message);
+      setQueryError(error.message);
+    }
+    setSpaces(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { loadInventory(); }, []);
+
+  const handleAdd = async () => {
+    if (!form.title.trim() || !form.location.trim()) {
+      toast.error("Title and location are required");
+      return;
+    }
+    let specs: any = {};
+    if (form.specifications.trim()) {
+      try {
+        specs = JSON.parse(form.specifications);
+      } catch {
+        toast.error("Specifications must be valid JSON");
+        return;
       }
-      setSpaces(data || []);
-      setLoading(false);
-    })();
-  }, []);
+    }
+    setSaving(true);
+    try {
+      // 1. Find or create house publisher_profiles row
+      const { data: existing, error: findErr } = await supabase
+        .from("publisher_profiles")
+        .select("id")
+        .eq("is_house_account", true)
+        .maybeSingle();
+      if (findErr) throw findErr;
+
+      let houseId = existing?.id;
+      if (!houseId) {
+        const { data: created, error: createErr } = await supabase
+          .from("publisher_profiles")
+          .insert({
+            business_name: "TrioTag",
+            contact_email: "tinystickyads@gmail.com",
+            publisher_type: "digital",
+            verification_status: "approved",
+            verified: true,
+            is_house_account: true,
+            user_id: null,
+          } as any)
+          .select("id")
+          .single();
+        if (createErr) throw createErr;
+        houseId = created.id;
+      }
+
+      const pricing: any = {};
+      if (form.weekly) pricing.weekly = parseFloat(form.weekly);
+      if (form.monthly) pricing.monthly = parseFloat(form.monthly);
+
+      const { error: insErr } = await supabase.from("ad_spaces").insert({
+        publisher_id: houseId,
+        title: form.title.trim(),
+        location: form.location.trim(),
+        media_type: form.media_type,
+        approval_status: "approved",
+        availability_status: "available",
+        approved_at: new Date().toISOString(),
+        pricing,
+        specifications: specs,
+      } as any);
+      if (insErr) throw insErr;
+
+      toast.success("Inventory added");
+      setAddOpen(false);
+      setForm({ title: "", location: "", media_type: "OOH", weekly: "", monthly: "", specifications: "" });
+      await loadInventory();
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e.message || "Failed to add inventory");
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   const totals = useMemo(() => {
     const by = (mt: string) => spaces.filter((s) => String(s.media_type).toUpperCase() === mt).length;
@@ -164,9 +250,14 @@ export default function AdminTotalInventory() {
               </p>
             </div>
           </div>
-          <Button onClick={exportCSV} disabled={!filtered.length}>
-            <Download className="w-4 h-4 mr-2" /> Export CSV
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setAddOpen(true)} className="bg-green-600 hover:bg-green-700 text-white">
+              <Plus className="w-4 h-4 mr-2" /> Add Inventory
+            </Button>
+            <Button onClick={exportCSV} disabled={!filtered.length} variant="outline">
+              <Download className="w-4 h-4 mr-2" /> Export CSV
+            </Button>
+          </div>
         </div>
 
         {queryError && (
@@ -312,7 +403,14 @@ export default function AdminTotalInventory() {
                             onClick={() => setSelected(s)}
                             className="cursor-pointer hover:bg-muted/50 transition-colors"
                           >
-                            <TableCell className="font-medium max-w-[200px] truncate">{s.title}</TableCell>
+                            <TableCell className="font-medium max-w-[220px] truncate">
+                              <div className="flex items-center gap-2">
+                                <span className="truncate">{s.title}</span>
+                                {s.publisher_profiles?.is_house_account && (
+                                  <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-primary/20 shrink-0">TrioTag</Badge>
+                                )}
+                              </div>
+                            </TableCell>
                             <TableCell className="max-w-[220px] truncate text-muted-foreground">{s.location || "—"}</TableCell>
                             <TableCell><Badge className={formatBadge(mt)}>{mt || "—"}</Badge></TableCell>
                             <TableCell>
@@ -320,7 +418,14 @@ export default function AdminTotalInventory() {
                                 {s.availability_status || "unknown"}
                               </Badge>
                             </TableCell>
-                            <TableCell className="max-w-[160px] truncate">{s.publisher_profiles?.business_name || "—"}</TableCell>
+                            <TableCell className="max-w-[160px] truncate">
+                              {s.publisher_profiles?.is_house_account ? (
+                                <span className="inline-flex items-center gap-1">
+                                  {s.publisher_profiles?.business_name || "TrioTag"}
+                                  <Badge variant="outline" className="text-[10px] px-1 py-0">House</Badge>
+                                </span>
+                              ) : (s.publisher_profiles?.business_name || "—")}
+                            </TableCell>
                             <TableCell>{fmtPHP(s.monthly_subscription_fee)}</TableCell>
                             <TableCell>{fmtPHP(s.activation_fee)}</TableCell>
                             <TableCell>
@@ -429,6 +534,63 @@ export default function AdminTotalInventory() {
 
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setSelected(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Inventory dialog */}
+      <Dialog open={addOpen} onOpenChange={(o) => !saving && setAddOpen(o)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add TrioTag Inventory</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Title *</Label>
+              <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} maxLength={200} />
+            </div>
+            <div>
+              <Label>Location *</Label>
+              <Input value={form.location} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} maxLength={300} />
+            </div>
+            <div>
+              <Label>Format *</Label>
+              <Select value={form.media_type} onValueChange={(v: MediaType) => setForm((f) => ({ ...f, media_type: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="OOH">OOH</SelectItem>
+                  <SelectItem value="DOOH">DOOH</SelectItem>
+                  <SelectItem value="AOOH">AOOH</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Weekly Price (₱)</Label>
+                <Input type="number" min="0" value={form.weekly} onChange={(e) => setForm((f) => ({ ...f, weekly: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Monthly Price (₱)</Label>
+                <Input type="number" min="0" value={form.monthly} onChange={(e) => setForm((f) => ({ ...f, monthly: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>Specifications (JSON)</Label>
+              <Textarea
+                rows={5}
+                placeholder='{"venue_type":"mall","dimensions":"3x2m"}'
+                value={form.specifications}
+                onChange={(e) => setForm((f) => ({ ...f, specifications: e.target.value }))}
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Optional. Must be valid JSON if provided.</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)} disabled={saving}>Cancel</Button>
+            <Button onClick={handleAdd} disabled={saving} className="bg-green-600 hover:bg-green-700 text-white">
+              {saving ? "Adding..." : "Add Inventory"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
