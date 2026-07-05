@@ -17,7 +17,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Network, Plus, Search, Pencil, Archive } from "lucide-react";
+import { Network, Plus, Search, Pencil, Archive, Upload, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Row = {
