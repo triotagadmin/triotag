@@ -322,7 +322,16 @@ export default function AdvertiserExplore() {
                 { title: "DOOH", desc: "Digital Out-of-Home screens with dynamic, scheduled creative.", media: doohVideo.url, isVideo: true },
                 { title: "AOOH", desc: "Ambient Out-of-Home reaching audiences through ambiance.", media: aoohVideo.url, isVideo: true },
               ].map((c) => (
-                <div key={c.title} className="rounded-2xl overflow-hidden border border-green-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div
+                  key={c.title}
+                  onClick={() => {
+                    document.getElementById("choose-ad-formats")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    setWizardStep(1);
+                    setChosenFormat(null);
+                    setSelections({});
+                  }}
+                  className="rounded-2xl overflow-hidden border border-green-100 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                >
                   <div className="aspect-video bg-black">
                     {c.isVideo ? (
                       <video
@@ -429,7 +438,7 @@ export default function AdvertiserExplore() {
               <div className="lg:col-span-2">
                 <div className="lg:sticky lg:top-6 space-y-5">
                   {/* Format selector — 3-step wizard */}
-                  <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                  <div id="choose-ad-formats" className="bg-white border border-gray-200 rounded-2xl p-6">
                     <h3 className="text-base font-bold text-gray-900 mb-1">Choose Your Ad Formats</h3>
                     <p className="text-xs text-gray-500 mb-4">Pick the formats and quantities for your campaign.</p>
 
