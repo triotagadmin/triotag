@@ -53,9 +53,26 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
 
-  // Step 2
-  const [envSearch, setEnvSearch] = useState("");
-  const [selectedEnvs, setSelectedEnvs] = useState<string[]>([]);
+  // Step 2 - inventory browser
+  const [invSearch, setInvSearch] = useState("");
+  const [mediaFilter, setMediaFilter] = useState<"ALL" | MediaType>("ALL");
+  const [selectedAdSpaceIds, setSelectedAdSpaceIds] = useState<string[]>([]);
+  const [adSpaces, setAdSpaces] = useState<AdSpaceRow[]>([]);
+  const [loadingInv, setLoadingInv] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      setLoadingInv(true);
+      const { data, error } = await supabase
+        .from("ad_spaces")
+        .select("id,title,location,media_type,pricing,monthly_subscription_fee")
+        .eq("approval_status", "approved")
+        .order("created_at", { ascending: false });
+      if (!error) setAdSpaces((data || []) as AdSpaceRow[]);
+      setLoadingInv(false);
+    })();
+  }, [open]);
 
   // Step 3
   const [ageMin, setAgeMin] = useState("18");
@@ -66,25 +83,42 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
   // Step 4
   const [notes, setNotes] = useState("");
 
-  const filteredEnvs = useMemo(
-    () => ENVIRONMENTS.filter((e) => e.toLowerCase().includes(envSearch.toLowerCase())),
-    [envSearch]
-  );
+  const filteredInventory = useMemo(() => {
+    const q = invSearch.trim().toLowerCase();
+    return adSpaces.filter((s) => {
+      const mt = String(s.media_type || "").toUpperCase();
+      if (mediaFilter !== "ALL" && mt !== mediaFilter) return false;
+      if (q) {
+        const hay = `${s.title || ""} ${s.location || ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [adSpaces, invSearch, mediaFilter]);
+
+  const selectedEnvs = useMemo(() => {
+    const set = new Set<string>();
+    adSpaces.forEach((s) => {
+      if (selectedAdSpaceIds.includes(s.id)) set.add(String(s.media_type || "").toUpperCase());
+    });
+    return Array.from(set);
+  }, [adSpaces, selectedAdSpaceIds]);
 
   const reset = () => {
     setStep(1); setCampaignName(""); setBudget(""); setStartDate(undefined); setEndDate(undefined);
-    setEnvSearch(""); setSelectedEnvs([]); setAgeMin("18"); setAgeMax("65"); setGender("All");
+    setInvSearch(""); setMediaFilter("ALL"); setSelectedAdSpaceIds([]);
+    setAgeMin("18"); setAgeMax("65"); setGender("All");
     setCreativeFormat("Image"); setNotes("");
   };
 
   const close = () => { onOpenChange(false); setTimeout(reset, 200); };
 
-  const toggleEnv = (env: string) => {
-    setSelectedEnvs((p) => p.includes(env) ? p.filter(e => e !== env) : [...p, env]);
+  const toggleAdSpace = (id: string) => {
+    setSelectedAdSpaceIds((p) => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   };
 
   const canNext1 = campaignName.trim() && Number(budget) > 0 && startDate && endDate;
-  const canNext2 = selectedEnvs.length > 0;
+  const canNext2 = selectedAdSpaceIds.length > 0;
 
   const submit = async () => {
     setSubmitting(true);
