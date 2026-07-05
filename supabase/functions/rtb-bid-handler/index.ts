@@ -128,7 +128,15 @@ async function resolveCampaignCandidates(
     .from("campaign_ad_space_targets")
     .select(
       `campaign_id,
-       brand_campaigns!inner(id, status, budget)`,
+       brand_campaigns!inner(
+         id,
+         status,
+         budget,
+         creative_set_id,
+         brand_advertiser_id,
+         brand_creative_sets:creative_set_id(id, file_url),
+         brand_advertiser_profiles:brand_advertiser_id(id, website_domain)
+       )`,
     )
     .eq("ad_space_id", adSpace.id)
     .eq("brand_campaigns.status", "approved");
@@ -160,22 +168,47 @@ async function resolveCampaignCandidates(
     }
   }
 
+  const candidates: CampaignCandidate[] = [];
+
   // deno-lint-ignore no-explicit-any
-  const candidates: CampaignCandidate[] = targets.map((t: any): CampaignCandidate => {
-    const budget = Number(t.brand_campaigns?.budget ?? 0);
+  for (const t of targets as any[]) {
+    const bc = t.brand_campaigns;
+    const creativeSet = bc?.brand_creative_sets;
+    const advertiser = bc?.brand_advertiser_profiles;
+
+    // Skip campaigns without an attached creative — we can't bid a blank ad.
+    if (!bc?.creative_set_id || !creativeSet?.file_url) {
+      console.info(
+        `Skipping campaign ${t.campaign_id} for ad_space ${adSpace.id}: campaign has no creative attached`,
+      );
+      continue;
+    }
+
+    const websiteDomain = advertiser?.website_domain;
+    if (!websiteDomain) {
+      // adomain is required by most exchanges for brand safety; without it
+      // the bid would be rejected downstream anyway.
+      console.info(
+        `Skipping campaign ${t.campaign_id} for ad_space ${adSpace.id}: advertiser has no website_domain set`,
+      );
+      continue;
+    }
+
+    const budget = Number(bc?.budget ?? 0);
     const spent = spendByCampaign.get(t.campaign_id) ?? 0;
-    return {
+
+    candidates.push({
       campaignId: t.campaign_id,
       allocationId: `${t.campaign_id}-${adSpace.id}`,
-      creativeId: t.campaign_id, // TODO: replace with real brand_creative_sets.id once linkage exists
-      creativeUrl: "", // TODO: join brand_creative_sets.file_url once that linkage exists
-      advertiserDomain: [], // TODO: populate from brand_advertiser_profiles once a domain field exists
+      creativeId: creativeSet.id,
+      creativeUrl: creativeSet.file_url,
+      advertiserDomain: [websiteDomain],
       bidPriceCpm: listedCpm,
       remainingBudget: Math.max(budget - spent, 0),
       minSpotSeconds: adSpace.specifications?.min_spot_seconds,
       maxSpotSeconds: adSpace.specifications?.max_spot_seconds,
-    };
-  });
+    });
+  }
 
   return { adSpaceId: adSpace.id, candidates };
 }
