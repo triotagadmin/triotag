@@ -50,9 +50,42 @@ export default function AdminTotalInventory() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<any | null>(null);
   const [queryError, setQueryError] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    title: "",
+    location: "",
+    media_type: "OOH" as MediaType,
+    weekly: "",
+    monthly: "",
+    specifications: "",
+  });
 
-  useEffect(() => {
-    (async () => {
+  const loadInventory = async () => {
+    setLoading(true);
+    setQueryError(null);
+    const { data, error } = await supabase
+      .from("ad_spaces")
+      .select(`
+        id, title, location, media_type, approval_status, availability_status,
+        monthly_subscription_fee, activation_fee, created_at, approved_at,
+        publisher_id,
+        publisher_profiles (
+          business_name, contact_email, user_id, is_house_account
+        )
+      `)
+      .eq("approval_status", "approved")
+      .order("approved_at", { ascending: false });
+
+    if (error) {
+      console.error("[AdminTotalInventory] Query error:", error.message);
+      setQueryError(error.message);
+    }
+    setSpaces(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { loadInventory(); }, []);
       setLoading(true);
       setQueryError(null);
       const { data, error } = await supabase
