@@ -85,31 +85,61 @@ const RetailerDashboard = () => {
 
     const [dPlaysRes, aPlaysRes, creativesRes, payoutRes, activationsRes] = await Promise.all([
       ids.length
-        ? supabase.from("dooh_play_logs").select("id", { count: "exact", head: true }).in("ad_space_id", ids).gte("played_at", today.toISOString())
-        : Promise.resolve({ count: 0 } as any),
+        ? supabase.from("dooh_play_logs").select("ad_space_id").in("ad_space_id", ids).gte("played_at", today.toISOString())
+        : Promise.resolve({ data: [] } as any),
       ids.length
-        ? supabase.from("aooh_play_logs").select("id", { count: "exact", head: true }).in("ad_space_id", ids).gte("played_at", today.toISOString())
-        : Promise.resolve({ count: 0 } as any),
+        ? supabase.from("aooh_play_logs").select("ad_space_id").in("ad_space_id", ids).gte("played_at", today.toISOString())
+        : Promise.resolve({ data: [] } as any),
       supabase.from("retailer_creatives").select("id", { count: "exact", head: true }).eq("publisher_id", pub.id).eq("status", "active"),
       supabase.from("retailer_payout_details").select("revenue_share_pct").eq("publisher_id", pub.id).maybeSingle(),
       ids.length
-        ? supabase.from("activations").select("total_amount, created_at").in("ad_space_id", ids).in("status", ["approved", "completed", "printing"] as any)
+        ? supabase.from("activations").select("ad_space_id, total_amount, created_at, start_date, end_date, status").in("ad_space_id", ids).in("status", ["approved", "completed", "printing"] as any)
         : Promise.resolve({ data: [] } as any),
     ]);
 
     const payout = (payoutRes as any).data;
     const sharePct = payout ? Number(payout.revenue_share_pct || 0) : 0;
-    const thisMonthActivations = ((activationsRes as any).data || []).filter((b: any) => {
+
+    const allActivations = ((activationsRes as any).data || []) as any[];
+    const thisMonthActivations = allActivations.filter((b: any) => {
       const d = new Date(b.created_at);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     });
     const revenueMonth = thisMonthActivations.reduce((s: number, b: any) => s + Number(b.total_amount || 0) * (sharePct / 100), 0);
 
+    // Per-space stats
+    const todayStr = today.toISOString().slice(0, 10);
+    const perSpace: Record<string, { active: number; plays: number; revenue: number }> = {};
+    for (const id of ids) perSpace[id] = { active: 0, plays: 0, revenue: 0 };
+
+    for (const b of allActivations) {
+      if (!b.ad_space_id || !perSpace[b.ad_space_id]) continue;
+      // active: running today
+      const start = b.start_date ? String(b.start_date).slice(0, 10) : null;
+      const end = b.end_date ? String(b.end_date).slice(0, 10) : null;
+      const isActive = ["approved", "completed"].includes(b.status) &&
+        (!start || start <= todayStr) && (!end || end >= todayStr);
+      if (isActive) perSpace[b.ad_space_id].active += 1;
+    }
+    for (const b of thisMonthActivations) {
+      if (!b.ad_space_id || !perSpace[b.ad_space_id]) continue;
+      perSpace[b.ad_space_id].revenue += Number(b.total_amount || 0) * (sharePct / 100);
+    }
+    for (const r of ((dPlaysRes as any).data || []) as any[]) {
+      if (r.ad_space_id && perSpace[r.ad_space_id]) perSpace[r.ad_space_id].plays += 1;
+    }
+    for (const r of ((aPlaysRes as any).data || []) as any[]) {
+      if (r.ad_space_id && perSpace[r.ad_space_id]) perSpace[r.ad_space_id].plays += 1;
+    }
+    setSpaceStats(perSpace);
+
+    const totalPlaysToday = ((dPlaysRes as any).data?.length || 0) + ((aPlaysRes as any).data?.length || 0);
+
     setStats({
       totalSpaces: rows.length,
       approved: rows.filter((s: any) => s.approval_status === "approved").length,
       pending: rows.filter((s: any) => s.approval_status === "pending").length,
-      playsToday: ((dPlaysRes as any).count || 0) + ((aPlaysRes as any).count || 0),
+      playsToday: totalPlaysToday,
       revenueMonth,
       creatives: (creativesRes as any).count || 0,
     });
