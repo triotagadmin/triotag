@@ -250,9 +250,14 @@ export default function AdminTotalInventory() {
               </p>
             </div>
           </div>
-          <Button onClick={exportCSV} disabled={!filtered.length}>
-            <Download className="w-4 h-4 mr-2" /> Export CSV
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setAddOpen(true)} className="bg-green-600 hover:bg-green-700 text-white">
+              <Plus className="w-4 h-4 mr-2" /> Add Inventory
+            </Button>
+            <Button onClick={exportCSV} disabled={!filtered.length} variant="outline">
+              <Download className="w-4 h-4 mr-2" /> Export CSV
+            </Button>
+          </div>
         </div>
 
         {queryError && (
