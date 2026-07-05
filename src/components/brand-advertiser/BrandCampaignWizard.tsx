@@ -129,7 +129,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
     setStep(1); setCampaignName(""); setBudget(""); setStartDate(undefined); setEndDate(undefined);
     setInvSearch(""); setMediaFilter("ALL"); setSelectedAdSpaceIds([]);
     setAgeMin("18"); setAgeMax("65"); setGender("All");
-    setCreativeFormat("Image"); setNotes("");
+    setCreativeFormat("Image"); setCreativeSetId(null); setNotes("");
   };
 
   const close = () => { onOpenChange(false); setTimeout(reset, 200); };
@@ -144,7 +144,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
   const submit = async () => {
     setSubmitting(true);
     try {
-      const { data: created, error } = await supabase.from("brand_campaigns").insert({
+      const { data: created, error } = await (supabase as any).from("brand_campaigns").insert({
         brand_advertiser_id: brandAdvertiserId,
         campaign_name: campaignName,
         budget: Number(budget),
@@ -156,6 +156,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
         target_age_max: Number(ageMax),
         target_gender: gender,
         creative_format: creativeFormat,
+        creative_set_id: creativeSetId,
         notes,
         status: "pending_review",
       }).select("id").single();
