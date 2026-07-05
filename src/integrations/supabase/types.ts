@@ -1230,6 +1230,51 @@ export type Database = {
           },
         ]
       }
+      campaign_spend_ledger: {
+        Row: {
+          ad_space_id: string
+          amount: number
+          bid_id: string
+          campaign_id: string
+          created_at: string
+          event_type: string
+          id: string
+        }
+        Insert: {
+          ad_space_id: string
+          amount: number
+          bid_id: string
+          campaign_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+        }
+        Update: {
+          ad_space_id?: string
+          amount?: number
+          bid_id?: string
+          campaign_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_spend_ledger_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_spend_ledger_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_subscriptions: {
         Row: {
           campaign_id: string
