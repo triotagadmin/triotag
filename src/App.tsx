@@ -159,7 +159,7 @@ const App = () => (
           <Route path="/verify" element={<Verify />} />
           <Route path="/dashboard" element={<Dashboard />} />
           
-          <Route path="/retailer-dashboard" element={<AdvertiserDashboard />} />
+          <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
           <Route path="/advertiser-settings" element={<AdvertiserSettings />} />
           <Route path="/print-partner/dashboard" element={<PrintPartnerDashboard />} />
           <Route path="/print-partner/clients" element={<PrintPartnerDashboard />} />
