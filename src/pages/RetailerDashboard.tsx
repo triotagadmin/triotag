@@ -261,6 +261,33 @@ const RetailerDashboard = () => {
           </Link>
         </div>
 
+        {/* Section Navigation */}
+        <div className="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto">
+          {[
+            { to: "/retailer-dashboard", label: "Dashboard", end: true },
+            { to: "/retailer-dashboard/creatives", label: "Creatives" },
+            { to: "/retailer-dashboard/bookings", label: "Bookings" },
+            { to: "/retailer-dashboard/house-ads", label: "House Ads" },
+            { to: "/retailer-dashboard/screens", label: "Screens" },
+            { to: "/retailer-dashboard/settings", label: "Settings" },
+          ].map((t) => (
+            <NavLink
+              key={t.to}
+              to={t.to}
+              end={t.end as any}
+              className={({ isActive }) =>
+                `px-4 py-2 text-sm font-semibold border-b-2 whitespace-nowrap transition-colors ${
+                  isActive
+                    ? "border-green-500 text-green-600"
+                    : "border-transparent text-zinc-500 hover:text-zinc-900"
+                }`
+              }
+            >
+              {t.label}
+            </NavLink>
+          ))}
+        </div>
+
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
           <StatCard label="Ad Spaces" value={stats.totalSpaces} icon={MapPin} />
