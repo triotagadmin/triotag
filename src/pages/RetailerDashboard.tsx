@@ -50,6 +50,7 @@ const RetailerDashboard = () => {
   const [profile, setProfile] = useState<any>(null);
   const [spaces, setSpaces] = useState<any[]>([]);
   const [stats, setStats] = useState<Stats>({ totalSpaces: 0, approved: 0, pending: 0, playsToday: 0, revenueMonth: 0, creatives: 0 });
+  const [revenueNote, setRevenueNote] = useState<string | null>(null);
   const [form, setForm] = useState({ business_name: "", contact_email: "", contact_phone: "", location: "", description: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -78,9 +79,10 @@ const RetailerDashboard = () => {
     setSpaces(rows);
 
     const ids = rows.map((s: any) => s.id);
+    const now = new Date();
     const today = new Date(); today.setHours(0, 0, 0, 0);
 
-    const [dPlaysRes, aPlaysRes, creativesRes] = await Promise.all([
+    const [dPlaysRes, aPlaysRes, creativesRes, payoutRes, activationsRes] = await Promise.all([
       ids.length
         ? supabase.from("dooh_play_logs").select("id", { count: "exact", head: true }).in("ad_space_id", ids).gte("played_at", today.toISOString())
         : Promise.resolve({ count: 0 } as any),
@@ -88,16 +90,29 @@ const RetailerDashboard = () => {
         ? supabase.from("aooh_play_logs").select("id", { count: "exact", head: true }).in("ad_space_id", ids).gte("played_at", today.toISOString())
         : Promise.resolve({ count: 0 } as any),
       supabase.from("retailer_creatives").select("id", { count: "exact", head: true }).eq("publisher_id", pub.id).eq("status", "active"),
+      supabase.from("retailer_payout_details").select("revenue_share_pct").eq("publisher_id", pub.id).maybeSingle(),
+      ids.length
+        ? supabase.from("activations").select("total_amount, created_at").in("ad_space_id", ids).in("status", ["approved", "completed", "printing"] as any)
+        : Promise.resolve({ data: [] } as any),
     ]);
+
+    const payout = (payoutRes as any).data;
+    const sharePct = payout ? Number(payout.revenue_share_pct || 0) : 0;
+    const thisMonthActivations = ((activationsRes as any).data || []).filter((b: any) => {
+      const d = new Date(b.created_at);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const revenueMonth = thisMonthActivations.reduce((s: number, b: any) => s + Number(b.total_amount || 0) * (sharePct / 100), 0);
 
     setStats({
       totalSpaces: rows.length,
       approved: rows.filter((s: any) => s.approval_status === "approved").length,
       pending: rows.filter((s: any) => s.approval_status === "pending").length,
       playsToday: ((dPlaysRes as any).count || 0) + ((aPlaysRes as any).count || 0),
-      revenueMonth: 0,
+      revenueMonth,
       creatives: (creativesRes as any).count || 0,
     });
+    setRevenueNote(payout ? null : "Revenue share not yet configured — contact support");
     setLoading(false);
   };
 
@@ -221,7 +236,7 @@ const RetailerDashboard = () => {
           <StatCard label="Approved" value={stats.approved} icon={ShieldCheck} sub={`${stats.pending} pending`} />
           <StatCard label="Pending Review" value={stats.pending} icon={Radio} />
           <StatCard label="Plays Today" value={stats.playsToday.toLocaleString()} icon={PlayCircle} />
-          <StatCard label="Revenue (Month)" value={`₱${stats.revenueMonth.toLocaleString()}`} icon={Wallet} />
+          <StatCard label="Revenue (Month)" value={`₱${stats.revenueMonth.toLocaleString()}`} icon={Wallet} sub={revenueNote} />
           <StatCard label="Active Creatives" value={stats.creatives} icon={PlayCircle} />
         </div>
 
