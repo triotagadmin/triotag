@@ -537,6 +537,63 @@ export default function AdminTotalInventory() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add Inventory dialog */}
+      <Dialog open={addOpen} onOpenChange={(o) => !saving && setAddOpen(o)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add TrioTag Inventory</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Title *</Label>
+              <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} maxLength={200} />
+            </div>
+            <div>
+              <Label>Location *</Label>
+              <Input value={form.location} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} maxLength={300} />
+            </div>
+            <div>
+              <Label>Format *</Label>
+              <Select value={form.media_type} onValueChange={(v: MediaType) => setForm((f) => ({ ...f, media_type: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="OOH">OOH</SelectItem>
+                  <SelectItem value="DOOH">DOOH</SelectItem>
+                  <SelectItem value="AOOH">AOOH</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Weekly Price (₱)</Label>
+                <Input type="number" min="0" value={form.weekly} onChange={(e) => setForm((f) => ({ ...f, weekly: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Monthly Price (₱)</Label>
+                <Input type="number" min="0" value={form.monthly} onChange={(e) => setForm((f) => ({ ...f, monthly: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>Specifications (JSON)</Label>
+              <Textarea
+                rows={5}
+                placeholder='{"venue_type":"mall","dimensions":"3x2m"}'
+                value={form.specifications}
+                onChange={(e) => setForm((f) => ({ ...f, specifications: e.target.value }))}
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Optional. Must be valid JSON if provided.</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)} disabled={saving}>Cancel</Button>
+            <Button onClick={handleAdd} disabled={saving} className="bg-green-600 hover:bg-green-700 text-white">
+              {saving ? "Adding..." : "Add Inventory"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
