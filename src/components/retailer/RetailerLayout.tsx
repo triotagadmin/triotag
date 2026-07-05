@@ -150,6 +150,7 @@ export const RetailerLayout = ({ children, title }: { children: ReactNode; title
 
   const navItems: Array<{ label: string; to: string; icon: any; badge?: number; pulse?: boolean; badgeColor?: string }> = [
     { label: "Overview", to: "/retailer/dashboard", icon: Home },
+    { label: "My Clients", to: "/retailer/clients", icon: Users },
     { label: "Creative Library", to: "/retailer/creative-library", icon: PlayCircle, badge: counts.creatives },
     { label: "House Ads", to: "/retailer/house-ads", icon: Megaphone, badge: counts.houseAds },
     { label: "Campaigns", to: "/retailer/campaigns", icon: Megaphone },
