@@ -414,23 +414,6 @@ const Auth = () => {
         });
         goAfterAuth("/admin/dashboard");
       } else if (roles?.role === "retailer") {
-        const { data: profile } = await supabase
-          .from("advertiser_profiles")
-          .select("verified")
-          .eq("user_id", session.user.id)
-          .single();
-        
-        if (profile && !profile.verified) {
-          toast({
-            title: "Email not verified",
-            description: "Please verify your email before logging in.",
-            variant: "destructive",
-          });
-          setShowResendVerification(true);
-          setResendEmail(validatedData.email);
-          await supabase.auth.signOut();
-          return;
-        }
         
         try {
           await supabase.functions.invoke("sync-pending-listing-ownership");
