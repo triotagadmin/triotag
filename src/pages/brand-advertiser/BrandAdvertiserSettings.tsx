@@ -96,6 +96,26 @@ export default function BrandAdvertiserSettings() {
                   <Label>Industry</Label>
                   <Input value={profile.industry || ""} onChange={(e) => setProfile({ ...profile, industry: e.target.value })} />
                 </div>
+                <div className="space-y-1.5">
+                  <Label>Website Domain</Label>
+                  <Input
+                    value={profile.website_domain || ""}
+                    onChange={(e) => {
+                      setProfile({ ...profile, website_domain: e.target.value });
+                      setDomainError(null);
+                    }}
+                    onBlur={(e) => setDomainError(validateDomain(e.target.value))}
+                    placeholder="example.com"
+                    aria-invalid={!!domainError}
+                  />
+                  {domainError ? (
+                    <p className="text-xs text-red-600">{domainError}</p>
+                  ) : (
+                    <p className="text-xs text-gray-500">
+                      Just the domain (no https://, no paths). Required by ad exchanges for brand safety review.
+                    </p>
+                  )}
+                </div>
                 <Button onClick={save} disabled={saving} className="bg-green-600 hover:bg-green-700 text-white">
                   {saving ? "Saving..." : "Save Changes"}
                 </Button>
