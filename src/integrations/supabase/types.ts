@@ -197,6 +197,7 @@ export type Database = {
           availability_status: string | null
           created_at: string | null
           description: string | null
+          external_ref_id: string | null
           has_pending_advertiser: boolean | null
           id: string
           latitude: number | null
@@ -225,6 +226,7 @@ export type Database = {
           availability_status?: string | null
           created_at?: string | null
           description?: string | null
+          external_ref_id?: string | null
           has_pending_advertiser?: boolean | null
           id?: string
           latitude?: number | null
@@ -253,6 +255,7 @@ export type Database = {
           availability_status?: string | null
           created_at?: string | null
           description?: string | null
+          external_ref_id?: string | null
           has_pending_advertiser?: boolean | null
           id?: string
           latitude?: number | null
@@ -1858,6 +1861,7 @@ export type Database = {
           contact_info: string | null
           contact_name: string | null
           created_at: string
+          external_ref_id: string | null
           id: string
           latitude: number | null
           location: string | null
@@ -1879,6 +1883,7 @@ export type Database = {
           contact_info?: string | null
           contact_name?: string | null
           created_at?: string
+          external_ref_id?: string | null
           id?: string
           latitude?: number | null
           location?: string | null
@@ -1900,6 +1905,7 @@ export type Database = {
           contact_info?: string | null
           contact_name?: string | null
           created_at?: string
+          external_ref_id?: string | null
           id?: string
           latitude?: number | null
           location?: string | null
