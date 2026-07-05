@@ -43,6 +43,7 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/admin/media-plans", label: "Media Plans", icon: ClipboardList },
     { to: "/admin/total-inventory", label: "Total Inventory", icon: Package },
+    { to: "/admin/brand-campaigns", label: "Brand Campaigns", icon: Megaphone },
     { to: "/campaigns", label: "All Campaigns", icon: Megaphone },
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
