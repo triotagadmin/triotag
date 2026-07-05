@@ -195,6 +195,85 @@ export default function AdminExternalInventory() {
     load();
   };
 
+  const [publishingId, setPublishingId] = useState<string | null>(null);
+
+  const publish = async (r: Row) => {
+    if (r.published_ad_space_id) return;
+    setPublishingId(r.id);
+    try {
+      // 1. Find or create external-source publisher_profiles row
+      const { data: existing, error: pErr } = await (supabase as any)
+        .from("publisher_profiles")
+        .select("id")
+        .eq("is_external_source", true)
+        .eq("external_source_name", r.supply_source)
+        .maybeSingle();
+      if (pErr) throw pErr;
+
+      let publisherId = existing?.id as string | undefined;
+      if (!publisherId) {
+        const isEmail = r.contact_info && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.contact_info);
+        const { data: created, error: cErr } = await (supabase as any)
+          .from("publisher_profiles")
+          .insert({
+            user_id: null,
+            business_name: r.supply_source,
+            contact_email: isEmail ? r.contact_info : "tinystickyads@gmail.com",
+            publisher_type: "digital",
+            verification_status: "approved",
+            verified: true,
+            is_external_source: true,
+            external_source_name: r.supply_source,
+          })
+          .select("id")
+          .single();
+        if (cErr) throw cErr;
+        publisherId = created.id;
+      }
+
+      // 2. Create ad_spaces row
+      const pricing = r.base_cpm != null ? { cpm: Number(r.base_cpm), currency: "PHP" } : {};
+      const specifications: Record<string, any> = {};
+      if (r.min_spot_seconds != null) specifications.min_spot_seconds = r.min_spot_seconds;
+      if (r.max_spot_seconds != null) specifications.max_spot_seconds = r.max_spot_seconds;
+      if (r.screen_count != null) specifications.screen_count = r.screen_count;
+      if (r.notes) specifications.notes = r.notes;
+
+      const { data: adSpace, error: aErr } = await (supabase as any)
+        .from("ad_spaces")
+        .insert({
+          publisher_id: publisherId,
+          title: r.venue_name,
+          location: r.location,
+          latitude: r.latitude,
+          longitude: r.longitude,
+          approval_status: "approved",
+          availability_status: "available",
+          ad_format: r.media_type,
+          media_type: r.media_type.toUpperCase(),
+          pricing,
+          specifications,
+        })
+        .select("id")
+        .single();
+      if (aErr) throw aErr;
+
+      // 3. Link back
+      const { error: uErr } = await (supabase as any)
+        .from("external_inventory")
+        .update({ published_ad_space_id: adSpace.id })
+        .eq("id", r.id);
+      if (uErr) throw uErr;
+
+      toast.success("Published to marketplace");
+      await load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to publish");
+    } finally {
+      setPublishingId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
