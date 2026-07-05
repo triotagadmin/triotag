@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ const RetailerDashboard = () => {
   const [profile, setProfile] = useState<any>(null);
   const [spaces, setSpaces] = useState<any[]>([]);
   const [stats, setStats] = useState<Stats>({ totalSpaces: 0, approved: 0, pending: 0, playsToday: 0, revenueMonth: 0, creatives: 0 });
+  const [spaceStats, setSpaceStats] = useState<Record<string, { active: number; plays: number; revenue: number }>>({});
   const [revenueNote, setRevenueNote] = useState<string | null>(null);
   const [form, setForm] = useState({ business_name: "", contact_email: "", contact_phone: "", location: "", description: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -84,31 +85,61 @@ const RetailerDashboard = () => {
 
     const [dPlaysRes, aPlaysRes, creativesRes, payoutRes, activationsRes] = await Promise.all([
       ids.length
-        ? supabase.from("dooh_play_logs").select("id", { count: "exact", head: true }).in("ad_space_id", ids).gte("played_at", today.toISOString())
-        : Promise.resolve({ count: 0 } as any),
+        ? supabase.from("dooh_play_logs").select("ad_space_id").in("ad_space_id", ids).gte("played_at", today.toISOString())
+        : Promise.resolve({ data: [] } as any),
       ids.length
-        ? supabase.from("aooh_play_logs").select("id", { count: "exact", head: true }).in("ad_space_id", ids).gte("played_at", today.toISOString())
-        : Promise.resolve({ count: 0 } as any),
+        ? supabase.from("aooh_play_logs").select("ad_space_id").in("ad_space_id", ids).gte("played_at", today.toISOString())
+        : Promise.resolve({ data: [] } as any),
       supabase.from("retailer_creatives").select("id", { count: "exact", head: true }).eq("publisher_id", pub.id).eq("status", "active"),
       supabase.from("retailer_payout_details").select("revenue_share_pct").eq("publisher_id", pub.id).maybeSingle(),
       ids.length
-        ? supabase.from("activations").select("total_amount, created_at").in("ad_space_id", ids).in("status", ["approved", "completed", "printing"] as any)
+        ? supabase.from("activations").select("ad_space_id, total_amount, created_at, start_date, end_date, status").in("ad_space_id", ids).in("status", ["approved", "completed", "printing"] as any)
         : Promise.resolve({ data: [] } as any),
     ]);
 
     const payout = (payoutRes as any).data;
     const sharePct = payout ? Number(payout.revenue_share_pct || 0) : 0;
-    const thisMonthActivations = ((activationsRes as any).data || []).filter((b: any) => {
+
+    const allActivations = ((activationsRes as any).data || []) as any[];
+    const thisMonthActivations = allActivations.filter((b: any) => {
       const d = new Date(b.created_at);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     });
     const revenueMonth = thisMonthActivations.reduce((s: number, b: any) => s + Number(b.total_amount || 0) * (sharePct / 100), 0);
 
+    // Per-space stats
+    const todayStr = today.toISOString().slice(0, 10);
+    const perSpace: Record<string, { active: number; plays: number; revenue: number }> = {};
+    for (const id of ids) perSpace[id] = { active: 0, plays: 0, revenue: 0 };
+
+    for (const b of allActivations) {
+      if (!b.ad_space_id || !perSpace[b.ad_space_id]) continue;
+      // active: running today
+      const start = b.start_date ? String(b.start_date).slice(0, 10) : null;
+      const end = b.end_date ? String(b.end_date).slice(0, 10) : null;
+      const isActive = ["approved", "completed"].includes(b.status) &&
+        (!start || start <= todayStr) && (!end || end >= todayStr);
+      if (isActive) perSpace[b.ad_space_id].active += 1;
+    }
+    for (const b of thisMonthActivations) {
+      if (!b.ad_space_id || !perSpace[b.ad_space_id]) continue;
+      perSpace[b.ad_space_id].revenue += Number(b.total_amount || 0) * (sharePct / 100);
+    }
+    for (const r of ((dPlaysRes as any).data || []) as any[]) {
+      if (r.ad_space_id && perSpace[r.ad_space_id]) perSpace[r.ad_space_id].plays += 1;
+    }
+    for (const r of ((aPlaysRes as any).data || []) as any[]) {
+      if (r.ad_space_id && perSpace[r.ad_space_id]) perSpace[r.ad_space_id].plays += 1;
+    }
+    setSpaceStats(perSpace);
+
+    const totalPlaysToday = ((dPlaysRes as any).data?.length || 0) + ((aPlaysRes as any).data?.length || 0);
+
     setStats({
       totalSpaces: rows.length,
       approved: rows.filter((s: any) => s.approval_status === "approved").length,
       pending: rows.filter((s: any) => s.approval_status === "pending").length,
-      playsToday: ((dPlaysRes as any).count || 0) + ((aPlaysRes as any).count || 0),
+      playsToday: totalPlaysToday,
       revenueMonth,
       creatives: (creativesRes as any).count || 0,
     });
@@ -230,6 +261,33 @@ const RetailerDashboard = () => {
           </Link>
         </div>
 
+        {/* Section Navigation */}
+        <div className="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto">
+          {[
+            { to: "/retailer-dashboard", label: "Dashboard", end: true },
+            { to: "/retailer-dashboard/creatives", label: "Creatives" },
+            { to: "/retailer-dashboard/bookings", label: "Bookings" },
+            { to: "/retailer-dashboard/house-ads", label: "House Ads" },
+            { to: "/retailer-dashboard/screens", label: "Screens" },
+            { to: "/retailer-dashboard/settings", label: "Settings" },
+          ].map((t) => (
+            <NavLink
+              key={t.to}
+              to={t.to}
+              end={t.end as any}
+              className={({ isActive }) =>
+                `px-4 py-2 text-sm font-semibold border-b-2 whitespace-nowrap transition-colors ${
+                  isActive
+                    ? "border-green-500 text-green-600"
+                    : "border-transparent text-zinc-500 hover:text-zinc-900"
+                }`
+              }
+            >
+              {t.label}
+            </NavLink>
+          ))}
+        </div>
+
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
           <StatCard label="Ad Spaces" value={stats.totalSpaces} icon={MapPin} />
@@ -277,12 +335,12 @@ const RetailerDashboard = () => {
                   <h3 className="font-bold text-zinc-900 truncate">{s.title}</h3>
                   <p className="text-xs text-zinc-500 truncate mb-3">{s.location}</p>
                   <div className="grid grid-cols-3 gap-2 text-center mb-3">
-                    <div><div className="text-xs text-zinc-500">Active</div><div className="font-bold text-green-600">0</div></div>
-                    <div><div className="text-xs text-zinc-500">Plays</div><div className="font-bold text-green-600">0</div></div>
-                    <div><div className="text-xs text-zinc-500">₱ Month</div><div className="font-bold text-green-600">0</div></div>
+                    <div><div className="text-xs text-zinc-500">Active</div><div className="font-bold text-green-600">{spaceStats[s.id]?.active || 0}</div></div>
+                    <div><div className="text-xs text-zinc-500">Plays</div><div className="font-bold text-green-600">{(spaceStats[s.id]?.plays || 0).toLocaleString()}</div></div>
+                    <div><div className="text-xs text-zinc-500">₱ Month</div><div className="font-bold text-green-600">{Math.round(spaceStats[s.id]?.revenue || 0).toLocaleString()}</div></div>
                   </div>
-                  <Link to={`/venue/${s.id}`}>
-                    <Button variant="outline" size="sm" className="w-full border-green-500 text-green-600 hover:bg-green-50">View Details</Button>
+                  <Link to={`/retailer-dashboard/creatives?space=${s.id}`}>
+                    <Button variant="outline" size="sm" className="w-full border-green-500 text-green-600 hover:bg-green-50">Manage</Button>
                   </Link>
                 </div>
               ))}
