@@ -1,0 +1,2 @@
+ALTER TABLE public.brand_campaigns ADD COLUMN IF NOT EXISTS creative_set_id uuid REFERENCES public.brand_creative_sets(id) ON DELETE SET NULL;
+ALTER TABLE public.brand_advertiser_profiles ADD COLUMN IF NOT EXISTS website_domain text;

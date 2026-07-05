@@ -11,8 +11,22 @@ export default function BrandAdvertiserSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<any>({
-    company_name: "", contact_name: "", contact_phone: "", industry: "",
+    company_name: "", contact_name: "", contact_phone: "", industry: "", website_domain: "",
   });
+  const [domainError, setDomainError] = useState<string | null>(null);
+
+  const validateDomain = (v: string): string | null => {
+    const trimmed = v.trim();
+    if (!trimmed) return null; // optional
+    if (/^https?:\/\//i.test(trimmed) || trimmed.includes("/")) {
+      return "Enter just the domain (e.g. example.com), not a full URL.";
+    }
+    // Basic domain regex: labels separated by dots, TLD 2+ chars
+    if (!/^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(trimmed)) {
+      return "Enter a valid domain like example.com.";
+    }
+    return null;
+  };
 
   useEffect(() => {
     (async () => {
@@ -29,10 +43,16 @@ export default function BrandAdvertiserSettings() {
   }, []);
 
   const save = async () => {
+    const err = validateDomain(profile.website_domain || "");
+    setDomainError(err);
+    if (err) {
+      toast({ title: "Invalid website domain", description: err, variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) { setSaving(false); return; }
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("brand_advertiser_profiles")
       .upsert({
         user_id: session.user.id,
@@ -40,6 +60,7 @@ export default function BrandAdvertiserSettings() {
         contact_name: profile.contact_name,
         contact_phone: profile.contact_phone,
         industry: profile.industry,
+        website_domain: (profile.website_domain || "").trim() || null,
         contact_email: session.user.email,
       }, { onConflict: "user_id" });
     setSaving(false);
@@ -74,6 +95,26 @@ export default function BrandAdvertiserSettings() {
                 <div className="space-y-1.5">
                   <Label>Industry</Label>
                   <Input value={profile.industry || ""} onChange={(e) => setProfile({ ...profile, industry: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Website Domain</Label>
+                  <Input
+                    value={profile.website_domain || ""}
+                    onChange={(e) => {
+                      setProfile({ ...profile, website_domain: e.target.value });
+                      setDomainError(null);
+                    }}
+                    onBlur={(e) => setDomainError(validateDomain(e.target.value))}
+                    placeholder="example.com"
+                    aria-invalid={!!domainError}
+                  />
+                  {domainError ? (
+                    <p className="text-xs text-red-600">{domainError}</p>
+                  ) : (
+                    <p className="text-xs text-gray-500">
+                      Just the domain (no https://, no paths). Required by ad exchanges for brand safety review.
+                    </p>
+                  )}
                 </div>
                 <Button onClick={save} disabled={saving} className="bg-green-600 hover:bg-green-700 text-white">
                   {saving ? "Saving..." : "Save Changes"}

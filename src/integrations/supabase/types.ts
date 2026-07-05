@@ -1007,6 +1007,7 @@ export type Database = {
           updated_at: string | null
           user_id: string
           verified: boolean | null
+          website_domain: string | null
         }
         Insert: {
           company_name?: string | null
@@ -1019,6 +1020,7 @@ export type Database = {
           updated_at?: string | null
           user_id: string
           verified?: boolean | null
+          website_domain?: string | null
         }
         Update: {
           company_name?: string | null
@@ -1031,6 +1033,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           verified?: boolean | null
+          website_domain?: string | null
         }
         Relationships: []
       }
@@ -1090,6 +1093,7 @@ export type Database = {
           countries: string[] | null
           created_at: string | null
           creative_format: string | null
+          creative_set_id: string | null
           end_date: string | null
           environments: string[] | null
           id: string
@@ -1109,6 +1113,7 @@ export type Database = {
           countries?: string[] | null
           created_at?: string | null
           creative_format?: string | null
+          creative_set_id?: string | null
           end_date?: string | null
           environments?: string[] | null
           id?: string
@@ -1128,6 +1133,7 @@ export type Database = {
           countries?: string[] | null
           created_at?: string | null
           creative_format?: string | null
+          creative_set_id?: string | null
           end_date?: string | null
           environments?: string[] | null
           id?: string
@@ -1146,6 +1152,13 @@ export type Database = {
             columns: ["brand_advertiser_id"]
             isOneToOne: false
             referencedRelation: "brand_advertiser_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_campaigns_creative_set_id_fkey"
+            columns: ["creative_set_id"]
+            isOneToOne: false
+            referencedRelation: "brand_creative_sets"
             referencedColumns: ["id"]
           },
         ]
