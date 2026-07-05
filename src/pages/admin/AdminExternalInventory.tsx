@@ -37,6 +37,7 @@ type Row = {
   contact_info: string | null;
   status: "active" | "inactive" | "pending_verification";
   created_at: string;
+  published_ad_space_id: string | null;
 };
 
 const emptyForm = {
