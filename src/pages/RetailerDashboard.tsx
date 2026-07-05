@@ -335,12 +335,12 @@ const RetailerDashboard = () => {
                   <h3 className="font-bold text-zinc-900 truncate">{s.title}</h3>
                   <p className="text-xs text-zinc-500 truncate mb-3">{s.location}</p>
                   <div className="grid grid-cols-3 gap-2 text-center mb-3">
-                    <div><div className="text-xs text-zinc-500">Active</div><div className="font-bold text-green-600">0</div></div>
-                    <div><div className="text-xs text-zinc-500">Plays</div><div className="font-bold text-green-600">0</div></div>
-                    <div><div className="text-xs text-zinc-500">₱ Month</div><div className="font-bold text-green-600">0</div></div>
+                    <div><div className="text-xs text-zinc-500">Active</div><div className="font-bold text-green-600">{spaceStats[s.id]?.active || 0}</div></div>
+                    <div><div className="text-xs text-zinc-500">Plays</div><div className="font-bold text-green-600">{(spaceStats[s.id]?.plays || 0).toLocaleString()}</div></div>
+                    <div><div className="text-xs text-zinc-500">₱ Month</div><div className="font-bold text-green-600">{Math.round(spaceStats[s.id]?.revenue || 0).toLocaleString()}</div></div>
                   </div>
-                  <Link to={`/venue/${s.id}`}>
-                    <Button variant="outline" size="sm" className="w-full border-green-500 text-green-600 hover:bg-green-50">View Details</Button>
+                  <Link to={`/retailer-dashboard/creatives?space=${s.id}`}>
+                    <Button variant="outline" size="sm" className="w-full border-green-500 text-green-600 hover:bg-green-50">Manage</Button>
                   </Link>
                 </div>
               ))}
