@@ -76,6 +76,12 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
     })();
   }, [open]);
 
+  useEffect(() => {
+    if (open && initialAdSpaceId) {
+      setSelectedAdSpaceIds((prev) => (prev.includes(initialAdSpaceId) ? prev : [...prev, initialAdSpaceId]));
+    }
+  }, [open, initialAdSpaceId]);
+
   // Step 3
   const [ageMin, setAgeMin] = useState("18");
   const [ageMax, setAgeMax] = useState("65");
