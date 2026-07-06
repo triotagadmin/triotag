@@ -76,7 +76,7 @@ export default function BrandAdvertiserSettings() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Brand Advertiser Settings</h1>
         <Card>
-          <CardHeader><CardTitle>Profile</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-gray-900">Profile</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             {loading ? <div className="text-sm text-gray-500">Loading...</div> : (
               <>
