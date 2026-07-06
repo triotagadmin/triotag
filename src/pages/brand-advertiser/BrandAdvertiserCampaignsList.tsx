@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,6 +32,17 @@ export default function BrandAdvertiserCampaignsList() {
   const [dateFrom, setDateFrom] = useState<Date>(subDays(new Date(), 30));
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [wizardOpen, setWizardOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const initialAdSpaceId = (location.state as any)?.adSpaceId ?? null;
+
+  useEffect(() => {
+    if ((location.state as any)?.openWizard) {
+      setWizardOpen(true);
+      navigate(location.pathname, { replace: true, state: { adSpaceId: initialAdSpaceId } });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -187,6 +199,7 @@ export default function BrandAdvertiserCampaignsList() {
           onOpenChange={setWizardOpen}
           brandAdvertiserId={profileId}
           onCreated={fetchData}
+          initialAdSpaceId={initialAdSpaceId}
         />
       )}
     </div>

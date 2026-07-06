@@ -21,6 +21,7 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   brandAdvertiserId: string;
   onCreated?: () => void;
+  initialAdSpaceId?: string | null;
 }
 
 const MEDIA_TYPES = ["OOH", "DOOH", "AOOH"] as const;
@@ -43,7 +44,7 @@ const formatBadge = (mt: string) => {
   return "bg-green-100 text-green-700";
 };
 
-export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertiserId, onCreated }: Props) {
+export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertiserId, onCreated, initialAdSpaceId }: Props) {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -74,6 +75,12 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
       setLoadingInv(false);
     })();
   }, [open]);
+
+  useEffect(() => {
+    if (open && initialAdSpaceId) {
+      setSelectedAdSpaceIds((prev) => (prev.includes(initialAdSpaceId) ? prev : [...prev, initialAdSpaceId]));
+    }
+  }, [open, initialAdSpaceId]);
 
   // Step 3
   const [ageMin, setAgeMin] = useState("18");

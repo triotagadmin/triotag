@@ -126,6 +126,7 @@ import BrandAdvertiserCreatives from "./pages/brand-advertiser/BrandAdvertiserCr
 import BrandAdvertiserAudiences from "./pages/brand-advertiser/BrandAdvertiserAudiences";
 import BrandAdvertiserReports from "./pages/brand-advertiser/BrandAdvertiserReports";
 import BrandAdvertiserChangelog from "./pages/brand-advertiser/BrandAdvertiserChangelog";
+import BrandAdvertiserInventory from "./pages/brand-advertiser/BrandAdvertiserInventory";
 
 const queryClient = new QueryClient();
 
@@ -302,6 +303,7 @@ const App = () => (
           {/* Brand Advertiser portal */}
           <Route path="/brand-advertiser/dashboard" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserDashboard /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/campaigns" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserCampaignsList /></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/inventory" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserInventory /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/creatives" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserCreatives /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/audiences" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserAudiences /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/reports" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserReports /></RoleProtectedRoute>} />
