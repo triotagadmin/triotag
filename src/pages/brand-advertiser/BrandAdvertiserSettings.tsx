@@ -76,28 +76,28 @@ export default function BrandAdvertiserSettings() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Brand Advertiser Settings</h1>
         <Card>
-          <CardHeader><CardTitle>Profile</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-gray-900">Profile</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             {loading ? <div className="text-sm text-gray-500">Loading...</div> : (
               <>
                 <div className="space-y-1.5">
-                  <Label>Company Name</Label>
+                  <Label className="text-gray-700">Company Name</Label>
                   <Input value={profile.company_name || ""} onChange={(e) => setProfile({ ...profile, company_name: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Contact Name</Label>
+                  <Label className="text-gray-700">Contact Name</Label>
                   <Input value={profile.contact_name || ""} onChange={(e) => setProfile({ ...profile, contact_name: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Phone</Label>
+                  <Label className="text-gray-700">Phone</Label>
                   <Input value={profile.contact_phone || ""} onChange={(e) => setProfile({ ...profile, contact_phone: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Industry</Label>
+                  <Label className="text-gray-700">Industry</Label>
                   <Input value={profile.industry || ""} onChange={(e) => setProfile({ ...profile, industry: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Website Domain</Label>
+                  <Label className="text-gray-700">Website Domain</Label>
                   <Input
                     value={profile.website_domain || ""}
                     onChange={(e) => {
