@@ -44,7 +44,7 @@ const formatBadge = (mt: string) => {
   return "bg-green-100 text-green-700";
 };
 
-export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertiserId, onCreated }: Props) {
+export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertiserId, onCreated, initialAdSpaceId }: Props) {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
