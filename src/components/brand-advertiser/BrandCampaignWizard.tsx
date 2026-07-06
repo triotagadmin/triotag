@@ -21,6 +21,7 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   brandAdvertiserId: string;
   onCreated?: () => void;
+  initialAdSpaceId?: string | null;
 }
 
 const MEDIA_TYPES = ["OOH", "DOOH", "AOOH"] as const;
