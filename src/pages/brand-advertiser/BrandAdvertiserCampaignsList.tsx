@@ -199,6 +199,7 @@ export default function BrandAdvertiserCampaignsList() {
           onOpenChange={setWizardOpen}
           brandAdvertiserId={profileId}
           onCreated={fetchData}
+          initialAdSpaceId={initialAdSpaceId}
         />
       )}
     </div>
