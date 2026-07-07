@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
+import { calculateMediaPlanEstimate } from "@/lib/mediaPlanPricing";
 
 // NOTE: ad_spaces registered before the latitude/longitude migration will have
 // null coordinates and won't appear in radius results — this is expected until
@@ -192,6 +193,11 @@ export default function BrandAdvertiserInventory() {
       .sort((a, b) => a.distance - b.distance);
   }, [rows, center.lat, center.lng, radiusMeters]);
 
+  const estimate = useMemo(
+    () => calculateMediaPlanEstimate([], radiusMeters),
+    [radiusMeters]
+  );
+
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -223,13 +229,26 @@ export default function BrandAdvertiserInventory() {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* LEFT: Map + radius planner */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-4">
             <RadiusMapPlanner
               center={center}
               radiusMeters={radiusMeters}
               onCenterChange={setCenter}
               onRadiusChange={setRadiusMeters}
             />
+
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                Coverage Radius — affects campaign reach pricing
+              </div>
+              <div className="text-sm text-gray-700">
+                {estimate.radiusPercent}% coverage ={" "}
+                <span className="font-semibold text-green-700">₱{estimate.radiusFee.toLocaleString()}</span>
+              </div>
+              <div className="text-xs text-gray-500 mt-1.5">
+                5% coverage starts at ₱200,000 · 100% coverage is ₱3,500,000
+              </div>
+            </div>
           </div>
 
           {/* RIGHT: Step-based panel */}
