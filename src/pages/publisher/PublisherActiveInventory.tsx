@@ -43,45 +43,21 @@ export default function PublisherActiveInventory() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { navigate("/auth"); return; }
 
-      const userId = session.user.id;
-
-      const { data: profile } = await supabase
-        .from("publisher_profiles")
-        .select("id, business_name")
-        .eq("user_id", userId)
-        .maybeSingle();
-
       const SELECT_COLS = "id, title, location, media_type, availability_status, approval_status, monthly_subscription_fee, activation_fee, specifications, media_urls, created_at, approved_at, publisher_id, advertiser_id, agent_disconnected";
 
-      // Fetch ad_spaces owned via either publisher_profile or advertiser_id (retailer self-listings)
-      const [pubRes, advRes] = await Promise.all([
-        profile?.id
-          ? supabase
-              .from("ad_spaces")
-              .select(SELECT_COLS)
-              .eq("publisher_id", profile.id)
-              .eq("approval_status", "approved")
-          : Promise.resolve({ data: [] as any[] }),
-        supabase
-          .from("ad_spaces")
-          .select(SELECT_COLS)
-          .eq("advertiser_id", userId)
-          .eq("approval_status", "approved"),
-      ]);
+      // Show all activated inventory across all accounts (retailer + agent)
+      const { data } = await supabase
+        .from("ad_spaces")
+        .select(SELECT_COLS)
+        .eq("approval_status", "approved");
 
-      const merged = [...(pubRes.data || []), ...(advRes.data || [])];
-      const seen = new Set<string>();
-      const unique = merged.filter((s: any) => {
-        if (seen.has(s.id)) return false;
-        seen.add(s.id);
-        // Only include activated inventory (agent_disconnected is false/null)
-        if (s.agent_disconnected === true) return false;
-        return true;
-      }).sort((a: any, b: any) => {
-        const ad = a.approved_at || a.created_at;
-        const bd = b.approved_at || b.created_at;
-        return new Date(bd).getTime() - new Date(ad).getTime();
-      });
+      const unique = (data || [])
+        .filter((s: any) => s.agent_disconnected !== true)
+        .sort((a: any, b: any) => {
+          const ad = a.approved_at || a.created_at;
+          const bd = b.approved_at || b.created_at;
+          return new Date(bd).getTime() - new Date(ad).getTime();
+        });
 
       setSpaces(unique);
       setLoading(false);
