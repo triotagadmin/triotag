@@ -9,9 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { format } from "date-fns";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
+
+const MAX_FILES = 20;
+const MAX_BYTES = 3 * 1024 * 1024;
+const BUCKET = "ad-space-media";
 
 export default function BrandAdvertiserCreatives() {
   const { toast } = useToast();
@@ -24,8 +28,10 @@ export default function BrandAdvertiserCreatives() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [fmt, setFmt] = useState<"image" | "video" | "audio">("image");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -51,34 +57,96 @@ export default function BrandAdvertiserCreatives() {
 
   useEffect(() => { fetchData(); }, []);
 
+  const resetForm = () => {
+    setTitle(""); setFmt("image"); setFiles([]); setFileError(null); setProgress(null);
+  };
+
+  const handleFileSelect = (selected: FileList | null) => {
+    setFileError(null);
+    if (!selected || selected.length === 0) { setFiles([]); return; }
+    const arr = Array.from(selected);
+    if (arr.length > MAX_FILES) {
+      setFileError(`Maximum ${MAX_FILES} photos per folder. You selected ${arr.length}.`);
+      setFiles([]);
+      return;
+    }
+    const oversized = arr.filter((f) => f.size > MAX_BYTES);
+    if (oversized.length > 0) {
+      const msgs = oversized.map((f) => `${f.name} is ${(f.size / 1024 / 1024).toFixed(2)}MB — maximum is 3MB per photo.`);
+      setFileError(msgs.join(" "));
+      setFiles([]);
+      return;
+    }
+    setFiles(arr);
+  };
+
+  const removeFile = (idx: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const handleCreate = async () => {
     if (!profileId || !title.trim()) return;
+    if (files.length === 0) {
+      setFileError("Please select at least 1 photo.");
+      return;
+    }
     setSubmitting(true);
+    setProgress({ done: 0, total: files.length });
     try {
-      let fileUrl: string | null = null;
-      if (file) {
-        const ext = file.name.split(".").pop();
-        const path = `${profileId}/${Date.now()}.${ext}`;
-        const bucket = fmt === "audio" ? "aooh-audio" : "ad-space-media";
-        const { error: upErr } = await supabase.storage.from(bucket).upload(path, file);
+      // 1. Create the set row
+      const { data: setRow, error: setErr } = await supabase
+        .from("brand_creative_sets" as any)
+        .insert({
+          brand_advertiser_id: profileId,
+          title: title.trim(),
+          creative_format: fmt,
+          creative_count: 0,
+        })
+        .select("id")
+        .single();
+      if (setErr) throw setErr;
+      const setId = (setRow as any).id as string;
+
+      // 2. Upload files and insert rows
+      const fileRows: { creative_set_id: string; file_url: string; file_name: string; file_size_bytes: number; sort_order: number }[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${profileId}/${setId}/${i}-${safeName}`;
+        const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, f, { upsert: false });
         if (upErr) throw upErr;
-        const { data: pub } = supabase.storage.from(bucket).getPublicUrl(path);
-        fileUrl = pub.publicUrl;
+        const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
+        fileRows.push({
+          creative_set_id: setId,
+          file_url: pub.publicUrl,
+          file_name: f.name,
+          file_size_bytes: f.size,
+          sort_order: i,
+        });
+        setProgress({ done: i + 1, total: files.length });
       }
-      const { error } = await supabase.from("brand_creative_sets" as any).insert({
-        brand_advertiser_id: profileId,
-        title: title.trim(),
-        creative_format: fmt,
-        creative_count: file ? 1 : 0,
-        file_url: fileUrl,
-      });
-      if (error) throw error;
-      toast({ title: "Creative set added" });
-      setOpen(false); setTitle(""); setFile(null); setFmt("image");
+
+      const { error: filesErr } = await supabase
+        .from("brand_creative_set_files" as any)
+        .insert(fileRows);
+      if (filesErr) throw filesErr;
+
+      // 3. Update set with primary file + count
+      await supabase
+        .from("brand_creative_sets" as any)
+        .update({ file_url: fileRows[0].file_url, creative_count: fileRows.length })
+        .eq("id", setId);
+
+      toast({ title: "Creative folder saved", description: `${fileRows.length} photo${fileRows.length === 1 ? "" : "s"} uploaded.` });
+      setOpen(false);
+      resetForm();
       fetchData();
     } catch (e: any) {
       toast({ title: "Failed", description: e.message, variant: "destructive" });
-    } finally { setSubmitting(false); }
+    } finally {
+      setSubmitting(false);
+      setProgress(null);
+    }
   };
 
   const filtered = sets.filter((s) => (s.title || "").toLowerCase().includes(search.toLowerCase()));
@@ -105,10 +173,10 @@ export default function BrandAdvertiserCreatives() {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
-                <TableHead>Title</TableHead>
+                <TableHead>Folder Name</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Format</TableHead>
-                <TableHead>Creatives</TableHead>
+                <TableHead>Photos</TableHead>
                 <TableHead>Last Updated</TableHead>
               </TableRow>
             </TableHeader>
@@ -129,7 +197,7 @@ export default function BrandAdvertiserCreatives() {
                   <TableCell>
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 capitalize">{s.creative_format}</Badge>
                   </TableCell>
-                  <TableCell>{s.creative_count}</TableCell>
+                  <TableCell>{s.creative_count ?? 0} photo{(s.creative_count ?? 0) === 1 ? "" : "s"}</TableCell>
                   <TableCell className="text-sm text-gray-500">{s.updated_at ? format(new Date(s.updated_at), "MMM d, yyyy") : "—"}</TableCell>
                 </TableRow>
               ))}
@@ -138,12 +206,12 @@ export default function BrandAdvertiserCreatives() {
         </Card>
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
         <DialogContent className="bg-white text-gray-900">
-          <DialogHeader><DialogTitle>Add Creative Set</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Add Creative Folder</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Title *</Label>
+              <Label>Folder Name *</Label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Summer Launch Banners" />
             </div>
             <div className="space-y-1.5">
@@ -158,13 +226,41 @@ export default function BrandAdvertiserCreatives() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>File (optional)</Label>
-              <Input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+              <Label>Photos * (max {MAX_FILES}, up to 3MB each)</Label>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => handleFileSelect(e.target.files)}
+              />
+              {fileError && (
+                <p className="text-sm text-red-600">{fileError}</p>
+              )}
+              {files.length > 0 && (
+                <div className="mt-2 space-y-1 max-h-40 overflow-y-auto border rounded p-2 bg-gray-50">
+                  <p className="text-xs text-gray-600 mb-1">{files.length} file{files.length === 1 ? "" : "s"} selected</p>
+                  {files.map((f, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className="truncate">{f.name} <span className="text-gray-400">({(f.size / 1024 / 1024).toFixed(2)}MB)</span></span>
+                      <button type="button" onClick={() => removeFile(i)} className="text-gray-400 hover:text-red-600 ml-2" disabled={submitting}>
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+            {progress && (
+              <p className="text-sm text-blue-700">Uploading {progress.done} of {progress.total}...</p>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={handleCreate} disabled={submitting || !title.trim()} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={submitting}>Cancel</Button>
+            <Button
+              onClick={handleCreate}
+              disabled={submitting || !title.trim() || files.length === 0 || !!fileError}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               {submitting ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
