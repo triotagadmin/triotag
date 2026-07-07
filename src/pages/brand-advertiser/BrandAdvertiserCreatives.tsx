@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, Eye, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 
@@ -32,6 +33,54 @@ export default function BrandAdvertiserCreatives() {
   const [fileError, setFileError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [viewSet, setViewSet] = useState<any | null>(null);
+  const [viewFiles, setViewFiles] = useState<any[]>([]);
+  const [viewLoading, setViewLoading] = useState(false);
+  const [deleteSet, setDeleteSet] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const openView = async (s: any) => {
+    setViewSet(s);
+    setViewLoading(true);
+    const { data } = await supabase
+      .from("brand_creative_set_files" as any)
+      .select("*")
+      .eq("creative_set_id", s.id)
+      .order("sort_order", { ascending: true });
+    setViewFiles((data as any[]) || []);
+    setViewLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteSet) return;
+    setDeleting(true);
+    try {
+      const { data: fileRows } = await supabase
+        .from("brand_creative_set_files" as any)
+        .select("file_url")
+        .eq("creative_set_id", deleteSet.id);
+      const paths: string[] = ((fileRows as any[]) || [])
+        .map((r) => {
+          const marker = `/${BUCKET}/`;
+          const idx = (r.file_url as string).indexOf(marker);
+          return idx >= 0 ? (r.file_url as string).slice(idx + marker.length) : null;
+        })
+        .filter((p): p is string => !!p);
+      if (paths.length > 0) {
+        await supabase.storage.from(BUCKET).remove(paths);
+      }
+      await supabase.from("brand_creative_set_files" as any).delete().eq("creative_set_id", deleteSet.id);
+      const { error: delErr } = await supabase.from("brand_creative_sets" as any).delete().eq("id", deleteSet.id);
+      if (delErr) throw delErr;
+      toast({ title: "Folder deleted", description: `"${deleteSet.title}" was removed.` });
+      setDeleteSet(null);
+      fetchData();
+    } catch (e: any) {
+      toast({ title: "Delete failed", description: e.message, variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -201,13 +250,14 @@ export default function BrandAdvertiserCreatives() {
                 <TableHead className="text-black">Format</TableHead>
                 <TableHead className="text-black">Photos</TableHead>
                 <TableHead className="text-black">Last Updated</TableHead>
+                <TableHead className="text-black text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-black py-8">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center text-black py-8">Loading...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-black py-8">No creative sets yet</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center text-black py-8">No creative sets yet</TableCell></TableRow>
               ) : filtered.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell className="font-mono text-xs text-black">{String(s.id).slice(0, 8)}</TableCell>
@@ -222,6 +272,16 @@ export default function BrandAdvertiserCreatives() {
                   </TableCell>
                   <TableCell className="text-black">{s.creative_count ?? 0} photo{(s.creative_count ?? 0) === 1 ? "" : "s"}</TableCell>
                   <TableCell className="text-sm text-black">{s.updated_at ? format(new Date(s.updated_at), "MMM d, yyyy") : "—"}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button size="sm" variant="ghost" onClick={() => openView(s)} className="text-black hover:bg-gray-100">
+                        <Eye className="w-4 h-4 mr-1" /> View
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setDeleteSet(s)} className="text-red-600 hover:bg-red-50 hover:text-red-700">
+                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -290,6 +350,55 @@ export default function BrandAdvertiserCreatives() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!viewSet} onOpenChange={(o) => { if (!o) { setViewSet(null); setViewFiles([]); } }}>
+        <DialogContent className="bg-white text-black max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-black">{viewSet?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            {viewLoading ? (
+              <p className="text-sm text-black">Loading...</p>
+            ) : viewFiles.length === 0 ? (
+              <p className="text-sm text-black">No photos in this folder yet.</p>
+            ) : (
+              <>
+                <p className="text-xs text-gray-600 mb-3">{viewFiles.length} photo{viewFiles.length === 1 ? "" : "s"}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto">
+                  {viewFiles.map((f) => (
+                    <a key={f.id} href={f.file_url} target="_blank" rel="noreferrer" className="block group">
+                      <div className="aspect-square rounded border border-gray-200 overflow-hidden bg-gray-100">
+                        <img src={f.file_url} alt={f.file_name} className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" />
+                      </div>
+                      <p className="text-xs text-black mt-1 truncate">{f.file_name}</p>
+                    </a>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setViewSet(null); setViewFiles([]); }} className="text-black">Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteSet} onOpenChange={(o) => { if (!o && !deleting) setDeleteSet(null); }}>
+        <AlertDialogContent className="bg-white text-black">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-black">Delete folder?</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-700">
+              This will permanently delete "{deleteSet?.title}" and all its photos. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting} className="text-black">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-red-600 hover:bg-red-700 text-white">
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
