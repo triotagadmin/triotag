@@ -44,6 +44,8 @@ const VenueDashboard = () => {
         return;
       }
       setUser(session.user);
+      const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).maybeSingle();
+      setUserRole(roleData?.role ?? null);
       const {
         data: profileData,
         error: profileError
