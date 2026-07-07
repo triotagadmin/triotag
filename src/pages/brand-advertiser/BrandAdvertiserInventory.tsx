@@ -174,7 +174,6 @@ export default function BrandAdvertiserInventory() {
           "id,title,location,media_type,pricing,monthly_subscription_fee,latitude,longitude,specifications,publisher_profiles(business_name,is_house_account)"
         )
         .eq("approval_status", "approved")
-        .eq("media_type", chosenFormat)
         .or("agent_disconnected.is.null,agent_disconnected.eq.false")
         .order("created_at", { ascending: false });
       setRows((data || []) as any);
@@ -183,7 +182,15 @@ export default function BrandAdvertiserInventory() {
   }, [chosenFormat]);
 
   const matches = useMemo(() => {
+    if (!chosenFormat) return [];
     return rows
+      .filter((r) => {
+        // Include ad space if its media_type matches, OR if its
+        // specifications.units include the chosen format with count > 0.
+        const units = (r.specifications && r.specifications.units) || null;
+        const unitCount = units ? Number(units[chosenFormat] || 0) : 0;
+        return r.media_type === chosenFormat || unitCount > 0;
+      })
       .filter((r) => r.latitude != null && r.longitude != null)
       .map((r) => ({
         row: r,
@@ -191,7 +198,7 @@ export default function BrandAdvertiserInventory() {
       }))
       .filter((m) => m.distance <= radiusMeters)
       .sort((a, b) => a.distance - b.distance);
-  }, [rows, center.lat, center.lng, radiusMeters]);
+  }, [rows, chosenFormat, center.lat, center.lng, radiusMeters]);
 
   const estimate = useMemo(
     () => calculateMediaPlanEstimate([], radiusMeters),
