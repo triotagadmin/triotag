@@ -25,6 +25,7 @@ const VenueDashboard = () => {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState("");
