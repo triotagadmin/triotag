@@ -68,7 +68,7 @@ const FORMATS: {
   {
     key: "AOOH",
     title: "AOOH",
-    desc: "Ambient Out-of-Home reaching audiences through in-venue audio.",
+    desc: "Ambient Out-of-Home reaching audiences through unique installations.",
     icon: Volume2,
     border: "border-green-300",
     bg: "bg-green-50",
