@@ -32,6 +32,7 @@ export default function BrandAdvertiserCampaignsList() {
   const [dateFrom, setDateFrom] = useState<Date>(subDays(new Date(), 30));
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [editCampaign, setEditCampaign] = useState<any | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const initialAdSpaceId = (location.state as any)?.adSpaceId ?? null;
