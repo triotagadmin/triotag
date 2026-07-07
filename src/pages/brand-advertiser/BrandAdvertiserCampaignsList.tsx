@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Plus, Pencil } from "lucide-react";
 import { format, subDays } from "date-fns";
 import BrandCampaignWizard from "@/components/brand-advertiser/BrandCampaignWizard";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
@@ -32,6 +32,7 @@ export default function BrandAdvertiserCampaignsList() {
   const [dateFrom, setDateFrom] = useState<Date>(subDays(new Date(), 30));
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [editCampaign, setEditCampaign] = useState<any | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const initialAdSpaceId = (location.state as any)?.adSpaceId ?? null;
@@ -83,7 +84,7 @@ export default function BrandAdvertiserCampaignsList() {
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">Campaigns</h1>
-          <Button onClick={() => setWizardOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={() => { setEditCampaign(null); setWizardOpen(true); }} className="bg-blue-600 hover:bg-blue-700 text-white">
             <Plus className="w-4 h-4 mr-2" /> New Campaign
           </Button>
         </div>
@@ -142,13 +143,13 @@ export default function BrandAdvertiserCampaignsList() {
                 <TableHead>ID</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Campaign</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead>Scope</TableHead>
+                <TableHead>Locations</TableHead>
                 <TableHead>Creative</TableHead>
                 <TableHead>Budget</TableHead>
                 <TableHead>Spend</TableHead>
                 <TableHead>Remaining</TableHead>
-                <TableHead>Impressions / eCPM</TableHead>
-                <TableHead>Clicks / eCPC</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -159,6 +160,10 @@ export default function BrandAdvertiserCampaignsList() {
               ) : (
                 filtered.map((c) => {
                   const status = c.status || "pending_review";
+                  const locTypes = (c.location_types || []) as string[];
+                  const locSummary = c.location_count
+                    ? `${c.location_count}${locTypes.length ? ` · ${locTypes.slice(0, 2).join(", ")}${locTypes.length > 2 ? ` +${locTypes.length - 2}` : ""}` : ""}`
+                    : "—";
                   return (
                     <TableRow key={c.id}>
                       <TableCell className="font-mono text-xs">{String(c.id).slice(0, 8)}</TableCell>
@@ -168,25 +173,32 @@ export default function BrandAdvertiserCampaignsList() {
                         </Badge>
                       </TableCell>
                       <TableCell className="font-medium text-blue-600">{c.campaign_name}</TableCell>
-                      <TableCell className="text-sm text-gray-600">{(c.environments || []).join(", ") || "—"}</TableCell>
+                      <TableCell className="text-sm text-gray-600">{c.scope_name || "—"}</TableCell>
+                      <TableCell className="text-sm text-gray-600">{locSummary}</TableCell>
                       <TableCell className="text-sm text-gray-600">{c.creative_format || "—"}</TableCell>
                       <TableCell>₱{Number(c.budget || 0).toLocaleString()}</TableCell>
                       <TableCell>₱0</TableCell>
                       <TableCell>₱{Number(c.budget || 0).toLocaleString()}</TableCell>
-                      <TableCell className="text-sm">0 / ₱0</TableCell>
-                      <TableCell className="text-sm">0 / ₱0</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => { setEditCampaign(c); setWizardOpen(true); }}
+                        >
+                          <Pencil className="w-4 h-4 mr-1" /> Edit
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })
               )}
               {filtered.length > 0 && (
                 <TableRow className="bg-gray-50 font-semibold">
-                  <TableCell colSpan={5}>Totals</TableCell>
+                  <TableCell colSpan={6}>Totals</TableCell>
                   <TableCell>₱{totalBudget.toLocaleString()}</TableCell>
                   <TableCell>₱0</TableCell>
                   <TableCell>₱{totalBudget.toLocaleString()}</TableCell>
-                  <TableCell>0</TableCell>
-                  <TableCell>0</TableCell>
+                  <TableCell></TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -197,13 +209,15 @@ export default function BrandAdvertiserCampaignsList() {
       {profileId && (
         <BrandCampaignWizard
           open={wizardOpen}
-          onOpenChange={setWizardOpen}
+          onOpenChange={(v) => { setWizardOpen(v); if (!v) setEditCampaign(null); }}
           brandAdvertiserId={profileId}
           onCreated={fetchData}
-          initialAdSpaceId={initialAdSpaceId}
-          initialAdSpaceIds={initialAdSpaceIds}
+          initialAdSpaceId={editCampaign ? null : initialAdSpaceId}
+          initialAdSpaceIds={editCampaign ? null : initialAdSpaceIds}
+          editCampaign={editCampaign}
         />
       )}
     </div>
   );
 }
+
