@@ -201,6 +201,7 @@ export default function BrandAdvertiserCampaignsList() {
           brandAdvertiserId={profileId}
           onCreated={fetchData}
           initialAdSpaceId={initialAdSpaceId}
+          initialAdSpaceIds={initialAdSpaceIds}
         />
       )}
     </div>
