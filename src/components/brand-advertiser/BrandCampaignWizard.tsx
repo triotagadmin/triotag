@@ -23,11 +23,27 @@ interface Props {
   onCreated?: () => void;
   initialAdSpaceId?: string | null;
   initialAdSpaceIds?: string[] | null;
+  editCampaign?: any | null;
 }
 
-const MEDIA_TYPES = ["OOH", "DOOH", "AOOH"] as const;
-type MediaType = typeof MEDIA_TYPES[number];
 const TOTAL_STEPS = 5;
+
+const LOCATION_TYPE_OPTIONS = [
+  { value: "cafe", label: "Cafe" },
+  { value: "coffee_shop", label: "Coffee Shop" },
+  { value: "restaurant", label: "Restaurant" },
+  { value: "fast_food", label: "Fast Food" },
+  { value: "bar", label: "Bar" },
+  { value: "nightclub", label: "Nightclub" },
+  { value: "supermarket", label: "Supermarket" },
+  { value: "convenience_store", label: "Convenience Store" },
+  { value: "mall", label: "Mall" },
+  { value: "clothing_store", label: "Clothing Store" },
+  { value: "department_store", label: "Department Store" },
+  { value: "barbershop", label: "Barbershop / Salon" },
+  { value: "fitness_centre", label: "Fitness / Gym" },
+  { value: "pharmacy", label: "Pharmacy" },
+];
 
 interface AdSpaceRow {
   id: string;
@@ -45,23 +61,27 @@ const formatBadge = (mt: string) => {
   return "bg-green-100 text-green-700";
 };
 
-export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertiserId, onCreated, initialAdSpaceId, initialAdSpaceIds }: Props) {
+export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertiserId, onCreated, initialAdSpaceId, initialAdSpaceIds, editCampaign }: Props) {
   const { toast } = useToast();
+  const isEdit = !!editCampaign?.id;
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
 
   // Step 1
   const [campaignName, setCampaignName] = useState("");
+  const [scopeName, setScopeName] = useState("");
   const [budget, setBudget] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
 
-  // Step 2 - inventory browser
+  // Step 2 - location targeting + optional inventory reference
+  const [locationCount, setLocationCount] = useState<string>("10");
+  const [locationTypes, setLocationTypes] = useState<string[]>([]);
   const [invSearch, setInvSearch] = useState("");
-  const [mediaFilter, setMediaFilter] = useState<"ALL" | MediaType>("ALL");
-  const [selectedAdSpaceIds, setSelectedAdSpaceIds] = useState<string[]>([]);
+  const [showInventory, setShowInventory] = useState(false);
   const [adSpaces, setAdSpaces] = useState<AdSpaceRow[]>([]);
   const [loadingInv, setLoadingInv] = useState(false);
+  const [selectedAdSpaceIds, setSelectedAdSpaceIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (!open) return;
@@ -77,8 +97,25 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
     })();
   }, [open]);
 
+  // Prefill from edit campaign or initial ad space seeds
   useEffect(() => {
     if (!open) return;
+    if (editCampaign) {
+      setCampaignName(editCampaign.campaign_name || "");
+      setScopeName(editCampaign.scope_name || "");
+      setBudget(String(editCampaign.budget ?? ""));
+      setStartDate(editCampaign.start_date ? new Date(editCampaign.start_date) : undefined);
+      setEndDate(editCampaign.end_date ? new Date(editCampaign.end_date) : undefined);
+      setLocationCount(String(editCampaign.location_count ?? "10"));
+      setLocationTypes(Array.isArray(editCampaign.location_types) ? editCampaign.location_types : []);
+      setAgeMin(String(editCampaign.target_age_min ?? "18"));
+      setAgeMax(String(editCampaign.target_age_max ?? "65"));
+      setGender(editCampaign.target_gender || "All");
+      setCreativeFormat(editCampaign.creative_format || "Image");
+      setCreativeSetId(editCampaign.creative_set_id || null);
+      setNotes(editCampaign.notes || "");
+      return;
+    }
     const ids = [
       ...(initialAdSpaceIds ?? []),
       ...(initialAdSpaceId ? [initialAdSpaceId] : []),
@@ -89,7 +126,8 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
       ids.forEach((id) => merged.add(id));
       return Array.from(merged);
     });
-  }, [open, initialAdSpaceId, initialAdSpaceIds]);
+    setShowInventory(true);
+  }, [open, initialAdSpaceId, initialAdSpaceIds, editCampaign]);
 
   // Step 3
   const [ageMin, setAgeMin] = useState("18");
@@ -123,27 +161,15 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
   const filteredInventory = useMemo(() => {
     const q = invSearch.trim().toLowerCase();
     return adSpaces.filter((s) => {
-      const mt = String(s.media_type || "").toUpperCase();
-      if (mediaFilter !== "ALL" && mt !== mediaFilter) return false;
-      if (q) {
-        const hay = `${s.title || ""} ${s.location || ""}`.toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
+      if (!q) return true;
+      const hay = `${s.title || ""} ${s.location || ""}`.toLowerCase();
+      return hay.includes(q);
     });
-  }, [adSpaces, invSearch, mediaFilter]);
-
-  const selectedEnvs = useMemo(() => {
-    const set = new Set<string>();
-    adSpaces.forEach((s) => {
-      if (selectedAdSpaceIds.includes(s.id)) set.add(String(s.media_type || "").toUpperCase());
-    });
-    return Array.from(set);
-  }, [adSpaces, selectedAdSpaceIds]);
+  }, [adSpaces, invSearch]);
 
   const reset = () => {
-    setStep(1); setCampaignName(""); setBudget(""); setStartDate(undefined); setEndDate(undefined);
-    setInvSearch(""); setMediaFilter("ALL"); setSelectedAdSpaceIds([]);
+    setStep(1); setCampaignName(""); setScopeName(""); setBudget(""); setStartDate(undefined); setEndDate(undefined);
+    setLocationCount("10"); setLocationTypes([]); setInvSearch(""); setShowInventory(false); setSelectedAdSpaceIds([]);
     setAgeMin("18"); setAgeMax("65"); setGender("All");
     setCreativeFormat("Image"); setCreativeSetId(null); setNotes("");
   };
@@ -153,20 +179,24 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
   const toggleAdSpace = (id: string) => {
     setSelectedAdSpaceIds((p) => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   };
+  const toggleLocationType = (v: string) => {
+    setLocationTypes((p) => p.includes(v) ? p.filter(x => x !== v) : [...p, v]);
+  };
 
   const canNext1 = campaignName.trim() && Number(budget) > 0 && startDate && endDate;
-  const canNext2 = selectedAdSpaceIds.length > 0;
+  const canNext2 = Number(locationCount) > 0 && locationTypes.length > 0;
 
   const submit = async () => {
     setSubmitting(true);
     try {
-      const { data: created, error } = await (supabase as any).from("brand_campaigns").insert({
-        brand_advertiser_id: brandAdvertiserId,
+      const payload: any = {
         campaign_name: campaignName,
+        scope_name: scopeName || null,
         budget: Number(budget),
         start_date: startDate ? format(startDate, "yyyy-MM-dd") : null,
         end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
-        environments: selectedEnvs,
+        location_count: Number(locationCount) || null,
+        location_types: locationTypes,
         countries: ["Philippines"],
         target_age_min: Number(ageMin),
         target_age_max: Number(ageMax),
@@ -174,29 +204,44 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
         creative_format: creativeFormat,
         creative_set_id: creativeSetId,
         notes,
-        status: "pending_review",
-      }).select("id").single();
-      if (error) throw error;
+      };
 
-      if (created?.id && selectedAdSpaceIds.length > 0) {
-        const targetRows = selectedAdSpaceIds.map((ad_space_id) => ({
-          campaign_id: created.id,
-          ad_space_id,
-        }));
-        const { error: targetErr } = await supabase.from("campaign_ad_space_targets").insert(targetRows);
-        if (targetErr) throw targetErr;
+      if (isEdit) {
+        const { error } = await (supabase as any)
+          .from("brand_campaigns")
+          .update(payload)
+          .eq("id", editCampaign.id);
+        if (error) throw error;
+        toast({ title: "Campaign updated" });
+      } else {
+        payload.brand_advertiser_id = brandAdvertiserId;
+        payload.status = "pending_review";
+        const { data: created, error } = await (supabase as any)
+          .from("brand_campaigns")
+          .insert(payload)
+          .select("id")
+          .single();
+        if (error) throw error;
+
+        if (created?.id && selectedAdSpaceIds.length > 0) {
+          const targetRows = selectedAdSpaceIds.map((ad_space_id) => ({
+            campaign_id: created.id,
+            ad_space_id,
+          }));
+          await supabase.from("campaign_ad_space_targets").insert(targetRows);
+        }
+
+        try {
+          await supabase.functions.invoke("notify-brand-campaign-submission", {
+            body: { campaign_name: campaignName, budget, location_types: locationTypes },
+          });
+        } catch (e) { /* non-fatal */ }
       }
-
-      try {
-        await supabase.functions.invoke("notify-brand-campaign-submission", {
-          body: { campaign_name: campaignName, budget, environments: selectedEnvs },
-        });
-      } catch (e) { /* non-fatal */ }
 
       onCreated?.();
       close();
     } catch (e: any) {
-      toast({ title: "Submission failed", description: e.message, variant: "destructive" });
+      toast({ title: isEdit ? "Update failed" : "Submission failed", description: e.message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -206,7 +251,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
     <Dialog open={open} onOpenChange={(v) => { if (!v) close(); }}>
       <DialogContent className="max-w-2xl bg-white text-gray-900 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-gray-900">New Brand Campaign</DialogTitle>
+          <DialogTitle className="text-gray-900">{isEdit ? "Edit Brand Campaign" : "New Brand Campaign"}</DialogTitle>
           <div className="text-xs text-gray-500 mt-1">Step {step} of {TOTAL_STEPS}</div>
           <div className="flex gap-1 mt-2">
             {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
@@ -220,6 +265,11 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
             <div className="space-y-1.5">
               <Label>Campaign Name *</Label>
               <Input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="e.g. Summer Brand Launch" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Campaign Scope Name</Label>
+              <Input value={scopeName} onChange={(e) => setScopeName(e.target.value)} placeholder="e.g. Metro Manila Cafes Q3" />
+              <p className="text-xs text-gray-500">A short label describing the reach/scope of this campaign.</p>
             </div>
             <div className="space-y-1.5">
               <Label>Budget (PHP) *</Label>
@@ -262,92 +312,104 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
         )}
 
         {step === 2 && (
-          <div className="space-y-3 py-2">
-            <h3 className="font-semibold text-gray-900">Select Inventory</h3>
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <Input
-                value={invSearch}
-                onChange={(e) => setInvSearch(e.target.value)}
-                placeholder="Search by title or location..."
-                className="pl-9"
-              />
+          <div className="space-y-4 py-2">
+            <div>
+              <h3 className="font-semibold text-gray-900">Location Targeting</h3>
+              <p className="text-xs text-gray-500 mt-1">
+                Tell us how many locations you want to reach and what types. Our team will match your campaign to the best available inventory — no need to hand-pick.
+              </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {(["ALL", ...MEDIA_TYPES] as const).map((m) => (
-                <Button
-                  key={m}
-                  type="button"
-                  size="sm"
-                  variant={mediaFilter === m ? "default" : "outline"}
-                  className={mediaFilter === m ? "bg-green-600 hover:bg-green-700 text-white" : ""}
-                  onClick={() => setMediaFilter(m)}
-                >
-                  {m === "ALL" ? "All" : m}
-                </Button>
-              ))}
-              <div className="flex-1" />
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setSelectedAdSpaceIds(filteredInventory.map((s) => s.id))}
-              >Select all</Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setSelectedAdSpaceIds([])}
-              >Clear</Button>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Number of Locations *</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={locationCount}
+                  onChange={(e) => setLocationCount(e.target.value)}
+                  placeholder="10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Selected Types</Label>
+                <div className="text-sm text-gray-700 pt-2">{locationTypes.length} selected</div>
+              </div>
             </div>
-            <div className="border border-gray-200 rounded-md divide-y divide-gray-100 max-h-[360px] overflow-y-auto">
-              {loadingInv ? (
-                <div className="px-4 py-8 text-center text-sm text-gray-400">Loading inventory…</div>
-              ) : adSpaces.length === 0 ? (
-                <div className="px-4 py-8 text-center text-sm text-gray-500">
-                  No approved inventory available yet — check back soon.
-                </div>
-              ) : filteredInventory.length === 0 ? (
-                <div className="px-4 py-6 text-center text-sm text-gray-400">No matches for your filters</div>
-              ) : (
-                filteredInventory.map((s) => {
-                  const mt = String(s.media_type || "").toUpperCase();
-                  const weekly = s.pricing?.weekly;
-                  const monthly = s.pricing?.monthly ?? s.monthly_subscription_fee;
-                  const checked = selectedAdSpaceIds.includes(s.id);
+            <div className="space-y-1.5">
+              <Label>Location Types *</Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 border border-gray-200 rounded-md p-3 max-h-[240px] overflow-y-auto">
+                {LOCATION_TYPE_OPTIONS.map((opt) => {
+                  const checked = locationTypes.includes(opt.value);
                   return (
                     <label
-                      key={s.id}
-                      className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 ${checked ? "bg-green-50/50" : ""}`}
+                      key={opt.value}
+                      className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer text-sm ${checked ? "bg-green-50 border border-green-200" : "hover:bg-gray-50 border border-transparent"}`}
                     >
-                      <Checkbox checked={checked} onCheckedChange={() => toggleAdSpace(s.id)} className="mt-1" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-medium text-gray-900 truncate">{s.title}</span>
-                          <Badge className={formatBadge(mt)}>{mt || "—"}</Badge>
-                        </div>
-                        {s.location && (
-                          <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                            <MapPin className="w-3 h-3" /> {s.location}
-                          </div>
-                        )}
-                        {(weekly || monthly) && (
-                          <div className="text-xs text-gray-600 mt-1">
-                            {weekly ? `₱${Number(weekly).toLocaleString()}/week` : ""}
-                            {weekly && monthly ? " • " : ""}
-                            {monthly ? `₱${Number(monthly).toLocaleString()}/month` : ""}
-                          </div>
-                        )}
-                      </div>
+                      <Checkbox checked={checked} onCheckedChange={() => toggleLocationType(opt.value)} />
+                      <span className="text-gray-800">{opt.label}</span>
                     </label>
                   );
-                })
-              )}
+                })}
+              </div>
             </div>
-            <div className="text-xs text-gray-500">
-              {selectedAdSpaceIds.length} ad space(s) selected
-              {selectedEnvs.length > 0 && ` • Environments: ${selectedEnvs.join(", ")}`}
-            </div>
+
+            {!isEdit && (
+              <div className="border-t border-gray-100 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowInventory((s) => !s)}
+                  className="text-xs text-green-700 hover:text-green-800 underline"
+                >
+                  {showInventory ? "Hide" : "Browse"} available inventory (reference only, optional)
+                </button>
+                {showInventory && (
+                  <div className="mt-3 space-y-2">
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <Input
+                        value={invSearch}
+                        onChange={(e) => setInvSearch(e.target.value)}
+                        placeholder="Search by location..."
+                        className="pl-9"
+                      />
+                    </div>
+                    <div className="border border-gray-200 rounded-md divide-y divide-gray-100 max-h-[240px] overflow-y-auto">
+                      {loadingInv ? (
+                        <div className="px-4 py-6 text-center text-sm text-gray-400">Loading inventory…</div>
+                      ) : filteredInventory.length === 0 ? (
+                        <div className="px-4 py-6 text-center text-sm text-gray-400">No inventory found</div>
+                      ) : (
+                        filteredInventory.slice(0, 50).map((s) => {
+                          const mt = String(s.media_type || "").toUpperCase();
+                          const checked = selectedAdSpaceIds.includes(s.id);
+                          return (
+                            <label
+                              key={s.id}
+                              className={`flex items-start gap-3 px-4 py-2 cursor-pointer hover:bg-gray-50 ${checked ? "bg-green-50/50" : ""}`}
+                            >
+                              <Checkbox checked={checked} onCheckedChange={() => toggleAdSpace(s.id)} className="mt-1" />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <Badge className={formatBadge(mt)}>{mt || "—"}</Badge>
+                                  {s.location && (
+                                    <span className="text-xs text-gray-600 flex items-center gap-1">
+                                      <MapPin className="w-3 h-3" /> {s.location}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </label>
+                          );
+                        })
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {selectedAdSpaceIds.length} referenced ad space(s)
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -397,7 +459,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
             <div>
               <h3 className="font-semibold text-gray-900">Attach Creative</h3>
               <p className="text-xs text-gray-500 mt-1">
-                Choose which creative set should serve on this campaign. You can skip this and add one later, but the campaign cannot be approved until a creative is attached.
+                Choose which creative set should serve on this campaign. You can skip and attach later.
               </p>
             </div>
 
@@ -407,53 +469,28 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
               <div className="border border-dashed border-gray-300 rounded-md p-6 text-center space-y-3 bg-gray-50">
                 <ImageIcon className="w-8 h-8 mx-auto text-gray-400" />
                 <div className="text-sm text-gray-700">You don't have any active creative sets yet.</div>
-                <Link
-                  to="/brand-advertiser/creatives"
-                  className="inline-block text-sm text-green-700 hover:text-green-800 underline"
-                >
+                <Link to="/brand-advertiser/creatives" className="inline-block text-sm text-green-700 hover:text-green-800 underline">
                   Create a creative set →
                 </Link>
-                <div className="text-xs text-gray-500 pt-1">
-                  You can continue without attaching one — the campaign will save as a draft until creative is added.
-                </div>
               </div>
             ) : (
               <div className="border border-gray-200 rounded-md divide-y divide-gray-100 max-h-[320px] overflow-y-auto">
                 <label className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 ${creativeSetId === null ? "bg-gray-50" : ""}`}>
-                  <input
-                    type="radio"
-                    name="creative-set"
-                    className="mt-1"
-                    checked={creativeSetId === null}
-                    onChange={() => setCreativeSetId(null)}
-                  />
+                  <input type="radio" name="creative-set" className="mt-1" checked={creativeSetId === null} onChange={() => setCreativeSetId(null)} />
                   <div className="flex-1">
                     <div className="text-sm font-medium text-gray-900">No creative yet</div>
                     <div className="text-xs text-gray-500">Save as draft; attach later from the campaigns list.</div>
                   </div>
                 </label>
                 {creativeSets.map((cs) => (
-                  <label
-                    key={cs.id}
-                    className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 ${creativeSetId === cs.id ? "bg-green-50/50" : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      name="creative-set"
-                      className="mt-1"
-                      checked={creativeSetId === cs.id}
-                      onChange={() => setCreativeSetId(cs.id)}
-                    />
+                  <label key={cs.id} className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 ${creativeSetId === cs.id ? "bg-green-50/50" : ""}`}>
+                    <input type="radio" name="creative-set" className="mt-1" checked={creativeSetId === cs.id} onChange={() => setCreativeSetId(cs.id)} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium text-gray-900 truncate">{cs.title}</span>
-                        {cs.creative_format && (
-                          <Badge className="bg-gray-100 text-gray-700">{cs.creative_format}</Badge>
-                        )}
+                        {cs.creative_format && <Badge className="bg-gray-100 text-gray-700">{cs.creative_format}</Badge>}
                       </div>
-                      {cs.file_url && (
-                        <div className="text-xs text-gray-500 truncate mt-0.5">{cs.file_url}</div>
-                      )}
+                      {cs.file_url && <div className="text-xs text-gray-500 truncate mt-0.5">{cs.file_url}</div>}
                     </div>
                   </label>
                 ))}
@@ -466,9 +503,10 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
           <div className="space-y-4 py-2">
             <div className="border border-gray-200 rounded-md p-4 space-y-2 bg-gray-50">
               <Row label="Campaign" value={campaignName} />
+              {scopeName && <Row label="Scope" value={scopeName} />}
               <Row label="Budget" value={`₱${Number(budget || 0).toLocaleString()}`} />
               <Row label="Dates" value={`${startDate ? format(startDate, "MMM d, yyyy") : "—"} – ${endDate ? format(endDate, "MMM d, yyyy") : "—"}`} />
-              <Row label="Environments" value={selectedEnvs.join(", ") || "—"} />
+              <Row label="Locations" value={`${locationCount || 0} × ${locationTypes.map(t => LOCATION_TYPE_OPTIONS.find(o => o.value === t)?.label || t).join(", ") || "—"}`} />
               <Row label="Country" value="Philippines" />
               <Row label="Age" value={`${ageMin} – ${ageMax}`} />
               <Row label="Gender" value={gender} />
@@ -497,7 +535,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
             >Next</Button>
           ) : (
             <Button onClick={submit} disabled={submitting} className="bg-green-600 hover:bg-green-700 text-white">
-              {submitting ? "Submitting..." : "Submit Campaign for Review"}
+              {submitting ? (isEdit ? "Saving..." : "Submitting...") : (isEdit ? "Save Changes" : "Submit Campaign for Review")}
             </Button>
           )}
         </div>
@@ -508,8 +546,8 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between text-sm">
-      <span className="text-gray-500">{label}</span>
+    <div className="flex justify-between text-sm gap-4">
+      <span className="text-gray-500 flex-shrink-0">{label}</span>
       <span className="text-gray-900 font-medium text-right">{value}</span>
     </div>
   );
