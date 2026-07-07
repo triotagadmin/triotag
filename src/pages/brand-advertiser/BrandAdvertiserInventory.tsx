@@ -831,14 +831,21 @@ export default function BrandAdvertiserInventory() {
                         <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center bg-gray-50">
                           <FolderOpen className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                           <p className="text-xs text-gray-600 mb-3">
-                            No creative sets yet. Upload one first to continue.
+                            No creatives folder saved yet. Save one on the Creatives page first.
                           </p>
                           <Button
                             size="sm"
-                            onClick={() => navigate("/brand-advertiser/creatives")}
+                            onClick={() => {
+                              toast({
+                                title: "Save a creatives folder first",
+                                description:
+                                  "You don't have any creatives yet. Save a creatives folder on the Creatives page, then come back to choose it.",
+                              });
+                              navigate("/brand-advertiser/creatives");
+                            }}
                             className="bg-green-600 hover:bg-green-500 text-white"
                           >
-                            Go to Creatives
+                            <FolderOpen className="w-4 h-4 mr-1" /> Choose Creatives
                           </Button>
                         </div>
                       ) : (
