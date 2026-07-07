@@ -102,6 +102,24 @@ const SUBTYPES: Record<MediaType, string[]> = {
   ],
 };
 
+const LOCATION_TYPES = [
+  "Cafe",
+  "Co-working Space",
+  "Barber Shop",
+  "Salon",
+  "Supermarket",
+  "Convenience Store",
+  "Restaurant",
+  "Fast Food",
+  "Bar",
+  "Nightclub",
+  "Gym",
+  "Pharmacy",
+  "Mall",
+  "Clothing Store",
+  "Department Store",
+] as const;
+
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
   const toRad = (v: number) => (v * Math.PI) / 180;
