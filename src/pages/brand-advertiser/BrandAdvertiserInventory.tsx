@@ -229,13 +229,26 @@ export default function BrandAdvertiserInventory() {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* LEFT: Map + radius planner */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-4">
             <RadiusMapPlanner
               center={center}
               radiusMeters={radiusMeters}
               onCenterChange={setCenter}
               onRadiusChange={setRadiusMeters}
             />
+
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                Coverage Radius — affects campaign reach pricing
+              </div>
+              <div className="text-sm text-gray-700">
+                {estimate.radiusPercent}% coverage ={" "}
+                <span className="font-semibold text-green-700">₱{estimate.radiusFee.toLocaleString()}</span>
+              </div>
+              <div className="text-xs text-gray-500 mt-1.5">
+                5% coverage starts at ₱200,000 · 100% coverage is ₱3,500,000
+              </div>
+            </div>
           </div>
 
           {/* RIGHT: Step-based panel */}
