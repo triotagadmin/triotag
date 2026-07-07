@@ -12,7 +12,7 @@ type Item = { to: string; label: string; icon: any };
 const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
   retailer: [
     { to: "/retailer-dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/publisher/active", label: "Active Media", icon: BarChart3 },
+    { to: "/publisher/active", label: "Active Inventory", icon: Package },
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
   ],
