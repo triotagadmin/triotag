@@ -777,7 +777,7 @@ export default function AdvertiserExplore() {
               </div>
               <h3 className="text-xl font-bold text-gray-900">Request submitted!</h3>
               <p className="text-sm text-gray-600 mt-2 max-w-sm mx-auto">
-                Your ad campaign request has been submitted. Our team will confirm final pricing and reach out within 24 hours to activate your campaign.
+                TrioTag will email you a direct Insertion Order (IO) with bank transfer payment details within 24 hours. Your campaign activates once payment is confirmed.
               </p>
               <Button className="mt-5 bg-green-600 hover:bg-green-500 text-white" onClick={() => setRequestOpen(false)}>
                 Done
@@ -788,9 +788,10 @@ export default function AdvertiserExplore() {
               <DialogHeader>
                 <DialogTitle>Request Your Ad Campaign</DialogTitle>
                 <DialogDescription>
-                  We'll confirm final pricing and reach out within 24 hours.
+                  TrioTag will send you a direct Insertion Order (IO) with bank transfer payment details within 24 hours.
                 </DialogDescription>
               </DialogHeader>
+
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm space-y-2">
                 {activeSelections.map((s) => {
