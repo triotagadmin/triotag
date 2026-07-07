@@ -22,6 +22,7 @@ const VenueDashboard = () => {
   } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [adSpaces, setAdSpaces] = useState<any[]>([]);
+  const [activatedIds, setActivatedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -67,6 +68,15 @@ const VenueDashboard = () => {
         ascending: false
       });
       setAdSpaces(spacesData || []);
+      const spaceIds = (spacesData || []).map((s: any) => s.id);
+      if (spaceIds.length > 0) {
+        const { data: acts } = await supabase
+          .from("activations")
+          .select("ad_space_id,status")
+          .in("ad_space_id", spaceIds)
+          .in("status", ["approved", "completed"]);
+        setActivatedIds(new Set((acts || []).map((a: any) => a.ad_space_id)));
+      }
       setLoading(false);
     };
     fetchData();
@@ -270,6 +280,15 @@ const VenueDashboard = () => {
                             {(!space.media_type || space.media_type === "OOH") && <Badge className="bg-green-600 hover:bg-green-600">OOH</Badge>}
                             {getStatusBadge(space.approval_status)}
                             <Badge variant="outline">{space.availability_status}</Badge>
+                            {activatedIds.has(space.id) ? (
+                              <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white gap-1">
+                                <CheckCircle className="w-3 h-3" /> Activated Inventory
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="gap-1 border-muted-foreground/40 text-muted-foreground">
+                                <XCircle className="w-3 h-3" /> Deactivated
+                              </Badge>
+                            )}
                             {Array.isArray((space as any).leased_advertiser_ids) && (space as any).leased_advertiser_ids.length > 0 && (
                               <Badge variant="secondary" className="text-xs">
                                 {(space as any).leased_advertiser_ids.length} lessee{(space as any).leased_advertiser_ids.length !== 1 ? "s" : ""}
