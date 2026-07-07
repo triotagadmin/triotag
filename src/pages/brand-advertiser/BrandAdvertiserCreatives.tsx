@@ -195,33 +195,33 @@ export default function BrandAdvertiserCreatives() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Folder Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Format</TableHead>
-                <TableHead>Photos</TableHead>
-                <TableHead>Last Updated</TableHead>
+                <TableHead className="text-black">ID</TableHead>
+                <TableHead className="text-black">Folder Name</TableHead>
+                <TableHead className="text-black">Status</TableHead>
+                <TableHead className="text-black">Format</TableHead>
+                <TableHead className="text-black">Photos</TableHead>
+                <TableHead className="text-black">Last Updated</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-gray-500 py-8">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-black py-8">Loading...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-gray-500 py-8">No creative sets yet</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-black py-8">No creative sets yet</TableCell></TableRow>
               ) : filtered.map((s) => (
                 <TableRow key={s.id}>
-                  <TableCell className="font-mono text-xs">{String(s.id).slice(0, 8)}</TableCell>
-                  <TableCell className="font-medium">{s.title}</TableCell>
+                  <TableCell className="font-mono text-xs text-black">{String(s.id).slice(0, 8)}</TableCell>
+                  <TableCell className="font-medium text-black">{s.title}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={s.status === "active" ? "bg-green-100 text-green-700 border-green-200" : "bg-gray-100 text-gray-600 border-gray-200"}>
+                    <Badge variant="outline" className={s.status === "active" ? "bg-green-100 text-black border-green-200" : "bg-gray-100 text-black border-gray-200"}>
                       {s.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 capitalize">{s.creative_format}</Badge>
+                    <Badge variant="outline" className="bg-blue-50 text-black border-blue-200 capitalize">{s.creative_format}</Badge>
                   </TableCell>
-                  <TableCell>{s.creative_count ?? 0} photo{(s.creative_count ?? 0) === 1 ? "" : "s"}</TableCell>
-                  <TableCell className="text-sm text-gray-500">{s.updated_at ? format(new Date(s.updated_at), "MMM d, yyyy") : "—"}</TableCell>
+                  <TableCell className="text-black">{s.creative_count ?? 0} photo{(s.creative_count ?? 0) === 1 ? "" : "s"}</TableCell>
+                  <TableCell className="text-sm text-black">{s.updated_at ? format(new Date(s.updated_at), "MMM d, yyyy") : "—"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -230,17 +230,17 @@ export default function BrandAdvertiserCreatives() {
       </div>
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
-        <DialogContent className="bg-white text-gray-900">
-          <DialogHeader><DialogTitle>Add Creative Folder</DialogTitle></DialogHeader>
+        <DialogContent className="bg-white text-black">
+          <DialogHeader><DialogTitle className="text-black">Add Creative Folder</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Folder Name *</Label>
+              <Label className="text-black">Folder Name *</Label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Summer Launch Banners" />
             </div>
             <div className="space-y-1.5">
-              <Label>Format *</Label>
+              <Label className="text-black">Format *</Label>
               <Select value={fmt} onValueChange={(v: any) => setFmt(v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="text-black"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="image">Image (OOH)</SelectItem>
                   <SelectItem value="video">Video (DOOH)</SelectItem>
@@ -249,7 +249,7 @@ export default function BrandAdvertiserCreatives() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Photos * (max {MAX_FILES}, up to 3MB each)</Label>
+              <Label className="text-black">Photos * (max {MAX_FILES}, up to 3MB each)</Label>
               <Input
                 type="file"
                 accept="image/*"
@@ -262,11 +262,11 @@ export default function BrandAdvertiserCreatives() {
               )}
               {files.length > 0 && (
                 <div className="mt-2 space-y-1 max-h-40 overflow-y-auto border rounded p-2 bg-gray-50">
-                  <p className="text-xs text-gray-600 mb-1">{files.length} file{files.length === 1 ? "" : "s"} selected</p>
+                  <p className="text-xs text-black mb-1">{files.length} file{files.length === 1 ? "" : "s"} selected</p>
                   {files.map((f, i) => (
-                    <div key={i} className="flex items-center justify-between text-xs">
-                      <span className="truncate">{f.name} <span className="text-gray-400">({(f.size / 1024 / 1024).toFixed(2)}MB)</span></span>
-                      <button type="button" onClick={() => removeFile(i)} className="text-gray-400 hover:text-red-600 ml-2" disabled={submitting}>
+                    <div key={i} className="flex items-center justify-between text-xs text-black">
+                      <span className="truncate">{f.name} <span className="text-gray-500">({(f.size / 1024 / 1024).toFixed(2)}MB)</span></span>
+                      <button type="button" onClick={() => removeFile(i)} className="text-gray-500 hover:text-red-600 ml-2" disabled={submitting}>
                         <X className="w-3 h-3" />
                       </button>
                     </div>
@@ -279,7 +279,7 @@ export default function BrandAdvertiserCreatives() {
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)} disabled={submitting}>Cancel</Button>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={submitting} className="text-black">Cancel</Button>
             <Button
               onClick={handleCreate}
               disabled={submitting || !title.trim() || files.length === 0 || !!fileError}
