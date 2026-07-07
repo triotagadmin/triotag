@@ -139,7 +139,7 @@ export default function AdvertiserExplore() {
       });
       const campaignType = [...new Set(enriched.map((s) => s.category).filter(Boolean))].join(", ");
 
-      const { data: inserted, error } = await supabase
+      const { error } = await supabase
         .from("media_plan_requests" as any)
         .insert({
           advertiser_id: user?.id ?? null,
@@ -154,9 +154,7 @@ export default function AdvertiserExplore() {
           notes: form.notes || null,
           status: "pending_payment",
           requester_email: emailTrimmed,
-        })
-        .select("id")
-        .single();
+        });
       if (error) throw error;
 
       setSubmitted(true);
