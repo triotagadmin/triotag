@@ -99,6 +99,33 @@ function priceLabel(row: AdSpaceRow): string {
   return "Contact for pricing";
 }
 
+function formatMaterialName(key: string): string {
+  return key
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function formatsLabel(row: AdSpaceRow): string {
+  const specs = row.specifications || {};
+  const materials: string[] = specs.ad_unit_materials || [];
+  const units: Record<string, number> | null = specs.units || null;
+
+  const available = materials.length
+    ? materials.map(formatMaterialName).join(", ")
+    : row.media_type;
+
+  if (!units || Object.keys(units).length === 0) {
+    return available;
+  }
+
+  const unitParts = Object.entries(units)
+    .filter(([, count]) => count > 0)
+    .map(([fmt, count]) => `${fmt}: ${count}`);
+
+  return unitParts.length ? `${available} · ${unitParts.join(", ")}` : available;
+}
+
 function distanceLabel(m: number): string {
   if (m < 1000) return `${Math.round(m)}m away`;
   return `${(m / 1000).toFixed(m < 10000 ? 2 : 1)}km away`;
