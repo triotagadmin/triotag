@@ -297,251 +297,307 @@ export default function BrandAdvertiserInventory() {
                 <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
                   <ClipboardList className="w-5 h-5 text-green-600" />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <h2 className="text-lg font-bold text-gray-900 leading-tight">Unit Registry</h2>
-                  <p className="text-xs text-gray-500">Pick one ad format for this campaign.</p>
+                  <p className="text-xs text-gray-500">
+                    {step === 1 ? "Step 1 of 2 — Ad locations & venue types" : "Step 2 of 2 — Ad format & units"}
+                  </p>
                 </div>
               </div>
 
-              {/* Location targeting — how many venues + which types */}
-              <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50/60 p-3 space-y-3">
-                <div>
-                  <Label htmlFor="total-locations" className="text-sm font-semibold text-gray-900">
-                    How many ad locations / venues?
-                  </Label>
-                  <p className="text-xs text-gray-500 mb-1.5">
-                    Total number of physical spots you want this campaign to run in.
-                  </p>
-                  <Input
-                    id="total-locations"
-                    type="number"
-                    min="0"
-                    placeholder="e.g. 25"
-                    value={totalLocations}
-                    onChange={(e) => setTotalLocations(e.target.value)}
-                    className="h-9 text-gray-900"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-sm font-semibold text-gray-900">
-                    Type of ad locations
-                  </Label>
-                  <p className="text-xs text-gray-500 mb-1.5">
-                    Tap the venue types you want, then set how many of each.
-                  </p>
-                  <div className="flex flex-wrap gap-1.5 mb-2">
-                    {LOCATION_TYPES.map((t) => {
-                      const on = selectedLocationTypes[t] !== undefined;
-                      return (
-                        <button
-                          key={t}
-                          type="button"
-                          onClick={() =>
-                            setSelectedLocationTypes((prev) => {
-                              const next = { ...prev };
-                              if (on) delete next[t];
-                              else next[t] = "";
-                              return next;
-                            })
-                          }
-                          className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                            on
-                              ? "bg-green-600 text-white border-green-600"
-                              : "bg-white text-gray-700 border-gray-300 hover:border-green-400"
-                          }`}
-                        >
-                          {t}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {Object.keys(selectedLocationTypes).length > 0 && (
-                    <div className="space-y-1.5">
-                      {Object.keys(selectedLocationTypes).map((t) => (
-                        <div
-                          key={t}
-                          className="flex items-center gap-2 bg-white rounded-md border border-gray-200 px-2 py-1.5"
-                        >
-                          <Label
-                            htmlFor={`loc-${t}`}
-                            className="text-xs text-gray-900 flex-1 min-w-0 truncate"
-                          >
-                            {t}
-                          </Label>
-                          <Input
-                            id={`loc-${t}`}
-                            type="number"
-                            min="0"
-                            placeholder="0"
-                            value={selectedLocationTypes[t]}
-                            onChange={(e) =>
-                              setSelectedLocationTypes((prev) => ({
-                                ...prev,
-                                [t]: e.target.value,
-                              }))
-                            }
-                            className="h-8 w-20 text-right text-gray-900"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Format picker — single choice with unit input inside selected card */}
-              <div className="space-y-2">
-                {FORMATS.map((f) => {
-                  const Icon = f.icon;
-                  const active = chosenFormat === f.key;
-                  return (
+              {/* Step indicator */}
+              <div className="flex items-center gap-2 mb-4">
+                {[1, 2].map((n) => (
+                  <div key={n} className="flex-1 flex items-center gap-2">
                     <div
-                      key={f.key}
-                      className={`w-full rounded-xl border-2 transition-all overflow-hidden ${
-                        active
-                          ? `${f.border} ${f.bg}`
-                          : "border-gray-200 hover:border-gray-300 bg-white"
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
+                        step >= (n as 1 | 2)
+                          ? "bg-green-600 text-white"
+                          : "bg-gray-200 text-gray-500"
                       }`}
                     >
-                      <button
-                        type="button"
-                        onClick={() => setChosenFormat(f.key)}
-                        className="w-full text-left p-3 flex items-center gap-3"
-                      >
-                        <div
-                          className={`w-10 h-10 rounded-lg ${f.bg} flex items-center justify-center shrink-0`}
-                        >
-                          <Icon className={`w-5 h-5 ${f.iconColor}`} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-sm font-semibold text-gray-900">{f.title}</div>
-                          <div className="text-xs text-gray-500">{f.desc}</div>
-                        </div>
-                        <div
-                          className={`w-4 h-4 rounded-full border-2 ${
-                            active ? "border-green-600 bg-green-600" : "border-gray-300"
-                          }`}
-                        />
-                      </button>
-
-                      {active && (
-                        <div className="px-3 pb-3">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <Label className="text-sm font-semibold text-green-900">
-                                {f.title} units by type
-                              </Label>
-                              <span className="text-xs text-green-700 font-medium">
-                                Total: {totalUnitsForFormat(f.key)}
-                              </span>
-                            </div>
-                            <p className="text-xs text-green-700">
-                              Enter how many units you want per {f.title} placement type within your selected radius. Leave blank for types you don't need.
-                            </p>
-                            <div className="space-y-1.5 pt-1">
-                              {SUBTYPES[f.key].map((sub) => (
-                                <div
-                                  key={sub}
-                                  className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
-                                >
-                                  <Label
-                                    htmlFor={`unit-${f.key}-${sub}`}
-                                    className="text-xs text-green-900 flex-1 min-w-0 truncate"
-                                  >
-                                    {sub}
-                                  </Label>
-                                  <Input
-                                    id={`unit-${f.key}-${sub}`}
-                                    type="number"
-                                    min="0"
-                                    placeholder="0"
-                                    value={unitCounts[f.key][sub] || ""}
-                                    onChange={(e) =>
-                                      setUnitCounts((prev) => ({
-                                        ...prev,
-                                        [f.key]: { ...prev[f.key], [sub]: e.target.value },
-                                      }))
-                                    }
-                                    className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                      {step > (n as 1 | 2) ? <Check className="w-3.5 h-3.5" /> : n}
                     </div>
-                  );
-                })}
+                    <div
+                      className={`flex-1 h-1 rounded-full ${
+                        step > (n as 1 | 2) ? "bg-green-600" : "bg-gray-200"
+                      }`}
+                    />
+                  </div>
+                ))}
               </div>
 
-              {/* Inventory in radius for selected format */}
-              {chosenFormat && selectedFormatMeta && (
-                <div className="mt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                      Inventory in radius
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className="bg-green-50 border-green-200 text-green-700"
-                    >
-                      {loadingRows
-                        ? "…"
-                        : `${matches.length} match${matches.length === 1 ? "" : "es"}`}
-                    </Badge>
-                  </div>
-                  <div className="max-h-[280px] overflow-y-auto -mx-1 px-1 space-y-2">
-                    {loadingRows ? (
-                      <div className="text-center text-gray-500 py-6 text-sm">Loading…</div>
-                    ) : matches.length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-gray-300 p-4 text-center bg-gray-50">
-                        <SearchIcon className="w-6 h-6 text-gray-300 mx-auto mb-1.5" />
-                        <p className="text-xs text-gray-600">
-                          No approved {chosenFormat} inventory in this radius yet — adjust the
-                          map or continue anyway.
-                        </p>
+              {step === 1 && (
+                <>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-900">
+                        Type of ad locations
+                      </Label>
+                      <p className="text-xs text-gray-500 mb-2">
+                        Check the venue types you want, then enter how many locations for each.
+                      </p>
+                      <div className="space-y-1.5">
+                        {LOCATION_TYPES.map((t) => {
+                          const on = selectedLocationTypes[t] !== undefined;
+                          return (
+                            <div
+                              key={t}
+                              className={`flex items-center gap-2 rounded-md border px-2 py-1.5 transition-colors ${
+                                on ? "bg-green-50 border-green-300" : "bg-white border-gray-200"
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSelectedLocationTypes((prev) => {
+                                    const next = { ...prev };
+                                    if (on) delete next[t];
+                                    else next[t] = "";
+                                    return next;
+                                  })
+                                }
+                                className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
+                                  on
+                                    ? "bg-green-600 border-green-600"
+                                    : "bg-white border-gray-400"
+                                }`}
+                                aria-label={`Select ${t}`}
+                              >
+                                {on && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                              </button>
+                              <Label
+                                className="text-xs text-gray-900 flex-1 min-w-0 truncate cursor-pointer"
+                                onClick={() =>
+                                  setSelectedLocationTypes((prev) => {
+                                    const next = { ...prev };
+                                    if (on) delete next[t];
+                                    else next[t] = "";
+                                    return next;
+                                  })
+                                }
+                              >
+                                {t}
+                              </Label>
+                              {on && (
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  placeholder="0"
+                                  value={selectedLocationTypes[t]}
+                                  onChange={(e) =>
+                                    setSelectedLocationTypes((prev) => ({
+                                      ...prev,
+                                      [t]: e.target.value,
+                                    }))
+                                  }
+                                  className="h-8 w-20 text-right text-gray-900"
+                                />
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                    ) : (
-                      matches.map(({ row: r, distance }) => (
+                    </div>
+
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 flex items-center justify-between">
+                      <span className="text-xs text-gray-600">Total ad locations</span>
+                      <span className="text-sm font-semibold text-green-700">
+                        {Object.values(selectedLocationTypes).reduce(
+                          (s, v) => s + (Number(v) || 0),
+                          0,
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => {
+                      const total = Object.values(selectedLocationTypes).reduce(
+                        (s, v) => s + (Number(v) || 0),
+                        0,
+                      );
+                      setTotalLocations(String(total));
+                      setStep(2);
+                    }}
+                    disabled={
+                      Object.keys(selectedLocationTypes).length === 0 ||
+                      Object.values(selectedLocationTypes).reduce(
+                        (s, v) => s + (Number(v) || 0),
+                        0,
+                      ) === 0
+                    }
+                    className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white"
+                  >
+                    Next: Ad format <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  {/* Format picker — single choice with unit input inside selected card */}
+                  <div className="space-y-2">
+                    {FORMATS.map((f) => {
+                      const Icon = f.icon;
+                      const active = chosenFormat === f.key;
+                      return (
                         <div
-                          key={r.id}
-                          className="rounded-lg border border-gray-200 p-2.5 bg-white"
+                          key={f.key}
+                          className={`w-full rounded-xl border-2 transition-all overflow-hidden ${
+                            active
+                              ? `${f.border} ${f.bg}`
+                              : "border-gray-200 hover:border-gray-300 bg-white"
+                          }`}
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="text-xs text-gray-500 truncate">
-                              {displayBusinessName(r)}
+                          <button
+                            type="button"
+                            onClick={() => setChosenFormat(f.key)}
+                            className="w-full text-left p-3 flex items-center gap-3"
+                          >
+                            <div
+                              className={`w-10 h-10 rounded-lg ${f.bg} flex items-center justify-center shrink-0`}
+                            >
+                              <Icon className={`w-5 h-5 ${f.iconColor}`} />
                             </div>
-                            <div className="text-[11px] text-green-700 font-medium whitespace-nowrap">
-                              {distanceLabel(distance)}
+                            <div className="min-w-0 flex-1">
+                              <div className="text-sm font-semibold text-gray-900">{f.title}</div>
+                              <div className="text-xs text-gray-500">{f.desc}</div>
                             </div>
-                          </div>
-                          {r.location && (
-                            <div className="flex items-center gap-1 text-xs text-gray-900 font-medium mt-0.5">
-                              <MapPin className="w-3 h-3 shrink-0" />
-                              <span className="truncate">{r.location}</span>
+                            <div
+                              className={`w-4 h-4 rounded-full border-2 ${
+                                active ? "border-green-600 bg-green-600" : "border-gray-300"
+                              }`}
+                            />
+                          </button>
+
+                          {active && (
+                            <div className="px-3 pb-3">
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <Label className="text-sm font-semibold text-green-900">
+                                    {f.title} units by type
+                                  </Label>
+                                  <span className="text-xs text-green-700 font-medium">
+                                    Total: {totalUnitsForFormat(f.key)}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-green-700">
+                                  Enter how many units you want per {f.title} placement type within your selected radius. Leave blank for types you don't need.
+                                </p>
+                                <div className="space-y-1.5 pt-1">
+                                  {SUBTYPES[f.key].map((sub) => (
+                                    <div
+                                      key={sub}
+                                      className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
+                                    >
+                                      <Label
+                                        htmlFor={`unit-${f.key}-${sub}`}
+                                        className="text-xs text-green-900 flex-1 min-w-0 truncate"
+                                      >
+                                        {sub}
+                                      </Label>
+                                      <Input
+                                        id={`unit-${f.key}-${sub}`}
+                                        type="number"
+                                        min="0"
+                                        placeholder="0"
+                                        value={unitCounts[f.key][sub] || ""}
+                                        onChange={(e) =>
+                                          setUnitCounts((prev) => ({
+                                            ...prev,
+                                            [f.key]: { ...prev[f.key], [sub]: e.target.value },
+                                          }))
+                                        }
+                                        className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
-                      ))
-                    )}
+                      );
+                    })}
                   </div>
-                </div>
+
+                  {/* Inventory in radius for selected format */}
+                  {chosenFormat && selectedFormatMeta && (
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                          Inventory in radius
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="bg-green-50 border-green-200 text-green-700"
+                        >
+                          {loadingRows
+                            ? "…"
+                            : `${matches.length} match${matches.length === 1 ? "" : "es"}`}
+                        </Badge>
+                      </div>
+                      <div className="max-h-[280px] overflow-y-auto -mx-1 px-1 space-y-2">
+                        {loadingRows ? (
+                          <div className="text-center text-gray-500 py-6 text-sm">Loading…</div>
+                        ) : matches.length === 0 ? (
+                          <div className="rounded-xl border border-dashed border-gray-300 p-4 text-center bg-gray-50">
+                            <SearchIcon className="w-6 h-6 text-gray-300 mx-auto mb-1.5" />
+                            <p className="text-xs text-gray-600">
+                              No approved {chosenFormat} inventory in this radius yet — adjust the
+                              map or continue anyway.
+                            </p>
+                          </div>
+                        ) : (
+                          matches.map(({ row: r, distance }) => (
+                            <div
+                              key={r.id}
+                              className="rounded-lg border border-gray-200 p-2.5 bg-white"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="text-xs text-gray-500 truncate">
+                                  {displayBusinessName(r)}
+                                </div>
+                                <div className="text-[11px] text-green-700 font-medium whitespace-nowrap">
+                                  {distanceLabel(distance)}
+                                </div>
+                              </div>
+                              {r.location && (
+                                <div className="flex items-center gap-1 text-xs text-gray-900 font-medium mt-0.5">
+                                  <MapPin className="w-3 h-3 shrink-0" />
+                                  <span className="truncate">{r.location}</span>
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setStep(1)}
+                      className="flex-1"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                    </Button>
+                    <Button
+                      onClick={submitRegistry}
+                      disabled={!chosenFormat}
+                      className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
+                    >
+                      Submit &amp; Continue <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                  <p className="text-[11px] text-gray-500 text-center mt-2">
+                    Inventory shown is reference only — you can launch without selecting specific
+                    spaces.
+                  </p>
+                </>
               )}
-
-
-              <Button
-                onClick={submitRegistry}
-                disabled={!chosenFormat}
-                className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white"
-              >
-                Submit &amp; Continue to Campaign <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-              <p className="text-[11px] text-gray-500 text-center mt-2">
-                Inventory shown is reference only — you can launch without selecting specific
-                spaces.
-              </p>
             </Card>
           </div>
         </div>
