@@ -257,14 +257,15 @@ export default function AdvertiserExplore() {
           </div>
           <div className="flex items-center gap-2 shrink-0 min-w-[140px]">
             <input
-              type="number"
-              min={0}
-              max={9999}
-              step={1}
-              value={qty}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={qty === 0 ? "" : qty}
+              placeholder="0"
               onChange={(e) => {
-                const val = parseInt(e.target.value, 10);
-                updateQty(variant.id, isNaN(val) ? 0 : Math.max(0, Math.min(9999, val)));
+                const raw = e.target.value.replace(/\D/g, "");
+                const val = raw === "" ? 0 : Math.min(9999, parseInt(raw, 10));
+                updateQty(variant.id, val);
               }}
               className="w-20 h-8 text-right text-sm font-medium text-gray-800 border border-gray-300 rounded-md px-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
             />
