@@ -487,7 +487,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
                     <input type="radio" name="creative-set" className="mt-1" checked={creativeSetId === cs.id} onChange={() => setCreativeSetId(cs.id)} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-gray-900 truncate">{cs.title}</span>
+                        <span className="text-sm font-medium text-gray-900 truncate">{cs.title} {cs.creative_count != null ? `(${cs.creative_count} photo${cs.creative_count === 1 ? "" : "s"})` : ""}</span>
                         {cs.creative_format && <Badge className="bg-gray-100 text-gray-700">{cs.creative_format}</Badge>}
                       </div>
                       {cs.file_url && <div className="text-xs text-gray-500 truncate mt-0.5">{cs.file_url}</div>}
