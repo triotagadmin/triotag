@@ -761,39 +761,78 @@ export default function BrandAdvertiserInventory() {
                       </button>
                     </div>
 
-                    <div className="text-xs text-gray-700 space-y-1.5 flex-1">
-                      <div>
-                        <span className="text-gray-500">Locations:</span>{" "}
-                        <span className="font-medium text-gray-900">{t.totalLocations}</span>{" "}
-                        <span className="text-gray-500">
-                          · radius {(t.radiusMeters / 1000).toFixed(1)}km
-                        </span>
+                    <div className="text-xs text-gray-700 space-y-2 flex-1">
+                      <div className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">
+                        Campaign Details
                       </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-md bg-green-50 border border-green-100 px-2 py-1.5">
+                          <div className="flex items-center gap-1 text-[10px] text-green-700 font-semibold uppercase tracking-wide">
+                            <LockIcon className="w-3 h-3" /> Radius
+                          </div>
+                          <div className="text-sm font-semibold text-green-800">
+                            {(t.radiusMeters / 1000).toFixed(t.radiusMeters < 1000 ? 2 : 1)} km
+                          </div>
+                        </div>
+                        <div className="rounded-md bg-gray-50 border border-gray-100 px-2 py-1.5">
+                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
+                            Locations
+                          </div>
+                          <div className="text-sm font-semibold text-gray-900">
+                            {t.totalLocations}
+                          </div>
+                        </div>
+                        <div className="rounded-md bg-gray-50 border border-gray-100 px-2 py-1.5">
+                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
+                            Ad Format
+                          </div>
+                          <div className="text-sm font-semibold text-gray-900">{t.format}</div>
+                        </div>
+                        <div className="rounded-md bg-gray-50 border border-gray-100 px-2 py-1.5">
+                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
+                            Total Units
+                          </div>
+                          <div className="text-sm font-semibold text-gray-900">{t.unitCount}</div>
+                        </div>
+                      </div>
+
                       {locEntries.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {locEntries.map(([k, v]) => (
-                            <span
-                              key={k}
-                              className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700"
-                            >
-                              {k} · {v}
-                            </span>
-                          ))}
+                        <div>
+                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mb-1">
+                            Ad Location Types
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {locEntries.map(([k, v]) => (
+                              <span
+                                key={k}
+                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700"
+                              >
+                                {k} · {v}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
                       {unitEntries.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {unitEntries.map(([k, v]) => (
-                            <span
-                              key={k}
-                              className="text-[10px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 border border-green-100"
-                            >
-                              {k} · {v}
-                            </span>
-                          ))}
+                        <div>
+                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mb-1">
+                            Units by Type
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {unitEntries.map(([k, v]) => (
+                              <span
+                                key={k}
+                                className="text-[10px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 border border-green-100"
+                              >
+                                {k} · {v}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
+
 
                     <Button
                       onClick={() => launchFromTarget(t)}
