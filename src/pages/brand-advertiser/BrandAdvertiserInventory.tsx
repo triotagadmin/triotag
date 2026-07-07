@@ -607,41 +607,70 @@ export default function BrandAdvertiserInventory() {
                                     {f.title} units by type
                                   </Label>
                                   <span className="text-xs text-green-700 font-medium">
-                                    Total: {totalUnitsForFormat(f.key)}
+                                    Total: {totalUnitsForFormat(f.key)} ·{" "}
+                                    {fmtPHP(
+                                      SUBTYPES[f.key].reduce(
+                                        (s, sub) =>
+                                          s + priceFor(sub) * (Number(unitCounts[f.key][sub]) || 0),
+                                        0,
+                                      ),
+                                    )}
                                   </span>
                                 </div>
                                 <p className="text-xs text-green-700">
                                   Enter how many units you want per {f.title} placement type within your selected radius. Leave blank for types you don't need.
                                 </p>
                                 <div className="space-y-1.5 pt-1">
-                                  {SUBTYPES[f.key].map((sub) => (
-                                    <div
-                                      key={sub}
-                                      className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
-                                    >
-                                      <Label
-                                        htmlFor={`unit-${f.key}-${sub}`}
-                                        className="text-xs text-green-900 flex-1 min-w-0 truncate"
+                                  {SUBTYPES[f.key].map((sub) => {
+                                    const qty = Number(unitCounts[f.key][sub]) || 0;
+                                    const unitPrice = priceFor(sub);
+                                    const subtotal = unitPrice * qty;
+                                    const priceUnit =
+                                      f.key === "OOH" ? "unit" : "screen / mo";
+                                    return (
+                                      <div
+                                        key={sub}
+                                        className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
                                       >
-                                        {sub}
-                                      </Label>
-                                      <Input
-                                        id={`unit-${f.key}-${sub}`}
-                                        type="number"
-                                        min="0"
-                                        placeholder="0"
-                                        value={unitCounts[f.key][sub] || ""}
-                                        onChange={(e) =>
-                                          setUnitCounts((prev) => ({
-                                            ...prev,
-                                            [f.key]: { ...prev[f.key], [sub]: e.target.value },
-                                          }))
-                                        }
-                                        className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
-                                      />
-                                    </div>
-                                  ))}
+                                        <div className="flex-1 min-w-0">
+                                          <Label
+                                            htmlFor={`unit-${f.key}-${sub}`}
+                                            className="text-xs text-green-900 truncate block"
+                                          >
+                                            {sub}
+                                          </Label>
+                                          <div className="text-[10px] text-green-700/80">
+                                            {fmtPHP(unitPrice)} / {priceUnit}
+                                            {qty > 0 && (
+                                              <>
+                                                {" "}
+                                                ·{" "}
+                                                <span className="font-semibold text-green-800">
+                                                  {fmtPHP(subtotal)}
+                                                </span>
+                                              </>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <Input
+                                          id={`unit-${f.key}-${sub}`}
+                                          type="number"
+                                          min="0"
+                                          placeholder="0"
+                                          value={unitCounts[f.key][sub] || ""}
+                                          onChange={(e) =>
+                                            setUnitCounts((prev) => ({
+                                              ...prev,
+                                              [f.key]: { ...prev[f.key], [sub]: e.target.value },
+                                            }))
+                                          }
+                                          className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
+                                        />
+                                      </div>
+                                    );
+                                  })}
                                 </div>
+
                               </div>
                             </div>
                           )}
