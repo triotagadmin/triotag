@@ -87,6 +87,7 @@ import BookTalent from "./pages/BookTalent";
 import RetailerDashboard from "./pages/retailer/RetailerDashboard";
 import RetailerSelfDashboard from "./pages/RetailerDashboard";
 import RetailerCreatives from "./pages/RetailerCreatives";
+import RetailerInventoryConfig from "./pages/RetailerInventoryConfig";
 import RetailerBookings from "./pages/RetailerBookings";
 import RetailerHouseAds from "./pages/RetailerHouseAds";
 import RetailerScreens from "./pages/RetailerScreens";
