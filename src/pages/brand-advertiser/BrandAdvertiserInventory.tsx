@@ -310,24 +310,47 @@ export default function BrandAdvertiserInventory() {
 
                       {active && (
                         <div className="px-3 pb-3">
-                          <div className="space-y-1.5">
-                            <Label htmlFor={`unit-count-${f.key}`} className="text-sm text-green-900">
-                              How many {f.title} units do you need?
-                            </Label>
-                            <Input
-                              id={`unit-count-${f.key}`}
-                              type="number"
-                              min="0"
-                              placeholder={`Enter how many ${f.title.toLowerCase()} units you want in this campaign radius (e.g. 10)`}
-                              value={unitCounts[f.key]}
-                              onChange={(e) =>
-                                setUnitCounts((prev) => ({ ...prev, [f.key]: e.target.value }))
-                              }
-                              className="text-green-900 placeholder:text-green-700"
-                            />
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-semibold text-green-900">
+                                {f.title} units by type
+                              </Label>
+                              <span className="text-xs text-green-700 font-medium">
+                                Total: {totalUnitsForFormat(f.key)}
+                              </span>
+                            </div>
                             <p className="text-xs text-green-700">
-                              This helps us estimate availability and pricing for {f.title.toLowerCase()} placements within your selected radius.
+                              Enter how many units you want per {f.title} placement type within your selected radius. Leave blank for types you don't need.
                             </p>
+                            <div className="space-y-1.5 pt-1">
+                              {SUBTYPES[f.key].map((sub) => (
+                                <div
+                                  key={sub}
+                                  className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
+                                >
+                                  <Label
+                                    htmlFor={`unit-${f.key}-${sub}`}
+                                    className="text-xs text-green-900 flex-1 min-w-0 truncate"
+                                  >
+                                    {sub}
+                                  </Label>
+                                  <Input
+                                    id={`unit-${f.key}-${sub}`}
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    value={unitCounts[f.key][sub] || ""}
+                                    onChange={(e) =>
+                                      setUnitCounts((prev) => ({
+                                        ...prev,
+                                        [f.key]: { ...prev[f.key], [sub]: e.target.value },
+                                      }))
+                                    }
+                                    className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
+                                  />
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       )}
