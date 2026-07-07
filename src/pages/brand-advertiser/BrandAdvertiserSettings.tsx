@@ -84,12 +84,25 @@ export default function BrandAdvertiserSettings() {
             {loading ? <div className="text-sm text-gray-500">Loading...</div> : (
               <>
                 <div className="space-y-1.5">
+                  <Label className="text-gray-700">Account Email</Label>
+                  <Input value={authEmail} disabled readOnly />
+                  <p className="text-xs text-gray-500">Your sign-in email (cannot be changed here).</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-gray-700">Username</Label>
+                  <Input value={profile.username || ""} onChange={(e) => setProfile({ ...profile, username: e.target.value })} placeholder="e.g. acme_brand" />
+                </div>
+                <div className="space-y-1.5">
                   <Label className="text-gray-700">Company Name</Label>
                   <Input value={profile.company_name || ""} onChange={(e) => setProfile({ ...profile, company_name: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-gray-700">Contact Name</Label>
                   <Input value={profile.contact_name || ""} onChange={(e) => setProfile({ ...profile, contact_name: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-gray-700">Contact Email</Label>
+                  <Input type="email" value={profile.contact_email || ""} onChange={(e) => setProfile({ ...profile, contact_email: e.target.value })} placeholder="billing@company.com" />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-gray-700">Phone</Label>
