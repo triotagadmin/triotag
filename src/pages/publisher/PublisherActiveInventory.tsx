@@ -76,6 +76,8 @@ export default function PublisherActiveInventory() {
       const unique = merged.filter((s: any) => {
         if (seen.has(s.id)) return false;
         seen.add(s.id);
+        // Only include activated inventory (agent_disconnected is false/null)
+        if (s.agent_disconnected === true) return false;
         return true;
       }).sort((a: any, b: any) => {
         const ad = a.approved_at || a.created_at;
