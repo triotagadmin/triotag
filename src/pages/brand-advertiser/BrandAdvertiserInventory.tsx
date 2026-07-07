@@ -74,6 +74,34 @@ const FORMATS: {
   },
 ];
 
+const SUBTYPES: Record<MediaType, string[]> = {
+  OOH: [
+    "Table Tents",
+    "Floor Stickers",
+    "Window Stickers",
+    "Wall Posters",
+    "Wall Decals",
+    "Counter Cards",
+    "Hanging Danglers",
+    "Standees",
+  ],
+  DOOH: [
+    "Indoor LED Screens",
+    "Outdoor LED Billboards",
+    "Digital Menu Boards",
+    "Elevator Screens",
+    "Checkout Counter Screens",
+    "Transit Digital Panels",
+  ],
+  AOOH: [
+    "In-Store Audio Spots",
+    "Radio Ad Insertions",
+    "Ambient Jingles",
+    "PA System Announcements",
+    "Scent / Sensory Ambient",
+  ],
+};
+
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
   const toRad = (v: number) => (v * Math.PI) / 180;
@@ -97,10 +125,10 @@ export default function BrandAdvertiserInventory() {
   const [radiusMeters, setRadiusMeters] = useState(1000);
 
   const [chosenFormat, setChosenFormat] = useState<MediaType | null>(null);
-  const [unitCounts, setUnitCounts] = useState<Record<MediaType, string>>({
-    OOH: "",
-    DOOH: "",
-    AOOH: "",
+  const [unitCounts, setUnitCounts] = useState<Record<MediaType, Record<string, string>>>({
+    OOH: {},
+    DOOH: {},
+    AOOH: {},
   });
   const [rows, setRows] = useState<AdSpaceRow[]>([]);
 
@@ -167,8 +195,12 @@ export default function BrandAdvertiserInventory() {
       ? "TrioTag"
       : r.publisher_profiles?.business_name || "Retail Partner";
 
+  const totalUnitsForFormat = (fmt: MediaType) =>
+    Object.values(unitCounts[fmt]).reduce((sum, v) => sum + (Number(v) || 0), 0);
+
   const submitRegistry = () => {
     if (!chosenFormat) return;
+    const breakdown = unitCounts[chosenFormat];
     navigate("/brand-advertiser/campaigns", {
       state: {
         openWizard: true,
@@ -177,7 +209,12 @@ export default function BrandAdvertiserInventory() {
           radiusMeters,
           center,
           format: chosenFormat,
-          unitCount: Number(unitCounts[chosenFormat]) || 0,
+          unitCount: totalUnitsForFormat(chosenFormat),
+          unitBreakdown: Object.fromEntries(
+            Object.entries(breakdown)
+              .map(([k, v]) => [k, Number(v) || 0])
+              .filter(([, n]) => (n as number) > 0)
+          ),
         },
       },
     });
@@ -273,24 +310,47 @@ export default function BrandAdvertiserInventory() {
 
                       {active && (
                         <div className="px-3 pb-3">
-                          <div className="space-y-1.5">
-                            <Label htmlFor={`unit-count-${f.key}`} className="text-sm text-green-900">
-                              How many {f.title} units do you need?
-                            </Label>
-                            <Input
-                              id={`unit-count-${f.key}`}
-                              type="number"
-                              min="0"
-                              placeholder={`Enter how many ${f.title.toLowerCase()} units you want in this campaign radius (e.g. 10)`}
-                              value={unitCounts[f.key]}
-                              onChange={(e) =>
-                                setUnitCounts((prev) => ({ ...prev, [f.key]: e.target.value }))
-                              }
-                              className="text-green-900 placeholder:text-green-700"
-                            />
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-semibold text-green-900">
+                                {f.title} units by type
+                              </Label>
+                              <span className="text-xs text-green-700 font-medium">
+                                Total: {totalUnitsForFormat(f.key)}
+                              </span>
+                            </div>
                             <p className="text-xs text-green-700">
-                              This helps us estimate availability and pricing for {f.title.toLowerCase()} placements within your selected radius.
+                              Enter how many units you want per {f.title} placement type within your selected radius. Leave blank for types you don't need.
                             </p>
+                            <div className="space-y-1.5 pt-1">
+                              {SUBTYPES[f.key].map((sub) => (
+                                <div
+                                  key={sub}
+                                  className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
+                                >
+                                  <Label
+                                    htmlFor={`unit-${f.key}-${sub}`}
+                                    className="text-xs text-green-900 flex-1 min-w-0 truncate"
+                                  >
+                                    {sub}
+                                  </Label>
+                                  <Input
+                                    id={`unit-${f.key}-${sub}`}
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    value={unitCounts[f.key][sub] || ""}
+                                    onChange={(e) =>
+                                      setUnitCounts((prev) => ({
+                                        ...prev,
+                                        [f.key]: { ...prev[f.key], [sub]: e.target.value },
+                                      }))
+                                    }
+                                    className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
+                                  />
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       )}
