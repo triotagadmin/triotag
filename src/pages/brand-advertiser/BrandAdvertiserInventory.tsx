@@ -146,6 +146,7 @@ export default function BrandAdvertiserInventory() {
         )
         .eq("approval_status", "approved")
         .eq("media_type", chosenFormat)
+        .or("agent_disconnected.is.null,agent_disconnected.eq.false")
         .order("created_at", { ascending: false });
       setRows((data || []) as any);
       setLoadingRows(false);
