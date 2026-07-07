@@ -17,6 +17,8 @@ export default {
         sans: ["Inter", "Helvetica Neue", "sans-serif"],
         display: ["Orbitron", "Inter", "sans-serif"],
         mono: ["JetBrains Mono", "Source Code Pro", "monospace"],
+        "space-grotesk": ["Space Grotesk", "Inter", "sans-serif"],
+        "dm-sans": ["DM Sans", "Inter", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

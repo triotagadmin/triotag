@@ -127,6 +127,7 @@ import BrandAdvertiserAudiences from "./pages/brand-advertiser/BrandAdvertiserAu
 import BrandAdvertiserReports from "./pages/brand-advertiser/BrandAdvertiserReports";
 import BrandAdvertiserChangelog from "./pages/brand-advertiser/BrandAdvertiserChangelog";
 import BrandAdvertiserInventory from "./pages/brand-advertiser/BrandAdvertiserInventory";
+import GoogleAdsServices from "./pages/GoogleAdsServices";
 
 const queryClient = new QueryClient();
 
@@ -309,6 +310,7 @@ const App = () => (
           <Route path="/brand-advertiser/reports" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserReports /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/changelog" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserChangelog /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/settings" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserSettings /></RoleProtectedRoute>} />
+          <Route path="/services/google-ads" element={<GoogleAdsServices />} />
 
           <Route path="/under-construction" element={<UnderConstruction />} />
           <Route path="/careers" element={<UnderConstruction />} />
