@@ -231,6 +231,7 @@ export default function BrandAdvertiserCreatives() {
                 type="file"
                 accept="image/*"
                 multiple
+                className="file:bg-gray-300 file:text-black file:border-0 file:rounded file:px-3 file:py-1 file:cursor-pointer"
                 onChange={(e) => handleFileSelect(e.target.files)}
               />
               {fileError && (
