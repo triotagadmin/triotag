@@ -136,7 +136,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
   const [creativeFormat, setCreativeFormat] = useState("Image");
 
   // Step 4 - creative selection
-  const [creativeSets, setCreativeSets] = useState<Array<{ id: string; title: string; creative_format: string | null; file_url: string | null }>>([]);
+  const [creativeSets, setCreativeSets] = useState<Array<{ id: string; title: string; creative_format: string | null; file_url: string | null; creative_count: number | null }>>([]);
   const [creativeSetId, setCreativeSetId] = useState<string | null>(null);
   const [loadingCreatives, setLoadingCreatives] = useState(false);
 
