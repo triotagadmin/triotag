@@ -243,7 +243,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
                       {endDate ? format(endDate, "MMM d, yyyy") : "Pick a date"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="p-0 bg-white" align="start">
+                  <PopoverContent className="p-0 bg-white text-gray-900" align="start">
                     <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
                   </PopoverContent>
                 </Popover>
