@@ -21,6 +21,10 @@ import {
   Trash2,
   Lock as LockIcon,
   Unlock as UnlockIcon,
+  FolderOpen,
+  FileImage,
+  Video as VideoIcon,
+  Music,
 } from "lucide-react";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
@@ -189,9 +193,14 @@ export default function BrandAdvertiserInventory() {
 
   const [totalLocations, setTotalLocations] = useState<string>("");
   const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, string>>({});
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const [loadingRows, setLoadingRows] = useState(false);
+
+  // Creative sets (step 3)
+  const [creativeSets, setCreativeSets] = useState<any[]>([]);
+  const [loadingCreatives, setLoadingCreatives] = useState(false);
+  const [chosenCreativeSetId, setChosenCreativeSetId] = useState<string | null>(null);
 
   interface SavedTarget {
     id: string;
@@ -203,6 +212,8 @@ export default function BrandAdvertiserInventory() {
     locationTypes: Record<string, number>;
     radiusMeters: number;
     center: { lat: number; lng: number };
+    creativeSetId?: string | null;
+    creativeSetTitle?: string | null;
   }
   const [savedTargets, setSavedTargets] = useState<SavedTarget[]>(() => {
     try {
@@ -226,10 +237,20 @@ export default function BrandAdvertiserInventory() {
       if (session?.user) {
         const { data: profile } = await supabase
           .from("brand_advertiser_profiles")
-          .select("company_name")
+          .select("id, company_name")
           .eq("user_id", session.user.id)
           .maybeSingle();
         if (profile?.company_name) setCompanyName(profile.company_name);
+        if (profile?.id) {
+          setLoadingCreatives(true);
+          const { data: sets } = await supabase
+            .from("brand_creative_sets" as any)
+            .select("*")
+            .eq("brand_advertiser_id", profile.id)
+            .order("created_at", { ascending: false });
+          setCreativeSets(sets || []);
+          setLoadingCreatives(false);
+        }
       }
     })();
   }, []);
@@ -297,6 +318,7 @@ export default function BrandAdvertiserInventory() {
         .map(([k, v]) => [k, Number(v) || 0])
         .filter(([, n]) => (n as number) > 0),
     ) as Record<string, number>;
+    const chosenSet = creativeSets.find((s) => s.id === chosenCreativeSetId);
     const target: SavedTarget = {
       id: (crypto as any).randomUUID?.() || String(Date.now()),
       createdAt: Date.now(),
@@ -307,6 +329,8 @@ export default function BrandAdvertiserInventory() {
       locationTypes,
       radiusMeters,
       center,
+      creativeSetId: chosenCreativeSetId,
+      creativeSetTitle: chosenSet?.title || null,
     };
     setSavedTargets((prev) => [target, ...prev]);
     // Reset wizard for a fresh save
@@ -314,6 +338,8 @@ export default function BrandAdvertiserInventory() {
     setUnitCounts({ OOH: {}, DOOH: {}, AOOH: {} });
     setSelectedLocationTypes({});
     setTotalLocations("");
+    setChosenCreativeSetId(null);
+    setRadiusLocked(false);
     setStep(1);
   };
 
@@ -330,6 +356,8 @@ export default function BrandAdvertiserInventory() {
           unitBreakdown: t.unitBreakdown,
           totalLocations: t.totalLocations,
           locationTypes: t.locationTypes,
+          creativeSetId: t.creativeSetId,
+          creativeSetTitle: t.creativeSetTitle,
         },
       },
     });
@@ -428,34 +456,103 @@ export default function BrandAdvertiserInventory() {
                 <div className="flex-1 min-w-0">
                   <h2 className="text-lg font-bold text-gray-900 leading-tight">Unit Registry</h2>
                   <p className="text-xs text-gray-500">
-                    {step === 1 ? "Step 1 of 2 — Ad locations & venue types" : "Step 2 of 2 — Ad format & units"}
+                    {step === 1
+                      ? "Step 1 of 3 — Radius & pin location"
+                      : step === 2
+                      ? "Step 2 of 3 — Ad locations & format"
+                      : "Step 3 of 3 — Creative set"}
                   </p>
                 </div>
               </div>
 
               {/* Step indicator */}
               <div className="flex items-center gap-2 mb-4">
-                {[1, 2].map((n) => (
+                {[1, 2, 3].map((n) => (
                   <div key={n} className="flex-1 flex items-center gap-2">
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
-                        step >= (n as 1 | 2)
+                        step >= (n as 1 | 2 | 3)
                           ? "bg-green-600 text-white"
                           : "bg-gray-200 text-gray-500"
                       }`}
                     >
-                      {step > (n as 1 | 2) ? <Check className="w-3.5 h-3.5" /> : n}
+                      {step > (n as 1 | 2 | 3) ? <Check className="w-3.5 h-3.5" /> : n}
                     </div>
-                    <div
-                      className={`flex-1 h-1 rounded-full ${
-                        step > (n as 1 | 2) ? "bg-green-600" : "bg-gray-200"
-                      }`}
-                    />
+                    {n < 3 && (
+                      <div
+                        className={`flex-1 h-1 rounded-full ${
+                          step > (n as 1 | 2 | 3) ? "bg-green-600" : "bg-gray-200"
+                        }`}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
 
               {step === 1 && (
+                <>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-900">
+                        Radius & pin location
+                      </Label>
+                      <p className="text-xs text-gray-500 mb-2">
+                        Drop the pin on the map and lock the coverage radius. This defines where your campaign runs.
+                      </p>
+                    </div>
+
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-600">Pin location</span>
+                        <span className="text-xs font-mono text-gray-900">
+                          {center.lat.toFixed(4)}, {center.lng.toFixed(4)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-600">Radius</span>
+                        <span className="text-sm font-semibold text-green-700">
+                          {(radiusMeters / 1000).toFixed(radiusMeters < 1000 ? 2 : 1)} km
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-600">Reach fee</span>
+                        <span className="text-sm font-semibold text-gray-900">
+                          ₱{estimate.radiusFee.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`rounded-md border px-3 py-2 flex items-center gap-2 ${
+                        radiusLocked
+                          ? "bg-green-50 border-green-300 text-green-800"
+                          : "bg-amber-50 border-amber-200 text-amber-800"
+                      }`}
+                    >
+                      {radiusLocked ? (
+                        <LockIcon className="w-4 h-4 shrink-0" />
+                      ) : (
+                        <UnlockIcon className="w-4 h-4 shrink-0" />
+                      )}
+                      <span className="text-xs">
+                        {radiusLocked
+                          ? "Radius locked — you can proceed to Unit Registry."
+                          : "Lock the radius on the map to continue."}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => setStep(2)}
+                    disabled={!radiusLocked}
+                    className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white"
+                  >
+                    Next: Unit Registry <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </>
+              )}
+
+              {step === 2 && (
                 <>
                   <div className="space-y-3">
                     <div>
@@ -537,225 +634,266 @@ export default function BrandAdvertiserInventory() {
                         )}
                       </span>
                     </div>
+
+                    <div className="pt-2">
+                      <Label className="text-sm font-semibold text-gray-900">Ad format</Label>
+                      <p className="text-xs text-gray-500 mb-2">
+                        Pick one format and enter units per placement type.
+                      </p>
+                    </div>
+
+                    {/* Format picker */}
+                    <div className="space-y-2">
+                      {FORMATS.map((f) => {
+                        const Icon = f.icon;
+                        const active = chosenFormat === f.key;
+                        return (
+                          <div
+                            key={f.key}
+                            className={`w-full rounded-xl border-2 transition-all overflow-hidden ${
+                              active
+                                ? `${f.border} ${f.bg}`
+                                : "border-gray-200 hover:border-gray-300 bg-white"
+                            }`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setChosenFormat(f.key)}
+                              className="w-full text-left p-3 flex items-center gap-3"
+                            >
+                              <div
+                                className={`w-10 h-10 rounded-lg ${f.bg} flex items-center justify-center shrink-0`}
+                              >
+                                <Icon className={`w-5 h-5 ${f.iconColor}`} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-sm font-semibold text-gray-900">{f.title}</div>
+                                <div className="text-xs text-gray-500">{f.desc}</div>
+                              </div>
+                              <div
+                                className={`w-4 h-4 rounded-full border-2 ${
+                                  active ? "border-green-600 bg-green-600" : "border-gray-300"
+                                }`}
+                              />
+                            </button>
+
+                            {active && (
+                              <div className="px-3 pb-3">
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <Label className="text-sm font-semibold text-green-900">
+                                      {f.title} units by type
+                                    </Label>
+                                    <span className="text-xs text-green-700 font-medium">
+                                      Total: {totalUnitsForFormat(f.key)} ·{" "}
+                                      {fmtPHP(
+                                        SUBTYPES[f.key].reduce(
+                                          (s, sub) =>
+                                            s + priceFor(sub) * (Number(unitCounts[f.key][sub]) || 0),
+                                          0,
+                                        ),
+                                      )}
+                                    </span>
+                                  </div>
+                                  <div className="space-y-1.5 pt-1">
+                                    {SUBTYPES[f.key].map((sub) => {
+                                      const qty = Number(unitCounts[f.key][sub]) || 0;
+                                      const unitPrice = priceFor(sub);
+                                      const subtotal = unitPrice * qty;
+                                      const priceUnit =
+                                        f.key === "OOH" ? "unit" : "screen / mo";
+                                      return (
+                                        <div
+                                          key={sub}
+                                          className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
+                                        >
+                                          <div className="flex-1 min-w-0">
+                                            <Label
+                                              htmlFor={`unit-${f.key}-${sub}`}
+                                              className="text-xs text-green-900 truncate block"
+                                            >
+                                              {sub}
+                                            </Label>
+                                            <div className="text-[10px] text-green-700/80">
+                                              {fmtPHP(unitPrice)} / {priceUnit}
+                                              {qty > 0 && (
+                                                <>
+                                                  {" "}
+                                                  ·{" "}
+                                                  <span className="font-semibold text-green-800">
+                                                    {fmtPHP(subtotal)}
+                                                  </span>
+                                                </>
+                                              )}
+                                            </div>
+                                          </div>
+                                          <Input
+                                            id={`unit-${f.key}-${sub}`}
+                                            type="number"
+                                            min="0"
+                                            placeholder="0"
+                                            value={unitCounts[f.key][sub] || ""}
+                                            onChange={(e) =>
+                                              setUnitCounts((prev) => ({
+                                                ...prev,
+                                                [f.key]: { ...prev[f.key], [sub]: e.target.value },
+                                              }))
+                                            }
+                                            className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
+                                          />
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <Button
-                    onClick={() => {
-                      const total = Object.values(selectedLocationTypes).reduce(
-                        (s, v) => s + (Number(v) || 0),
-                        0,
-                      );
-                      setTotalLocations(String(total));
-                      setStep(2);
-                    }}
-                    disabled={
-                      Object.keys(selectedLocationTypes).length === 0 ||
-                      Object.values(selectedLocationTypes).reduce(
-                        (s, v) => s + (Number(v) || 0),
-                        0,
-                      ) === 0
-                    }
-                    className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white"
-                  >
-                    Next: Ad format <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
+                  <div className="flex gap-2 mt-4">
+                    <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                      <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const total = Object.values(selectedLocationTypes).reduce(
+                          (s, v) => s + (Number(v) || 0),
+                          0,
+                        );
+                        setTotalLocations(String(total));
+                        setStep(3);
+                      }}
+                      disabled={
+                        Object.keys(selectedLocationTypes).length === 0 ||
+                        Object.values(selectedLocationTypes).reduce(
+                          (s, v) => s + (Number(v) || 0),
+                          0,
+                        ) === 0 ||
+                        !chosenFormat ||
+                        totalUnitsForFormat(chosenFormat) === 0
+                      }
+                      className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
+                    >
+                      Next: Creative set <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
                 </>
               )}
 
-              {step === 2 && (
+              {step === 3 && (
                 <>
-                  {/* Format picker — single choice with unit input inside selected card */}
-                  <div className="space-y-2">
-                    {FORMATS.map((f) => {
-                      const Icon = f.icon;
-                      const active = chosenFormat === f.key;
-                      return (
-                        <div
-                          key={f.key}
-                          className={`w-full rounded-xl border-2 transition-all overflow-hidden ${
-                            active
-                              ? `${f.border} ${f.bg}`
-                              : "border-gray-200 hover:border-gray-300 bg-white"
-                          }`}
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-900">
+                        Select a creative set
+                      </Label>
+                      <p className="text-xs text-gray-500 mb-2">
+                        Pick from creatives uploaded on the{" "}
+                        <button
+                          type="button"
+                          onClick={() => navigate("/brand-advertiser/creatives")}
+                          className="text-green-700 font-medium underline hover:text-green-800"
                         >
-                          <button
-                            type="button"
-                            onClick={() => setChosenFormat(f.key)}
-                            className="w-full text-left p-3 flex items-center gap-3"
+                          Creatives
+                        </button>{" "}
+                        page.
+                      </p>
+                    </div>
+
+                    <div className="max-h-[360px] overflow-y-auto -mx-1 px-1 space-y-2">
+                      {loadingCreatives ? (
+                        <div className="text-center text-gray-500 py-6 text-sm">Loading…</div>
+                      ) : creativeSets.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center bg-gray-50">
+                          <FolderOpen className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                          <p className="text-xs text-gray-600 mb-3">
+                            No creative sets yet. Upload one first to continue.
+                          </p>
+                          <Button
+                            size="sm"
+                            onClick={() => navigate("/brand-advertiser/creatives")}
+                            className="bg-green-600 hover:bg-green-500 text-white"
                           >
-                            <div
-                              className={`w-10 h-10 rounded-lg ${f.bg} flex items-center justify-center shrink-0`}
-                            >
-                              <Icon className={`w-5 h-5 ${f.iconColor}`} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="text-sm font-semibold text-gray-900">{f.title}</div>
-                              <div className="text-xs text-gray-500">{f.desc}</div>
-                            </div>
-                            <div
-                              className={`w-4 h-4 rounded-full border-2 ${
-                                active ? "border-green-600 bg-green-600" : "border-gray-300"
-                              }`}
-                            />
-                          </button>
-
-                          {active && (
-                            <div className="px-3 pb-3">
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-sm font-semibold text-green-900">
-                                    {f.title} units by type
-                                  </Label>
-                                  <span className="text-xs text-green-700 font-medium">
-                                    Total: {totalUnitsForFormat(f.key)} ·{" "}
-                                    {fmtPHP(
-                                      SUBTYPES[f.key].reduce(
-                                        (s, sub) =>
-                                          s + priceFor(sub) * (Number(unitCounts[f.key][sub]) || 0),
-                                        0,
-                                      ),
-                                    )}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-green-700">
-                                  Enter how many units you want per {f.title} placement type within your selected radius. Leave blank for types you don't need.
-                                </p>
-                                <div className="space-y-1.5 pt-1">
-                                  {SUBTYPES[f.key].map((sub) => {
-                                    const qty = Number(unitCounts[f.key][sub]) || 0;
-                                    const unitPrice = priceFor(sub);
-                                    const subtotal = unitPrice * qty;
-                                    const priceUnit =
-                                      f.key === "OOH" ? "unit" : "screen / mo";
-                                    return (
-                                      <div
-                                        key={sub}
-                                        className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
-                                      >
-                                        <div className="flex-1 min-w-0">
-                                          <Label
-                                            htmlFor={`unit-${f.key}-${sub}`}
-                                            className="text-xs text-green-900 truncate block"
-                                          >
-                                            {sub}
-                                          </Label>
-                                          <div className="text-[10px] text-green-700/80">
-                                            {fmtPHP(unitPrice)} / {priceUnit}
-                                            {qty > 0 && (
-                                              <>
-                                                {" "}
-                                                ·{" "}
-                                                <span className="font-semibold text-green-800">
-                                                  {fmtPHP(subtotal)}
-                                                </span>
-                                              </>
-                                            )}
-                                          </div>
-                                        </div>
-                                        <Input
-                                          id={`unit-${f.key}-${sub}`}
-                                          type="number"
-                                          min="0"
-                                          placeholder="0"
-                                          value={unitCounts[f.key][sub] || ""}
-                                          onChange={(e) =>
-                                            setUnitCounts((prev) => ({
-                                              ...prev,
-                                              [f.key]: { ...prev[f.key], [sub]: e.target.value },
-                                            }))
-                                          }
-                                          className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
-                                        />
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-
-                              </div>
-                            </div>
-                          )}
+                            Go to Creatives
+                          </Button>
                         </div>
-                      );
-                    })}
+                      ) : (
+                        creativeSets.map((s: any) => {
+                          const active = chosenCreativeSetId === s.id;
+                          const FmtIcon =
+                            s.creative_format === "video"
+                              ? VideoIcon
+                              : s.creative_format === "audio"
+                              ? Music
+                              : FileImage;
+                          return (
+                            <button
+                              key={s.id}
+                              type="button"
+                              onClick={() => setChosenCreativeSetId(s.id)}
+                              className={`w-full text-left rounded-lg border-2 p-3 flex items-center gap-3 transition-all ${
+                                active
+                                  ? "border-green-500 bg-green-50"
+                                  : "border-gray-200 hover:border-gray-300 bg-white"
+                              }`}
+                            >
+                              <div
+                                className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                                  active ? "bg-green-100" : "bg-gray-100"
+                                }`}
+                              >
+                                <FmtIcon
+                                  className={`w-5 h-5 ${
+                                    active ? "text-green-700" : "text-gray-600"
+                                  }`}
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-semibold text-gray-900 truncate">
+                                  {s.title}
+                                </div>
+                                <div className="text-xs text-gray-500 capitalize">
+                                  {s.creative_format} · {s.creative_count || 0} file
+                                  {(s.creative_count || 0) === 1 ? "" : "s"}
+                                </div>
+                              </div>
+                              <div
+                                className={`w-4 h-4 rounded-full border-2 shrink-0 ${
+                                  active ? "border-green-600 bg-green-600" : "border-gray-300"
+                                }`}
+                              />
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
 
-                  {/* Inventory in radius for selected format */}
-                  {chosenFormat && selectedFormatMeta && (
-                    <div className="mt-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                          Inventory in radius
-                        </div>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 border-green-200 text-green-700"
-                        >
-                          {loadingRows
-                            ? "…"
-                            : `${matches.length} match${matches.length === 1 ? "" : "es"}`}
-                        </Badge>
-                      </div>
-                      <div className="max-h-[280px] overflow-y-auto -mx-1 px-1 space-y-2">
-                        {loadingRows ? (
-                          <div className="text-center text-gray-500 py-6 text-sm">Loading…</div>
-                        ) : matches.length === 0 ? (
-                          <div className="rounded-xl border border-dashed border-gray-300 p-4 text-center bg-gray-50">
-                            <SearchIcon className="w-6 h-6 text-gray-300 mx-auto mb-1.5" />
-                            <p className="text-xs text-gray-600">
-                              No approved {chosenFormat} inventory in this radius yet — adjust the
-                              map or continue anyway.
-                            </p>
-                          </div>
-                        ) : (
-                          matches.map(({ row: r, distance }) => (
-                            <div
-                              key={r.id}
-                              className="rounded-lg border border-gray-200 p-2.5 bg-white"
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="text-xs text-gray-500 truncate">
-                                  {displayBusinessName(r)}
-                                </div>
-                                <div className="text-[11px] text-green-700 font-medium whitespace-nowrap">
-                                  {distanceLabel(distance)}
-                                </div>
-                              </div>
-                              {r.location && (
-                                <div className="flex items-center gap-1 text-xs text-gray-900 font-medium mt-0.5">
-                                  <MapPin className="w-3 h-3 shrink-0" />
-                                  <span className="truncate">{r.location}</span>
-                                </div>
-                              )}
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
-
                   <div className="flex gap-2 mt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => setStep(1)}
-                      className="flex-1"
-                    >
+                    <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
                       <ArrowLeft className="w-4 h-4 mr-1" /> Back
                     </Button>
                     <Button
                       onClick={submitRegistry}
-                      disabled={!chosenFormat || !radiusLocked}
+                      disabled={!chosenFormat || !radiusLocked || !chosenCreativeSetId}
                       className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
                     >
                       <Save className="w-4 h-4 mr-1" /> Save Inventory Target
                     </Button>
                   </div>
                   <p className="text-[11px] text-gray-500 text-center mt-2">
-                    {radiusLocked
-                      ? "Saved targets appear below and can be launched as campaigns anytime."
-                      : "Lock the radius on the left to enable saving."}
+                    {!radiusLocked
+                      ? "Radius must be locked (Step 1)."
+                      : !chosenCreativeSetId
+                      ? "Select a creative set to save."
+                      : "Saved targets appear below and can be launched as campaigns anytime."}
                   </p>
-
                 </>
+
               )}
             </Card>
           </div>
@@ -854,6 +992,20 @@ export default function BrandAdvertiserInventory() {
                           <div className="text-sm font-semibold text-gray-900">{t.unitCount}</div>
                         </div>
                       </div>
+
+                      {t.creativeSetTitle && (
+                        <div className="rounded-md bg-blue-50 border border-blue-100 px-2 py-1.5 flex items-center gap-1.5">
+                          <FolderOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[10px] text-blue-700 font-semibold uppercase tracking-wide">
+                              Creative Set
+                            </div>
+                            <div className="text-xs font-semibold text-blue-900 truncate">
+                              {t.creativeSetTitle}
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {locEntries.length > 0 && (
                         <div>
