@@ -894,7 +894,7 @@ export default function BrandAdvertiserInventory() {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
+                    <Button variant="outline" onClick={() => setStep(3)} className="flex-1">
                       <ArrowLeft className="w-4 h-4 mr-1" /> Back
                     </Button>
                     <Button
