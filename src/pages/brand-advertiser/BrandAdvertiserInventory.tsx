@@ -212,9 +212,12 @@ export default function BrandAdvertiserInventory() {
   };
 
   const continueToCampaign = () => {
-    if (selectedIds.length === 0) return;
     navigate("/brand-advertiser/campaigns", {
-      state: { openWizard: true, adSpaceIds: selectedIds },
+      state: {
+        openWizard: true,
+        adSpaceIds: selectedIds,
+        prefill: { format: chosenFormat, radiusMeters },
+      },
     });
   };
 
@@ -333,7 +336,7 @@ export default function BrandAdvertiserInventory() {
                           No approved {chosenFormat} inventory found in this area
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          Try increasing the radius using the slider on the map.
+                          Selecting inventory is optional — you can launch a campaign with just your radius and {chosenFormat} format. Adjust the radius on the map to see more matches.
                         </p>
                       </div>
                     ) : (
@@ -379,11 +382,16 @@ export default function BrandAdvertiserInventory() {
 
                   <Button
                     onClick={() => setWizardStep(3)}
-                    disabled={selectedIds.length === 0}
                     className="w-full bg-green-600 hover:bg-green-500 text-white"
                   >
-                    Continue with {selectedIds.length} selected <ArrowRight className="w-4 h-4 ml-1" />
+                    {selectedIds.length === 0
+                      ? `Continue without selecting inventory`
+                      : `Continue with ${selectedIds.length} selected`}
+                    <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
+                  <p className="text-[11px] text-gray-500 text-center">
+                    Selecting inventory is optional. Radius + {chosenFormat} format are all you need to launch.
+                  </p>
                 </div>
               )}
 
@@ -401,11 +409,13 @@ export default function BrandAdvertiserInventory() {
                     <div className="flex items-center gap-2 mb-1">
                       <Building2 className="w-4 h-4 text-green-700" />
                       <div className="text-sm font-semibold text-green-900">
-                        {selectedIds.length} ad space{selectedIds.length === 1 ? "" : "s"} selected
+                        {chosenFormat} campaign · {(radiusMeters / 1000).toFixed(radiusMeters < 10000 ? 2 : 1)} km radius
                       </div>
                     </div>
                     <p className="text-xs text-green-800">
-                      We'll pre-populate the campaign wizard with these inventory selections.
+                      {selectedIds.length > 0
+                        ? `${selectedIds.length} ad space${selectedIds.length === 1 ? "" : "s"} will be attached as reference. You can adjust locations and units in the next step.`
+                        : "No inventory attached — that's fine. You'll set your target location count and unit mix in the next step."}
                     </p>
                   </div>
                   <Button
