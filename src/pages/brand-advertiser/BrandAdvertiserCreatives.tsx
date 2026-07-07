@@ -195,33 +195,33 @@ export default function BrandAdvertiserCreatives() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Folder Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Format</TableHead>
-                <TableHead>Photos</TableHead>
-                <TableHead>Last Updated</TableHead>
+                <TableHead className="text-black">ID</TableHead>
+                <TableHead className="text-black">Folder Name</TableHead>
+                <TableHead className="text-black">Status</TableHead>
+                <TableHead className="text-black">Format</TableHead>
+                <TableHead className="text-black">Photos</TableHead>
+                <TableHead className="text-black">Last Updated</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-gray-500 py-8">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-black py-8">Loading...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-gray-500 py-8">No creative sets yet</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-black py-8">No creative sets yet</TableCell></TableRow>
               ) : filtered.map((s) => (
                 <TableRow key={s.id}>
-                  <TableCell className="font-mono text-xs">{String(s.id).slice(0, 8)}</TableCell>
-                  <TableCell className="font-medium">{s.title}</TableCell>
+                  <TableCell className="font-mono text-xs text-black">{String(s.id).slice(0, 8)}</TableCell>
+                  <TableCell className="font-medium text-black">{s.title}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={s.status === "active" ? "bg-green-100 text-green-700 border-green-200" : "bg-gray-100 text-gray-600 border-gray-200"}>
+                    <Badge variant="outline" className={s.status === "active" ? "bg-green-100 text-black border-green-200" : "bg-gray-100 text-black border-gray-200"}>
                       {s.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 capitalize">{s.creative_format}</Badge>
+                    <Badge variant="outline" className="bg-blue-50 text-black border-blue-200 capitalize">{s.creative_format}</Badge>
                   </TableCell>
-                  <TableCell>{s.creative_count ?? 0} photo{(s.creative_count ?? 0) === 1 ? "" : "s"}</TableCell>
-                  <TableCell className="text-sm text-gray-500">{s.updated_at ? format(new Date(s.updated_at), "MMM d, yyyy") : "—"}</TableCell>
+                  <TableCell className="text-black">{s.creative_count ?? 0} photo{(s.creative_count ?? 0) === 1 ? "" : "s"}</TableCell>
+                  <TableCell className="text-sm text-black">{s.updated_at ? format(new Date(s.updated_at), "MMM d, yyyy") : "—"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
