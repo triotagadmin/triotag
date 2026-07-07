@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
+import { calculateMediaPlanEstimate } from "@/lib/mediaPlanPricing";
 
 // NOTE: ad_spaces registered before the latitude/longitude migration will have
 // null coordinates and won't appear in radius results — this is expected until
