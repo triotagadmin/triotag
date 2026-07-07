@@ -332,13 +332,15 @@ export default function BrandAdvertiserInventory() {
                                   {distanceLabel(distance)}
                                 </div>
                               </div>
-                              <div className="font-semibold text-sm text-gray-900 truncate">{r.title}</div>
                               {r.location && (
-                                <div className="flex items-center gap-1 text-xs text-gray-600 mt-0.5">
+                                <div className="flex items-center gap-1 text-xs text-gray-900 font-medium">
                                   <MapPin className="w-3 h-3 shrink-0" />
                                   <span className="truncate">{r.location}</span>
                                 </div>
                               )}
+                              <div className="text-xs text-gray-600 mt-0.5 truncate">
+                                {formatsLabel(r)}
+                              </div>
                               <div className="text-xs font-medium text-gray-800 mt-1">
                                 {priceLabel(r)}
                               </div>
