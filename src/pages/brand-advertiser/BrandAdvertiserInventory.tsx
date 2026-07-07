@@ -161,6 +161,33 @@ export default function BrandAdvertiserInventory() {
 
   const [loadingRows, setLoadingRows] = useState(false);
 
+  interface SavedTarget {
+    id: string;
+    createdAt: number;
+    format: MediaType;
+    unitBreakdown: Record<string, number>;
+    unitCount: number;
+    totalLocations: number;
+    locationTypes: Record<string, number>;
+    radiusMeters: number;
+    center: { lat: number; lng: number };
+  }
+  const [savedTargets, setSavedTargets] = useState<SavedTarget[]>(() => {
+    try {
+      const raw = localStorage.getItem("ba_saved_inventory_targets");
+      return raw ? (JSON.parse(raw) as SavedTarget[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("ba_saved_inventory_targets", JSON.stringify(savedTargets));
+    } catch {}
+  }, [savedTargets]);
+
+
   useEffect(() => {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
