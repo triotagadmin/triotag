@@ -1175,6 +1175,44 @@ export type Database = {
           },
         ]
       }
+      brand_creative_set_files: {
+        Row: {
+          created_at: string
+          creative_set_id: string
+          file_name: string
+          file_size_bytes: number
+          file_url: string
+          id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          creative_set_id: string
+          file_name: string
+          file_size_bytes: number
+          file_url: string
+          id?: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          creative_set_id?: string
+          file_name?: string
+          file_size_bytes?: number
+          file_url?: string
+          id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_creative_set_files_creative_set_id_fkey"
+            columns: ["creative_set_id"]
+            isOneToOne: false
+            referencedRelation: "brand_creative_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_creative_sets: {
         Row: {
           brand_advertiser_id: string
