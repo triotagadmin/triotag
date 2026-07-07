@@ -637,7 +637,40 @@ export default function BrandAdvertiserInventory() {
                       </span>
                     </div>
 
-                    <div className="pt-2">
+                  </div>
+
+                  <div className="flex gap-2 mt-4">
+                    <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                      <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const total = Object.values(selectedLocationTypes).reduce(
+                          (s, v) => s + (Number(v) || 0),
+                          0,
+                        );
+                        setTotalLocations(String(total));
+                        setStep(3);
+                      }}
+                      disabled={
+                        Object.keys(selectedLocationTypes).length === 0 ||
+                        Object.values(selectedLocationTypes).reduce(
+                          (s, v) => s + (Number(v) || 0),
+                          0,
+                        ) === 0
+                      }
+                      className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
+                    >
+                      Next: Ad format <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {step === 3 && (
+                <>
+                  <div className="space-y-3">
+                    <div>
                       <Label className="text-sm font-semibold text-gray-900">Ad format</Label>
                       <p className="text-xs text-gray-500 mb-2">
                         Pick one format and enter units per placement type.
@@ -757,27 +790,12 @@ export default function BrandAdvertiserInventory() {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                    <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
                       <ArrowLeft className="w-4 h-4 mr-1" /> Back
                     </Button>
                     <Button
-                      onClick={() => {
-                        const total = Object.values(selectedLocationTypes).reduce(
-                          (s, v) => s + (Number(v) || 0),
-                          0,
-                        );
-                        setTotalLocations(String(total));
-                        setStep(3);
-                      }}
-                      disabled={
-                        Object.keys(selectedLocationTypes).length === 0 ||
-                        Object.values(selectedLocationTypes).reduce(
-                          (s, v) => s + (Number(v) || 0),
-                          0,
-                        ) === 0 ||
-                        !chosenFormat ||
-                        totalUnitsForFormat(chosenFormat) === 0
-                      }
+                      onClick={() => setStep(4)}
+                      disabled={!chosenFormat || totalUnitsForFormat(chosenFormat) === 0}
                       className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
                     >
                       Next: Creative set <ArrowRight className="w-4 h-4 ml-1" />
@@ -786,7 +804,7 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {step === 3 && (
+              {step === 4 && (
                 <>
                   <div className="space-y-3">
                     <div>
