@@ -685,15 +685,18 @@ export default function BrandAdvertiserInventory() {
                     </Button>
                     <Button
                       onClick={submitRegistry}
-                      disabled={!chosenFormat}
+                      disabled={!chosenFormat || !radiusLocked}
                       className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
                     >
                       <Save className="w-4 h-4 mr-1" /> Save Inventory Target
                     </Button>
                   </div>
                   <p className="text-[11px] text-gray-500 text-center mt-2">
-                    Saved targets appear below and can be launched as campaigns anytime.
+                    {radiusLocked
+                      ? "Saved targets appear below and can be launched as campaigns anytime."
+                      : "Lock the radius on the left to enable saving."}
                   </p>
+
                 </>
               )}
             </Card>
