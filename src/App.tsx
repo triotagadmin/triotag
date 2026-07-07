@@ -87,6 +87,7 @@ import BookTalent from "./pages/BookTalent";
 import RetailerDashboard from "./pages/retailer/RetailerDashboard";
 import RetailerSelfDashboard from "./pages/RetailerDashboard";
 import RetailerCreatives from "./pages/RetailerCreatives";
+import RetailerInventoryConfig from "./pages/RetailerInventoryConfig";
 import RetailerBookings from "./pages/RetailerBookings";
 import RetailerHouseAds from "./pages/RetailerHouseAds";
 import RetailerScreens from "./pages/RetailerScreens";
@@ -170,6 +171,7 @@ const App = () => (
           
           <Route path="/retailer-dashboard" element={<RetailerSelfDashboard />} />
           <Route path="/retailer-dashboard/creatives" element={<RetailerCreatives />} />
+          <Route path="/retailer-dashboard/inventory/:spaceId" element={<RetailerInventoryConfig />} />
           <Route path="/retailer-dashboard/bookings" element={<RetailerBookings />} />
           <Route path="/retailer-dashboard/house-ads" element={<RetailerHouseAds />} />
           <Route path="/retailer-dashboard/screens" element={<RetailerScreens />} />

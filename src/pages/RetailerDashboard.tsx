@@ -353,7 +353,7 @@ const RetailerDashboard = () => {
                     <div><div className="text-xs text-zinc-500">Plays</div><div className="font-bold text-green-600">{(spaceStats[s.id]?.plays || 0).toLocaleString()}</div></div>
                     <div><div className="text-xs text-zinc-500">₱ Month</div><div className="font-bold text-green-600">{Math.round(spaceStats[s.id]?.revenue || 0).toLocaleString()}</div></div>
                   </div>
-                  <Link to={`/retailer-dashboard/creatives?space=${s.id}`}>
+                  <Link to={`/retailer-dashboard/inventory/${s.id}`}>
                     <Button variant="outline" size="sm" className="w-full border-green-500 text-green-600 hover:bg-green-50">Manage</Button>
                   </Link>
                   {(() => {
