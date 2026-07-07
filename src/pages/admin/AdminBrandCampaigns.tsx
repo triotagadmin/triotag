@@ -270,7 +270,7 @@ export default function AdminBrandCampaigns() {
 
       {/* Detail dialog */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white text-gray-900">
           {selected && (
             <>
               <DialogHeader>
@@ -365,7 +365,7 @@ export default function AdminBrandCampaigns() {
 
       {/* Reject dialog */}
       <Dialog open={!!rejectTarget} onOpenChange={(o) => !o && setRejectTarget(null)}>
-        <DialogContent className="max-w-md bg-white">
+        <DialogContent className="max-w-md bg-white text-gray-900">
           <DialogHeader>
             <DialogTitle>Reject Campaign</DialogTitle>
             <DialogDescription>

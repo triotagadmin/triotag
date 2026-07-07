@@ -139,7 +139,7 @@ export default function BrandAdvertiserCreatives() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-white">
+        <DialogContent className="bg-white text-gray-900">
           <DialogHeader><DialogTitle>Add Creative Set</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">

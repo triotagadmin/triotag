@@ -89,7 +89,7 @@ export default function BrandAdvertiserReports() {
                   {format(dateFrom, "d MMM")} - {format(dateTo, "d MMM")}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="p-0 bg-white" align="start">
+              <PopoverContent className="p-0 bg-white text-gray-900" align="start">
                 <Calendar mode="range" selected={{ from: dateFrom, to: dateTo }}
                   onSelect={(r: any) => { if (r?.from) setDateFrom(r.from); if (r?.to) setDateTo(r.to); }} initialFocus />
               </PopoverContent>

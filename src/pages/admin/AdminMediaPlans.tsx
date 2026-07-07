@@ -234,7 +234,7 @@ export default function AdminMediaPlans() {
       </div>
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white text-gray-900">
           {selected && (
             <>
               <DialogHeader>
