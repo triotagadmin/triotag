@@ -237,10 +237,20 @@ export default function BrandAdvertiserInventory() {
       if (session?.user) {
         const { data: profile } = await supabase
           .from("brand_advertiser_profiles")
-          .select("company_name")
+          .select("id, company_name")
           .eq("user_id", session.user.id)
           .maybeSingle();
         if (profile?.company_name) setCompanyName(profile.company_name);
+        if (profile?.id) {
+          setLoadingCreatives(true);
+          const { data: sets } = await supabase
+            .from("brand_creative_sets" as any)
+            .select("*")
+            .eq("brand_advertiser_id", profile.id)
+            .order("created_at", { ascending: false });
+          setCreativeSets(sets || []);
+          setLoadingCreatives(false);
+        }
       }
     })();
   }, []);
