@@ -68,15 +68,6 @@ const VenueDashboard = () => {
         ascending: false
       });
       setAdSpaces(spacesData || []);
-      const spaceIds = (spacesData || []).map((s: any) => s.id);
-      if (spaceIds.length > 0) {
-        const { data: acts } = await supabase
-          .from("activations")
-          .select("ad_space_id,status")
-          .in("ad_space_id", spaceIds)
-          .in("status", ["approved", "completed"]);
-        setActivatedIds(new Set((acts || []).map((a: any) => a.ad_space_id)));
-      }
       setLoading(false);
     };
     fetchData();
