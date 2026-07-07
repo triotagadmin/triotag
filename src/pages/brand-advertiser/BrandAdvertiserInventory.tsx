@@ -193,7 +193,7 @@ export default function BrandAdvertiserInventory() {
 
   const [totalLocations, setTotalLocations] = useState<string>("");
   const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, string>>({});
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   const [loadingRows, setLoadingRows] = useState(false);
 
@@ -457,31 +457,33 @@ export default function BrandAdvertiserInventory() {
                   <h2 className="text-lg font-bold text-gray-900 leading-tight">Unit Registry</h2>
                   <p className="text-xs text-gray-500">
                     {step === 1
-                      ? "Step 1 of 3 — Radius & pin location"
+                      ? "Step 1 of 4 — Radius & pin location"
                       : step === 2
-                      ? "Step 2 of 3 — Ad locations & format"
-                      : "Step 3 of 3 — Creative set"}
+                      ? "Step 2 of 4 — Ad locations"
+                      : step === 3
+                      ? "Step 3 of 4 — Ad format & units"
+                      : "Step 4 of 4 — Creative set"}
                   </p>
                 </div>
               </div>
 
               {/* Step indicator */}
               <div className="flex items-center gap-2 mb-4">
-                {[1, 2, 3].map((n) => (
+                {[1, 2, 3, 4].map((n) => (
                   <div key={n} className="flex-1 flex items-center gap-2">
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
-                        step >= (n as 1 | 2 | 3)
+                        step >= (n as 1 | 2 | 3 | 4)
                           ? "bg-green-600 text-white"
                           : "bg-gray-200 text-gray-500"
                       }`}
                     >
-                      {step > (n as 1 | 2 | 3) ? <Check className="w-3.5 h-3.5" /> : n}
+                      {step > (n as 1 | 2 | 3 | 4) ? <Check className="w-3.5 h-3.5" /> : n}
                     </div>
-                    {n < 3 && (
+                    {n < 4 && (
                       <div
                         className={`flex-1 h-1 rounded-full ${
-                          step > (n as 1 | 2 | 3) ? "bg-green-600" : "bg-gray-200"
+                          step > (n as 1 | 2 | 3 | 4) ? "bg-green-600" : "bg-gray-200"
                         }`}
                       />
                     )}
@@ -635,7 +637,40 @@ export default function BrandAdvertiserInventory() {
                       </span>
                     </div>
 
-                    <div className="pt-2">
+                  </div>
+
+                  <div className="flex gap-2 mt-4">
+                    <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                      <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const total = Object.values(selectedLocationTypes).reduce(
+                          (s, v) => s + (Number(v) || 0),
+                          0,
+                        );
+                        setTotalLocations(String(total));
+                        setStep(3);
+                      }}
+                      disabled={
+                        Object.keys(selectedLocationTypes).length === 0 ||
+                        Object.values(selectedLocationTypes).reduce(
+                          (s, v) => s + (Number(v) || 0),
+                          0,
+                        ) === 0
+                      }
+                      className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
+                    >
+                      Next: Ad format <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {step === 3 && (
+                <>
+                  <div className="space-y-3">
+                    <div>
                       <Label className="text-sm font-semibold text-gray-900">Ad format</Label>
                       <p className="text-xs text-gray-500 mb-2">
                         Pick one format and enter units per placement type.
@@ -755,27 +790,12 @@ export default function BrandAdvertiserInventory() {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                    <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
                       <ArrowLeft className="w-4 h-4 mr-1" /> Back
                     </Button>
                     <Button
-                      onClick={() => {
-                        const total = Object.values(selectedLocationTypes).reduce(
-                          (s, v) => s + (Number(v) || 0),
-                          0,
-                        );
-                        setTotalLocations(String(total));
-                        setStep(3);
-                      }}
-                      disabled={
-                        Object.keys(selectedLocationTypes).length === 0 ||
-                        Object.values(selectedLocationTypes).reduce(
-                          (s, v) => s + (Number(v) || 0),
-                          0,
-                        ) === 0 ||
-                        !chosenFormat ||
-                        totalUnitsForFormat(chosenFormat) === 0
-                      }
+                      onClick={() => setStep(4)}
+                      disabled={!chosenFormat || totalUnitsForFormat(chosenFormat) === 0}
                       className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
                     >
                       Next: Creative set <ArrowRight className="w-4 h-4 ml-1" />
@@ -784,7 +804,7 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {step === 3 && (
+              {step === 4 && (
                 <>
                   <div className="space-y-3">
                     <div>
@@ -874,7 +894,7 @@ export default function BrandAdvertiserInventory() {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
+                    <Button variant="outline" onClick={() => setStep(3)} className="flex-1">
                       <ArrowLeft className="w-4 h-4 mr-1" /> Back
                     </Button>
                     <Button
