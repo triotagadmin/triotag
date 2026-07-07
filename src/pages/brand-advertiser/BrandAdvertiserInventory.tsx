@@ -97,8 +97,13 @@ export default function BrandAdvertiserInventory() {
   const [radiusMeters, setRadiusMeters] = useState(1000);
 
   const [chosenFormat, setChosenFormat] = useState<MediaType | null>(null);
-  const [unitCount, setUnitCount] = useState<string>("");
+  const [unitCounts, setUnitCounts] = useState<Record<MediaType, string>>({
+    OOH: "",
+    DOOH: "",
+    AOOH: "",
+  });
   const [rows, setRows] = useState<AdSpaceRow[]>([]);
+
   const [loadingRows, setLoadingRows] = useState(false);
 
   useEffect(() => {
