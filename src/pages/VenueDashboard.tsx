@@ -22,7 +22,7 @@ const VenueDashboard = () => {
   } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [adSpaces, setAdSpaces] = useState<any[]>([]);
-  const [activatedIds, setActivatedIds] = useState<Set<string>>(new Set());
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -68,19 +68,28 @@ const VenueDashboard = () => {
         ascending: false
       });
       setAdSpaces(spacesData || []);
-      const spaceIds = (spacesData || []).map((s: any) => s.id);
-      if (spaceIds.length > 0) {
-        const { data: acts } = await supabase
-          .from("activations")
-          .select("ad_space_id,status")
-          .in("ad_space_id", spaceIds)
-          .in("status", ["approved", "completed"]);
-        setActivatedIds(new Set((acts || []).map((a: any) => a.ad_space_id)));
-      }
       setLoading(false);
     };
     fetchData();
   }, [navigate, toast]);
+  const toggleActivation = async (space: any) => {
+    const next = !(space.agent_disconnected ?? false);
+    setTogglingId(space.id);
+    const { error } = await supabase
+      .from("ad_spaces")
+      .update({ agent_disconnected: next })
+      .eq("id", space.id);
+    setTogglingId(null);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    setAdSpaces((prev) => prev.map((s) => (s.id === space.id ? { ...s, agent_disconnected: next } : s)));
+    toast({
+      title: next ? "Inventory deactivated" : "Inventory activated",
+      description: next ? "Hidden from inventory search." : "Now visible in inventory search.",
+    });
+  };
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
@@ -280,14 +289,25 @@ const VenueDashboard = () => {
                             {(!space.media_type || space.media_type === "OOH") && <Badge className="bg-green-600 hover:bg-green-600">OOH</Badge>}
                             {getStatusBadge(space.approval_status)}
                             <Badge variant="outline">{space.availability_status}</Badge>
-                            {activatedIds.has(space.id) ? (
-                              <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white gap-1">
-                                <CheckCircle className="w-3 h-3" /> Activated Inventory
-                              </Badge>
+                            {(space as any).agent_disconnected ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-6 px-2 text-xs gap-1 border-muted-foreground/40 text-muted-foreground"
+                                disabled={togglingId === space.id}
+                                onClick={() => toggleActivation(space)}
+                              >
+                                <XCircle className="w-3 h-3" /> Deactivated · Activate
+                              </Button>
                             ) : (
-                              <Badge variant="outline" className="gap-1 border-muted-foreground/40 text-muted-foreground">
-                                <XCircle className="w-3 h-3" /> Deactivated
-                              </Badge>
+                              <Button
+                                size="sm"
+                                className="h-6 px-2 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                                disabled={togglingId === space.id}
+                                onClick={() => toggleActivation(space)}
+                              >
+                                <CheckCircle className="w-3 h-3" /> Activated Inventory
+                              </Button>
                             )}
                             {Array.isArray((space as any).leased_advertiser_ids) && (space as any).leased_advertiser_ids.length > 0 && (
                               <Badge variant="secondary" className="text-xs">
