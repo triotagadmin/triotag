@@ -195,7 +195,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) close(); }}>
-      <DialogContent className="max-w-2xl bg-white max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl bg-white text-gray-900 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-gray-900">New Brand Campaign</DialogTitle>
           <div className="text-xs text-gray-500 mt-1">Step {step} of {TOTAL_STEPS}</div>
