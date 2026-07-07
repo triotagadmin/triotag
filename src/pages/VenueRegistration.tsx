@@ -712,6 +712,14 @@ const VenueRegistration = () => {
                         setLongitude(loc.lng);
                       }}
                     />
+                    {(!latitude || !longitude) && (
+                      <Alert className="rounded-[14px]">
+                        <Info className="h-4 w-4" />
+                        <AlertDescription className="text-xs">
+                          No pin placed yet. You can still submit — but ad spaces without exact coordinates won't appear in advertisers' radius-based inventory searches until coordinates are added.
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </CardContent>
 
                 </Card>
