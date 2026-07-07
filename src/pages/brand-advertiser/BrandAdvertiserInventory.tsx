@@ -329,24 +329,62 @@ export default function BrandAdvertiserInventory() {
             <RadiusMapPlanner
               center={center}
               radiusMeters={radiusMeters}
-              onCenterChange={setCenter}
-              onRadiusChange={setRadiusMeters}
+              onCenterChange={(c) => {
+                setCenter(c);
+                setRadiusLocked(false);
+              }}
+              onRadiusChange={(r) => {
+                setRadiusMeters(r);
+                setRadiusLocked(false);
+              }}
             />
 
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                Coverage Radius — affects campaign reach pricing
-              </div>
-              <div className="text-sm text-gray-700">
-                {estimate.radiusPercent}% coverage ={" "}
-                <span className="font-semibold text-green-700">
-                  ₱{estimate.radiusFee.toLocaleString()}
-                </span>
-              </div>
-              <div className="text-xs text-gray-500 mt-1.5">
-                5% coverage starts at ₱200,000 · 100% coverage is ₱3,500,000
+            <div
+              className={`border rounded-xl p-4 transition-colors ${
+                radiusLocked ? "bg-green-50 border-green-300" : "bg-white border-gray-200"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                    Coverage Radius — affects campaign reach pricing
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    {estimate.radiusPercent}% coverage ={" "}
+                    <span className="font-semibold text-green-700">
+                      ₱{estimate.radiusFee.toLocaleString()}
+                    </span>
+                    <span className="text-gray-500">
+                      {" "}
+                      · {(radiusMeters / 1000).toFixed(radiusMeters < 1000 ? 2 : 1)}km
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1.5">
+                    Lock the radius to save it as a requirement for this inventory target.
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => setRadiusLocked((v) => !v)}
+                  className={`shrink-0 ${
+                    radiusLocked
+                      ? "bg-green-600 hover:bg-green-500 text-white"
+                      : "bg-white border border-green-500 text-green-700 hover:bg-green-50"
+                  }`}
+                >
+                  {radiusLocked ? (
+                    <>
+                      <Lock className="w-4 h-4 mr-1" /> Radius Locked
+                    </>
+                  ) : (
+                    <>
+                      <LockOpen className="w-4 h-4 mr-1" /> Lock Radius
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
+
           </div>
 
           {/* RIGHT: Registry form */}
