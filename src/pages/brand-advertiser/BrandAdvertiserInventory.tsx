@@ -195,8 +195,12 @@ export default function BrandAdvertiserInventory() {
       ? "TrioTag"
       : r.publisher_profiles?.business_name || "Retail Partner";
 
+  const totalUnitsForFormat = (fmt: MediaType) =>
+    Object.values(unitCounts[fmt]).reduce((sum, v) => sum + (Number(v) || 0), 0);
+
   const submitRegistry = () => {
     if (!chosenFormat) return;
+    const breakdown = unitCounts[chosenFormat];
     navigate("/brand-advertiser/campaigns", {
       state: {
         openWizard: true,
@@ -205,7 +209,12 @@ export default function BrandAdvertiserInventory() {
           radiusMeters,
           center,
           format: chosenFormat,
-          unitCount: Number(unitCounts[chosenFormat]) || 0,
+          unitCount: totalUnitsForFormat(chosenFormat),
+          unitBreakdown: Object.fromEntries(
+            Object.entries(breakdown)
+              .map(([k, v]) => [k, Number(v) || 0])
+              .filter(([, n]) => (n as number) > 0)
+          ),
         },
       },
     });
