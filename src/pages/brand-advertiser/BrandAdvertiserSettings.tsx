@@ -10,18 +10,18 @@ export default function BrandAdvertiserSettings() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [authEmail, setAuthEmail] = useState<string>("");
   const [profile, setProfile] = useState<any>({
-    company_name: "", contact_name: "", contact_phone: "", industry: "", website_domain: "",
+    username: "", company_name: "", contact_name: "", contact_email: "", contact_phone: "", industry: "", website_domain: "",
   });
   const [domainError, setDomainError] = useState<string | null>(null);
 
   const validateDomain = (v: string): string | null => {
     const trimmed = v.trim();
-    if (!trimmed) return null; // optional
+    if (!trimmed) return null;
     if (/^https?:\/\//i.test(trimmed) || trimmed.includes("/")) {
       return "Enter just the domain (e.g. example.com), not a full URL.";
     }
-    // Basic domain regex: labels separated by dots, TLD 2+ chars
     if (!/^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(trimmed)) {
       return "Enter a valid domain like example.com.";
     }
@@ -32,12 +32,14 @@ export default function BrandAdvertiserSettings() {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) { setLoading(false); return; }
+      setAuthEmail(session.user.email || "");
       const { data } = await supabase
         .from("brand_advertiser_profiles")
         .select("*")
         .eq("user_id", session.user.id)
         .maybeSingle();
-      if (data) setProfile(data);
+      if (data) setProfile({ ...data, contact_email: (data as any).contact_email || session.user.email || "" });
+      else setProfile((p: any) => ({ ...p, contact_email: session.user.email || "" }));
       setLoading(false);
     })();
   }, []);
@@ -56,12 +58,13 @@ export default function BrandAdvertiserSettings() {
       .from("brand_advertiser_profiles")
       .upsert({
         user_id: session.user.id,
+        username: (profile.username || "").trim() || null,
         company_name: profile.company_name,
         contact_name: profile.contact_name,
         contact_phone: profile.contact_phone,
         industry: profile.industry,
         website_domain: (profile.website_domain || "").trim() || null,
-        contact_email: session.user.email,
+        contact_email: (profile.contact_email || "").trim() || session.user.email,
       }, { onConflict: "user_id" });
     setSaving(false);
     if (error) {
