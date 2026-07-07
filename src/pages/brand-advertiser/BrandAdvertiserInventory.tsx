@@ -102,6 +102,24 @@ const SUBTYPES: Record<MediaType, string[]> = {
   ],
 };
 
+const LOCATION_TYPES = [
+  "Cafe",
+  "Co-working Space",
+  "Barber Shop",
+  "Salon",
+  "Supermarket",
+  "Convenience Store",
+  "Restaurant",
+  "Fast Food",
+  "Bar",
+  "Nightclub",
+  "Gym",
+  "Pharmacy",
+  "Mall",
+  "Clothing Store",
+  "Department Store",
+] as const;
+
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
   const toRad = (v: number) => (v * Math.PI) / 180;
@@ -131,6 +149,9 @@ export default function BrandAdvertiserInventory() {
     AOOH: {},
   });
   const [rows, setRows] = useState<AdSpaceRow[]>([]);
+
+  const [totalLocations, setTotalLocations] = useState<string>("");
+  const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, string>>({});
 
   const [loadingRows, setLoadingRows] = useState(false);
 
@@ -215,6 +236,12 @@ export default function BrandAdvertiserInventory() {
               .map(([k, v]) => [k, Number(v) || 0])
               .filter(([, n]) => (n as number) > 0)
           ),
+          totalLocations: Number(totalLocations) || 0,
+          locationTypes: Object.fromEntries(
+            Object.entries(selectedLocationTypes)
+              .map(([k, v]) => [k, Number(v) || 0])
+              .filter(([, n]) => (n as number) > 0)
+          ),
         },
       },
     });
@@ -270,6 +297,93 @@ export default function BrandAdvertiserInventory() {
                 <div>
                   <h2 className="text-lg font-bold text-gray-900 leading-tight">Unit Registry</h2>
                   <p className="text-xs text-gray-500">Pick one ad format for this campaign.</p>
+                </div>
+              </div>
+
+              {/* Location targeting — how many venues + which types */}
+              <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50/60 p-3 space-y-3">
+                <div>
+                  <Label htmlFor="total-locations" className="text-sm font-semibold text-gray-900">
+                    How many ad locations / venues?
+                  </Label>
+                  <p className="text-xs text-gray-500 mb-1.5">
+                    Total number of physical spots you want this campaign to run in.
+                  </p>
+                  <Input
+                    id="total-locations"
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 25"
+                    value={totalLocations}
+                    onChange={(e) => setTotalLocations(e.target.value)}
+                    className="h-9 text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-semibold text-gray-900">
+                    Type of ad locations
+                  </Label>
+                  <p className="text-xs text-gray-500 mb-1.5">
+                    Tap the venue types you want, then set how many of each.
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {LOCATION_TYPES.map((t) => {
+                      const on = selectedLocationTypes[t] !== undefined;
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() =>
+                            setSelectedLocationTypes((prev) => {
+                              const next = { ...prev };
+                              if (on) delete next[t];
+                              else next[t] = "";
+                              return next;
+                            })
+                          }
+                          className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                            on
+                              ? "bg-green-600 text-white border-green-600"
+                              : "bg-white text-gray-700 border-gray-300 hover:border-green-400"
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {Object.keys(selectedLocationTypes).length > 0 && (
+                    <div className="space-y-1.5">
+                      {Object.keys(selectedLocationTypes).map((t) => (
+                        <div
+                          key={t}
+                          className="flex items-center gap-2 bg-white rounded-md border border-gray-200 px-2 py-1.5"
+                        >
+                          <Label
+                            htmlFor={`loc-${t}`}
+                            className="text-xs text-gray-900 flex-1 min-w-0 truncate"
+                          >
+                            {t}
+                          </Label>
+                          <Input
+                            id={`loc-${t}`}
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            value={selectedLocationTypes[t]}
+                            onChange={(e) =>
+                              setSelectedLocationTypes((prev) => ({
+                                ...prev,
+                                [t]: e.target.value,
+                              }))
+                            }
+                            className="h-8 w-20 text-right text-gray-900"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
