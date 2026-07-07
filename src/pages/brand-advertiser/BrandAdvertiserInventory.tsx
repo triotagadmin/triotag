@@ -109,6 +109,35 @@ const SUBTYPES: Record<MediaType, string[]> = {
   ],
 };
 
+// PHP price per unit (per placement / per slot / per month)
+const SUBTYPE_PRICES: Record<string, number> = {
+  // OOH — per printed unit
+  "Table Tents": 150,
+  "Floor Stickers": 220,
+  "Window Stickers": 180,
+  "Wall Posters": 120,
+  "Wall Decals": 200,
+  "Counter Cards": 130,
+  "Hanging Danglers": 110,
+  "Standees": 450,
+  // DOOH — per screen / month
+  "Indoor LED Screens": 3500,
+  "Outdoor LED Billboards": 12000,
+  "Digital Menu Boards": 2800,
+  "Elevator Screens": 2200,
+  "Checkout Counter Screens": 1800,
+  "Transit Digital Panels": 4200,
+  // AOOH — per spot / month
+  "In-Store Audio Spots": 900,
+  "Radio Ad Insertions": 1500,
+  "Ambient Jingles": 700,
+  "PA System Announcements": 500,
+  "Scent / Sensory Ambient": 2500,
+};
+
+const priceFor = (sub: string) => SUBTYPE_PRICES[sub] ?? 0;
+const fmtPHP = (n: number) => `₱${n.toLocaleString("en-PH")}`;
+
 const LOCATION_TYPES = [
   "Cafe",
   "Co-working Space",
