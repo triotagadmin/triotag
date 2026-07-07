@@ -39,12 +39,6 @@ const NAV_ITEMS_PUBLIC: NavItemDef[] = [
       { label: "Media Truck", to: "/solutions/media-truck" },
     ],
   },
-  {
-    label: "Services",
-    children: [
-      { label: "Campaign Management", to: "/services" },
-    ],
-  },
   { label: "Advertise Your Brand", to: "/advertiser/explore" },
 ];
 
