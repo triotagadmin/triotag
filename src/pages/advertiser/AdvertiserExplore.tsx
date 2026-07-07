@@ -139,7 +139,7 @@ export default function AdvertiserExplore() {
       });
       const campaignType = [...new Set(enriched.map((s) => s.category).filter(Boolean))].join(", ");
 
-      const { data: inserted, error } = await supabase
+      const { error } = await supabase
         .from("media_plan_requests" as any)
         .insert({
           advertiser_id: user?.id ?? null,
@@ -154,34 +154,10 @@ export default function AdvertiserExplore() {
           notes: form.notes || null,
           status: "pending_payment",
           requester_email: emailTrimmed,
-        })
-        .select("id")
-        .single();
+        });
       if (error) throw error;
 
-      const mediaPlanRequestId = (inserted as any).id;
-
-      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
-        "create-media-plan-checkout",
-        {
-          body: {
-            mediaPlanRequestId,
-            campaignName: form.campaignName,
-            campaignType,
-            estimatedPrice: estimate.totalEstimate,
-            requesterEmail: emailTrimmed,
-            requesterName: user?.user_metadata?.full_name || emailTrimmed,
-            successUrl: `${window.location.origin}/payment-success?type=media_plan&id=${mediaPlanRequestId}`,
-            cancelUrl: window.location.href,
-          },
-        }
-      );
-
-      if (checkoutError || !(checkoutData as any)?.checkoutUrl) {
-        throw new Error((checkoutData as any)?.error || checkoutError?.message || "Failed to create payment session.");
-      }
-
-      window.location.href = (checkoutData as any).checkoutUrl;
+      setSubmitted(true);
     } catch (e: any) {
       toast({ title: "Submission failed", description: e?.message ?? "Try again.", variant: "destructive" });
     } finally {
@@ -799,7 +775,7 @@ export default function AdvertiserExplore() {
               </div>
               <h3 className="text-xl font-bold text-gray-900">Request submitted!</h3>
               <p className="text-sm text-gray-600 mt-2 max-w-sm mx-auto">
-                Your ad campaign request has been submitted. Our team will confirm final pricing and reach out within 24 hours to activate your campaign.
+                TrioTag will email you a direct Insertion Order (IO) with bank transfer payment details within 24 hours. Your campaign activates once payment is confirmed.
               </p>
               <Button className="mt-5 bg-green-600 hover:bg-green-500 text-white" onClick={() => setRequestOpen(false)}>
                 Done
@@ -810,9 +786,10 @@ export default function AdvertiserExplore() {
               <DialogHeader>
                 <DialogTitle>Request Your Ad Campaign</DialogTitle>
                 <DialogDescription>
-                  We'll confirm final pricing and reach out within 24 hours.
+                  TrioTag will send you a direct Insertion Order (IO) with bank transfer payment details within 24 hours.
                 </DialogDescription>
               </DialogHeader>
+
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm space-y-2">
                 {activeSelections.map((s) => {
@@ -884,7 +861,7 @@ export default function AdvertiserExplore() {
               <DialogFooter>
                 <Button variant="outline" onClick={() => setRequestOpen(false)}>Cancel</Button>
                 <Button onClick={handleSubmitRequest} disabled={submitting} className="bg-green-600 hover:bg-green-500 text-white">
-                  {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating payment session...</> : "Proceed to Payment"}
+                  {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting request...</> : "Submit Request"}
                 </Button>
               </DialogFooter>
             </>
