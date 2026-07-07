@@ -993,6 +993,20 @@ export default function BrandAdvertiserInventory() {
                         </div>
                       </div>
 
+                      {t.creativeSetTitle && (
+                        <div className="rounded-md bg-blue-50 border border-blue-100 px-2 py-1.5 flex items-center gap-1.5">
+                          <FolderOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[10px] text-blue-700 font-semibold uppercase tracking-wide">
+                              Creative Set
+                            </div>
+                            <div className="text-xs font-semibold text-blue-900 truncate">
+                              {t.creativeSetTitle}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {locEntries.length > 0 && (
                         <div>
                           <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mb-1">
