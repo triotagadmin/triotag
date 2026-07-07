@@ -193,9 +193,14 @@ export default function BrandAdvertiserInventory() {
 
   const [totalLocations, setTotalLocations] = useState<string>("");
   const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, string>>({});
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const [loadingRows, setLoadingRows] = useState(false);
+
+  // Creative sets (step 3)
+  const [creativeSets, setCreativeSets] = useState<any[]>([]);
+  const [loadingCreatives, setLoadingCreatives] = useState(false);
+  const [chosenCreativeSetId, setChosenCreativeSetId] = useState<string | null>(null);
 
   interface SavedTarget {
     id: string;
@@ -207,6 +212,8 @@ export default function BrandAdvertiserInventory() {
     locationTypes: Record<string, number>;
     radiusMeters: number;
     center: { lat: number; lng: number };
+    creativeSetId?: string | null;
+    creativeSetTitle?: string | null;
   }
   const [savedTargets, setSavedTargets] = useState<SavedTarget[]>(() => {
     try {
