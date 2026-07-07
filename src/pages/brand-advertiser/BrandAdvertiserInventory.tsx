@@ -274,7 +274,7 @@ export default function BrandAdvertiserInventory() {
                       {active && (
                         <div className="px-3 pb-3">
                           <div className="space-y-1.5">
-                            <Label htmlFor={`unit-count-${f.key}`} className="text-sm">
+                            <Label htmlFor={`unit-count-${f.key}`} className="text-sm text-green-900">
                               How many {f.title} units do you need?
                             </Label>
                             <Input
@@ -286,8 +286,9 @@ export default function BrandAdvertiserInventory() {
                               onChange={(e) =>
                                 setUnitCounts((prev) => ({ ...prev, [f.key]: e.target.value }))
                               }
+                              className="text-green-900 placeholder:text-green-700"
                             />
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-green-700">
                               This helps us estimate availability and pricing for {f.title.toLowerCase()} placements within your selected radius.
                             </p>
                           </div>
