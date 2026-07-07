@@ -250,13 +250,14 @@ export default function BrandAdvertiserCreatives() {
                 <TableHead className="text-black">Format</TableHead>
                 <TableHead className="text-black">Photos</TableHead>
                 <TableHead className="text-black">Last Updated</TableHead>
+                <TableHead className="text-black text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-black py-8">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center text-black py-8">Loading...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-black py-8">No creative sets yet</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center text-black py-8">No creative sets yet</TableCell></TableRow>
               ) : filtered.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell className="font-mono text-xs text-black">{String(s.id).slice(0, 8)}</TableCell>
@@ -271,6 +272,16 @@ export default function BrandAdvertiserCreatives() {
                   </TableCell>
                   <TableCell className="text-black">{s.creative_count ?? 0} photo{(s.creative_count ?? 0) === 1 ? "" : "s"}</TableCell>
                   <TableCell className="text-sm text-black">{s.updated_at ? format(new Date(s.updated_at), "MMM d, yyyy") : "—"}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button size="sm" variant="ghost" onClick={() => openView(s)} className="text-black hover:bg-gray-100">
+                        <Eye className="w-4 h-4 mr-1" /> View
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setDeleteSet(s)} className="text-red-600 hover:bg-red-50 hover:text-red-700">
+                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
