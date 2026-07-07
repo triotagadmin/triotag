@@ -356,6 +356,8 @@ export default function BrandAdvertiserInventory() {
           unitBreakdown: t.unitBreakdown,
           totalLocations: t.totalLocations,
           locationTypes: t.locationTypes,
+          creativeSetId: t.creativeSetId,
+          creativeSetTitle: t.creativeSetTitle,
         },
       },
     });
