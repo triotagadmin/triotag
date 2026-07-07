@@ -10,18 +10,18 @@ export default function BrandAdvertiserSettings() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [authEmail, setAuthEmail] = useState<string>("");
   const [profile, setProfile] = useState<any>({
-    company_name: "", contact_name: "", contact_phone: "", industry: "", website_domain: "",
+    username: "", company_name: "", contact_name: "", contact_email: "", contact_phone: "", industry: "", website_domain: "",
   });
   const [domainError, setDomainError] = useState<string | null>(null);
 
   const validateDomain = (v: string): string | null => {
     const trimmed = v.trim();
-    if (!trimmed) return null; // optional
+    if (!trimmed) return null;
     if (/^https?:\/\//i.test(trimmed) || trimmed.includes("/")) {
       return "Enter just the domain (e.g. example.com), not a full URL.";
     }
-    // Basic domain regex: labels separated by dots, TLD 2+ chars
     if (!/^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(trimmed)) {
       return "Enter a valid domain like example.com.";
     }
@@ -32,12 +32,14 @@ export default function BrandAdvertiserSettings() {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) { setLoading(false); return; }
+      setAuthEmail(session.user.email || "");
       const { data } = await supabase
         .from("brand_advertiser_profiles")
         .select("*")
         .eq("user_id", session.user.id)
         .maybeSingle();
-      if (data) setProfile(data);
+      if (data) setProfile({ ...data, contact_email: (data as any).contact_email || session.user.email || "" });
+      else setProfile((p: any) => ({ ...p, contact_email: session.user.email || "" }));
       setLoading(false);
     })();
   }, []);
@@ -56,12 +58,13 @@ export default function BrandAdvertiserSettings() {
       .from("brand_advertiser_profiles")
       .upsert({
         user_id: session.user.id,
+        username: (profile.username || "").trim() || null,
         company_name: profile.company_name,
         contact_name: profile.contact_name,
         contact_phone: profile.contact_phone,
         industry: profile.industry,
         website_domain: (profile.website_domain || "").trim() || null,
-        contact_email: session.user.email,
+        contact_email: (profile.contact_email || "").trim() || session.user.email,
       }, { onConflict: "user_id" });
     setSaving(false);
     if (error) {
@@ -81,12 +84,25 @@ export default function BrandAdvertiserSettings() {
             {loading ? <div className="text-sm text-gray-500">Loading...</div> : (
               <>
                 <div className="space-y-1.5">
+                  <Label className="text-gray-700">Account Email</Label>
+                  <Input value={authEmail} disabled readOnly />
+                  <p className="text-xs text-gray-500">Your sign-in email (cannot be changed here).</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-gray-700">Username</Label>
+                  <Input value={profile.username || ""} onChange={(e) => setProfile({ ...profile, username: e.target.value })} placeholder="e.g. acme_brand" />
+                </div>
+                <div className="space-y-1.5">
                   <Label className="text-gray-700">Company Name</Label>
                   <Input value={profile.company_name || ""} onChange={(e) => setProfile({ ...profile, company_name: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-gray-700">Contact Name</Label>
                   <Input value={profile.contact_name || ""} onChange={(e) => setProfile({ ...profile, contact_name: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-gray-700">Contact Email</Label>
+                  <Input type="email" value={profile.contact_email || ""} onChange={(e) => setProfile({ ...profile, contact_email: e.target.value })} placeholder="billing@company.com" />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-gray-700">Phone</Label>

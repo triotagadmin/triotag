@@ -1006,6 +1006,7 @@ export type Database = {
           industry: string | null
           updated_at: string | null
           user_id: string
+          username: string | null
           verified: boolean | null
           website_domain: string | null
         }
@@ -1019,6 +1020,7 @@ export type Database = {
           industry?: string | null
           updated_at?: string | null
           user_id: string
+          username?: string | null
           verified?: boolean | null
           website_domain?: string | null
         }
@@ -1032,6 +1034,7 @@ export type Database = {
           industry?: string | null
           updated_at?: string | null
           user_id?: string
+          username?: string | null
           verified?: boolean | null
           website_domain?: string | null
         }
