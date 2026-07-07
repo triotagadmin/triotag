@@ -109,6 +109,35 @@ const SUBTYPES: Record<MediaType, string[]> = {
   ],
 };
 
+// PHP price per unit (per placement / per slot / per month)
+const SUBTYPE_PRICES: Record<string, number> = {
+  // OOH — per printed unit
+  "Table Tents": 150,
+  "Floor Stickers": 220,
+  "Window Stickers": 180,
+  "Wall Posters": 120,
+  "Wall Decals": 200,
+  "Counter Cards": 130,
+  "Hanging Danglers": 110,
+  "Standees": 450,
+  // DOOH — per screen / month
+  "Indoor LED Screens": 3500,
+  "Outdoor LED Billboards": 12000,
+  "Digital Menu Boards": 2800,
+  "Elevator Screens": 2200,
+  "Checkout Counter Screens": 1800,
+  "Transit Digital Panels": 4200,
+  // AOOH — per spot / month
+  "In-Store Audio Spots": 900,
+  "Radio Ad Insertions": 1500,
+  "Ambient Jingles": 700,
+  "PA System Announcements": 500,
+  "Scent / Sensory Ambient": 2500,
+};
+
+const priceFor = (sub: string) => SUBTYPE_PRICES[sub] ?? 0;
+const fmtPHP = (n: number) => `₱${n.toLocaleString("en-PH")}`;
+
 const LOCATION_TYPES = [
   "Cafe",
   "Co-working Space",
@@ -578,41 +607,70 @@ export default function BrandAdvertiserInventory() {
                                     {f.title} units by type
                                   </Label>
                                   <span className="text-xs text-green-700 font-medium">
-                                    Total: {totalUnitsForFormat(f.key)}
+                                    Total: {totalUnitsForFormat(f.key)} ·{" "}
+                                    {fmtPHP(
+                                      SUBTYPES[f.key].reduce(
+                                        (s, sub) =>
+                                          s + priceFor(sub) * (Number(unitCounts[f.key][sub]) || 0),
+                                        0,
+                                      ),
+                                    )}
                                   </span>
                                 </div>
                                 <p className="text-xs text-green-700">
                                   Enter how many units you want per {f.title} placement type within your selected radius. Leave blank for types you don't need.
                                 </p>
                                 <div className="space-y-1.5 pt-1">
-                                  {SUBTYPES[f.key].map((sub) => (
-                                    <div
-                                      key={sub}
-                                      className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
-                                    >
-                                      <Label
-                                        htmlFor={`unit-${f.key}-${sub}`}
-                                        className="text-xs text-green-900 flex-1 min-w-0 truncate"
+                                  {SUBTYPES[f.key].map((sub) => {
+                                    const qty = Number(unitCounts[f.key][sub]) || 0;
+                                    const unitPrice = priceFor(sub);
+                                    const subtotal = unitPrice * qty;
+                                    const priceUnit =
+                                      f.key === "OOH" ? "unit" : "screen / mo";
+                                    return (
+                                      <div
+                                        key={sub}
+                                        className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
                                       >
-                                        {sub}
-                                      </Label>
-                                      <Input
-                                        id={`unit-${f.key}-${sub}`}
-                                        type="number"
-                                        min="0"
-                                        placeholder="0"
-                                        value={unitCounts[f.key][sub] || ""}
-                                        onChange={(e) =>
-                                          setUnitCounts((prev) => ({
-                                            ...prev,
-                                            [f.key]: { ...prev[f.key], [sub]: e.target.value },
-                                          }))
-                                        }
-                                        className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
-                                      />
-                                    </div>
-                                  ))}
+                                        <div className="flex-1 min-w-0">
+                                          <Label
+                                            htmlFor={`unit-${f.key}-${sub}`}
+                                            className="text-xs text-green-900 truncate block"
+                                          >
+                                            {sub}
+                                          </Label>
+                                          <div className="text-[10px] text-green-700/80">
+                                            {fmtPHP(unitPrice)} / {priceUnit}
+                                            {qty > 0 && (
+                                              <>
+                                                {" "}
+                                                ·{" "}
+                                                <span className="font-semibold text-green-800">
+                                                  {fmtPHP(subtotal)}
+                                                </span>
+                                              </>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <Input
+                                          id={`unit-${f.key}-${sub}`}
+                                          type="number"
+                                          min="0"
+                                          placeholder="0"
+                                          value={unitCounts[f.key][sub] || ""}
+                                          onChange={(e) =>
+                                            setUnitCounts((prev) => ({
+                                              ...prev,
+                                              [f.key]: { ...prev[f.key], [sub]: e.target.value },
+                                            }))
+                                          }
+                                          className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
+                                        />
+                                      </div>
+                                    );
+                                  })}
                                 </div>
+
                               </div>
                             </div>
                           )}
@@ -816,8 +874,19 @@ export default function BrandAdvertiserInventory() {
                       )}
                       {unitEntries.length > 0 && (
                         <div>
-                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mb-1">
-                            Units by Type
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
+                              Units by Type
+                            </div>
+                            <div className="text-[10px] font-semibold text-green-700">
+                              Est.{" "}
+                              {fmtPHP(
+                                unitEntries.reduce(
+                                  (s, [k, v]) => s + priceFor(k) * (v as number),
+                                  0,
+                                ),
+                              )}
+                            </div>
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {unitEntries.map(([k, v]) => (
@@ -825,12 +894,13 @@ export default function BrandAdvertiserInventory() {
                                 key={k}
                                 className="text-[10px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 border border-green-100"
                               >
-                                {k} · {v}
+                                {k} · {v} · {fmtPHP(priceFor(k) * (v as number))}
                               </span>
                             ))}
                           </div>
                         </div>
                       )}
+
                     </div>
 
 
