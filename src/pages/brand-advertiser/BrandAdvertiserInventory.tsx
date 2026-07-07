@@ -35,6 +35,7 @@ interface AdSpaceRow {
   monthly_subscription_fee: number | null;
   latitude: number | null;
   longitude: number | null;
+  specifications: any;
   publisher_profiles?: { business_name: string | null; is_house_account: boolean | null } | null;
 }
 
@@ -98,6 +99,33 @@ function priceLabel(row: AdSpaceRow): string {
   return "Contact for pricing";
 }
 
+function formatMaterialName(key: string): string {
+  return key
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function formatsLabel(row: AdSpaceRow): string {
+  const specs = row.specifications || {};
+  const materials: string[] = specs.ad_unit_materials || [];
+  const units: Record<string, number> | null = specs.units || null;
+
+  const available = materials.length
+    ? materials.map(formatMaterialName).join(", ")
+    : row.media_type;
+
+  if (!units || Object.keys(units).length === 0) {
+    return available;
+  }
+
+  const unitParts = Object.entries(units)
+    .filter(([, count]) => count > 0)
+    .map(([fmt, count]) => `${fmt}: ${count}`);
+
+  return unitParts.length ? `${available} · ${unitParts.join(", ")}` : available;
+}
+
 function distanceLabel(m: number): string {
   if (m < 1000) return `${Math.round(m)}m away`;
   return `${(m / 1000).toFixed(m < 10000 ? 2 : 1)}km away`;
@@ -142,7 +170,7 @@ export default function BrandAdvertiserInventory() {
       const { data } = await supabase
         .from("ad_spaces")
         .select(
-          "id,title,location,media_type,pricing,monthly_subscription_fee,latitude,longitude,publisher_profiles(business_name,is_house_account)"
+          "id,title,location,media_type,pricing,monthly_subscription_fee,latitude,longitude,specifications,publisher_profiles(business_name,is_house_account)"
         )
         .eq("approval_status", "approved")
         .eq("media_type", chosenFormat)
@@ -304,13 +332,15 @@ export default function BrandAdvertiserInventory() {
                                   {distanceLabel(distance)}
                                 </div>
                               </div>
-                              <div className="font-semibold text-sm text-gray-900 truncate">{r.title}</div>
                               {r.location && (
-                                <div className="flex items-center gap-1 text-xs text-gray-600 mt-0.5">
+                                <div className="flex items-center gap-1 text-xs text-gray-900 font-medium">
                                   <MapPin className="w-3 h-3 shrink-0" />
                                   <span className="truncate">{r.location}</span>
                                 </div>
                               )}
+                              <div className="text-xs text-gray-600 mt-0.5 truncate">
+                                {formatsLabel(r)}
+                              </div>
                               <div className="text-xs font-medium text-gray-800 mt-1">
                                 {priceLabel(r)}
                               </div>
