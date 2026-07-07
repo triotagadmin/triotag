@@ -74,6 +74,34 @@ const FORMATS: {
   },
 ];
 
+const SUBTYPES: Record<MediaType, string[]> = {
+  OOH: [
+    "Table Tents",
+    "Floor Stickers",
+    "Window Stickers",
+    "Wall Posters",
+    "Wall Decals",
+    "Counter Cards",
+    "Hanging Danglers",
+    "Standees",
+  ],
+  DOOH: [
+    "Indoor LED Screens",
+    "Outdoor LED Billboards",
+    "Digital Menu Boards",
+    "Elevator Screens",
+    "Checkout Counter Screens",
+    "Transit Digital Panels",
+  ],
+  AOOH: [
+    "In-Store Audio Spots",
+    "Radio Ad Insertions",
+    "Ambient Jingles",
+    "PA System Announcements",
+    "Scent / Sensory Ambient",
+  ],
+};
+
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
   const toRad = (v: number) => (v * Math.PI) / 180;
