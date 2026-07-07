@@ -1100,8 +1100,11 @@ export type Database = {
           end_date: string | null
           environments: string[] | null
           id: string
+          location_count: number | null
+          location_types: string[] | null
           notes: string | null
           rejection_reason: string | null
+          scope_name: string | null
           start_date: string | null
           status: string | null
           target_age_max: number | null
@@ -1120,8 +1123,11 @@ export type Database = {
           end_date?: string | null
           environments?: string[] | null
           id?: string
+          location_count?: number | null
+          location_types?: string[] | null
           notes?: string | null
           rejection_reason?: string | null
+          scope_name?: string | null
           start_date?: string | null
           status?: string | null
           target_age_max?: number | null
@@ -1140,8 +1146,11 @@ export type Database = {
           end_date?: string | null
           environments?: string[] | null
           id?: string
+          location_count?: number | null
+          location_types?: string[] | null
           notes?: string | null
           rejection_reason?: string | null
+          scope_name?: string | null
           start_date?: string | null
           status?: string | null
           target_age_max?: number | null
