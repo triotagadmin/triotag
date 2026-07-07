@@ -85,7 +85,7 @@ export default function BrandAdvertiserCreatives() {
   };
 
   const handleCreate = async () => {
-    if (!profileId || !title.trim()) return;
+    if (!title.trim()) return;
     if (files.length === 0) {
       setFileError("Please select at least 1 photo.");
       return;
@@ -93,11 +93,38 @@ export default function BrandAdvertiserCreatives() {
     setSubmitting(true);
     setProgress({ done: 0, total: files.length });
     try {
+      // Re-fetch profile fresh to avoid stale state / session race
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        setFileError("Your session has expired. Please refresh and log in again.");
+        setSubmitting(false);
+        setProgress(null);
+        return;
+      }
+      const { data: freshProfile, error: profileErr } = await supabase
+        .from("brand_advertiser_profiles")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      if (profileErr || !freshProfile) {
+        setFileError("Could not verify your brand profile. Please refresh the page and try again.");
+        setSubmitting(false);
+        setProgress(null);
+        return;
+      }
+      const advertiserId = freshProfile.id;
+
+      console.log("DEBUG creative set insert:", {
+        profileId,
+        freshProfileId: advertiserId,
+        sessionUserId: session.user.id,
+      });
+
       // 1. Create the set row
       const { data: setRow, error: setErr } = await supabase
         .from("brand_creative_sets" as any)
         .insert({
-          brand_advertiser_id: profileId,
+          brand_advertiser_id: advertiserId,
           title: title.trim(),
           creative_format: fmt,
           creative_count: 0,
