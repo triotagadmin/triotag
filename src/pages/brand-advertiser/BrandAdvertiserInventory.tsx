@@ -281,12 +281,15 @@ export default function BrandAdvertiserInventory() {
                               id={`unit-count-${f.key}`}
                               type="number"
                               min="0"
-                              placeholder="e.g. 10"
+                              placeholder={`Enter how many ${f.title.toLowerCase()} units you want in this campaign radius (e.g. 10)`}
                               value={unitCounts[f.key]}
                               onChange={(e) =>
                                 setUnitCounts((prev) => ({ ...prev, [f.key]: e.target.value }))
                               }
                             />
+                            <p className="text-xs text-gray-500">
+                              This helps us estimate availability and pricing for {f.title.toLowerCase()} placements within your selected radius.
+                            </p>
                           </div>
                         </div>
                       )}
