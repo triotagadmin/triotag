@@ -193,6 +193,11 @@ export default function BrandAdvertiserInventory() {
       .sort((a, b) => a.distance - b.distance);
   }, [rows, center.lat, center.lng, radiusMeters]);
 
+  const estimate = useMemo(
+    () => calculateMediaPlanEstimate([], radiusMeters),
+    [radiusMeters]
+  );
+
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
