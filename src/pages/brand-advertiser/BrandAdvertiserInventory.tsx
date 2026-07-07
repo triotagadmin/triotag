@@ -336,7 +336,7 @@ export default function BrandAdvertiserInventory() {
                           No approved {chosenFormat} inventory found in this area
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          Try increasing the radius using the slider on the map.
+                          Selecting inventory is optional — you can launch a campaign with just your radius and {chosenFormat} format. Adjust the radius on the map to see more matches.
                         </p>
                       </div>
                     ) : (
