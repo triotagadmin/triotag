@@ -159,29 +159,7 @@ export default function AdvertiserExplore() {
         .single();
       if (error) throw error;
 
-      const mediaPlanRequestId = (inserted as any).id;
-
-      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
-        "create-media-plan-checkout",
-        {
-          body: {
-            mediaPlanRequestId,
-            campaignName: form.campaignName,
-            campaignType,
-            estimatedPrice: estimate.totalEstimate,
-            requesterEmail: emailTrimmed,
-            requesterName: user?.user_metadata?.full_name || emailTrimmed,
-            successUrl: `${window.location.origin}/payment-success?type=media_plan&id=${mediaPlanRequestId}`,
-            cancelUrl: window.location.href,
-          },
-        }
-      );
-
-      if (checkoutError || !(checkoutData as any)?.checkoutUrl) {
-        throw new Error((checkoutData as any)?.error || checkoutError?.message || "Failed to create payment session.");
-      }
-
-      window.location.href = (checkoutData as any).checkoutUrl;
+      setSubmitted(true);
     } catch (e: any) {
       toast({ title: "Submission failed", description: e?.message ?? "Try again.", variant: "destructive" });
     } finally {
