@@ -236,6 +236,12 @@ export default function BrandAdvertiserInventory() {
               .map(([k, v]) => [k, Number(v) || 0])
               .filter(([, n]) => (n as number) > 0)
           ),
+          totalLocations: Number(totalLocations) || 0,
+          locationTypes: Object.fromEntries(
+            Object.entries(selectedLocationTypes)
+              .map(([k, v]) => [k, Number(v) || 0])
+              .filter(([, n]) => (n as number) > 0)
+          ),
         },
       },
     });
