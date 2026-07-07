@@ -382,11 +382,16 @@ export default function BrandAdvertiserInventory() {
 
                   <Button
                     onClick={() => setWizardStep(3)}
-                    disabled={selectedIds.length === 0}
                     className="w-full bg-green-600 hover:bg-green-500 text-white"
                   >
-                    Continue with {selectedIds.length} selected <ArrowRight className="w-4 h-4 ml-1" />
+                    {selectedIds.length === 0
+                      ? `Continue without selecting inventory`
+                      : `Continue with ${selectedIds.length} selected`}
+                    <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
+                  <p className="text-[11px] text-gray-500 text-center">
+                    Selecting inventory is optional. Radius + {chosenFormat} format are all you need to launch.
+                  </p>
                 </div>
               )}
 
