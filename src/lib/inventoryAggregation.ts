@@ -70,7 +70,8 @@ export async function fetchApprovedSpaces(): Promise<ApprovedAdSpaceLite[]> {
   const { data, error } = await supabase
     .from("ad_spaces")
     .select("id, publisher_id, location, latitude, longitude, media_type")
-    .eq("approval_status", "approved");
+    .eq("approval_status", "approved")
+    .or("agent_disconnected.is.null,agent_disconnected.eq.false");
   if (error || !data) return [];
   return data as ApprovedAdSpaceLite[];
 }
