@@ -127,6 +127,7 @@ import BrandAdvertiserAudiences from "./pages/brand-advertiser/BrandAdvertiserAu
 import BrandAdvertiserReports from "./pages/brand-advertiser/BrandAdvertiserReports";
 import BrandAdvertiserChangelog from "./pages/brand-advertiser/BrandAdvertiserChangelog";
 import BrandAdvertiserInventory from "./pages/brand-advertiser/BrandAdvertiserInventory";
+import GoogleAdsServices from "./pages/GoogleAdsServices";
 
 const queryClient = new QueryClient();
 
