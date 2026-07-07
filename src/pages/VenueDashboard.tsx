@@ -22,7 +22,7 @@ const VenueDashboard = () => {
   } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [adSpaces, setAdSpaces] = useState<any[]>([]);
-  const [activatedIds, setActivatedIds] = useState<Set<string>>(new Set());
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
