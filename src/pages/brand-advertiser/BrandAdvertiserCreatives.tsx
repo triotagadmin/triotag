@@ -33,6 +33,54 @@ export default function BrandAdvertiserCreatives() {
   const [fileError, setFileError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [viewSet, setViewSet] = useState<any | null>(null);
+  const [viewFiles, setViewFiles] = useState<any[]>([]);
+  const [viewLoading, setViewLoading] = useState(false);
+  const [deleteSet, setDeleteSet] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const openView = async (s: any) => {
+    setViewSet(s);
+    setViewLoading(true);
+    const { data } = await supabase
+      .from("brand_creative_set_files" as any)
+      .select("*")
+      .eq("creative_set_id", s.id)
+      .order("sort_order", { ascending: true });
+    setViewFiles((data as any[]) || []);
+    setViewLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteSet) return;
+    setDeleting(true);
+    try {
+      const { data: fileRows } = await supabase
+        .from("brand_creative_set_files" as any)
+        .select("file_url")
+        .eq("creative_set_id", deleteSet.id);
+      const paths: string[] = ((fileRows as any[]) || [])
+        .map((r) => {
+          const marker = `/${BUCKET}/`;
+          const idx = (r.file_url as string).indexOf(marker);
+          return idx >= 0 ? (r.file_url as string).slice(idx + marker.length) : null;
+        })
+        .filter((p): p is string => !!p);
+      if (paths.length > 0) {
+        await supabase.storage.from(BUCKET).remove(paths);
+      }
+      await supabase.from("brand_creative_set_files" as any).delete().eq("creative_set_id", deleteSet.id);
+      const { error: delErr } = await supabase.from("brand_creative_sets" as any).delete().eq("id", deleteSet.id);
+      if (delErr) throw delErr;
+      toast({ title: "Folder deleted", description: `"${deleteSet.title}" was removed.` });
+      setDeleteSet(null);
+      fetchData();
+    } catch (e: any) {
+      toast({ title: "Delete failed", description: e.message, variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
