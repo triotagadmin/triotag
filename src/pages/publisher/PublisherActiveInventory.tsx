@@ -61,14 +61,12 @@ export default function PublisherActiveInventory() {
               .select(SELECT_COLS)
               .eq("publisher_id", profile.id)
               .eq("approval_status", "approved")
-              .eq("availability_status", "available")
           : Promise.resolve({ data: [] as any[] }),
         supabase
           .from("ad_spaces")
           .select(SELECT_COLS)
           .eq("advertiser_id", userId)
-          .eq("approval_status", "approved")
-          .eq("availability_status", "available"),
+          .eq("approval_status", "approved"),
       ]);
 
       const merged = [...(pubRes.data || []), ...(advRes.data || [])];
