@@ -150,6 +150,9 @@ export default function BrandAdvertiserInventory() {
   });
   const [rows, setRows] = useState<AdSpaceRow[]>([]);
 
+  const [totalLocations, setTotalLocations] = useState<string>("");
+  const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, string>>({});
+
   const [loadingRows, setLoadingRows] = useState(false);
 
   useEffect(() => {
