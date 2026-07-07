@@ -376,11 +376,11 @@ export default function BrandAdvertiserInventory() {
                 >
                   {radiusLocked ? (
                     <>
-                      <Lock className="w-4 h-4 mr-1" /> Radius Locked
+                      <LockIcon className="w-4 h-4 mr-1" /> Radius Locked
                     </>
                   ) : (
                     <>
-                      <LockOpen className="w-4 h-4 mr-1" /> Lock Radius
+                      <UnlockIcon className="w-4 h-4 mr-1" /> Lock Radius
                     </>
                   )}
                 </Button>
