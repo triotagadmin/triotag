@@ -4,13 +4,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Plus, Building2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Image as ImageIcon,
+  Monitor,
+  Volume2,
+  MapPin,
+  ArrowRight,
+  ArrowLeft,
+  Building2,
+  Search as SearchIcon,
+} from "lucide-react";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
+import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
+
+// NOTE: ad_spaces registered before the latitude/longitude migration will have
+// null coordinates and won't appear in radius results — this is expected until
+// those listings are backfilled with coordinates.
 
 type MediaType = "OOH" | "DOOH" | "AOOH";
+
+const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
 
 interface AdSpaceRow {
   id: string;
@@ -19,19 +33,62 @@ interface AdSpaceRow {
   media_type: string;
   pricing: any;
   monthly_subscription_fee: number | null;
-  specifications: any;
-  publisher_id: string;
+  latitude: number | null;
+  longitude: number | null;
   publisher_profiles?: { business_name: string | null; is_house_account: boolean | null } | null;
 }
 
-const mediaBadge = (mt: string) => {
-  const u = String(mt || "").toUpperCase();
-  if (u === "DOOH") return "bg-cyan-100 text-cyan-700 border-cyan-200";
-  if (u === "AOOH") return "bg-green-100 text-green-700 border-green-200";
-  return "bg-purple-100 text-purple-700 border-purple-200";
-};
+const FORMATS: {
+  key: MediaType;
+  title: string;
+  desc: string;
+  icon: any;
+  border: string;
+  bg: string;
+  iconColor: string;
+}[] = [
+  {
+    key: "OOH",
+    title: "OOH",
+    desc: "Out-of-Home print placements across retail and high-traffic locations.",
+    icon: ImageIcon,
+    border: "border-purple-300",
+    bg: "bg-purple-50",
+    iconColor: "text-purple-600",
+  },
+  {
+    key: "DOOH",
+    title: "DOOH",
+    desc: "Digital Out-of-Home screens with dynamic, scheduled creative.",
+    icon: Monitor,
+    border: "border-cyan-300",
+    bg: "bg-cyan-50",
+    iconColor: "text-cyan-600",
+  },
+  {
+    key: "AOOH",
+    title: "AOOH",
+    desc: "Ambient Out-of-Home reaching audiences through in-venue audio.",
+    icon: Volume2,
+    border: "border-green-300",
+    bg: "bg-green-50",
+    iconColor: "text-green-600",
+  },
+];
 
-const priceLabel = (row: AdSpaceRow): string => {
+// Haversine distance (meters) between two lat/lng points.
+function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const toRad = (v: number) => (v * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function priceLabel(row: AdSpaceRow): string {
   const p = row.pricing || {};
   const monthly = p.monthly ?? row.monthly_subscription_fee;
   if (monthly) return `₱${Number(monthly).toLocaleString()} / mo`;
@@ -39,20 +96,27 @@ const priceLabel = (row: AdSpaceRow): string => {
   if (p.daily) return `₱${Number(p.daily).toLocaleString()} / day`;
   if (p.cpm) return `₱${Number(p.cpm).toLocaleString()} CPM`;
   return "Contact for pricing";
-};
+}
+
+function distanceLabel(m: number): string {
+  if (m < 1000) return `${Math.round(m)}m away`;
+  return `${(m / 1000).toFixed(m < 10000 ? 2 : 1)}km away`;
+}
 
 export default function BrandAdvertiserInventory() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const [companyName, setCompanyName] = useState("My Brand");
+  const [center, setCenter] = useState(DEFAULT_CENTER);
+  const [radiusMeters, setRadiusMeters] = useState(1000);
+
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
+  const [chosenFormat, setChosenFormat] = useState<MediaType | null>(null);
   const [rows, setRows] = useState<AdSpaceRow[]>([]);
-  const [search, setSearch] = useState("");
-  const [mediaFilter, setMediaFilter] = useState<"ALL" | MediaType>("ALL");
-  const [sourceFilter, setSourceFilter] = useState<"all" | "house" | "partners">("all");
+  const [loadingRows, setLoadingRows] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const { data: profile } = await supabase
@@ -62,132 +126,242 @@ export default function BrandAdvertiserInventory() {
           .maybeSingle();
         if (profile?.company_name) setCompanyName(profile.company_name);
       }
-      const { data } = await supabase
-        .from("ad_spaces")
-        .select("id,title,location,media_type,pricing,monthly_subscription_fee,specifications,publisher_id,publisher_profiles(business_name,is_house_account)")
-        .eq("approval_status", "approved")
-        .order("created_at", { ascending: false });
-      setRows((data || []) as any);
-      setLoading(false);
     })();
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return rows.filter((r) => {
-      const mt = String(r.media_type || "").toUpperCase();
-      if (mediaFilter !== "ALL" && mt !== mediaFilter) return false;
-      const isHouse = !!r.publisher_profiles?.is_house_account;
-      if (sourceFilter === "house" && !isHouse) return false;
-      if (sourceFilter === "partners" && isHouse) return false;
-      if (!q) return true;
-      const biz = (r.publisher_profiles?.business_name || "").toLowerCase();
-      return (
-        r.title.toLowerCase().includes(q) ||
-        (r.location || "").toLowerCase().includes(q) ||
-        biz.includes(q)
-      );
-    });
-  }, [rows, search, mediaFilter, sourceFilter]);
+  // Fetch approved inventory matching the chosen media type. Radius/distance
+  // filtering happens client-side via Haversine since public Postgres here has
+  // no PostGIS extension enabled.
+  useEffect(() => {
+    if (!chosenFormat) {
+      setRows([]);
+      return;
+    }
+    (async () => {
+      setLoadingRows(true);
+      const { data } = await supabase
+        .from("ad_spaces")
+        .select(
+          "id,title,location,media_type,pricing,monthly_subscription_fee,latitude,longitude,publisher_profiles(business_name,is_house_account)"
+        )
+        .eq("approval_status", "approved")
+        .eq("media_type", chosenFormat)
+        .order("created_at", { ascending: false });
+      setRows((data || []) as any);
+      setLoadingRows(false);
+    })();
+  }, [chosenFormat]);
 
-  const startCampaign = (adSpaceId: string) => {
-    navigate("/brand-advertiser/campaigns", { state: { openWizard: true, adSpaceId } });
+  const matches = useMemo(() => {
+    return rows
+      .filter((r) => r.latitude != null && r.longitude != null)
+      .map((r) => ({
+        row: r,
+        distance: haversineMeters(center.lat, center.lng, Number(r.latitude), Number(r.longitude)),
+      }))
+      .filter((m) => m.distance <= radiusMeters)
+      .sort((a, b) => a.distance - b.distance);
+  }, [rows, center.lat, center.lng, radiusMeters]);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const continueToCampaign = () => {
+    if (selectedIds.length === 0) return;
+    navigate("/brand-advertiser/campaigns", {
+      state: { openWizard: true, adSpaceIds: selectedIds },
+    });
   };
 
   const displayBusinessName = (r: AdSpaceRow) =>
-    r.publisher_profiles?.is_house_account ? "TrioTag" : (r.publisher_profiles?.business_name || "Retail Partner");
+    r.publisher_profiles?.is_house_account
+      ? "TrioTag"
+      : r.publisher_profiles?.business_name || "Retail Partner";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       <BrandAdvertiserTopBar companyName={companyName} totalBudget={0} />
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">Inventory</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Browse approved OOH, DOOH, and AOOH inventory from TrioTag and retail media partners.
+            Search real bookable OOH, DOOH, and AOOH inventory near your target area.
           </p>
         </div>
 
-        <Card className="p-4 mb-4 bg-white border border-gray-200">
-          <div className="flex flex-wrap gap-3 items-center">
-            <div className="relative flex-1 min-w-[240px]">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search title, location, or business…"
-                className="pl-9"
-              />
-            </div>
-            <Tabs value={mediaFilter} onValueChange={(v) => setMediaFilter(v as any)}>
-              <TabsList>
-                <TabsTrigger value="ALL">All</TabsTrigger>
-                <TabsTrigger value="OOH">OOH</TabsTrigger>
-                <TabsTrigger value="DOOH">DOOH</TabsTrigger>
-                <TabsTrigger value="AOOH">AOOH</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Select value={sourceFilter} onValueChange={(v) => setSourceFilter(v as any)}>
-              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sources</SelectItem>
-                <SelectItem value="house">TrioTag</SelectItem>
-                <SelectItem value="partners">Retail Partners</SelectItem>
-              </SelectContent>
-            </Select>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* LEFT: Map + radius planner */}
+          <div className="lg:col-span-3">
+            <RadiusMapPlanner
+              center={center}
+              radiusMeters={radiusMeters}
+              onCenterChange={setCenter}
+              onRadiusChange={setRadiusMeters}
+            />
           </div>
-        </Card>
 
-        {loading ? (
-          <div className="text-center text-gray-500 py-16">Loading inventory…</div>
-        ) : filtered.length === 0 ? (
-          <Card className="p-12 text-center bg-white border border-gray-200">
-            <Building2 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-600">No inventory available yet — check back soon.</p>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((r) => {
-              const mt = String(r.media_type || "OOH").toUpperCase();
-              const spec = r.specifications || {};
-              const specBits: string[] = [];
-              if (spec.dimensions) specBits.push(String(spec.dimensions));
-              if (spec.resolution) specBits.push(String(spec.resolution));
-              if (spec.screen_size) specBits.push(`${spec.screen_size}`);
-              if (spec.orientation) specBits.push(String(spec.orientation));
-              return (
-                <Card key={r.id} className="p-4 bg-white border border-gray-200 flex flex-col">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="min-w-0">
-                      <div className="text-xs text-gray-500 truncate">{displayBusinessName(r)}</div>
-                      <h3 className="font-semibold text-gray-900 truncate">{r.title}</h3>
-                    </div>
-                    <Badge variant="outline" className={mediaBadge(mt)}>{mt}</Badge>
+          {/* RIGHT: Step-based panel */}
+          <div className="lg:col-span-2">
+            <Card className="p-5 bg-white border border-gray-200 sticky top-4">
+              <div className="mb-4">
+                <div className="text-xs font-semibold text-green-700 uppercase tracking-wide">
+                  Step {wizardStep} of 3
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 mt-1">Find Inventory Near You</h2>
+              </div>
+
+              {/* STEP 1 — Format */}
+              {wizardStep === 1 && (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600 mb-2">Which format do you want to run?</p>
+                  {FORMATS.map((f) => {
+                    const Icon = f.icon;
+                    const active = chosenFormat === f.key;
+                    return (
+                      <button
+                        key={f.key}
+                        type="button"
+                        onClick={() => {
+                          setChosenFormat(f.key);
+                          setSelectedIds([]);
+                          setWizardStep(2);
+                        }}
+                        className={`w-full text-left rounded-xl border-2 p-4 transition-all ${
+                          active ? `${f.border} ${f.bg}` : "border-gray-200 hover:border-gray-300 bg-white"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`w-10 h-10 rounded-lg ${f.bg} flex items-center justify-center shrink-0`}>
+                            <Icon className={`w-5 h-5 ${f.iconColor}`} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-semibold text-gray-900">{f.title}</div>
+                            <div className="text-xs text-gray-600 mt-0.5">{f.desc}</div>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* STEP 2 — Matching inventory */}
+              {wizardStep === 2 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      className="text-xs text-gray-500 hover:text-gray-800 inline-flex items-center gap-1"
+                      onClick={() => setWizardStep(1)}
+                    >
+                      <ArrowLeft className="w-3 h-3" /> Change format
+                    </button>
+                    <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
+                      {loadingRows ? "…" : `${matches.length} match${matches.length === 1 ? "" : "es"}`}
+                    </Badge>
                   </div>
-                  {r.location && (
-                    <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" />
-                      <span className="truncate">{r.location}</span>
+
+                  <div className="text-xs text-gray-500">
+                    Showing approved <strong>{chosenFormat}</strong> inventory within your selected radius.
+                  </div>
+
+                  <div className="max-h-[520px] overflow-y-auto -mx-1 px-1 space-y-2">
+                    {loadingRows ? (
+                      <div className="text-center text-gray-500 py-8 text-sm">Loading…</div>
+                    ) : matches.length === 0 ? (
+                      <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center bg-gray-50">
+                        <SearchIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-gray-700">
+                          No approved {chosenFormat} inventory found in this area
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Try increasing the radius using the slider on the map.
+                        </p>
+                      </div>
+                    ) : (
+                      matches.map(({ row: r, distance }) => {
+                        const checked = selectedIds.includes(r.id);
+                        return (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => toggleSelect(r.id)}
+                            className={`w-full text-left rounded-xl border p-3 flex gap-3 transition-colors ${
+                              checked ? "border-green-500 bg-green-50/40" : "border-gray-200 hover:border-gray-300 bg-white"
+                            }`}
+                          >
+                            <Checkbox checked={checked} className="mt-0.5" />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="text-xs text-gray-500 truncate">
+                                  {displayBusinessName(r)}
+                                </div>
+                                <div className="text-[11px] text-green-700 font-medium whitespace-nowrap">
+                                  {distanceLabel(distance)}
+                                </div>
+                              </div>
+                              <div className="font-semibold text-sm text-gray-900 truncate">{r.title}</div>
+                              {r.location && (
+                                <div className="flex items-center gap-1 text-xs text-gray-600 mt-0.5">
+                                  <MapPin className="w-3 h-3 shrink-0" />
+                                  <span className="truncate">{r.location}</span>
+                                </div>
+                              )}
+                              <div className="text-xs font-medium text-gray-800 mt-1">
+                                {priceLabel(r)}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <Button
+                    onClick={() => setWizardStep(3)}
+                    disabled={selectedIds.length === 0}
+                    className="w-full bg-green-600 hover:bg-green-500 text-white"
+                  >
+                    Continue with {selectedIds.length} selected <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              )}
+
+              {/* STEP 3 — Continue to campaign */}
+              {wizardStep === 3 && (
+                <div className="space-y-4">
+                  <button
+                    type="button"
+                    className="text-xs text-gray-500 hover:text-gray-800 inline-flex items-center gap-1"
+                    onClick={() => setWizardStep(2)}
+                  >
+                    <ArrowLeft className="w-3 h-3" /> Back
+                  </button>
+                  <div className="rounded-xl border border-green-200 bg-green-50/60 p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Building2 className="w-4 h-4 text-green-700" />
+                      <div className="text-sm font-semibold text-green-900">
+                        {selectedIds.length} ad space{selectedIds.length === 1 ? "" : "s"} selected
+                      </div>
                     </div>
-                  )}
-                  {specBits.length > 0 && (
-                    <div className="text-xs text-gray-500 mb-2">{specBits.join(" · ")}</div>
-                  )}
-                  <div className="text-sm font-medium text-gray-900 mt-auto pt-2">
-                    {priceLabel(r)}
+                    <p className="text-xs text-green-800">
+                      We'll pre-populate the campaign wizard with these inventory selections.
+                    </p>
                   </div>
                   <Button
-                    onClick={() => startCampaign(r.id)}
-                    className="mt-3 bg-blue-600 hover:bg-blue-700 text-white"
-                    size="sm"
+                    onClick={continueToCampaign}
+                    className="w-full bg-green-600 hover:bg-green-500 text-white"
                   >
-                    <Plus className="w-4 h-4 mr-1" /> Create Campaign
+                    Continue to campaign <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
-                </Card>
-              );
-            })}
+                </div>
+              )}
+            </Card>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

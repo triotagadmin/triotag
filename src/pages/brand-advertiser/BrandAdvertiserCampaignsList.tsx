@@ -35,11 +35,12 @@ export default function BrandAdvertiserCampaignsList() {
   const location = useLocation();
   const navigate = useNavigate();
   const initialAdSpaceId = (location.state as any)?.adSpaceId ?? null;
+  const initialAdSpaceIds = (location.state as any)?.adSpaceIds ?? null;
 
   useEffect(() => {
     if ((location.state as any)?.openWizard) {
       setWizardOpen(true);
-      navigate(location.pathname, { replace: true, state: { adSpaceId: initialAdSpaceId } });
+      navigate(location.pathname, { replace: true, state: { adSpaceId: initialAdSpaceId, adSpaceIds: initialAdSpaceIds } });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -200,6 +201,7 @@ export default function BrandAdvertiserCampaignsList() {
           brandAdvertiserId={profileId}
           onCreated={fetchData}
           initialAdSpaceId={initialAdSpaceId}
+          initialAdSpaceIds={initialAdSpaceIds}
         />
       )}
     </div>
