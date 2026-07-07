@@ -81,6 +81,7 @@ const RetailerInventoryConfig = () => {
     if (error) { toast.error(error.message); return; }
     toast.success("Inventory configuration saved");
     setSpace({ ...space, specifications: nextSpecs });
+    navigate("/retailer-dashboard");
   };
 
   if (loading) return <div className="min-h-screen bg-gray-50"><Navigation /><PageLoader /></div>;
