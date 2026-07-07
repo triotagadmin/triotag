@@ -84,7 +84,7 @@ export default function BrandAdvertiserCampaignsList() {
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">Campaigns</h1>
-          <Button onClick={() => setWizardOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={() => { setEditCampaign(null); setWizardOpen(true); }} className="bg-blue-600 hover:bg-blue-700 text-white">
             <Plus className="w-4 h-4 mr-2" /> New Campaign
           </Button>
         </div>
