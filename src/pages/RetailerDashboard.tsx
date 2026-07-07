@@ -59,14 +59,15 @@ const RetailerDashboard = () => {
 
   const toggleActivation = async (space: any) => {
     const next = !(space.agent_disconnected ?? false);
+    const nextAvailability = next ? "unavailable" : "available";
     setTogglingId(space.id);
     const { error } = await supabase
       .from("ad_spaces")
-      .update({ agent_disconnected: next })
+      .update({ agent_disconnected: next, availability_status: nextAvailability })
       .eq("id", space.id);
     setTogglingId(null);
     if (error) { toast.error(error.message); return; }
-    setSpaces((prev) => prev.map((s) => (s.id === space.id ? { ...s, agent_disconnected: next } : s)));
+    setSpaces((prev) => prev.map((s) => (s.id === space.id ? { ...s, agent_disconnected: next, availability_status: nextAvailability } : s)));
     toast.success(next ? "Inventory deactivated" : "Inventory activated");
   };
 
