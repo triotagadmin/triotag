@@ -72,6 +72,24 @@ const VenueDashboard = () => {
     };
     fetchData();
   }, [navigate, toast]);
+  const toggleActivation = async (space: any) => {
+    const next = !(space.agent_disconnected ?? false);
+    setTogglingId(space.id);
+    const { error } = await supabase
+      .from("ad_spaces")
+      .update({ agent_disconnected: next })
+      .eq("id", space.id);
+    setTogglingId(null);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    setAdSpaces((prev) => prev.map((s) => (s.id === space.id ? { ...s, agent_disconnected: next } : s)));
+    toast({
+      title: next ? "Inventory deactivated" : "Inventory activated",
+      description: next ? "Hidden from inventory search." : "Now visible in inventory search.",
+    });
+  };
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
