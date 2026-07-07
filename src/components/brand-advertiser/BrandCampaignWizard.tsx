@@ -513,7 +513,12 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
               <Row label="Creative Format" value={creativeFormat} />
               <Row
                 label="Creative Set"
-                value={creativeSetId ? (creativeSets.find(c => c.id === creativeSetId)?.title || "Selected") : "None (draft)"}
+                value={creativeSetId ? (() => {
+                  const cs = creativeSets.find(c => c.id === creativeSetId);
+                  if (!cs) return "Selected";
+                  const count = cs.creative_count ?? 0;
+                  return `${cs.title} (${count} photo${count === 1 ? "" : "s"})`;
+                })() : "None (draft)"}
               />
             </div>
             <div className="space-y-1.5">
