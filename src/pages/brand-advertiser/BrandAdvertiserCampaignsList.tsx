@@ -122,7 +122,7 @@ export default function BrandAdvertiserCampaignsList() {
                   {format(dateFrom, "d MMM")} - {format(dateTo, "d MMM, yyyy")}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="p-0 bg-white" align="start">
+              <PopoverContent className="p-0 bg-white text-gray-900" align="start">
                 <Calendar
                   mode="range"
                   selected={{ from: dateFrom, to: dateTo }}

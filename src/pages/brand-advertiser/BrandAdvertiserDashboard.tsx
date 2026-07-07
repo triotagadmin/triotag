@@ -104,7 +104,7 @@ export default function BrandAdvertiserDashboard() {
                   {format(dateFrom, "d MMM, yyyy")} - {format(dateTo, "d MMM, yyyy")}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="p-0 bg-white" align="end">
+              <PopoverContent className="p-0 bg-white text-gray-900" align="end">
                 <Calendar
                   mode="range"
                   selected={{ from: dateFrom, to: dateTo }}
