@@ -139,7 +139,7 @@ export default function BrandAdvertiserCreatives() {
       for (let i = 0; i < files.length; i++) {
         const f = files[i];
         const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const path = `${advertiserId}/${setId}/${i}-${safeName}`;
+        const path = `${session.user.id}/${advertiserId}/${setId}/${i}-${safeName}`;
         const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, f, { upsert: false });
         if (upErr) throw upErr;
         const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
