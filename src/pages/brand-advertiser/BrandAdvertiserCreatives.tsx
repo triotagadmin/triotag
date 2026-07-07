@@ -114,11 +114,7 @@ export default function BrandAdvertiserCreatives() {
       }
       const advertiserId = freshProfile.id;
 
-      console.log("DEBUG creative set insert:", {
-        profileId,
-        freshProfileId: advertiserId,
-        sessionUserId: session.user.id,
-      });
+
 
       // 1. Create the set row
       const { data: setRow, error: setErr } = await supabase
