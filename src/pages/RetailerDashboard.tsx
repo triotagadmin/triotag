@@ -55,6 +55,20 @@ const RetailerDashboard = () => {
   const [form, setForm] = useState({ business_name: "", contact_email: "", contact_phone: "", location: "", description: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const toggleActivation = async (space: any) => {
+    const next = !(space.agent_disconnected ?? false);
+    setTogglingId(space.id);
+    const { error } = await supabase
+      .from("ad_spaces")
+      .update({ agent_disconnected: next })
+      .eq("id", space.id);
+    setTogglingId(null);
+    if (error) { toast.error(error.message); return; }
+    setSpaces((prev) => prev.map((s) => (s.id === space.id ? { ...s, agent_disconnected: next } : s)));
+    toast.success(next ? "Inventory deactivated" : "Inventory activated");
+  };
 
   const loadAll = async () => {
     setLoading(true);
