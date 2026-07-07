@@ -761,17 +761,17 @@ export default function BrandAdvertiserInventory() {
           </div>
         </div>
 
-        {/* Saved Inventory Targets */}
+        {/* Pending Campaigns */}
         <div className="mt-8">
           <div className="flex items-end justify-between mb-3">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Saved Inventory Targets</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Pending Campaigns</h2>
               <p className="text-sm text-gray-500">
-                Reusable targeting presets — launch a campaign from any saved target.
+                Saved targeting presets ready to launch as campaigns.
               </p>
             </div>
             <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
-              {savedTargets.length} saved
+              {savedTargets.length} pending
             </Badge>
           </div>
 
@@ -779,7 +779,7 @@ export default function BrandAdvertiserInventory() {
             <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center">
               <ClipboardList className="w-8 h-8 text-gray-300 mx-auto mb-2" />
               <p className="text-sm text-gray-600">
-                No saved inventory targets yet. Complete the wizard and click{" "}
+                No pending campaigns yet. Complete the wizard and click{" "}
                 <span className="font-semibold text-green-700">Save Inventory Target</span> to add one.
               </p>
             </div>
