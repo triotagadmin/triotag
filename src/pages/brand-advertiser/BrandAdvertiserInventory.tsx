@@ -2,51 +2,104 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Image as ImageIcon, Monitor, Volume2, ArrowRight, ClipboardList } from "lucide-react";
+import {
+  Image as ImageIcon,
+  Monitor,
+  Volume2,
+  ArrowRight,
+  ClipboardList,
+  MapPin,
+  Search as SearchIcon,
+} from "lucide-react";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
 import { calculateMediaPlanEstimate } from "@/lib/mediaPlanPricing";
 
 const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
 
-const UNIT_FORMATS = [
+type MediaType = "OOH" | "DOOH" | "AOOH";
+
+interface AdSpaceRow {
+  id: string;
+  title: string;
+  location: string | null;
+  media_type: string;
+  pricing: any;
+  monthly_subscription_fee: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  specifications: any;
+  publisher_profiles?: { business_name: string | null; is_house_account: boolean | null } | null;
+}
+
+const FORMATS: {
+  key: MediaType;
+  title: string;
+  desc: string;
+  icon: any;
+  border: string;
+  bg: string;
+  iconColor: string;
+}[] = [
   {
-    key: "OOH" as const,
-    title: "OOH Units",
+    key: "OOH",
+    title: "OOH",
     desc: "Out-of-Home print placements",
     icon: ImageIcon,
+    border: "border-purple-400",
     bg: "bg-purple-50",
     iconColor: "text-purple-600",
   },
   {
-    key: "DOOH" as const,
-    title: "DOOH Units",
+    key: "DOOH",
+    title: "DOOH",
     desc: "Digital screens with scheduled creative",
     icon: Monitor,
+    border: "border-cyan-400",
     bg: "bg-cyan-50",
     iconColor: "text-cyan-600",
   },
   {
-    key: "AOOH" as const,
-    title: "AOOH Units",
+    key: "AOOH",
+    title: "AOOH",
     desc: "Ambient / audio placements",
     icon: Volume2,
+    border: "border-green-400",
     bg: "bg-green-50",
     iconColor: "text-green-600",
   },
 ];
 
-type UnitCounts = { OOH: string; DOOH: string; AOOH: string };
+function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const toRad = (v: number) => (v * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function distanceLabel(m: number): string {
+  if (m < 1000) return `${Math.round(m)}m away`;
+  return `${(m / 1000).toFixed(m < 10000 ? 2 : 1)}km away`;
+}
 
 export default function BrandAdvertiserInventory() {
   const navigate = useNavigate();
   const [companyName, setCompanyName] = useState("My Brand");
   const [center, setCenter] = useState(DEFAULT_CENTER);
   const [radiusMeters, setRadiusMeters] = useState(1000);
-  const [units, setUnits] = useState<UnitCounts>({ OOH: "", DOOH: "", AOOH: "" });
+
+  const [chosenFormat, setChosenFormat] = useState<MediaType | null>(null);
+  const [unitCount, setUnitCount] = useState<string>("");
+  const [rows, setRows] = useState<AdSpaceRow[]>([]);
+  const [loadingRows, setLoadingRows] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -62,30 +115,70 @@ export default function BrandAdvertiserInventory() {
     })();
   }, []);
 
+  useEffect(() => {
+    if (!chosenFormat) {
+      setRows([]);
+      return;
+    }
+    (async () => {
+      setLoadingRows(true);
+      const { data } = await supabase
+        .from("ad_spaces")
+        .select(
+          "id,title,location,media_type,pricing,monthly_subscription_fee,latitude,longitude,specifications,publisher_profiles(business_name,is_house_account)"
+        )
+        .eq("approval_status", "approved")
+        .or("agent_disconnected.is.null,agent_disconnected.eq.false")
+        .order("created_at", { ascending: false });
+      setRows((data || []) as any);
+      setLoadingRows(false);
+    })();
+  }, [chosenFormat]);
+
+  const matches = useMemo(() => {
+    if (!chosenFormat) return [];
+    return rows
+      .filter((r) => {
+        const units = (r.specifications && r.specifications.units) || null;
+        const unitCt = units ? Number(units[chosenFormat] || 0) : 0;
+        return r.media_type === chosenFormat || unitCt > 0;
+      })
+      .filter((r) => r.latitude != null && r.longitude != null)
+      .map((r) => ({
+        row: r,
+        distance: haversineMeters(center.lat, center.lng, Number(r.latitude), Number(r.longitude)),
+      }))
+      .filter((m) => m.distance <= radiusMeters)
+      .sort((a, b) => a.distance - b.distance);
+  }, [rows, chosenFormat, center.lat, center.lng, radiusMeters]);
+
   const estimate = useMemo(
     () => calculateMediaPlanEstimate([], radiusMeters),
     [radiusMeters]
   );
 
-  const totalUnits =
-    (Number(units.OOH) || 0) + (Number(units.DOOH) || 0) + (Number(units.AOOH) || 0);
+  const displayBusinessName = (r: AdSpaceRow) =>
+    r.publisher_profiles?.is_house_account
+      ? "TrioTag"
+      : r.publisher_profiles?.business_name || "Retail Partner";
 
   const submitRegistry = () => {
+    if (!chosenFormat) return;
     navigate("/brand-advertiser/campaigns", {
       state: {
         openWizard: true,
+        adSpaceIds: matches.map((m) => m.row.id),
         prefill: {
           radiusMeters,
           center,
-          unitCounts: {
-            OOH: Number(units.OOH) || 0,
-            DOOH: Number(units.DOOH) || 0,
-            AOOH: Number(units.AOOH) || 0,
-          },
+          format: chosenFormat,
+          unitCount: Number(unitCount) || 0,
         },
       },
     });
   };
+
+  const selectedFormatMeta = FORMATS.find((f) => f.key === chosenFormat);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -94,7 +187,7 @@ export default function BrandAdvertiserInventory() {
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">Campaign Unit Registry</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Pick your target area and register how many OOH, DOOH, and AOOH units you want for this campaign.
+            Pick your target area and register your ad format and units for this campaign.
           </p>
         </div>
 
@@ -133,17 +226,25 @@ export default function BrandAdvertiserInventory() {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-gray-900 leading-tight">Unit Registry</h2>
-                  <p className="text-xs text-gray-500">How many of each unit do you need?</p>
+                  <p className="text-xs text-gray-500">Pick one ad format for this campaign.</p>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {UNIT_FORMATS.map((f) => {
+              {/* Format picker — single choice */}
+              <div className="space-y-2">
+                {FORMATS.map((f) => {
                   const Icon = f.icon;
+                  const active = chosenFormat === f.key;
                   return (
-                    <div
+                    <button
                       key={f.key}
-                      className="rounded-xl border border-gray-200 p-3 flex items-center gap-3 bg-white"
+                      type="button"
+                      onClick={() => setChosenFormat(f.key)}
+                      className={`w-full text-left rounded-xl border-2 p-3 flex items-center gap-3 transition-all ${
+                        active
+                          ? `${f.border} ${f.bg}`
+                          : "border-gray-200 hover:border-gray-300 bg-white"
+                      }`}
                     >
                       <div
                         className={`w-10 h-10 rounded-lg ${f.bg} flex items-center justify-center shrink-0`}
@@ -151,44 +252,99 @@ export default function BrandAdvertiserInventory() {
                         <Icon className={`w-5 h-5 ${f.iconColor}`} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <Label
-                          htmlFor={`units-${f.key}`}
-                          className="text-sm font-semibold text-gray-900"
-                        >
-                          {f.title}
-                        </Label>
+                        <div className="text-sm font-semibold text-gray-900">{f.title}</div>
                         <div className="text-xs text-gray-500">{f.desc}</div>
                       </div>
-                      <Input
-                        id={`units-${f.key}`}
-                        type="number"
-                        min="0"
-                        placeholder="0"
-                        value={units[f.key]}
-                        onChange={(e) =>
-                          setUnits((p) => ({ ...p, [f.key]: e.target.value }))
-                        }
-                        className="w-20 text-center"
+                      <div
+                        className={`w-4 h-4 rounded-full border-2 ${
+                          active ? "border-green-600 bg-green-600" : "border-gray-300"
+                        }`}
                       />
-                    </div>
+                    </button>
                   );
                 })}
               </div>
 
-              <div className="mt-4 rounded-lg bg-gray-50 border border-gray-200 px-3 py-2 flex items-center justify-between">
-                <span className="text-xs text-gray-600">Total units requested</span>
-                <span className="text-sm font-semibold text-gray-900">{totalUnits}</span>
-              </div>
+              {/* Info below selected format */}
+              {chosenFormat && selectedFormatMeta && (
+                <div className="mt-4 space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="unit-count" className="text-sm">
+                      How many {chosenFormat} units do you need?
+                    </Label>
+                    <Input
+                      id="unit-count"
+                      type="number"
+                      min="0"
+                      placeholder="e.g. 10"
+                      value={unitCount}
+                      onChange={(e) => setUnitCount(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                        Inventory in radius
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className="bg-green-50 border-green-200 text-green-700"
+                      >
+                        {loadingRows
+                          ? "…"
+                          : `${matches.length} match${matches.length === 1 ? "" : "es"}`}
+                      </Badge>
+                    </div>
+                    <div className="max-h-[280px] overflow-y-auto -mx-1 px-1 space-y-2">
+                      {loadingRows ? (
+                        <div className="text-center text-gray-500 py-6 text-sm">Loading…</div>
+                      ) : matches.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-gray-300 p-4 text-center bg-gray-50">
+                          <SearchIcon className="w-6 h-6 text-gray-300 mx-auto mb-1.5" />
+                          <p className="text-xs text-gray-600">
+                            No approved {chosenFormat} inventory in this radius yet — adjust the
+                            map or continue anyway.
+                          </p>
+                        </div>
+                      ) : (
+                        matches.map(({ row: r, distance }) => (
+                          <div
+                            key={r.id}
+                            className="rounded-lg border border-gray-200 p-2.5 bg-white"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="text-xs text-gray-500 truncate">
+                                {displayBusinessName(r)}
+                              </div>
+                              <div className="text-[11px] text-green-700 font-medium whitespace-nowrap">
+                                {distanceLabel(distance)}
+                              </div>
+                            </div>
+                            {r.location && (
+                              <div className="flex items-center gap-1 text-xs text-gray-900 font-medium mt-0.5">
+                                <MapPin className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{r.location}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <Button
                 onClick={submitRegistry}
-                disabled={totalUnits === 0}
+                disabled={!chosenFormat}
                 className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white"
               >
                 Submit &amp; Continue to Campaign <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
               <p className="text-[11px] text-gray-500 text-center mt-2">
-                We'll match your registered units to available inventory in your radius.
+                Inventory shown is reference only — you can launch without selecting specific
+                spaces.
               </p>
             </Card>
           </div>
