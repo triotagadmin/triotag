@@ -35,6 +35,7 @@ interface AdSpaceRow {
   monthly_subscription_fee: number | null;
   latitude: number | null;
   longitude: number | null;
+  specifications: any;
   publisher_profiles?: { business_name: string | null; is_house_account: boolean | null } | null;
 }
 
