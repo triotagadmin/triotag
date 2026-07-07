@@ -874,8 +874,19 @@ export default function BrandAdvertiserInventory() {
                       )}
                       {unitEntries.length > 0 && (
                         <div>
-                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mb-1">
-                            Units by Type
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
+                              Units by Type
+                            </div>
+                            <div className="text-[10px] font-semibold text-green-700">
+                              Est.{" "}
+                              {fmtPHP(
+                                unitEntries.reduce(
+                                  (s, [k, v]) => s + priceFor(k) * (v as number),
+                                  0,
+                                ),
+                              )}
+                            </div>
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {unitEntries.map(([k, v]) => (
@@ -883,12 +894,13 @@ export default function BrandAdvertiserInventory() {
                                 key={k}
                                 className="text-[10px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 border border-green-100"
                               >
-                                {k} · {v}
+                                {k} · {v} · {fmtPHP(priceFor(k) * (v as number))}
                               </span>
                             ))}
                           </div>
                         </div>
                       )}
+
                     </div>
 
 
