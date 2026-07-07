@@ -55,7 +55,7 @@ import aoohAnnouncements from "@/assets/formats/aooh-announcements.jpg";
 import aoohInstoreAudio from "@/assets/formats/aooh-instore-audio.jpg";
 import aoohQueueAudio from "@/assets/formats/aooh-queue-audio.jpg";
 import aoohPlaylist from "@/assets/formats/aooh-playlist.jpg";
-import aoohPromoSpots from "@/assets/formats/aooh-promo-spots.jpg";
+
 
 const Hero = () => {
   const [totals, setTotals] = useState<{
@@ -372,7 +372,6 @@ const PopularFormats = () => {
       { label: "In-store Audio Ads", icon: Speaker, img: aoohInstoreAudio },
       { label: "Queue Line Audio", icon: Volume2, img: aoohQueueAudio },
       { label: "Playlist Sponsorships", icon: Music, img: aoohPlaylist },
-      { label: "Promotional Spots", icon: Volume2, img: aoohPromoSpots },
     ],
   } as const;
   const [active, setActive] = useState<keyof typeof groups>("OOH");
