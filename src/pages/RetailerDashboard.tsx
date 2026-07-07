@@ -356,6 +356,24 @@ const RetailerDashboard = () => {
                   <Link to={`/retailer-dashboard/creatives?space=${s.id}`}>
                     <Button variant="outline" size="sm" className="w-full border-green-500 text-green-600 hover:bg-green-50">Manage</Button>
                   </Link>
+                  {(() => {
+                    const deactivated = s.agent_disconnected === true;
+                    return (
+                      <>
+                        <Button
+                          size="sm"
+                          disabled={togglingId === s.id}
+                          onClick={() => toggleActivation(s)}
+                          className={`w-full mt-2 ${deactivated ? "bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50" : "bg-green-600 hover:bg-green-500 text-white"}`}
+                        >
+                          {togglingId === s.id ? "…" : deactivated ? "Deactivated · Activate" : "Activated Inventory"}
+                        </Button>
+                        <p className="text-[10px] text-zinc-500 text-center mt-1">
+                          {deactivated ? "Click to activate this inventory" : "Click to deactivate this inventory"}
+                        </p>
+                      </>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
