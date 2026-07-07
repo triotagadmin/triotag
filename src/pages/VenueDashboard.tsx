@@ -25,6 +25,7 @@ const VenueDashboard = () => {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState("");
@@ -43,6 +44,8 @@ const VenueDashboard = () => {
         return;
       }
       setUser(session.user);
+      const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).maybeSingle();
+      setUserRole(roleData?.role ?? null);
       const {
         data: profileData,
         error: profileError
@@ -346,36 +349,40 @@ const VenueDashboard = () => {
 
           {/* Branch Management */}
 
-          {/* Bottom Modules */}
-          <Separator className="my-8" />
-          
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Management Hub</h2>
-            
-            {profile?.id && <BookingsArchive publisherProfileId={profile.id} />}
-            
-            {user?.id && <MessagesCard userId={user.id} />}
-            
-            {user?.id && <BillingInvoices userId={user.id} />}
-            
-            {/* Account Settings Link */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="h-5 w-5 text-primary" />
-                      Account Settings
-                    </CardTitle>
-                    <CardDescription>Manage your profile, password, and notification preferences</CardDescription>
-                  </div>
-                  <Button onClick={() => navigate("/publisher/settings")}>
-                    <Settings className="h-4 w-4 mr-2" />Open Settings
-                  </Button>
-                </div>
-              </CardHeader>
-            </Card>
-          </div>
+          {/* Bottom Modules - Admin Only */}
+          {userRole === "admin" && (
+            <>
+              <Separator className="my-8" />
+              
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold">Management Hub</h2>
+                
+                {profile?.id && <BookingsArchive publisherProfileId={profile.id} />}
+                
+                {user?.id && <MessagesCard userId={user.id} />}
+                
+                {user?.id && <BillingInvoices userId={user.id} />}
+                
+                {/* Account Settings Link */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="h-5 w-5 text-primary" />
+                          Account Settings
+                        </CardTitle>
+                        <CardDescription>Manage your profile, password, and notification preferences</CardDescription>
+                      </div>
+                      <Button onClick={() => navigate("/publisher/settings")}>
+                        <Settings className="h-4 w-4 mr-2" />Open Settings
+                      </Button>
+                    </div>
+                  </CardHeader>
+                </Card>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
