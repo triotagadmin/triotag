@@ -255,30 +255,58 @@ export default function BrandAdvertiserInventory() {
   const submitRegistry = () => {
     if (!chosenFormat) return;
     const breakdown = unitCounts[chosenFormat];
+    const unitBreakdown = Object.fromEntries(
+      Object.entries(breakdown)
+        .map(([k, v]) => [k, Number(v) || 0])
+        .filter(([, n]) => (n as number) > 0),
+    ) as Record<string, number>;
+    const locationTypes = Object.fromEntries(
+      Object.entries(selectedLocationTypes)
+        .map(([k, v]) => [k, Number(v) || 0])
+        .filter(([, n]) => (n as number) > 0),
+    ) as Record<string, number>;
+    const target: SavedTarget = {
+      id: (crypto as any).randomUUID?.() || String(Date.now()),
+      createdAt: Date.now(),
+      format: chosenFormat,
+      unitBreakdown,
+      unitCount: totalUnitsForFormat(chosenFormat),
+      totalLocations: Number(totalLocations) || 0,
+      locationTypes,
+      radiusMeters,
+      center,
+    };
+    setSavedTargets((prev) => [target, ...prev]);
+    // Reset wizard for a fresh save
+    setChosenFormat(null);
+    setUnitCounts({ OOH: {}, DOOH: {}, AOOH: {} });
+    setSelectedLocationTypes({});
+    setTotalLocations("");
+    setStep(1);
+  };
+
+  const launchFromTarget = (t: SavedTarget) => {
     navigate("/brand-advertiser/campaigns", {
       state: {
         openWizard: true,
-        adSpaceIds: matches.map((m) => m.row.id),
+        adSpaceIds: [],
         prefill: {
-          radiusMeters,
-          center,
-          format: chosenFormat,
-          unitCount: totalUnitsForFormat(chosenFormat),
-          unitBreakdown: Object.fromEntries(
-            Object.entries(breakdown)
-              .map(([k, v]) => [k, Number(v) || 0])
-              .filter(([, n]) => (n as number) > 0)
-          ),
-          totalLocations: Number(totalLocations) || 0,
-          locationTypes: Object.fromEntries(
-            Object.entries(selectedLocationTypes)
-              .map(([k, v]) => [k, Number(v) || 0])
-              .filter(([, n]) => (n as number) > 0)
-          ),
+          radiusMeters: t.radiusMeters,
+          center: t.center,
+          format: t.format,
+          unitCount: t.unitCount,
+          unitBreakdown: t.unitBreakdown,
+          totalLocations: t.totalLocations,
+          locationTypes: t.locationTypes,
         },
       },
     });
   };
+
+  const deleteTarget = (id: string) => {
+    setSavedTargets((prev) => prev.filter((t) => t.id !== id));
+  };
+
 
   const selectedFormatMeta = FORMATS.find((f) => f.key === chosenFormat);
 
