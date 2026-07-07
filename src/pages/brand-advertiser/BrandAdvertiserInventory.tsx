@@ -16,6 +16,9 @@ import {
   MapPin,
   Search as SearchIcon,
   Check,
+  Save,
+  Rocket,
+  Trash2,
 } from "lucide-react";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
@@ -158,6 +161,33 @@ export default function BrandAdvertiserInventory() {
 
   const [loadingRows, setLoadingRows] = useState(false);
 
+  interface SavedTarget {
+    id: string;
+    createdAt: number;
+    format: MediaType;
+    unitBreakdown: Record<string, number>;
+    unitCount: number;
+    totalLocations: number;
+    locationTypes: Record<string, number>;
+    radiusMeters: number;
+    center: { lat: number; lng: number };
+  }
+  const [savedTargets, setSavedTargets] = useState<SavedTarget[]>(() => {
+    try {
+      const raw = localStorage.getItem("ba_saved_inventory_targets");
+      return raw ? (JSON.parse(raw) as SavedTarget[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("ba_saved_inventory_targets", JSON.stringify(savedTargets));
+    } catch {}
+  }, [savedTargets]);
+
+
   useEffect(() => {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -225,30 +255,58 @@ export default function BrandAdvertiserInventory() {
   const submitRegistry = () => {
     if (!chosenFormat) return;
     const breakdown = unitCounts[chosenFormat];
+    const unitBreakdown = Object.fromEntries(
+      Object.entries(breakdown)
+        .map(([k, v]) => [k, Number(v) || 0])
+        .filter(([, n]) => (n as number) > 0),
+    ) as Record<string, number>;
+    const locationTypes = Object.fromEntries(
+      Object.entries(selectedLocationTypes)
+        .map(([k, v]) => [k, Number(v) || 0])
+        .filter(([, n]) => (n as number) > 0),
+    ) as Record<string, number>;
+    const target: SavedTarget = {
+      id: (crypto as any).randomUUID?.() || String(Date.now()),
+      createdAt: Date.now(),
+      format: chosenFormat,
+      unitBreakdown,
+      unitCount: totalUnitsForFormat(chosenFormat),
+      totalLocations: Number(totalLocations) || 0,
+      locationTypes,
+      radiusMeters,
+      center,
+    };
+    setSavedTargets((prev) => [target, ...prev]);
+    // Reset wizard for a fresh save
+    setChosenFormat(null);
+    setUnitCounts({ OOH: {}, DOOH: {}, AOOH: {} });
+    setSelectedLocationTypes({});
+    setTotalLocations("");
+    setStep(1);
+  };
+
+  const launchFromTarget = (t: SavedTarget) => {
     navigate("/brand-advertiser/campaigns", {
       state: {
         openWizard: true,
-        adSpaceIds: matches.map((m) => m.row.id),
+        adSpaceIds: [],
         prefill: {
-          radiusMeters,
-          center,
-          format: chosenFormat,
-          unitCount: totalUnitsForFormat(chosenFormat),
-          unitBreakdown: Object.fromEntries(
-            Object.entries(breakdown)
-              .map(([k, v]) => [k, Number(v) || 0])
-              .filter(([, n]) => (n as number) > 0)
-          ),
-          totalLocations: Number(totalLocations) || 0,
-          locationTypes: Object.fromEntries(
-            Object.entries(selectedLocationTypes)
-              .map(([k, v]) => [k, Number(v) || 0])
-              .filter(([, n]) => (n as number) > 0)
-          ),
+          radiusMeters: t.radiusMeters,
+          center: t.center,
+          format: t.format,
+          unitCount: t.unitCount,
+          unitBreakdown: t.unitBreakdown,
+          totalLocations: t.totalLocations,
+          locationTypes: t.locationTypes,
         },
       },
     });
   };
+
+  const deleteTarget = (id: string) => {
+    setSavedTargets((prev) => prev.filter((t) => t.id !== id));
+  };
+
 
   const selectedFormatMeta = FORMATS.find((f) => f.key === chosenFormat);
 
@@ -589,18 +647,123 @@ export default function BrandAdvertiserInventory() {
                       disabled={!chosenFormat}
                       className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
                     >
-                      Submit &amp; Continue <ArrowRight className="w-4 h-4 ml-1" />
+                      <Save className="w-4 h-4 mr-1" /> Save Inventory Target
                     </Button>
                   </div>
                   <p className="text-[11px] text-gray-500 text-center mt-2">
-                    Inventory shown is reference only — you can launch without selecting specific
-                    spaces.
+                    Saved targets appear below and can be launched as campaigns anytime.
                   </p>
                 </>
               )}
             </Card>
           </div>
         </div>
+
+        {/* Saved Inventory Targets */}
+        <div className="mt-8">
+          <div className="flex items-end justify-between mb-3">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Saved Inventory Targets</h2>
+              <p className="text-sm text-gray-500">
+                Reusable targeting presets — launch a campaign from any saved target.
+              </p>
+            </div>
+            <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
+              {savedTargets.length} saved
+            </Badge>
+          </div>
+
+          {savedTargets.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center">
+              <ClipboardList className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">
+                No saved inventory targets yet. Complete the wizard and click{" "}
+                <span className="font-semibold text-green-700">Save Inventory Target</span> to add one.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {savedTargets.map((t) => {
+                const meta = FORMATS.find((f) => f.key === t.format);
+                const Icon = meta?.icon || ClipboardList;
+                const locEntries = Object.entries(t.locationTypes);
+                const unitEntries = Object.entries(t.unitBreakdown);
+                return (
+                  <div
+                    key={t.id}
+                    className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div
+                        className={`w-9 h-9 rounded-lg ${meta?.bg || "bg-gray-100"} flex items-center justify-center`}
+                      >
+                        <Icon className={`w-5 h-5 ${meta?.iconColor || "text-gray-600"}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-gray-900">
+                          {t.format} · {t.unitCount} units
+                        </div>
+                        <div className="text-[11px] text-gray-500">
+                          {new Date(t.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => deleteTarget(t.id)}
+                        className="text-gray-400 hover:text-red-600 p-1"
+                        aria-label="Delete target"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="text-xs text-gray-700 space-y-1.5 flex-1">
+                      <div>
+                        <span className="text-gray-500">Locations:</span>{" "}
+                        <span className="font-medium text-gray-900">{t.totalLocations}</span>{" "}
+                        <span className="text-gray-500">
+                          · radius {(t.radiusMeters / 1000).toFixed(1)}km
+                        </span>
+                      </div>
+                      {locEntries.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {locEntries.map(([k, v]) => (
+                            <span
+                              key={k}
+                              className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700"
+                            >
+                              {k} · {v}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {unitEntries.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {unitEntries.map(([k, v]) => (
+                            <span
+                              key={k}
+                              className="text-[10px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 border border-green-100"
+                            >
+                              {k} · {v}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <Button
+                      onClick={() => launchFromTarget(t)}
+                      className="w-full mt-3 bg-green-600 hover:bg-green-500 text-white"
+                    >
+                      <Rocket className="w-4 h-4 mr-1" /> Launch Campaign
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
