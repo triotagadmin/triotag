@@ -212,9 +212,12 @@ export default function BrandAdvertiserInventory() {
   };
 
   const continueToCampaign = () => {
-    if (selectedIds.length === 0) return;
     navigate("/brand-advertiser/campaigns", {
-      state: { openWizard: true, adSpaceIds: selectedIds },
+      state: {
+        openWizard: true,
+        adSpaceIds: selectedIds,
+        prefill: { format: chosenFormat, radiusMeters },
+      },
     });
   };
 
