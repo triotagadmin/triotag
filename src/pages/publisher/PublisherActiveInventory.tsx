@@ -43,16 +43,9 @@ export default function PublisherActiveInventory() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { navigate("/auth"); return; }
 
-      const SELECT_COLS = "id, title, location, media_type, availability_status, approval_status, monthly_subscription_fee, activation_fee, specifications, media_urls, created_at, approved_at, publisher_id, advertiser_id, agent_disconnected";
+      const { data } = await supabase.rpc("get_active_inventory_all" as any);
 
-      // Show all activated inventory across all accounts (retailer + agent)
-      const { data } = await supabase
-        .from("ad_spaces")
-        .select(SELECT_COLS)
-        .eq("approval_status", "approved");
-
-      const unique = (data || [])
-        .filter((s: any) => s.agent_disconnected !== true)
+      const unique = ((data as any[]) || [])
         .sort((a: any, b: any) => {
           const ad = a.approved_at || a.created_at;
           const bd = b.approved_at || b.created_at;
