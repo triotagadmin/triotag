@@ -55,6 +55,20 @@ const RetailerDashboard = () => {
   const [form, setForm] = useState({ business_name: "", contact_email: "", contact_phone: "", location: "", description: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const toggleActivation = async (space: any) => {
+    const next = !(space.agent_disconnected ?? false);
+    setTogglingId(space.id);
+    const { error } = await supabase
+      .from("ad_spaces")
+      .update({ agent_disconnected: next })
+      .eq("id", space.id);
+    setTogglingId(null);
+    if (error) { toast.error(error.message); return; }
+    setSpaces((prev) => prev.map((s) => (s.id === space.id ? { ...s, agent_disconnected: next } : s)));
+    toast.success(next ? "Inventory deactivated" : "Inventory activated");
+  };
 
   const loadAll = async () => {
     setLoading(true);
@@ -342,6 +356,24 @@ const RetailerDashboard = () => {
                   <Link to={`/retailer-dashboard/creatives?space=${s.id}`}>
                     <Button variant="outline" size="sm" className="w-full border-green-500 text-green-600 hover:bg-green-50">Manage</Button>
                   </Link>
+                  {(() => {
+                    const deactivated = s.agent_disconnected === true;
+                    return (
+                      <>
+                        <Button
+                          size="sm"
+                          disabled={togglingId === s.id}
+                          onClick={() => toggleActivation(s)}
+                          className={`w-full mt-2 ${deactivated ? "bg-white text-zinc-700 border border-zinc-300 hover:bg-zinc-50" : "bg-green-600 hover:bg-green-500 text-white"}`}
+                        >
+                          {togglingId === s.id ? "…" : deactivated ? "Deactivated · Activate" : "Activated Inventory"}
+                        </Button>
+                        <p className="text-[10px] text-zinc-500 text-center mt-1">
+                          {deactivated ? "Click to activate this inventory" : "Click to deactivate this inventory"}
+                        </p>
+                      </>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
