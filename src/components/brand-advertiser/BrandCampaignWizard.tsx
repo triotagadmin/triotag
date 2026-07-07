@@ -146,7 +146,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
       setLoadingCreatives(true);
       const { data } = await (supabase as any)
         .from("brand_creative_sets")
-        .select("id,title,creative_format,file_url,status")
+        .select("id,title,creative_format,file_url,status,creative_count")
         .eq("brand_advertiser_id", brandAdvertiserId)
         .eq("status", "active")
         .order("created_at", { ascending: false });
