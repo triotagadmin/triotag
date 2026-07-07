@@ -318,6 +318,7 @@ export default function BrandAdvertiserInventory() {
         .map(([k, v]) => [k, Number(v) || 0])
         .filter(([, n]) => (n as number) > 0),
     ) as Record<string, number>;
+    const chosenSet = creativeSets.find((s) => s.id === chosenCreativeSetId);
     const target: SavedTarget = {
       id: (crypto as any).randomUUID?.() || String(Date.now()),
       createdAt: Date.now(),
@@ -328,6 +329,8 @@ export default function BrandAdvertiserInventory() {
       locationTypes,
       radiusMeters,
       center,
+      creativeSetId: chosenCreativeSetId,
+      creativeSetTitle: chosenSet?.title || null,
     };
     setSavedTargets((prev) => [target, ...prev]);
     // Reset wizard for a fresh save
@@ -335,6 +338,8 @@ export default function BrandAdvertiserInventory() {
     setUnitCounts({ OOH: {}, DOOH: {}, AOOH: {} });
     setSelectedLocationTypes({});
     setTotalLocations("");
+    setChosenCreativeSetId(null);
+    setRadiusLocked(false);
     setStep(1);
   };
 
