@@ -51,7 +51,7 @@ export default function PublisherActiveInventory() {
         .eq("user_id", userId)
         .maybeSingle();
 
-      const SELECT_COLS = "id, title, location, media_type, availability_status, approval_status, monthly_subscription_fee, activation_fee, specifications, media_urls, created_at, approved_at, publisher_id, advertiser_id";
+      const SELECT_COLS = "id, title, location, media_type, availability_status, approval_status, monthly_subscription_fee, activation_fee, specifications, media_urls, created_at, approved_at, publisher_id, advertiser_id, agent_disconnected";
 
       // Fetch ad_spaces owned via either publisher_profile or advertiser_id (retailer self-listings)
       const [pubRes, advRes] = await Promise.all([
