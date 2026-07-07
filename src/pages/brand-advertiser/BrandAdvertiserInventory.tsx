@@ -454,29 +454,35 @@ export default function BrandAdvertiserInventory() {
                 <div className="flex-1 min-w-0">
                   <h2 className="text-lg font-bold text-gray-900 leading-tight">Unit Registry</h2>
                   <p className="text-xs text-gray-500">
-                    {step === 1 ? "Step 1 of 2 — Ad locations & venue types" : "Step 2 of 2 — Ad format & units"}
+                    {step === 1
+                      ? "Step 1 of 3 — Radius & pin location"
+                      : step === 2
+                      ? "Step 2 of 3 — Ad locations & format"
+                      : "Step 3 of 3 — Creative set"}
                   </p>
                 </div>
               </div>
 
               {/* Step indicator */}
               <div className="flex items-center gap-2 mb-4">
-                {[1, 2].map((n) => (
+                {[1, 2, 3].map((n) => (
                   <div key={n} className="flex-1 flex items-center gap-2">
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
-                        step >= (n as 1 | 2)
+                        step >= (n as 1 | 2 | 3)
                           ? "bg-green-600 text-white"
                           : "bg-gray-200 text-gray-500"
                       }`}
                     >
-                      {step > (n as 1 | 2) ? <Check className="w-3.5 h-3.5" /> : n}
+                      {step > (n as 1 | 2 | 3) ? <Check className="w-3.5 h-3.5" /> : n}
                     </div>
-                    <div
-                      className={`flex-1 h-1 rounded-full ${
-                        step > (n as 1 | 2) ? "bg-green-600" : "bg-gray-200"
-                      }`}
-                    />
+                    {n < 3 && (
+                      <div
+                        className={`flex-1 h-1 rounded-full ${
+                          step > (n as 1 | 2 | 3) ? "bg-green-600" : "bg-gray-200"
+                        }`}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
