@@ -193,7 +193,7 @@ export default function BrandAdvertiserInventory() {
 
   const [totalLocations, setTotalLocations] = useState<string>("");
   const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, string>>({});
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   const [loadingRows, setLoadingRows] = useState(false);
 
