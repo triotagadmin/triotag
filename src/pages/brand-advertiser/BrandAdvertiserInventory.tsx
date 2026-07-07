@@ -236,110 +236,119 @@ export default function BrandAdvertiserInventory() {
                 </div>
               </div>
 
-              {/* Format picker — single choice */}
+              {/* Format picker — single choice with unit input inside selected card */}
               <div className="space-y-2">
                 {FORMATS.map((f) => {
                   const Icon = f.icon;
                   const active = chosenFormat === f.key;
                   return (
-                    <button
+                    <div
                       key={f.key}
-                      type="button"
-                      onClick={() => setChosenFormat(f.key)}
-                      className={`w-full text-left rounded-xl border-2 p-3 flex items-center gap-3 transition-all ${
+                      className={`w-full rounded-xl border-2 transition-all overflow-hidden ${
                         active
                           ? `${f.border} ${f.bg}`
                           : "border-gray-200 hover:border-gray-300 bg-white"
                       }`}
                     >
-                      <div
-                        className={`w-10 h-10 rounded-lg ${f.bg} flex items-center justify-center shrink-0`}
+                      <button
+                        type="button"
+                        onClick={() => setChosenFormat(f.key)}
+                        className="w-full text-left p-3 flex items-center gap-3"
                       >
-                        <Icon className={`w-5 h-5 ${f.iconColor}`} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold text-gray-900">{f.title}</div>
-                        <div className="text-xs text-gray-500">{f.desc}</div>
-                      </div>
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 ${
-                          active ? "border-green-600 bg-green-600" : "border-gray-300"
-                        }`}
-                      />
-                    </button>
+                        <div
+                          className={`w-10 h-10 rounded-lg ${f.bg} flex items-center justify-center shrink-0`}
+                        >
+                          <Icon className={`w-5 h-5 ${f.iconColor}`} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-semibold text-gray-900">{f.title}</div>
+                          <div className="text-xs text-gray-500">{f.desc}</div>
+                        </div>
+                        <div
+                          className={`w-4 h-4 rounded-full border-2 ${
+                            active ? "border-green-600 bg-green-600" : "border-gray-300"
+                          }`}
+                        />
+                      </button>
+
+                      {active && (
+                        <div className="px-3 pb-3">
+                          <div className="space-y-1.5">
+                            <Label htmlFor={`unit-count-${f.key}`} className="text-sm">
+                              How many {f.title} units do you need?
+                            </Label>
+                            <Input
+                              id={`unit-count-${f.key}`}
+                              type="number"
+                              min="0"
+                              placeholder="e.g. 10"
+                              value={unitCounts[f.key]}
+                              onChange={(e) =>
+                                setUnitCounts((prev) => ({ ...prev, [f.key]: e.target.value }))
+                              }
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
 
-              {/* Info below selected format */}
+              {/* Inventory in radius for selected format */}
               {chosenFormat && selectedFormatMeta && (
-                <div className="mt-4 space-y-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="unit-count" className="text-sm">
-                      How many {chosenFormat} units do you need?
-                    </Label>
-                    <Input
-                      id="unit-count"
-                      type="number"
-                      min="0"
-                      placeholder="e.g. 10"
-                      value={unitCount}
-                      onChange={(e) => setUnitCount(e.target.value)}
-                    />
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                      Inventory in radius
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="bg-green-50 border-green-200 text-green-700"
+                    >
+                      {loadingRows
+                        ? "…"
+                        : `${matches.length} match${matches.length === 1 ? "" : "es"}`}
+                    </Badge>
                   </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                        Inventory in radius
+                  <div className="max-h-[280px] overflow-y-auto -mx-1 px-1 space-y-2">
+                    {loadingRows ? (
+                      <div className="text-center text-gray-500 py-6 text-sm">Loading…</div>
+                    ) : matches.length === 0 ? (
+                      <div className="rounded-xl border border-dashed border-gray-300 p-4 text-center bg-gray-50">
+                        <SearchIcon className="w-6 h-6 text-gray-300 mx-auto mb-1.5" />
+                        <p className="text-xs text-gray-600">
+                          No approved {chosenFormat} inventory in this radius yet — adjust the
+                          map or continue anyway.
+                        </p>
                       </div>
-                      <Badge
-                        variant="outline"
-                        className="bg-green-50 border-green-200 text-green-700"
-                      >
-                        {loadingRows
-                          ? "…"
-                          : `${matches.length} match${matches.length === 1 ? "" : "es"}`}
-                      </Badge>
-                    </div>
-                    <div className="max-h-[280px] overflow-y-auto -mx-1 px-1 space-y-2">
-                      {loadingRows ? (
-                        <div className="text-center text-gray-500 py-6 text-sm">Loading…</div>
-                      ) : matches.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-gray-300 p-4 text-center bg-gray-50">
-                          <SearchIcon className="w-6 h-6 text-gray-300 mx-auto mb-1.5" />
-                          <p className="text-xs text-gray-600">
-                            No approved {chosenFormat} inventory in this radius yet — adjust the
-                            map or continue anyway.
-                          </p>
-                        </div>
-                      ) : (
-                        matches.map(({ row: r, distance }) => (
-                          <div
-                            key={r.id}
-                            className="rounded-lg border border-gray-200 p-2.5 bg-white"
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="text-xs text-gray-500 truncate">
-                                {displayBusinessName(r)}
-                              </div>
-                              <div className="text-[11px] text-green-700 font-medium whitespace-nowrap">
-                                {distanceLabel(distance)}
-                              </div>
+                    ) : (
+                      matches.map(({ row: r, distance }) => (
+                        <div
+                          key={r.id}
+                          className="rounded-lg border border-gray-200 p-2.5 bg-white"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="text-xs text-gray-500 truncate">
+                              {displayBusinessName(r)}
                             </div>
-                            {r.location && (
-                              <div className="flex items-center gap-1 text-xs text-gray-900 font-medium mt-0.5">
-                                <MapPin className="w-3 h-3 shrink-0" />
-                                <span className="truncate">{r.location}</span>
-                              </div>
-                            )}
+                            <div className="text-[11px] text-green-700 font-medium whitespace-nowrap">
+                              {distanceLabel(distance)}
+                            </div>
                           </div>
-                        ))
-                      )}
-                    </div>
+                          {r.location && (
+                            <div className="flex items-center gap-1 text-xs text-gray-900 font-medium mt-0.5">
+                              <MapPin className="w-3 h-3 shrink-0" />
+                              <span className="truncate">{r.location}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
+
 
               <Button
                 onClick={submitRegistry}
