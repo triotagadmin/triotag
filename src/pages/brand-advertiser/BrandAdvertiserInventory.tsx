@@ -457,31 +457,33 @@ export default function BrandAdvertiserInventory() {
                   <h2 className="text-lg font-bold text-gray-900 leading-tight">Unit Registry</h2>
                   <p className="text-xs text-gray-500">
                     {step === 1
-                      ? "Step 1 of 3 — Radius & pin location"
+                      ? "Step 1 of 4 — Radius & pin location"
                       : step === 2
-                      ? "Step 2 of 3 — Ad locations & format"
-                      : "Step 3 of 3 — Creative set"}
+                      ? "Step 2 of 4 — Ad locations"
+                      : step === 3
+                      ? "Step 3 of 4 — Ad format & units"
+                      : "Step 4 of 4 — Creative set"}
                   </p>
                 </div>
               </div>
 
               {/* Step indicator */}
               <div className="flex items-center gap-2 mb-4">
-                {[1, 2, 3].map((n) => (
+                {[1, 2, 3, 4].map((n) => (
                   <div key={n} className="flex-1 flex items-center gap-2">
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
-                        step >= (n as 1 | 2 | 3)
+                        step >= (n as 1 | 2 | 3 | 4)
                           ? "bg-green-600 text-white"
                           : "bg-gray-200 text-gray-500"
                       }`}
                     >
-                      {step > (n as 1 | 2 | 3) ? <Check className="w-3.5 h-3.5" /> : n}
+                      {step > (n as 1 | 2 | 3 | 4) ? <Check className="w-3.5 h-3.5" /> : n}
                     </div>
-                    {n < 3 && (
+                    {n < 4 && (
                       <div
                         className={`flex-1 h-1 rounded-full ${
-                          step > (n as 1 | 2 | 3) ? "bg-green-600" : "bg-gray-200"
+                          step > (n as 1 | 2 | 3 | 4) ? "bg-green-600" : "bg-gray-200"
                         }`}
                       />
                     )}
