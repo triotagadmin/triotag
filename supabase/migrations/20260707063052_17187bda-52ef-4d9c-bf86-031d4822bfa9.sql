@@ -1,0 +1,1 @@
+ALTER TABLE public.brand_advertiser_profiles ADD COLUMN IF NOT EXISTS username TEXT;
