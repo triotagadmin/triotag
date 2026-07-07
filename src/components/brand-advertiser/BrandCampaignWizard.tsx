@@ -22,6 +22,7 @@ interface Props {
   brandAdvertiserId: string;
   onCreated?: () => void;
   initialAdSpaceId?: string | null;
+  initialAdSpaceIds?: string[] | null;
 }
 
 const MEDIA_TYPES = ["OOH", "DOOH", "AOOH"] as const;
