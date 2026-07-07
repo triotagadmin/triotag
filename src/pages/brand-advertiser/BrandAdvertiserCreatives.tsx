@@ -114,11 +114,7 @@ export default function BrandAdvertiserCreatives() {
       }
       const advertiserId = freshProfile.id;
 
-      console.log("DEBUG creative set insert:", {
-        profileId,
-        freshProfileId: advertiserId,
-        sessionUserId: session.user.id,
-      });
+
 
       // 1. Create the set row
       const { data: setRow, error: setErr } = await supabase
@@ -139,7 +135,7 @@ export default function BrandAdvertiserCreatives() {
       for (let i = 0; i < files.length; i++) {
         const f = files[i];
         const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const path = `${advertiserId}/${setId}/${i}-${safeName}`;
+        const path = `${session.user.id}/${advertiserId}/${setId}/${i}-${safeName}`;
         const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, f, { upsert: false });
         if (upErr) throw upErr;
         const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
