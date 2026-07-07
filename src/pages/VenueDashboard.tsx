@@ -289,26 +289,6 @@ const VenueDashboard = () => {
                             {(!space.media_type || space.media_type === "OOH") && <Badge className="bg-green-600 hover:bg-green-600">OOH</Badge>}
                             {getStatusBadge(space.approval_status)}
                             <Badge variant="outline">{space.availability_status}</Badge>
-                            {(space as any).agent_disconnected ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-6 px-2 text-xs gap-1 border-muted-foreground/40 text-muted-foreground"
-                                disabled={togglingId === space.id}
-                                onClick={() => toggleActivation(space)}
-                              >
-                                <XCircle className="w-3 h-3" /> Deactivated · Activate
-                              </Button>
-                            ) : (
-                              <Button
-                                size="sm"
-                                className="h-6 px-2 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
-                                disabled={togglingId === space.id}
-                                onClick={() => toggleActivation(space)}
-                              >
-                                <CheckCircle className="w-3 h-3" /> Activated Inventory
-                              </Button>
-                            )}
                             {Array.isArray((space as any).leased_advertiser_ids) && (space as any).leased_advertiser_ids.length > 0 && (
                               <Badge variant="secondary" className="text-xs">
                                 {(space as any).leased_advertiser_ids.length} lessee{(space as any).leased_advertiser_ids.length !== 1 ? "s" : ""}
@@ -327,6 +307,28 @@ const VenueDashboard = () => {
                             <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/venue/${space.id}`)}>
                               <Eye className="w-3 h-3 mr-1" />View
                             </Button>
+                          </div>
+                          <div className="mt-2">
+                            {(space as any).agent_disconnected ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full h-6 px-2 text-xs gap-1 border-muted-foreground/40 text-muted-foreground"
+                                disabled={togglingId === space.id}
+                                onClick={() => toggleActivation(space)}
+                              >
+                                <XCircle className="w-3 h-3" /> Deactivated · Activate
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                className="w-full h-6 px-2 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                                disabled={togglingId === space.id}
+                                onClick={() => toggleActivation(space)}
+                              >
+                                <CheckCircle className="w-3 h-3" /> Activated Inventory
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </Card>)}
