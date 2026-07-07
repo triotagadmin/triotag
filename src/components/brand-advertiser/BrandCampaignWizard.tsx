@@ -136,7 +136,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
   const [creativeFormat, setCreativeFormat] = useState("Image");
 
   // Step 4 - creative selection
-  const [creativeSets, setCreativeSets] = useState<Array<{ id: string; title: string; creative_format: string | null; file_url: string | null }>>([]);
+  const [creativeSets, setCreativeSets] = useState<Array<{ id: string; title: string; creative_format: string | null; file_url: string | null; creative_count: number | null }>>([]);
   const [creativeSetId, setCreativeSetId] = useState<string | null>(null);
   const [loadingCreatives, setLoadingCreatives] = useState(false);
 
@@ -146,7 +146,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
       setLoadingCreatives(true);
       const { data } = await (supabase as any)
         .from("brand_creative_sets")
-        .select("id,title,creative_format,file_url,status")
+        .select("id,title,creative_format,file_url,status,creative_count")
         .eq("brand_advertiser_id", brandAdvertiserId)
         .eq("status", "active")
         .order("created_at", { ascending: false });
@@ -487,7 +487,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
                     <input type="radio" name="creative-set" className="mt-1" checked={creativeSetId === cs.id} onChange={() => setCreativeSetId(cs.id)} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-gray-900 truncate">{cs.title}</span>
+                        <span className="text-sm font-medium text-gray-900 truncate">{cs.title} {cs.creative_count != null ? `(${cs.creative_count} photo${cs.creative_count === 1 ? "" : "s"})` : ""}</span>
                         {cs.creative_format && <Badge className="bg-gray-100 text-gray-700">{cs.creative_format}</Badge>}
                       </div>
                       {cs.file_url && <div className="text-xs text-gray-500 truncate mt-0.5">{cs.file_url}</div>}
@@ -513,7 +513,12 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
               <Row label="Creative Format" value={creativeFormat} />
               <Row
                 label="Creative Set"
-                value={creativeSetId ? (creativeSets.find(c => c.id === creativeSetId)?.title || "Selected") : "None (draft)"}
+                value={creativeSetId ? (() => {
+                  const cs = creativeSets.find(c => c.id === creativeSetId);
+                  if (!cs) return "Selected";
+                  const count = cs.creative_count ?? 0;
+                  return `${cs.title} (${count} photo${count === 1 ? "" : "s"})`;
+                })() : "None (draft)"}
               />
             </div>
             <div className="space-y-1.5">
