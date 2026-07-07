@@ -177,13 +177,14 @@ export default function BrandAdvertiserInventory() {
           radiusMeters,
           center,
           format: chosenFormat,
-          unitCount: Number(unitCount) || 0,
+          unitCount: Number(unitCounts[chosenFormat]) || 0,
         },
       },
     });
   };
 
   const selectedFormatMeta = FORMATS.find((f) => f.key === chosenFormat);
+
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
