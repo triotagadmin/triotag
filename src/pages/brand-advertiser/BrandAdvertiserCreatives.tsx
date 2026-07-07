@@ -350,6 +350,55 @@ export default function BrandAdvertiserCreatives() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!viewSet} onOpenChange={(o) => { if (!o) { setViewSet(null); setViewFiles([]); } }}>
+        <DialogContent className="bg-white text-black max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-black">{viewSet?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            {viewLoading ? (
+              <p className="text-sm text-black">Loading...</p>
+            ) : viewFiles.length === 0 ? (
+              <p className="text-sm text-black">No photos in this folder yet.</p>
+            ) : (
+              <>
+                <p className="text-xs text-gray-600 mb-3">{viewFiles.length} photo{viewFiles.length === 1 ? "" : "s"}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto">
+                  {viewFiles.map((f) => (
+                    <a key={f.id} href={f.file_url} target="_blank" rel="noreferrer" className="block group">
+                      <div className="aspect-square rounded border border-gray-200 overflow-hidden bg-gray-100">
+                        <img src={f.file_url} alt={f.file_name} className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" />
+                      </div>
+                      <p className="text-xs text-black mt-1 truncate">{f.file_name}</p>
+                    </a>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setViewSet(null); setViewFiles([]); }} className="text-black">Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteSet} onOpenChange={(o) => { if (!o && !deleting) setDeleteSet(null); }}>
+        <AlertDialogContent className="bg-white text-black">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-black">Delete folder?</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-700">
+              This will permanently delete "{deleteSet?.title}" and all its photos. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting} className="text-black">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-red-600 hover:bg-red-700 text-white">
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
