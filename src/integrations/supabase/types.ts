@@ -4290,6 +4290,10 @@ export type Database = {
       }
     }
     Functions: {
+      ad_space_owner_exists: {
+        Args: { _advertiser_id: string; _publisher_id: string }
+        Returns: boolean
+      }
       check_cross_branch_duplicate: {
         Args: { _full_address: string; _user_id: string }
         Returns: {
