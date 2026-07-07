@@ -146,6 +146,7 @@ export default function BrandAdvertiserInventory() {
   const [companyName, setCompanyName] = useState("My Brand");
   const [center, setCenter] = useState(DEFAULT_CENTER);
   const [radiusMeters, setRadiusMeters] = useState(1000);
+  const [radiusLocked, setRadiusLocked] = useState(false);
 
   const [chosenFormat, setChosenFormat] = useState<MediaType | null>(null);
   const [unitCounts, setUnitCounts] = useState<Record<MediaType, Record<string, string>>>({
