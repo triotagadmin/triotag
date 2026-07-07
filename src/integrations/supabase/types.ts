@@ -4311,6 +4311,44 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_active_inventory_all: {
+        Args: never
+        Returns: {
+          activation_fee: number | null
+          advertiser_id: string | null
+          agent_disconnected: boolean
+          annual_subscription_fee: number | null
+          approval_status: Database["public"]["Enums"]["approval_status"]
+          approved_at: string | null
+          approved_by: string | null
+          availability_status: string | null
+          created_at: string | null
+          description: string | null
+          external_ref_id: string | null
+          has_pending_advertiser: boolean | null
+          id: string
+          latitude: number | null
+          leased_advertiser_ids: string[]
+          location: string | null
+          longitude: number | null
+          media_type: Database["public"]["Enums"]["media_type"]
+          media_urls: Json | null
+          monthly_subscription_fee: number | null
+          pending_advertiser_email: string | null
+          pricing: Json | null
+          publisher_id: string
+          rejection_reason: string | null
+          specifications: Json | null
+          title: string
+          updated_at: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ad_spaces"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_auth_email: { Args: never; Returns: string }
       get_client_checkout_by_token: {
         Args: { _token: string }
