@@ -310,24 +310,30 @@ const VenueDashboard = () => {
                           </div>
                           <div className="mt-2">
                             {(space as any).agent_disconnected ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="w-full h-6 px-2 text-xs gap-1 border-muted-foreground/40 text-muted-foreground"
-                                disabled={togglingId === space.id}
-                                onClick={() => toggleActivation(space)}
-                              >
-                                <XCircle className="w-3 h-3" /> Deactivated · Activate
-                              </Button>
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="w-full h-6 px-2 text-xs gap-1 border-muted-foreground/40 text-muted-foreground"
+                                  disabled={togglingId === space.id}
+                                  onClick={() => toggleActivation(space)}
+                                >
+                                  <XCircle className="w-3 h-3" /> Deactivated · Activate
+                                </Button>
+                                <p className="text-[10px] text-muted-foreground text-center mt-1">Click to activate this inventory</p>
+                              </>
                             ) : (
-                              <Button
-                                size="sm"
-                                className="w-full h-6 px-2 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
-                                disabled={togglingId === space.id}
-                                onClick={() => toggleActivation(space)}
-                              >
-                                <CheckCircle className="w-3 h-3" /> Activated Inventory
-                              </Button>
+                              <>
+                                <Button
+                                  size="sm"
+                                  className="w-full h-6 px-2 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                                  disabled={togglingId === space.id}
+                                  onClick={() => toggleActivation(space)}
+                                >
+                                  <CheckCircle className="w-3 h-3" /> Activated Inventory
+                                </Button>
+                                <p className="text-[10px] text-muted-foreground text-center mt-1">Click to deactivate this inventory</p>
+                              </>
                             )}
                           </div>
                         </div>
