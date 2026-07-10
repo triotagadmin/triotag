@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User, Settings, Building } from "lucide-react";
+import { MapPin, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User, Settings, Building, Layers } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { BookingsArchive } from "@/components/publisher/BookingsArchive";
 import { BillingInvoices } from "@/components/publisher/BillingInvoices";
@@ -113,6 +113,9 @@ const VenueDashboard = () => {
   }
   const activeSpaces = adSpaces.filter((s) => s.approval_status === "approved" && s.availability_status === "available").length;
   const pendingSpaces = adSpaces.filter((s) => s.approval_status === "pending").length;
+  const oohUnits = adSpaces.filter((s) => !s.media_type || s.media_type === "OOH").length;
+  const doohUnits = adSpaces.filter((s) => s.media_type === "DOOH").length;
+  const aoohUnits = adSpaces.filter((s) => s.media_type === "AOOH").length;
   const isApprovedAgent = profile?.verification_status === "approved";
   const isPendingAgent = profile?.verification_status === "pending";
   return <div className="min-h-screen bg-muted/30">
@@ -226,6 +229,30 @@ const VenueDashboard = () => {
                 <Button variant="link" className="p-0 h-auto text-sm" onClick={() => navigate("/publisher/ad-requests")}>
                   View All Requests
                 </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                  <Layers className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle>Inventory Units</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{oohUnits}</p>
+                    <p className="text-xs text-muted-foreground">OOH</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{doohUnits}</p>
+                    <p className="text-xs text-muted-foreground">DOOH</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{aoohUnits}</p>
+                    <p className="text-xs text-muted-foreground">AOOH</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
