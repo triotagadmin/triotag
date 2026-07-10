@@ -231,6 +231,30 @@ const VenueDashboard = () => {
                 </Button>
               </CardContent>
             </Card>
+            <Card>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                  <Layers className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle>Inventory Units</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{oohUnits}</p>
+                    <p className="text-xs text-muted-foreground">OOH</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{doohUnits}</p>
+                    <p className="text-xs text-muted-foreground">DOOH</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{aoohUnits}</p>
+                    <p className="text-xs text-muted-foreground">AOOH</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           <Card>
