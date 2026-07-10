@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, DollarSign, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User, Settings, Building } from "lucide-react";
+import { MapPin, Calendar, Upload, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, Edit, Eye, Ticket, Check, X, User, Settings, Building } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { BookingsArchive } from "@/components/publisher/BookingsArchive";
 import { BillingInvoices } from "@/components/publisher/BillingInvoices";
@@ -212,17 +212,6 @@ const VenueDashboard = () => {
               <CardContent>
                 <p className="text-3xl font-bold">{activeSpaces}</p>
                 <p className="text-sm text-muted-foreground">{pendingSpaces} pending</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                  <DollarSign className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle>Earnings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">$0</p>
               </CardContent>
             </Card>
             <Card>
