@@ -217,17 +217,6 @@ const VenueDashboard = () => {
             <Card>
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                  <DollarSign className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle>Earnings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">$0</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
                   <Calendar className="w-6 h-6 text-primary" />
                 </div>
                 <CardTitle>Ad Requests</CardTitle>
