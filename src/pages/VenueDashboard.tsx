@@ -231,30 +231,110 @@ const VenueDashboard = () => {
                 </Button>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                  <Layers className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle>Inventory Units</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-3">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold">{oohUnits}</p>
-                    <p className="text-xs text-muted-foreground">OOH</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold">{doohUnits}</p>
-                    <p className="text-xs text-muted-foreground">DOOH</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold">{aoohUnits}</p>
-                    <p className="text-xs text-muted-foreground">AOOH</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {(() => {
+              const totalUnits = oohUnits + doohUnits + aoohUnits;
+              const pct = (n: number) => (totalUnits ? Math.round((n / totalUnits) * 100) : 0);
+              const rows: { key: string; label: string; value: number; color: string; glow: string }[] = [
+                { key: "OOH",  label: "Static",   value: oohUnits,  color: "#22d3ee", glow: "0 0 12px rgba(34,211,238,0.75)" },
+                { key: "DOOH", label: "Digital",  value: doohUnits, color: "#a855f7", glow: "0 0 12px rgba(168,85,247,0.75)" },
+                { key: "AOOH", label: "Ambient",  value: aoohUnits, color: "#f472b6", glow: "0 0 12px rgba(244,114,182,0.75)" },
+              ];
+              return (
+                <Card
+                  className="relative overflow-hidden border-primary/30 bg-[radial-gradient(circle_at_20%_0%,hsl(var(--primary)/0.25),transparent_55%),linear-gradient(145deg,#0b1220_0%,#0a0f1c_60%,#050810_100%)] text-white shadow-[0_20px_45px_-15px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]"
+                  style={{ perspective: "1200px" }}
+                >
+                  {/* grid + scanline overlay */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 opacity-40"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(rgba(56,189,248,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.10) 1px, transparent 1px)",
+                      backgroundSize: "22px 22px",
+                      maskImage: "radial-gradient(ellipse at center, black 55%, transparent 90%)",
+                      transform: "rotateX(55deg) translateY(20%) scale(1.6)",
+                      transformOrigin: "center top",
+                    }}
+                  />
+                  <div aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_0px,transparent_2px,rgba(255,255,255,0.03)_3px)] bg-[length:100%_4px]" />
+
+                  <CardHeader className="relative z-10 pb-2">
+                    <div className="flex items-center justify-between">
+                      <div
+                        className="w-12 h-12 rounded-lg flex items-center justify-center mb-2 border border-cyan-400/40 bg-cyan-400/10 shadow-[0_0_18px_rgba(34,211,238,0.35),inset_0_0_12px_rgba(34,211,238,0.25)]"
+                        style={{ transform: "rotateX(18deg) rotateY(-18deg)", transformStyle: "preserve-3d" }}
+                      >
+                        <Layers className="w-6 h-6 text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)]" />
+                      </div>
+                      <div className="flex flex-col items-end font-mono text-[10px] tracking-widest text-cyan-300/80">
+                        <span>SYS://INV.MATRIX</span>
+                        <span className="text-cyan-300/50">v3.14 • LIVE</span>
+                      </div>
+                    </div>
+                    <CardTitle className="text-white font-mono uppercase tracking-widest text-sm flex items-center gap-2">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,1)] animate-pulse" />
+                      Inventory Matrix
+                    </CardTitle>
+                  </CardHeader>
+
+                  <CardContent className="relative z-10">
+                    {/* 3D total block */}
+                    <div className="flex items-end justify-between mb-4" style={{ transformStyle: "preserve-3d" }}>
+                      <div style={{ transform: "rotateY(-14deg) rotateX(8deg)", transformStyle: "preserve-3d" }}>
+                        <p className="font-mono text-[10px] tracking-[0.25em] text-cyan-300/70">TOTAL UNITS</p>
+                        <p
+                          className="text-5xl font-bold font-mono leading-none bg-gradient-to-b from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent"
+                          style={{ textShadow: "0 6px 18px rgba(34,211,238,0.35)" }}
+                        >
+                          {String(totalUnits).padStart(3, "0")}
+                        </p>
+                      </div>
+                      <div className="font-mono text-[10px] text-right text-cyan-300/70 leading-tight">
+                        <div>NODES: <span className="text-white">{totalUnits}</span></div>
+                        <div>ONLINE: <span className="text-emerald-400">{activeSpaces}</span></div>
+                        <div>PEND: <span className="text-amber-300">{pendingSpaces}</span></div>
+                      </div>
+                    </div>
+
+                    {/* bars */}
+                    <div className="space-y-2">
+                      {rows.map((r) => (
+                        <div key={r.key} className="font-mono">
+                          <div className="flex items-center justify-between text-[10px] tracking-widest mb-1">
+                            <span className="flex items-center gap-2">
+                              <span
+                                className="inline-block w-1.5 h-1.5 rounded-sm"
+                                style={{ background: r.color, boxShadow: r.glow }}
+                              />
+                              <span style={{ color: r.color }}>{r.key}</span>
+                              <span className="text-white/40">/ {r.label}</span>
+                            </span>
+                            <span className="text-white/80">
+                              {String(r.value).padStart(2, "0")}
+                              <span className="text-white/40"> · {pct(r.value)}%</span>
+                            </span>
+                          </div>
+                          <div
+                            className="h-2 rounded-sm bg-white/[0.04] border border-white/5 overflow-hidden"
+                            style={{ transform: "perspective(600px) rotateX(35deg)", transformOrigin: "bottom" }}
+                          >
+                            <div
+                              className="h-full rounded-sm transition-all duration-700"
+                              style={{
+                                width: `${pct(r.value)}%`,
+                                background: `linear-gradient(90deg, ${r.color}00, ${r.color})`,
+                                boxShadow: r.glow,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
           </div>
 
           <Card>
