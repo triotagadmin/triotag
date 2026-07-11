@@ -92,3 +92,15 @@ verify_jwt = false
 
 [functions.notify-media-plan-status]
 verify_jwt = false
+
+[functions.verify-venue-subscription]
+verify_jwt = false
+
+[functions.track-email-event]
+verify_jwt = false
+
+[functions.send-venue-subscription]
+verify_jwt = true
+
+[functions.send-verified-venue-campaign]
+verify_jwt = true
