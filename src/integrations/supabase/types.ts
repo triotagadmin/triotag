@@ -4127,6 +4127,139 @@ export type Database = {
           },
         ]
       }
+      venue_subscription_messages: {
+        Row: {
+          agent_id: string
+          clicks: number
+          created_at: string
+          delivered: boolean
+          first_clicked_at: string | null
+          first_opened_at: string | null
+          id: string
+          last_clicked_at: string | null
+          last_opened_at: string | null
+          message: string
+          message_type: string
+          metadata: Json
+          opens: number
+          sent_at: string
+          subject: string
+          subscription_id: string
+          tracking_token: string
+        }
+        Insert: {
+          agent_id: string
+          clicks?: number
+          created_at?: string
+          delivered?: boolean
+          first_clicked_at?: string | null
+          first_opened_at?: string | null
+          id?: string
+          last_clicked_at?: string | null
+          last_opened_at?: string | null
+          message: string
+          message_type?: string
+          metadata?: Json
+          opens?: number
+          sent_at?: string
+          subject: string
+          subscription_id: string
+          tracking_token: string
+        }
+        Update: {
+          agent_id?: string
+          clicks?: number
+          created_at?: string
+          delivered?: boolean
+          first_clicked_at?: string | null
+          first_opened_at?: string | null
+          id?: string
+          last_clicked_at?: string | null
+          last_opened_at?: string | null
+          message?: string
+          message_type?: string
+          metadata?: Json
+          opens?: number
+          sent_at?: string
+          subject?: string
+          subscription_id?: string
+          tracking_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_subscription_messages_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "venue_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venue_subscriptions: {
+        Row: {
+          ad_space_id: string | null
+          agent_id: string
+          campaign_status: string | null
+          contact_person: string | null
+          created_at: string
+          email: string
+          email_verified: boolean
+          id: string
+          last_contacted_at: string | null
+          subscription_status: Database["public"]["Enums"]["venue_subscription_status"]
+          updated_at: string
+          venue_name: string | null
+          verification_expiry: string
+          verification_sent_at: string
+          verification_token: string
+          verified_at: string | null
+        }
+        Insert: {
+          ad_space_id?: string | null
+          agent_id: string
+          campaign_status?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email: string
+          email_verified?: boolean
+          id?: string
+          last_contacted_at?: string | null
+          subscription_status?: Database["public"]["Enums"]["venue_subscription_status"]
+          updated_at?: string
+          venue_name?: string | null
+          verification_expiry?: string
+          verification_sent_at?: string
+          verification_token: string
+          verified_at?: string | null
+        }
+        Update: {
+          ad_space_id?: string | null
+          agent_id?: string
+          campaign_status?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string
+          email_verified?: boolean
+          id?: string
+          last_contacted_at?: string | null
+          subscription_status?: Database["public"]["Enums"]["venue_subscription_status"]
+          updated_at?: string
+          venue_name?: string | null
+          verification_expiry?: string
+          verification_sent_at?: string
+          verification_token?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_subscriptions_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venue_tickets: {
         Row: {
           created_at: string
@@ -4600,6 +4733,11 @@ export type Database = {
       publisher_type: "venue" | "digital" | "agent"
       skill_type: "promoter" | "artist" | "creator"
       talent_status: "pending" | "approved" | "rejected"
+      venue_subscription_status:
+        | "pending"
+        | "active"
+        | "unsubscribed"
+        | "expired"
       venue_ticket_status: "valid" | "used"
     }
     CompositeTypes: {
@@ -4779,6 +4917,12 @@ export const Constants = {
       publisher_type: ["venue", "digital", "agent"],
       skill_type: ["promoter", "artist", "creator"],
       talent_status: ["pending", "approved", "rejected"],
+      venue_subscription_status: [
+        "pending",
+        "active",
+        "unsubscribed",
+        "expired",
+      ],
       venue_ticket_status: ["valid", "used"],
     },
   },
