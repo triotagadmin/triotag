@@ -866,25 +866,44 @@ const VenueRegistration = () => {
                                 <Clock className="h-3 w-3" />
                                 {ownershipWorkflow === "verification" ? "Pending Retailer Verification" : "Pending Retailer Registration"}
                               </Badge>
-                              {editId && (
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full gap-1.5 text-xs"
-                                  disabled={sendingVerification}
-                                  onClick={async () => {
-                                    try {
-                                      await requestOwnershipWorkflow(editId, contactEmail);
-                                    } catch (err: any) {
-                                      toast({ title: "Error", description: err.message || "Failed to send advertiser workflow email", variant: "destructive" });
-                                    }
-                                  }}
-                                >
-                                  {sendingVerification ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
-                                  {verificationSent ? "Resend Workflow Email" : "Send Workflow Email"}
-                                </Button>
-                              )}
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="w-full gap-1.5 text-xs"
+                                disabled={sendingVerification}
+                                onClick={async () => {
+                                  if (!contactEmail.trim()) {
+                                    toast({ title: "Email required", description: "Enter a contact email first.", variant: "destructive" });
+                                    return;
+                                  }
+                                  setSendingVerification(true);
+                                  try {
+                                    const { data, error } = await supabase.functions.invoke("send-venue-subscription", {
+                                      body: {
+                                        email: contactEmail.trim().toLowerCase(),
+                                        venueName: title || null,
+                                        contactPerson: contactPerson || null,
+                                        adSpaceId: editId || null,
+                                      },
+                                    });
+                                    if (error) throw error;
+                                    if ((data as any)?.error) throw new Error((data as any).error);
+                                    setVerificationSent(true);
+                                    toast({
+                                      title: "Subscription invitation sent",
+                                      description: "The recipient must verify their email before they can receive advertising campaign requests.",
+                                    });
+                                  } catch (err: any) {
+                                    toast({ title: "Error", description: err.message || "Failed to send subscription email", variant: "destructive" });
+                                  } finally {
+                                    setSendingVerification(false);
+                                  }
+                                }}
+                              >
+                                {sendingVerification ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
+                                {verificationSent ? "Resend Subscription" : "Send Subscription"}
+                              </Button>
                             </div>
                           )
                         )}
