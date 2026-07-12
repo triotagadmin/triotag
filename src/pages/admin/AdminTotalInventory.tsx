@@ -383,6 +383,23 @@ export default function AdminTotalInventory() {
           </CardContent>
         </Card>
 
+        <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="mb-4">
+          <TabsList>
+            <TabsTrigger value="approved">
+              Approved <span className="ml-2 text-xs text-muted-foreground">({spaces.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="pending" className="relative">
+              <Clock className="w-4 h-4 mr-1.5" />
+              Pending Review
+              {pendingSpaces.length > 0 && (
+                <span className="ml-2 min-w-[20px] h-5 px-1.5 rounded-full bg-orange-500 text-white text-[10px] font-bold inline-flex items-center justify-center">
+                  {pendingSpaces.length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="approved" className="mt-4 space-y-4">
         {/* Filters */}
         <Card className="mb-4">
           <CardContent className="pt-6 space-y-4">
