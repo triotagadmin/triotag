@@ -13,14 +13,16 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell,
 } from "recharts";
 import {
   Package, Download, Search, Users, CheckCircle2, ChevronLeft, ChevronRight, Plus,
+  Check, X, Clock,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,6 +45,9 @@ export default function AdminTotalInventory() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [spaces, setSpaces] = useState<any[]>([]);
+  const [pendingSpaces, setPendingSpaces] = useState<any[]>([]);
+  const [pendingLoading, setPendingLoading] = useState(true);
+  const [tab, setTab] = useState<"approved" | "pending">("approved");
   const [search, setSearch] = useState("");
   const [mediaFilter, setMediaFilter] = useState<"ALL" | MediaType>("ALL");
   const [availFilter, setAvailFilter] = useState<string>("all");
@@ -52,6 +57,9 @@ export default function AdminTotalInventory() {
   const [queryError, setQueryError] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<any | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [actionBusyId, setActionBusyId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     location: "",
@@ -85,7 +93,71 @@ export default function AdminTotalInventory() {
     setLoading(false);
   };
 
-  useEffect(() => { loadInventory(); }, []);
+  const loadPending = async () => {
+    setPendingLoading(true);
+    const { data, error } = await supabase
+      .from("ad_spaces")
+      .select(`
+        id, title, location, media_type, approval_status, availability_status,
+        specifications, created_at, publisher_id,
+        publisher_profiles ( business_name, contact_email )
+      `)
+      .eq("approval_status", "pending")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("[AdminTotalInventory] Pending query error:", error.message);
+    }
+    setPendingSpaces(data || []);
+    setPendingLoading(false);
+  };
+
+  useEffect(() => { loadInventory(); loadPending(); }, []);
+
+  const handleApprove = async (row: any) => {
+    setActionBusyId(row.id);
+    try {
+      const { error } = await supabase
+        .from("ad_spaces")
+        .update({
+          approval_status: "approved",
+          availability_status: "available",
+          approved_at: new Date().toISOString(),
+        } as any)
+        .eq("id", row.id);
+      if (error) throw error;
+      toast.success(`Approved "${row.title}"`);
+      setPendingSpaces((prev) => prev.filter((r) => r.id !== row.id));
+      loadInventory();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to approve");
+    } finally {
+      setActionBusyId(null);
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectTarget) return;
+    setActionBusyId(rejectTarget.id);
+    try {
+      const { error } = await supabase
+        .from("ad_spaces")
+        .update({
+          approval_status: "rejected",
+          rejection_reason: rejectReason.trim() || null,
+        } as any)
+        .eq("id", rejectTarget.id);
+      if (error) throw error;
+      toast.success(`Rejected "${rejectTarget.title}"`);
+      setPendingSpaces((prev) => prev.filter((r) => r.id !== rejectTarget.id));
+      setRejectTarget(null);
+      setRejectReason("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reject");
+    } finally {
+      setActionBusyId(null);
+    }
+  };
+
 
   const handleAdd = async () => {
     if (!form.title.trim() || !form.location.trim()) {
@@ -311,6 +383,23 @@ export default function AdminTotalInventory() {
           </CardContent>
         </Card>
 
+        <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="mb-4">
+          <TabsList>
+            <TabsTrigger value="approved">
+              Approved <span className="ml-2 text-xs text-muted-foreground">({spaces.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="pending" className="relative">
+              <Clock className="w-4 h-4 mr-1.5" />
+              Pending Review
+              {pendingSpaces.length > 0 && (
+                <span className="ml-2 min-w-[20px] h-5 px-1.5 rounded-full bg-orange-500 text-white text-[10px] font-bold inline-flex items-center justify-center">
+                  {pendingSpaces.length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="approved" className="mt-4 space-y-4">
         {/* Filters */}
         <Card className="mb-4">
           <CardContent className="pt-6 space-y-4">
@@ -457,7 +546,151 @@ export default function AdminTotalInventory() {
             )}
           </CardContent>
         </Card>
+        </TabsContent>
+
+        <TabsContent value="pending" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Clock className="w-5 h-5 text-orange-500" />
+                Pending Review <span className="text-sm font-normal text-muted-foreground">({pendingSpaces.length})</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {pendingLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              ) : pendingSpaces.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  <CheckCircle2 className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                  <div>No listings awaiting review</div>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Format</TableHead>
+                        <TableHead>Format Details</TableHead>
+                        <TableHead>Publisher</TableHead>
+                        <TableHead>Submitted</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingSpaces.map((s) => {
+                        const mt = String(s.media_type || "").toUpperCase();
+                        const fd = s.specifications?.format_details || {};
+                        const detailChips: string[] = [];
+                        if (fd.placement_count) detailChips.push(`${fd.placement_count} placements`);
+                        if (fd.screen_count) detailChips.push(`${fd.screen_count} screens`);
+                        if (fd.audio_zones) detailChips.push(`${fd.audio_zones} zones`);
+                        if (fd.screen_size) detailChips.push(`${fd.screen_size}`);
+                        if (fd.material) detailChips.push(`${fd.material}`);
+                        const busy = actionBusyId === s.id;
+                        return (
+                          <TableRow key={s.id} className="align-top">
+                            <TableCell className="font-medium max-w-[200px]">
+                              <div className="truncate">{s.title}</div>
+                            </TableCell>
+                            <TableCell className="max-w-[200px] truncate text-muted-foreground text-sm">
+                              {s.location || "—"}
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={formatBadge(mt)}>{mt || "—"}</Badge>
+                            </TableCell>
+                            <TableCell className="max-w-[240px]">
+                              {detailChips.length ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {detailChips.map((c, i) => (
+                                    <Badge key={i} variant="outline" className="text-[10px] font-normal">{c}</Badge>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground text-xs">No details</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="max-w-[180px]">
+                              <div className="truncate text-sm">{s.publisher_profiles?.business_name || "—"}</div>
+                              <div className="truncate text-xs text-muted-foreground">
+                                {s.publisher_profiles?.contact_email || "—"}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                              {s.created_at ? new Date(s.created_at).toLocaleDateString("en-PH") : "—"}
+                            </TableCell>
+                            <TableCell className="text-right whitespace-nowrap">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  disabled={busy}
+                                  onClick={() => handleApprove(s)}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  <Check className="w-4 h-4 mr-1" /> Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={busy}
+                                  onClick={() => { setRejectTarget(s); setRejectReason(""); }}
+                                  className="border-red-300 text-red-600 hover:bg-red-50"
+                                >
+                                  <X className="w-4 h-4 mr-1" /> Reject
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        </Tabs>
       </div>
+
+      {/* Reject dialog */}
+      <Dialog open={!!rejectTarget} onOpenChange={(o) => { if (!o) { setRejectTarget(null); setRejectReason(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Listing</DialogTitle>
+            <DialogDescription>
+              Optionally add a reason. The publisher will see this if surfaced in their dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Rejection reason (optional)</Label>
+            <Textarea
+              rows={4}
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="e.g. Photos don't match location, insufficient verification documents…"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setRejectTarget(null); setRejectReason(""); }}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={actionBusyId === rejectTarget?.id}
+              onClick={handleRejectConfirm}
+            >
+              {actionBusyId === rejectTarget?.id ? "Rejecting…" : "Reject Listing"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Detail dialog */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>

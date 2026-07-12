@@ -113,9 +113,26 @@ const VenueDashboard = () => {
   }
   const activeSpaces = adSpaces.filter((s) => s.approval_status === "approved" && s.availability_status === "available").length;
   const pendingSpaces = adSpaces.filter((s) => s.approval_status === "pending").length;
-  const oohUnits = adSpaces.filter((s) => !s.media_type || s.media_type === "OOH").length;
-  const doohUnits = adSpaces.filter((s) => s.media_type === "DOOH").length;
-  const aoohUnits = adSpaces.filter((s) => s.media_type === "AOOH").length;
+  const sumUnits = (mediaType: "OOH" | "DOOH" | "AOOH") =>
+    adSpaces
+      .filter((s) =>
+        mediaType === "OOH"
+          ? !s.media_type || s.media_type === "OOH"
+          : s.media_type === mediaType
+      )
+      .reduce((total, s: any) => {
+        const details = s.specifications?.format_details;
+        const configured =
+          mediaType === "OOH"
+            ? details?.placement_count
+            : mediaType === "DOOH"
+            ? details?.screen_count
+            : details?.audio_zones;
+        return total + (Number(configured) || 1);
+      }, 0);
+  const oohUnits = sumUnits("OOH");
+  const doohUnits = sumUnits("DOOH");
+  const aoohUnits = sumUnits("AOOH");
   const isApprovedAgent = profile?.verification_status === "approved";
   const isPendingAgent = profile?.verification_status === "pending";
   return <div className="min-h-screen bg-muted/30">
