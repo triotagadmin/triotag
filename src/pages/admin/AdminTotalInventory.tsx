@@ -45,6 +45,9 @@ export default function AdminTotalInventory() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [spaces, setSpaces] = useState<any[]>([]);
+  const [pendingSpaces, setPendingSpaces] = useState<any[]>([]);
+  const [pendingLoading, setPendingLoading] = useState(true);
+  const [tab, setTab] = useState<"approved" | "pending">("approved");
   const [search, setSearch] = useState("");
   const [mediaFilter, setMediaFilter] = useState<"ALL" | MediaType>("ALL");
   const [availFilter, setAvailFilter] = useState<string>("all");
@@ -54,6 +57,9 @@ export default function AdminTotalInventory() {
   const [queryError, setQueryError] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<any | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [actionBusyId, setActionBusyId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     location: "",
