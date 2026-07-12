@@ -74,9 +74,25 @@ export function AppSidebar({ role }: { role: string }) {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const items = ROLE_SIDEBAR_ITEMS[role] || [];
   const settingsPath = ROLE_SETTINGS_PATH[role] || "/auth";
   const isActive = (to: string) => pathname === to || pathname.startsWith(to + "/");
+
+  useEffect(() => {
+    if (role !== "admin") return;
+    let cancelled = false;
+    const fetchPending = async () => {
+      const { count } = await supabase
+        .from("ad_spaces")
+        .select("id", { count: "exact", head: true })
+        .eq("approval_status", "pending");
+      if (!cancelled) setPendingCount(count || 0);
+    };
+    fetchPending();
+    const interval = setInterval(fetchPending, 30000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [role, pathname]);
 
   const handleLogout = async () => {
     setSigningOut(true);
@@ -110,23 +126,41 @@ export function AppSidebar({ role }: { role: string }) {
         {items.map((it) => {
           const active = isActive(it.to);
           const Icon = it.icon;
+          const showBadge = role === "admin" && it.to === "/admin/total-inventory" && pendingCount > 0;
           return (
             <NavLink
               key={it.to}
               to={it.to}
               title={it.label}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
                 active
                   ? "bg-green-900/40 text-green-400 border-l-2 border-green-500"
                   : "text-gray-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent"
               }`}
             >
-              <Icon className="w-5 h-5 shrink-0" />
-              {expanded && <span className="truncate">{it.label}</span>}
+              <div className="relative shrink-0">
+                <Icon className="w-5 h-5" />
+                {showBadge && !expanded && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    {pendingCount > 9 ? "9+" : pendingCount}
+                  </span>
+                )}
+              </div>
+              {expanded && (
+                <>
+                  <span className="truncate flex-1">{it.label}</span>
+                  {showBadge && (
+                    <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center">
+                      {pendingCount}
+                    </span>
+                  )}
+                </>
+              )}
             </NavLink>
           );
         })}
       </nav>
+
 
       <div className="px-3 py-3 border-t border-white/5 space-y-1">
         <button
