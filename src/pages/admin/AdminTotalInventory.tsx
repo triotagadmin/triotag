@@ -93,7 +93,71 @@ export default function AdminTotalInventory() {
     setLoading(false);
   };
 
-  useEffect(() => { loadInventory(); }, []);
+  const loadPending = async () => {
+    setPendingLoading(true);
+    const { data, error } = await supabase
+      .from("ad_spaces")
+      .select(`
+        id, title, location, media_type, approval_status, availability_status,
+        specifications, created_at, publisher_id,
+        publisher_profiles ( business_name, contact_email )
+      `)
+      .eq("approval_status", "pending")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("[AdminTotalInventory] Pending query error:", error.message);
+    }
+    setPendingSpaces(data || []);
+    setPendingLoading(false);
+  };
+
+  useEffect(() => { loadInventory(); loadPending(); }, []);
+
+  const handleApprove = async (row: any) => {
+    setActionBusyId(row.id);
+    try {
+      const { error } = await supabase
+        .from("ad_spaces")
+        .update({
+          approval_status: "approved",
+          availability_status: "available",
+          approved_at: new Date().toISOString(),
+        } as any)
+        .eq("id", row.id);
+      if (error) throw error;
+      toast.success(`Approved "${row.title}"`);
+      setPendingSpaces((prev) => prev.filter((r) => r.id !== row.id));
+      loadInventory();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to approve");
+    } finally {
+      setActionBusyId(null);
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectTarget) return;
+    setActionBusyId(rejectTarget.id);
+    try {
+      const { error } = await supabase
+        .from("ad_spaces")
+        .update({
+          approval_status: "rejected",
+          rejection_reason: rejectReason.trim() || null,
+        } as any)
+        .eq("id", rejectTarget.id);
+      if (error) throw error;
+      toast.success(`Rejected "${rejectTarget.title}"`);
+      setPendingSpaces((prev) => prev.filter((r) => r.id !== rejectTarget.id));
+      setRejectTarget(null);
+      setRejectReason("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reject");
+    } finally {
+      setActionBusyId(null);
+    }
+  };
+
 
   const handleAdd = async () => {
     if (!form.title.trim() || !form.location.trim()) {
