@@ -273,7 +273,6 @@ export default function PublisherActiveInventory() {
               <DialogHeader>
                 <div className="flex items-start justify-between gap-3">
                   <DialogTitle className="text-xl">{selectedSpace.title}</DialogTitle>
-                  <div className="flex gap-2">
                   <div className="flex flex-wrap gap-2">
                     {((selectedSpace.media_types as Channel[]) || [selectedSpace.media_type]).filter(Boolean).map((mt: Channel) => (
                       <Badge key={mt} variant="outline" className={`inline-flex items-center gap-1 ${FORMAT_BADGE[mt] || ""}`}>
