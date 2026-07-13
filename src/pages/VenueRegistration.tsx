@@ -558,6 +558,43 @@ const VenueRegistration = () => {
         };
         const rows = selectedFormats.map(fmt => ({
           ...venueData,
+      const sumUnits = (m: Record<string, number>) => Object.values(m).reduce((s, n) => s + (Number(n) || 0), 0);
+      const formatDetails: Record<string, any> = {
+        OOH: { print_format: oohPrintFormats.join(", "), print_formats: oohPrintFormats, units_by_format: oohUnits, placement_count: sumUnits(oohUnits) || null },
+        DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenTypes.join(", "), screen_types: doohScreenTypes, units_by_type: doohUnits, screen_count: sumUnits(doohUnits) || null },
+        AOOH: { spot_duration: aoohSpotDurations.join(", "), spot_durations: aoohSpotDurations, zones_by_duration: aoohUnits, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: sumUnits(aoohUnits) || null },
+      };
+
+      if (isEditing) {
+        const emailChanged = normalizedContactEmail !== originalContactEmail;
+        const formatDetailsForCurrentMediaType = editingMediaType ? formatDetails[editingMediaType] : null;
+        const updatePayload: any = {
+          ...venueData,
+          specifications: {
+            ...(venueData.specifications as any),
+            ...(formatDetailsForCurrentMediaType ? { format_details: formatDetailsForCurrentMediaType } : {}),
+          },
+          availability_status: isListedOnExplore ? "available" : "unlisted",
+        };
+
+        if (emailChanged && normalizedContactEmail) {
+          updatePayload.advertiser_id = null;
+          updatePayload.pending_advertiser_email = normalizedContactEmail;
+        }
+
+        const { error } = await supabase.from("ad_spaces").update(updatePayload).eq("id", editId!).eq("publisher_id", publisherId);
+        if (error) throw error;
+
+        if (emailChanged && normalizedContactEmail) {
+          await requestOwnershipWorkflow(editId!, normalizedContactEmail);
+        }
+
+        setOriginalContactEmail(normalizedContactEmail);
+        toast({ title: "Success", description: "Listing updated successfully" });
+        navigate("/venue-inventory");
+      } else {
+        const rows = selectedFormats.map(fmt => ({
+          ...venueData,
           specifications: { ...(venueData.specifications as any), format_details: formatDetails[fmt] },
           media_type: fmt,
           advertiser_id: null,
