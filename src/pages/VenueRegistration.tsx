@@ -200,6 +200,7 @@ const VenueRegistration = () => {
   const toggleAoohSpotDuration = (v: string) => setAoohSpotDurations(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   const [aoohUnits, setAoohUnits] = useState<Record<string, number>>({});
   const [aoohPlayFrequency, setAoohPlayFrequency] = useState("");
+  const [editingMediaType, setEditingMediaType] = useState<"OOH" | "DOOH" | "AOOH" | null>(null);
 
   const toggleFormat = (f: "OOH" | "DOOH" | "AOOH") =>
     setSelectedFormats(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
@@ -290,6 +291,33 @@ const VenueRegistration = () => {
 
       if (specs.environment_details) {
         setEnvDetails({ ...envDetails, ...specs.environment_details });
+      }
+
+      // Load previously-saved format details for the row's media_type
+      const mt = (venue.media_type as "OOH" | "DOOH" | "AOOH" | null) || null;
+      setEditingMediaType(mt);
+      if (mt) setSelectedFormats([mt]);
+      const fd = specs.format_details || {};
+      if (mt === "OOH") {
+        const printFormats: string[] = Array.isArray(fd.print_formats)
+          ? fd.print_formats
+          : (typeof fd.print_format === "string" && fd.print_format ? fd.print_format.split(",").map((s: string) => s.trim()).filter(Boolean) : []);
+        setOohPrintFormats(printFormats);
+        setOohUnits(fd.units_by_format && typeof fd.units_by_format === "object" ? fd.units_by_format : {});
+      } else if (mt === "DOOH") {
+        setDoohScreenDescription(fd.screen_description || "");
+        const screenTypes: string[] = Array.isArray(fd.screen_types)
+          ? fd.screen_types
+          : (typeof fd.screen_type === "string" && fd.screen_type ? fd.screen_type.split(",").map((s: string) => s.trim()).filter(Boolean) : []);
+        setDoohScreenTypes(screenTypes);
+        setDoohUnits(fd.units_by_type && typeof fd.units_by_type === "object" ? fd.units_by_type : {});
+      } else if (mt === "AOOH") {
+        const spotDurations: string[] = Array.isArray(fd.spot_durations)
+          ? fd.spot_durations
+          : (typeof fd.spot_duration === "string" && fd.spot_duration ? fd.spot_duration.split(",").map((s: string) => s.trim()).filter(Boolean) : []);
+        setAoohSpotDurations(spotDurations);
+        setAoohUnits(fd.zones_by_duration && typeof fd.zones_by_duration === "object" ? fd.zones_by_duration : {});
+        setAoohPlayFrequency(fd.play_frequency_min != null ? String(fd.play_frequency_min) : "");
       }
 
       // Track advertiser linking status
@@ -502,9 +530,24 @@ const VenueRegistration = () => {
         await supabase.from('verification_documents').insert({ publisher_id: publisherId, document_type: doc.type, file_name: doc.file.name, file_url: filePath });
       }
 
+      const sumUnits = (m: Record<string, number>) => Object.values(m).reduce((s, n) => s + (Number(n) || 0), 0);
+      const formatDetails: Record<string, any> = {
+        OOH: { print_format: oohPrintFormats.join(", "), print_formats: oohPrintFormats, units_by_format: oohUnits, placement_count: sumUnits(oohUnits) || null },
+        DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenTypes.join(", "), screen_types: doohScreenTypes, units_by_type: doohUnits, screen_count: sumUnits(doohUnits) || null },
+        AOOH: { spot_duration: aoohSpotDurations.join(", "), spot_durations: aoohSpotDurations, zones_by_duration: aoohUnits, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: sumUnits(aoohUnits) || null },
+      };
+
       if (isEditing) {
         const emailChanged = normalizedContactEmail !== originalContactEmail;
-        const updatePayload: any = { ...venueData, availability_status: isListedOnExplore ? "available" : "unlisted" };
+        const formatDetailsForCurrentMediaType = editingMediaType ? formatDetails[editingMediaType] : null;
+        const updatePayload: any = {
+          ...venueData,
+          specifications: {
+            ...(venueData.specifications as any),
+            ...(formatDetailsForCurrentMediaType ? { format_details: formatDetailsForCurrentMediaType } : {}),
+          },
+          availability_status: isListedOnExplore ? "available" : "unlisted",
+        };
 
         if (emailChanged && normalizedContactEmail) {
           updatePayload.advertiser_id = null;
@@ -522,12 +565,6 @@ const VenueRegistration = () => {
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
-        const sumUnits = (m: Record<string, number>) => Object.values(m).reduce((s, n) => s + (Number(n) || 0), 0);
-        const formatDetails: Record<string, any> = {
-          OOH: { print_format: oohPrintFormats.join(", "), print_formats: oohPrintFormats, units_by_format: oohUnits, placement_count: sumUnits(oohUnits) || null },
-          DOOH: { screen_description: doohScreenDescription, screen_type: doohScreenTypes.join(", "), screen_types: doohScreenTypes, units_by_type: doohUnits, screen_count: sumUnits(doohUnits) || null },
-          AOOH: { spot_duration: aoohSpotDurations.join(", "), spot_durations: aoohSpotDurations, zones_by_duration: aoohUnits, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: sumUnits(aoohUnits) || null },
-        };
         const rows = selectedFormats.map(fmt => ({
           ...venueData,
           specifications: { ...(venueData.specifications as any), format_details: formatDetails[fmt] },
