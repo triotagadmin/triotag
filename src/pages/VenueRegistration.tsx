@@ -200,6 +200,7 @@ const VenueRegistration = () => {
   const toggleAoohSpotDuration = (v: string) => setAoohSpotDurations(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   const [aoohUnits, setAoohUnits] = useState<Record<string, number>>({});
   const [aoohPlayFrequency, setAoohPlayFrequency] = useState("");
+  const [editingMediaType, setEditingMediaType] = useState<"OOH" | "DOOH" | "AOOH" | null>(null);
 
   const toggleFormat = (f: "OOH" | "DOOH" | "AOOH") =>
     setSelectedFormats(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
