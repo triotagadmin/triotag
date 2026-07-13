@@ -58,24 +58,46 @@ export default function PublisherActiveInventory() {
   }, [navigate]);
 
 
+  // Group rows that represent the same listing (same title+location) so a
+  // listing registered with multiple formats shows all its format badges.
+  const groupedSpaces = useMemo(() => {
+    const map = new Map<string, any>();
+    for (const s of spaces) {
+      const key = `${(s.title || "").trim().toLowerCase()}|${(s.location || "").trim().toLowerCase()}`;
+      const existing = map.get(key);
+      const mt = s.media_type as Channel;
+      if (!existing) {
+        map.set(key, { ...s, media_types: mt ? [mt] : [], rows: [s] });
+      } else {
+        if (mt && !existing.media_types.includes(mt)) existing.media_types.push(mt);
+        existing.rows.push(s);
+        // Keep the earliest approval date as "live since"
+        const ea = existing.approved_at ? new Date(existing.approved_at).getTime() : Infinity;
+        const sa = s.approved_at ? new Date(s.approved_at).getTime() : Infinity;
+        if (sa < ea) existing.approved_at = s.approved_at;
+      }
+    }
+    return Array.from(map.values());
+  }, [spaces]);
+
   const counts = useMemo(() => ({
-    total: spaces.length,
-    OOH: spaces.filter((s) => s.media_type === "OOH").length,
-    DOOH: spaces.filter((s) => s.media_type === "DOOH").length,
-    AOOH: spaces.filter((s) => s.media_type === "AOOH").length,
-  }), [spaces]);
+    total: groupedSpaces.length,
+    OOH: groupedSpaces.filter((s) => s.media_types.includes("OOH")).length,
+    DOOH: groupedSpaces.filter((s) => s.media_types.includes("DOOH")).length,
+    AOOH: groupedSpaces.filter((s) => s.media_types.includes("AOOH")).length,
+  }), [groupedSpaces]);
 
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-    return spaces.filter((s) => {
-      if (activeFilter !== "All" && s.media_type !== activeFilter) return false;
+    return groupedSpaces.filter((s) => {
+      if (activeFilter !== "All" && !s.media_types.includes(activeFilter)) return false;
       if (!term) return true;
       return (
         (s.title || "").toLowerCase().includes(term) ||
         (s.location || "").toLowerCase().includes(term)
       );
     });
-  }, [spaces, searchTerm, activeFilter]);
+  }, [groupedSpaces, searchTerm, activeFilter]);
 
   const mediaUrls: string[] = Array.isArray(selectedSpace?.media_urls)
     ? selectedSpace.media_urls
@@ -179,10 +201,14 @@ export default function PublisherActiveInventory() {
                       </div>
                     )}
                   </div>
-                  <Badge variant="outline" className={`shrink-0 inline-flex items-center gap-1 ${FORMAT_BADGE[space.media_type as Channel] || ""}`}>
-                    <FormatIcon type={space.media_type} />
-                    {space.media_type}
-                  </Badge>
+                  <div className="flex flex-wrap gap-1 shrink-0 justify-end">
+                    {(space.media_types as Channel[]).map((mt) => (
+                      <Badge key={mt} variant="outline" className={`inline-flex items-center gap-1 ${FORMAT_BADGE[mt] || ""}`}>
+                        <FormatIcon type={mt} />
+                        {mt}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 mb-3">
@@ -247,10 +273,13 @@ export default function PublisherActiveInventory() {
               <DialogHeader>
                 <div className="flex items-start justify-between gap-3">
                   <DialogTitle className="text-xl">{selectedSpace.title}</DialogTitle>
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className={FORMAT_BADGE[selectedSpace.media_type as Channel] || ""}>
-                      {selectedSpace.media_type}
-                    </Badge>
+                  <div className="flex flex-wrap gap-2">
+                    {((selectedSpace.media_types as Channel[]) || [selectedSpace.media_type]).filter(Boolean).map((mt: Channel) => (
+                      <Badge key={mt} variant="outline" className={`inline-flex items-center gap-1 ${FORMAT_BADGE[mt] || ""}`}>
+                        <FormatIcon type={mt} />
+                        {mt}
+                      </Badge>
+                    ))}
                     <Badge className="bg-green-100 text-green-700 border-green-200">Live</Badge>
                   </div>
                 </div>
