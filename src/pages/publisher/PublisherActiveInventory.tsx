@@ -274,9 +274,13 @@ export default function PublisherActiveInventory() {
                 <div className="flex items-start justify-between gap-3">
                   <DialogTitle className="text-xl">{selectedSpace.title}</DialogTitle>
                   <div className="flex gap-2">
-                    <Badge variant="outline" className={FORMAT_BADGE[selectedSpace.media_type as Channel] || ""}>
-                      {selectedSpace.media_type}
-                    </Badge>
+                  <div className="flex flex-wrap gap-2">
+                    {((selectedSpace.media_types as Channel[]) || [selectedSpace.media_type]).filter(Boolean).map((mt: Channel) => (
+                      <Badge key={mt} variant="outline" className={`inline-flex items-center gap-1 ${FORMAT_BADGE[mt] || ""}`}>
+                        <FormatIcon type={mt} />
+                        {mt}
+                      </Badge>
+                    ))}
                     <Badge className="bg-green-100 text-green-700 border-green-200">Live</Badge>
                   </div>
                 </div>
