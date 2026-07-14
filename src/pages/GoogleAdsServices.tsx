@@ -70,11 +70,13 @@ const Hero = ({ onBook }: { onBook: () => void }) => (
           buyers at every stage of the funnel.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <Link to="/contact">
-            <Button size="lg" className="bg-green-600 hover:bg-green-500 text-white px-8">
-              Book a Free Audit <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
+          <Button
+            size="lg"
+            onClick={onBook}
+            className="bg-green-600 hover:bg-green-500 text-white px-8"
+          >
+            Book a Free Consultation <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
           <a href="#pricing">
             <Button size="lg" variant="outline" className="border-green-500 text-green-500 hover:bg-green-500/10 px-8">
               See Packages
