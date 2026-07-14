@@ -49,7 +49,7 @@ import {
 } from "lucide-react";
 
 /* ================================= HERO ================================= */
-const Hero = () => (
+const Hero = ({ onBook }: { onBook: () => void }) => (
   <section className="relative bg-[#0c0c0c] text-white overflow-hidden">
     <div className="absolute inset-0 bg-grid-dark opacity-30 pointer-events-none" />
     <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-green-500/10 rounded-full blur-[120px]" />
