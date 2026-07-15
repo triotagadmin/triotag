@@ -40,6 +40,7 @@ interface AdSpaceRow {
   title: string;
   location: string | null;
   media_type: string;
+  media_types?: string[] | null;
   pricing: any;
   monthly_subscription_fee: number | null;
   latitude: number | null;
