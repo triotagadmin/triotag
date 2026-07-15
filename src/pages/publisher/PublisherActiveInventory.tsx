@@ -191,10 +191,14 @@ export default function PublisherActiveInventory() {
                       </div>
                     )}
                   </div>
-                  <Badge variant="outline" className={`shrink-0 inline-flex items-center gap-1 ${FORMAT_BADGE[space.media_type as Channel] || ""}`}>
-                    <FormatIcon type={space.media_type} />
-                    {space.media_type}
-                  </Badge>
+                  <div className="flex flex-wrap gap-1 shrink-0">
+                    {spaceFormats(space).map((f) => (
+                      <Badge key={f} variant="outline" className={`inline-flex items-center gap-1 ${FORMAT_BADGE[f] || ""}`}>
+                        <FormatIcon type={f} />
+                        {f}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 mb-3">
