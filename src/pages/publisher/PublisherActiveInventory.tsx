@@ -58,17 +58,29 @@ export default function PublisherActiveInventory() {
   }, [navigate]);
 
 
-  const counts = useMemo(() => ({
-    total: spaces.length,
-    OOH: spaces.filter((s) => s.media_type === "OOH").length,
-    DOOH: spaces.filter((s) => s.media_type === "DOOH").length,
-    AOOH: spaces.filter((s) => s.media_type === "AOOH").length,
-  }), [spaces]);
+  const counts = useMemo(() => {
+    const has = (s: any, f: Channel) => {
+      const arr = Array.isArray(s.media_types) ? s.media_types : null;
+      return arr && arr.length > 0 ? arr.includes(f) : s.media_type === f;
+    };
+    return {
+      total: spaces.length,
+      OOH: spaces.filter((s) => has(s, "OOH")).length,
+      DOOH: spaces.filter((s) => has(s, "DOOH")).length,
+      AOOH: spaces.filter((s) => has(s, "AOOH")).length,
+    };
+  }, [spaces]);
+
+  const spaceFormats = (s: any): Channel[] => {
+    const arr = Array.isArray(s.media_types) ? s.media_types : null;
+    if (arr && arr.length > 0) return arr.filter((x: any): x is Channel => x === "OOH" || x === "DOOH" || x === "AOOH");
+    return s.media_type ? [s.media_type as Channel] : [];
+  };
 
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     return spaces.filter((s) => {
-      if (activeFilter !== "All" && s.media_type !== activeFilter) return false;
+      if (activeFilter !== "All" && !spaceFormats(s).includes(activeFilter)) return false;
       if (!term) return true;
       return (
         (s.title || "").toLowerCase().includes(term) ||
