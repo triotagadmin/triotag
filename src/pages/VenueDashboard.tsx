@@ -115,13 +115,16 @@ const VenueDashboard = () => {
   const pendingSpaces = adSpaces.filter((s) => s.approval_status === "pending").length;
   const sumUnits = (mediaType: "OOH" | "DOOH" | "AOOH") =>
     adSpaces
-      .filter((s) =>
-        mediaType === "OOH"
-          ? !s.media_type || s.media_type === "OOH"
-          : s.media_type === mediaType
-      )
+      .filter((s: any) => {
+        const arr = Array.isArray(s.media_types) ? s.media_types : null;
+        if (arr && arr.length > 0) return arr.includes(mediaType);
+        // fallback for older rows without media_types populated
+        return s.media_type === mediaType;
+      })
       .reduce((total, s: any) => {
-        const details = s.specifications?.format_details;
+        const fdRoot = s.specifications?.format_details;
+        const isKeyed = fdRoot && typeof fdRoot === "object" && (fdRoot.OOH || fdRoot.DOOH || fdRoot.AOOH);
+        const details = isKeyed ? fdRoot[mediaType] : fdRoot;
         const configured =
           mediaType === "OOH"
             ? details?.placement_count
