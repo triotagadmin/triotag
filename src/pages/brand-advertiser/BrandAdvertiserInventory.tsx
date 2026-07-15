@@ -267,7 +267,7 @@ export default function BrandAdvertiserInventory() {
       const { data } = await supabase
         .from("ad_spaces")
         .select(
-          "id,title,location,media_type,pricing,monthly_subscription_fee,latitude,longitude,specifications,publisher_profiles(business_name,is_house_account)"
+          "id,title,location,media_type,media_types,pricing,monthly_subscription_fee,latitude,longitude,specifications,publisher_profiles(business_name,is_house_account)"
         )
         .eq("approval_status", "approved")
         .or("agent_disconnected.is.null,agent_disconnected.eq.false")
