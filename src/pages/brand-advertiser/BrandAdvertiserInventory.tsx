@@ -40,6 +40,7 @@ interface AdSpaceRow {
   title: string;
   location: string | null;
   media_type: string;
+  media_types?: string[] | null;
   pricing: any;
   monthly_subscription_fee: number | null;
   latitude: number | null;
@@ -266,7 +267,7 @@ export default function BrandAdvertiserInventory() {
       const { data } = await supabase
         .from("ad_spaces")
         .select(
-          "id,title,location,media_type,pricing,monthly_subscription_fee,latitude,longitude,specifications,publisher_profiles(business_name,is_house_account)"
+          "id,title,location,media_type,media_types,pricing,monthly_subscription_fee,latitude,longitude,specifications,publisher_profiles(business_name,is_house_account)"
         )
         .eq("approval_status", "approved")
         .or("agent_disconnected.is.null,agent_disconnected.eq.false")
@@ -282,7 +283,8 @@ export default function BrandAdvertiserInventory() {
       .filter((r) => {
         const units = (r.specifications && r.specifications.units) || null;
         const unitCt = units ? Number(units[chosenFormat] || 0) : 0;
-        return r.media_type === chosenFormat || unitCt > 0;
+        const inArray = Array.isArray(r.media_types) && r.media_types.includes(chosenFormat);
+        return inArray || r.media_type === chosenFormat || unitCt > 0;
       })
       .filter((r) => r.latitude != null && r.longitude != null)
       .map((r) => ({

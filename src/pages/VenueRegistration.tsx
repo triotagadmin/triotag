@@ -293,25 +293,37 @@ const VenueRegistration = () => {
         setEnvDetails({ ...envDetails, ...specs.environment_details });
       }
 
-      // Load previously-saved format details for the row's media_type
-      const mt = (venue.media_type as "OOH" | "DOOH" | "AOOH" | null) || null;
-      setEditingMediaType(mt);
-      if (mt) setSelectedFormats([mt]);
-      const fd = specs.format_details || {};
-      if (mt === "OOH") {
+      // Load previously-saved formats: prefer media_types[] array; fall back to singular media_type
+      const mtsRaw = (venue as any).media_types;
+      const mts: ("OOH" | "DOOH" | "AOOH")[] = Array.isArray(mtsRaw) && mtsRaw.length > 0
+        ? (mtsRaw as any[]).filter((x): x is "OOH" | "DOOH" | "AOOH" => x === "OOH" || x === "DOOH" || x === "AOOH")
+        : (venue.media_type ? [venue.media_type as "OOH" | "DOOH" | "AOOH"] : []);
+      setEditingMediaType((venue.media_type as any) || mts[0] || null);
+      setSelectedFormats(mts);
+      const fdRoot = specs.format_details || {};
+      // Support both new keyed shape ({OOH:{...}, DOOH:{...}}) and legacy flat shape
+      const isKeyed = fdRoot && typeof fdRoot === "object" && (fdRoot.OOH || fdRoot.DOOH || fdRoot.AOOH);
+      const getFd = (k: "OOH" | "DOOH" | "AOOH") => (isKeyed ? (fdRoot[k] || {}) : (venue.media_type === k ? fdRoot : {}));
+
+      if (mts.includes("OOH")) {
+        const fd = getFd("OOH");
         const printFormats: string[] = Array.isArray(fd.print_formats)
           ? fd.print_formats
           : (typeof fd.print_format === "string" && fd.print_format ? fd.print_format.split(",").map((s: string) => s.trim()).filter(Boolean) : []);
         setOohPrintFormats(printFormats);
         setOohUnits(fd.units_by_format && typeof fd.units_by_format === "object" ? fd.units_by_format : {});
-      } else if (mt === "DOOH") {
+      }
+      if (mts.includes("DOOH")) {
+        const fd = getFd("DOOH");
         setDoohScreenDescription(fd.screen_description || "");
         const screenTypes: string[] = Array.isArray(fd.screen_types)
           ? fd.screen_types
           : (typeof fd.screen_type === "string" && fd.screen_type ? fd.screen_type.split(",").map((s: string) => s.trim()).filter(Boolean) : []);
         setDoohScreenTypes(screenTypes);
         setDoohUnits(fd.units_by_type && typeof fd.units_by_type === "object" ? fd.units_by_type : {});
-      } else if (mt === "AOOH") {
+      }
+      if (mts.includes("AOOH")) {
+        const fd = getFd("AOOH");
         const spotDurations: string[] = Array.isArray(fd.spot_durations)
           ? fd.spot_durations
           : (typeof fd.spot_duration === "string" && fd.spot_duration ? fd.spot_duration.split(",").map((s: string) => s.trim()).filter(Boolean) : []);
@@ -537,14 +549,18 @@ const VenueRegistration = () => {
         AOOH: { spot_duration: aoohSpotDurations.join(", "), spot_durations: aoohSpotDurations, zones_by_duration: aoohUnits, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: sumUnits(aoohUnits) || null },
       };
 
+      const combinedFormatDetails: Record<string, any> = {};
+      selectedFormats.forEach(fmt => { combinedFormatDetails[fmt] = formatDetails[fmt]; });
+
       if (isEditing) {
         const emailChanged = normalizedContactEmail !== originalContactEmail;
-        const formatDetailsForCurrentMediaType = editingMediaType ? formatDetails[editingMediaType] : null;
         const updatePayload: any = {
           ...venueData,
+          media_type: selectedFormats[0] || editingMediaType,
+          media_types: selectedFormats,
           specifications: {
             ...(venueData.specifications as any),
-            ...(formatDetailsForCurrentMediaType ? { format_details: formatDetailsForCurrentMediaType } : {}),
+            format_details: combinedFormatDetails,
           },
           availability_status: isListedOnExplore ? "available" : "unlisted",
         };
@@ -565,23 +581,24 @@ const VenueRegistration = () => {
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
-        const rows = selectedFormats.map(fmt => ({
+        const insertPayload: any = {
           ...venueData,
-          specifications: { ...(venueData.specifications as any), format_details: formatDetails[fmt] },
-          media_type: fmt,
+          media_type: selectedFormats[0],
+          media_types: selectedFormats,
+          specifications: { ...(venueData.specifications as any), format_details: combinedFormatDetails },
           advertiser_id: null,
           pending_advertiser_email: normalizedContactEmail || null,
           approval_status: "pending" as const,
           availability_status: "unavailable",
-        }));
-        const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert(rows).select("id");
+        };
+        const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert(insertPayload).select("id");
         if (insertError) throw insertError;
 
         if (normalizedContactEmail && insertedData?.[0]) {
           await requestOwnershipWorkflow(insertedData[0].id, normalizedContactEmail);
         }
 
-
+        toast({ title: "Listing created", description: `1 listing created with formats: ${selectedFormats.join(", ")}` });
         setShowConfirmation(true);
         window.scrollTo(0, 0);
       }

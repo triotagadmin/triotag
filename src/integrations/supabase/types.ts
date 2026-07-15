@@ -205,6 +205,7 @@ export type Database = {
           location: string | null
           longitude: number | null
           media_type: Database["public"]["Enums"]["media_type"]
+          media_types: Database["public"]["Enums"]["media_type"][]
           media_urls: Json | null
           monthly_subscription_fee: number | null
           pending_advertiser_email: string | null
@@ -234,6 +235,7 @@ export type Database = {
           location?: string | null
           longitude?: number | null
           media_type?: Database["public"]["Enums"]["media_type"]
+          media_types?: Database["public"]["Enums"]["media_type"][]
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
           pending_advertiser_email?: string | null
@@ -263,6 +265,7 @@ export type Database = {
           location?: string | null
           longitude?: number | null
           media_type?: Database["public"]["Enums"]["media_type"]
+          media_types?: Database["public"]["Enums"]["media_type"][]
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
           pending_advertiser_email?: string | null
@@ -4512,6 +4515,7 @@ export type Database = {
           location: string | null
           longitude: number | null
           media_type: Database["public"]["Enums"]["media_type"]
+          media_types: Database["public"]["Enums"]["media_type"][]
           media_urls: Json | null
           monthly_subscription_fee: number | null
           pending_advertiser_email: string | null

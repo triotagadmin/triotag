@@ -58,17 +58,29 @@ export default function PublisherActiveInventory() {
   }, [navigate]);
 
 
-  const counts = useMemo(() => ({
-    total: spaces.length,
-    OOH: spaces.filter((s) => s.media_type === "OOH").length,
-    DOOH: spaces.filter((s) => s.media_type === "DOOH").length,
-    AOOH: spaces.filter((s) => s.media_type === "AOOH").length,
-  }), [spaces]);
+  const counts = useMemo(() => {
+    const has = (s: any, f: Channel) => {
+      const arr = Array.isArray(s.media_types) ? s.media_types : null;
+      return arr && arr.length > 0 ? arr.includes(f) : s.media_type === f;
+    };
+    return {
+      total: spaces.length,
+      OOH: spaces.filter((s) => has(s, "OOH")).length,
+      DOOH: spaces.filter((s) => has(s, "DOOH")).length,
+      AOOH: spaces.filter((s) => has(s, "AOOH")).length,
+    };
+  }, [spaces]);
+
+  const spaceFormats = (s: any): Channel[] => {
+    const arr = Array.isArray(s.media_types) ? s.media_types : null;
+    if (arr && arr.length > 0) return arr.filter((x: any): x is Channel => x === "OOH" || x === "DOOH" || x === "AOOH");
+    return s.media_type ? [s.media_type as Channel] : [];
+  };
 
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     return spaces.filter((s) => {
-      if (activeFilter !== "All" && s.media_type !== activeFilter) return false;
+      if (activeFilter !== "All" && !spaceFormats(s).includes(activeFilter)) return false;
       if (!term) return true;
       return (
         (s.title || "").toLowerCase().includes(term) ||
@@ -179,10 +191,14 @@ export default function PublisherActiveInventory() {
                       </div>
                     )}
                   </div>
-                  <Badge variant="outline" className={`shrink-0 inline-flex items-center gap-1 ${FORMAT_BADGE[space.media_type as Channel] || ""}`}>
-                    <FormatIcon type={space.media_type} />
-                    {space.media_type}
-                  </Badge>
+                  <div className="flex flex-wrap gap-1 shrink-0">
+                    {spaceFormats(space).map((f) => (
+                      <Badge key={f} variant="outline" className={`inline-flex items-center gap-1 ${FORMAT_BADGE[f] || ""}`}>
+                        <FormatIcon type={f} />
+                        {f}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 mb-3">
@@ -248,10 +264,12 @@ export default function PublisherActiveInventory() {
                 <div className="flex items-start justify-between gap-3">
                   <DialogTitle className="text-xl">{selectedSpace.title}</DialogTitle>
                   <div className="flex gap-2">
-                    <Badge variant="outline" className={FORMAT_BADGE[selectedSpace.media_type as Channel] || ""}>
-                      {selectedSpace.media_type}
-                    </Badge>
+                  <div className="flex flex-wrap gap-2">
+                    {spaceFormats(selectedSpace).map((f) => (
+                      <Badge key={f} variant="outline" className={FORMAT_BADGE[f] || ""}>{f}</Badge>
+                    ))}
                     <Badge className="bg-green-100 text-green-700 border-green-200">Live</Badge>
+                  </div>
                   </div>
                 </div>
               </DialogHeader>
