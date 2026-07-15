@@ -283,7 +283,8 @@ export default function BrandAdvertiserInventory() {
       .filter((r) => {
         const units = (r.specifications && r.specifications.units) || null;
         const unitCt = units ? Number(units[chosenFormat] || 0) : 0;
-        return r.media_type === chosenFormat || unitCt > 0;
+        const inArray = Array.isArray(r.media_types) && r.media_types.includes(chosenFormat);
+        return inArray || r.media_type === chosenFormat || unitCt > 0;
       })
       .filter((r) => r.latitude != null && r.longitude != null)
       .map((r) => ({
