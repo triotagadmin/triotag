@@ -293,25 +293,37 @@ const VenueRegistration = () => {
         setEnvDetails({ ...envDetails, ...specs.environment_details });
       }
 
-      // Load previously-saved format details for the row's media_type
-      const mt = (venue.media_type as "OOH" | "DOOH" | "AOOH" | null) || null;
-      setEditingMediaType(mt);
-      if (mt) setSelectedFormats([mt]);
-      const fd = specs.format_details || {};
-      if (mt === "OOH") {
+      // Load previously-saved formats: prefer media_types[] array; fall back to singular media_type
+      const mtsRaw = (venue as any).media_types;
+      const mts: ("OOH" | "DOOH" | "AOOH")[] = Array.isArray(mtsRaw) && mtsRaw.length > 0
+        ? (mtsRaw as any[]).filter((x): x is "OOH" | "DOOH" | "AOOH" => x === "OOH" || x === "DOOH" || x === "AOOH")
+        : (venue.media_type ? [venue.media_type as "OOH" | "DOOH" | "AOOH"] : []);
+      setEditingMediaType((venue.media_type as any) || mts[0] || null);
+      setSelectedFormats(mts);
+      const fdRoot = specs.format_details || {};
+      // Support both new keyed shape ({OOH:{...}, DOOH:{...}}) and legacy flat shape
+      const isKeyed = fdRoot && typeof fdRoot === "object" && (fdRoot.OOH || fdRoot.DOOH || fdRoot.AOOH);
+      const getFd = (k: "OOH" | "DOOH" | "AOOH") => (isKeyed ? (fdRoot[k] || {}) : (venue.media_type === k ? fdRoot : {}));
+
+      if (mts.includes("OOH")) {
+        const fd = getFd("OOH");
         const printFormats: string[] = Array.isArray(fd.print_formats)
           ? fd.print_formats
           : (typeof fd.print_format === "string" && fd.print_format ? fd.print_format.split(",").map((s: string) => s.trim()).filter(Boolean) : []);
         setOohPrintFormats(printFormats);
         setOohUnits(fd.units_by_format && typeof fd.units_by_format === "object" ? fd.units_by_format : {});
-      } else if (mt === "DOOH") {
+      }
+      if (mts.includes("DOOH")) {
+        const fd = getFd("DOOH");
         setDoohScreenDescription(fd.screen_description || "");
         const screenTypes: string[] = Array.isArray(fd.screen_types)
           ? fd.screen_types
           : (typeof fd.screen_type === "string" && fd.screen_type ? fd.screen_type.split(",").map((s: string) => s.trim()).filter(Boolean) : []);
         setDoohScreenTypes(screenTypes);
         setDoohUnits(fd.units_by_type && typeof fd.units_by_type === "object" ? fd.units_by_type : {});
-      } else if (mt === "AOOH") {
+      }
+      if (mts.includes("AOOH")) {
+        const fd = getFd("AOOH");
         const spotDurations: string[] = Array.isArray(fd.spot_durations)
           ? fd.spot_durations
           : (typeof fd.spot_duration === "string" && fd.spot_duration ? fd.spot_duration.split(",").map((s: string) => s.trim()).filter(Boolean) : []);
