@@ -549,14 +549,18 @@ const VenueRegistration = () => {
         AOOH: { spot_duration: aoohSpotDurations.join(", "), spot_durations: aoohSpotDurations, zones_by_duration: aoohUnits, play_frequency_min: aoohPlayFrequency ? parseInt(aoohPlayFrequency) : null, audio_zones: sumUnits(aoohUnits) || null },
       };
 
+      const combinedFormatDetails: Record<string, any> = {};
+      selectedFormats.forEach(fmt => { combinedFormatDetails[fmt] = formatDetails[fmt]; });
+
       if (isEditing) {
         const emailChanged = normalizedContactEmail !== originalContactEmail;
-        const formatDetailsForCurrentMediaType = editingMediaType ? formatDetails[editingMediaType] : null;
         const updatePayload: any = {
           ...venueData,
+          media_type: selectedFormats[0] || editingMediaType,
+          media_types: selectedFormats,
           specifications: {
             ...(venueData.specifications as any),
-            ...(formatDetailsForCurrentMediaType ? { format_details: formatDetailsForCurrentMediaType } : {}),
+            format_details: combinedFormatDetails,
           },
           availability_status: isListedOnExplore ? "available" : "unlisted",
         };
@@ -577,23 +581,24 @@ const VenueRegistration = () => {
         toast({ title: "Success", description: "Listing updated successfully" });
         navigate("/venue-inventory");
       } else {
-        const rows = selectedFormats.map(fmt => ({
+        const insertPayload: any = {
           ...venueData,
-          specifications: { ...(venueData.specifications as any), format_details: formatDetails[fmt] },
-          media_type: fmt,
+          media_type: selectedFormats[0],
+          media_types: selectedFormats,
+          specifications: { ...(venueData.specifications as any), format_details: combinedFormatDetails },
           advertiser_id: null,
           pending_advertiser_email: normalizedContactEmail || null,
           approval_status: "pending" as const,
           availability_status: "unavailable",
-        }));
-        const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert(rows).select("id");
+        };
+        const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert(insertPayload).select("id");
         if (insertError) throw insertError;
 
         if (normalizedContactEmail && insertedData?.[0]) {
           await requestOwnershipWorkflow(insertedData[0].id, normalizedContactEmail);
         }
 
-
+        toast({ title: "Listing created", description: `1 listing created with formats: ${selectedFormats.join(", ")}` });
         setShowConfirmation(true);
         window.scrollTo(0, 0);
       }
