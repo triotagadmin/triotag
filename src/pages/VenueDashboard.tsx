@@ -332,7 +332,6 @@ const VenueDashboard = () => {
                             </span>
                             <span className="text-white/80">
                               {String(r.value).padStart(2, "0")}
-                              <span className="text-white/40"> · {pct(r.value)}%</span>
                             </span>
                           </div>
                           <div
