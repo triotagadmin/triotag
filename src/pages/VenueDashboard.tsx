@@ -333,7 +333,7 @@ const VenueDashboard = () => {
                       </div>
                       <div className="font-mono text-[10px] text-right text-cyan-300/70 leading-tight">
                         <div>NODES: <span className="text-white">{totalUnits}</span></div>
-                        <div>ONLINE: <span className="text-emerald-400">{activeSpaces}</span></div>
+                        <div>ACTIVATED: <span className="text-emerald-400">{activeSpaces}</span></div>
                         <div>PEND: <span className="text-amber-300">{pendingSpaces}</span></div>
                       </div>
                     </div>
