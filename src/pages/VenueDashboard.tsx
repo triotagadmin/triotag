@@ -132,7 +132,7 @@ const VenueDashboard = () => {
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>;
   }
-  const activeSpaces = adSpaces.filter((s) => s.approval_status === "approved" && s.availability_status === "available").length;
+  const activeSpaces = adSpaces.filter((s) => s.approval_status === "approved" && !s.agent_disconnected).length;
   const pendingSpaces = adSpaces.filter((s) => s.approval_status === "pending").length;
   const sumUnits = (mediaType: "OOH" | "DOOH" | "AOOH") =>
     adSpaces
