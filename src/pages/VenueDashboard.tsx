@@ -328,7 +328,7 @@ const VenueDashboard = () => {
                           className="text-5xl font-bold font-mono leading-none bg-gradient-to-b from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent"
                           style={{ textShadow: "0 6px 18px rgba(34,211,238,0.35)" }}
                         >
-                          {String(totalUnits).padStart(3, "0")}
+                          {totalUnits >= 1_000_000 ? `${(totalUnits / 1_000_000).toFixed(1)}M` : totalUnits >= 1_000 ? `${(totalUnits / 1_000).toFixed(1)}K` : String(totalUnits).padStart(3, "0")}
                         </p>
                       </div>
                       <div className="font-mono text-[10px] text-right text-cyan-300/70 leading-tight">
