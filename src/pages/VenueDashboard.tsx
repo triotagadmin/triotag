@@ -75,6 +75,27 @@ const VenueDashboard = () => {
     };
     fetchData();
   }, [navigate, toast]);
+
+  // Realtime: keep ad_spaces in sync so the "Activated" count updates live
+  useEffect(() => {
+    if (!profile?.id) return;
+    const channel = supabase
+      .channel(`ad_spaces_publisher_${profile.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ad_spaces", filter: `publisher_id=eq.${profile.id}` },
+        (payload: any) => {
+          setAdSpaces((prev) => {
+            if (payload.eventType === "INSERT") return [payload.new, ...prev];
+            if (payload.eventType === "DELETE") return prev.filter((s) => s.id !== payload.old.id);
+            if (payload.eventType === "UPDATE") return prev.map((s) => (s.id === payload.new.id ? { ...s, ...payload.new } : s));
+            return prev;
+          });
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [profile?.id]);
   const toggleActivation = async (space: any) => {
     const next = !(space.agent_disconnected ?? false);
     setTogglingId(space.id);
@@ -111,7 +132,7 @@ const VenueDashboard = () => {
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>;
   }
-  const activeSpaces = adSpaces.filter((s) => s.approval_status === "approved" && s.availability_status === "available").length;
+  const activeSpaces = adSpaces.filter((s) => s.approval_status === "approved" && !s.agent_disconnected).length;
   const pendingSpaces = adSpaces.filter((s) => s.approval_status === "pending").length;
   const sumUnits = (mediaType: "OOH" | "DOOH" | "AOOH") =>
     adSpaces
@@ -312,7 +333,7 @@ const VenueDashboard = () => {
                       </div>
                       <div className="font-mono text-[10px] text-right text-cyan-300/70 leading-tight">
                         <div>NODES: <span className="text-white">{totalUnits}</span></div>
-                        <div>ONLINE: <span className="text-emerald-400">{activeSpaces}</span></div>
+                        <div>ACTIVATED: <span className="text-emerald-400">{activeSpaces}</span></div>
                         <div>PEND: <span className="text-amber-300">{pendingSpaces}</span></div>
                       </div>
                     </div>
