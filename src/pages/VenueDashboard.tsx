@@ -332,7 +332,7 @@ const VenueDashboard = () => {
                         </p>
                       </div>
                       <div className="font-mono text-[10px] text-right text-cyan-300/70 leading-tight">
-                        <div>TOTAL: <span className="text-white">{adSpaces.length}</span></div>
+                        <div>TOTAL LISTING: <span className="text-white">{adSpaces.length}</span></div>
                         <div>ACTIVATED: <span className="text-emerald-400">{activeSpaces}</span></div>
                         <div>DEACTIVATED: <span className="text-rose-400">{adSpaces.filter((s) => s.approval_status === "approved" && s.agent_disconnected).length}</span></div>
                         <div>PEND: <span className="text-amber-300">{pendingSpaces}</span></div>
