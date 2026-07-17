@@ -88,10 +88,15 @@ serve(async (req) => {
 
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0c0c0c">
-        <h1 style="color:#16a34a;margin:0 0 12px">You've been invited to subscribe</h1>
+        <h1 style="color:#16a34a;margin:0 0 12px">You've been listed on TrioTag</h1>
         <p>Hi${contactPerson ? " " + contactPerson : ""},</p>
-        <p><strong>${agentName}</strong> would like to subscribe <strong>${venueName || "your venue"}</strong> (${email}) to receive advertising campaign invitations on TrioTag.</p>
-        <p>By verifying below, you confirm ownership of this email and consent to receive campaign requests, briefs, and media kits from Agent accounts.</p>
+        <p><strong>${agentName}</strong> added <strong>${venueName || "your venue"}</strong> (${email}) as an ad space listing on TrioTag.</p>
+        <p>Verifying below means you're joining the <strong>TrioTag Retail Media Network</strong> — confirming you're the owner or authorized representative for this listing, and subscribing to:</p>
+        <ul style="line-height:1.7;margin:12px 0">
+          <li>Ad requests when brands want to book this space</li>
+          <li>Updates whenever your listing details change</li>
+        </ul>
+        <p>One click does both: verifies you as the listing's contact, and subscribes you to these notifications.</p>
         <p style="text-align:center;margin:28px 0">
           <a href="${verifyUrl}" style="background:#16a34a;color:#fff;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:600;display:inline-block">Verify &amp; Subscribe</a>
         </p>
