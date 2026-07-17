@@ -180,6 +180,30 @@ const VenueRegistration = () => {
   const [sendingVerification, setSendingVerification] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [ownershipWorkflow, setOwnershipWorkflow] = useState<"verification" | "registration" | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<"none" | "pending" | "active" | "expired">("none");
+
+  // Load subscription status from venue_subscriptions
+  const loadSubscriptionStatus = async (adSpaceId: string | null, emailValue: string) => {
+    const normalized = emailValue.trim().toLowerCase();
+    if (!adSpaceId || !normalized) { setSubscriptionStatus("none"); return; }
+    const { data } = await supabase
+      .from("venue_subscriptions")
+      .select("subscription_status")
+      .eq("ad_space_id", adSpaceId)
+      .eq("email", normalized)
+      .maybeSingle();
+    const s = (data as any)?.subscription_status;
+    if (s === "active") setSubscriptionStatus("active");
+    else if (s === "expired") setSubscriptionStatus("expired");
+    else if (s === "pending") setSubscriptionStatus("pending");
+    else setSubscriptionStatus("none");
+  };
+
+  useEffect(() => {
+    if (editId && contactEmail) loadSubscriptionStatus(editId, contactEmail);
+    else setSubscriptionStatus("none");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId, contactEmail]);
 
   // Listing toggle (edit mode)
   const [isListedOnExplore, setIsListedOnExplore] = useState(true);
@@ -573,9 +597,6 @@ const VenueRegistration = () => {
         const { error } = await supabase.from("ad_spaces").update(updatePayload).eq("id", editId!).eq("publisher_id", publisherId);
         if (error) throw error;
 
-        if (emailChanged && normalizedContactEmail) {
-          await requestOwnershipWorkflow(editId!, normalizedContactEmail);
-        }
 
         setOriginalContactEmail(normalizedContactEmail);
         toast({ title: "Success", description: "Listing updated successfully" });
@@ -594,9 +615,6 @@ const VenueRegistration = () => {
         const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert(insertPayload).select("id");
         if (insertError) throw insertError;
 
-        if (normalizedContactEmail && insertedData?.[0]) {
-          await requestOwnershipWorkflow(insertedData[0].id, normalizedContactEmail);
-        }
 
         toast({ title: "Listing created", description: `1 listing created with formats: ${selectedFormats.join(", ")}` });
         setShowConfirmation(true);
@@ -909,16 +927,16 @@ const VenueRegistration = () => {
                         <Label>Contact Email *</Label>
                         <Input type="email" value={contactEmail} onChange={e => { setContactEmail(e.target.value); setVerificationSent(false); setOwnershipWorkflow(null); }} required />
                         {contactEmail.trim() && (
-                          advertiserLinked ? (
+                          subscriptionStatus === "active" ? (
                             <div className="flex items-center gap-1.5 mt-1.5">
                               <CheckCircle className="h-3.5 w-3.5 text-primary" />
-                              <span className="text-xs text-primary font-medium">Retailer Linked</span>
+                              <span className="text-xs text-primary font-medium">Verified &amp; Subscribed</span>
                             </div>
-                          ) : (pendingAdvertiserEmail || !advertiserLinked) && (
+                          ) : (
                             <div className="mt-2 space-y-2">
                               <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
                                 <Clock className="h-3 w-3" />
-                                {ownershipWorkflow === "verification" ? "Pending Retailer Verification" : "Pending Retailer Registration"}
+                                Pending Verification
                               </Badge>
                               <Button
                                 type="button"
@@ -944,6 +962,7 @@ const VenueRegistration = () => {
                                     if (error) throw error;
                                     if ((data as any)?.error) throw new Error((data as any).error);
                                     setVerificationSent(true);
+                                    setSubscriptionStatus("pending");
                                     toast({
                                       title: "Subscription invitation sent",
                                       description: "The recipient must verify their email before they can receive advertising campaign requests.",
@@ -956,7 +975,7 @@ const VenueRegistration = () => {
                                 }}
                               >
                                 {sendingVerification ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
-                                {verificationSent ? "Resend Subscription" : "Send Subscription"}
+                                {subscriptionStatus === "expired" ? "Resend Subscription" : (verificationSent ? "Resend Subscription" : "Send Subscription")}
                               </Button>
                             </div>
                           )

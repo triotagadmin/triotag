@@ -12,7 +12,7 @@ serve(async (req) => {
 
   const { data: sub } = await admin
     .from("venue_subscriptions")
-    .select("id, email_verified, subscription_status, verification_expiry")
+    .select("id, ad_space_id, email_verified, subscription_status, verification_expiry")
     .eq("verification_token", token)
     .maybeSingle();
 
@@ -33,6 +33,10 @@ serve(async (req) => {
     verified_at: now,
     subscription_status: "active",
   }).eq("id", sub.id);
+
+  if (sub.ad_space_id) {
+    await admin.from("ad_spaces").update({ contact_verified_at: now }).eq("id", sub.ad_space_id);
+  }
 
   return Response.redirect(`${APP_URL}/verify?subscription_verified=success`, 302);
 });
