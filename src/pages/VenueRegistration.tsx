@@ -180,6 +180,30 @@ const VenueRegistration = () => {
   const [sendingVerification, setSendingVerification] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [ownershipWorkflow, setOwnershipWorkflow] = useState<"verification" | "registration" | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<"none" | "pending" | "active" | "expired">("none");
+
+  // Load subscription status from venue_subscriptions
+  const loadSubscriptionStatus = async (adSpaceId: string | null, emailValue: string) => {
+    const normalized = emailValue.trim().toLowerCase();
+    if (!adSpaceId || !normalized) { setSubscriptionStatus("none"); return; }
+    const { data } = await supabase
+      .from("venue_subscriptions")
+      .select("subscription_status")
+      .eq("ad_space_id", adSpaceId)
+      .eq("email", normalized)
+      .maybeSingle();
+    const s = (data as any)?.subscription_status;
+    if (s === "active") setSubscriptionStatus("active");
+    else if (s === "expired") setSubscriptionStatus("expired");
+    else if (s === "pending") setSubscriptionStatus("pending");
+    else setSubscriptionStatus("none");
+  };
+
+  useEffect(() => {
+    if (editId && contactEmail) loadSubscriptionStatus(editId, contactEmail);
+    else setSubscriptionStatus("none");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId, contactEmail]);
 
   // Listing toggle (edit mode)
   const [isListedOnExplore, setIsListedOnExplore] = useState(true);
