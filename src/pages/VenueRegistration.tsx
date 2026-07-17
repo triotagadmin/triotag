@@ -573,9 +573,6 @@ const VenueRegistration = () => {
         const { error } = await supabase.from("ad_spaces").update(updatePayload).eq("id", editId!).eq("publisher_id", publisherId);
         if (error) throw error;
 
-        if (emailChanged && normalizedContactEmail) {
-          await requestOwnershipWorkflow(editId!, normalizedContactEmail);
-        }
 
         setOriginalContactEmail(normalizedContactEmail);
         toast({ title: "Success", description: "Listing updated successfully" });
@@ -594,9 +591,6 @@ const VenueRegistration = () => {
         const { data: insertedData, error: insertError } = await supabase.from("ad_spaces").insert(insertPayload).select("id");
         if (insertError) throw insertError;
 
-        if (normalizedContactEmail && insertedData?.[0]) {
-          await requestOwnershipWorkflow(insertedData[0].id, normalizedContactEmail);
-        }
 
         toast({ title: "Listing created", description: `1 listing created with formats: ${selectedFormats.join(", ")}` });
         setShowConfirmation(true);
