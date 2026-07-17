@@ -195,6 +195,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           availability_status: string | null
+          contact_verified_at: string | null
           created_at: string | null
           description: string | null
           external_ref_id: string | null
@@ -225,6 +226,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           availability_status?: string | null
+          contact_verified_at?: string | null
           created_at?: string | null
           description?: string | null
           external_ref_id?: string | null
@@ -255,6 +257,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           availability_status?: string | null
+          contact_verified_at?: string | null
           created_at?: string | null
           description?: string | null
           external_ref_id?: string | null
@@ -4505,6 +4508,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           availability_status: string | null
+          contact_verified_at: string | null
           created_at: string | null
           description: string | null
           external_ref_id: string | null
