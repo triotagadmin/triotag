@@ -927,16 +927,16 @@ const VenueRegistration = () => {
                         <Label>Contact Email *</Label>
                         <Input type="email" value={contactEmail} onChange={e => { setContactEmail(e.target.value); setVerificationSent(false); setOwnershipWorkflow(null); }} required />
                         {contactEmail.trim() && (
-                          advertiserLinked ? (
+                          subscriptionStatus === "active" ? (
                             <div className="flex items-center gap-1.5 mt-1.5">
                               <CheckCircle className="h-3.5 w-3.5 text-primary" />
-                              <span className="text-xs text-primary font-medium">Retailer Linked</span>
+                              <span className="text-xs text-primary font-medium">Verified &amp; Subscribed</span>
                             </div>
-                          ) : (pendingAdvertiserEmail || !advertiserLinked) && (
+                          ) : (
                             <div className="mt-2 space-y-2">
                               <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
                                 <Clock className="h-3 w-3" />
-                                {ownershipWorkflow === "verification" ? "Pending Retailer Verification" : "Pending Retailer Registration"}
+                                Pending Verification
                               </Badge>
                               <Button
                                 type="button"
@@ -962,6 +962,7 @@ const VenueRegistration = () => {
                                     if (error) throw error;
                                     if ((data as any)?.error) throw new Error((data as any).error);
                                     setVerificationSent(true);
+                                    setSubscriptionStatus("pending");
                                     toast({
                                       title: "Subscription invitation sent",
                                       description: "The recipient must verify their email before they can receive advertising campaign requests.",
@@ -974,7 +975,7 @@ const VenueRegistration = () => {
                                 }}
                               >
                                 {sendingVerification ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
-                                {verificationSent ? "Resend Subscription" : "Send Subscription"}
+                                {subscriptionStatus === "expired" ? "Resend Subscription" : (verificationSent ? "Resend Subscription" : "Send Subscription")}
                               </Button>
                             </div>
                           )
