@@ -188,6 +188,7 @@ export type Database = {
       ad_spaces: {
         Row: {
           activation_fee: number | null
+          admin_notes: string | null
           advertiser_id: string | null
           agent_disconnected: boolean
           annual_subscription_fee: number | null
@@ -219,6 +220,7 @@ export type Database = {
         }
         Insert: {
           activation_fee?: number | null
+          admin_notes?: string | null
           advertiser_id?: string | null
           agent_disconnected?: boolean
           annual_subscription_fee?: number | null
@@ -250,6 +252,7 @@ export type Database = {
         }
         Update: {
           activation_fee?: number | null
+          admin_notes?: string | null
           advertiser_id?: string | null
           agent_disconnected?: boolean
           annual_subscription_fee?: number | null
@@ -4501,6 +4504,7 @@ export type Database = {
         Args: never
         Returns: {
           activation_fee: number | null
+          admin_notes: string | null
           advertiser_id: string | null
           agent_disconnected: boolean
           annual_subscription_fee: number | null

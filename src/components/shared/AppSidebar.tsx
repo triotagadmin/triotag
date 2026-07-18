@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   Globe, Megaphone, BarChart3, MessageSquare, Bell, User, LayoutDashboard, TrendingUp, Package,
-  Image as ImageIcon, Users, History, ClipboardList, Layers, ShieldCheck,
+  Image as ImageIcon, Users, History, ClipboardList, Layers, ShieldCheck, MapPinCheck,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
@@ -41,6 +41,7 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
   ],
   admin: [
     { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/admin/verified-locations", label: "Verified Locations", icon: MapPinCheck },
     { to: "/admin/media-plans", label: "Media Plans", icon: ClipboardList },
     { to: "/admin/total-inventory", label: "Total Inventory", icon: Package },
     { to: "/admin/brand-campaigns", label: "Brand Campaigns", icon: Megaphone },

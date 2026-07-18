@@ -1,0 +1,1 @@
+ALTER TABLE public.ad_spaces ADD COLUMN IF NOT EXISTS admin_notes text;
