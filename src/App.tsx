@@ -253,6 +253,11 @@ const App = () => (
               <AdminTotalInventory />
             </ProtectedAdminRoute>
           } />
+          <Route path="/admin/verified-locations" element={
+            <ProtectedAdminRoute>
+              <AdminVerifiedLocations />
+            </ProtectedAdminRoute>
+          } />
           <Route path="/admin/media-plans" element={
             <ProtectedAdminRoute>
               <AdminMediaPlans />
