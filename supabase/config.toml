@@ -104,3 +104,6 @@ verify_jwt = true
 
 [functions.send-verified-venue-campaign]
 verify_jwt = true
+
+[functions.send-media-plan-request]
+verify_jwt = false

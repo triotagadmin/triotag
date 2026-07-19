@@ -26,7 +26,7 @@ const STATUS_STYLE: Record<string, string> = {
 };
 const STATUS_LABEL: Record<string, string> = {
   pending_payment: "Pending Payment",
-  paid: "Paid — Awaiting Review",
+  paid: "Awaiting Review",
   approved: "Approved",
   activated: "Activated",
   rejected: "Rejected",
