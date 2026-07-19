@@ -29,12 +29,24 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { data: subs, error: subsErr } = await admin
+    const { data: callerRoles } = await admin.from("user_roles").select("role").eq("user_id", agentId);
+    const isAdmin = (callerRoles || []).some((r: any) => r.role === "admin");
+
+    let subsQuery = admin
       .from("venue_subscriptions")
       .select("id, email, venue_name, contact_person, subscription_status")
-      .eq("agent_id", agentId)
       .in("id", subscriptionIds);
+
+    if (!isAdmin) {
+      subsQuery = subsQuery.eq("agent_id", agentId);
+    }
+
+    const { data: subs, error: subsErr } = await subsQuery;
     if (subsErr) throw subsErr;
+
+    if (!subs || subs.length === 0) {
+      return new Response(JSON.stringify({ error: "No matching subscriptions found for the given IDs" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     const { data: profile } = await admin.from("publisher_profiles").select("business_name").eq("user_id", agentId).maybeSingle();
     const agentName = profile?.business_name || "TrioTag Agent";
