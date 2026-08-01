@@ -25,7 +25,9 @@ interface RadiusMapPlannerProps {
   onRadiusChange: (r: number) => void;
   onServiceAreaChange?: (withinServiceArea: boolean) => void;
   onLocationSet?: (displayName: string) => void;
+  markers?: { lat: number; lng: number; name: string }[];
 }
+
 
 const PRESETS = [250, 500, 1000, 2000, 5000];
 
