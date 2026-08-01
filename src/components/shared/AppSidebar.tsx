@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   Globe, Megaphone, BarChart3, MessageSquare, Bell, User, LayoutDashboard, TrendingUp, Package,
-  Image as ImageIcon, Users, History, ClipboardList, Layers, ShieldCheck, MapPinCheck,
+  Image as ImageIcon, Users, History, ClipboardList, Layers, ShieldCheck, MapPinCheck, Compass,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
@@ -21,6 +21,8 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/publisher/active", label: "Active Inventory", icon: Package },
     { to: "/venue-inventory", label: "My Ad Spaces", icon: Globe },
     { to: "/agent/verified-venues", label: "Verified Venues", icon: ShieldCheck },
+    { to: "/agent/discover-locations", label: "Discover Locations", icon: Compass },
+
     { to: "/publisher/campaigns", label: "Campaigns", icon: Megaphone },
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
