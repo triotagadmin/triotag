@@ -32,13 +32,14 @@ interface RadiusMapPlannerProps {
 const PRESETS = [250, 500, 1000, 2000, 5000];
 
 export function RadiusMapPlanner({
-  center, radiusMeters, onCenterChange, onRadiusChange, onServiceAreaChange, onLocationSet,
+  center, radiusMeters, onCenterChange, onRadiusChange, onServiceAreaChange, onLocationSet, markers,
 }: RadiusMapPlannerProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   const circleRef = useRef<any>(null);
   const LRef = useRef<any>(null);
+  const markersLayerRef = useRef<any>(null);
 
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -135,6 +136,27 @@ export function RadiusMapPlanner({
     const within = isWithinServiceArea(center.lat, center.lng);
     setIsOutsideServiceArea(!within);
   }, [center.lat, center.lng]);
+
+  // Render result markers
+  useEffect(() => {
+    const L = LRef.current;
+    if (!L || !mapRef.current) return;
+    if (markersLayerRef.current) {
+      markersLayerRef.current.remove();
+      markersLayerRef.current = null;
+    }
+    if (!markers || markers.length === 0) return;
+    const icon = L.divIcon({
+      className: "",
+      html: `<div style="width:14px;height:14px;border-radius:9999px;background:#0ea5e9;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`,
+      iconSize: [14, 14], iconAnchor: [7, 7],
+    });
+    const group = L.layerGroup(
+      markers.map((m) => L.marker([m.lat, m.lng], { icon }).bindTooltip(m.name)),
+    );
+    group.addTo(mapRef.current);
+    markersLayerRef.current = group;
+  }, [markers]);
 
   useEffect(() => {
     if (!circleRef.current) return;
