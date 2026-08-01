@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -125,6 +125,7 @@ const DEFAULT_DESCRIPTION = "";
 
 const VenueRegistration = () => {
   const navigate = useNavigate();
+  const routerLocation = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [publisherId, setPublisherId] = useState<string | null>(null);
@@ -234,6 +235,20 @@ const VenueRegistration = () => {
     { type: "proof_of_address", label: "Proof of Address", description: "Utility bill, bank statement, or lease agreement (within 3 months)", file: null, uploaded: false },
     { type: "tax_documents", label: "Tax/Registration Documents", description: "Tax registration certificate or similar business documentation", file: null, uploaded: false },
   ]);
+
+  // Pre-fill from Discover Locations (route state) for new listings only
+  useEffect(() => {
+    const incoming = routerLocation.state as
+      | { name?: string; address?: string; lat?: number; lng?: number }
+      | null;
+    if (!incoming?.name && !incoming?.address) return;
+    if (new URLSearchParams(window.location.search).get("edit")) return;
+    if (incoming.name) setTitle(incoming.name);
+    if (incoming.address) { setHeadOfficeAddress(incoming.address); setHeadOfficeSearch(incoming.address); }
+    if (typeof incoming.lat === "number") setLatitude(incoming.lat);
+    if (typeof incoming.lng === "number") setLongitude(incoming.lng);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
