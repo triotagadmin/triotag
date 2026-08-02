@@ -101,6 +101,66 @@ export default function AdvertiserExplore() {
     return () => { cancelled = true; };
   }, []);
 
+  // Auto-discover nearby retail-type places for map markers (debounced)
+  const [nearbyPlaces, setNearbyPlaces] = useState<
+    { lat: number; lng: number; name: string; category: string }[]
+  >([]);
+  const [placesLoading, setPlacesLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setPlacesLoading(true);
+      const CATS: { key: string; type?: string; keyword?: string }[] = [
+        { key: "cafe", type: "cafe" },
+        { key: "restaurant", type: "restaurant" },
+        { key: "gym", type: "gym" },
+        { key: "night_club", type: "night_club" },
+        { key: "store", type: "store" },
+        { key: "beauty_salon", type: "beauty_salon" },
+        { key: "coworking", keyword: "co-working space" },
+      ];
+      try {
+        const settled = await Promise.all(
+          CATS.map(async (c) => {
+            const { data } = await supabase.functions.invoke("discover-nearby-places", {
+              body: {
+                lat: center.lat,
+                lng: center.lng,
+                radiusMeters,
+                ...(c.type ? { type: c.type } : {}),
+                ...(c.keyword ? { keyword: c.keyword } : {}),
+              },
+            });
+            return ((data as any)?.results ?? []).map((r: any) => ({
+              lat: r.lat,
+              lng: r.lng,
+              name: r.name,
+              category: c.key,
+              placeId: r.placeId,
+            }));
+          }),
+        );
+        if (cancelled) return;
+        const seen = new Set<string>();
+        const merged: { lat: number; lng: number; name: string; category: string }[] = [];
+        for (const list of settled) {
+          for (const p of list) {
+            if (!p.lat || !p.lng || seen.has(p.placeId)) continue;
+            seen.add(p.placeId);
+            merged.push({ lat: p.lat, lng: p.lng, name: p.name, category: p.category });
+          }
+        }
+        setNearbyPlaces(merged);
+      } catch (e) {
+        console.error("[AdvertiserExplore] nearby places failed", e);
+      } finally {
+        if (!cancelled) setPlacesLoading(false);
+      }
+    }, 500);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [center.lat, center.lng, radiusMeters]);
+
   const nearbyInventory = useMemo(() => {
     const list = inventory
       .filter((r) => r.latitude != null && r.longitude != null)
@@ -112,6 +172,7 @@ export default function AdvertiserExplore() {
       .sort((a, b) => a.distance - b.distance);
     return list;
   }, [inventory, center.lat, center.lng, radiusMeters]);
+
 
   const updateQty = (variantId: string, qty: number) => {
     setSelections((prev) => ({ ...prev, [variantId]: Math.max(0, qty) }));
@@ -358,17 +419,10 @@ export default function AdvertiserExplore() {
                     onRadiusChange={setRadiusMeters}
                     onServiceAreaChange={setWithinServiceArea}
                     onLocationSet={setSelectedLocationAddress}
+                    markers={nearbyPlaces}
+                    markersLoading={placesLoading}
                   />
 
-                  <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                      Coverage Radius — affects campaign reach pricing
-                    </div>
-                    <div className="text-sm text-gray-700">
-                      {estimate.radiusPercent}% coverage ={" "}
-                      <span className="font-semibold text-green-700">₱{estimate.radiusFee.toLocaleString()}</span>
-                    </div>
-                  </div>
 
                   {/* Available inventory */}
                   <div className="bg-white border border-gray-200 rounded-2xl p-5">
@@ -544,8 +598,9 @@ export default function AdvertiserExplore() {
                         })}
                         <div className="flex justify-between text-gray-700 pt-1.5 border-t border-green-200">
                           <span>Coverage Radius ({estimate.radiusPercent}% of {MAX_RADIUS_METERS / 1000}km)</span>
-                          <span className="font-medium">₱{estimate.radiusFee.toLocaleString()}</span>
+                          <span className="font-medium">{estimate.radiusKm}km</span>
                         </div>
+
                       </div>
                     </div>
                   )}

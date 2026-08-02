@@ -409,18 +409,16 @@ export default function BrandAdvertiserInventory() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                    Coverage Radius — affects campaign reach pricing
+                    Coverage Radius
                   </div>
                   <div className="text-sm text-gray-700">
-                    {estimate.radiusPercent}% coverage ={" "}
-                    <span className="font-semibold text-green-700">
-                      ₱{estimate.radiusFee.toLocaleString()}
-                    </span>
+                    {estimate.radiusPercent}% coverage
                     <span className="text-gray-500">
                       {" "}
                       · {(radiusMeters / 1000).toFixed(radiusMeters < 1000 ? 2 : 1)}km
                     </span>
                   </div>
+
                   <div className="text-xs text-gray-500 mt-1.5">
                     Lock the radius to save it as a requirement for this inventory target.
                   </div>
@@ -520,11 +518,12 @@ export default function BrandAdvertiserInventory() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Reach fee</span>
+                        <span className="text-xs text-gray-600">Coverage</span>
                         <span className="text-sm font-semibold text-gray-900">
-                          ₱{estimate.radiusFee.toLocaleString()}
+                          {estimate.radiusPercent}%
                         </span>
                       </div>
+
                     </div>
 
                     <div

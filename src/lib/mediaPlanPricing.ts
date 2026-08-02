@@ -244,15 +244,12 @@ export interface MediaPlanEstimate {
   radiusKm: number;
   radiusPercent: number;
   unitCost: number;
-  radiusFee: number;
   totalEstimate: number;
   tier: "Starter" | "Growth" | "Domination";
   totalUnits: number;
 }
 
 export const MAX_RADIUS_METERS = 5000;
-export const BASE_RADIUS_FEE = 65000;
-export const MAX_RADIUS_FEE = 3500000;
 
 export function calculateMediaPlanEstimate(
   selections: SelectedVariant[],
@@ -260,14 +257,6 @@ export function calculateMediaPlanEstimate(
 ): MediaPlanEstimate {
   const radiusKm = radiusMeters / 1000;
   const radiusPercent = Math.min(100, Math.round((radiusMeters / MAX_RADIUS_METERS) * 100));
-
-  let radiusFee: number;
-  if (radiusPercent <= 5) {
-    radiusFee = Math.round(BASE_RADIUS_FEE + (radiusPercent / 5) * (200000 - BASE_RADIUS_FEE));
-  } else {
-    radiusFee = Math.round(200000 + ((radiusPercent - 5) / 95) * (MAX_RADIUS_FEE - 200000));
-  }
-
 
   let unitCost = 0;
   let totalUnits = 0;
@@ -280,11 +269,12 @@ export function calculateMediaPlanEstimate(
     totalUnits += sel.quantity;
   }
 
-  const totalEstimate = unitCost + radiusFee;
+  const totalEstimate = unitCost;
 
   let tier: MediaPlanEstimate["tier"] = "Starter";
   if (totalUnits > 10) tier = "Growth";
   if (totalUnits > 30) tier = "Domination";
 
-  return { selections, radiusMeters, radiusKm, radiusPercent, unitCost, radiusFee, totalEstimate, tier, totalUnits };
+  return { selections, radiusMeters, radiusKm, radiusPercent, unitCost, totalEstimate, tier, totalUnits };
 }
+

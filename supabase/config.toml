@@ -107,3 +107,7 @@ verify_jwt = true
 
 [functions.send-media-plan-request]
 verify_jwt = false
+
+[functions.search-places]
+verify_jwt = false
+
