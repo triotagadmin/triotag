@@ -358,17 +358,10 @@ export default function AdvertiserExplore() {
                     onRadiusChange={setRadiusMeters}
                     onServiceAreaChange={setWithinServiceArea}
                     onLocationSet={setSelectedLocationAddress}
+                    markers={nearbyPlaces}
+                    markersLoading={placesLoading}
                   />
 
-                  <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                      Coverage Radius — affects campaign reach pricing
-                    </div>
-                    <div className="text-sm text-gray-700">
-                      {estimate.radiusPercent}% coverage ={" "}
-                      <span className="font-semibold text-green-700">₱{estimate.radiusFee.toLocaleString()}</span>
-                    </div>
-                  </div>
 
                   {/* Available inventory */}
                   <div className="bg-white border border-gray-200 rounded-2xl p-5">
