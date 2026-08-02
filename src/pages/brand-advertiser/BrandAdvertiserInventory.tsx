@@ -518,11 +518,12 @@ export default function BrandAdvertiserInventory() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Reach fee</span>
+                        <span className="text-xs text-gray-600">Coverage</span>
                         <span className="text-sm font-semibold text-gray-900">
-                          ₱{estimate.radiusFee.toLocaleString()}
+                          {estimate.radiusPercent}%
                         </span>
                       </div>
+
                     </div>
 
                     <div

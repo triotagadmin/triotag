@@ -544,8 +544,9 @@ export default function AdvertiserExplore() {
                         })}
                         <div className="flex justify-between text-gray-700 pt-1.5 border-t border-green-200">
                           <span>Coverage Radius ({estimate.radiusPercent}% of {MAX_RADIUS_METERS / 1000}km)</span>
-                          <span className="font-medium">₱{estimate.radiusFee.toLocaleString()}</span>
+                          <span className="font-medium">{estimate.radiusKm}km</span>
                         </div>
+
                       </div>
                     </div>
                   )}
