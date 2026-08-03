@@ -132,9 +132,6 @@ const Retailers = () => {
 
         <div className="container mx-auto px-4 md:px-6 py-24 md:py-32 relative">
           <div className="max-w-4xl">
-            <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-semibold mb-6">
-              Retail Media DSP
-            </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] mb-6">
               One dashboard to run your{" "}
               <span className="text-green-500">retail media campaigns.</span>
@@ -157,9 +154,6 @@ const Retailers = () => {
       <section className="py-20 md:py-28 border-t border-white/5">
         <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold mb-5">
-              Built for retail brands
-            </span>
             <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
               Buy retail media like{" "}
               <span className="text-green-500">you buy digital.</span>
