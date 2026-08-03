@@ -1,60 +1,23 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@/components/ui/separator";
-
-const signInSchema = z.object({
-  email: z.string()
-    .trim()
-    .email({ message: "Invalid email address" })
-    .max(255, { message: "Email must be less than 255 characters" }),
-  password: z.string()
-    .min(1, { message: "Password is required" })
-    .max(72, { message: "Password must be less than 72 characters" }),
-});
-
-const signUpSchema = z.object({
-  email: z.string()
-    .trim()
-    .email({ message: "Invalid email address" })
-    .max(255, { message: "Email must be less than 255 characters" }),
-  password: z.string()
-    .min(8, { message: "Password must be at least 8 characters" })
-    .max(72, { message: "Password must be less than 72 characters" })
-    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
-    .regex(/[0-9]/, { message: "Password must contain at least one number" }),
-});
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [userType, setUserType] = useState<string>("retailer");
-  const [companyName, setCompanyName] = useState("");
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [businessAddress, setBusinessAddress] = useState("");
-  const [showResendVerification, setShowResendVerification] = useState(false);
-  const [resendEmail, setResendEmail] = useState("");
-  const [activeTab, setActiveTab] = useState("signin");
 
   useEffect(() => {
     const intendedRole = localStorage.getItem("intended_role");
     if (intendedRole) {
       setUserType(intendedRole);
-      setActiveTab("signup");
       localStorage.removeItem("intended_role");
     }
   }, []);
