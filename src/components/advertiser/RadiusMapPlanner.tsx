@@ -263,6 +263,9 @@ export function RadiusMapPlanner({
     }
     const display = s.address ? `${s.name} — ${s.address}` : s.name;
     reportPin(lat, lng);
+    // cancel any in-flight reverse lookup so it can't overwrite the picked name
+    reverseSeqRef.current++;
+    setReverseLoading(false);
     setSearchText(display);
     onLocationSet?.(display);
     setSuggestions([]);
