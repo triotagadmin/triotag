@@ -68,14 +68,11 @@ const Auth = () => {
           storedUserType;
 
         if (existingRole) {
-          if (existingRole.role === intendedRole) {
-            // Returning user with correct role - just route
-            routeByRole(existingRole.role);
-            return;
-          }
-          // New Google user whose trigger defaulted to wrong role - fix it
-          await supabase.rpc("set_own_role", { _role: intendedRole as any });
+          // Existing account (including legacy retailers) — always honor its role
+          routeByRole(existingRole.role);
+          return;
         }
+
 
         // New Google user - create role and profile
         const mappedRole =
