@@ -1,26 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
+
+// Self-serve signup only creates Brand Advertiser accounts.
+const SIGNUP_USER_TYPE = "brand_advertiser";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [userType, setUserType] = useState<string>("retailer");
+  const userType = SIGNUP_USER_TYPE;
 
-  useEffect(() => {
-    const intendedRole = localStorage.getItem("intended_role");
-    if (intendedRole) {
-      setUserType(intendedRole);
-      localStorage.removeItem("intended_role");
-    }
-  }, []);
 
   // Read ?redirect=... once so post-auth flows can honor it
   const redirectTo = (() => {
@@ -61,21 +55,13 @@ const Auth = () => {
           .eq("user_id", userId)
           .maybeSingle();
 
-        const intendedRole =
-          storedUserType === "venue" ? "agent" :
-          storedUserType === "advertiser" ? "retailer" :
-          storedUserType === "brand_advertiser" ? "brand_advertiser" :
-          storedUserType;
-
         if (existingRole) {
-          if (existingRole.role === intendedRole) {
-            // Returning user with correct role - just route
-            routeByRole(existingRole.role);
-            return;
-          }
-          // New Google user whose trigger defaulted to wrong role - fix it
-          await supabase.rpc("set_own_role", { _role: intendedRole as any });
+          // Existing account (including legacy retailers) — always honor its role
+          routeByRole(existingRole.role);
+          return;
         }
+
+
 
         // New Google user - create role and profile
         const mappedRole =
@@ -86,28 +72,8 @@ const Auth = () => {
 
         // The trigger handle_new_user_role should handle this, but ensure it exists
         // Create the appropriate profile and mark as verified
-        if (storedUserType === "advertiser" || storedUserType === "retailer") {
-          const { data: existingProfile } = await supabase
-            .from("advertiser_profiles")
-            .select("id")
-            .eq("user_id", userId)
-            .maybeSingle();
+        if (storedUserType === "print_partner") {
 
-          if (!existingProfile) {
-            await supabase.from("advertiser_profiles").insert({
-              user_id: userId,
-              company_name: session.user.user_metadata?.full_name || "",
-              contact_name: session.user.user_metadata?.full_name || "",
-              contact_email: userEmail,
-              verified: true,
-            });
-          } else {
-            await supabase
-              .from("advertiser_profiles")
-              .update({ verified: true })
-              .eq("user_id", userId);
-          }
-        } else if (storedUserType === "print_partner") {
           const { data: existingProfile } = await supabase
             .from("print_partner_profiles")
             .select("id")
@@ -302,20 +268,9 @@ const Auth = () => {
           <CardDescription>Continue with Google to sign in or create your account</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="user-type">I am a...</Label>
-            <Select value={userType} onValueChange={setUserType}>
-              <SelectTrigger id="user-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="retailer">Retailer</SelectItem>
-                <SelectItem value="brand_advertiser">Brand Advertiser</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
           <GoogleButton label="Continue with Google" />
         </CardContent>
+
       </Card>
     </div>
   );
