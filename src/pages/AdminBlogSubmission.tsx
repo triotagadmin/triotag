@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { ArrowLeft, FileText, Upload, Image } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
+import { BlogSeoPanels, slugify } from "@/components/blog/BlogSeoPanels";
 
 export default function AdminBlogSubmission() {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export default function AdminBlogSubmission() {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [publishedDate, setPublishedDate] = useState<string | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -27,7 +29,13 @@ export default function AdminBlogSubmission() {
     author: "",
     category: "",
     image_url: "",
-    read_time: ""
+    read_time: "",
+    slug: "",
+    meta_title: "",
+    meta_description: "",
+    canonical_url: "",
+    focus_keyword: "",
+    image_alt_text: ""
   });
 
   useEffect(() => {
@@ -35,6 +43,7 @@ export default function AdminBlogSubmission() {
       loadBlogPost(editId);
     }
   }, [editId]);
+
 
   const loadBlogPost = async (id: string) => {
     setIsLoading(true);
@@ -55,11 +64,19 @@ export default function AdminBlogSubmission() {
           author: data.author || "",
           category: data.category || "",
           image_url: data.image_url || "",
-          read_time: data.read_time || ""
+          read_time: data.read_time || "",
+          slug: (data as any).slug || "",
+          meta_title: (data as any).meta_title || "",
+          meta_description: (data as any).meta_description || "",
+          canonical_url: (data as any).canonical_url || "",
+          focus_keyword: (data as any).focus_keyword || "",
+          image_alt_text: (data as any).image_alt_text || ""
         });
+        setPublishedDate(data.created_at || undefined);
         if (data.image_url) {
           setPreviewUrl(data.image_url);
         }
+
       }
     } catch (error: any) {
       console.error("Error loading blog post:", error);
@@ -138,12 +155,22 @@ export default function AdminBlogSubmission() {
         return;
       }
 
+      const payload = {
+        ...formData,
+        slug: formData.slug?.trim() ? slugify(formData.slug) : slugify(formData.title),
+        meta_title: formData.meta_title || null,
+        meta_description: formData.meta_description || null,
+        canonical_url: formData.canonical_url || null,
+        focus_keyword: formData.focus_keyword || null,
+        image_alt_text: formData.image_alt_text || null,
+      };
+
       if (editId) {
         // Update existing blog post
         const { error } = await supabase
           .from("blog_posts")
           .update({
-            ...formData,
+            ...payload,
             updated_at: new Date().toISOString()
           })
           .eq("id", editId);
@@ -156,7 +183,7 @@ export default function AdminBlogSubmission() {
         const { error } = await supabase
           .from("blog_posts")
           .insert({
-            ...formData,
+            ...payload,
             published_by: user.id,
             status: "published"
           });
@@ -165,6 +192,7 @@ export default function AdminBlogSubmission() {
 
         toast.success("Blog post published successfully!");
       }
+
       
       navigate("/insights");
     } catch (error: any) {
@@ -359,6 +387,14 @@ export default function AdminBlogSubmission() {
             </form>
           </CardContent>
         </Card>
+
+        <BlogSeoPanels
+          form={formData}
+          onChange={(patch) => setFormData((prev) => ({ ...prev, ...patch }))}
+          currentPostId={editId}
+          publishedDate={publishedDate}
+        />
+
       </div>
 
       <Footer />

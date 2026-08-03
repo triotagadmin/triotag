@@ -19,7 +19,13 @@ interface BlogPostData {
   read_time: string;
   category: string;
   image_url: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  image_alt_text?: string | null;
+  canonical_url?: string | null;
+  slug?: string | null;
 }
+
 
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,6 +38,33 @@ const BlogPost = () => {
       loadBlogPost();
     }
   }, [id]);
+
+  // Inject Article JSON-LD schema into <head> for the live post
+  useEffect(() => {
+    if (!post) return;
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.setAttribute("data-blog-schema", "true");
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: post.title,
+      description: post.meta_description || post.excerpt,
+      image: post.image_url || undefined,
+      author: { "@type": "Person", name: post.author },
+      datePublished: post.created_at,
+    });
+    document.head.appendChild(script);
+
+    const prevTitle = document.title;
+    document.title = post.meta_title || post.title;
+
+    return () => {
+      script.remove();
+      document.title = prevTitle;
+    };
+  }, [post]);
+
 
   const loadBlogPost = async () => {
     try {
@@ -130,7 +163,7 @@ const BlogPost = () => {
         <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
           <img
             src={post.image_url}
-            alt={post.title}
+            alt={post.image_alt_text || post.title}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
