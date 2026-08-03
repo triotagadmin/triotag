@@ -40,12 +40,16 @@ const STATUS_STYLE: Record<string, string> = {
   approved: "bg-green-100 text-green-700 border border-green-200",
   rejected: "bg-red-100 text-red-700 border border-red-200",
   draft: "bg-gray-100 text-gray-600 border border-gray-200",
+  paid: "bg-blue-100 text-blue-700 border border-blue-200",
+  completed: "bg-emerald-100 text-emerald-700 border border-emerald-200",
 };
 const STATUS_LABEL: Record<string, string> = {
   pending_review: "Pending Review",
   approved: "Approved",
   rejected: "Rejected",
   draft: "Draft",
+  paid: "Awaiting Review",
+  completed: "Completed",
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -71,7 +75,195 @@ function Detail({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+type MediaPlanRequest = {
+  id: string;
+  campaign_name: string | null;
+  campaign_type: string | null;
+  requester_email: string | null;
+  center_lat: number | null;
+  center_lng: number | null;
+  radius_meters: number | null;
+  selections: any;
+  estimated_price: number | null;
+  preferred_start_date: string | null;
+  notes: string | null;
+  status: string | null;
+  created_at: string | null;
+};
+
+const REQUEST_STATUSES = ["pending_review", "paid", "approved", "rejected", "completed"];
+
+function ExploreCampaignRequests() {
+  const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState<MediaPlanRequest[]>([]);
+  const [selected, setSelected] = useState<MediaPlanRequest | null>(null);
+  const [working, setWorking] = useState(false);
+
+  const fetchRequests = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("media_plan_requests" as any)
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("[ExploreCampaignRequests]", error);
+      toast.error("Failed to load campaign requests");
+    }
+    setRows((data as any) || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchRequests(); }, []);
+
+  const setStatus = async (r: MediaPlanRequest, status: string) => {
+    setWorking(true);
+    const { error } = await supabase
+      .from("media_plan_requests" as any)
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", r.id);
+    setWorking(false);
+    if (error) { toast.error("Failed to update status"); return; }
+    toast.success(`Status set to ${status.replace("_", " ")}`);
+    setSelected(null);
+    await fetchRequests();
+  };
+
+  const formats = (s: any): { label: string; quantity: number }[] =>
+    Array.isArray(s) ? s.map((x: any) => ({ label: x.label ?? x.variantId ?? "—", quantity: Number(x.quantity) || 0 })) : [];
+
+  return (
+    <>
+      <Card className="bg-white">
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="p-6 space-y-3">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+            </div>
+          ) : rows.length === 0 ? (
+            <div className="p-10 text-center text-sm text-gray-500">No campaign requests yet.</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Campaign</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Requester</TableHead>
+                  <TableHead>Location / Radius</TableHead>
+                  <TableHead>Formats</TableHead>
+                  <TableHead>Estimate</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Submitted</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((r) => (
+                  <TableRow key={r.id} className="cursor-pointer" onClick={() => setSelected(r)}>
+                    <TableCell className="font-medium">{r.campaign_name || "—"}</TableCell>
+                    <TableCell className="text-sm">{r.campaign_type || "—"}</TableCell>
+                    <TableCell className="text-sm">{r.requester_email || "guest"}</TableCell>
+                    <TableCell className="text-xs">
+                      {r.center_lat != null && r.center_lng != null
+                        ? `${Number(r.center_lat).toFixed(4)}, ${Number(r.center_lng).toFixed(4)}`
+                        : "—"}
+                      {r.radius_meters ? ` · ${(r.radius_meters / 1000).toFixed(1)} km` : ""}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {formats(r.selections).map((f, i) => (
+                          <span key={i} className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-700">
+                            {f.label} × {f.quantity}
+                          </span>
+                        ))}
+                        {formats(r.selections).length === 0 && <span className="text-xs text-gray-400">—</span>}
+                      </div>
+                    </TableCell>
+                    <TableCell>₱{Number(r.estimated_price || 0).toLocaleString()}</TableCell>
+                    <TableCell><StatusBadge status={r.status || ""} /></TableCell>
+                    <TableCell className="text-xs">
+                      {r.created_at ? new Date(r.created_at).toLocaleDateString("en-PH") : "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white text-gray-900">
+          {selected && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3">
+                  <span>{selected.campaign_name || "Untitled Request"}</span>
+                  <StatusBadge status={selected.status || ""} />
+                </DialogTitle>
+                <DialogDescription>{selected.requester_email || "guest"}</DialogDescription>
+              </DialogHeader>
+
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <Detail label="Campaign Type" value={selected.campaign_type || "—"} />
+                <Detail label="Estimated Price" value={`₱${Number(selected.estimated_price || 0).toLocaleString()}`} />
+                <Detail label="Map Location" value={
+                  selected.center_lat != null && selected.center_lng != null ? (
+                    <a
+                      className="text-green-700 underline"
+                      href={`https://www.openstreetmap.org/?mlat=${selected.center_lat}&mlon=${selected.center_lng}#map=14/${selected.center_lat}/${selected.center_lng}`}
+                      target="_blank" rel="noreferrer"
+                    >
+                      {Number(selected.center_lat).toFixed(5)}, {Number(selected.center_lng).toFixed(5)}
+                    </a>
+                  ) : "—"
+                } />
+                <Detail label="Radius" value={selected.radius_meters ? `${(selected.radius_meters / 1000).toFixed(2)} km` : "—"} />
+                <Detail label="Preferred Start" value={selected.preferred_start_date || "—"} />
+                <Detail label="Submitted" value={selected.created_at ? new Date(selected.created_at).toLocaleString("en-PH") : "—"} />
+              </div>
+
+              <div className="mt-4">
+                <h3 className="font-semibold mb-1 text-sm">Selected Formats</h3>
+                <div className="flex flex-wrap gap-1">
+                  {formats(selected.selections).map((f, i) => (
+                    <span key={i} className="text-[11px] font-semibold px-2 py-1 rounded bg-cyan-100 text-cyan-700">
+                      {f.label} × {f.quantity}
+                    </span>
+                  ))}
+                  {formats(selected.selections).length === 0 && <span className="text-sm text-gray-500">—</span>}
+                </div>
+              </div>
+
+              {selected.notes && (
+                <div className="mt-4">
+                  <h3 className="font-semibold mb-1 text-sm">Notes</h3>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap p-3 bg-gray-50 rounded border">{selected.notes}</p>
+                </div>
+              )}
+
+              <DialogFooter className="mt-4 gap-2 flex-wrap">
+                <Button variant="outline" onClick={() => setSelected(null)}>Close</Button>
+                {REQUEST_STATUSES.filter((s) => s !== selected.status).map((s) => (
+                  <Button
+                    key={s}
+                    variant={s === "rejected" ? "destructive" : "default"}
+                    className={s === "approved" ? "bg-green-600 hover:bg-green-700 text-white" : undefined}
+                    disabled={working}
+                    onClick={() => setStatus(selected, s)}
+                  >
+                    {working ? <Loader2 className="w-4 h-4 animate-spin" /> : `Mark ${s.replace("_", " ")}`}
+                  </Button>
+                ))}
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 export default function AdminBrandCampaigns() {
+  const [section, setSection] = useState<string>("brand");
   const [loading, setLoading] = useState(true);
   const [campaigns, setCampaigns] = useState<BrandCampaign[]>([]);
   const [tab, setTab] = useState<string>("pending_review");
@@ -153,11 +345,20 @@ export default function AdminBrandCampaigns() {
         <div className="flex items-center gap-3 mb-6">
           <Megaphone className="w-7 h-7 text-green-600" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Brand Campaigns</h1>
-            <p className="text-sm text-gray-500">Review and approve retailer/brand campaigns</p>
+            <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
+            <p className="text-sm text-gray-500">Review brand campaigns and Explore campaign requests</p>
           </div>
         </div>
 
+        <Tabs value={section} onValueChange={setSection} className="mb-6">
+          <TabsList className="bg-white border">
+            <TabsTrigger value="brand">Brand Campaigns</TabsTrigger>
+            <TabsTrigger value="explore">Explore Campaign Requests</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {section === "brand" ? (
+        <>
         <div className="grid grid-cols-3 gap-3 mb-6">
           <Card className="bg-yellow-50 border-yellow-300 border">
             <CardContent className="p-4">
@@ -266,6 +467,10 @@ export default function AdminBrandCampaigns() {
             )}
           </CardContent>
         </Card>
+        </>
+        ) : (
+          <ExploreCampaignRequests />
+        )}
       </div>
 
       {/* Detail dialog */}
