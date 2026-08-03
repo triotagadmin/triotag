@@ -252,6 +252,7 @@ export default function AdvertiserExplore() {
           center_lat: center.lat,
           center_lng: center.lng,
           radius_meters: radiusMeters,
+          venue_count: nearbyPlaces.length,
           selections: enriched,
           estimated_price: estimate.totalEstimate,
           preferred_start_date: form.preferredStartDate,
