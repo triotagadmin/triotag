@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { ArrowLeft, FileText, Upload, Image } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
+import { BlogSeoPanels, slugify } from "@/components/blog/BlogSeoPanels";
 
 export default function AdminBlogSubmission() {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export default function AdminBlogSubmission() {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [publishedDate, setPublishedDate] = useState<string | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -27,7 +29,13 @@ export default function AdminBlogSubmission() {
     author: "",
     category: "",
     image_url: "",
-    read_time: ""
+    read_time: "",
+    slug: "",
+    meta_title: "",
+    meta_description: "",
+    canonical_url: "",
+    focus_keyword: "",
+    image_alt_text: ""
   });
 
   useEffect(() => {
@@ -35,6 +43,7 @@ export default function AdminBlogSubmission() {
       loadBlogPost(editId);
     }
   }, [editId]);
+
 
   const loadBlogPost = async (id: string) => {
     setIsLoading(true);
