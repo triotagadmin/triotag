@@ -146,7 +146,7 @@ const Retailers = () => {
             </p>
             <div className="flex flex-wrap gap-3">
               <Button size="lg" variant="cyber" onClick={startCampaign}>
-                <LayoutDashboard className="h-4 w-4" /> Launch a Campaign
+                <LayoutDashboard className="h-4 w-4" /> Account Registration
               </Button>
               <Button size="lg" variant="outline" onClick={bookDemo}>
                 <PhoneCall className="h-4 w-4" /> Book a Demo
