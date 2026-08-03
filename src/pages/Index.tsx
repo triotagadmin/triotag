@@ -489,11 +489,6 @@ const CTABanner = () => (
             Partner With Triotag
           </Button>
         </Link>
-        <Link to="/contact">
-          <Button variant="outline" size="lg" className="w-full sm:w-auto">
-            Request Media Kit
-          </Button>
-        </Link>
       </div>
     </div>
   </section>
