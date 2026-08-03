@@ -387,6 +387,14 @@ export default function AdminBlogSubmission() {
             </form>
           </CardContent>
         </Card>
+
+        <BlogSeoPanels
+          form={formData}
+          onChange={(patch) => setFormData((prev) => ({ ...prev, ...patch }))}
+          currentPostId={editId}
+          publishedDate={publishedDate}
+        />
+
       </div>
 
       <Footer />
