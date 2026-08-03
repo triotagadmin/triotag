@@ -305,7 +305,7 @@ export const Navigation = () => {
           ) : (
             <>
               <Link to="/auth"><Button variant="outline" size="sm" className="border-green-500 text-green-500 hover:bg-green-500/10">Log In</Button></Link>
-              <Link to="/auth"><Button size="sm" className="bg-green-600 hover:bg-green-500 text-white">Get Started</Button></Link>
+              
             </>
           )}
         </div>
