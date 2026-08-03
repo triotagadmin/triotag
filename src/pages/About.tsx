@@ -246,13 +246,6 @@ const About = () => {
                   unified Retail Media Exchange. We enable organizations to discover, plan, activate,
                   and measure retail media campaigns through technology-driven workflows.
                 </p>
-                <a
-                  href="#who-we-are"
-                  className="mt-10 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
-                >
-                  Learn more
-                  <ChevronDown className="h-4 w-4 animate-bounce motion-reduce:animate-none" aria-hidden="true" />
-                </a>
               </Reveal>
 
               <Reveal delay={120}>
