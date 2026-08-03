@@ -625,37 +625,47 @@ const LookingAheadSection = () => (
         </div>
 
         <Reveal delay={150}>
-          <div className="relative mx-auto w-full max-w-md aspect-square">
-            <svg viewBox="0 0 200 200" className="w-full h-full" aria-hidden="true">
-              <defs>
-                <linearGradient id="globe-grad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#22c55e" stopOpacity="0.5" />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.25" />
-                </linearGradient>
-              </defs>
-              <circle cx="100" cy="100" r="78" fill="none" stroke="url(#globe-grad)" strokeWidth="1.2" />
-              {[20, 40, 60].map((rx) => (
-                <ellipse key={rx} cx="100" cy="100" rx={rx} ry="78" fill="none" stroke="rgba(148,163,184,0.22)" strokeWidth="0.8" />
-              ))}
-              {[-52, -26, 0, 26, 52].map((dy) => (
-                <ellipse key={dy} cx="100" cy={100 + dy} rx={Math.sqrt(Math.max(78 * 78 - dy * dy, 0))} ry="8" fill="none" stroke="rgba(148,163,184,0.18)" strokeWidth="0.8" />
-              ))}
-              {[
-                [62, 74, 138, 118],
-                [82, 140, 148, 68],
-                [50, 110, 128, 152],
-              ].map(([x1, y1, x2, y2], i) => (
-                <g key={i}>
-                  <path d={`M${x1},${y1} Q100,${(y1 + y2) / 2 - 40} ${x2},${y2}`} fill="none" stroke="#22c55e" strokeWidth="1" opacity="0.6" strokeDasharray="4 5">
-                    <animate attributeName="stroke-dashoffset" values="18;0" dur="2s" repeatCount="indefinite" />
-                  </path>
-                  <circle cx={x1} cy={y1} r="2.5" fill="#22c55e" />
-                  <circle cx={x2} cy={y2} r="2.5" fill="#3b82f6" />
-                </g>
-              ))}
-            </svg>
+          <div className="relative mx-auto w-full max-w-md aspect-square flex items-center justify-center">
+            <style>{`@keyframes tt-globe-spin{from{background-position:0 center}to{background-position:-200% center}}`}</style>
+            {/* Ambient glow */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full blur-3xl opacity-40"
+              style={{ background: "radial-gradient(circle at 50% 50%, rgba(34,197,94,0.35), transparent 65%)" }}
+            />
+            {/* Globe */}
+            <div
+              role="img"
+              aria-label="Rotating globe representing global commerce infrastructure"
+              className="relative w-[85%] aspect-square rounded-full overflow-hidden"
+              style={{
+                backgroundImage: `url(${earthTexture})`,
+                backgroundSize: "200% 100%",
+                backgroundRepeat: "repeat-x",
+                animation: "tt-globe-spin 40s linear infinite",
+                boxShadow:
+                  "inset 18px 0 38px 10px rgba(0,0,0,0.75), inset -10px 0 26px rgba(0,0,0,0.45), 0 0 60px rgba(34,197,94,0.25)",
+              }}
+            >
+              {/* Sphere shading + specular highlight */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle at 32% 28%, rgba(255,255,255,0.28), rgba(255,255,255,0.05) 28%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.75) 100%)",
+                }}
+              />
+            </div>
+            {/* Atmosphere rim */}
+            <div
+              aria-hidden="true"
+              className="absolute w-[85%] aspect-square rounded-full pointer-events-none"
+              style={{ boxShadow: "0 0 0 1px rgba(96,165,250,0.35), 0 0 40px 6px rgba(59,130,246,0.25) inset" }}
+            />
           </div>
         </Reveal>
+
       </div>
     </div>
   </section>
