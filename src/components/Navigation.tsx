@@ -13,6 +13,7 @@ import {
   DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { getDashboardByRole } from "@/components/RoleProtectedRoute";
 
 type Role = "retailer" | "agent" | "print_partner" | "talent" | "admin" | null;
 
@@ -200,7 +201,32 @@ export const Navigation = () => {
 
   const isActive = (to: string) => location.pathname === to || (to !== "/" && location.pathname.startsWith(to));
 
-  if (user) return null;
+  // Logged-in users normally use their dashboard's own nav shell. But if they
+  // land on a public route (e.g. "/") we still render a minimal header so they
+  // always have a way to reach their dashboard or sign out.
+  if (user) {
+    const dashboard = getDashboardByRole(userRole as any);
+    return (
+      <nav className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
+        <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logoAsset.url} alt={`${BRAND_NAME} logo`} className="w-8 h-8 object-contain" />
+            <span className="font-bold text-lg text-white tracking-tight">{BRAND_NAME}</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            {dashboard !== "/" && (
+              <Button asChild variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+                <Link to={dashboard}>Go to Dashboard</Link>
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" /> Log Out
+            </Button>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">

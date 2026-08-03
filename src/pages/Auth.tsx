@@ -56,6 +56,42 @@ const Auth = () => {
           .maybeSingle();
 
         if (existingRole) {
+          // The handle_new_user_role trigger defaults Google signups to
+          // 'retailer' (Google never sets user_type metadata). Correct it only
+          // for genuinely brand-new brand_advertiser signups.
+          const createdAt = new Date(session.user.created_at || 0).getTime();
+          const lastSignIn = new Date(session.user.last_sign_in_at || 0).getTime();
+          const isBrandNew = Math.abs(lastSignIn - createdAt) < 10_000;
+
+          if (
+            urlAccountType === "brand_advertiser" &&
+            existingRole.role === "retailer" &&
+            isBrandNew
+          ) {
+            const { data: baProfile } = await supabase
+              .from("brand_advertiser_profiles")
+              .select("id")
+              .eq("user_id", userId)
+              .maybeSingle();
+
+            if (!baProfile) {
+              await supabase.rpc("set_own_role", { _role: "brand_advertiser" });
+              await supabase.from("brand_advertiser_profiles").insert({
+                user_id: userId,
+                company_name: session.user.user_metadata?.full_name || "",
+                contact_name: session.user.user_metadata?.full_name || "",
+                contact_email: userEmail,
+                verified: true,
+              });
+              toast({
+                title: "Welcome!",
+                description: "Your account has been created successfully.",
+              });
+              routeByRole("brand_advertiser");
+              return;
+            }
+          }
+
           // Existing account (including legacy retailers) — always honor its role
           routeByRole(existingRole.role);
           return;
