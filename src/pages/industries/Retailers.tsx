@@ -154,9 +154,6 @@ const Retailers = () => {
       <section className="py-20 md:py-28 border-t border-white/5">
         <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold mb-5">
-              Built for retail brands
-            </span>
             <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
               Buy retail media like{" "}
               <span className="text-green-500">you buy digital.</span>
