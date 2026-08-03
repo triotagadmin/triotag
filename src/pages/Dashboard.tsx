@@ -28,8 +28,7 @@ const Dashboard = () => {
         .eq("user_id", session.user.id)
         .maybeSingle();
 
-      const role = (data?.role as never) ?? "brand_advertiser";
-      const target = getDashboardByRole(role);
+      const target = getDashboardByRole((data?.role as never) ?? "brand_advertiser");
       if (!cancelled) {
         setState({
           loading: false,
