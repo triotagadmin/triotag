@@ -23,7 +23,7 @@ import {
   Handshake,
   Layers,
   ShieldCheck,
-  ChevronDown,
+  
   Target,
   Compass,
 } from "lucide-react";
