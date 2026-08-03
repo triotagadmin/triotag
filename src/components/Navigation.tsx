@@ -27,7 +27,6 @@ const NAV_ITEMS_PUBLIC: NavItemDef[] = [
     children: [
       { label: "Outsource AdOps", to: "/industries/sspsource" },
       { label: "Retail Media DSP", to: "/industries/retaildsp" },
-      { label: "eCommerce SEO Microsites", to: "/services/ecommerce-seo" },
     ],
   },
   {
@@ -37,6 +36,7 @@ const NAV_ITEMS_PUBLIC: NavItemDef[] = [
       { label: "DOOH", to: "/solutions/dooh" },
       { label: "AOOH", to: "/solutions/aooh" },
       { label: "Media Truck", to: "/solutions/media-truck" },
+      { label: "SEO Microsites", to: "/services/ecommerce-seo" },
     ],
   },
   { label: "Advertise Your Brand", to: "/advertiser/explore" },
