@@ -17,7 +17,7 @@ import {
   Wallet,
   Users,
   ArrowRight,
-  PhoneCall,
+  
   PlayCircle,
   Store,
   Radio,
