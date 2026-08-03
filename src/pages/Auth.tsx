@@ -1,60 +1,23 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@/components/ui/separator";
-
-const signInSchema = z.object({
-  email: z.string()
-    .trim()
-    .email({ message: "Invalid email address" })
-    .max(255, { message: "Email must be less than 255 characters" }),
-  password: z.string()
-    .min(1, { message: "Password is required" })
-    .max(72, { message: "Password must be less than 72 characters" }),
-});
-
-const signUpSchema = z.object({
-  email: z.string()
-    .trim()
-    .email({ message: "Invalid email address" })
-    .max(255, { message: "Email must be less than 255 characters" }),
-  password: z.string()
-    .min(8, { message: "Password must be at least 8 characters" })
-    .max(72, { message: "Password must be less than 72 characters" })
-    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
-    .regex(/[0-9]/, { message: "Password must contain at least one number" }),
-});
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [userType, setUserType] = useState<string>("retailer");
-  const [companyName, setCompanyName] = useState("");
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [businessAddress, setBusinessAddress] = useState("");
-  const [showResendVerification, setShowResendVerification] = useState(false);
-  const [resendEmail, setResendEmail] = useState("");
-  const [activeTab, setActiveTab] = useState("signin");
 
   useEffect(() => {
     const intendedRole = localStorage.getItem("intended_role");
     if (intendedRole) {
       setUserType(intendedRole);
-      setActiveTab("signup");
       localStorage.removeItem("intended_role");
     }
   }, []);
@@ -275,306 +238,8 @@ const Auth = () => {
     handleOAuthRedirect();
   }, [navigate, toast]);
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
 
-    try {
-      // Validate inputs
-      const validatedData = signUpSchema.parse({
-        email,
-        password,
-      });
 
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email: validatedData.email,
-        password: validatedData.password,
-        options: {
-          data: {
-            user_type: userType,
-            ...(userType === "print_partner" ? {
-              company_name: companyName,
-              contact_name: contactName,
-              contact_phone: contactPhone,
-              business_address: businessAddress,
-            } : {}),
-          },
-        },
-      });
-
-      if (signUpError) throw signUpError;
-      if (!authData.user) throw new Error("User creation failed");
-
-      // Profile is automatically created by database trigger for most roles.
-      // Brand Advertiser profile must be created explicitly (no trigger).
-      if (userType === "brand_advertiser") {
-        await supabase.from("brand_advertiser_profiles").insert({
-          user_id: authData.user.id,
-          company_name: companyName || "",
-          contact_name: contactName || "",
-          contact_email: validatedData.email,
-          verified: false,
-        });
-      }
-
-      // Sign out the user immediately (they must verify email first)
-      await supabase.auth.signOut();
-
-      // Send verification email via edge function
-      const { data: emailResult, error: emailError } = await supabase.functions.invoke("send-verification-email", {
-        body: {
-          email: validatedData.email,
-          userId: authData.user.id,
-          userType: userType,
-        },
-      });
-
-      console.log("[handleSignUp] send-verification-email response:", { emailResult, emailError });
-
-      if (emailError || emailResult?.error) {
-        const detailedMessage = emailResult?.error || emailError?.message || "Failed to send verification email.";
-        console.error("Error sending verification email:", detailedMessage);
-        throw new Error(detailedMessage);
-      }
-
-      toast({
-        title: "Registration Successful!",
-        description: "A verification email has been sent. Please check your inbox.",
-      });
-      setShowResendVerification(true);
-      setResendEmail(validatedData.email);
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        toast({
-          title: "Validation Error",
-          description: error.errors[0].message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Validate inputs
-      const validatedData = signInSchema.parse({
-        email,
-        password,
-      });
-
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: validatedData.email,
-        password: validatedData.password,
-      });
-
-      if (signInError) throw signInError;
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) throw new Error("No session found");
-
-      // Check user role
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .single();
-      
-      // Check verification status based on role
-      if (roles?.role === "admin") {
-        const { data: adminProfile } = await supabase
-          .from("admin_profiles")
-          .select("status")
-          .eq("user_id", session.user.id)
-          .single();
-        
-        if (adminProfile && adminProfile.status !== "verified") {
-          toast({
-            title: "Admin not verified",
-            description: "Your admin account is pending verification.",
-            variant: "destructive",
-          });
-          await supabase.auth.signOut();
-          return;
-        }
-        
-        toast({
-          title: "Welcome back!",
-          description: "Successfully signed in as admin.",
-        });
-        goAfterAuth("/admin/dashboard");
-      } else if (roles?.role === "retailer") {
-        
-        try {
-          await supabase.functions.invoke("sync-pending-listing-ownership");
-        } catch (syncError) {
-          console.error("Failed to sync pending listings on sign in:", syncError);
-        }
-
-        toast({
-          title: "Welcome back!",
-          description: "Successfully signed in.",
-        });
-        goAfterAuth("/retailer-dashboard");
-      } else if (roles?.role === "print_partner") {
-        toast({
-          title: "Wrong portal",
-          description: "Print Partners must sign in at /admin",
-          variant: "destructive",
-        });
-        await supabase.auth.signOut();
-        return;
-      } else if (roles?.role === "agent") {
-        const { data: profile } = await supabase
-          .from("publisher_profiles")
-          .select("verified, publisher_type")
-          .eq("user_id", session.user.id)
-          .single();
-        
-        if (profile && !profile.verified) {
-          toast({
-            title: "Email not verified",
-            description: "Please verify your email before logging in.",
-            variant: "destructive",
-          });
-          setShowResendVerification(true);
-          setResendEmail(validatedData.email);
-          await supabase.auth.signOut();
-          return;
-        }
-        
-        if (profile) {
-          toast({
-            title: "Welcome back!",
-            description: "Successfully signed in.",
-          });
-          goAfterAuth("/venue-publishers");
-        } else {
-          goAfterAuth("/venue-publishers");
-        }
-      } else if (roles?.role === "talent") {
-        // Check talent profile status to route correctly
-        const { data: talentProfile } = await supabase
-          .from("talent_profiles")
-          .select("status")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-
-        toast({
-          title: "Welcome back!",
-          description: "Successfully signed in.",
-        });
-
-        if (talentProfile?.status === "approved") {
-          goAfterAuth("/talent-dashboard");
-        } else {
-          goAfterAuth("/talent-profile");
-        }
-      } else if (roles?.role === "brand_advertiser") {
-        toast({ title: "Welcome back!", description: "Successfully signed in." });
-        goAfterAuth("/brand-advertiser/dashboard");
-      } else {
-        navigate("/");
-      }
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        toast({
-          title: "Validation Error",
-          description: error.errors[0].message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendVerification = async () => {
-    if (!resendEmail) return;
-    
-    setLoading(true);
-    try {
-      // Look up user by email to get their userId
-      let userId = "";
-      
-      // Try advertiser first
-      const { data: advertiser } = await supabase
-        .from("advertiser_profiles")
-        .select("user_id")
-        .eq("contact_email", resendEmail)
-        .maybeSingle();
-      
-      if (advertiser) {
-        userId = advertiser.user_id;
-      } else {
-        // Try print partner
-        const { data: printPartner } = await supabase
-          .from("print_partner_profiles")
-          .select("user_id")
-          .eq("contact_email", resendEmail)
-          .maybeSingle();
-        
-        if (printPartner) {
-          userId = printPartner.user_id;
-        } else {
-          // Try publisher
-          const { data: publisher } = await supabase
-            .from("publisher_profiles")
-            .select("user_id")
-            .eq("contact_email", resendEmail)
-            .maybeSingle();
-          
-          if (publisher) {
-            userId = publisher.user_id;
-          }
-        }
-      }
-
-      if (!userId) {
-        throw new Error("No account found with this email. Please sign up first.");
-      }
-
-      // Call the custom edge function to resend verification email
-      const { error } = await supabase.functions.invoke("send-verification-email", {
-        body: {
-          email: resendEmail,
-          userId: userId,
-          userType: userType,
-        },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Verification email sent!",
-        description: "Please check your inbox for the verification link.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -609,14 +274,7 @@ const Auth = () => {
 
   const GoogleButton = ({ label = "Sign in with Google" }: { label?: string }) => (
     <div className="space-y-4 mt-4">
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <Separator className="w-full" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-        </div>
-      </div>
+
       <Button
         type="button"
         variant="outline"
@@ -641,109 +299,22 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Welcome to TrioTag</CardTitle>
-          <CardDescription>Sign in or create an account to get started</CardDescription>
+          <CardDescription>Continue with Google to sign in or create your account</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
-                </Button>
-              </form>
-              <GoogleButton label="Sign in with Google" />
-            </TabsContent>
-
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="user-type">I am a...</Label>
-                  <Select value={userType} onValueChange={setUserType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="retailer">Retailer</SelectItem>
-                      <SelectItem value="brand_advertiser">Brand Advertiser</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating account..." : "Create Account"}
-                </Button>
-              </form>
-              <GoogleButton label="Sign up with Google" />
-            </TabsContent>
-          </Tabs>
-          
-          {showResendVerification && (
-            <Card className="mt-6 border-blue-500 bg-blue-50 dark:bg-blue-950/20">
-              <CardHeader>
-                <CardTitle className="text-blue-800 dark:text-blue-200 text-lg">Verify Your Email</CardTitle>
-                <CardDescription className="text-blue-700 dark:text-blue-300">
-                  We've sent a verification link to <strong>{resendEmail}</strong>. 
-                  Please check your inbox (and spam folder) to activate your account.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  onClick={handleResendVerification} 
-                  disabled={loading}
-                  variant="outline"
-                  className="w-full"
-                >
-                  {loading ? "Sending..." : "Resend Verification Email"}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="user-type">I am a...</Label>
+            <Select value={userType} onValueChange={setUserType}>
+              <SelectTrigger id="user-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="retailer">Retailer</SelectItem>
+                <SelectItem value="brand_advertiser">Brand Advertiser</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <GoogleButton label="Continue with Google" />
         </CardContent>
       </Card>
     </div>
