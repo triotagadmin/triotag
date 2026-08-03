@@ -38,12 +38,6 @@ export const Footer = () => {
             <p className="text-sm text-zinc-400 max-w-sm leading-relaxed">{BRAND_DESCRIPTION}</p>
           </div>
 
-          {linkCol("Platform", [
-            { label: "For Retailers", href: "/list-space" },
-            { label: "For Retailers", href: "/campaign-submit" },
-            { label: "Inventory Formats", href: "/explore" },
-            
-          ])}
 
           {linkCol("Company", [
             { label: "About Us", href: "https://sites.google.com/view/stickymedia", external: true },
