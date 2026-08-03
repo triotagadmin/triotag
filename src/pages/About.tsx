@@ -216,7 +216,7 @@ const values = [
   { icon: ShieldCheck, title: "Integrity", body: "Professionalism, accountability, and long-term value creation." },
 ];
 
-const flow = ["Brand", "Triotag Platform", "Retail Locations", "Consumer", "Measurement"];
+
 
 /* ============================ PAGE ============================ */
 const About = () => {
