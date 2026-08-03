@@ -548,96 +548,66 @@ const About = () => {
 
 /* ============================ HERO GRAPHIC ============================ */
 const NetworkGraphic = () => {
+  const nodes = [
+    { x: 50, y: 50, r: 9, core: true },
+    { x: 16, y: 22, r: 5 },
+    { x: 84, y: 20, r: 5 },
+    { x: 12, y: 74, r: 5 },
+    { x: 86, y: 78, r: 5 },
+    { x: 50, y: 10, r: 4 },
+    { x: 50, y: 92, r: 4 },
+    { x: 26, y: 50, r: 4 },
+    { x: 76, y: 50, r: 4 },
+  ];
+
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm">
+    <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
       <svg
         viewBox="0 0 100 100"
         role="img"
-        aria-label="Abstract geometric object representing connected commerce infrastructure"
+        aria-label="Abstract network of connected retail locations, commerce, media, and data"
         className="h-auto w-full"
       >
-        <defs>
-          <linearGradient id="absGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--primary) / 0.85)" />
-            <stop offset="100%" stopColor="hsl(var(--primary) / 0.15)" />
-          </linearGradient>
-          <radialGradient id="absGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="hsl(var(--primary) / 0.28)" />
-            <stop offset="100%" stopColor="hsl(var(--primary) / 0)" />
-          </radialGradient>
-        </defs>
-
-        <circle cx="50" cy="50" r="44" fill="url(#absGlow)" />
-
-        {/* orbiting rings */}
-        <g fill="none" stroke="hsl(var(--primary) / 0.45)" strokeWidth="0.5">
-          <ellipse cx="50" cy="50" rx="38" ry="14">
-            <animateTransform
-              attributeName="transform"
-              type="rotate"
-              from="0 50 50"
-              to="360 50 50"
-              dur="26s"
-              repeatCount="indefinite"
-            />
-          </ellipse>
-          <ellipse cx="50" cy="50" rx="38" ry="14" transform="rotate(60 50 50)">
-            <animateTransform
-              attributeName="transform"
-              type="rotate"
-              from="60 50 50"
-              to="420 50 50"
-              dur="34s"
-              repeatCount="indefinite"
-            />
-          </ellipse>
-          <ellipse cx="50" cy="50" rx="38" ry="14" transform="rotate(120 50 50)">
-            <animateTransform
-              attributeName="transform"
-              type="rotate"
-              from="120 50 50"
-              to="480 50 50"
-              dur="44s"
-              repeatCount="indefinite"
-            />
-          </ellipse>
-        </g>
-
-        {/* faceted core */}
-        <g>
-          <animateTransform
-            attributeName="transform"
-            type="rotate"
-            from="0 50 50"
-            to="360 50 50"
-            dur="30s"
-            repeatCount="indefinite"
+        {nodes.slice(1).map((n, i) => (
+          <line
+            key={i}
+            x1="50"
+            y1="50"
+            x2={n.x}
+            y2={n.y}
+            stroke="hsl(var(--border))"
+            strokeWidth="0.4"
           />
-          <polygon
-            points="50,26 71,38 71,62 50,74 29,62 29,38"
-            fill="url(#absGrad)"
-            stroke="hsl(var(--primary) / 0.6)"
-            strokeWidth="0.6"
-          />
-          <polygon
-            points="50,26 71,38 50,50 29,38"
-            fill="hsl(var(--primary) / 0.35)"
-          />
-          <polyline
-            points="29,38 50,50 71,38"
-            fill="none"
-            stroke="hsl(var(--card))"
-            strokeWidth="0.5"
-            opacity="0.7"
-          />
-          <line x1="50" y1="50" x2="50" y2="74" stroke="hsl(var(--card))" strokeWidth="0.5" opacity="0.7" />
-        </g>
-
-        <circle cx="50" cy="50" r="26" fill="none" stroke="hsl(var(--border))" strokeWidth="0.4" strokeDasharray="2 3" />
+        ))}
+        {nodes.map((n, i) => (
+          <g key={i}>
+            {n.core && (
+              <circle cx={n.x} cy={n.y} r={n.r + 6} fill="hsl(var(--primary) / 0.08)">
+                <animate attributeName="r" values={`${n.r + 4};${n.r + 9};${n.r + 4}`} dur="4s" repeatCount="indefinite" />
+              </circle>
+            )}
+            <circle
+              cx={n.x}
+              cy={n.y}
+              r={n.r}
+              fill={n.core ? "hsl(var(--primary))" : "hsl(var(--card))"}
+              stroke="hsl(var(--primary) / 0.5)"
+              strokeWidth="0.6"
+            >
+              {!n.core && (
+                <animate
+                  attributeName="opacity"
+                  values="0.55;1;0.55"
+                  dur={`${3 + i * 0.4}s`}
+                  repeatCount="indefinite"
+                />
+              )}
+            </circle>
+          </g>
+        ))}
       </svg>
     </div>
   );
 };
-
 
 export default About;
