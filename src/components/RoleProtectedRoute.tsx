@@ -32,8 +32,8 @@ export const getDashboardByRole = (role: Role | null | undefined): string => {
 
 export const RoleProtectedRoute = ({ children, allowedRoles, requireAuth = true }: Props) => {
   const location = useLocation();
-  const [state, setState] = useState<{ loading: boolean; loggedIn: boolean; role: Role | null }>({
-    loading: true, loggedIn: false, role: null,
+  const [state, setState] = useState<{ loading: boolean; loggedIn: boolean; role: Role | null; error: boolean }>({
+    loading: true, loggedIn: false, role: null, error: false,
   });
 
   useEffect(() => {
@@ -41,21 +41,41 @@ export const RoleProtectedRoute = ({ children, allowedRoles, requireAuth = true 
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        if (!cancelled) setState({ loading: false, loggedIn: false, role: null });
+        if (!cancelled) setState({ loading: false, loggedIn: false, role: null, error: false });
         return;
       }
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", session.user.id)
         .maybeSingle();
+      if (error) {
+        console.error("RoleProtectedRoute: failed to load user role", error);
+        if (!cancelled) setState({ loading: false, loggedIn: true, role: null, error: true });
+        return;
+      }
       const role = (data?.role as Role | undefined) ?? null;
-      if (!cancelled) setState({ loading: false, loggedIn: true, role });
+      if (!cancelled) setState({ loading: false, loggedIn: true, role, error: false });
     })();
     return () => { cancelled = true; };
   }, [location.pathname]);
 
   if (state.loading) return <PageLoader />;
+
+  if (state.error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#0c0c0c] text-center px-6">
+        <p className="text-white/80">We couldn't verify your account permissions. Please try again.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 rounded-md bg-green-500 text-black font-medium"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
 
   if (!state.loggedIn) {
     const redirectParam = encodeURIComponent(location.pathname + location.search);

@@ -38,11 +38,20 @@ const Auth = () => {
 
       if (!storedUserType) {
         // Already logged in, no fresh OAuth flow — route to their dashboard
-        const { data: roleRow } = await supabase
+        const { data: roleRow, error: roleRowError } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", session.user.id)
           .maybeSingle();
+        if (roleRowError) {
+          console.error("Failed to load user role:", roleRowError);
+          toast({
+            title: "Couldn't load your account",
+            description: roleRowError.message,
+            variant: "destructive",
+          });
+          return;
+        }
         if (roleRow?.role) routeByRole(roleRow.role);
         return;
       }
@@ -59,11 +68,23 @@ const Auth = () => {
         const userEmail = session.user.email || "";
 
         // Check if user_roles already exist (returning user)
-        const { data: existingRole } = await supabase
+        const { data: existingRole, error: existingRoleError } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", userId)
           .maybeSingle();
+
+        if (existingRoleError) {
+          console.error("Failed to load user role:", existingRoleError);
+          toast({
+            title: "Couldn't load your account",
+            description: existingRoleError.message,
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
 
         if (existingRole) {
           // The handle_new_user_role trigger defaults Google signups to
