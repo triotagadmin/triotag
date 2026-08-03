@@ -324,7 +324,7 @@ const Retailers = () => {
                 Launch a Campaign <ArrowRight className="h-4 w-4" />
               </Button>
               <Button size="lg" variant="outline" onClick={bookDemo} className="text-base">
-                Book a Demo
+                Campaign Request
               </Button>
             </div>
           </div>
