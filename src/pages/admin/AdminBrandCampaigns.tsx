@@ -340,11 +340,20 @@ export default function AdminBrandCampaigns() {
         <div className="flex items-center gap-3 mb-6">
           <Megaphone className="w-7 h-7 text-green-600" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Brand Campaigns</h1>
-            <p className="text-sm text-gray-500">Review and approve retailer/brand campaigns</p>
+            <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
+            <p className="text-sm text-gray-500">Review brand campaigns and Explore campaign requests</p>
           </div>
         </div>
 
+        <Tabs value={section} onValueChange={setSection} className="mb-6">
+          <TabsList className="bg-white border">
+            <TabsTrigger value="brand">Brand Campaigns</TabsTrigger>
+            <TabsTrigger value="explore">Explore Campaign Requests</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {section === "brand" ? (
+        <>
         <div className="grid grid-cols-3 gap-3 mb-6">
           <Card className="bg-yellow-50 border-yellow-300 border">
             <CardContent className="p-4">
