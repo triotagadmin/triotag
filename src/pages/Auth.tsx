@@ -78,28 +78,8 @@ const Auth = () => {
 
         // The trigger handle_new_user_role should handle this, but ensure it exists
         // Create the appropriate profile and mark as verified
-        if (storedUserType === "advertiser" || storedUserType === "retailer") {
-          const { data: existingProfile } = await supabase
-            .from("advertiser_profiles")
-            .select("id")
-            .eq("user_id", userId)
-            .maybeSingle();
+        if (storedUserType === "print_partner") {
 
-          if (!existingProfile) {
-            await supabase.from("advertiser_profiles").insert({
-              user_id: userId,
-              company_name: session.user.user_metadata?.full_name || "",
-              contact_name: session.user.user_metadata?.full_name || "",
-              contact_email: userEmail,
-              verified: true,
-            });
-          } else {
-            await supabase
-              .from("advertiser_profiles")
-              .update({ verified: true })
-              .eq("user_id", userId);
-          }
-        } else if (storedUserType === "print_partner") {
           const { data: existingProfile } = await supabase
             .from("print_partner_profiles")
             .select("id")
