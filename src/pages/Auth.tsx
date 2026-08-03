@@ -61,17 +61,12 @@ const Auth = () => {
           .eq("user_id", userId)
           .maybeSingle();
 
-        const intendedRole =
-          storedUserType === "venue" ? "agent" :
-          storedUserType === "advertiser" ? "retailer" :
-          storedUserType === "brand_advertiser" ? "brand_advertiser" :
-          storedUserType;
-
         if (existingRole) {
           // Existing account (including legacy retailers) — always honor its role
           routeByRole(existingRole.role);
           return;
         }
+
 
 
         // New Google user - create role and profile
