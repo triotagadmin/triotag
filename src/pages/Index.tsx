@@ -514,9 +514,9 @@ const MediaTruckSection = () => (
     <div className="container mx-auto px-4 md:px-6 relative py-20 md:py-32 grid lg:grid-cols-2 gap-12 items-center">
       <div className="space-y-6 text-white">
         <h2 className="text-4xl md:text-6xl font-extrabold leading-[1.05]">
-          <span className="text-green-500">TRIOTAG</span> Mobile
+          <span className="text-green-500">TRIOTAG</span> Media
           <br />
-          Truck Media
+          Truck
         </h2>
         <p className="text-zinc-200 text-lg max-w-xl">
           Retail Media. Real Results. Deploy high-impact Retail Media trucks across your target districts
