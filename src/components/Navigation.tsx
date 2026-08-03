@@ -13,6 +13,7 @@ import {
   DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { getDashboardByRole } from "@/components/RoleProtectedRoute";
 
 type Role = "retailer" | "agent" | "print_partner" | "talent" | "admin" | null;
 
