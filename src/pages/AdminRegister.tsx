@@ -34,6 +34,19 @@ const printPartnerSchema = z.object({
   path: ["confirmPassword"],
 });
 
+const agentSchema = z.object({
+  fullName: z.string().min(2, "Full name required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+  phoneNumber: z.string().min(5, "Phone number required"),
+  companyName: z.string().min(2, "Business / agency name required"),
+  businessAddress: z.string().min(2, "Coverage area required"),
+}).refine((d) => d.password === d.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 const CAPABILITIES = [
   "Sticker Printing",
   "Poster Printing",
@@ -49,6 +62,7 @@ export default function AdminRegister() {
     return new URLSearchParams(location.search).get("type") || "admin";
   }, [location.search]);
   const isPrintPartner = type === "print_partner";
+  const isAgent = type === "agent";
 
   const [formData, setFormData] = useState({
     fullName: "",
