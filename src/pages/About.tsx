@@ -216,7 +216,7 @@ const values = [
   { icon: ShieldCheck, title: "Integrity", body: "Professionalism, accountability, and long-term value creation." },
 ];
 
-const flow = ["Brand", "Triotag Platform", "Retail Locations", "Consumer", "Measurement"];
+
 
 /* ============================ PAGE ============================ */
 const About = () => {
@@ -328,7 +328,7 @@ const About = () => {
 
         {/* SECTION 3 — INDUSTRY */}
         <Section>
-          <div className="grid gap-14 lg:grid-cols-2">
+          <div className="grid gap-14">
             <Reveal>
               <Eyebrow>Our industry</Eyebrow>
               <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
@@ -353,33 +353,8 @@ const About = () => {
                 </li>
               </ul>
             </Reveal>
-
-            <Reveal delay={120}>
-              <div className="rounded-3xl border border-border bg-card p-8 shadow-sm">
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  Value chain
-                </p>
-                <ol className="mt-6 space-y-3">
-                  {flow.map((step, i) => (
-                    <li key={step} className="flex items-center gap-4">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background text-xs font-semibold text-muted-foreground">
-                        {i + 1}
-                      </span>
-                      <span
-                        className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium ${
-                          step === "Triotag Platform"
-                            ? "border-primary/40 bg-primary/10 text-foreground"
-                            : "border-border bg-background text-muted-foreground"
-                        }`}
-                      >
-                        {step}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </Reveal>
           </div>
+
         </Section>
 
         {/* SECTION 4 — TECHNOLOGY */}
