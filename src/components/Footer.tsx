@@ -40,7 +40,7 @@ export const Footer = () => {
 
 
           {linkCol("Company", [
-            { label: "About Us", href: "https://sites.google.com/view/stickymedia", external: true },
+            { label: "About Us", href: "/about" },
             { label: "Careers", href: "/under-construction" },
             { label: "News & Press", href: "/insights" },
             { label: "Contact Us", href: "/contact" },
