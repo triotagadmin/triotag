@@ -119,6 +119,10 @@ import IndustriesRetailers from "./pages/industries/Retailers";
 import IndustriesBrands from "./pages/industries/Brands";
 import EcommerceOperations from "./pages/industries/EcommerceOperations";
 import MediaPartners from "./pages/MediaPartners";
+import PartnerDirectory from "./pages/PartnerDirectory";
+import MediaPartnerRegister from "./pages/MediaPartnerRegister";
+import AdminMediaPartners from "./pages/admin/AdminMediaPartners";
+
 import UnderConstruction from "./pages/UnderConstruction";
 import HomeRouter from "./components/HomeRouter";
 import Notifications from "./pages/Notifications";
@@ -315,6 +319,10 @@ const App = () => (
           <Route path="/industries/sspsource" element={<IndustriesBrands />} />
           <Route path="/ecommerce" element={<EcommerceOperations />} />
           <Route path="/media-partners" element={<MediaPartners />} />
+          <Route path="/partners/directory" element={<PartnerDirectory />} />
+          <Route path="/partners/register" element={<MediaPartnerRegister />} />
+          <Route path="/admin/media-partners" element={<ProtectedAdminRoute><AdminMediaPartners /></ProtectedAdminRoute>} />
+
           {/* Brand Advertiser portal */}
           <Route path="/brand-advertiser/dashboard" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserDashboard /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/campaigns" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserCampaignsList /></RoleProtectedRoute>} />

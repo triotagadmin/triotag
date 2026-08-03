@@ -45,6 +45,8 @@ export const Footer = () => {
             { label: "News & Press", href: "/insights" },
             { label: "Contact Us", href: "/contact" },
             { label: "Media Partners", href: "/media-partners" },
+            { label: "Partner Directory", href: "/partners/directory" },
+
           ])}
 
           {linkCol("Legal", [
