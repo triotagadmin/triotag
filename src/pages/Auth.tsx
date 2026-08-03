@@ -641,109 +641,22 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Welcome to TrioTag</CardTitle>
-          <CardDescription>Sign in or create an account to get started</CardDescription>
+          <CardDescription>Continue with Google to sign in or create your account</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
-                </Button>
-              </form>
-              <GoogleButton label="Sign in with Google" />
-            </TabsContent>
-
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="user-type">I am a...</Label>
-                  <Select value={userType} onValueChange={setUserType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="retailer">Retailer</SelectItem>
-                      <SelectItem value="brand_advertiser">Brand Advertiser</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating account..." : "Create Account"}
-                </Button>
-              </form>
-              <GoogleButton label="Sign up with Google" />
-            </TabsContent>
-          </Tabs>
-          
-          {showResendVerification && (
-            <Card className="mt-6 border-blue-500 bg-blue-50 dark:bg-blue-950/20">
-              <CardHeader>
-                <CardTitle className="text-blue-800 dark:text-blue-200 text-lg">Verify Your Email</CardTitle>
-                <CardDescription className="text-blue-700 dark:text-blue-300">
-                  We've sent a verification link to <strong>{resendEmail}</strong>. 
-                  Please check your inbox (and spam folder) to activate your account.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  onClick={handleResendVerification} 
-                  disabled={loading}
-                  variant="outline"
-                  className="w-full"
-                >
-                  {loading ? "Sending..." : "Resend Verification Email"}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="user-type">I am a...</Label>
+            <Select value={userType} onValueChange={setUserType}>
+              <SelectTrigger id="user-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="retailer">Retailer</SelectItem>
+                <SelectItem value="brand_advertiser">Brand Advertiser</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <GoogleButton label="Continue with Google" />
         </CardContent>
       </Card>
     </div>
