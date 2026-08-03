@@ -274,20 +274,9 @@ const Auth = () => {
           <CardDescription>Continue with Google to sign in or create your account</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="user-type">I am a...</Label>
-            <Select value={userType} onValueChange={setUserType}>
-              <SelectTrigger id="user-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="retailer">Retailer</SelectItem>
-                <SelectItem value="brand_advertiser">Brand Advertiser</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
           <GoogleButton label="Continue with Google" />
         </CardContent>
+
       </Card>
     </div>
   );
