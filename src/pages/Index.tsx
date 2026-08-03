@@ -483,7 +483,8 @@ const CTABanner = () => (
         Join the retail media revolution and unlock new opportunities today.
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-        <Link to="/list-space">
+        <Link to="/partners/register">
+
           <Button variant="secondary" size="lg" className="w-full sm:w-auto">
             Partner With Triotag
           </Button>
