@@ -319,14 +319,14 @@ export default function AdminRegister() {
                 />
               </div>
 
-              {isPrintPartner && (
+              {(isPrintPartner || isAgent) && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="companyName">Company Name *</Label>
+                    <Label htmlFor="companyName">{isAgent ? "Business / Agency Name *" : "Company Name *"}</Label>
                     <Input
                       id="companyName"
                       type="text"
-                      placeholder="Your printing company"
+                      placeholder={isAgent ? "Your agency or business name" : "Your printing company"}
                       value={formData.companyName}
                       onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                       required
@@ -335,11 +335,11 @@ export default function AdminRegister() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="businessAddress">Business Address *</Label>
+                    <Label htmlFor="businessAddress">{isAgent ? "Coverage Area / City *" : "Business Address *"}</Label>
                     <Input
                       id="businessAddress"
                       type="text"
-                      placeholder="Full address"
+                      placeholder={isAgent ? "e.g. Metro Manila" : "Full address"}
                       value={formData.businessAddress}
                       onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
                       required
@@ -352,7 +352,7 @@ export default function AdminRegister() {
 
               <div className="space-y-2">
                 <Label htmlFor="phoneNumber">
-                  {isPrintPartner ? "Phone Number *" : "Phone Number (Optional)"}
+                  {isPrintPartner || isAgent ? "Phone Number *" : "Phone Number (Optional)"}
                 </Label>
                 <Input
                   id="phoneNumber"
@@ -360,7 +360,7 @@ export default function AdminRegister() {
                   placeholder="+63..."
                   value={formData.phoneNumber}
                   onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  required={isPrintPartner}
+                  required={isPrintPartner || isAgent}
                   disabled={isLoading}
                   className="h-11"
                 />
