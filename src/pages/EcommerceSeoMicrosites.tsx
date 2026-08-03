@@ -593,7 +593,7 @@ const packages = [
   {
     name: "Starter",
     price: "₱49,888",
-    period: "/month",
+    period: "\n",
     volume: "15 SEO Microsites",
     description: "For growing online stores publishing their first product-keyword microsite network.",
     features: [
@@ -609,7 +609,7 @@ const packages = [
   {
     name: "Growth",
     price: "₱89,888",
-    period: "/month",
+    period: "\n",
     volume: "50 SEO Microsites",
     description: "For eCommerce brands scaling category coverage and organic order volume.",
     features: [
@@ -626,7 +626,7 @@ const packages = [
   {
     name: "Enterprise",
     price: "₱189,888",
-    period: "/month",
+    period: "\n",
     volume: "100+ SEO Microsites",
     description: "Category-domination scale for multi-SKU retailers and marketplace sellers.",
     features: [
