@@ -225,7 +225,7 @@ export default function AdminLogin() {
                 <p className="text-xs text-muted-foreground mb-2">New here?</p>
                 <div className="flex gap-2">
                   <Button asChild variant="outline" size="sm" className="flex-1">
-                    <Link to="/admin/register?type=admin">Register as Admin</Link>
+                    <Link to="/admin/register?type=agent">Register as Agent</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm" className="flex-1">
                     <Link to="/admin/register?type=print_partner">Register as Media Partner</Link>

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Shield, ArrowLeft, CheckCircle2, Printer } from "lucide-react";
+import { Shield, ArrowLeft, CheckCircle2, Printer, UserCheck } from "lucide-react";
 import { z } from "zod";
 
 const adminRegisterSchema = z.object({
@@ -34,6 +34,19 @@ const printPartnerSchema = z.object({
   path: ["confirmPassword"],
 });
 
+const agentSchema = z.object({
+  fullName: z.string().min(2, "Full name required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+  phoneNumber: z.string().min(5, "Phone number required"),
+  companyName: z.string().min(2, "Business / agency name required"),
+  businessAddress: z.string().min(2, "Coverage area required"),
+}).refine((d) => d.password === d.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 const CAPABILITIES = [
   "Sticker Printing",
   "Poster Printing",
@@ -49,6 +62,7 @@ export default function AdminRegister() {
     return new URLSearchParams(location.search).get("type") || "admin";
   }, [location.search]);
   const isPrintPartner = type === "print_partner";
+  const isAgent = type === "agent";
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -74,6 +88,47 @@ export default function AdminRegister() {
     setIsLoading(true);
 
     try {
+      if (isAgent) {
+        const validated = agentSchema.parse(formData);
+
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: validated.email,
+          password: validated.password,
+          options: {
+            data: {
+              user_type: "agent",
+              full_name: validated.fullName,
+              business_name: validated.companyName,
+              contact_phone: validated.phoneNumber,
+              location: validated.businessAddress,
+            },
+            emailRedirectTo: `${window.location.origin}/admin`,
+          },
+        });
+
+        if (authError) throw authError;
+        if (!authData.user) throw new Error("Registration failed");
+
+        const { error: notifyError } = await supabase.functions.invoke("notify-admin-registration", {
+          body: {
+            fullName: validated.fullName,
+            email: validated.email,
+            phoneNumber: validated.phoneNumber,
+            userId: authData.user.id,
+            registrationType: "agent",
+            companyName: validated.companyName,
+            businessAddress: validated.businessAddress,
+          },
+        });
+        if (notifyError) console.error("Failed to send notification email:", notifyError);
+
+        await supabase.auth.signOut();
+        setIsSuccess(true);
+        toast.success("Agent application submitted!");
+        setTimeout(() => navigate("/admin"), 3000);
+        return;
+      }
+
       if (isPrintPartner) {
         const validated = printPartnerSchema.parse(formData);
 
@@ -184,10 +239,12 @@ export default function AdminRegister() {
             </div>
             <div>
               <CardTitle className="text-2xl font-bold">
-                {isPrintPartner ? "Application Submitted" : "Registration Submitted"}
+                {isPrintPartner || isAgent ? "Application Submitted" : "Registration Submitted"}
               </CardTitle>
               <CardDescription className="text-base mt-2">
-                {isPrintPartner
+                {isAgent
+                  ? "Your agent application has been submitted. An admin will review and approve your account."
+                  : isPrintPartner
                   ? "Your print partner application has been submitted. The super admin will review and approve your account."
                   : "Your admin account request is pending approval"}
               </CardDescription>
@@ -203,7 +260,7 @@ export default function AdminRegister() {
     );
   }
 
-  const Icon = isPrintPartner ? Printer : Shield;
+  const Icon = isAgent ? UserCheck : isPrintPartner ? Printer : Shield;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
@@ -220,10 +277,12 @@ export default function AdminRegister() {
             </div>
             <div>
               <CardTitle className="text-2xl font-bold">
-                {isPrintPartner ? "Print Partner Registration" : "Request Admin Access"}
+                {isAgent ? "Agent Registration" : isPrintPartner ? "Print Partner Registration" : "Request Admin Access"}
               </CardTitle>
               <CardDescription className="text-base mt-2">
-                {isPrintPartner
+                {isAgent
+                  ? "Apply to join TrioTag as an Agent. Your application will be reviewed by an admin before you can sign in."
+                  : isPrintPartner
                   ? "Apply to join TrioTag's print partner network. Your application will be reviewed by the super admin."
                   : "Submit your application for administrator privileges"}
               </CardDescription>
@@ -260,14 +319,14 @@ export default function AdminRegister() {
                 />
               </div>
 
-              {isPrintPartner && (
+              {(isPrintPartner || isAgent) && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="companyName">Company Name *</Label>
+                    <Label htmlFor="companyName">{isAgent ? "Business / Agency Name *" : "Company Name *"}</Label>
                     <Input
                       id="companyName"
                       type="text"
-                      placeholder="Your printing company"
+                      placeholder={isAgent ? "Your agency or business name" : "Your printing company"}
                       value={formData.companyName}
                       onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                       required
@@ -276,11 +335,11 @@ export default function AdminRegister() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="businessAddress">Business Address *</Label>
+                    <Label htmlFor="businessAddress">{isAgent ? "Coverage Area / City *" : "Business Address *"}</Label>
                     <Input
                       id="businessAddress"
                       type="text"
-                      placeholder="Full address"
+                      placeholder={isAgent ? "e.g. Metro Manila" : "Full address"}
                       value={formData.businessAddress}
                       onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
                       required
@@ -293,7 +352,7 @@ export default function AdminRegister() {
 
               <div className="space-y-2">
                 <Label htmlFor="phoneNumber">
-                  {isPrintPartner ? "Phone Number *" : "Phone Number (Optional)"}
+                  {isPrintPartner || isAgent ? "Phone Number *" : "Phone Number (Optional)"}
                 </Label>
                 <Input
                   id="phoneNumber"
@@ -301,7 +360,7 @@ export default function AdminRegister() {
                   placeholder="+63..."
                   value={formData.phoneNumber}
                   onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  required={isPrintPartner}
+                  required={isPrintPartner || isAgent}
                   disabled={isLoading}
                   className="h-11"
                 />
