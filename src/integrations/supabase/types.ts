@@ -2663,6 +2663,133 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      partner_portfolio_items: {
+        Row: {
+          created_at: string
+          file_path: string | null
+          id: string
+          item_type: string
+          mime_type: string | null
+          partner_id: string
+          platform: string | null
+          sort_order: number
+          title: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          item_type?: string
+          mime_type?: string | null
+          partner_id: string
+          platform?: string | null
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          item_type?: string
+          mime_type?: string | null
+          partner_id?: string
+          platform?: string | null
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_portfolio_items_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "print_partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_specializations: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_specializations_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "partner_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       print_orders: {
         Row: {
           activation_id: string | null
@@ -3204,68 +3331,131 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          availability: string[]
           blocked_reason: string | null
           business_address: string | null
+          business_registration_name: string | null
+          capabilities: string[]
+          certifications: Json
+          company_description: string | null
           company_name: string
           contact_email: string
           contact_person: string
           contact_phone: string | null
+          coverage_cities: string[]
+          coverage_countries: string[]
+          coverage_provinces: string[]
+          coverage_regions: string[]
           created_at: string
           id: string
+          industries_served: string[]
           is_blocked: boolean
+          is_featured: boolean
+          job_title: string | null
           logo_url: string | null
+          notable_clients: string | null
+          partner_category: string | null
           rejection_reason: string | null
           service_areas: string[] | null
+          service_coverage: string | null
+          social_links: Json
+          specializations: string[]
           status: string
+          team_size: string | null
           token_expires: string | null
           updated_at: string
           user_id: string
           verification_token: string | null
           verified: boolean | null
+          website: string | null
+          years_experience: number | null
+          years_in_operation: number | null
         }
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          availability?: string[]
           blocked_reason?: string | null
           business_address?: string | null
+          business_registration_name?: string | null
+          capabilities?: string[]
+          certifications?: Json
+          company_description?: string | null
           company_name?: string
           contact_email?: string
           contact_person?: string
           contact_phone?: string | null
+          coverage_cities?: string[]
+          coverage_countries?: string[]
+          coverage_provinces?: string[]
+          coverage_regions?: string[]
           created_at?: string
           id?: string
+          industries_served?: string[]
           is_blocked?: boolean
+          is_featured?: boolean
+          job_title?: string | null
           logo_url?: string | null
+          notable_clients?: string | null
+          partner_category?: string | null
           rejection_reason?: string | null
           service_areas?: string[] | null
+          service_coverage?: string | null
+          social_links?: Json
+          specializations?: string[]
           status?: string
+          team_size?: string | null
           token_expires?: string | null
           updated_at?: string
           user_id: string
           verification_token?: string | null
           verified?: boolean | null
+          website?: string | null
+          years_experience?: number | null
+          years_in_operation?: number | null
         }
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          availability?: string[]
           blocked_reason?: string | null
           business_address?: string | null
+          business_registration_name?: string | null
+          capabilities?: string[]
+          certifications?: Json
+          company_description?: string | null
           company_name?: string
           contact_email?: string
           contact_person?: string
           contact_phone?: string | null
+          coverage_cities?: string[]
+          coverage_countries?: string[]
+          coverage_provinces?: string[]
+          coverage_regions?: string[]
           created_at?: string
           id?: string
+          industries_served?: string[]
           is_blocked?: boolean
+          is_featured?: boolean
+          job_title?: string | null
           logo_url?: string | null
+          notable_clients?: string | null
+          partner_category?: string | null
           rejection_reason?: string | null
           service_areas?: string[] | null
+          service_coverage?: string | null
+          social_links?: Json
+          specializations?: string[]
           status?: string
+          team_size?: string | null
           token_expires?: string | null
           updated_at?: string
           user_id?: string
           verification_token?: string | null
           verified?: boolean | null
+          website?: string | null
+          years_experience?: number | null
+          years_in_operation?: number | null
         }
         Relationships: []
       }
