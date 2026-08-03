@@ -74,14 +74,41 @@ export function RadiusMapPlanner({
   );
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
+  const onLocationSetRef = useRef(onLocationSet);
+  useEffect(() => {
+    onLocationSetRef.current = onLocationSet;
+  }, [onLocationSet]);
+
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    const seq = ++reverseSeqRef.current;
+    setReverseLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("search-places", {
+        body: { lat, lng },
+      });
+      if (error) throw error;
+      const address = (data as any)?.address as string | undefined;
+      if (seq === reverseSeqRef.current && address) {
+        setSearchText(address);
+        setSuggestions([]);
+        onLocationSetRef.current?.(address);
+      }
+    } catch (e) {
+      console.error("[RadiusMapPlanner] reverse geocode failed", e);
+    } finally {
+      if (seq === reverseSeqRef.current) setReverseLoading(false);
+    }
+  }, []);
+
   const reportPin = useCallback(
     (lat: number, lng: number) => {
       const within = isWithinServiceArea(lat, lng);
       setIsOutsideServiceArea(!within);
       onServiceAreaChange?.(within);
       onCenterChange({ lat, lng });
+      void reverseGeocode(lat, lng);
     },
-    [onCenterChange, onServiceAreaChange],
+    [onCenterChange, onServiceAreaChange, reverseGeocode],
   );
 
   // Init map once
