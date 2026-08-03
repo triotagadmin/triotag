@@ -101,11 +101,11 @@ export default function Auth() {
 
             <p className="mt-6 text-center text-xs text-muted-foreground leading-relaxed">
               By continuing, you agree to the{" "}
-              <Link to="/terms-of-service" className="underline hover:text-foreground">
+              <Link to="/terms" className="underline hover:text-foreground">
                 Terms of Service
               </Link>{" "}
               and{" "}
-              <Link to="/privacy-policy" className="underline hover:text-foreground">
+              <Link to="/privacy" className="underline hover:text-foreground">
                 Privacy Policy
               </Link>
               .
