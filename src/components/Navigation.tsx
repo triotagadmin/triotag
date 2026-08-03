@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MessengerBell } from "@/components/MessengerBell";
 import { BRAND_NAME } from "@/lib/brand";
+import logoAsset from "@/assets/triotag-logo.png.asset.json";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
@@ -205,9 +206,7 @@ export const Navigation = () => {
     <nav className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
       <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         <Link to="/" onClick={close} className="flex items-center gap-2 group">
-          <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-green-600 text-white">
-            <TrendingUp className="w-4 h-4" />
-          </span>
+          <img src={logoAsset.url} alt={`${BRAND_NAME} logo`} className="w-8 h-8 object-contain" />
           <span className="font-bold text-lg text-white tracking-tight">{BRAND_NAME}</span>
         </Link>
 
