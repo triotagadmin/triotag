@@ -355,12 +355,11 @@ export default function SolutionsMediaTruck() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-10">
             <div className="text-xs font-semibold tracking-widest text-green-500 uppercase mb-3">
-              Editable Rate Card Framework
+              {"\n"}
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">FMCG Package Structure</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Media Truck Package Structure</h2>
             <p className="text-zinc-400 max-w-3xl mx-auto">
-              Use this as the working rate card framework. All rates are custom-quoted based on confirmed pricing,
-              inclusions, operating hours, route coverage, and fleet availability.
+              {"\n"}
             </p>
           </div>
           <div className="bg-black border border-white/10 rounded-2xl overflow-hidden">
