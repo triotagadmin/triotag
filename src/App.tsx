@@ -315,6 +315,10 @@ const App = () => (
           <Route path="/industries/sspsource" element={<IndustriesBrands />} />
           <Route path="/ecommerce" element={<EcommerceOperations />} />
           <Route path="/media-partners" element={<MediaPartners />} />
+          <Route path="/partners/directory" element={<PartnerDirectory />} />
+          <Route path="/partners/register" element={<MediaPartnerRegister />} />
+          <Route path="/admin/media-partners" element={<ProtectedAdminRoute><AdminMediaPartners /></ProtectedAdminRoute>} />
+
           {/* Brand Advertiser portal */}
           <Route path="/brand-advertiser/dashboard" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserDashboard /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/campaigns" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserCampaignsList /></RoleProtectedRoute>} />
