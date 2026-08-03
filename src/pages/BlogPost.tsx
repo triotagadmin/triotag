@@ -39,6 +39,33 @@ const BlogPost = () => {
     }
   }, [id]);
 
+  // Inject Article JSON-LD schema into <head> for the live post
+  useEffect(() => {
+    if (!post) return;
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.setAttribute("data-blog-schema", "true");
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: post.title,
+      description: post.meta_description || post.excerpt,
+      image: post.image_url || undefined,
+      author: { "@type": "Person", name: post.author },
+      datePublished: post.created_at,
+    });
+    document.head.appendChild(script);
+
+    const prevTitle = document.title;
+    document.title = post.meta_title || post.title;
+
+    return () => {
+      script.remove();
+      document.title = prevTitle;
+    };
+  }, [post]);
+
+
   const loadBlogPost = async () => {
     try {
       const { data, error } = await supabase
