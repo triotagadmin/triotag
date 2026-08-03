@@ -27,7 +27,7 @@ const NAV_ITEMS_PUBLIC: NavItemDef[] = [
     children: [
       { label: "Outsource AdOps", to: "/industries/sspsource" },
       { label: "Retail Media DSP", to: "/industries/retaildsp" },
-      { label: "Google Ads & SEO", to: "/services/google-ads" },
+      { label: "eCommerce SEO Microsites", to: "/services/ecommerce-seo" },
     ],
   },
   {

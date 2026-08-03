@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { GuestBasketProvider } from "@/contexts/GuestBasketContext";
 import Index from "./pages/Index";
@@ -129,7 +129,7 @@ import BrandAdvertiserAudiences from "./pages/brand-advertiser/BrandAdvertiserAu
 import BrandAdvertiserReports from "./pages/brand-advertiser/BrandAdvertiserReports";
 import BrandAdvertiserChangelog from "./pages/brand-advertiser/BrandAdvertiserChangelog";
 import BrandAdvertiserInventory from "./pages/brand-advertiser/BrandAdvertiserInventory";
-import GoogleAdsServices from "./pages/GoogleAdsServices";
+import EcommerceSeoMicrosites from "./pages/EcommerceSeoMicrosites";
 import VerifiedVenues from "./pages/agent/VerifiedVenues";
 import DiscoverLocations from "./pages/agent/DiscoverLocations";
 
@@ -320,7 +320,8 @@ const App = () => (
           <Route path="/brand-advertiser/reports" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserReports /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/changelog" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserChangelog /></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/settings" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserSettings /></RoleProtectedRoute>} />
-          <Route path="/services/google-ads" element={<GoogleAdsServices />} />
+          <Route path="/services/ecommerce-seo" element={<EcommerceSeoMicrosites />} />
+          <Route path="/services/google-ads" element={<Navigate to="/services/ecommerce-seo" replace />} />
           <Route path="/agent/discover-locations" element={<RoleProtectedRoute requireAuth allowedRoles={["agent", "admin"]}><DiscoverLocations /></RoleProtectedRoute>} />
           <Route path="/agent/verified-venues" element={<RoleProtectedRoute requireAuth allowedRoles={["agent", "admin"]}><VerifiedVenues /></RoleProtectedRoute>} />
 
