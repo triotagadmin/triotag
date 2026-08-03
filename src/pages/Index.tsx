@@ -86,9 +86,6 @@ const Hero = () => {
 
       <div className="container mx-auto px-4 md:px-6 py-16 md:py-24 lg:py-32 relative grid lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
-          <span className="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase text-green-500 bg-green-500/10 border border-green-500/30 rounded-full">
-            Retail Media Demand Platform
-          </span>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1]">
             Retail Media DSP Platform for <span className="text-green-500">OOH</span>,{" "}
             <span className="text-green-500">DOOH</span>, and <span className="text-green-500">AOOH</span>
