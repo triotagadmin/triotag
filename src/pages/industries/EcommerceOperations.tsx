@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Link } from "react-router-dom";
+import earthTexture from "@/assets/earth-texture.jpg";
 import {
   Cpu,
   Monitor,
