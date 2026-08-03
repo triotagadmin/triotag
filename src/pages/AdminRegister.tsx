@@ -239,10 +239,12 @@ export default function AdminRegister() {
             </div>
             <div>
               <CardTitle className="text-2xl font-bold">
-                {isPrintPartner ? "Application Submitted" : "Registration Submitted"}
+                {isPrintPartner || isAgent ? "Application Submitted" : "Registration Submitted"}
               </CardTitle>
               <CardDescription className="text-base mt-2">
-                {isPrintPartner
+                {isAgent
+                  ? "Your agent application has been submitted. An admin will review and approve your account."
+                  : isPrintPartner
                   ? "Your print partner application has been submitted. The super admin will review and approve your account."
                   : "Your admin account request is pending approval"}
               </CardDescription>
