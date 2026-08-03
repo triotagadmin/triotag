@@ -765,23 +765,6 @@ const VenueRegistration = () => {
                     <p className="text-xs text-muted-foreground">Search for your location or click the map to place a pin. This address is private.</p>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10">
-                        <MapPin className="w-4 h-4" />
-                      </div>
-                      <Input
-                        placeholder="Type your venue address, barangay, or landmark..."
-                        value={headOfficeSearch}
-                        onChange={(e) => setHeadOfficeSearch(e.target.value)}
-                        className="pl-9 font-medium"
-                      />
-                      {headOfficeAddress && (
-                        <div className="mt-1.5 text-xs text-green-600 flex items-center gap-1 pl-1">
-                          <CheckCircle className="w-3 h-3" />
-                          Location saved: {headOfficeAddress}
-                        </div>
-                      )}
-                    </div>
                     <LocationPickerMap
                       initialLocation={latitude && longitude ? { lat: latitude, lng: longitude } : null}
                       searchValue={headOfficeSearch}
@@ -799,6 +782,12 @@ const VenueRegistration = () => {
                         setLongitude(loc.lng);
                       }}
                     />
+                    {headOfficeAddress && (
+                      <div className="text-xs text-green-600 flex items-center gap-1 pl-1">
+                        <CheckCircle className="w-3 h-3" />
+                        Location saved: {headOfficeAddress}
+                      </div>
+                    )}
                     {(!latitude || !longitude) && (
                       <Alert className="rounded-[14px]">
                         <Info className="h-4 w-4" />
