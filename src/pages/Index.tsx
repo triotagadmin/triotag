@@ -531,15 +531,6 @@ const MediaTruckSection = () => (
               Explore Media Truck <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
-          <Link to="/contact">
-            <Button
-              size="lg"
-              variant="outline"
-              className="bg-black/40 backdrop-blur border-white/30 text-white hover:bg-black/60 hover:text-white"
-            >
-              Custom Brand Truck
-            </Button>
-          </Link>
         </div>
       </div>
     </div>
