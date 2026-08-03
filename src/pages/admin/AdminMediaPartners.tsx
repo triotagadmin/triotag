@@ -143,7 +143,7 @@ export default function AdminMediaPartners() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
+        <AppSidebar role="admin" />
         <main className="flex-1 p-6 space-y-6">
           <div className="flex items-center gap-3">
             <SidebarTrigger />
