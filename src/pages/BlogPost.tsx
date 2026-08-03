@@ -19,7 +19,13 @@ interface BlogPostData {
   read_time: string;
   category: string;
   image_url: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  image_alt_text?: string | null;
+  canonical_url?: string | null;
+  slug?: string | null;
 }
+
 
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
