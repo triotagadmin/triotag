@@ -917,42 +917,60 @@ export type Database = {
       blog_posts: {
         Row: {
           author: string
+          canonical_url: string | null
           category: string
           content: string
           created_at: string
           excerpt: string
+          focus_keyword: string | null
           id: string
+          image_alt_text: string | null
           image_url: string | null
+          meta_description: string | null
+          meta_title: string | null
           published_by: string | null
           read_time: string
+          slug: string | null
           status: string
           title: string
           updated_at: string
         }
         Insert: {
           author: string
+          canonical_url?: string | null
           category: string
           content: string
           created_at?: string
           excerpt: string
+          focus_keyword?: string | null
           id?: string
+          image_alt_text?: string | null
           image_url?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
           published_by?: string | null
           read_time: string
+          slug?: string | null
           status?: string
           title: string
           updated_at?: string
         }
         Update: {
           author?: string
+          canonical_url?: string | null
           category?: string
           content?: string
           created_at?: string
           excerpt?: string
+          focus_keyword?: string | null
           id?: string
+          image_alt_text?: string | null
           image_url?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
           published_by?: string | null
           read_time?: string
+          slug?: string | null
           status?: string
           title?: string
           updated_at?: string
