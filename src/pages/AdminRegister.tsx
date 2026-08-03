@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Shield, ArrowLeft, CheckCircle2, Printer } from "lucide-react";
+import { Shield, ArrowLeft, CheckCircle2, Printer, UserCheck } from "lucide-react";
 import { z } from "zod";
 
 const adminRegisterSchema = z.object({
