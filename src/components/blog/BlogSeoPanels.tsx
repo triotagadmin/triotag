@@ -617,7 +617,7 @@ export function BlogSeoPanels({ form, onChange, currentPostId, publishedDate }: 
                 <div key={r.id} className="rounded-lg border p-3">
                   <p>
                     This post is <strong>{r.pct}%</strong> similar to{" "}
-                    <a href={`/blog/${r.id}`} className="text-primary hover:underline">
+                    <a href={`/insights/${r.id}`} className="text-primary hover:underline">
                       "{r.title}"
                     </a>
                   </p>
