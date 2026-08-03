@@ -371,7 +371,7 @@ export function RadiusMapPlanner({
       {legendCategories.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
           <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">
-            Nearby locations ({markers?.length ?? 0})
+            RETAIL MEDIA &nbsp;CATEGORY({markers?.length ?? 0})
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-1.5">
             {legendCategories.map((c) => {

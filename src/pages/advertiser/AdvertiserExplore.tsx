@@ -429,7 +429,7 @@ export default function AdvertiserExplore() {
                   <div className="bg-white border border-gray-200 rounded-2xl p-5">
                     <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
                       <div>
-                        <h3 className="text-base font-bold text-gray-900">Nearby Locations in This Area</h3>
+                        <h3 className="text-base font-bold text-gray-900">Retail Media Locations in This Area</h3>
                         <p className="text-xs text-gray-500 mt-0.5">
                           {placesLoading
                             ? "Finding nearby locations…"
