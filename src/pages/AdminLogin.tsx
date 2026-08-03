@@ -228,7 +228,7 @@ export default function AdminLogin() {
                     <Link to="/admin/register?type=agent">Register as Agent</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm" className="flex-1">
-                    <Link to="/admin/register?type=print_partner">Register as Media Partner</Link>
+                    <Link to="/partners/register">Register as Media Partner</Link>
                   </Button>
                 </div>
               </div>
