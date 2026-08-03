@@ -119,6 +119,10 @@ import IndustriesRetailers from "./pages/industries/Retailers";
 import IndustriesBrands from "./pages/industries/Brands";
 import EcommerceOperations from "./pages/industries/EcommerceOperations";
 import MediaPartners from "./pages/MediaPartners";
+import PartnerDirectory from "./pages/PartnerDirectory";
+import MediaPartnerRegister from "./pages/MediaPartnerRegister";
+import AdminMediaPartners from "./pages/admin/AdminMediaPartners";
+
 import UnderConstruction from "./pages/UnderConstruction";
 import HomeRouter from "./components/HomeRouter";
 import Notifications from "./pages/Notifications";
