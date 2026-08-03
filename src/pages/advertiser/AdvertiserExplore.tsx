@@ -14,7 +14,7 @@ import {
 import { addMonths, format, startOfDay, isBefore } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
+import { RadiusMapPlanner, CATEGORY_STYLES } from "@/components/advertiser/RadiusMapPlanner";
 import { getActiveAreaNamesText, isWithinServiceArea } from "@/lib/serviceAreas";
 import {
   calculateMediaPlanEstimate,
