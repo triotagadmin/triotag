@@ -136,6 +136,7 @@ export default function AdvertiserExplore() {
               lat: r.lat,
               lng: r.lng,
               name: r.name,
+              address: r.address ?? "",
               category: c.key,
               placeId: r.placeId,
             }));
@@ -143,12 +144,12 @@ export default function AdvertiserExplore() {
         );
         if (cancelled) return;
         const seen = new Set<string>();
-        const merged: { lat: number; lng: number; name: string; category: string }[] = [];
+        const merged: { lat: number; lng: number; name: string; category: string; address?: string }[] = [];
         for (const list of settled) {
           for (const p of list) {
             if (!p.lat || !p.lng || seen.has(p.placeId)) continue;
             seen.add(p.placeId);
-            merged.push({ lat: p.lat, lng: p.lng, name: p.name, category: p.category });
+            merged.push({ lat: p.lat, lng: p.lng, name: p.name, category: p.category, address: p.address });
           }
         }
         setNearbyPlaces(merged);
