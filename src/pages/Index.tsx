@@ -575,9 +575,6 @@ const ExchangeIntro = () => (
 
     <div className="container mx-auto px-4 md:px-6 py-16 md:py-20 relative">
       <div className="max-w-3xl mx-auto text-center space-y-5">
-        <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold tracking-wider uppercase text-green-500 bg-green-500/10 border border-green-500/30 rounded-full">
-          <Network className="w-3.5 h-3.5" /> Retail Advertising Exchange
-        </span>
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1]">
           The Central Hub for <span className="text-green-500">Retail Advertising</span>
         </h2>
