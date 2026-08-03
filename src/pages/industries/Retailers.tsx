@@ -321,7 +321,7 @@ const Retailers = () => {
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Button size="lg" variant="cyber" onClick={startCampaign} className="text-base">
-                Launch a Campaign <ArrowRight className="h-4 w-4" />
+                Account Registration <ArrowRight className="h-4 w-4" />
               </Button>
               <Button size="lg" variant="outline" onClick={bookDemo} className="text-base">
                 Campaign Request
