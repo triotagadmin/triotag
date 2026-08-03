@@ -424,70 +424,54 @@ export default function AdvertiserExplore() {
                   />
 
 
-                  {/* Available inventory */}
+                  {/* Nearby locations discovered via Places */}
                   <div className="bg-white border border-gray-200 rounded-2xl p-5">
                     <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
                       <div>
-                        <h3 className="text-base font-bold text-gray-900">Available Inventory in Your Area</h3>
+                        <h3 className="text-base font-bold text-gray-900">Nearby Locations in This Area</h3>
                         <p className="text-xs text-gray-500 mt-0.5">
-                          {inventoryLoading
-                            ? "Detecting nearby ad spaces…"
-                            : `${nearbyInventory.length} ad space${nearbyInventory.length === 1 ? "" : "s"} found within ${(radiusMeters / 1000).toFixed(radiusMeters % 1000 === 0 ? 0 : 2)} km`}
+                          {placesLoading
+                            ? "Finding nearby locations…"
+                            : `${nearbyPlaces.length} location${nearbyPlaces.length === 1 ? "" : "s"} found within ${(radiusMeters / 1000).toFixed(radiusMeters % 1000 === 0 ? 0 : 2)} km`}
                         </p>
                       </div>
-                      {inventoryLoading && <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />}
+                      {placesLoading && <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />}
                     </div>
 
-                    {!inventoryLoading && nearbyInventory.length === 0 && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-900">
-                        No active listings in this area yet — you can still submit a request and we'll find suitable inventory for you.
+                    {!placesLoading && nearbyPlaces.length === 0 && (
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-600">
+                        No nearby locations found — try a larger radius.
                       </div>
                     )}
 
-                    {!inventoryLoading && nearbyInventory.length > 0 && (
+                    {nearbyPlaces.length > 0 && (
                       <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-                        {nearbyInventory.slice(0, 40).map((r) => (
-                          <div
-                            key={r.id}
-                            className="flex items-start justify-between gap-3 border border-gray-100 hover:border-green-300 rounded-lg px-3 py-2.5"
-                          >
-                            <div className="min-w-0">
-                              <div className="text-sm font-semibold text-gray-900 truncate">
-                                {r.publisher_profiles?.business_name || r.title}
+                        {nearbyPlaces.map((p, i) => {
+                          const s = CATEGORY_STYLES[p.category] ?? CATEGORY_STYLES.other;
+                          return (
+                            <div
+                              key={`${p.name}-${i}`}
+                              className="flex items-start justify-between gap-3 border border-gray-100 hover:border-green-300 rounded-lg px-3 py-2.5"
+                            >
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-gray-900 truncate">{p.name}</div>
+                                {p.address && (
+                                  <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-1">
+                                    <MapPin className="w-3 h-3 shrink-0" />
+                                    <span className="truncate">{p.address}</span>
+                                  </div>
+                                )}
                               </div>
-                              <div className="text-xs text-gray-500 truncate">{r.title}</div>
-                              <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-1">
-                                <MapPin className="w-3 h-3" />
-                                <span className="truncate">{r.location || "Location not disclosed"}</span>
-                              </div>
-                              {(r.media_types || []).length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1.5">
-                                  {(r.media_types || []).map((mt) => (
-                                    <span
-                                      key={mt}
-                                      className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                                        mt === "OOH" ? "bg-purple-100 text-purple-700" :
-                                        mt === "DOOH" ? "bg-cyan-100 text-cyan-700" :
-                                        mt === "AOOH" ? "bg-green-100 text-green-700" :
-                                        "bg-gray-100 text-gray-700"
-                                      }`}
-                                    >
-                                      {mt}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
+                              <span className="inline-flex items-center gap-1.5 text-xs text-gray-700 shrink-0">
+                                <span
+                                  className="w-2.5 h-2.5 rounded-full border border-white shadow"
+                                  style={{ background: s.color }}
+                                />
+                                {s.label}
+                              </span>
                             </div>
-                            <span className="text-xs text-gray-600 shrink-0 font-medium">
-                              {distanceLabel(r.distance)}
-                            </span>
-                          </div>
-                        ))}
-                        {nearbyInventory.length > 40 && (
-                          <div className="text-xs text-gray-500 text-center pt-2">
-                            + {nearbyInventory.length - 40} more nearby
-                          </div>
-                        )}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
