@@ -103,7 +103,7 @@ export default function AdvertiserExplore() {
 
   // Auto-discover nearby retail-type places for map markers (debounced)
   const [nearbyPlaces, setNearbyPlaces] = useState<
-    { lat: number; lng: number; name: string; category: string }[]
+    { lat: number; lng: number; name: string; category: string; address?: string }[]
   >([]);
   const [placesLoading, setPlacesLoading] = useState(false);
 
