@@ -259,6 +259,7 @@ function ExploreCampaignRequests() {
 }
 
 export default function AdminBrandCampaigns() {
+  const [section, setSection] = useState<string>("brand");
   const [loading, setLoading] = useState(true);
   const [campaigns, setCampaigns] = useState<BrandCampaign[]>([]);
   const [tab, setTab] = useState<string>("pending_review");
