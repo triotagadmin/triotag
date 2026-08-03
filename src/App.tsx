@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { GuestBasketProvider } from "@/contexts/GuestBasketContext";
 import Index from "./pages/Index";
+import About from "./pages/About";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminLogin from "./pages/AdminLogin";
@@ -148,6 +149,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<HomeRouter />} />
           
+          <Route path="/about" element={<About />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/campaigns" element={<RoleProtectedRoute requireAuth allowedRoles={["admin"]}><CampaignMarketplace /></RoleProtectedRoute>} />
