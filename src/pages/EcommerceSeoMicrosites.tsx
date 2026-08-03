@@ -667,7 +667,7 @@ const Pricing = () => (
               <h3 className="text-xl font-extrabold text-zinc-900">{pkg.name}</h3>
               <div className="flex items-baseline gap-1">
                 <span className="text-3xl font-extrabold text-zinc-900">{pkg.price}</span>
-                <span className="text-sm text-zinc-500">{pkg.period}</span>
+                <span className="text-sm text-zinc-500 whitespace-pre-line">{pkg.period}</span>
               </div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 border border-green-100 text-xs font-semibold text-green-700">
                 <Layers className="w-3.5 h-3.5" /> {pkg.volume}
