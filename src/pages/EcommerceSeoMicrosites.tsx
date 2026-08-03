@@ -110,7 +110,7 @@ const usePageMetadata = () => {
         offers: [
           { "@type": "Offer", name: "Starter", price: "49888", priceCurrency: "PHP", description: "15 SEO Microsites per month" },
           { "@type": "Offer", name: "Growth", price: "89888", priceCurrency: "PHP", description: "50 SEO Microsites per month" },
-          { "@type": "Offer", name: "Enterprise", price: "189888", priceCurrency: "PHP", description: "100+ SEO Microsites per month" },
+          { "@type": "Offer", name: "Enterprise", price: "189888", priceCurrency: "PHP", description: "100 SEO Microsites per month" },
         ],
       },
       {
@@ -627,10 +627,10 @@ const packages = [
     name: "Enterprise",
     price: "₱189,888",
     period: "\n",
-    volume: "100+ SEO Microsites",
+    volume: "100 SEO Microsites",
     description: "Category-domination scale for multi-SKU retailers and marketplace sellers.",
     features: [
-      "100+ SEO microsites per month",
+      "100 SEO microsites per month",
       "Multi-brand & multi-city coverage",
       "Advanced entity & AEO optimization",
       "Digital PR & premium link placements",
