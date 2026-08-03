@@ -87,15 +87,19 @@ const Auth = () => {
             ]);
 
             // publisher_profiles present = genuine retailer/venue account, never touch
-            if (!baProfile && !pubProfile) {
+            if (!pubProfile) {
               await supabase.rpc("set_own_role", { _role: "brand_advertiser" });
-              await supabase.from("brand_advertiser_profiles").insert({
-                user_id: userId,
-                company_name: session.user.user_metadata?.full_name || "",
-                contact_name: session.user.user_metadata?.full_name || "",
-                contact_email: userEmail,
-                verified: true,
-              });
+
+              if (!baProfile) {
+                await supabase.from("brand_advertiser_profiles").insert({
+                  user_id: userId,
+                  company_name: session.user.user_metadata?.full_name || "",
+                  contact_name: session.user.user_metadata?.full_name || "",
+                  contact_email: userEmail,
+                  verified: true,
+                });
+              }
+
               toast({
                 title: "Welcome!",
                 description: "Your account has been created successfully.",
@@ -104,6 +108,7 @@ const Auth = () => {
               return;
             }
           }
+
 
           // Existing account (including legacy retailers) — always honor its role
           routeByRole(existingRole.role);
