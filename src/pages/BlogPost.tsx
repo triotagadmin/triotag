@@ -163,7 +163,7 @@ const BlogPost = () => {
         <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
           <img
             src={post.image_url}
-            alt={post.title}
+            alt={post.image_alt_text || post.title}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
