@@ -293,12 +293,15 @@ export function RadiusMapPlanner({
         <div className="relative">
           <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400 z-[1]" />
           <Input
-            value={searchText}
+            value={reverseLoading ? "" : searchText}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search an address, business or area..."
+            placeholder={reverseLoading ? "Getting address…" : "Search an address, business or area..."}
+            disabled={reverseLoading}
             className="pl-9 h-11 bg-white text-gray-900 border border-gray-300 rounded-lg focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:border-green-500"
           />
-          {searching && <Loader2 className="absolute right-3 top-3 w-4 h-4 text-gray-400 animate-spin" />}
+          {(searching || reverseLoading) && (
+            <Loader2 className="absolute right-3 top-3 w-4 h-4 text-gray-400 animate-spin" />
+          )}
           {suggestions.length > 0 && (
             <div className="absolute z-[1000] mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {suggestions.map((s) => (
