@@ -27,7 +27,8 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
 
-  const intended = sanitizeRedirect(searchParams.get("redirect")) ?? "/dashboard";
+  const rawIntended = sanitizeRedirect(searchParams.get("redirect"));
+  const intended = rawIntended && rawIntended !== "/" ? rawIntended : "/dashboard";
 
   useEffect(() => {
     let active = true;
