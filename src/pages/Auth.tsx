@@ -1,26 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
+
+// Self-serve signup only creates Brand Advertiser accounts.
+const SIGNUP_USER_TYPE = "brand_advertiser";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [userType, setUserType] = useState<string>("retailer");
+  const userType = SIGNUP_USER_TYPE;
 
-  useEffect(() => {
-    const intendedRole = localStorage.getItem("intended_role");
-    if (intendedRole) {
-      setUserType(intendedRole);
-      localStorage.removeItem("intended_role");
-    }
-  }, []);
 
   // Read ?redirect=... once so post-auth flows can honor it
   const redirectTo = (() => {
