@@ -88,6 +88,47 @@ export default function AdminRegister() {
     setIsLoading(true);
 
     try {
+      if (isAgent) {
+        const validated = agentSchema.parse(formData);
+
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: validated.email,
+          password: validated.password,
+          options: {
+            data: {
+              user_type: "agent",
+              full_name: validated.fullName,
+              business_name: validated.companyName,
+              contact_phone: validated.phoneNumber,
+              location: validated.businessAddress,
+            },
+            emailRedirectTo: `${window.location.origin}/admin`,
+          },
+        });
+
+        if (authError) throw authError;
+        if (!authData.user) throw new Error("Registration failed");
+
+        const { error: notifyError } = await supabase.functions.invoke("notify-admin-registration", {
+          body: {
+            fullName: validated.fullName,
+            email: validated.email,
+            phoneNumber: validated.phoneNumber,
+            userId: authData.user.id,
+            registrationType: "agent",
+            companyName: validated.companyName,
+            businessAddress: validated.businessAddress,
+          },
+        });
+        if (notifyError) console.error("Failed to send notification email:", notifyError);
+
+        await supabase.auth.signOut();
+        setIsSuccess(true);
+        toast.success("Agent application submitted!");
+        setTimeout(() => navigate("/admin"), 3000);
+        return;
+      }
+
       if (isPrintPartner) {
         const validated = printPartnerSchema.parse(formData);
 
