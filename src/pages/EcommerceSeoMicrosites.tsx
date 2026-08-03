@@ -593,7 +593,7 @@ const packages = [
   {
     name: "Starter",
     price: "₱49,888",
-    period: "/month",
+    period: "\n",
     volume: "15 SEO Microsites",
     description: "For growing online stores publishing their first product-keyword microsite network.",
     features: [
@@ -609,7 +609,7 @@ const packages = [
   {
     name: "Growth",
     price: "₱89,888",
-    period: "/month",
+    period: "\n",
     volume: "50 SEO Microsites",
     description: "For eCommerce brands scaling category coverage and organic order volume.",
     features: [
@@ -626,7 +626,7 @@ const packages = [
   {
     name: "Enterprise",
     price: "₱189,888",
-    period: "/month",
+    period: "\n",
     volume: "100+ SEO Microsites",
     description: "Category-domination scale for multi-SKU retailers and marketplace sellers.",
     features: [
@@ -667,7 +667,7 @@ const Pricing = () => (
               <h3 className="text-xl font-extrabold text-zinc-900">{pkg.name}</h3>
               <div className="flex items-baseline gap-1">
                 <span className="text-3xl font-extrabold text-zinc-900">{pkg.price}</span>
-                <span className="text-sm text-zinc-500">{pkg.period}</span>
+                <span className="text-sm text-zinc-500 whitespace-pre-line">{pkg.period}</span>
               </div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 border border-green-100 text-xs font-semibold text-green-700">
                 <Layers className="w-3.5 h-3.5" /> {pkg.volume}
