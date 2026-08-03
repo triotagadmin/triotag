@@ -277,10 +277,12 @@ export default function AdminRegister() {
             </div>
             <div>
               <CardTitle className="text-2xl font-bold">
-                {isPrintPartner ? "Print Partner Registration" : "Request Admin Access"}
+                {isAgent ? "Agent Registration" : isPrintPartner ? "Print Partner Registration" : "Request Admin Access"}
               </CardTitle>
               <CardDescription className="text-base mt-2">
-                {isPrintPartner
+                {isAgent
+                  ? "Apply to join TrioTag as an Agent. Your application will be reviewed by an admin before you can sign in."
+                  : isPrintPartner
                   ? "Apply to join TrioTag's print partner network. Your application will be reviewed by the super admin."
                   : "Submit your application for administrator privileges"}
               </CardDescription>
