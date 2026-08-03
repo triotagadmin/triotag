@@ -25,6 +25,32 @@ serve(async (req) => {
     const lat = typeof body?.lat === "number" ? body.lat : null;
     const lng = typeof body?.lng === "number" ? body.lng : null;
 
+    // Reverse geocoding mode: lat/lng provided without a query
+    if (!query && lat != null && lng != null) {
+      const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+      const geoRes = await fetch(geoUrl);
+      const geoData = geoRes.ok ? await geoRes.json() : null;
+      const top = geoData?.status === "OK" ? (geoData.results ?? [])[0] : null;
+      if (top?.formatted_address) {
+        return json({ status: "OK", address: top.formatted_address, placeId: top.place_id ?? null });
+      }
+      console.warn("[search-places] geocode unavailable", geoData?.status, geoData?.error_message);
+
+      // Fallback: nearest place via Places Nearby Search
+      const nearUrl =
+        `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}` +
+        `&rankby=distance&key=${apiKey}`;
+      const nearRes = await fetch(nearUrl);
+      if (!nearRes.ok) return json({ error: "Reverse lookup failed" }, 502);
+      const nearData = await nearRes.json();
+      const place = (nearData.results ?? [])[0];
+      if (!place) return json({ status: "ZERO_RESULTS", address: null });
+      const address = place.vicinity
+        ? `${place.name} — ${place.vicinity}`
+        : place.name ?? null;
+      return json({ status: "OK", address, placeId: place.place_id ?? null });
+    }
+
     if (query.length < 3 || query.length > 200) {
       return json({ error: "Query must be between 3 and 200 characters" }, 400);
     }

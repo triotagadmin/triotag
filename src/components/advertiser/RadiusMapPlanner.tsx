@@ -67,10 +67,38 @@ export function RadiusMapPlanner({
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [searching, setSearching] = useState(false);
+  const [reverseLoading, setReverseLoading] = useState(false);
+  const reverseSeqRef = useRef(0);
   const [isOutsideServiceArea, setIsOutsideServiceArea] = useState(
     !isWithinServiceArea(center.lat, center.lng),
   );
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const onLocationSetRef = useRef(onLocationSet);
+  useEffect(() => {
+    onLocationSetRef.current = onLocationSet;
+  }, [onLocationSet]);
+
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    const seq = ++reverseSeqRef.current;
+    setReverseLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("search-places", {
+        body: { lat, lng },
+      });
+      if (error) throw error;
+      const address = (data as any)?.address as string | undefined;
+      if (seq === reverseSeqRef.current && address) {
+        setSearchText(address);
+        setSuggestions([]);
+        onLocationSetRef.current?.(address);
+      }
+    } catch (e) {
+      console.error("[RadiusMapPlanner] reverse geocode failed", e);
+    } finally {
+      if (seq === reverseSeqRef.current) setReverseLoading(false);
+    }
+  }, []);
 
   const reportPin = useCallback(
     (lat: number, lng: number) => {
@@ -78,8 +106,9 @@ export function RadiusMapPlanner({
       setIsOutsideServiceArea(!within);
       onServiceAreaChange?.(within);
       onCenterChange({ lat, lng });
+      void reverseGeocode(lat, lng);
     },
-    [onCenterChange, onServiceAreaChange],
+    [onCenterChange, onServiceAreaChange, reverseGeocode],
   );
 
   // Init map once
@@ -234,6 +263,9 @@ export function RadiusMapPlanner({
     }
     const display = s.address ? `${s.name} — ${s.address}` : s.name;
     reportPin(lat, lng);
+    // cancel any in-flight reverse lookup so it can't overwrite the picked name
+    reverseSeqRef.current++;
+    setReverseLoading(false);
     setSearchText(display);
     onLocationSet?.(display);
     setSuggestions([]);
@@ -261,12 +293,15 @@ export function RadiusMapPlanner({
         <div className="relative">
           <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400 z-[1]" />
           <Input
-            value={searchText}
+            value={reverseLoading ? "" : searchText}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search an address, business or area..."
+            placeholder={reverseLoading ? "Getting address…" : "Search an address, business or area..."}
+            disabled={reverseLoading}
             className="pl-9 h-11 bg-white text-gray-900 border border-gray-300 rounded-lg focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:border-green-500"
           />
-          {searching && <Loader2 className="absolute right-3 top-3 w-4 h-4 text-gray-400 animate-spin" />}
+          {(searching || reverseLoading) && (
+            <Loader2 className="absolute right-3 top-3 w-4 h-4 text-gray-400 animate-spin" />
+          )}
           {suggestions.length > 0 && (
             <div className="absolute z-[1000] mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {suggestions.map((s) => (
