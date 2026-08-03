@@ -64,17 +64,25 @@ export default function AdminLogin() {
 
       console.log(`[Admin Login] User authenticated: ${authData.user.id}`);
 
-      // Verify role (admin or print_partner)
+      // Verify role (admin, print_partner or agent)
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", authData.user.id)
         .single();
 
-      if (roleError || (roleData?.role !== "admin" && roleData?.role !== "print_partner")) {
-        console.error("[Admin Login Error] User does not have admin or print_partner role:", roleError);
+      const allowedRoles = ["admin", "print_partner", "agent"];
+      if (roleError || !roleData?.role || !allowedRoles.includes(roleData.role)) {
+        console.error("[Admin Login Error] User role not permitted on admin portal:", roleError);
         await supabase.auth.signOut();
-        toast.error("Access denied. Admin or Print Partner credentials required.");
+        toast.error("Access denied. Admin, Agent or Print Partner credentials required.");
+        return;
+      }
+
+      // Handle agent login
+      if (roleData.role === "agent") {
+        toast.success("Welcome back!");
+        navigate("/venue-publishers");
         return;
       }
 
