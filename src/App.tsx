@@ -116,6 +116,7 @@ import SolutionsAOOH from "./pages/solutions/AOOH";
 import SolutionsMediaTruck from "./pages/solutions/MediaTruck";
 import IndustriesRetailers from "./pages/industries/Retailers";
 import IndustriesBrands from "./pages/industries/Brands";
+import EcommerceOperations from "./pages/industries/EcommerceOperations";
 import MediaPartners from "./pages/MediaPartners";
 import UnderConstruction from "./pages/UnderConstruction";
 import HomeRouter from "./components/HomeRouter";
@@ -310,6 +311,7 @@ const App = () => (
           <Route path="/solutions/media-truck" element={<SolutionsMediaTruck />} />
           <Route path="/industries/retaildsp" element={<IndustriesRetailers />} />
           <Route path="/industries/sspsource" element={<IndustriesBrands />} />
+          <Route path="/ecommerce" element={<EcommerceOperations />} />
           <Route path="/media-partners" element={<MediaPartners />} />
           {/* Brand Advertiser portal */}
           <Route path="/brand-advertiser/dashboard" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandAdvertiserDashboard /></RoleProtectedRoute>} />
