@@ -179,7 +179,7 @@ const StorefrontPreview = () => (
         <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" />
         <span className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
         <span className="ml-3 text-[10px] font-mono text-zinc-500 truncate">
-          yourbrand.com/best-running-shoes
+          microsite.com/best-running-shoes
         </span>
       </div>
       <div className="grid grid-cols-3 gap-3">
