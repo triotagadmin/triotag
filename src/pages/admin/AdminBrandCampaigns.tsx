@@ -40,12 +40,16 @@ const STATUS_STYLE: Record<string, string> = {
   approved: "bg-green-100 text-green-700 border border-green-200",
   rejected: "bg-red-100 text-red-700 border border-red-200",
   draft: "bg-gray-100 text-gray-600 border border-gray-200",
+  paid: "bg-blue-100 text-blue-700 border border-blue-200",
+  completed: "bg-emerald-100 text-emerald-700 border border-emerald-200",
 };
 const STATUS_LABEL: Record<string, string> = {
   pending_review: "Pending Review",
   approved: "Approved",
   rejected: "Rejected",
   draft: "Draft",
+  paid: "Awaiting Review",
+  completed: "Completed",
 };
 
 function StatusBadge({ status }: { status: string }) {
