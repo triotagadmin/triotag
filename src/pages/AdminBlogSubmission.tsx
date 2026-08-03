@@ -64,11 +64,19 @@ export default function AdminBlogSubmission() {
           author: data.author || "",
           category: data.category || "",
           image_url: data.image_url || "",
-          read_time: data.read_time || ""
+          read_time: data.read_time || "",
+          slug: (data as any).slug || "",
+          meta_title: (data as any).meta_title || "",
+          meta_description: (data as any).meta_description || "",
+          canonical_url: (data as any).canonical_url || "",
+          focus_keyword: (data as any).focus_keyword || "",
+          image_alt_text: (data as any).image_alt_text || ""
         });
+        setPublishedDate(data.created_at || undefined);
         if (data.image_url) {
           setPreviewUrl(data.image_url);
         }
+
       }
     } catch (error: any) {
       console.error("Error loading blog post:", error);
