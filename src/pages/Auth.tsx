@@ -35,7 +35,17 @@ const Auth = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const urlAccountType = urlParams.get("account_type");
       const storedUserType = urlAccountType || localStorage.getItem("google_signup_user_type");
-      if (!storedUserType) return; // Not a Google signup flow we initiated
+
+      if (!storedUserType) {
+        // Already logged in, no fresh OAuth flow — route to their dashboard
+        const { data: roleRow } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        if (roleRow?.role) routeByRole(roleRow.role);
+        return;
+      }
 
       localStorage.removeItem("google_signup_user_type");
       // Clean up URL params
@@ -57,24 +67,27 @@ const Auth = () => {
 
         if (existingRole) {
           // The handle_new_user_role trigger defaults Google signups to
-          // 'retailer' (Google never sets user_type metadata). Correct it only
-          // for genuinely brand-new brand_advertiser signups.
-          const createdAt = new Date(session.user.created_at || 0).getTime();
-          const lastSignIn = new Date(session.user.last_sign_in_at || 0).getTime();
-          const isBrandNew = Math.abs(lastSignIn - createdAt) < 10_000;
-
+          // 'retailer' (Google never sets user_type metadata). Correct it when
+          // there's no evidence of a genuine retailer account.
           if (
             urlAccountType === "brand_advertiser" &&
-            existingRole.role === "retailer" &&
-            isBrandNew
+            existingRole.role === "retailer"
           ) {
-            const { data: baProfile } = await supabase
-              .from("brand_advertiser_profiles")
-              .select("id")
-              .eq("user_id", userId)
-              .maybeSingle();
+            const [{ data: baProfile }, { data: pubProfile }] = await Promise.all([
+              supabase
+                .from("brand_advertiser_profiles")
+                .select("id")
+                .eq("user_id", userId)
+                .maybeSingle(),
+              supabase
+                .from("publisher_profiles")
+                .select("id")
+                .eq("user_id", userId)
+                .maybeSingle(),
+            ]);
 
-            if (!baProfile) {
+            // publisher_profiles present = genuine retailer/venue account, never touch
+            if (!baProfile && !pubProfile) {
               await supabase.rpc("set_own_role", { _role: "brand_advertiser" });
               await supabase.from("brand_advertiser_profiles").insert({
                 user_id: userId,
@@ -96,6 +109,7 @@ const Auth = () => {
           routeByRole(existingRole.role);
           return;
         }
+
 
 
 
