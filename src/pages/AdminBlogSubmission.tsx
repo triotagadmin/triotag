@@ -155,12 +155,22 @@ export default function AdminBlogSubmission() {
         return;
       }
 
+      const payload = {
+        ...formData,
+        slug: formData.slug?.trim() ? slugify(formData.slug) : slugify(formData.title),
+        meta_title: formData.meta_title || null,
+        meta_description: formData.meta_description || null,
+        canonical_url: formData.canonical_url || null,
+        focus_keyword: formData.focus_keyword || null,
+        image_alt_text: formData.image_alt_text || null,
+      };
+
       if (editId) {
         // Update existing blog post
         const { error } = await supabase
           .from("blog_posts")
           .update({
-            ...formData,
+            ...payload,
             updated_at: new Date().toISOString()
           })
           .eq("id", editId);
@@ -173,7 +183,7 @@ export default function AdminBlogSubmission() {
         const { error } = await supabase
           .from("blog_posts")
           .insert({
-            ...formData,
+            ...payload,
             published_by: user.id,
             status: "published"
           });
@@ -182,6 +192,7 @@ export default function AdminBlogSubmission() {
 
         toast.success("Blog post published successfully!");
       }
+
       
       navigate("/insights");
     } catch (error: any) {
