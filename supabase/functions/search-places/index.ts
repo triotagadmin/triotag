@@ -25,6 +25,28 @@ serve(async (req) => {
     const lat = typeof body?.lat === "number" ? body.lat : null;
     const lng = typeof body?.lng === "number" ? body.lng : null;
 
+    // Reverse geocoding mode: lat/lng provided without a query
+    if (!query && lat != null && lng != null) {
+      const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+      const geoRes = await fetch(geoUrl);
+      if (!geoRes.ok) {
+        const text = (await geoRes.text()).slice(0, 300);
+        console.error("[search-places] reverse HTTP error", geoRes.status, text);
+        return json({ error: `Reverse geocode failed (${geoRes.status})` }, 502);
+      }
+      const geoData = await geoRes.json();
+      if (geoData.status !== "OK" && geoData.status !== "ZERO_RESULTS") {
+        console.error("[search-places] reverse status", geoData.status, geoData.error_message);
+        return json({ error: `Google Geocoding API error: ${geoData.status}` }, 502);
+      }
+      const top = (geoData.results ?? [])[0];
+      return json({
+        status: geoData.status,
+        address: top?.formatted_address ?? null,
+        placeId: top?.place_id ?? null,
+      });
+    }
+
     if (query.length < 3 || query.length > 200) {
       return json({ error: "Query must be between 3 and 200 characters" }, 400);
     }

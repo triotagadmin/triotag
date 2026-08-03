@@ -67,6 +67,8 @@ export function RadiusMapPlanner({
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [searching, setSearching] = useState(false);
+  const [reverseLoading, setReverseLoading] = useState(false);
+  const reverseSeqRef = useRef(0);
   const [isOutsideServiceArea, setIsOutsideServiceArea] = useState(
     !isWithinServiceArea(center.lat, center.lng),
   );
