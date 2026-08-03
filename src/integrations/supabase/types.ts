@@ -3316,6 +3316,42 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          account_status: string
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          provider: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          account_status?: string
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          provider?: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          account_status?: string
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          provider?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       publisher_profiles: {
         Row: {
           agent_role: Database["public"]["Enums"]["agent_role"] | null
