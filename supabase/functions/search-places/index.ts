@@ -29,22 +29,26 @@ serve(async (req) => {
     if (!query && lat != null && lng != null) {
       const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
       const geoRes = await fetch(geoUrl);
-      if (!geoRes.ok) {
-        const text = (await geoRes.text()).slice(0, 300);
-        console.error("[search-places] reverse HTTP error", geoRes.status, text);
-        return json({ error: `Reverse geocode failed (${geoRes.status})` }, 502);
+      const geoData = geoRes.ok ? await geoRes.json() : null;
+      const top = geoData?.status === "OK" ? (geoData.results ?? [])[0] : null;
+      if (top?.formatted_address) {
+        return json({ status: "OK", address: top.formatted_address, placeId: top.place_id ?? null });
       }
-      const geoData = await geoRes.json();
-      if (geoData.status !== "OK" && geoData.status !== "ZERO_RESULTS") {
-        console.error("[search-places] reverse status", geoData.status, geoData.error_message);
-        return json({ error: `Google Geocoding API error: ${geoData.status}` }, 502);
-      }
-      const top = (geoData.results ?? [])[0];
-      return json({
-        status: geoData.status,
-        address: top?.formatted_address ?? null,
-        placeId: top?.place_id ?? null,
-      });
+      console.warn("[search-places] geocode unavailable", geoData?.status, geoData?.error_message);
+
+      // Fallback: nearest place via Places Nearby Search
+      const nearUrl =
+        `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}` +
+        `&rankby=distance&key=${apiKey}`;
+      const nearRes = await fetch(nearUrl);
+      if (!nearRes.ok) return json({ error: "Reverse lookup failed" }, 502);
+      const nearData = await nearRes.json();
+      const place = (nearData.results ?? [])[0];
+      if (!place) return json({ status: "ZERO_RESULTS", address: null });
+      const address = place.vicinity
+        ? `${place.name} — ${place.vicinity}`
+        : place.name ?? null;
+      return json({ status: "OK", address, placeId: place.place_id ?? null });
     }
 
     if (query.length < 3 || query.length > 200) {
