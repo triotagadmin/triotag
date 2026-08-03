@@ -512,9 +512,6 @@ const MediaTruckSection = () => (
     </div>
     <div className="container mx-auto px-4 md:px-6 relative py-20 md:py-32 grid lg:grid-cols-2 gap-12 items-center">
       <div className="space-y-6 text-white">
-        <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30 tracking-widest uppercase">
-          New · Mobile Truck Media Kit
-        </span>
         <h2 className="text-4xl md:text-6xl font-extrabold leading-[1.05]">
           <span className="text-green-500">TRIOTAG</span> Mobile
           <br />
