@@ -59,18 +59,8 @@ export default function SolutionsDOOH() {
             <p className="text-zinc-400 text-lg">
               TrioTag's DOOH network connects DOOH media owners to Global Brands as well as MSME businesses across the Philippines.Launch Retal media campaiagns in Print, Video, Animated, and Aduio creatives — all managed through TrioTag's SSP platform.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg"><Link to="/advertiser/explore">Register DOOH Inventory</Link></Button>
-              
-            </div>
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
-              {[["100+", "Digital Screens"], ["5–30 min", "Avg. dwell time"], ["HD", "Display quality"]].map(([n, l]) => (
-                <div key={l}>
-                  <div className="text-2xl md:text-3xl font-bold text-green-500">{n}</div>
-                  <div className="text-xs text-zinc-400 mt-1">{l}</div>
-                </div>
-              ))}
-            </div>
+
+
           </div>
           <div className="bg-[#0c0c0c] border-4 border-green-500/30 rounded-2xl p-3 overflow-hidden">
             <video
