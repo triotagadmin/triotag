@@ -64,9 +64,6 @@ export default function SolutionsAOOH() {
             <p className="text-zinc-400 text-lg">
               TrioTag's AOOH network is equipped with audio proof of play technology, we also provide audio publisher partnerships with retail media owners &nbsp;— managed through TrioTag's SSP platform.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg"><Link to="/advertiser/explore">Register AOOH Inventory</Link></Button>
-            </div>
           </div>
           <div className="bg-[#0c0c0c] border border-green-500/30 rounded-2xl p-6 text-center relative overflow-hidden">
             <div className="relative rounded-xl overflow-hidden bg-black">
@@ -143,26 +140,9 @@ export default function SolutionsAOOH() {
               </div>
             ))}
           </div>
-          <div className="mt-12 bg-gradient-to-r from-green-500/10 to-green-500/5 border border-green-500/40 rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="text-2xl md:text-3xl font-bold mb-2">Register your venue for a partnership</h3>
-              <p className="text-zinc-400">Get a free Sound System and Digital Screen installation when you join the TrioTag retail media network.</p>
-            </div>
-            <Button asChild size="lg" className="shrink-0"><Link to="/contact">Register Your Venue</Link></Button>
-          </div>
         </div>
       </section>
 
-      <section className="py-20 md:py-28 bg-gradient-to-br from-green-900/40 to-black">
-        <div className="container mx-auto px-4 md:px-6 text-center max-w-3xl">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">Be the voice inside the store</h2>
-          <p className="text-zinc-400 text-lg mb-8">We also produce audio advertisements.</p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Button asChild size="lg"><Link to="/advertiser/explore">Produce an Audio Advertisement</Link></Button>
-            <Button asChild size="lg" variant="outline"><Link to="/contact">Get a Quote</Link></Button>
-          </div>
-        </div>
-      </section>
 
       <Footer />
     </div>
