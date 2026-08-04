@@ -96,7 +96,7 @@ const Hero = () => {
             inventory.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link to="/list-space">
+            <Link to="/auth">
               <Button variant="default" size="lg" className="w-full sm:w-auto">
                 Register Account&nbsp; <ArrowRight className="w-4 h-4" />
               </Button>
