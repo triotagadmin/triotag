@@ -724,7 +724,7 @@ const Brands = () => {
                 className="w-full"
                 onClick={() => navigate("/contact")}
               >
-                Talk to Our Team First
+                Talk to an Agent
               </Button>
 
               <div className="flex justify-center gap-6 mt-6 text-xs text-white/70">
