@@ -38,7 +38,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const CANONICAL = "https://tinystickyads.com/industries/sspsource";
+const CANONICAL = "https://triotag.com/industries/sspsource";
 
 const setMeta = (selector: string, attr: string, value: string) => {
   let el = document.head.querySelector<HTMLMetaElement | HTMLLinkElement>(selector);

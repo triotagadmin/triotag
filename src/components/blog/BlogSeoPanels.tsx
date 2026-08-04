@@ -35,7 +35,7 @@ export interface BlogSeoFields {
   image_alt_text: string;
 }
 
-const SITE_DOMAIN = "tinystickyads.com";
+const SITE_DOMAIN = "triotag.com";
 
 export const slugify = (value: string) =>
   value
