@@ -30,6 +30,7 @@ const NAV_ITEMS_PUBLIC: NavItemDef[] = [
       { label: "Outsource AdOps", to: "/industries/sspsource" },
       { label: "Retail Media DSP", to: "/industries/retaildsp" },
       { label: "Digital Commerce", to: "/ecommerce" },
+      { label: "QR Technology", to: "/industries/qr-technology" },
     ],
   },
   {
