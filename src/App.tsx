@@ -118,6 +118,7 @@ import SolutionsMediaTruck from "./pages/solutions/MediaTruck";
 import IndustriesRetailers from "./pages/industries/Retailers";
 import IndustriesBrands from "./pages/industries/Brands";
 import EcommerceOperations from "./pages/industries/EcommerceOperations";
+import QRTechnology from "./pages/industries/QRTechnology";
 import MediaPartners from "./pages/MediaPartners";
 import PartnerDirectory from "./pages/PartnerDirectory";
 import MediaPartnerRegister from "./pages/MediaPartnerRegister";
@@ -317,6 +318,7 @@ const App = () => (
           <Route path="/solutions/media-truck" element={<SolutionsMediaTruck />} />
           <Route path="/industries/retaildsp" element={<IndustriesRetailers />} />
           <Route path="/industries/sspsource" element={<IndustriesBrands />} />
+          <Route path="/industries/qr-technology" element={<QRTechnology />} />
           <Route path="/ecommerce" element={<EcommerceOperations />} />
           <Route path="/media-partners" element={<MediaPartners />} />
           <Route path="/partners/directory" element={<PartnerDirectory />} />
