@@ -228,14 +228,6 @@ const Brands = () => {
               sales and business growth.
             </p>
 
-            <div className="flex flex-wrap gap-3 mb-10">
-              <Button size="lg" variant="cyber" onClick={bookCall}>
-                <PhoneCall className="h-4 w-4" /> Book a Discovery Call
-              </Button>
-              <Button size="lg" variant="outline" onClick={registerInventory}>
-                <ClipboardList className="h-4 w-4" /> Register your Ad Space
-              </Button>
-            </div>
 
             <div className="flex flex-wrap gap-3">
               {[
