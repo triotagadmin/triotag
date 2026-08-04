@@ -126,6 +126,6 @@ function esc(str: string): string {
 function escUrl(str: string): string {
   return str
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&quot;".slice(0, 0) + "&gt;")
+    .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
