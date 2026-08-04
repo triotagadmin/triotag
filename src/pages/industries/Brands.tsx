@@ -513,9 +513,6 @@ const Brands = () => {
               </p>
             </div>
 
-            <Button size="lg" variant="cyber" onClick={bookCall} className="text-base">
-              Book a Discovery Call <ArrowRight className="h-4 w-4" />
-            </Button>
           </div>
         </div>
       </section>
