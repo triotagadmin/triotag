@@ -55,7 +55,7 @@ import {
   Quote,
 } from "lucide-react";
 
-const PAGE_URL = "https://tinystickyads.com/services/ecommerce-seo";
+const PAGE_URL = "https://triotag.com/services/ecommerce-seo";
 const PAGE_TITLE = "eCommerce SEO Microsites | Triotag";
 const PAGE_DESCRIPTION =
   "Generate more organic traffic and online sales with professionally built eCommerce SEO Microsites. We create high-ranking product-focused websites that attract customers from Google Search.";
@@ -106,7 +106,7 @@ const usePageMetadata = () => {
         url: PAGE_URL,
         description: PAGE_DESCRIPTION,
         areaServed: "PH",
-        provider: { "@type": "Organization", name: "Triotag", url: "https://tinystickyads.com" },
+        provider: { "@type": "Organization", name: "Triotag", url: "https://triotag.com" },
         offers: [
           { "@type": "Offer", name: "Starter", price: "49888", priceCurrency: "PHP", description: "15 SEO Microsites per month" },
           { "@type": "Offer", name: "Growth", price: "89888", priceCurrency: "PHP", description: "50 SEO Microsites per month" },
@@ -117,8 +117,8 @@ const usePageMetadata = () => {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: "https://tinystickyads.com/" },
-          { "@type": "ListItem", position: 2, name: "Services", item: "https://tinystickyads.com/services" },
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://triotag.com/" },
+          { "@type": "ListItem", position: 2, name: "Services", item: "https://triotag.com/services" },
           { "@type": "ListItem", position: 3, name: "eCommerce SEO Microsites", item: PAGE_URL },
         ],
       },

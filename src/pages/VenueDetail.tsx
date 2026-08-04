@@ -123,7 +123,7 @@ const VenueDetail = () => {
   const images = venue ? Array.isArray(venue.media_urls) ? venue.media_urls : [] : [];
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const ogShareUrl = `${supabaseUrl}/functions/v1/venue-og-meta?id=${id}`;
-  const canonicalUrl = `https://tinystickyads.com/venue/${id}`;
+  const canonicalUrl = `https://triotag.com/venue/${id}`;
 
   useEffect(() => {
     if (!venue) return;

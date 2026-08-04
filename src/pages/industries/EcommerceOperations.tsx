@@ -35,7 +35,7 @@ import {
 const PAGE_TITLE = "eCommerce Ops | Triotag";
 const PAGE_DESCRIPTION =
   "Discover how Triotag develops commerce technology, retail media infrastructure, search commerce platforms, and digital advertising solutions supporting modern eCommerce across Southeast Asia.";
-const PAGE_URL = "https://tinystickyads.com/ecommerce";
+const PAGE_URL = "https://triotag.com/ecommerce";
 
 /* ============================ HEAD METADATA ============================ */
 const setMeta = (selector: string, attr: string, key: string, content: string) => {
@@ -79,7 +79,7 @@ const usePageMetadata = () => {
         "@context": "https://schema.org",
         "@type": "Organization",
         name: "Triotag",
-        url: "https://tinystickyads.com",
+        url: "https://triotag.com",
         description:
           "Triotag develops commerce technology, retail media infrastructure, search commerce platforms, and digital advertising systems across Southeast Asia.",
         areaServed: ["PH", "Southeast Asia"],
@@ -95,8 +95,8 @@ const usePageMetadata = () => {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: "https://tinystickyads.com/" },
-          { "@type": "ListItem", position: 2, name: "Industries", item: "https://tinystickyads.com/industries/retaildsp" },
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://triotag.com/" },
+          { "@type": "ListItem", position: 2, name: "Industries", item: "https://triotag.com/industries/retaildsp" },
           { "@type": "ListItem", position: 3, name: "eCommerce Operations", item: PAGE_URL },
         ],
       },

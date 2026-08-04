@@ -13,7 +13,7 @@ const AdminAuditLog = () => {
       id: "1",
       action: "Payment gateway updated",
       details: "Stripe account changed",
-      user: "admin@tinystickyads.com",
+      user: "admin@triotag.com",
       timestamp: new Date().toISOString(),
     },
   ];

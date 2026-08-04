@@ -32,7 +32,7 @@ import {
 const PAGE_TITLE = "Triotag | About Us";
 const PAGE_DESCRIPTION =
   "Learn about Triotag, an Advertising Technology company developing the infrastructure that powers Retail Media across the Philippines through data-driven campaign management, technology, and innovation.";
-const PAGE_URL = "https://tinystickyads.com/about";
+const PAGE_URL = "https://triotag.com/about";
 
 const setMeta = (selector: string, attr: string, key: string, content: string) => {
   let el = document.head.querySelector<HTMLMetaElement>(selector);
@@ -75,7 +75,7 @@ const usePageMetadata = () => {
       mainEntity: {
         "@type": "Organization",
         name: "Triotag",
-        url: "https://tinystickyads.com",
+        url: "https://triotag.com",
         description:
           "Advertising Technology company building Retail Media infrastructure connecting advertisers, retailers, media owners, and commercial venues.",
       },
