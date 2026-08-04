@@ -73,12 +73,14 @@
 
   html {
     overflow-x: clip;
+    overflow-y: visible;
     font-family: 'Inter', 'Helvetica Neue', sans-serif;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     overflow-x: clip;
+    overflow-y: visible;
     width: 100%;
     max-width: 100vw;
     font-family: 'Inter', sans-serif;
