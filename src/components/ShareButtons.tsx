@@ -10,13 +10,14 @@ import {
 
 interface ShareButtonsProps {
   url: string;
+  copyUrl?: string;
   title: string;
   description?: string;
 }
 
 const SHARE_TEXT_SUFFIX = "Check out this ad space on TrioTag!";
 
-const ShareButtons = ({ url, title, description }: ShareButtonsProps) => {
+const ShareButtons = ({ url, copyUrl, title, description }: ShareButtonsProps) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
@@ -25,7 +26,7 @@ const ShareButtons = ({ url, title, description }: ShareButtonsProps) => {
   const copyLink = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(copyUrl || url);
       setCopied(true);
       toast({ title: "Link copied!", description: "Listing URL copied to clipboard." });
       setTimeout(() => setCopied(false), 2000);
