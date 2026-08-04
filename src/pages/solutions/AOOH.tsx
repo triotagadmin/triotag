@@ -64,9 +64,6 @@ export default function SolutionsAOOH() {
             <p className="text-zinc-400 text-lg">
               TrioTag's AOOH network is equipped with audio proof of play technology, we also provide audio publisher partnerships with retail media owners &nbsp;— managed through TrioTag's SSP platform.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg"><Link to="/advertiser/explore">Register AOOH Inventory</Link></Button>
-            </div>
           </div>
           <div className="bg-[#0c0c0c] border border-green-500/30 rounded-2xl p-6 text-center relative overflow-hidden">
             <div className="relative rounded-xl overflow-hidden bg-black">
