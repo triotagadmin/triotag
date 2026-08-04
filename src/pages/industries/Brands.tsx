@@ -538,14 +538,6 @@ const Brands = () => {
               shoppers. List your ad space for free, approve every booking, and
               get paid monthly.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Button size="lg" variant="cyber" onClick={goPublisherSignup}>
-                List My Space for Free
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => navigate("/contact")}>
-                Talk to Our Team
-              </Button>
-            </div>
           </div>
           <div className="bg-[#0c0c0c] border border-white/10 rounded-3xl p-8">
             <div className="grid grid-cols-2 gap-4">
