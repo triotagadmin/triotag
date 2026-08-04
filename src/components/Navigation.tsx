@@ -261,6 +261,15 @@ export const Navigation = () => {
               {userRole === "admin" && (
                 <Badge className="bg-green-600 hover:bg-green-600 text-white">Admin Panel</Badge>
               )}
+              {dashboard !== "/" && (
+                <Button asChild variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+                  <Link to={dashboard}>Go to Dashboard</Link>
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-2" /> Log Out
+              </Button>
+
               <MessengerBell />
               <NotificationBell />
               <DropdownMenu>
