@@ -296,9 +296,7 @@ const ValueProps = () => {
         ))}
       </ul>
       <Link to={to}>
-        <Button variant="default">
-          className="whitespace-pre-line"
-        >
+        <Button variant="default" className="whitespace-pre-line">
           {cta} <ArrowRight className="w-4 h-4" />
         </Button>
       </Link>
