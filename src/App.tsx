@@ -318,6 +318,7 @@ const App = () => (
           <Route path="/solutions/media-truck" element={<SolutionsMediaTruck />} />
           <Route path="/industries/retaildsp" element={<IndustriesRetailers />} />
           <Route path="/industries/sspsource" element={<IndustriesBrands />} />
+          <Route path="/industries/qr-technology" element={<QRTechnology />} />
           <Route path="/ecommerce" element={<EcommerceOperations />} />
           <Route path="/media-partners" element={<MediaPartners />} />
           <Route path="/partners/directory" element={<PartnerDirectory />} />
