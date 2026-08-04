@@ -104,7 +104,6 @@ export default function SolutionsOOH() {
             </p>
           </div>
 
-          </div>
           <div className="grid grid-cols-2 gap-4">
             {formatCards.map((c) => (
               <div
