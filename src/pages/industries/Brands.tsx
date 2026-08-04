@@ -612,11 +612,6 @@ const Brands = () => {
             </div>
           ))}
         </div>
-        <div className="text-center mt-10">
-          <Button size="lg" variant="cyber" onClick={goPublisherSignup}>
-            List My Space for Free
-          </Button>
-        </div>
       </section>
 
       {/* Formats */}
