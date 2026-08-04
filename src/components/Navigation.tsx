@@ -201,6 +201,8 @@ export const Navigation = () => {
   const initial = (userName[0] || "U").toUpperCase();
 
   const dashboard = getDashboardByRole(userRole as any);
+  const isActive = (to: string) => location.pathname === to || (to !== "/" && location.pathname.startsWith(to));
+
 
 
 
