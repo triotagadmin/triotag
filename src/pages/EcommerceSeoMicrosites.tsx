@@ -933,11 +933,6 @@ const FinalCTA = ({ onBook }: { onBook: () => void }) => (
           >
             Get a Free SEO Audit <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
-          <Link to="/services">
-            <Button size="lg" variant="outline" className="border-zinc-300 text-zinc-700 hover:bg-zinc-100 px-8">
-              Explore All Services
-            </Button>
-          </Link>
         </div>
       </div>
     </div>
