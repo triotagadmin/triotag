@@ -684,9 +684,10 @@ const Brands = () => {
               <p className="text-white/70 text-sm mb-6">
                 Create your free retailer account and submit your first space in minutes.
               </p>
-              <Button size="lg" variant="cyber" className="w-full whitespace-pre-line" onClick={goPublisherSignup}>
+              <Button size="lg" variant="cyber" className="w-full whitespace-pre-line" onClick={() => navigate("/advertiser/explore")}>
                 List your Ad Space{"\n"}
               </Button>
+
 
               <div className="flex items-center gap-3 my-5 text-white/40 text-xs">
                 <div className="flex-1 h-px bg-white/10" />
