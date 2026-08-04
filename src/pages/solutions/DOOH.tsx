@@ -161,8 +161,8 @@ export default function SolutionsDOOH() {
           <h2 className="text-3xl md:text-5xl font-bold mb-4">Put your brand on screen in venues that matter</h2>
           <p className="text-zinc-400 text-lg mb-8">Browse DOOH screen inventory across our publisher network or get a custom media plan for your next campaign.</p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Button asChild size="lg"><Link to="/advertiser/explore">Browse DOOH Screens</Link></Button>
-            <Button asChild size="lg" variant="outline"><Link to="/contact">Talk to Our Team</Link></Button>
+            <Button asChild size="lg"><Link to="/auth">Register DOOH Inventory</Link></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/advertiser/explore">Launch DOOH Campaign</Link></Button>
           </div>
         </div>
       </section>
