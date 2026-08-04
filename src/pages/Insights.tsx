@@ -130,6 +130,7 @@ const Insights = () => {
                           </Button>}
                         <ShareButtons
                           url={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-og-meta?id=${post.id}`}
+                          copyUrl={`https://triotag.com/insights/${post.id}`}
                           title={post.title}
                           description={post.excerpt}
                         />
