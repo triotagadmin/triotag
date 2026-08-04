@@ -198,7 +198,7 @@ export default function SolutionsOOH() {
               <Link to="/advertiser/explore">Register OOH Inventory</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/contact">Get a Promo Quote</Link>
+              <Link to="/advertiser/explore">Launch OOH Campaign</Link>
             </Button>
           </div>
         </div>
