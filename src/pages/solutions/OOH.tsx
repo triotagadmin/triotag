@@ -102,24 +102,8 @@ export default function SolutionsOOH() {
               TrioTag is an SSP (Supply-Side Platform) for retail advertising — we connect retail advertising inventory
               with brands and companies.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link to="/advertiser/explore">Register OOH Inventory</Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
-              {[
-                ["180+", "Retailer Partners"],
-                ["100M+", "OOH Assets"],
-                ["5000+", "Active Placements"],
-              ].map(([n, l]) => (
-                <div key={l}>
-                  <div className="text-2xl md:text-3xl font-bold text-green-500">{n}</div>
-                  <div className="text-xs text-zinc-400 mt-1">{l}</div>
-                </div>
-              ))}
-            </div>
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             {formatCards.map((c) => (
               <div
