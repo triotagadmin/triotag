@@ -337,7 +337,7 @@ const ValueProps = () => {
             "Drive footfall and sales",
           ]}
           cta="Advertise Now"
-          to="/campaign-submit"
+          to="/advertiser/explore"
         />
       </div>
     </section>
