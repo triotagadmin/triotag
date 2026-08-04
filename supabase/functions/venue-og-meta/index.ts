@@ -102,7 +102,6 @@ function buildHtml(
   <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${t}" />
-  <meta name="twitter:title" content="${t}" />
   <meta name="twitter:description" content="${d}" />
   <meta name="twitter:image" content="${img}" />
 
