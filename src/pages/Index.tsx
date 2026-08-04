@@ -297,6 +297,8 @@ const ValueProps = () => {
       </ul>
       <Link to={to}>
         <Button variant="default">
+          className="whitespace-pre-line"
+        >
           {cta} <ArrowRight className="w-4 h-4" />
         </Button>
       </Link>
@@ -317,7 +319,7 @@ const ValueProps = () => {
             "Grow non-product revenue",
             "Real-time reporting & insights",
           ]}
-          cta="Learn more about listing your space"
+          cta={"Register your Ad Space\n"}
           to="/list-space"
         />
         <Card
