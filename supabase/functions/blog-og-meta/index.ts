@@ -12,12 +12,20 @@ Deno.serve(async (req: Request) => {
   }
 
   const url = new URL(req.url);
-  const venueId = url.searchParams.get("id");
+  const postId = url.searchParams.get("id");
 
-  if (!venueId) {
-    return new Response("Missing id parameter", {
-      status: 400,
-      headers: corsHeaders,
+  const appUrl = "https://triotag.com";
+  const fallbackImage = `${appUrl}/favicon.png`;
+
+  if (!postId) {
+    const html = buildHtml(
+      "TrioTag",
+      "Discover advertising insights on TrioTag!",
+      fallbackImage,
+      `${appUrl}/insights`
+    );
+    return new Response(html, {
+      headers: { "Content-Type": "text/html; charset=utf-8", ...corsHeaders },
     });
   }
 
@@ -25,39 +33,30 @@ Deno.serve(async (req: Request) => {
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  const { data: venue, error } = await supabase
-    .from("ad_spaces")
-    .select("id, title, description, media_urls, location")
-    .eq("id", venueId)
+  const { data: post, error } = await supabase
+    .from("blog_posts")
+    .select("id, title, meta_title, excerpt, meta_description, image_url, slug")
+    .eq("id", postId)
     .single();
 
-  const appUrl = "https://triotag.com";
-  const fallbackImage = `${appUrl}/favicon.png`;
-
-  if (error || !venue) {
+  if (error || !post) {
     const html = buildHtml(
       "TrioTag",
-      "Discover micro OOH ad spaces on TrioTag!",
+      "Discover advertising insights on TrioTag!",
       fallbackImage,
-      appUrl
+      `${appUrl}/insights`
     );
     return new Response(html, {
       headers: { "Content-Type": "text/html; charset=utf-8", ...corsHeaders },
     });
   }
 
-  const canonicalUrl = `${appUrl}/venue/${venue.id}`;
-  const title = venue.title || "TrioTag";
+  const canonicalUrl = `${appUrl}/insights/${post.id}`;
+  const title = post.meta_title || post.title || "TrioTag";
   const description =
-    venue.description || "Check out this ad space on TrioTag!";
-  const images: string[] = Array.isArray(venue.media_urls)
-    ? venue.media_urls
-    : [];
-  // Use first listing image, normalized to 1200x630 via weserv.nl proxy
-  // This handles any size/aspect ratio by letterboxing with a white background
-  const rawImage = images.length > 0 ? images[0] : "";
-  const ogImage = rawImage
-    ? `https://images.weserv.nl/?url=${encodeURIComponent(rawImage)}&w=1200&h=630&fit=contain&cbg=white&output=jpg&q=85`
+    post.meta_description || post.excerpt || "Check out this article on TrioTag!";
+  const ogImage = post.image_url
+    ? `https://images.weserv.nl/?url=${encodeURIComponent(post.image_url)}&w=1200&h=630&fit=contain&cbg=white&output=jpg&q=85`
     : fallbackImage;
 
   const html = buildHtml(title, description, ogImage, canonicalUrl);
@@ -90,7 +89,7 @@ function buildHtml(
   <meta name="description" content="${d}" />
 
   <!-- Open Graph -->
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="article" />
   <meta property="og:title" content="${t}" />
   <meta property="og:description" content="${d}" />
   <meta property="og:url" content="${cUrl}" />
