@@ -104,8 +104,8 @@ function buildHtml(
   <meta name="twitter:description" content="${d}" />
   <meta name="twitter:image" content="${img}" />
 
-  <link rel="canonical" href="${cUrl}" />
   <!-- Delay redirect so crawlers can read OG tags -->
+
   <meta http-equiv="refresh" content="2;url=${cUrl}" />
 </head>
 <body>
