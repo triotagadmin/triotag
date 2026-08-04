@@ -101,11 +101,6 @@ const Hero = () => {
                 Become a Retail Media Partner <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Link to="/campaign-submit">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Book an Inventory Survey
-              </Button>
-            </Link>
           </div>
         </div>
 
