@@ -217,7 +217,7 @@ export const Navigation = () => {
         <div className="hidden lg:flex items-center gap-1">
           {(userRole === "admin" ? NAV_ITEMS_ADMIN : NAV_ITEMS_PUBLIC).map((item) =>
             item.children ? (
-              <DropdownMenu key={item.label}>
+              <DropdownMenu key={item.label} modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button className="px-3 py-2 text-sm transition-colors border-b-2 border-transparent text-zinc-300 hover:text-green-500 inline-flex items-center gap-1 outline-none">
                     {item.label}
@@ -272,7 +272,7 @@ export const Navigation = () => {
 
               <MessengerBell />
               <NotificationBell />
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button className="w-9 h-9 rounded-full bg-green-600 text-white font-semibold flex items-center justify-center hover:bg-green-500 transition-colors">
                     {initial}
