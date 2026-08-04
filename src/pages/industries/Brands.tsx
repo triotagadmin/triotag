@@ -160,7 +160,7 @@ const Brands = () => {
 
   const clients = [
     { icon: Home, title: "Real Estate Managers", desc: "Own or manage a building? Maximize your profit and turn blank walls into ad space. Register by booking our outsourced agents to survey your real estate property." },
-    { icon: Store, title: "Retail Media Networks", desc: "Operate and scale retail advertising ecosystems with dedicated AdOps support." },
+    
     { icon: Building2, title: "Property and Venue Networks", desc: "Manage DOOH, in-store media, and physical advertising inventory through centralized operations." },
     { icon: Newspaper, title: "Publishers & Media Owners", desc: "Monetize digital and physical inventory with expert supply-side operations and yield management." },
   ];
