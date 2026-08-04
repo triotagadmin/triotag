@@ -118,6 +118,7 @@ import SolutionsMediaTruck from "./pages/solutions/MediaTruck";
 import IndustriesRetailers from "./pages/industries/Retailers";
 import IndustriesBrands from "./pages/industries/Brands";
 import EcommerceOperations from "./pages/industries/EcommerceOperations";
+import QRTechnology from "./pages/industries/QRTechnology";
 import MediaPartners from "./pages/MediaPartners";
 import PartnerDirectory from "./pages/PartnerDirectory";
 import MediaPartnerRegister from "./pages/MediaPartnerRegister";
