@@ -98,7 +98,7 @@ const Hero = () => {
           <div className="flex flex-col sm:flex-row gap-3">
             <Link to="/list-space">
               <Button variant="default" size="lg" className="w-full sm:w-auto">
-                Become a Retail Media Partner <ArrowRight className="w-4 h-4" />
+                Register Account&nbsp; <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
           </div>
