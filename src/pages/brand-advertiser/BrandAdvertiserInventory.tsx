@@ -225,7 +225,101 @@ export default function BrandAdvertiserInventory() {
   const [rows, setRows] = useState<AdSpaceRow[]>([]);
 
   const [totalLocations, setTotalLocations] = useState<string>("");
-  const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, string>>({});
+  const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, PlaceMarker[]>>({});
+  const [placeResults, setPlaceResults] = useState<Record<string, PlaceMarker[]>>({});
+  const [placeLoading, setPlaceLoading] = useState<Record<string, boolean>>({});
+
+  const selectedPlacesTotal = Object.values(selectedLocationTypes).reduce(
+    (s, arr) => s + arr.length,
+    0,
+  );
+
+  const fetchVerifiedAdSpaces = async () => {
+    const { data: spaces } = await supabase
+      .from("ad_spaces")
+      .select("id, latitude, longitude, contact_verified_at")
+      .not("latitude", "is", null)
+      .not("longitude", "is", null);
+    const inRadius = (spaces || []).filter(
+      (s: any) =>
+        haversineMeters(center.lat, center.lng, Number(s.latitude), Number(s.longitude)) <=
+        radiusMeters,
+    );
+    if (inRadius.length === 0) return [] as { lat: number; lng: number }[];
+    const { data: subs } = await supabase
+      .from("venue_subscriptions")
+      .select("id, ad_space_id, subscription_status")
+      .in("ad_space_id", inRadius.map((s: any) => s.id));
+    const activeIds = new Set(
+      (subs || [])
+        .filter((s: any) => s.subscription_status === "active")
+        .map((s: any) => s.ad_space_id),
+    );
+    return inRadius
+      .filter((s: any) => s.contact_verified_at != null || activeIds.has(s.id))
+      .map((s: any) => ({ lat: Number(s.latitude), lng: Number(s.longitude) }));
+  };
+
+  const loadPlacesForCategory = async (category: string) => {
+    if (placeResults[category]) return;
+    setPlaceLoading((p) => ({ ...p, [category]: true }));
+    try {
+      const q = LOCATION_TYPE_QUERY[category] || {};
+      const [{ data, error }, verifiedPoints] = await Promise.all([
+        supabase.functions.invoke("discover-nearby-places", {
+          body: { lat: center.lat, lng: center.lng, radiusMeters, ...q },
+        }),
+        fetchVerifiedAdSpaces(),
+      ]);
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const places: PlaceMarker[] = (data?.results ?? [])
+        .filter((r: any) => typeof r.lat === "number" && typeof r.lng === "number")
+        .map((r: any) => ({
+          id: r.placeId,
+          name: r.name,
+          address: r.address || "",
+          lat: r.lat,
+          lng: r.lng,
+          verified: verifiedPoints.some(
+            (v) => haversineMeters(v.lat, v.lng, r.lat, r.lng) <= 60,
+          ),
+        }));
+      setPlaceResults((p) => ({ ...p, [category]: places }));
+    } catch (err: any) {
+      console.error("[BrandAdvertiserInventory] places fetch failed", err);
+      toast({
+        title: "Could not load locations",
+        description: err?.message || `Failed to fetch ${category} nearby.`,
+        variant: "destructive",
+      });
+      setPlaceResults((p) => ({ ...p, [category]: [] }));
+    } finally {
+      setPlaceLoading((p) => ({ ...p, [category]: false }));
+    }
+  };
+
+  const toggleCategory = (t: string, on: boolean) => {
+    setSelectedLocationTypes((prev) => {
+      const next = { ...prev };
+      if (on) delete next[t];
+      else next[t] = [];
+      return next;
+    });
+    if (!on) loadPlacesForCategory(t);
+  };
+
+  const togglePlace = (t: string, place: PlaceMarker) => {
+    setSelectedLocationTypes((prev) => {
+      const cur = prev[t] || [];
+      const exists = cur.some((p) => p.id === place.id);
+      return {
+        ...prev,
+        [t]: exists ? cur.filter((p) => p.id !== place.id) : [...cur, place],
+      };
+    });
+  };
+
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   const [loadingRows, setLoadingRows] = useState(false);
