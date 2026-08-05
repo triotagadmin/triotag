@@ -490,7 +490,7 @@ export default function BrandCampaignWizard({ open, onOpenChange, brandAdvertise
                         <span className="text-sm font-medium text-gray-900 truncate">{cs.title} {cs.creative_count != null ? `(${cs.creative_count} photo${cs.creative_count === 1 ? "" : "s"})` : ""}</span>
                         {cs.creative_format && <Badge className="bg-gray-100 text-gray-700">{cs.creative_format}</Badge>}
                       </div>
-                      {cs.file_url && <div className="text-xs text-gray-500 truncate mt-0.5">{cs.file_url}</div>}
+                      {cs.file_url && <div className="text-xs text-gray-500 truncate mt-0.5">Primary creative attached</div>}
                     </div>
                   </label>
                 ))}
