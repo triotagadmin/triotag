@@ -21,7 +21,7 @@ const STATUS_STYLES: Record<string, string> = {
   pending_review: "bg-yellow-100 text-yellow-700 border-yellow-200",
 };
 
-export default function BrandAdvertiserCampaignsList() {
+function BrandAdvertiserCampaignsList() {
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState("My Brand");
@@ -221,3 +221,13 @@ export default function BrandAdvertiserCampaignsList() {
   );
 }
 
+
+import BrandApprovalGate from "@/components/brand-advertiser/BrandApprovalGate";
+
+export default function BrandAdvertiserCampaignsListGated() {
+  return (
+    <BrandApprovalGate>
+      <BrandAdvertiserCampaignsList />
+    </BrandApprovalGate>
+  );
+}

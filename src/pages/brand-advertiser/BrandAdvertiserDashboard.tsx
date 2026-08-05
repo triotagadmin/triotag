@@ -14,7 +14,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import BrandCampaignWizard from "@/components/brand-advertiser/BrandCampaignWizard";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 
-export default function BrandAdvertiserDashboard() {
+function BrandAdvertiserDashboard() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState<string | null>(null);
@@ -253,5 +253,15 @@ export default function BrandAdvertiserDashboard() {
         />
       )}
     </div>
+  );
+}
+
+import BrandApprovalGate from "@/components/brand-advertiser/BrandApprovalGate";
+
+export default function BrandAdvertiserDashboardGated() {
+  return (
+    <BrandApprovalGate>
+      <BrandAdvertiserDashboard />
+    </BrandApprovalGate>
   );
 }
