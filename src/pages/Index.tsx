@@ -86,6 +86,10 @@ const Hero = () => {
 
       <div className="container mx-auto px-4 md:px-6 py-16 md:py-24 lg:py-32 relative grid lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-green-400 bg-green-500/10 border border-green-500/30 rounded-full px-3 py-1.5 mb-4">
+            <Sparkles className="w-3.5 h-3.5" />
+            AI-Powered Retail Media Platform
+          </span>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1]">
             Retail Media DSP Platform for <span className="text-green-500">OOH</span>,{" "}
             <span className="text-green-500">DOOH</span>, and <span className="text-green-500">AOOH</span>
@@ -93,7 +97,8 @@ const Hero = () => {
           <p className="text-lg text-zinc-400 max-w-xl leading-relaxed">
             Triotag is a Retail Media DSP platform built to help location-based businesses
             monetize their vacant space, blank walls, digital screens and audio system into OOH, DOOH, and AOOH
-            inventory.
+            inventory — powered by smart, location-based matching that connects advertisers to the right
+            venues in real time.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link to="/auth">
