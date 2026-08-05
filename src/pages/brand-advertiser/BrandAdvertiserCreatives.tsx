@@ -18,7 +18,7 @@ const MAX_FILES = 20;
 const MAX_BYTES = 3 * 1024 * 1024;
 const BUCKET = "ad-space-media";
 
-export default function BrandAdvertiserCreatives() {
+function BrandAdvertiserCreatives() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState<string | null>(null);
@@ -400,5 +400,15 @@ export default function BrandAdvertiserCreatives() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+import BrandApprovalGate from "@/components/brand-advertiser/BrandApprovalGate";
+
+export default function BrandAdvertiserCreativesGated() {
+  return (
+    <BrandApprovalGate>
+      <BrandAdvertiserCreatives />
+    </BrandApprovalGate>
   );
 }

@@ -14,7 +14,7 @@ function estimateReach(envs: string[] = []) {
   return envs.reduce((s, e) => s + (ENV_REACH[e] || 5000), 0);
 }
 
-export default function BrandAdvertiserAudiences() {
+function BrandAdvertiserAudiences() {
   const [loading, setLoading] = useState(true);
   const [companyName, setCompanyName] = useState("My Brand");
   const [totalBudget, setTotalBudget] = useState(0);
@@ -103,5 +103,15 @@ export default function BrandAdvertiserAudiences() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+import BrandApprovalGate from "@/components/brand-advertiser/BrandApprovalGate";
+
+export default function BrandAdvertiserAudiencesGated() {
+  return (
+    <BrandApprovalGate>
+      <BrandAdvertiserAudiences />
+    </BrandApprovalGate>
   );
 }

@@ -1024,6 +1024,7 @@ export type Database = {
       }
       brand_advertiser_profiles: {
         Row: {
+          approval_status: Database["public"]["Enums"]["approval_status"]
           company_name: string | null
           contact_email: string | null
           contact_name: string | null
@@ -1031,6 +1032,7 @@ export type Database = {
           created_at: string | null
           id: string
           industry: string | null
+          rejection_reason: string | null
           updated_at: string | null
           user_id: string
           username: string | null
@@ -1038,6 +1040,7 @@ export type Database = {
           website_domain: string | null
         }
         Insert: {
+          approval_status?: Database["public"]["Enums"]["approval_status"]
           company_name?: string | null
           contact_email?: string | null
           contact_name?: string | null
@@ -1045,6 +1048,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           industry?: string | null
+          rejection_reason?: string | null
           updated_at?: string | null
           user_id: string
           username?: string | null
@@ -1052,6 +1056,7 @@ export type Database = {
           website_domain?: string | null
         }
         Update: {
+          approval_status?: Database["public"]["Enums"]["approval_status"]
           company_name?: string | null
           contact_email?: string | null
           contact_name?: string | null
@@ -1059,6 +1064,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           industry?: string | null
+          rejection_reason?: string | null
           updated_at?: string | null
           user_id?: string
           username?: string | null

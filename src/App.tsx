@@ -21,6 +21,7 @@ import AdminTotalInventory from "./pages/admin/AdminTotalInventory";
 import AdminMediaPlans from "./pages/admin/AdminMediaPlans";
 import AdminExternalInventory from "./pages/admin/AdminExternalInventory";
 import AdminBrandCampaigns from "./pages/admin/AdminBrandCampaigns";
+import AdminBrandAdvertiserApprovals from "./pages/admin/AdminBrandAdvertiserApprovals";
 import AdminVerifiedLocations from "./pages/admin/AdminVerifiedLocations";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
@@ -276,6 +277,7 @@ const App = () => (
               <AdminExternalInventory />
             </ProtectedAdminRoute>
           } />
+          <Route path="/admin/brand-advertiser-approvals" element={<AdminBrandAdvertiserApprovals />} />
           <Route path="/admin/brand-campaigns" element={
             <ProtectedAdminRoute>
               <AdminBrandCampaigns />

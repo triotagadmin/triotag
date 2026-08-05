@@ -11,7 +11,7 @@ import { format, subDays, eachDayOfInterval } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, PieChart, Pie, Cell } from "recharts";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 
-export default function BrandAdvertiserReports() {
+function BrandAdvertiserReports() {
   const [companyName, setCompanyName] = useState("My Brand");
   const [totalBudget, setTotalBudget] = useState(0);
   const [campaigns, setCampaigns] = useState<any[]>([]);
@@ -153,5 +153,15 @@ export default function BrandAdvertiserReports() {
         </Card>
       </div>
     </div>
+  );
+}
+
+import BrandApprovalGate from "@/components/brand-advertiser/BrandApprovalGate";
+
+export default function BrandAdvertiserReportsGated() {
+  return (
+    <BrandApprovalGate>
+      <BrandAdvertiserReports />
+    </BrandApprovalGate>
   );
 }

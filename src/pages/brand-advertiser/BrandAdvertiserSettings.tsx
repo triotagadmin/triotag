@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function BrandAdvertiserSettings() {
+function BrandAdvertiserSettings() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -141,5 +141,15 @@ export default function BrandAdvertiserSettings() {
         </Card>
       </div>
     </div>
+  );
+}
+
+import BrandApprovalGate from "@/components/brand-advertiser/BrandApprovalGate";
+
+export default function BrandAdvertiserSettingsGated() {
+  return (
+    <BrandApprovalGate>
+      <BrandAdvertiserSettings />
+    </BrandApprovalGate>
   );
 }

@@ -209,7 +209,7 @@ function distanceLabel(m: number): string {
   return `${(m / 1000).toFixed(m < 10000 ? 2 : 1)}km away`;
 }
 
-export default function BrandAdvertiserInventory() {
+function BrandAdvertiserInventory() {
   const navigate = useNavigate();
   const [companyName, setCompanyName] = useState("My Brand");
   const [center, setCenter] = useState(DEFAULT_CENTER);
@@ -1269,5 +1269,15 @@ export default function BrandAdvertiserInventory() {
 
       </div>
     </div>
+  );
+}
+
+import BrandApprovalGate from "@/components/brand-advertiser/BrandApprovalGate";
+
+export default function BrandAdvertiserInventoryGated() {
+  return (
+    <BrandApprovalGate>
+      <BrandAdvertiserInventory />
+    </BrandApprovalGate>
   );
 }
