@@ -53,6 +53,8 @@ import {
   ShieldCheck,
   Loader2,
   Quote,
+  Gauge,
+  Braces,
 } from "lucide-react";
 
 const PAGE_URL = "https://triotag.com/services/ecommerce-seo";
@@ -392,6 +394,107 @@ const ServicesGrid = () => (
       </div>
       <div className="grid md:grid-cols-3 gap-6">
         {services.map((s) => {
+          const I = s.icon;
+          return (
+            <div
+              key={s.title}
+              className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden hover:shadow-lg transition-shadow p-6 space-y-5"
+            >
+              <div className="w-12 h-12 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center">
+                <I className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-extrabold text-zinc-900">{s.title}</h3>
+                <p className="text-sm font-semibold text-green-600 mt-1">{s.tagline}</p>
+              </div>
+              <p className="text-sm text-zinc-500 leading-relaxed">{s.description}</p>
+              <ul className="space-y-2">
+                {s.bullets.map((b) => (
+                  <li key={b} className="flex items-start gap-2 text-sm text-zinc-700">
+                    <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+);
+
+/* ========================= AI SEO ENGINE ========================= */
+
+const aiFeatures = [
+  {
+    icon: Sparkles,
+    title: "AI Content Generation",
+    tagline: "Copy · Outlines · FAQs",
+    description:
+      "AI writes product copy, meta titles and descriptions, and FAQ content tuned for both real shoppers and AI search engines — then keeps it fresh as your catalog changes.",
+    bullets: [
+      "SEO title & meta description generation",
+      "Auto-generated FAQ blocks",
+      "Outline & H1/H2 structure generation",
+      "Rewrite, expand & shorten tools",
+    ],
+  },
+  {
+    icon: Gauge,
+    title: "Live AI SEO Scoring",
+    tagline: "Real-Time · 0-100 Score",
+    description:
+      "Every microsite page is scored in real time against title, meta, headings, keyword placement, readability, and internal linking — with actionable fixes surfaced instantly.",
+    bullets: [
+      "Real-time 0-100 SEO score",
+      "Keyword density & placement checks",
+      "Readability & structure analysis",
+      "Actionable fix recommendations",
+    ],
+  },
+  {
+    icon: Search,
+    title: "AI Keyword & Competitor Research",
+    tagline: "Intent · Gaps · Trends",
+    description:
+      "AI surfaces primary, secondary, and long-tail keywords, classifies search intent, and maps content gaps against the competitors currently ranking above you.",
+    bullets: [
+      "Primary & long-tail keyword discovery",
+      "Search intent classification",
+      "Competitor content gap analysis",
+      "Trending topic surfacing",
+    ],
+  },
+  {
+    icon: Braces,
+    title: "Automated Schema & Rich Results",
+    tagline: "Structured Data · Auto-Generated",
+    description:
+      "Product, FAQ, Review, and Article schema is generated automatically for every microsite, so your pages qualify for rich results without anyone hand-writing markup.",
+    bullets: [
+      "Auto-generated Product/FAQ/Review schema",
+      "Rich snippet eligibility checks",
+      "Breadcrumb & Organization markup",
+      "Validated structured data on every page",
+    ],
+  },
+];
+
+const AiSeoEngine = () => (
+  <section className="bg-white py-20 md:py-28 text-zinc-900">
+    <div className="container mx-auto px-4 md:px-6">
+      <div className="text-center max-w-3xl mx-auto mb-14">
+        <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
+          Built On An <span className="text-green-600">AI SEO Engine</span>
+        </h2>
+        <p className="text-zinc-500 text-base md:text-lg">
+          Every microsite is optimized continuously by AI — scored, rewritten, and re-marked up as
+          search shifts, not just built once and left behind.
+        </p>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {aiFeatures.map((s) => {
           const I = s.icon;
           return (
             <div
@@ -1308,6 +1411,7 @@ const EcommerceSeoMicrosites = () => {
       <HowItWorks />
       <Benefits />
       <ServicesGrid />
+      <AiSeoEngine />
       <Pricing />
       <CaseStudies />
       <Testimonials />
