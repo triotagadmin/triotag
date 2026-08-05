@@ -443,7 +443,7 @@ export default function BrandAdvertiserInventory() {
     ) as Record<string, number>;
     const locationTypes = Object.fromEntries(
       Object.entries(selectedLocationTypes)
-        .map(([k, v]) => [k, Number(v) || 0])
+        .map(([k, v]) => [k, v.length])
         .filter(([, n]) => (n as number) > 0),
     ) as Record<string, number>;
     const chosenSet = creativeSets.find((s) => s.id === chosenCreativeSetId);
