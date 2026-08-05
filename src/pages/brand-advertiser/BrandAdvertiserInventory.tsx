@@ -813,10 +813,7 @@ export default function BrandAdvertiserInventory() {
                     <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 flex items-center justify-between">
                       <span className="text-xs text-gray-600">Total ad locations</span>
                       <span className="text-sm font-semibold text-green-700">
-                        {Object.values(selectedLocationTypes).reduce(
-                          (s, v) => s + (Number(v) || 0),
-                          0,
-                        )}
+                        {selectedPlacesTotal}
                       </span>
                     </div>
 
@@ -828,20 +825,11 @@ export default function BrandAdvertiserInventory() {
                     </Button>
                     <Button
                       onClick={() => {
-                        const total = Object.values(selectedLocationTypes).reduce(
-                          (s, v) => s + (Number(v) || 0),
-                          0,
-                        );
-                        setTotalLocations(String(total));
+                        setTotalLocations(String(selectedPlacesTotal));
                         setStep(3);
                       }}
-                      disabled={
-                        Object.keys(selectedLocationTypes).length === 0 ||
-                        Object.values(selectedLocationTypes).reduce(
-                          (s, v) => s + (Number(v) || 0),
-                          0,
-                        ) === 0
-                      }
+                      disabled={selectedPlacesTotal === 0}
+
                       className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
                     >
                       Next: Ad format <ArrowRight className="w-4 h-4 ml-1" />
