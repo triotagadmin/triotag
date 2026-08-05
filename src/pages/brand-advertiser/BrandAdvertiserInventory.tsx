@@ -26,6 +26,8 @@ import {
   FileImage,
   Video as VideoIcon,
   Music,
+  ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
@@ -162,6 +164,35 @@ const LOCATION_TYPES = [
   "Department Store",
 ] as const;
 
+const LOCATION_TYPE_QUERY: Record<string, { type?: string; keyword?: string }> = {
+  "Cafe": { type: "cafe" },
+  "Co-working Space": { keyword: "co-working space" },
+  "Barber Shop": { keyword: "barber shop" },
+  "Salon": { type: "beauty_salon" },
+  "Supermarket": { type: "supermarket" },
+  "Convenience Store": { type: "convenience_store" },
+  "Restaurant": { type: "restaurant" },
+  "Fast Food": { type: "meal_takeaway" },
+  "Bar": { type: "bar" },
+  "Nightclub": { type: "night_club" },
+  "Gym": { type: "gym" },
+  "Pharmacy": { type: "pharmacy" },
+  "Mall": { type: "shopping_mall" },
+  "Clothing Store": { type: "clothing_store" },
+  "Department Store": { type: "department_store" },
+};
+
+interface PlaceMarker {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  verified?: boolean;
+}
+
+
+
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
   const toRad = (v: number) => (v * Math.PI) / 180;
@@ -194,7 +225,101 @@ export default function BrandAdvertiserInventory() {
   const [rows, setRows] = useState<AdSpaceRow[]>([]);
 
   const [totalLocations, setTotalLocations] = useState<string>("");
-  const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, string>>({});
+  const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, PlaceMarker[]>>({});
+  const [placeResults, setPlaceResults] = useState<Record<string, PlaceMarker[]>>({});
+  const [placeLoading, setPlaceLoading] = useState<Record<string, boolean>>({});
+
+  const selectedPlacesTotal = Object.values(selectedLocationTypes).reduce(
+    (s, arr) => s + arr.length,
+    0,
+  );
+
+  const fetchVerifiedAdSpaces = async () => {
+    const { data: spaces } = await supabase
+      .from("ad_spaces")
+      .select("id, latitude, longitude, contact_verified_at")
+      .not("latitude", "is", null)
+      .not("longitude", "is", null);
+    const inRadius = (spaces || []).filter(
+      (s: any) =>
+        haversineMeters(center.lat, center.lng, Number(s.latitude), Number(s.longitude)) <=
+        radiusMeters,
+    );
+    if (inRadius.length === 0) return [] as { lat: number; lng: number }[];
+    const { data: subs } = await supabase
+      .from("venue_subscriptions")
+      .select("id, ad_space_id, subscription_status")
+      .in("ad_space_id", inRadius.map((s: any) => s.id));
+    const activeIds = new Set(
+      (subs || [])
+        .filter((s: any) => s.subscription_status === "active")
+        .map((s: any) => s.ad_space_id),
+    );
+    return inRadius
+      .filter((s: any) => s.contact_verified_at != null || activeIds.has(s.id))
+      .map((s: any) => ({ lat: Number(s.latitude), lng: Number(s.longitude) }));
+  };
+
+  const loadPlacesForCategory = async (category: string) => {
+    if (placeResults[category]) return;
+    setPlaceLoading((p) => ({ ...p, [category]: true }));
+    try {
+      const q = LOCATION_TYPE_QUERY[category] || {};
+      const [{ data, error }, verifiedPoints] = await Promise.all([
+        supabase.functions.invoke("discover-nearby-places", {
+          body: { lat: center.lat, lng: center.lng, radiusMeters, ...q },
+        }),
+        fetchVerifiedAdSpaces(),
+      ]);
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const places: PlaceMarker[] = (data?.results ?? [])
+        .filter((r: any) => typeof r.lat === "number" && typeof r.lng === "number")
+        .map((r: any) => ({
+          id: r.placeId,
+          name: r.name,
+          address: r.address || "",
+          lat: r.lat,
+          lng: r.lng,
+          verified: verifiedPoints.some(
+            (v) => haversineMeters(v.lat, v.lng, r.lat, r.lng) <= 60,
+          ),
+        }));
+      setPlaceResults((p) => ({ ...p, [category]: places }));
+    } catch (err: any) {
+      console.error("[BrandAdvertiserInventory] places fetch failed", err);
+      toast({
+        title: "Could not load locations",
+        description: err?.message || `Failed to fetch ${category} nearby.`,
+        variant: "destructive",
+      });
+      setPlaceResults((p) => ({ ...p, [category]: [] }));
+    } finally {
+      setPlaceLoading((p) => ({ ...p, [category]: false }));
+    }
+  };
+
+  const toggleCategory = (t: string, on: boolean) => {
+    setSelectedLocationTypes((prev) => {
+      const next = { ...prev };
+      if (on) delete next[t];
+      else next[t] = [];
+      return next;
+    });
+    if (!on) loadPlacesForCategory(t);
+  };
+
+  const togglePlace = (t: string, place: PlaceMarker) => {
+    setSelectedLocationTypes((prev) => {
+      const cur = prev[t] || [];
+      const exists = cur.some((p) => p.id === place.id);
+      return {
+        ...prev,
+        [t]: exists ? cur.filter((p) => p.id !== place.id) : [...cur, place],
+      };
+    });
+  };
+
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   const [loadingRows, setLoadingRows] = useState(false);
@@ -318,7 +443,7 @@ export default function BrandAdvertiserInventory() {
     ) as Record<string, number>;
     const locationTypes = Object.fromEntries(
       Object.entries(selectedLocationTypes)
-        .map(([k, v]) => [k, Number(v) || 0])
+        .map(([k, v]) => [k, v.length])
         .filter(([, n]) => (n as number) > 0),
     ) as Record<string, number>;
     const chosenSet = creativeSets.find((s) => s.id === chosenCreativeSetId);
@@ -564,64 +689,119 @@ export default function BrandAdvertiserInventory() {
                         Type of ad locations
                       </Label>
                       <p className="text-xs text-gray-500 mb-2">
-                        Check the venue types you want, then enter how many locations for each.
+                        Check a venue type to browse real nearby locations, then pick the
+                        specific venues you want.
                       </p>
                       <div className="space-y-1.5">
                         {LOCATION_TYPES.map((t) => {
                           const on = selectedLocationTypes[t] !== undefined;
+                          const results = placeResults[t];
+                          const loading = !!placeLoading[t];
+                          const chosen = selectedLocationTypes[t] || [];
                           return (
                             <div
                               key={t}
-                              className={`flex items-center gap-2 rounded-md border px-2 py-1.5 transition-colors ${
+                              className={`rounded-md border transition-colors ${
                                 on ? "bg-green-50 border-green-300" : "bg-white border-gray-200"
                               }`}
                             >
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setSelectedLocationTypes((prev) => {
-                                    const next = { ...prev };
-                                    if (on) delete next[t];
-                                    else next[t] = "";
-                                    return next;
-                                  })
-                                }
-                                className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
-                                  on
-                                    ? "bg-green-600 border-green-600"
-                                    : "bg-white border-gray-400"
-                                }`}
-                                aria-label={`Select ${t}`}
-                              >
-                                {on && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
-                              </button>
-                              <Label
-                                className="text-xs text-gray-900 flex-1 min-w-0 truncate cursor-pointer"
-                                onClick={() =>
-                                  setSelectedLocationTypes((prev) => {
-                                    const next = { ...prev };
-                                    if (on) delete next[t];
-                                    else next[t] = "";
-                                    return next;
-                                  })
-                                }
-                              >
-                                {t}
-                              </Label>
+                              <div className="flex items-center gap-2 px-2 py-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleCategory(t, on)}
+                                  className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
+                                    on
+                                      ? "bg-green-600 border-green-600"
+                                      : "bg-white border-gray-400"
+                                  }`}
+                                  aria-label={`Select ${t}`}
+                                >
+                                  {on && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                                </button>
+                                <Label
+                                  className="text-xs text-gray-900 flex-1 min-w-0 truncate cursor-pointer"
+                                  onClick={() => toggleCategory(t, on)}
+                                >
+                                  {t}
+                                </Label>
+                                {on && chosen.length > 0 && (
+                                  <span className="text-xs font-semibold text-green-700">
+                                    {chosen.length} selected
+                                  </span>
+                                )}
+                              </div>
+
                               {on && (
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  placeholder="0"
-                                  value={selectedLocationTypes[t]}
-                                  onChange={(e) =>
-                                    setSelectedLocationTypes((prev) => ({
-                                      ...prev,
-                                      [t]: e.target.value,
-                                    }))
-                                  }
-                                  className="h-8 w-20 text-right text-gray-900"
-                                />
+                                <div className="border-t border-green-200 px-2 py-2">
+                                  {loading && (
+                                    <div className="flex items-center gap-2 text-xs text-gray-500 py-2">
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                      Finding {t} nearby...
+                                    </div>
+                                  )}
+                                  {!loading && results && results.length === 0 && (
+                                    <p className="text-xs text-gray-500 py-2">
+                                      No {t} found in this radius.
+                                    </p>
+                                  )}
+                                  {!loading && results && results.length > 0 && (
+                                    <div className="max-h-56 overflow-y-auto space-y-1 pr-1">
+                                      {results.map((p) => {
+                                        const picked = chosen.some((c) => c.id === p.id);
+                                        return (
+                                          <button
+                                            key={p.id}
+                                            type="button"
+                                            onClick={() => togglePlace(t, p)}
+                                            className={`w-full text-left flex items-start gap-2 rounded-md border px-2 py-1.5 ${
+                                              picked
+                                                ? "border-green-500 bg-white"
+                                                : "border-gray-200 bg-white hover:border-gray-300"
+                                            }`}
+                                          >
+                                            <span
+                                              className={`w-3.5 h-3.5 mt-0.5 rounded border-2 flex items-center justify-center shrink-0 ${
+                                                picked
+                                                  ? "bg-green-600 border-green-600"
+                                                  : "bg-white border-gray-400"
+                                              }`}
+                                            >
+                                              {picked && (
+                                                <Check
+                                                  className="w-2.5 h-2.5 text-white"
+                                                  strokeWidth={3}
+                                                />
+                                              )}
+                                            </span>
+                                            <span className="min-w-0 flex-1">
+                                              <span className="flex items-center gap-1.5 flex-wrap">
+                                                <span className="text-xs font-medium text-gray-900">
+                                                  {p.name}
+                                                </span>
+                                                {p.verified ? (
+                                                  <Badge className="h-4 px-1.5 gap-1 bg-green-100 text-green-700 hover:bg-green-100 border border-green-300 text-[10px]">
+                                                    <ShieldCheck className="w-2.5 h-2.5" />
+                                                    Verified
+                                                  </Badge>
+                                                ) : (
+                                                  <Badge
+                                                    variant="secondary"
+                                                    className="h-4 px-1.5 bg-gray-100 text-gray-600 hover:bg-gray-100 border border-gray-200 text-[10px]"
+                                                  >
+                                                    Unverified
+                                                  </Badge>
+                                                )}
+                                              </span>
+                                              <span className="block text-[11px] text-gray-500 truncate">
+                                                {p.address}
+                                              </span>
+                                            </span>
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
                               )}
                             </div>
                           );
@@ -629,13 +809,11 @@ export default function BrandAdvertiserInventory() {
                       </div>
                     </div>
 
+
                     <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 flex items-center justify-between">
                       <span className="text-xs text-gray-600">Total ad locations</span>
                       <span className="text-sm font-semibold text-green-700">
-                        {Object.values(selectedLocationTypes).reduce(
-                          (s, v) => s + (Number(v) || 0),
-                          0,
-                        )}
+                        {selectedPlacesTotal}
                       </span>
                     </div>
 
@@ -647,20 +825,11 @@ export default function BrandAdvertiserInventory() {
                     </Button>
                     <Button
                       onClick={() => {
-                        const total = Object.values(selectedLocationTypes).reduce(
-                          (s, v) => s + (Number(v) || 0),
-                          0,
-                        );
-                        setTotalLocations(String(total));
+                        setTotalLocations(String(selectedPlacesTotal));
                         setStep(3);
                       }}
-                      disabled={
-                        Object.keys(selectedLocationTypes).length === 0 ||
-                        Object.values(selectedLocationTypes).reduce(
-                          (s, v) => s + (Number(v) || 0),
-                          0,
-                        ) === 0
-                      }
+                      disabled={selectedPlacesTotal === 0}
+
                       className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
                     >
                       Next: Ad format <ArrowRight className="w-4 h-4 ml-1" />
