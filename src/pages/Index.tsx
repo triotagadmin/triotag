@@ -31,6 +31,7 @@ import {
   Image as ImageIcon,
   Square,
   ScanLine,
+  Sparkles,
 } from "lucide-react";
 
 /* --------------------------------- HERO --------------------------------- */
