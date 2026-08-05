@@ -164,6 +164,35 @@ const LOCATION_TYPES = [
   "Department Store",
 ] as const;
 
+const LOCATION_TYPE_QUERY: Record<string, { type?: string; keyword?: string }> = {
+  "Cafe": { type: "cafe" },
+  "Co-working Space": { keyword: "co-working space" },
+  "Barber Shop": { keyword: "barber shop" },
+  "Salon": { type: "beauty_salon" },
+  "Supermarket": { type: "supermarket" },
+  "Convenience Store": { type: "convenience_store" },
+  "Restaurant": { type: "restaurant" },
+  "Fast Food": { type: "meal_takeaway" },
+  "Bar": { type: "bar" },
+  "Nightclub": { type: "night_club" },
+  "Gym": { type: "gym" },
+  "Pharmacy": { type: "pharmacy" },
+  "Mall": { type: "shopping_mall" },
+  "Clothing Store": { type: "clothing_store" },
+  "Department Store": { type: "department_store" },
+};
+
+interface PlaceMarker {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  verified?: boolean;
+}
+
+
+
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
   const toRad = (v: number) => (v * Math.PI) / 180;
