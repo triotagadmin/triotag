@@ -20,11 +20,13 @@ type BrandProfile = {
   company_name: string | null;
   contact_name: string | null;
   contact_email: string | null;
+  contact_phone: string | null;
   industry: string | null;
   approval_status: string | null;
   rejection_reason: string | null;
   created_at: string | null;
 };
+
 
 const STATUS_STYLE: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700 border border-yellow-300",
@@ -57,14 +59,16 @@ export default function AdminBrandAdvertiserApprovals() {
   const [working, setWorking] = useState(false);
   const [rejectTarget, setRejectTarget] = useState<BrandProfile | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [detail, setDetail] = useState<BrandProfile | null>(null);
 
   const fetchRows = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("brand_advertiser_profiles")
-      .select("id, user_id, company_name, contact_name, contact_email, industry, approval_status, rejection_reason, created_at")
+      .select("id, user_id, company_name, contact_name, contact_email, contact_phone, industry, approval_status, rejection_reason, created_at")
       .order("created_at", { ascending: false });
     if (error) {
+
       console.error("[AdminBrandAdvertiserApprovals]", error);
       toast.error("Failed to load brand advertiser accounts");
     }
@@ -92,7 +96,9 @@ export default function AdminBrandAdvertiserApprovals() {
     setWorking(false);
     if (error) { toast.error("Failed to approve account"); return; }
     toast.success("Account approved");
+    setDetail(null);
     await fetchRows();
+
   };
 
   const confirmReject = async () => {
@@ -106,7 +112,9 @@ export default function AdminBrandAdvertiserApprovals() {
     if (error) { toast.error("Failed to reject account"); return; }
     toast.success("Account rejected");
     setRejectTarget(null);
+    setDetail(null);
     setRejectReason("");
+
     await fetchRows();
   };
 
@@ -148,6 +156,7 @@ export default function AdminBrandAdvertiserApprovals() {
                     <TableHead>Company</TableHead>
                     <TableHead>Contact</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead>Industry</TableHead>
                     <TableHead>Registered</TableHead>
                     <TableHead>Status</TableHead>
@@ -157,19 +166,28 @@ export default function AdminBrandAdvertiserApprovals() {
                 <TableBody>
                   {rows.map((r) => {
                     const status = r.approval_status || "pending";
+                    const incomplete = !r.company_name || !r.company_name.trim();
                     return (
-                      <TableRow key={r.id}>
-                        <TableCell className="font-medium">{r.company_name || "—"}</TableCell>
+                      <TableRow key={r.id} className="cursor-pointer" onClick={() => setDetail(r)}>
+                        <TableCell className="font-medium">
+                          {incomplete ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                              Profile Incomplete
+                            </span>
+                          ) : r.company_name}
+                        </TableCell>
                         <TableCell>{r.contact_name || "—"}</TableCell>
                         <TableCell className="text-sm text-gray-600">{r.contact_email || "—"}</TableCell>
+                        <TableCell className="text-sm text-gray-600">{r.contact_phone || "—"}</TableCell>
                         <TableCell>{r.industry || "—"}</TableCell>
                         <TableCell className="text-sm text-gray-600">
                           {r.created_at ? new Date(r.created_at).toLocaleDateString() : "—"}
                         </TableCell>
                         <TableCell><StatusBadge status={status} /></TableCell>
-                        <TableCell className="text-right space-x-2">
+                        <TableCell className="text-right space-x-2" onClick={(e) => e.stopPropagation()}>
+                          <Button size="sm" variant="outline" onClick={() => setDetail(r)}>View</Button>
                           {status !== "approved" && (
-                            <Button size="sm" disabled={working} onClick={() => approve(r)}>
+                            <Button size="sm" disabled={working || incomplete} onClick={() => approve(r)}>
                               {working && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                               Approve
                             </Button>
@@ -188,12 +206,72 @@ export default function AdminBrandAdvertiserApprovals() {
                       </TableRow>
                     );
                   })}
+
                 </TableBody>
               </Table>
             )}
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={!!detail} onOpenChange={(o) => { if (!o) setDetail(null); }}>
+        <DialogContent className="bg-white max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{detail?.company_name || "Profile Incomplete"}</DialogTitle>
+            <DialogDescription>
+              {detail?.company_name
+                ? "Full details submitted by this Brand Advertiser."
+                : "This advertiser hasn't completed the onboarding wizard yet — nothing to review."}
+            </DialogDescription>
+          </DialogHeader>
+          {detail && (
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              {[
+                ["Company Name", detail.company_name],
+                ["Industry", detail.industry],
+                ["Contact Name", detail.contact_name],
+                ["Contact Email", detail.contact_email],
+                ["Contact Phone", detail.contact_phone],
+                ["Account Created", detail.created_at ? new Date(detail.created_at).toLocaleString() : null],
+              ].map(([label, value]) => (
+                <div key={label as string}>
+                  <div className="text-xs uppercase tracking-wide text-gray-500">{label}</div>
+                  <div className="text-gray-900 mt-0.5 break-words">{(value as string) || "—"}</div>
+                </div>
+              ))}
+              <div className="col-span-2">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">Status</div>
+                <StatusBadge status={detail.approval_status || "pending"} />
+                {detail.rejection_reason && (
+                  <p className="text-sm text-red-600 mt-2">Reason: {detail.rejection_reason}</p>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetail(null)}>Close</Button>
+            {detail && (detail.approval_status || "pending") !== "rejected" && (
+              <Button
+                variant="destructive"
+                disabled={working}
+                onClick={() => { setRejectTarget(detail); setRejectReason(detail.rejection_reason || ""); }}
+              >
+                Reject
+              </Button>
+            )}
+            {detail && (detail.approval_status || "pending") !== "approved" && (
+              <Button
+                disabled={working || !detail.company_name}
+                onClick={() => approve(detail)}
+              >
+                {working && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
+                Approve
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       <Dialog open={!!rejectTarget} onOpenChange={(o) => { if (!o) { setRejectTarget(null); setRejectReason(""); } }}>
         <DialogContent className="bg-white">
