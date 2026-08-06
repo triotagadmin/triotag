@@ -156,6 +156,7 @@ export default function AdminBrandAdvertiserApprovals() {
                     <TableHead>Company</TableHead>
                     <TableHead>Contact</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead>Industry</TableHead>
                     <TableHead>Registered</TableHead>
                     <TableHead>Status</TableHead>
@@ -165,19 +166,28 @@ export default function AdminBrandAdvertiserApprovals() {
                 <TableBody>
                   {rows.map((r) => {
                     const status = r.approval_status || "pending";
+                    const incomplete = !r.company_name || !r.company_name.trim();
                     return (
-                      <TableRow key={r.id}>
-                        <TableCell className="font-medium">{r.company_name || "—"}</TableCell>
+                      <TableRow key={r.id} className="cursor-pointer" onClick={() => setDetail(r)}>
+                        <TableCell className="font-medium">
+                          {incomplete ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                              Profile Incomplete
+                            </span>
+                          ) : r.company_name}
+                        </TableCell>
                         <TableCell>{r.contact_name || "—"}</TableCell>
                         <TableCell className="text-sm text-gray-600">{r.contact_email || "—"}</TableCell>
+                        <TableCell className="text-sm text-gray-600">{r.contact_phone || "—"}</TableCell>
                         <TableCell>{r.industry || "—"}</TableCell>
                         <TableCell className="text-sm text-gray-600">
                           {r.created_at ? new Date(r.created_at).toLocaleDateString() : "—"}
                         </TableCell>
                         <TableCell><StatusBadge status={status} /></TableCell>
-                        <TableCell className="text-right space-x-2">
+                        <TableCell className="text-right space-x-2" onClick={(e) => e.stopPropagation()}>
+                          <Button size="sm" variant="outline" onClick={() => setDetail(r)}>View</Button>
                           {status !== "approved" && (
-                            <Button size="sm" disabled={working} onClick={() => approve(r)}>
+                            <Button size="sm" disabled={working || incomplete} onClick={() => approve(r)}>
                               {working && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                               Approve
                             </Button>
@@ -196,6 +206,7 @@ export default function AdminBrandAdvertiserApprovals() {
                       </TableRow>
                     );
                   })}
+
                 </TableBody>
               </Table>
             )}
