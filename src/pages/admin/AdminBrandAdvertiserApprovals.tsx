@@ -59,14 +59,16 @@ export default function AdminBrandAdvertiserApprovals() {
   const [working, setWorking] = useState(false);
   const [rejectTarget, setRejectTarget] = useState<BrandProfile | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [detail, setDetail] = useState<BrandProfile | null>(null);
 
   const fetchRows = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("brand_advertiser_profiles")
-      .select("id, user_id, company_name, contact_name, contact_email, industry, approval_status, rejection_reason, created_at")
+      .select("id, user_id, company_name, contact_name, contact_email, contact_phone, industry, approval_status, rejection_reason, created_at")
       .order("created_at", { ascending: false });
     if (error) {
+
       console.error("[AdminBrandAdvertiserApprovals]", error);
       toast.error("Failed to load brand advertiser accounts");
     }
