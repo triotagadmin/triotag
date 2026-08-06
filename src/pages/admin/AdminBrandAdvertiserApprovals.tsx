@@ -20,11 +20,13 @@ type BrandProfile = {
   company_name: string | null;
   contact_name: string | null;
   contact_email: string | null;
+  contact_phone: string | null;
   industry: string | null;
   approval_status: string | null;
   rejection_reason: string | null;
   created_at: string | null;
 };
+
 
 const STATUS_STYLE: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700 border border-yellow-300",
