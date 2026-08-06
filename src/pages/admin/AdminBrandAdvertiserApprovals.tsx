@@ -214,6 +214,65 @@ export default function AdminBrandAdvertiserApprovals() {
         </Card>
       </div>
 
+      <Dialog open={!!detail} onOpenChange={(o) => { if (!o) setDetail(null); }}>
+        <DialogContent className="bg-white max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{detail?.company_name || "Profile Incomplete"}</DialogTitle>
+            <DialogDescription>
+              {detail?.company_name
+                ? "Full details submitted by this Brand Advertiser."
+                : "This advertiser hasn't completed the onboarding wizard yet — nothing to review."}
+            </DialogDescription>
+          </DialogHeader>
+          {detail && (
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              {[
+                ["Company Name", detail.company_name],
+                ["Industry", detail.industry],
+                ["Contact Name", detail.contact_name],
+                ["Contact Email", detail.contact_email],
+                ["Contact Phone", detail.contact_phone],
+                ["Account Created", detail.created_at ? new Date(detail.created_at).toLocaleString() : null],
+              ].map(([label, value]) => (
+                <div key={label as string}>
+                  <div className="text-xs uppercase tracking-wide text-gray-500">{label}</div>
+                  <div className="text-gray-900 mt-0.5 break-words">{(value as string) || "—"}</div>
+                </div>
+              ))}
+              <div className="col-span-2">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">Status</div>
+                <StatusBadge status={detail.approval_status || "pending"} />
+                {detail.rejection_reason && (
+                  <p className="text-sm text-red-600 mt-2">Reason: {detail.rejection_reason}</p>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetail(null)}>Close</Button>
+            {detail && (detail.approval_status || "pending") !== "rejected" && (
+              <Button
+                variant="destructive"
+                disabled={working}
+                onClick={() => { setRejectTarget(detail); setRejectReason(detail.rejection_reason || ""); }}
+              >
+                Reject
+              </Button>
+            )}
+            {detail && (detail.approval_status || "pending") !== "approved" && (
+              <Button
+                disabled={working || !detail.company_name}
+                onClick={() => approve(detail)}
+              >
+                {working && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
+                Approve
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
       <Dialog open={!!rejectTarget} onOpenChange={(o) => { if (!o) { setRejectTarget(null); setRejectReason(""); } }}>
         <DialogContent className="bg-white">
           <DialogHeader>
