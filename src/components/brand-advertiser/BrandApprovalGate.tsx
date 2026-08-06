@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Clock, XCircle, Loader2, Building2, User, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,6 +22,26 @@ const STEPS = [
   { title: "Company Info", icon: Building2 },
   { title: "Contact Info", icon: User },
 ];
+
+const INDUSTRIES = [
+  "Retail & Convenience",
+  "Food & Beverage",
+  "Fashion & Apparel",
+  "Beauty & Personal Care",
+  "Health & Wellness",
+  "Consumer Electronics",
+  "Automotive",
+  "Banking & Finance",
+  "Telecommunications",
+  "Real Estate",
+  "Travel & Hospitality",
+  "Education",
+  "Entertainment & Media",
+  "eCommerce & Marketplace",
+  "Logistics & Delivery",
+  "Other",
+];
+
 
 export default function BrandApprovalGate({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -128,33 +149,44 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
           </div>
 
           {step === 0 ? (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="company_name">Company Name *</Label>
+            <div className="space-y-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="company_name" className="text-gray-900 font-medium">Company Name *</Label>
+                <p className="text-xs text-gray-500">Enter your registered business name exactly as it appears on official documents.</p>
                 <Input id="company_name" value={form.company_name}
-                  onChange={(e) => setForm({ ...form, company_name: e.target.value })}
-                  placeholder="Acme Corporation" />
+                  className="bg-white text-gray-900 border-gray-300"
+                  onChange={(e) => setForm({ ...form, company_name: e.target.value })} />
               </div>
-              <div>
-                <Label htmlFor="industry">Industry</Label>
-                <Input id="industry" value={form.industry}
-                  onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                  placeholder="Retail, F&B, Fashion..." />
+              <div className="space-y-1.5">
+                <Label htmlFor="industry" className="text-gray-900 font-medium">Industry</Label>
+                <p className="text-xs text-gray-500">Select the industry that best describes your business.</p>
+                <Select value={form.industry} onValueChange={(v) => setForm({ ...form, industry: v })}>
+                  <SelectTrigger id="industry" className="bg-white text-gray-900 border-gray-300">
+                    <SelectValue placeholder="Choose an industry" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white text-gray-900 z-50">
+                    {INDUSTRIES.map((i) => (
+                      <SelectItem key={i} value={i}>{i}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="contact_name">Contact Name *</Label>
+            <div className="space-y-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="contact_name" className="text-gray-900 font-medium">Contact Name *</Label>
+                <p className="text-xs text-gray-500">Full name of the person we should coordinate with about campaigns.</p>
                 <Input id="contact_name" value={form.contact_name}
-                  onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
-                  placeholder="Jane Dela Cruz" />
+                  className="bg-white text-gray-900 border-gray-300"
+                  onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
               </div>
-              <div>
-                <Label htmlFor="contact_phone">Contact Phone</Label>
-                <Input id="contact_phone" value={form.contact_phone}
-                  onChange={(e) => setForm({ ...form, contact_phone: e.target.value })}
-                  placeholder="+63 912 345 6789" />
+              <div className="space-y-1.5">
+                <Label htmlFor="contact_phone" className="text-gray-900 font-medium">Contact Phone</Label>
+                <p className="text-xs text-gray-500">Mobile or landline number where we can reach you during business hours.</p>
+                <Input id="contact_phone" inputMode="tel" value={form.contact_phone}
+                  className="bg-white text-gray-900 border-gray-300"
+                  onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
               </div>
             </div>
           )}
