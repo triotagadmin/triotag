@@ -96,7 +96,9 @@ export default function AdminBrandAdvertiserApprovals() {
     setWorking(false);
     if (error) { toast.error("Failed to approve account"); return; }
     toast.success("Account approved");
+    setDetail(null);
     await fetchRows();
+
   };
 
   const confirmReject = async () => {
@@ -110,7 +112,9 @@ export default function AdminBrandAdvertiserApprovals() {
     if (error) { toast.error("Failed to reject account"); return; }
     toast.success("Account rejected");
     setRejectTarget(null);
+    setDetail(null);
     setRejectReason("");
+
     await fetchRows();
   };
 
