@@ -23,6 +23,26 @@ const STEPS = [
   { title: "Contact Info", icon: User },
 ];
 
+const INDUSTRIES = [
+  "Retail & Convenience",
+  "Food & Beverage",
+  "Fashion & Apparel",
+  "Beauty & Personal Care",
+  "Health & Wellness",
+  "Consumer Electronics",
+  "Automotive",
+  "Banking & Finance",
+  "Telecommunications",
+  "Real Estate",
+  "Travel & Hospitality",
+  "Education",
+  "Entertainment & Media",
+  "eCommerce & Marketplace",
+  "Logistics & Delivery",
+  "Other",
+];
+
+
 export default function BrandApprovalGate({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
