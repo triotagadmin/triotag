@@ -1025,6 +1025,7 @@ export type Database = {
       brand_advertiser_profiles: {
         Row: {
           approval_status: Database["public"]["Enums"]["approval_status"]
+          campaign_pillar: string | null
           company_name: string | null
           contact_email: string | null
           contact_name: string | null
@@ -1041,6 +1042,7 @@ export type Database = {
         }
         Insert: {
           approval_status?: Database["public"]["Enums"]["approval_status"]
+          campaign_pillar?: string | null
           company_name?: string | null
           contact_email?: string | null
           contact_name?: string | null
@@ -1057,6 +1059,7 @@ export type Database = {
         }
         Update: {
           approval_status?: Database["public"]["Enums"]["approval_status"]
+          campaign_pillar?: string | null
           company_name?: string | null
           contact_email?: string | null
           contact_name?: string | null

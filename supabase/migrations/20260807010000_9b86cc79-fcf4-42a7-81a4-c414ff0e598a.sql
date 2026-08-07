@@ -1,0 +1,3 @@
+ALTER TABLE public.brand_advertiser_profiles ADD COLUMN IF NOT EXISTS campaign_pillar text;
+ALTER TABLE public.brand_advertiser_profiles DROP CONSTRAINT IF EXISTS brand_advertiser_profiles_campaign_pillar_check;
+ALTER TABLE public.brand_advertiser_profiles ADD CONSTRAINT brand_advertiser_profiles_campaign_pillar_check CHECK (campaign_pillar IS NULL OR campaign_pillar IN ('product','service','event'));
