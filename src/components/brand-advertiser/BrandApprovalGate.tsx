@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, XCircle, Loader2, Building2, User, Check } from "lucide-react";
+import { Clock, XCircle, Loader2, Building2, User, Check, Target, Package, Wrench, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 
 type Profile = {
@@ -14,6 +14,7 @@ type Profile = {
   industry: string | null;
   contact_name: string | null;
   contact_phone: string | null;
+  campaign_pillar: string | null;
   approval_status: string | null;
   rejection_reason: string | null;
 };
@@ -21,6 +22,13 @@ type Profile = {
 const STEPS = [
   { title: "Company Info", icon: Building2 },
   { title: "Contact Info", icon: User },
+  { title: "Campaign Needs", icon: Target },
+];
+
+const PILLARS = [
+  { value: "product", label: "Product", description: "Promote a physical product", icon: Package },
+  { value: "service", label: "Service", description: "Promote a service or offering", icon: Wrench },
+  { value: "event", label: "Event", description: "Promote an upcoming event", icon: CalendarDays },
 ];
 
 const INDUSTRIES = [
