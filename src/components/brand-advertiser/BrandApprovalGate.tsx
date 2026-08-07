@@ -57,7 +57,7 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
   const [userId, setUserId] = useState<string | null>(null);
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ company_name: "", industry: "", contact_name: "", contact_phone: "" });
+  const [form, setForm] = useState({ company_name: "", industry: "", contact_name: "", contact_phone: "", campaign_pillar: "" });
 
   const load = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -65,7 +65,7 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
     setUserId(session.user.id);
     const { data } = await supabase
       .from("brand_advertiser_profiles")
-      .select("id, company_name, industry, contact_name, contact_phone, approval_status, rejection_reason")
+      .select("id, company_name, industry, contact_name, contact_phone, campaign_pillar, approval_status, rejection_reason")
       .eq("user_id", session.user.id)
       .maybeSingle();
     setProfile((data as any) || null);
@@ -75,6 +75,7 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
         industry: (data as any).industry || "",
         contact_name: (data as any).contact_name || "",
         contact_phone: (data as any).contact_phone || "",
+        campaign_pillar: (data as any).campaign_pillar || "",
       });
     }
     setLoading(false);
@@ -88,12 +89,17 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
       toast.error("Company name and contact name are required");
       return;
     }
+    if (!form.campaign_pillar) {
+      toast.error("Please select what best describes your campaign needs");
+      return;
+    }
     setSaving(true);
     const payload = {
       company_name: form.company_name.trim(),
       industry: form.industry.trim() || null,
       contact_name: form.contact_name.trim(),
       contact_phone: form.contact_phone.trim() || null,
+      campaign_pillar: form.campaign_pillar,
     };
     let error: any = null;
     if (profile?.id) {
