@@ -186,7 +186,7 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
                 </Select>
               </div>
             </div>
-          ) : (
+          ) : step === 1 ? (
             <div className="space-y-5">
               <div className="space-y-1.5">
                 <Label htmlFor="contact_name" className="text-gray-900 font-medium">Contact Name *</Label>
@@ -203,6 +203,40 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
                   onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
               </div>
             </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-900 font-medium">What best describes your campaign needs? *</Label>
+                <p className="text-xs text-gray-500 mt-1">Choose one — this tailors your dashboard to how you advertise.</p>
+              </div>
+              <div className="space-y-3">
+                {PILLARS.map((p) => {
+                  const Icon = p.icon;
+                  const selected = form.campaign_pillar === p.value;
+                  return (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, campaign_pillar: p.value })}
+                      className={`w-full text-left flex items-center gap-4 rounded-lg border p-4 transition-colors ${
+                        selected ? "border-primary bg-primary/5" : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 ${
+                        selected ? "bg-primary text-primary-foreground" : "bg-gray-100 text-gray-500"
+                      }`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900">{p.label}</p>
+                        <p className="text-sm text-gray-500">{p.description}</p>
+                      </div>
+                      {selected && <Check className="w-5 h-5 text-primary shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
           <div className="flex justify-between mt-8">
@@ -211,8 +245,10 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
             </Button>
             {step === 0 ? (
               <Button disabled={!form.company_name.trim()} onClick={() => setStep(1)}>Next</Button>
+            ) : step === 1 ? (
+              <Button disabled={!form.contact_name.trim()} onClick={() => setStep(2)}>Next</Button>
             ) : (
-              <Button disabled={saving} onClick={submit}>
+              <Button disabled={saving || !form.campaign_pillar} onClick={submit}>
                 {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Submit for approval
               </Button>
