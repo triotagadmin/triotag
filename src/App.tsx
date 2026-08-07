@@ -339,6 +339,9 @@ const App = () => (
           <Route path="/brand-advertiser/reports" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserReports /></BrandApprovalGate></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/changelog" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserChangelog /></BrandApprovalGate></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/settings" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserSettings /></BrandApprovalGate></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/products" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserProductCampaigns /></BrandApprovalGate></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/services" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserServiceCampaigns /></BrandApprovalGate></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/events" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserEventCampaigns /></BrandApprovalGate></RoleProtectedRoute>} />
 
           <Route path="/services/ecommerce-seo" element={<EcommerceSeoMicrosites />} />
           <Route path="/services/google-ads" element={<Navigate to="/services/ecommerce-seo" replace />} />
