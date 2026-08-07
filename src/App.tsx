@@ -136,6 +136,9 @@ import BrandAdvertiserAudiences from "./pages/brand-advertiser/BrandAdvertiserAu
 import BrandAdvertiserReports from "./pages/brand-advertiser/BrandAdvertiserReports";
 import BrandAdvertiserChangelog from "./pages/brand-advertiser/BrandAdvertiserChangelog";
 import BrandAdvertiserInventory from "./pages/brand-advertiser/BrandAdvertiserInventory";
+import BrandAdvertiserProductCampaigns from "./pages/brand-advertiser/BrandAdvertiserProductCampaigns";
+import BrandAdvertiserServiceCampaigns from "./pages/brand-advertiser/BrandAdvertiserServiceCampaigns";
+import BrandAdvertiserEventCampaigns from "./pages/brand-advertiser/BrandAdvertiserEventCampaigns";
 import BrandApprovalGate from "./components/brand-advertiser/BrandApprovalGate";
 
 import EcommerceSeoMicrosites from "./pages/EcommerceSeoMicrosites";
