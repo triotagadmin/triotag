@@ -202,15 +202,20 @@ export function AppSidebar({ role, campaignPillar }: { role: string; campaignPil
 
 export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<string | null>(null);
+  const [pillar, setPillar] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const load = async (session: any) => {
       const userId = session?.user?.id;
-      if (!userId) { setRole(null); setReady(true); return; }
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
+      if (!userId) { setRole(null); setPillar(null); setReady(true); return; }
+      const [{ data }, { data: brandProfile }] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
+        supabase.from("brand_advertiser_profiles").select("campaign_pillar").eq("user_id", userId).maybeSingle(),
+      ]);
       const resolved = (data?.role as string) || null;
       setRole(resolved);
+      setPillar(((brandProfile as any)?.campaign_pillar as string) || null);
       setReady(true);
     };
     supabase.auth.getSession().then(({ data: { session } }) => load(session));
@@ -224,7 +229,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   if (!ready) return <>{children}</>;
   return (
     <>
-      {role && <AppSidebar role={role} />}
+      {role && <AppSidebar role={role} campaignPillar={pillar} />}
       <div className={role ? "md:pl-[68px]" : ""}>{children}</div>
     </>
   );
