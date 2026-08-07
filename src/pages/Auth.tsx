@@ -135,6 +135,9 @@ const Auth = () => {
 
 
           // Existing account (including legacy retailers) — always honor its role
+          if (intent === "signup") {
+            toast({ title: "Welcome back!", description: "We found your existing account and signed you in." });
+          }
           routeByRole(existingRole.role);
           return;
         }
