@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   Globe, Megaphone, BarChart3, MessageSquare, Bell, User, LayoutDashboard, TrendingUp, Package,
   Image as ImageIcon, Users, History, ClipboardList, Layers, ShieldCheck, MapPinCheck, Compass,
+  Wrench, CalendarDays,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
@@ -75,13 +76,21 @@ const ROLE_SETTINGS_PATH: Record<string, string> = {
   brand_advertiser: "/brand-advertiser/settings",
 };
 
-export function AppSidebar({ role }: { role: string }) {
+const PILLAR_ITEM: Record<string, Item> = {
+  product: { to: "/brand-advertiser/products", label: "Product Campaigns", icon: Package },
+  service: { to: "/brand-advertiser/services", label: "Service Campaigns", icon: Wrench },
+  event: { to: "/brand-advertiser/events", label: "Event Campaigns", icon: CalendarDays },
+};
+
+export function AppSidebar({ role, campaignPillar }: { role: string; campaignPillar?: string | null }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
-  const items = ROLE_SIDEBAR_ITEMS[role] || [];
+  const baseItems = ROLE_SIDEBAR_ITEMS[role] || [];
+  const pillarItem = role === "brand_advertiser" && campaignPillar ? PILLAR_ITEM[campaignPillar] : undefined;
+  const items = pillarItem ? [...baseItems, pillarItem] : baseItems;
   const settingsPath = ROLE_SETTINGS_PATH[role] || "/auth";
   const isActive = (to: string) => pathname === to || pathname.startsWith(to + "/");
 
@@ -193,15 +202,20 @@ export function AppSidebar({ role }: { role: string }) {
 
 export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<string | null>(null);
+  const [pillar, setPillar] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const load = async (session: any) => {
       const userId = session?.user?.id;
-      if (!userId) { setRole(null); setReady(true); return; }
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
+      if (!userId) { setRole(null); setPillar(null); setReady(true); return; }
+      const [{ data }, { data: brandProfile }] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
+        supabase.from("brand_advertiser_profiles").select("campaign_pillar").eq("user_id", userId).maybeSingle(),
+      ]);
       const resolved = (data?.role as string) || null;
       setRole(resolved);
+      setPillar(((brandProfile as any)?.campaign_pillar as string) || null);
       setReady(true);
     };
     supabase.auth.getSession().then(({ data: { session } }) => load(session));
@@ -215,7 +229,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   if (!ready) return <>{children}</>;
   return (
     <>
-      {role && <AppSidebar role={role} />}
+      {role && <AppSidebar role={role} campaignPillar={pillar} />}
       <div className={role ? "md:pl-[68px]" : ""}>{children}</div>
     </>
   );

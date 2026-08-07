@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, XCircle, Loader2, Building2, User, Check } from "lucide-react";
+import { Clock, XCircle, Loader2, Building2, User, Check, Target, Package, Wrench, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 
 type Profile = {
@@ -14,6 +14,7 @@ type Profile = {
   industry: string | null;
   contact_name: string | null;
   contact_phone: string | null;
+  campaign_pillar: string | null;
   approval_status: string | null;
   rejection_reason: string | null;
 };
@@ -21,6 +22,13 @@ type Profile = {
 const STEPS = [
   { title: "Company Info", icon: Building2 },
   { title: "Contact Info", icon: User },
+  { title: "Campaign Needs", icon: Target },
+];
+
+const PILLARS = [
+  { value: "product", label: "Product", description: "Promote a physical product", icon: Package },
+  { value: "service", label: "Service", description: "Promote a service or offering", icon: Wrench },
+  { value: "event", label: "Event", description: "Promote an upcoming event", icon: CalendarDays },
 ];
 
 const INDUSTRIES = [
@@ -49,7 +57,7 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
   const [userId, setUserId] = useState<string | null>(null);
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ company_name: "", industry: "", contact_name: "", contact_phone: "" });
+  const [form, setForm] = useState({ company_name: "", industry: "", contact_name: "", contact_phone: "", campaign_pillar: "" });
 
   const load = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -57,7 +65,7 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
     setUserId(session.user.id);
     const { data } = await supabase
       .from("brand_advertiser_profiles")
-      .select("id, company_name, industry, contact_name, contact_phone, approval_status, rejection_reason")
+      .select("id, company_name, industry, contact_name, contact_phone, campaign_pillar, approval_status, rejection_reason")
       .eq("user_id", session.user.id)
       .maybeSingle();
     setProfile((data as any) || null);
@@ -67,6 +75,7 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
         industry: (data as any).industry || "",
         contact_name: (data as any).contact_name || "",
         contact_phone: (data as any).contact_phone || "",
+        campaign_pillar: (data as any).campaign_pillar || "",
       });
     }
     setLoading(false);
@@ -80,12 +89,17 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
       toast.error("Company name and contact name are required");
       return;
     }
+    if (!form.campaign_pillar) {
+      toast.error("Please select what best describes your campaign needs");
+      return;
+    }
     setSaving(true);
     const payload = {
       company_name: form.company_name.trim(),
       industry: form.industry.trim() || null,
       contact_name: form.contact_name.trim(),
       contact_phone: form.contact_phone.trim() || null,
+      campaign_pillar: form.campaign_pillar,
     };
     let error: any = null;
     if (profile?.id) {
@@ -172,7 +186,7 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
                 </Select>
               </div>
             </div>
-          ) : (
+          ) : step === 1 ? (
             <div className="space-y-5">
               <div className="space-y-1.5">
                 <Label htmlFor="contact_name" className="text-gray-900 font-medium">Contact Name *</Label>
@@ -189,6 +203,40 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
                   onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
               </div>
             </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-900 font-medium">What best describes your campaign needs? *</Label>
+                <p className="text-xs text-gray-500 mt-1">Choose one — this tailors your dashboard to how you advertise.</p>
+              </div>
+              <div className="space-y-3">
+                {PILLARS.map((p) => {
+                  const Icon = p.icon;
+                  const selected = form.campaign_pillar === p.value;
+                  return (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, campaign_pillar: p.value })}
+                      className={`w-full text-left flex items-center gap-4 rounded-lg border p-4 transition-colors ${
+                        selected ? "border-primary bg-primary/5" : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 ${
+                        selected ? "bg-primary text-primary-foreground" : "bg-gray-100 text-gray-500"
+                      }`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900">{p.label}</p>
+                        <p className="text-sm text-gray-500">{p.description}</p>
+                      </div>
+                      {selected && <Check className="w-5 h-5 text-primary shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
           <div className="flex justify-between mt-8">
@@ -197,8 +245,10 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
             </Button>
             {step === 0 ? (
               <Button disabled={!form.company_name.trim()} onClick={() => setStep(1)}>Next</Button>
+            ) : step === 1 ? (
+              <Button disabled={!form.contact_name.trim()} onClick={() => setStep(2)}>Next</Button>
             ) : (
-              <Button disabled={saving} onClick={submit}>
+              <Button disabled={saving || !form.campaign_pillar} onClick={submit}>
                 {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Submit for approval
               </Button>
