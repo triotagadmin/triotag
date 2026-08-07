@@ -123,10 +123,11 @@ const Auth = () => {
                 });
               }
 
-              toast({
-                title: "Welcome!",
-                description: "Your account has been created successfully.",
-              });
+              toast(
+                intent === "signup"
+                  ? { title: "Welcome back!", description: "We found your existing account and signed you in." }
+                  : { title: "Welcome!", description: "Your account has been created successfully." }
+              );
               routeByRole("brand_advertiser");
               return;
             }
