@@ -225,10 +225,11 @@ const Auth = () => {
           // No automatic profile creation here — routeByRole will redirect to /talent-profile
         }
 
-        toast({
-          title: "Welcome!",
-          description: "Your account has been created successfully.",
-        });
+        toast(
+          intent === "signin"
+            ? { title: "Looks like this is your first time", description: "Setting up your account now." }
+            : { title: "Welcome!", description: "Your account has been created successfully." }
+        );
         routeByRole(mappedRole);
       } catch (error: any) {
         console.error("OAuth post-redirect error:", error);
