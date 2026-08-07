@@ -61,6 +61,8 @@ const Auth = () => {
       if (urlAccountType) {
         window.history.replaceState({}, "", window.location.pathname);
       }
+      const intent = localStorage.getItem("google_auth_intent");
+      localStorage.removeItem("google_auth_intent");
       setLoading(true);
 
       try {
