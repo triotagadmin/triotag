@@ -101,66 +101,105 @@ export default function AdvertiserExplore() {
     return () => { cancelled = true; };
   }, []);
 
-  // Auto-discover nearby retail-type places for map markers (debounced)
-  const [nearbyPlaces, setNearbyPlaces] = useState<
-    { lat: number; lng: number; name: string; category: string; address?: string }[]
-  >([]);
-  const [placesLoading, setPlacesLoading] = useState(false);
+  // ---- Google Places category browsing (ported from BrandAdvertiserInventory) ----
+  const [placeResults, setPlaceResults] = useState<Record<string, PlaceMarker[]>>({});
+  const [placeLoading, setPlaceLoading] = useState<Record<string, boolean>>({});
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
 
+  const placesLoading = Object.values(placeLoading).some(Boolean);
+
+  // Reset cached results when the search area changes
   useEffect(() => {
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      setPlacesLoading(true);
-      const CATS: { key: string; type?: string; keyword?: string }[] = [
-        { key: "cafe", type: "cafe" },
-        { key: "restaurant", type: "restaurant" },
-        { key: "gym", type: "gym" },
-        { key: "night_club", type: "night_club" },
-        { key: "store", type: "store" },
-        { key: "beauty_salon", type: "beauty_salon" },
-        { key: "coworking", keyword: "co-working space" },
-      ];
-      try {
-        const settled = await Promise.all(
-          CATS.map(async (c) => {
-            const { data } = await supabase.functions.invoke("discover-nearby-places", {
-              body: {
-                lat: center.lat,
-                lng: center.lng,
-                radiusMeters,
-                ...(c.type ? { type: c.type } : {}),
-                ...(c.keyword ? { keyword: c.keyword } : {}),
-              },
-            });
-            return ((data as any)?.results ?? []).map((r: any) => ({
-              lat: r.lat,
-              lng: r.lng,
-              name: r.name,
-              address: r.address ?? "",
-              category: c.key,
-              placeId: r.placeId,
-            }));
-          }),
-        );
-        if (cancelled) return;
-        const seen = new Set<string>();
-        const merged: { lat: number; lng: number; name: string; category: string; address?: string }[] = [];
-        for (const list of settled) {
-          for (const p of list) {
-            if (!p.lat || !p.lng || seen.has(p.placeId)) continue;
-            seen.add(p.placeId);
-            merged.push({ lat: p.lat, lng: p.lng, name: p.name, category: p.category, address: p.address });
-          }
-        }
-        setNearbyPlaces(merged);
-      } catch (e) {
-        console.error("[AdvertiserExplore] nearby places failed", e);
-      } finally {
-        if (!cancelled) setPlacesLoading(false);
-      }
-    }, 500);
-    return () => { cancelled = true; clearTimeout(timer); };
+    setPlaceResults({});
   }, [center.lat, center.lng, radiusMeters]);
+
+  const fetchVerifiedPoints = async (): Promise<{ lat: number; lng: number }[]> => {
+    const { data: spaces } = await supabase
+      .from("ad_spaces")
+      .select("id, latitude, longitude, contact_verified_at")
+      .not("latitude", "is", null)
+      .not("longitude", "is", null);
+    const inRadius = (spaces || []).filter(
+      (s: any) =>
+        haversineMeters(center.lat, center.lng, Number(s.latitude), Number(s.longitude)) <= radiusMeters,
+    );
+    if (inRadius.length === 0) return [];
+    const { data: subs } = await supabase
+      .from("venue_subscriptions")
+      .select("id, ad_space_id, subscription_status")
+      .in("ad_space_id", inRadius.map((s: any) => s.id));
+    const activeIds = new Set(
+      (subs || []).filter((s: any) => s.subscription_status === "active").map((s: any) => s.ad_space_id),
+    );
+    return inRadius
+      .filter((s: any) => s.contact_verified_at != null || activeIds.has(s.id))
+      .map((s: any) => ({ lat: Number(s.latitude), lng: Number(s.longitude) }));
+  };
+
+  const loadPlacesForCategory = async (category: string) => {
+    if (placeResults[category] || placeLoading[category]) return;
+    setPlaceLoading((p) => ({ ...p, [category]: true }));
+    try {
+      const q = LOCATION_TYPE_QUERY[category] || {};
+      const [{ data, error }, verifiedPoints] = await Promise.all([
+        supabase.functions.invoke("discover-nearby-places", {
+          body: { lat: center.lat, lng: center.lng, radiusMeters, ...q },
+        }),
+        fetchVerifiedPoints(),
+      ]);
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const places: PlaceMarker[] = ((data as any)?.results ?? [])
+        .filter((r: any) => typeof r.lat === "number" && typeof r.lng === "number")
+        .map((r: any) => ({
+          id: r.placeId,
+          name: r.name,
+          address: r.address || "",
+          lat: r.lat,
+          lng: r.lng,
+          category,
+          verified: verifiedPoints.some((v) => haversineMeters(v.lat, v.lng, r.lat, r.lng) <= 60),
+        }));
+      setPlaceResults((p) => ({ ...p, [category]: places }));
+    } catch (err: any) {
+      console.error("[AdvertiserExplore] places fetch failed", err);
+      toast({
+        title: "Could not load locations",
+        description: err?.message || `Failed to fetch ${category} nearby.`,
+        variant: "destructive",
+      });
+      setPlaceResults((p) => ({ ...p, [category]: [] }));
+    } finally {
+      setPlaceLoading((p) => ({ ...p, [category]: false }));
+    }
+  };
+
+  const toggleCategory = (t: string) => {
+    const on = !!openCategories[t];
+    setOpenCategories((prev) => ({ ...prev, [t]: !on }));
+    if (!on) loadPlacesForCategory(t);
+  };
+
+  // Markers shown on the map = every place discovered for the opened categories
+  const nearbyPlaces = useMemo(() => {
+    const seen = new Set<string>();
+    const out: { lat: number; lng: number; name: string; category: string; address?: string }[] = [];
+    for (const [cat, list] of Object.entries(placeResults)) {
+      if (!openCategories[cat]) continue;
+      for (const p of list) {
+        if (seen.has(p.id)) continue;
+        seen.add(p.id);
+        out.push({
+          lat: p.lat,
+          lng: p.lng,
+          name: p.name,
+          address: p.address,
+          category: LOCATION_TYPE_MARKER_CATEGORY[cat] ?? "other",
+        });
+      }
+    }
+    return out;
+  }, [placeResults, openCategories]);
 
   const nearbyInventory = useMemo(() => {
     const list = inventory
@@ -173,6 +212,13 @@ export default function AdvertiserExplore() {
       .sort((a, b) => a.distance - b.distance);
     return list;
   }, [inventory, center.lat, center.lng, radiusMeters]);
+
+  const matchedInventory = useMemo(() => {
+    if (!chosenFormat || chosenFormat === "MEDIA_TRUCK") return nearbyInventory;
+    return nearbyInventory.filter((r) =>
+      (r.media_types ?? []).includes(chosenFormat) || (r as any).media_type === chosenFormat,
+    );
+  }, [nearbyInventory, chosenFormat]);
 
 
   const updateQty = (variantId: string, qty: number) => {
