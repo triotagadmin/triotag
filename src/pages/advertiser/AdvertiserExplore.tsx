@@ -62,6 +62,73 @@ type AdSpaceRow = {
   publisher_profiles?: { business_name: string | null } | null;
 };
 
+interface PlaceMarker {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  category?: string;
+  verified?: boolean;
+}
+
+const LOCATION_TYPES = [
+  "Cafe",
+  "Co-working Space",
+  "Barber Shop",
+  "Salon",
+  "Supermarket",
+  "Convenience Store",
+  "Restaurant",
+  "Fast Food",
+  "Bar",
+  "Nightclub",
+  "Gym",
+  "Pharmacy",
+  "Mall",
+  "Clothing Store",
+  "Department Store",
+] as const;
+
+const LOCATION_TYPE_QUERY: Record<string, { type?: string; keyword?: string }> = {
+  "Cafe": { type: "cafe" },
+  "Co-working Space": { keyword: "co-working space" },
+  "Barber Shop": { keyword: "barber shop" },
+  "Salon": { type: "beauty_salon" },
+  "Supermarket": { type: "supermarket" },
+  "Convenience Store": { type: "convenience_store" },
+  "Restaurant": { type: "restaurant" },
+  "Fast Food": { type: "meal_takeaway" },
+  "Bar": { type: "bar" },
+  "Nightclub": { type: "night_club" },
+  "Gym": { type: "gym" },
+  "Pharmacy": { type: "pharmacy" },
+  "Mall": { type: "shopping_mall" },
+  "Clothing Store": { type: "clothing_store" },
+  "Department Store": { type: "department_store" },
+};
+
+// Maps a location type onto the marker colour buckets used by RadiusMapPlanner
+const LOCATION_TYPE_MARKER_CATEGORY: Record<string, string> = {
+  "Cafe": "cafe",
+  "Co-working Space": "coworking",
+  "Barber Shop": "beauty_salon",
+  "Salon": "beauty_salon",
+  "Supermarket": "store",
+  "Convenience Store": "store",
+  "Restaurant": "restaurant",
+  "Fast Food": "restaurant",
+  "Bar": "night_club",
+  "Nightclub": "night_club",
+  "Gym": "gym",
+  "Pharmacy": "store",
+  "Mall": "store",
+  "Clothing Store": "store",
+  "Department Store": "store",
+};
+
+
+
 export default function AdvertiserExplore() {
   const [center, setCenter] = useState(DEFAULT_CENTER);
   const [radiusMeters, setRadiusMeters] = useState(250);
