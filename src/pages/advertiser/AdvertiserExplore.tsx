@@ -62,6 +62,73 @@ type AdSpaceRow = {
   publisher_profiles?: { business_name: string | null } | null;
 };
 
+interface PlaceMarker {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  category?: string;
+  verified?: boolean;
+}
+
+const LOCATION_TYPES = [
+  "Cafe",
+  "Co-working Space",
+  "Barber Shop",
+  "Salon",
+  "Supermarket",
+  "Convenience Store",
+  "Restaurant",
+  "Fast Food",
+  "Bar",
+  "Nightclub",
+  "Gym",
+  "Pharmacy",
+  "Mall",
+  "Clothing Store",
+  "Department Store",
+] as const;
+
+const LOCATION_TYPE_QUERY: Record<string, { type?: string; keyword?: string }> = {
+  "Cafe": { type: "cafe" },
+  "Co-working Space": { keyword: "co-working space" },
+  "Barber Shop": { keyword: "barber shop" },
+  "Salon": { type: "beauty_salon" },
+  "Supermarket": { type: "supermarket" },
+  "Convenience Store": { type: "convenience_store" },
+  "Restaurant": { type: "restaurant" },
+  "Fast Food": { type: "meal_takeaway" },
+  "Bar": { type: "bar" },
+  "Nightclub": { type: "night_club" },
+  "Gym": { type: "gym" },
+  "Pharmacy": { type: "pharmacy" },
+  "Mall": { type: "shopping_mall" },
+  "Clothing Store": { type: "clothing_store" },
+  "Department Store": { type: "department_store" },
+};
+
+// Maps a location type onto the marker colour buckets used by RadiusMapPlanner
+const LOCATION_TYPE_MARKER_CATEGORY: Record<string, string> = {
+  "Cafe": "cafe",
+  "Co-working Space": "coworking",
+  "Barber Shop": "beauty_salon",
+  "Salon": "beauty_salon",
+  "Supermarket": "store",
+  "Convenience Store": "store",
+  "Restaurant": "restaurant",
+  "Fast Food": "restaurant",
+  "Bar": "night_club",
+  "Nightclub": "night_club",
+  "Gym": "gym",
+  "Pharmacy": "store",
+  "Mall": "store",
+  "Clothing Store": "store",
+  "Department Store": "store",
+};
+
+
+
 export default function AdvertiserExplore() {
   const [center, setCenter] = useState(DEFAULT_CENTER);
   const [radiusMeters, setRadiusMeters] = useState(250);
@@ -101,66 +168,105 @@ export default function AdvertiserExplore() {
     return () => { cancelled = true; };
   }, []);
 
-  // Auto-discover nearby retail-type places for map markers (debounced)
-  const [nearbyPlaces, setNearbyPlaces] = useState<
-    { lat: number; lng: number; name: string; category: string; address?: string }[]
-  >([]);
-  const [placesLoading, setPlacesLoading] = useState(false);
+  // ---- Google Places category browsing (ported from BrandAdvertiserInventory) ----
+  const [placeResults, setPlaceResults] = useState<Record<string, PlaceMarker[]>>({});
+  const [placeLoading, setPlaceLoading] = useState<Record<string, boolean>>({});
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
 
+  const placesLoading = Object.values(placeLoading).some(Boolean);
+
+  // Reset cached results when the search area changes
   useEffect(() => {
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      setPlacesLoading(true);
-      const CATS: { key: string; type?: string; keyword?: string }[] = [
-        { key: "cafe", type: "cafe" },
-        { key: "restaurant", type: "restaurant" },
-        { key: "gym", type: "gym" },
-        { key: "night_club", type: "night_club" },
-        { key: "store", type: "store" },
-        { key: "beauty_salon", type: "beauty_salon" },
-        { key: "coworking", keyword: "co-working space" },
-      ];
-      try {
-        const settled = await Promise.all(
-          CATS.map(async (c) => {
-            const { data } = await supabase.functions.invoke("discover-nearby-places", {
-              body: {
-                lat: center.lat,
-                lng: center.lng,
-                radiusMeters,
-                ...(c.type ? { type: c.type } : {}),
-                ...(c.keyword ? { keyword: c.keyword } : {}),
-              },
-            });
-            return ((data as any)?.results ?? []).map((r: any) => ({
-              lat: r.lat,
-              lng: r.lng,
-              name: r.name,
-              address: r.address ?? "",
-              category: c.key,
-              placeId: r.placeId,
-            }));
-          }),
-        );
-        if (cancelled) return;
-        const seen = new Set<string>();
-        const merged: { lat: number; lng: number; name: string; category: string; address?: string }[] = [];
-        for (const list of settled) {
-          for (const p of list) {
-            if (!p.lat || !p.lng || seen.has(p.placeId)) continue;
-            seen.add(p.placeId);
-            merged.push({ lat: p.lat, lng: p.lng, name: p.name, category: p.category, address: p.address });
-          }
-        }
-        setNearbyPlaces(merged);
-      } catch (e) {
-        console.error("[AdvertiserExplore] nearby places failed", e);
-      } finally {
-        if (!cancelled) setPlacesLoading(false);
-      }
-    }, 500);
-    return () => { cancelled = true; clearTimeout(timer); };
+    setPlaceResults({});
   }, [center.lat, center.lng, radiusMeters]);
+
+  const fetchVerifiedPoints = async (): Promise<{ lat: number; lng: number }[]> => {
+    const { data: spaces } = await supabase
+      .from("ad_spaces")
+      .select("id, latitude, longitude, contact_verified_at")
+      .not("latitude", "is", null)
+      .not("longitude", "is", null);
+    const inRadius = (spaces || []).filter(
+      (s: any) =>
+        haversineMeters(center.lat, center.lng, Number(s.latitude), Number(s.longitude)) <= radiusMeters,
+    );
+    if (inRadius.length === 0) return [];
+    const { data: subs } = await supabase
+      .from("venue_subscriptions")
+      .select("id, ad_space_id, subscription_status")
+      .in("ad_space_id", inRadius.map((s: any) => s.id));
+    const activeIds = new Set(
+      (subs || []).filter((s: any) => s.subscription_status === "active").map((s: any) => s.ad_space_id),
+    );
+    return inRadius
+      .filter((s: any) => s.contact_verified_at != null || activeIds.has(s.id))
+      .map((s: any) => ({ lat: Number(s.latitude), lng: Number(s.longitude) }));
+  };
+
+  const loadPlacesForCategory = async (category: string) => {
+    if (placeResults[category] || placeLoading[category]) return;
+    setPlaceLoading((p) => ({ ...p, [category]: true }));
+    try {
+      const q = LOCATION_TYPE_QUERY[category] || {};
+      const [{ data, error }, verifiedPoints] = await Promise.all([
+        supabase.functions.invoke("discover-nearby-places", {
+          body: { lat: center.lat, lng: center.lng, radiusMeters, ...q },
+        }),
+        fetchVerifiedPoints(),
+      ]);
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const places: PlaceMarker[] = ((data as any)?.results ?? [])
+        .filter((r: any) => typeof r.lat === "number" && typeof r.lng === "number")
+        .map((r: any) => ({
+          id: r.placeId,
+          name: r.name,
+          address: r.address || "",
+          lat: r.lat,
+          lng: r.lng,
+          category,
+          verified: verifiedPoints.some((v) => haversineMeters(v.lat, v.lng, r.lat, r.lng) <= 60),
+        }));
+      setPlaceResults((p) => ({ ...p, [category]: places }));
+    } catch (err: any) {
+      console.error("[AdvertiserExplore] places fetch failed", err);
+      toast({
+        title: "Could not load locations",
+        description: err?.message || `Failed to fetch ${category} nearby.`,
+        variant: "destructive",
+      });
+      setPlaceResults((p) => ({ ...p, [category]: [] }));
+    } finally {
+      setPlaceLoading((p) => ({ ...p, [category]: false }));
+    }
+  };
+
+  const toggleCategory = (t: string) => {
+    const on = !!openCategories[t];
+    setOpenCategories((prev) => ({ ...prev, [t]: !on }));
+    if (!on) loadPlacesForCategory(t);
+  };
+
+  // Markers shown on the map = every place discovered for the opened categories
+  const nearbyPlaces = useMemo(() => {
+    const seen = new Set<string>();
+    const out: { lat: number; lng: number; name: string; category: string; address?: string }[] = [];
+    for (const [cat, list] of Object.entries(placeResults)) {
+      if (!openCategories[cat]) continue;
+      for (const p of list) {
+        if (seen.has(p.id)) continue;
+        seen.add(p.id);
+        out.push({
+          lat: p.lat,
+          lng: p.lng,
+          name: p.name,
+          address: p.address,
+          category: LOCATION_TYPE_MARKER_CATEGORY[cat] ?? "other",
+        });
+      }
+    }
+    return out;
+  }, [placeResults, openCategories]);
 
   const nearbyInventory = useMemo(() => {
     const list = inventory
@@ -173,6 +279,13 @@ export default function AdvertiserExplore() {
       .sort((a, b) => a.distance - b.distance);
     return list;
   }, [inventory, center.lat, center.lng, radiusMeters]);
+
+  const matchedInventory = useMemo(() => {
+    if (!chosenFormat || chosenFormat === "MEDIA_TRUCK") return nearbyInventory;
+    return nearbyInventory.filter((r) =>
+      (r.media_types ?? []).includes(chosenFormat) || (r as any).media_type === chosenFormat,
+    );
+  }, [nearbyInventory, chosenFormat]);
 
 
   const updateQty = (variantId: string, qty: number) => {
@@ -414,69 +527,188 @@ export default function AdvertiserExplore() {
               {/* STEP 1 */}
               {wizardStep === 1 && (
                 <div className="space-y-5">
-                  <RadiusMapPlanner
-                    center={center}
-                    radiusMeters={radiusMeters}
-                    onCenterChange={setCenter}
-                    onRadiusChange={setRadiusMeters}
-                    onServiceAreaChange={setWithinServiceArea}
-                    onLocationSet={setSelectedLocationAddress}
-                    markers={nearbyPlaces}
-                    markersLoading={placesLoading}
-                  />
+                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+                    {/* LEFT: map + coverage radius card */}
+                    <div className="lg:col-span-3 space-y-4">
+                      <RadiusMapPlanner
+                        center={center}
+                        radiusMeters={radiusMeters}
+                        onCenterChange={setCenter}
+                        onRadiusChange={setRadiusMeters}
+                        onServiceAreaChange={setWithinServiceArea}
+                        onLocationSet={setSelectedLocationAddress}
+                        markers={nearbyPlaces}
+                        markersLoading={placesLoading}
+                      />
 
-
-                  {/* Nearby locations discovered via Places */}
-                  <div className="bg-white border border-gray-200 rounded-2xl p-5">
-                    <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
-                      <div>
-                        <h3 className="text-base font-bold text-gray-900">Retail Media Locations in This Area</h3>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          {placesLoading
-                            ? "Finding nearby locations…"
-                            : `${nearbyPlaces.length} location${nearbyPlaces.length === 1 ? "" : "s"} found within ${(radiusMeters / 1000).toFixed(radiusMeters % 1000 === 0 ? 0 : 2)} km`}
+                      <div className="border border-gray-200 bg-white rounded-xl p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                          Coverage Radius
+                        </div>
+                        <div className="text-sm text-gray-700">
+                          {estimate.radiusPercent}% coverage
+                          <span className="text-gray-500">
+                            {" "}· {(radiusMeters / 1000).toFixed(radiusMeters < 1000 ? 2 : 1)}km
+                          </span>
+                        </div>
+                        <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 space-y-1.5 mt-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-600">Pin location</span>
+                            <span className="text-xs font-mono text-gray-900">
+                              {center.lat.toFixed(4)}, {center.lng.toFixed(4)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-600">Radius</span>
+                            <span className="text-sm font-semibold text-green-700">
+                              {(radiusMeters / 1000).toFixed(radiusMeters < 1000 ? 2 : 1)} km
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-600">Locations found</span>
+                            <span className="text-sm font-semibold text-gray-900">{nearbyPlaces.length}</span>
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-gray-500 mt-2">
+                          This is exploratory coverage info only — nothing here is booked or charged.
                         </p>
                       </div>
-                      {placesLoading && <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />}
                     </div>
 
-                    {!placesLoading && nearbyPlaces.length === 0 && (
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-600">
-                        No nearby locations found — try a larger radius.
-                      </div>
-                    )}
+                    {/* RIGHT: browse real nearby locations by category */}
+                    <div className="lg:col-span-2 space-y-4">
+                      <div className="bg-white border border-gray-200 rounded-2xl p-4">
+                        <h3 className="text-sm font-bold text-gray-900">Retail Media Locations in This Area</h3>
+                        <p className="text-xs text-gray-500 mt-0.5 mb-3">
+                          Open a location type to see real businesses within your radius.
+                        </p>
+                        <div className="space-y-1.5 max-h-[520px] overflow-y-auto pr-1">
+                          {LOCATION_TYPES.map((t) => {
+                            const on = !!openCategories[t];
+                            const results = placeResults[t];
+                            const loading = !!placeLoading[t];
+                            const s = CATEGORY_STYLES[LOCATION_TYPE_MARKER_CATEGORY[t]] ?? CATEGORY_STYLES.other;
+                            return (
+                              <div
+                                key={t}
+                                className={`rounded-md border transition-colors ${
+                                  on ? "bg-green-50 border-green-300" : "bg-white border-gray-200"
+                                }`}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => toggleCategory(t)}
+                                  className="w-full flex items-center gap-2 px-2 py-2 text-left"
+                                >
+                                  <span
+                                    className="w-2.5 h-2.5 rounded-full border border-white shadow shrink-0"
+                                    style={{ background: s.color }}
+                                  />
+                                  <span className="text-xs text-gray-900 flex-1 min-w-0 truncate">{t}</span>
+                                  {loading ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
+                                  ) : results ? (
+                                    <span className="text-[11px] font-semibold text-green-700">
+                                      {results.length} found
+                                    </span>
+                                  ) : (
+                                    <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+                                  )}
+                                </button>
 
-                    {nearbyPlaces.length > 0 && (
-                      <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-                        {nearbyPlaces.map((p, i) => {
-                          const s = CATEGORY_STYLES[p.category] ?? CATEGORY_STYLES.other;
-                          return (
-                            <div
-                              key={`${p.name}-${i}`}
-                              className="flex items-start justify-between gap-3 border border-gray-100 hover:border-green-300 rounded-lg px-3 py-2.5"
-                            >
-                              <div className="min-w-0">
-                                <div className="text-sm font-semibold text-gray-900 truncate">{p.name}</div>
-                                {p.address && (
-                                  <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-1">
-                                    <MapPin className="w-3 h-3 shrink-0" />
-                                    <span className="truncate">{p.address}</span>
+                                {on && (
+                                  <div className="border-t border-green-200 px-2 py-2">
+                                    {loading && (
+                                      <div className="flex items-center gap-2 text-xs text-gray-500 py-2">
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                        Finding {t} nearby…
+                                      </div>
+                                    )}
+                                    {!loading && results && results.length === 0 && (
+                                      <p className="text-xs text-gray-500 py-2">No {t} found in this radius.</p>
+                                    )}
+                                    {!loading && results && results.length > 0 && (
+                                      <div className="max-h-56 overflow-y-auto space-y-1 pr-1">
+                                        {results.map((p) => (
+                                          <div
+                                            key={p.id}
+                                            className="rounded-md border border-gray-200 bg-white px-2 py-1.5"
+                                          >
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                              <span className="text-xs font-medium text-gray-900">{p.name}</span>
+                                              {p.verified ? (
+                                                <Badge className="h-4 px-1.5 gap-1 bg-green-100 text-green-700 hover:bg-green-100 border border-green-300 text-[10px]">
+                                                  <ShieldCheck className="w-2.5 h-2.5" />
+                                                  Verified
+                                                </Badge>
+                                              ) : (
+                                                <Badge
+                                                  variant="secondary"
+                                                  className="h-4 px-1.5 bg-gray-100 text-gray-600 hover:bg-gray-100 border border-gray-200 text-[10px]"
+                                                >
+                                                  Unverified
+                                                </Badge>
+                                              )}
+                                            </div>
+                                            {p.address && (
+                                              <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-0.5">
+                                                <MapPin className="w-3 h-3 shrink-0" />
+                                                <span className="truncate">{p.address}</span>
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </div>
-                              <span className="inline-flex items-center gap-1.5 text-xs text-gray-700 shrink-0">
-                                <span
-                                  className="w-2.5 h-2.5 rounded-full border border-white shadow"
-                                  style={{ background: s.color }}
-                                />
-                                {s.label}
-                              </span>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
                       </div>
-                    )}
+
+                      {/* Real TrioTag inventory inside the radius */}
+                      <div className="bg-white border border-gray-200 rounded-2xl p-4">
+                        <h3 className="text-sm font-bold text-gray-900">TrioTag Inventory in Range</h3>
+                        <p className="text-xs text-gray-500 mt-0.5 mb-3">
+                          {inventoryLoading
+                            ? "Checking live inventory…"
+                            : `${matchedInventory.length} live listing${matchedInventory.length === 1 ? "" : "s"} within your radius`}
+                        </p>
+                        {!inventoryLoading && matchedInventory.length === 0 && (
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-600">
+                            No live listings mapped here yet — we can still source venues for your campaign.
+                          </div>
+                        )}
+                        {matchedInventory.length > 0 && (
+                          <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                            {matchedInventory.slice(0, 40).map((r) => (
+                              <div key={r.id} className="rounded-md border border-gray-200 px-2 py-1.5">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="text-xs font-medium text-gray-900 truncate">{r.title}</span>
+                                  {(r.media_types ?? []).map((m) => (
+                                    <Badge
+                                      key={m}
+                                      variant="secondary"
+                                      className="h-4 px-1.5 text-[10px] bg-gray-100 text-gray-600 border border-gray-200"
+                                    >
+                                      {m}
+                                    </Badge>
+                                  ))}
+                                </div>
+                                <div className="text-[11px] text-gray-500 mt-0.5">
+                                  {distanceLabel(r.distance)}
+                                  {r.location ? ` · ${r.location}` : ""}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
+
 
                   {!canAdvanceStep1 && (
                     <div className="flex items-start gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
