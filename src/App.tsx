@@ -55,6 +55,12 @@ import Install from "./pages/Install";
 import ListSpace from "./pages/ListSpace";
 
 import QRRedirect from "./pages/QRRedirect";
+import MobileQRLanding from "./pages/qr/MobileQRLanding";
+import AdminQRCodes from "./pages/admin/AdminQRCodes";
+import AdminMobileQR from "./pages/admin/AdminMobileQR";
+import AdminQRAnalytics from "./pages/admin/AdminQRAnalytics";
+import AdminMobileQRAnalytics from "./pages/admin/AdminMobileQRAnalytics";
+import AdminMobileLeads from "./pages/admin/AdminMobileLeads";
 import Tickets from "./pages/Tickets";
 import OrderPrints from "./pages/OrderPrints";
 import Contact from "./pages/Contact";
@@ -211,7 +217,13 @@ const App = () => (
           <Route path="/venue/verify" element={<VenueVerification />} />
           <Route path="/explore-all" element={<RoleProtectedRoute allowedRoles={["admin"]}><ExploreAll /></RoleProtectedRoute>} />
           <Route path="/campaign-submit" element={<CampaignSubmission />} />
+          <Route path="/qr/mobile/:qrRef" element={<MobileQRLanding />} />
           <Route path="/qr/:shortCode" element={<QRRedirect />} />
+          <Route path="/admin/qr-codes" element={<ProtectedAdminRoute><AdminQRCodes /></ProtectedAdminRoute>} />
+          <Route path="/admin/mobile-qr" element={<ProtectedAdminRoute><AdminMobileQR /></ProtectedAdminRoute>} />
+          <Route path="/admin/mobile-qr/:id/analytics" element={<ProtectedAdminRoute><AdminMobileQRAnalytics /></ProtectedAdminRoute>} />
+          <Route path="/admin/qr-analytics" element={<ProtectedAdminRoute><AdminQRAnalytics /></ProtectedAdminRoute>} />
+          <Route path="/admin/mobile-leads" element={<ProtectedAdminRoute><AdminMobileLeads /></ProtectedAdminRoute>} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />

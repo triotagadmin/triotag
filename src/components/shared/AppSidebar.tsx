@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   Globe, Megaphone, BarChart3, MessageSquare, Bell, User, LayoutDashboard, TrendingUp, Package,
   Image as ImageIcon, Users, History, ClipboardList, Layers, ShieldCheck, MapPinCheck, Compass,
-  Wrench, CalendarDays,
+  Wrench, CalendarDays, QrCode, Smartphone,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
@@ -52,6 +52,10 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/admin/total-inventory", label: "Total Inventory", icon: Package },
     { to: "/admin/brand-campaigns", label: "Brand Campaigns", icon: Megaphone },
     { to: "/campaigns", label: "All Campaigns", icon: Megaphone },
+    { to: "/admin/qr-codes", label: "All QR Codes", icon: QrCode },
+    { to: "/admin/mobile-qr", label: "Mobile QR", icon: Smartphone },
+    { to: "/admin/qr-analytics", label: "QR Analytics", icon: BarChart3 },
+    { to: "/admin/mobile-leads", label: "Mobile Leads", icon: Users },
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
   ],
