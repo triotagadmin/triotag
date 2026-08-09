@@ -2588,6 +2588,138 @@ export type Database = {
         }
         Relationships: []
       }
+      mobile_qr_events: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          landing_page: string | null
+          qr_id: string
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          landing_page?: string | null
+          qr_id: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          landing_page?: string | null
+          qr_id?: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_qr_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_qr_events_qr_id_fkey"
+            columns: ["qr_id"]
+            isOneToOne: false
+            referencedRelation: "qr_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobile_qr_leads: {
+        Row: {
+          advertiser_id: string | null
+          campaign_id: string | null
+          consent_marketing: boolean
+          consent_timestamp: string | null
+          created_at: string
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          mobile_number: string
+          mobile_verified: boolean
+          offer_redeemed_at: string | null
+          otp_provider: string | null
+          privacy_policy_version: string | null
+          qr_id: string
+          session_id: string | null
+          source: string | null
+          terms_version: string | null
+          updated_at: string
+          verified_at: string | null
+        }
+        Insert: {
+          advertiser_id?: string | null
+          campaign_id?: string | null
+          consent_marketing?: boolean
+          consent_timestamp?: string | null
+          created_at?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          mobile_number: string
+          mobile_verified?: boolean
+          offer_redeemed_at?: string | null
+          otp_provider?: string | null
+          privacy_policy_version?: string | null
+          qr_id: string
+          session_id?: string | null
+          source?: string | null
+          terms_version?: string | null
+          updated_at?: string
+          verified_at?: string | null
+        }
+        Update: {
+          advertiser_id?: string | null
+          campaign_id?: string | null
+          consent_marketing?: boolean
+          consent_timestamp?: string | null
+          created_at?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          mobile_number?: string
+          mobile_verified?: boolean
+          offer_redeemed_at?: string | null
+          otp_provider?: string | null
+          privacy_policy_version?: string | null
+          qr_id?: string
+          session_id?: string | null
+          source?: string | null
+          terms_version?: string | null
+          updated_at?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_qr_leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_qr_leads_qr_id_fkey"
+            columns: ["qr_id"]
+            isOneToOne: false
+            referencedRelation: "qr_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_subscribers: {
         Row: {
           created_at: string
@@ -3744,33 +3876,108 @@ export type Database = {
       }
       qr_codes: {
         Row: {
+          ad_space_id: string | null
+          advertiser_id: string | null
+          background_url: string | null
+          brand_name: string | null
+          campaign_id: string | null
           created_at: string | null
           created_by: string | null
+          description: string | null
           destination_url: string
+          end_date: string | null
           id: string
           is_active: boolean | null
+          landing_title: string | null
+          logo_url: string | null
           name: string | null
+          offer_cta: string | null
+          placement_label: string | null
+          privacy_policy_url: string | null
+          privacy_policy_version: string | null
+          qr_ref: string | null
+          qr_type: string
           short_code: string
+          start_date: string | null
+          status: string
+          terms_text: string | null
+          terms_version: string | null
+          updated_at: string
         }
         Insert: {
+          ad_space_id?: string | null
+          advertiser_id?: string | null
+          background_url?: string | null
+          brand_name?: string | null
+          campaign_id?: string | null
           created_at?: string | null
           created_by?: string | null
+          description?: string | null
           destination_url: string
+          end_date?: string | null
           id?: string
           is_active?: boolean | null
+          landing_title?: string | null
+          logo_url?: string | null
           name?: string | null
+          offer_cta?: string | null
+          placement_label?: string | null
+          privacy_policy_url?: string | null
+          privacy_policy_version?: string | null
+          qr_ref?: string | null
+          qr_type?: string
           short_code: string
+          start_date?: string | null
+          status?: string
+          terms_text?: string | null
+          terms_version?: string | null
+          updated_at?: string
         }
         Update: {
+          ad_space_id?: string | null
+          advertiser_id?: string | null
+          background_url?: string | null
+          brand_name?: string | null
+          campaign_id?: string | null
           created_at?: string | null
           created_by?: string | null
+          description?: string | null
           destination_url?: string
+          end_date?: string | null
           id?: string
           is_active?: boolean | null
+          landing_title?: string | null
+          logo_url?: string | null
           name?: string | null
+          offer_cta?: string | null
+          placement_label?: string | null
+          privacy_policy_url?: string | null
+          privacy_policy_version?: string | null
+          qr_ref?: string | null
+          qr_type?: string
           short_code?: string
+          start_date?: string | null
+          status?: string
+          terms_text?: string | null
+          terms_version?: string | null
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "qr_codes_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qr_codes_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       retailer_audience_data: {
         Row: {
@@ -4843,6 +5050,26 @@ export type Database = {
           listing_id: string
         }[]
       }
+      get_mobile_qr_public: {
+        Args: { _qr_ref: string }
+        Returns: {
+          background_url: string
+          brand_name: string
+          description: string
+          destination_url: string
+          id: string
+          landing_title: string
+          logo_url: string
+          name: string
+          offer_cta: string
+          privacy_policy_url: string
+          privacy_policy_version: string
+          qr_ref: string
+          status: string
+          terms_text: string
+          terms_version: string
+        }[]
+      }
       get_venue_ticket_by_code: {
         Args: { _unique_code: string }
         Returns: {
@@ -4880,6 +5107,7 @@ export type Database = {
         }
         Returns: number
       }
+      next_mobile_qr_ref: { Args: never; Returns: string }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
