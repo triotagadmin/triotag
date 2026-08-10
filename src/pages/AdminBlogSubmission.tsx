@@ -82,9 +82,17 @@ export default function AdminBlogSubmission() {
     }
   };
 
-  useEffect(() => {
-    loadPosts();
-  }, []);
+  const [showBlogList, setShowBlogList] = useState(false);
+  const [postsLoaded, setPostsLoaded] = useState(false);
+
+  const handleShowBlogList = () => {
+    setShowBlogList(true);
+    if (!postsLoaded) {
+      setPostsLoaded(true);
+      loadPosts();
+    }
+  };
+
 
   const handleDeletePost = async () => {
     if (!deleteTarget) return;
