@@ -262,7 +262,7 @@ export default function AdminBlogSubmission() {
         toast.success("Blog post published successfully!");
       }
 
-      
+      await loadPosts();
       navigate("/insights");
     } catch (error: any) {
       console.error("Error submitting blog post:", error);
