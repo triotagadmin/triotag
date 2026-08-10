@@ -400,6 +400,7 @@ export default function AdminBlogSubmission() {
             )}
           </CardContent>
         </Card>
+        )}
 
         <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
           <AlertDialogContent>
