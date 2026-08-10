@@ -60,7 +60,7 @@ export default function AdminBlogSubmission() {
     status: string | null;
   };
   const [posts, setPosts] = useState<PostRow[]>([]);
-  const [postsLoading, setPostsLoading] = useState(true);
+  const [postsLoading, setPostsLoading] = useState(false);
   const [postSearch, setPostSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<PostRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
