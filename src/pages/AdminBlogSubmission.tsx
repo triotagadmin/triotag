@@ -298,6 +298,114 @@ export default function AdminBlogSubmission() {
           Back to Dashboard
         </Button>
 
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-2xl">All Blog Posts</CardTitle>
+            <CardDescription>
+              {postsLoading ? "Loading..." : `${posts.length} blog post${posts.length === 1 ? "" : "s"} total`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={postSearch}
+                onChange={(e) => setPostSearch(e.target.value)}
+                placeholder="Search by title"
+                className="pl-9"
+              />
+            </div>
+
+            {postsLoading ? (
+              <p className="text-sm text-muted-foreground py-4">Loading blog posts...</p>
+            ) : posts.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4">
+                No blog posts yet — create your first one below
+              </p>
+            ) : filteredPosts.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4">No posts match your search.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Author</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPosts.map((post) => (
+                      <TableRow key={post.id}>
+                        <TableCell className="font-medium max-w-[240px] truncate">{post.title}</TableCell>
+                        <TableCell>{post.author || "—"}</TableCell>
+                        <TableCell>{post.category || "—"}</TableCell>
+                        <TableCell>
+                          {post.created_at
+                            ? new Date(post.created_at).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })
+                            : "—"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={post.status === "published" ? "default" : "secondary"}>
+                            {post.status || "draft"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button asChild variant="ghost" size="sm">
+                              <Link to={`/admin/blog-submission?edit=${post.id}`} aria-label="Edit post">
+                                <Pencil className="w-4 h-4" />
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              aria-label="Delete post"
+                              onClick={() => setDeleteTarget(post)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete this blog post?</AlertDialogTitle>
+              <AlertDialogDescription>
+                "{deleteTarget?.title}" will be permanently removed. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeletePost();
+                }}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
