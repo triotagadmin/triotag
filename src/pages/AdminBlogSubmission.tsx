@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowLeft, FileText, Upload, Image } from "lucide-react";
+import { ArrowLeft, FileText, Upload, Image, Search, Pencil, Trash2 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { BlogSeoPanels, slugify } from "@/components/blog/BlogSeoPanels";
