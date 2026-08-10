@@ -8,7 +8,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
 
-type Item = { to: string; label: string; icon: any };
+type Item = { to: string; label: string; icon: any; children?: Item[] };
 
 const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
   retailer: [
@@ -46,16 +46,17 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/admin/verified-locations", label: "Verified Locations", icon: MapPinCheck },
     { to: "/admin/media-partners", label: "Media Partners", icon: Users },
-    { to: "/admin/brand-advertiser-approvals", label: "Brand Advertiser Approvals", icon: ShieldCheck },
-
     { to: "/admin/media-plans", label: "Media Request", icon: ClipboardList },
     { to: "/admin/total-inventory", label: "Total Inventory", icon: Package },
-    { to: "/admin/brand-campaigns", label: "Brand Campaigns", icon: Megaphone },
-    { to: "/campaigns", label: "All Campaigns", icon: Megaphone },
-    { to: "/admin/qr-codes", label: "All QR Codes", icon: QrCode },
-    { to: "/admin/mobile-qr", label: "Mobile QR", icon: Smartphone },
-    { to: "/admin/qr-analytics", label: "QR Analytics", icon: BarChart3 },
-    { to: "/admin/mobile-leads", label: "Mobile Leads", icon: Users },
+    { to: "/campaigns", label: "All Campaigns", icon: Megaphone, children: [
+      { to: "/admin/brand-advertiser-approvals", label: "Brand Advertiser Approvals", icon: ShieldCheck },
+      { to: "/admin/brand-campaigns", label: "Brand Campaigns", icon: Megaphone },
+    ] },
+    { to: "/admin/qr-codes", label: "All QR Codes", icon: QrCode, children: [
+      { to: "/admin/mobile-qr", label: "Mobile QR", icon: Smartphone },
+      { to: "/admin/qr-analytics", label: "QR Analytics", icon: BarChart3 },
+      { to: "/admin/mobile-leads", label: "Mobile Leads", icon: Users },
+    ] },
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
   ],
