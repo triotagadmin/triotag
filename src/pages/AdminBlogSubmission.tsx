@@ -306,9 +306,19 @@ export default function AdminBlogSubmission() {
           Back to Dashboard
         </Button>
 
+        {!showBlogList ? (
+          <Button onClick={handleShowBlogList} variant="outline" className="mb-6">
+            View All Blog Posts
+          </Button>
+        ) : (
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-2xl">All Blog Posts</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl">All Blog Posts</CardTitle>
+              <Button onClick={() => setShowBlogList(false)} variant="ghost" size="sm">
+                Hide
+              </Button>
+            </div>
             <CardDescription>
               {postsLoading ? "Loading..." : `${posts.length} blog post${posts.length === 1 ? "" : "s"} total`}
             </CardDescription>
