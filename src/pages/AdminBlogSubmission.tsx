@@ -50,6 +50,63 @@ export default function AdminBlogSubmission() {
     image_alt_text: ""
   });
 
+  // --- Independent state for the blog post list ---
+  type PostRow = {
+    id: string;
+    title: string;
+    author: string | null;
+    category: string | null;
+    created_at: string;
+    status: string | null;
+  };
+  const [posts, setPosts] = useState<PostRow[]>([]);
+  const [postsLoading, setPostsLoading] = useState(true);
+  const [postSearch, setPostSearch] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<PostRow | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const loadPosts = async () => {
+    setPostsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("id, title, author, category, created_at, status")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setPosts((data as PostRow[]) || []);
+    } catch (error: any) {
+      console.error("Error loading blog posts:", error);
+      toast.error("Failed to load blog posts");
+    } finally {
+      setPostsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const handleDeletePost = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.from("blog_posts").delete().eq("id", deleteTarget.id);
+      if (error) throw error;
+      toast.success("Blog post deleted");
+      setDeleteTarget(null);
+      await loadPosts();
+    } catch (error: any) {
+      console.error("Error deleting blog post:", error);
+      toast.error(error.message || "Failed to delete blog post");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const filteredPosts = posts.filter((p) =>
+    (p.title || "").toLowerCase().includes(postSearch.trim().toLowerCase())
+  );
+
   useEffect(() => {
     if (editId) {
       loadBlogPost(editId);
