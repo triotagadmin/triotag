@@ -1,5 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowLeft, FileText, Upload, Image } from "lucide-react";
+import { ArrowLeft, FileText, Upload, Image, Search, Pencil, Trash2 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { BlogSeoPanels, slugify } from "@/components/blog/BlogSeoPanels";
@@ -37,6 +49,63 @@ export default function AdminBlogSubmission() {
     focus_keyword: "",
     image_alt_text: ""
   });
+
+  // --- Independent state for the blog post list ---
+  type PostRow = {
+    id: string;
+    title: string;
+    author: string | null;
+    category: string | null;
+    created_at: string;
+    status: string | null;
+  };
+  const [posts, setPosts] = useState<PostRow[]>([]);
+  const [postsLoading, setPostsLoading] = useState(true);
+  const [postSearch, setPostSearch] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<PostRow | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const loadPosts = async () => {
+    setPostsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("id, title, author, category, created_at, status")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setPosts((data as PostRow[]) || []);
+    } catch (error: any) {
+      console.error("Error loading blog posts:", error);
+      toast.error("Failed to load blog posts");
+    } finally {
+      setPostsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const handleDeletePost = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.from("blog_posts").delete().eq("id", deleteTarget.id);
+      if (error) throw error;
+      toast.success("Blog post deleted");
+      setDeleteTarget(null);
+      await loadPosts();
+    } catch (error: any) {
+      console.error("Error deleting blog post:", error);
+      toast.error(error.message || "Failed to delete blog post");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const filteredPosts = posts.filter((p) =>
+    (p.title || "").toLowerCase().includes(postSearch.trim().toLowerCase())
+  );
 
   useEffect(() => {
     if (editId) {
@@ -193,7 +262,7 @@ export default function AdminBlogSubmission() {
         toast.success("Blog post published successfully!");
       }
 
-      
+      await loadPosts();
       navigate("/insights");
     } catch (error: any) {
       console.error("Error submitting blog post:", error);
@@ -228,6 +297,114 @@ export default function AdminBlogSubmission() {
           <ArrowLeft className="mr-2 w-4 h-4" />
           Back to Dashboard
         </Button>
+
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-2xl">All Blog Posts</CardTitle>
+            <CardDescription>
+              {postsLoading ? "Loading..." : `${posts.length} blog post${posts.length === 1 ? "" : "s"} total`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={postSearch}
+                onChange={(e) => setPostSearch(e.target.value)}
+                placeholder="Search by title"
+                className="pl-9"
+              />
+            </div>
+
+            {postsLoading ? (
+              <p className="text-sm text-muted-foreground py-4">Loading blog posts...</p>
+            ) : posts.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4">
+                No blog posts yet — create your first one below
+              </p>
+            ) : filteredPosts.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4">No posts match your search.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Author</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPosts.map((post) => (
+                      <TableRow key={post.id}>
+                        <TableCell className="font-medium max-w-[240px] truncate">{post.title}</TableCell>
+                        <TableCell>{post.author || "—"}</TableCell>
+                        <TableCell>{post.category || "—"}</TableCell>
+                        <TableCell>
+                          {post.created_at
+                            ? new Date(post.created_at).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })
+                            : "—"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={post.status === "published" ? "default" : "secondary"}>
+                            {post.status || "draft"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button asChild variant="ghost" size="sm">
+                              <Link to={`/admin/blog-submission?edit=${post.id}`} aria-label="Edit post">
+                                <Pencil className="w-4 h-4" />
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              aria-label="Delete post"
+                              onClick={() => setDeleteTarget(post)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete this blog post?</AlertDialogTitle>
+              <AlertDialogDescription>
+                "{deleteTarget?.title}" will be permanently removed. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeletePost();
+                }}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <Card>
           <CardHeader>
