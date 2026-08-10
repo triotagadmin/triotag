@@ -60,7 +60,7 @@ export default function AdminBlogSubmission() {
     status: string | null;
   };
   const [posts, setPosts] = useState<PostRow[]>([]);
-  const [postsLoading, setPostsLoading] = useState(true);
+  const [postsLoading, setPostsLoading] = useState(false);
   const [postSearch, setPostSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<PostRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -82,9 +82,17 @@ export default function AdminBlogSubmission() {
     }
   };
 
-  useEffect(() => {
-    loadPosts();
-  }, []);
+  const [showBlogList, setShowBlogList] = useState(false);
+  const [postsLoaded, setPostsLoaded] = useState(false);
+
+  const handleShowBlogList = () => {
+    setShowBlogList(true);
+    if (!postsLoaded) {
+      setPostsLoaded(true);
+      loadPosts();
+    }
+  };
+
 
   const handleDeletePost = async () => {
     if (!deleteTarget) return;
@@ -298,9 +306,19 @@ export default function AdminBlogSubmission() {
           Back to Dashboard
         </Button>
 
+        {!showBlogList ? (
+          <Button onClick={handleShowBlogList} variant="outline" className="mb-6">
+            View All Blog Posts
+          </Button>
+        ) : (
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-2xl">All Blog Posts</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl">All Blog Posts</CardTitle>
+              <Button onClick={() => setShowBlogList(false)} variant="ghost" size="sm">
+                Hide
+              </Button>
+            </div>
             <CardDescription>
               {postsLoading ? "Loading..." : `${posts.length} blog post${posts.length === 1 ? "" : "s"} total`}
             </CardDescription>
@@ -382,6 +400,7 @@ export default function AdminBlogSubmission() {
             )}
           </CardContent>
         </Card>
+        )}
 
         <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
           <AlertDialogContent>
