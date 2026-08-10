@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   Globe, Megaphone, BarChart3, MessageSquare, Bell, User, LayoutDashboard, TrendingUp, Package,
   Image as ImageIcon, Users, History, ClipboardList, Layers, ShieldCheck, MapPinCheck, Compass,
-  Wrench, CalendarDays, QrCode, Smartphone,
+  Wrench, CalendarDays, QrCode, Smartphone, ChevronDown,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
@@ -98,6 +98,13 @@ export function AppSidebar({ role, campaignPillar }: { role: string; campaignPil
   const items = pillarItem ? [...baseItems, pillarItem] : baseItems;
   const settingsPath = ROLE_SETTINGS_PATH[role] || "/auth";
   const isActive = (to: string) => pathname === to || pathname.startsWith(to + "/");
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    items.forEach((it) => {
+      if (it.children?.some((c) => pathname === c.to || pathname.startsWith(c.to + "/"))) init[it.to] = true;
+    });
+    return init;
+  });
 
   useEffect(() => {
     if (role !== "admin") return;
@@ -147,36 +154,74 @@ export function AppSidebar({ role, campaignPillar }: { role: string; campaignPil
           const active = isActive(it.to);
           const Icon = it.icon;
           const showBadge = role === "admin" && it.to === "/admin/total-inventory" && pendingCount > 0;
+          const hasChildren = !!it.children?.length;
+          const groupOpen = !!openGroups[it.to];
           return (
-            <NavLink
-              key={it.to}
-              to={it.to}
-              title={it.label}
-              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                active
-                  ? "bg-green-900/40 text-green-400 border-l-2 border-green-500"
-                  : "text-gray-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent"
-              }`}
-            >
-              <div className="relative shrink-0">
-                <Icon className="w-5 h-5" />
-                {showBadge && !expanded && (
-                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center">
-                    {pendingCount > 9 ? "9+" : pendingCount}
-                  </span>
+            <div key={it.to}>
+              <div className="relative flex items-center">
+                <NavLink
+                  to={it.to}
+                  title={it.label}
+                  className={`relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors flex-1 min-w-0 ${
+                    active
+                      ? "bg-green-900/40 text-green-400 border-l-2 border-green-500"
+                      : "text-gray-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent"
+                  }`}
+                >
+                  <div className="relative shrink-0">
+                    <Icon className="w-5 h-5" />
+                    {showBadge && !expanded && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center">
+                        {pendingCount > 9 ? "9+" : pendingCount}
+                      </span>
+                    )}
+                  </div>
+                  {expanded && (
+                    <>
+                      <span className="truncate flex-1">{it.label}</span>
+                      {showBadge && (
+                        <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center">
+                          {pendingCount}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+                {expanded && hasChildren && (
+                  <button
+                    type="button"
+                    aria-label={groupOpen ? `Collapse ${it.label}` : `Expand ${it.label}`}
+                    onClick={() => setOpenGroups((p) => ({ ...p, [it.to]: !p[it.to] }))}
+                    className="p-1.5 mr-1 rounded-md text-gray-400 hover:text-white hover:bg-white/5 transition-colors shrink-0"
+                  >
+                    <ChevronDown className={`w-4 h-4 transition-transform ${groupOpen ? "rotate-180" : ""}`} />
+                  </button>
                 )}
               </div>
-              {expanded && (
-                <>
-                  <span className="truncate flex-1">{it.label}</span>
-                  {showBadge && (
-                    <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center">
-                      {pendingCount}
-                    </span>
-                  )}
-                </>
+              {expanded && hasChildren && groupOpen && (
+                <div className="mt-1 space-y-1">
+                  {it.children!.map((child) => {
+                    const ChildIcon = child.icon;
+                    const childActive = isActive(child.to);
+                    return (
+                      <NavLink
+                        key={child.to}
+                        to={child.to}
+                        title={child.label}
+                        className={`flex items-center gap-2.5 pl-8 pr-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                          childActive
+                            ? "bg-green-900/40 text-green-400 border-l-2 border-green-500"
+                            : "text-gray-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent"
+                        }`}
+                      >
+                        <ChildIcon className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{child.label}</span>
+                      </NavLink>
+                    );
+                  })}
+                </div>
               )}
-            </NavLink>
+            </div>
           );
         })}
       </nav>
