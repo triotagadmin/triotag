@@ -80,7 +80,8 @@ function buildHtml(
   title: string,
   description: string,
   ogImage: string,
-  canonicalUrl: string
+  canonicalUrl: string,
+  isBot: boolean
 ): string {
   const t = esc(title);
   const d = esc(description);
@@ -113,7 +114,7 @@ function buildHtml(
   ${isBot ? "" : `<meta http-equiv="refresh" content="2;url=${cUrl}" />`}
 </head>
 <body>
-  <p>Redirecting to <a href="${cUrl}">${t}</a>…</p>
+  <p>${isBot ? "" : "Redirecting to "}<a href="${cUrl}">${t}</a></p>
 </body>
 </html>`;
 }
