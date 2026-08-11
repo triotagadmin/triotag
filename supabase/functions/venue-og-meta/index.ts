@@ -11,6 +11,9 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const ua = req.headers.get("user-agent") || "";
+  const isBot = /facebookexternalhit|Twitterbot|LinkedInBot|Slackbot|WhatsApp|TelegramBot|Discordbot|Googlebot|bingbot|Pinterest|redditbot/i.test(ua);
+
   const url = new URL(req.url);
   const venueId = url.searchParams.get("id");
 
@@ -40,7 +43,8 @@ Deno.serve(async (req: Request) => {
       "Discover micro OOH ad spaces on TrioTag!",
       fallbackImage,
       appUrl
-    );
+    ,
+      isBot);
     return new Response(html, {
       headers: { "Content-Type": "text/html; charset=utf-8", ...corsHeaders },
     });
@@ -60,7 +64,8 @@ Deno.serve(async (req: Request) => {
     ? `https://images.weserv.nl/?url=${encodeURIComponent(rawImage)}&w=1200&h=630&fit=contain&cbg=white&output=jpg&q=85`
     : fallbackImage;
 
-  const html = buildHtml(title, description, ogImage, canonicalUrl);
+  const html = buildHtml(title, description, ogImage, canonicalUrl,
+      isBot);
 
   return new Response(html, {
     headers: {
@@ -75,7 +80,8 @@ function buildHtml(
   title: string,
   description: string,
   ogImage: string,
-  canonicalUrl: string
+  canonicalUrl: string,
+  isBot: boolean
 ): string {
   const t = esc(title);
   const d = esc(description);
@@ -105,12 +111,10 @@ function buildHtml(
   <meta name="twitter:description" content="${d}" />
   <meta name="twitter:image" content="${img}" />
 
-  <!-- Delay redirect so crawlers can read OG tags -->
-
-  <meta http-equiv="refresh" content="2;url=${cUrl}" />
+  ${isBot ? "" : `<meta http-equiv="refresh" content="2;url=${cUrl}" />`}
 </head>
 <body>
-  <p>Redirecting to <a href="${cUrl}">${t}</a>…</p>
+  <p>${isBot ? "" : "Redirecting to "}<a href="${cUrl}">${t}</a></p>
 </body>
 </html>`;
 }
