@@ -48,7 +48,6 @@ const NAV_ITEMS_PUBLIC: NavItemDef[] = [
 
 const NAV_ITEMS_ADMIN: NavItemDef[] = [
   ...NAV_ITEMS_PUBLIC,
-  { label: "Campaigns", to: "/campaigns" },
 ];
 
 const PUBLIC_LINKS: NavLinkDef[] = [
