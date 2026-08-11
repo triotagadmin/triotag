@@ -59,9 +59,36 @@ const BlogPost = () => {
     const prevTitle = document.title;
     document.title = post.meta_title || post.title;
 
+    const created: Element[] = [];
+    const prevContent = new Map<Element, string | null>();
+    const setMeta = (property: string, content: string) => {
+      let el =
+        document.querySelector(`meta[property="${property}"]`) ||
+        document.querySelector(`meta[name="${property}"]`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(property.startsWith("og:") ? "property" : "name", property);
+        document.head.appendChild(el);
+        created.push(el);
+      } else if (!prevContent.has(el)) {
+        prevContent.set(el, el.getAttribute("content"));
+      }
+      el.setAttribute("content", content);
+    };
+
+    setMeta("og:title", post.meta_title || post.title);
+    setMeta("og:description", post.meta_description || post.excerpt || "");
+    setMeta("og:url", `https://triotag.com/insights/${post.id}`);
+    setMeta("og:image", post.image_url || "");
+
     return () => {
       script.remove();
       document.title = prevTitle;
+      created.forEach((el) => el.remove());
+      prevContent.forEach((value, el) => {
+        if (value === null) el.removeAttribute("content");
+        else el.setAttribute("content", value);
+      });
     };
   }, [post]);
 
