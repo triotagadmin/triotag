@@ -49,7 +49,7 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/admin/media-plans", label: "Media Request", icon: ClipboardList },
     { to: "/admin/total-inventory", label: "Total Inventory", icon: Package },
     { to: "/campaigns", label: "All Campaigns", icon: Megaphone, children: [
-      { to: "/admin/brand-advertiser-approvals", label: "Brand Advertiser Approvals", icon: ShieldCheck },
+      { to: "/admin/brand-advertiser-approvals", label: "Account Approvals", icon: ShieldCheck },
       { to: "/admin/brand-campaigns", label: "Brand Campaigns", icon: Megaphone },
     ] },
     { to: "/admin/qr-codes", label: "All QR Codes", icon: QrCode, children: [
