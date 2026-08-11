@@ -60,9 +60,7 @@ Deno.serve(async (req: Request) => {
   const title = post.meta_title || post.title || "TrioTag";
   const description =
     post.meta_description || post.excerpt || "Check out this article on TrioTag!";
-  const ogImage = post.image_url
-    ? `https://images.weserv.nl/?url=${encodeURIComponent(post.image_url)}&w=1200&h=630&fit=contain&cbg=white&output=jpg&q=85`
-    : fallbackImage;
+  const ogImage = post.image_url || fallbackImage;
 
   const html = buildHtml(title, description, ogImage, canonicalUrl,
       isBot);
