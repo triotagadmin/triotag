@@ -286,7 +286,7 @@ const VenueDetail = () => {
                     </>);
               })()}
                 <div className="mt-3">
-                  <ShareButtons url={ogShareUrl} copyUrl={canonicalUrl} title={venue.title} description={venue.description} />
+                  <ShareButtons url={canonicalUrl} title={venue.title} description={venue.description} />
                 </div>
               </CardContent>
             </Card>

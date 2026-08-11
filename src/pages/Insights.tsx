@@ -129,8 +129,7 @@ const Insights = () => {
                             <Edit className="w-4 h-4" />
                           </Button>}
                         <ShareButtons
-                          url={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-og-meta?id=${post.id}`}
-                          copyUrl={`https://triotag.com/insights/${post.id}`}
+                          url={`https://triotag.com/insights/${post.id}`}
                           title={post.title}
                           description={post.excerpt}
                         />
