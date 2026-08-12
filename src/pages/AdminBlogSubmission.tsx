@@ -167,9 +167,10 @@ export default function AdminBlogSubmission() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
+    // Validate file type (only real, web-safe raster image formats)
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/avif"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Please upload a JPG, PNG, WebP, GIF or AVIF image");
       return;
     }
 
