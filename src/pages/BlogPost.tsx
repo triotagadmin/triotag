@@ -16,9 +16,11 @@ interface BlogPostData {
   excerpt: string;
   author: string;
   created_at: string;
+  updated_at?: string | null;
   read_time: string;
   category: string;
   image_url: string | null;
+  social_image_url?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
   image_alt_text?: string | null;
