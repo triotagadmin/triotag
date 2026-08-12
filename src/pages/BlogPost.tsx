@@ -16,9 +16,11 @@ interface BlogPostData {
   excerpt: string;
   author: string;
   created_at: string;
+  updated_at?: string | null;
   read_time: string;
   category: string;
   image_url: string | null;
+  social_image_url?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
   image_alt_text?: string | null;
@@ -39,25 +41,41 @@ const BlogPost = () => {
     }
   }, [id]);
 
-  // Inject Article JSON-LD schema into <head> for the live post
+  // Inject article-specific metadata + BlogPosting JSON-LD into <head>
   useEffect(() => {
     if (!post) return;
+
+    const canonical = `https://triotag.com/insights/${post.id}`;
+    const description =
+      post.meta_description || post.excerpt ||
+      post.content.replace(/[#*_`>-]/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
+    const socialImage =
+      post.social_image_url || "https://triotag.com/triotag-social-200.jpg";
+    const modified = post.updated_at || post.created_at;
+
     const script = document.createElement("script");
     script.type = "application/ld+json";
     script.setAttribute("data-blog-schema", "true");
     script.text = JSON.stringify({
       "@context": "https://schema.org",
-      "@type": "Article",
+      "@type": "BlogPosting",
       headline: post.title,
-      description: post.meta_description || post.excerpt,
-      image: post.image_url || undefined,
-      author: { "@type": "Person", name: post.author },
+      description,
+      image: [socialImage],
       datePublished: post.created_at,
+      dateModified: modified,
+      author: { "@type": "Person", name: post.author },
+      publisher: {
+        "@type": "Organization",
+        name: "TrioTag",
+        logo: { "@type": "ImageObject", url: "https://triotag.com/icon-512x512.png" },
+      },
+      mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
     });
     document.head.appendChild(script);
 
     const prevTitle = document.title;
-    document.title = post.meta_title || post.title;
+    document.title = `${post.meta_title || post.title} | TRIOTAG`;
 
     const created: Element[] = [];
     const prevContent = new Map<Element, string | null>();
@@ -67,7 +85,7 @@ const BlogPost = () => {
         document.querySelector(`meta[name="${property}"]`);
       if (!el) {
         el = document.createElement("meta");
-        el.setAttribute(property.startsWith("og:") ? "property" : "name", property);
+        el.setAttribute(property.startsWith("og:") || property.startsWith("article:") ? "property" : "name", property);
         document.head.appendChild(el);
         created.push(el);
       } else if (!prevContent.has(el)) {
@@ -76,10 +94,36 @@ const BlogPost = () => {
       el.setAttribute("content", content);
     };
 
+    setMeta("description", description);
+    setMeta("og:type", "article");
+    setMeta("og:site_name", "TRIOTAG");
     setMeta("og:title", post.meta_title || post.title);
-    setMeta("og:description", post.meta_description || post.excerpt || "");
-    setMeta("og:url", `https://triotag.com/insights/${post.id}`);
-    setMeta("og:image", post.image_url || "");
+    setMeta("og:description", description);
+    setMeta("og:url", canonical);
+    setMeta("og:image", socialImage);
+    setMeta("og:image:width", "200");
+    setMeta("og:image:height", "200");
+    setMeta("og:image:alt", post.image_alt_text || post.title);
+    setMeta("article:published_time", post.created_at);
+    setMeta("article:modified_time", modified);
+    setMeta("article:author", post.author);
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", post.meta_title || post.title);
+    setMeta("twitter:description", description);
+    setMeta("twitter:image", socialImage);
+
+    // Article-specific canonical (restore the site canonical on unmount)
+    const canonicalEl = document.querySelector('link[rel="canonical"]');
+    const prevCanonical = canonicalEl?.getAttribute("href") ?? null;
+    let createdCanonical: HTMLLinkElement | null = null;
+    if (canonicalEl) {
+      canonicalEl.setAttribute("href", canonical);
+    } else {
+      createdCanonical = document.createElement("link");
+      createdCanonical.rel = "canonical";
+      createdCanonical.href = canonical;
+      document.head.appendChild(createdCanonical);
+    }
 
     return () => {
       script.remove();
@@ -89,6 +133,8 @@ const BlogPost = () => {
         if (value === null) el.removeAttribute("content");
         else el.setAttribute("content", value);
       });
+      if (createdCanonical) createdCanonical.remove();
+      else if (canonicalEl && prevCanonical) canonicalEl.setAttribute("href", prevCanonical);
     };
   }, [post]);
 

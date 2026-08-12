@@ -1,0 +1,3 @@
+UPDATE public.blog_posts SET social_image_url = 'https://jungfmgsxbayxzptvpky.supabase.co/storage/v1/object/public/ad-space-media/blog-images/social/' || id::text || '-200.jpg', social_image_source_url = image_url
+WHERE id IN (
+'02c4cdba-0fbd-4488-9274-2ecbcd48c310','197b87ba-a713-4158-9a22-5a175f1cb1c6','2aa62ed3-96e6-48f1-935b-545dc563425c','3ad2ba45-371f-4f3e-92f3-77b5dc6965cb','3d7360b2-8298-477d-897b-78f0fde2d42e','89a1a7bb-a9d2-428a-9a94-733c0fcd9c26','9939cc3b-ad1c-4697-b4b3-4f02c0a8df7a','e676d591-9337-4b6c-8d7c-e298269ed19c','edbee135-e84e-4724-95ce-e0e84ab6f287');

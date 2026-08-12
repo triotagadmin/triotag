@@ -931,6 +931,8 @@ export type Database = {
           published_by: string | null
           read_time: string
           slug: string | null
+          social_image_source_url: string | null
+          social_image_url: string | null
           status: string
           title: string
           updated_at: string
@@ -951,6 +953,8 @@ export type Database = {
           published_by?: string | null
           read_time: string
           slug?: string | null
+          social_image_source_url?: string | null
+          social_image_url?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -971,6 +975,8 @@ export type Database = {
           published_by?: string | null
           read_time?: string
           slug?: string | null
+          social_image_source_url?: string | null
+          social_image_url?: string | null
           status?: string
           title?: string
           updated_at?: string

@@ -167,9 +167,10 @@ export default function AdminBlogSubmission() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
+    // Validate file type (only real, web-safe raster image formats)
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/avif"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Please upload a JPG, PNG, WebP, GIF or AVIF image");
       return;
     }
 
@@ -242,6 +243,8 @@ export default function AdminBlogSubmission() {
         image_alt_text: formData.image_alt_text || null,
       };
 
+      let savedPostId: string | null = null;
+
       if (editId) {
         // Update existing blog post
         const { error } = await supabase
@@ -254,20 +257,37 @@ export default function AdminBlogSubmission() {
 
         if (error) throw error;
 
+        savedPostId = editId;
         toast.success("Blog post updated successfully!");
       } else {
         // Create new blog post
-        const { error } = await supabase
+        const { data: inserted, error } = await supabase
           .from("blog_posts")
           .insert({
             ...payload,
             published_by: user.id,
             status: "published"
-          });
+          })
+          .select("id")
+          .single();
 
         if (error) throw error;
 
+        savedPostId = inserted?.id ?? null;
         toast.success("Blog post published successfully!");
+      }
+
+      // Generate / refresh the 200x200 social (og:image) derivative.
+      // The original uploaded image is never modified.
+      if (savedPostId) {
+        const { error: ogError } = await supabase.functions.invoke(
+          "generate-blog-social-image",
+          { body: { post_id: savedPostId } }
+        );
+        if (ogError) {
+          console.error("Social image generation failed:", ogError);
+          toast.warning("Post saved, but the social preview image could not be generated.");
+        }
       }
 
       await loadPosts();
