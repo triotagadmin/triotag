@@ -40,6 +40,7 @@ import {
   ShieldCheck,
   Gauge,
   MonitorPlay,
+  Handshake,
 } from "lucide-react";
 
 
