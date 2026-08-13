@@ -36,7 +36,13 @@ import {
   Wallet,
   LayoutGrid,
   Sparkles,
+  Megaphone,
+  ShieldCheck,
+  Gauge,
+  MonitorPlay,
+  Handshake,
 } from "lucide-react";
+
 
 const CANONICAL = "https://triotag.com/industries/sspsource";
 
@@ -56,7 +62,90 @@ const setMeta = (selector: string, attr: string, value: string) => {
   el.setAttribute(attr, value);
 };
 
+const ServiceCard = ({
+  Icon,
+  title,
+  items,
+}: {
+  Icon: React.ElementType;
+  title: string;
+  items: string[];
+}) => (
+  <div className="group relative bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-green-500/50 hover:shadow-[0_0_30px_-5px_rgba(34,197,94,0.35)]">
+    <div className="h-11 w-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center mb-4">
+      <Icon className="h-5 w-5 text-green-400" />
+    </div>
+    <h3 className="text-xl font-semibold mb-3">{title}</h3>
+    <ul className="space-y-2">
+      {items.map((it) => (
+        <li key={it} className="text-sm text-white/65 flex gap-2">
+          <span className="mt-1.5 h-1 w-1 rounded-full bg-green-400 shrink-0" />
+          {it}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+const TierBlock = ({
+  num,
+  label,
+  title,
+  desc,
+  highlight,
+  children,
+}: {
+  num: number;
+  label: string;
+  title: string;
+  desc: string;
+  highlight?: boolean;
+  children: React.ReactNode;
+}) => (
+  <div className="relative md:pl-20">
+    <div
+      className={`absolute left-0 top-0 hidden md:flex h-12 w-12 items-center justify-center rounded-full border-2 bg-black font-bold ${
+        highlight
+          ? "border-green-400 text-green-300 shadow-[0_0_28px_-4px_rgba(34,197,94,0.9)]"
+          : "border-green-500/50 text-green-400 shadow-[0_0_20px_-6px_rgba(34,197,94,0.7)]"
+      }`}
+    >
+      {num}
+    </div>
+
+    <div
+      className={
+        highlight
+          ? "rounded-3xl border border-green-500/30 bg-gradient-to-b from-green-500/[0.07] to-transparent p-6 md:p-8"
+          : ""
+      }
+    >
+      <div className="flex items-center gap-3 mb-3">
+        <span className="md:hidden h-8 w-8 shrink-0 rounded-full border-2 border-green-500/60 text-green-400 text-sm font-bold flex items-center justify-center">
+          {num}
+        </span>
+        <span className="text-xs font-semibold tracking-[0.18em] text-green-400">
+          TIER {num} — {label}
+        </span>
+        {highlight && (
+          <span className="px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/40 text-[10px] font-semibold text-green-300 uppercase tracking-wider">
+            Dual-Sided
+          </span>
+        )}
+      </div>
+      <h3 className="text-2xl md:text-3xl font-bold mb-3">{title}</h3>
+      <p className="text-white/60 mb-7 max-w-3xl">{desc}</p>
+      {children}
+    </div>
+
+    <div className="hidden md:flex absolute left-6 -bottom-10 -translate-x-1/2 text-green-500/50">
+      <ArrowRight className="h-5 w-5 rotate-90" />
+    </div>
+  </div>
+);
+
 const Brands = () => {
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -93,7 +182,7 @@ const Brands = () => {
     navigate("/auth");
   };
 
-  const services = [
+  const tier1Cards = [
     {
       icon: Layers,
       title: "Ad Inventory Management",
@@ -115,6 +204,26 @@ const Brands = () => {
         "Yield optimization",
       ],
     },
+  ];
+
+  const publisherAdOps = [
+    "Ad Inventory Management & Yield Optimization",
+    "SSP Integration & Header Bidding Setup",
+    "PMP (Private Marketplace) & Deal ID Management",
+    "Demand Partner Management",
+    "Fill Rate & eCPM Optimization",
+    "Ad Serving Operations (trafficking campaigns sold on your own inventory)",
+  ];
+
+  const advertiserAdOps = [
+    "Campaign Trafficking & Ad Operations",
+    "Programmatic Media Buying Operations (DSP management, bid strategy, pacing)",
+    "Creative Trafficking & Ad Tagging (versioning, tag implementation, QA)",
+    "Brand Safety & Verification Operations",
+    "Campaign Performance Monitoring & Optimization",
+  ];
+
+  const tier3Cards = [
     {
       icon: Server,
       title: "Ad Serving Operations",
@@ -124,17 +233,6 @@ const Brands = () => {
         "Creative quality assurance",
         "Delivery monitoring and troubleshooting",
         "Tag implementation and management",
-      ],
-    },
-    {
-      icon: LineChart,
-      title: "Reporting & Revenue Analytics",
-      items: [
-        "Revenue reporting dashboards",
-        "Fill rate and eCPM analysis",
-        "Inventory performance monitoring",
-        "Demand partner reporting",
-        "Optimization recommendations",
       ],
     },
     {
@@ -149,6 +247,38 @@ const Brands = () => {
       ],
     },
   ];
+
+  const tier4Points = [
+    { icon: Plug, title: "Demand Partner Integrations", desc: "Connect your retail inventory to SSPs, DSPs, and direct demand partners with clean, tested integrations." },
+    { icon: Gauge, title: "Header Bidding & Auction Setup", desc: "Wrapper configuration, timeout tuning, and bidder management to compete every impression properly." },
+    { icon: Handshake, title: "PMP & Deal Activation", desc: "Package retail inventory into Deal IDs and private marketplaces that buyers can actually transact on." },
+  ];
+
+  const tier5Cards = [
+    {
+      icon: LineChart,
+      title: "Publisher Revenue Analytics",
+      items: [
+        "Revenue reporting dashboards",
+        "Fill rate and eCPM analysis",
+        "Inventory performance monitoring",
+        "Demand partner reporting",
+        "Optimization recommendations",
+      ],
+    },
+    {
+      icon: MonitorPlay,
+      title: "Advertiser Campaign Reporting",
+      items: [
+        "Delivery, pacing, and spend reporting",
+        "Placement-level performance breakdowns",
+        "Creative and tag QA verification reporting",
+        "Brand safety and viewability results",
+        "Optimization actions and next-cycle recommendations",
+      ],
+    },
+  ];
+
 
   const benefits = [
     { icon: TrendingDown, title: "Reduce Operational Costs", desc: "Access experienced AdOps professionals without the cost of building and maintaining an internal team." },
@@ -227,6 +357,11 @@ const Brands = () => {
               programmatic monetization, reporting, and optimization so your team can focus on
               sales and business growth.
             </p>
+            <p className="text-sm md:text-base text-green-300/90 mb-10 max-w-3xl">
+              Dual-sided AdOps: we operate the supply side for publishers monetizing retail media
+              inventory — and the demand side for advertisers running programmatic campaigns.
+            </p>
+
 
 
             <div className="flex flex-wrap gap-3">
@@ -326,40 +461,154 @@ const Brands = () => {
         </div>
       </section>
 
-      {/* Our Services */}
+      {/* ===== 5-Tier Narrative: Our Services ===== */}
       <section className="py-20 md:py-28 border-t border-white/5">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-2xl mb-14">
+          <div className="max-w-3xl mb-16">
+            <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-semibold mb-5">
+              The TrioTag AdOps Stack · Tier 1 → Tier 5
+            </span>
             <h2 className="text-3xl md:text-5xl font-bold mb-4">Our Services</h2>
             <p className="text-white/60 text-lg">
-              End-to-end supply-side AdOps capabilities delivered by specialists who monetize your
-              inventory as part of your team.
+              Five connected tiers — from plugging your retail media inventory into demand, to
+              operating campaigns for both publishers and advertisers, to proving what delivered
+              and what earned.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {services.map(({ icon: Icon, title, items }) => (
-              <div
-                key={title}
-                className="group relative bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-green-500/50 hover:shadow-[0_0_30px_-5px_rgba(34,197,94,0.35)]"
+          {/* Tier rail */}
+          <div className="relative">
+            <div className="hidden md:block absolute left-6 top-4 bottom-4 w-px bg-gradient-to-b from-green-500/60 via-green-500/25 to-transparent" />
+
+            <div className="space-y-14 md:space-y-20">
+              {/* TIER 1 */}
+              <TierBlock
+                num={1}
+                label="SSP SOURCE"
+                title="Connect & monetize retail media inventory"
+                desc="The technical monetization foundation — your inventory structured, packaged, and wired into programmatic demand."
               >
-                <div className="h-11 w-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center mb-4">
-                  <Icon className="h-5 w-5 text-green-400" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">{title}</h3>
-                <ul className="space-y-2">
-                  {items.map((it) => (
-                    <li key={it} className="text-sm text-white/65 flex gap-2">
-                      <span className="mt-1.5 h-1 w-1 rounded-full bg-green-400 shrink-0" />
-                      {it}
-                    </li>
+                <div className="grid sm:grid-cols-2 gap-5">
+                  {tier1Cards.map(({ icon: Icon, title, items }) => (
+                    <ServiceCard key={title} Icon={Icon} title={title} items={items} />
                   ))}
-                </ul>
-              </div>
-            ))}
+                </div>
+              </TierBlock>
+
+              {/* TIER 2 — dual-sided */}
+              <TierBlock
+                num={2}
+                label="RETAIL MEDIA ADOPS"
+                title="TrioTag operates it for you"
+                desc="Whether you're monetizing retail media inventory or running programmatic campaigns as an advertiser, TrioTag's outsourced AdOps team operates the technical and operational layer for you."
+                highlight
+              >
+                <div className="grid lg:grid-cols-2 gap-5">
+                  <div className="relative bg-[#0a0a0a] border border-green-500/30 rounded-2xl p-6 shadow-[0_0_40px_-15px_rgba(34,197,94,0.5)]">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="h-11 w-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center">
+                        <Server className="h-5 w-5 text-green-400" />
+                      </div>
+                      <div>
+                        <div className="text-[11px] uppercase tracking-wider text-green-400 font-semibold">
+                          Supply-Side
+                        </div>
+                        <h3 className="text-xl font-semibold">For Publishers</h3>
+                      </div>
+                    </div>
+                    <p className="text-sm text-white/60 mb-4">
+                      Publisher / supply-side AdOps that keeps inventory sold, served, and yielding.
+                    </p>
+                    <ul className="space-y-2.5">
+                      {publisherAdOps.map((it) => (
+                        <li key={it} className="text-sm text-white/70 flex gap-2.5">
+                          <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                          {it}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="relative bg-[#0a0a0a] border border-green-500/30 rounded-2xl p-6 shadow-[0_0_40px_-15px_rgba(34,197,94,0.5)]">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="h-11 w-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center">
+                        <Megaphone className="h-5 w-5 text-green-400" />
+                      </div>
+                      <div>
+                        <div className="text-[11px] uppercase tracking-wider text-green-400 font-semibold">
+                          Demand-Side
+                        </div>
+                        <h3 className="text-xl font-semibold">For Advertisers</h3>
+                      </div>
+                    </div>
+                    <p className="text-sm text-white/60 mb-4">
+                      Advertiser / demand-side AdOps that runs your buys, creatives, and pacing.
+                    </p>
+                    <ul className="space-y-2.5">
+                      {advertiserAdOps.map((it) => (
+                        <li key={it} className="text-sm text-white/70 flex gap-2.5">
+                          <ShieldCheck className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                          {it}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </TierBlock>
+
+              {/* TIER 3 */}
+              <TierBlock
+                num={3}
+                label="MONETIZATION SUITE"
+                title="Manage demand, inventory, campaigns & revenue"
+                desc="Trafficking, advertiser onboarding, sponsored inventory, and revenue reporting — operated day to day."
+              >
+                <div className="grid sm:grid-cols-2 gap-5">
+                  {tier3Cards.map(({ icon: Icon, title, items }) => (
+                    <ServiceCard key={title} Icon={Icon} title={title} items={items} />
+                  ))}
+                </div>
+              </TierBlock>
+
+              {/* TIER 4 */}
+              <TierBlock
+                num={4}
+                label="PROGRAMMATIC ENABLEMENT"
+                title="Connect retail inventory to demand"
+                desc="The plumbing between your retail media supply and the buyers who want it."
+              >
+                <div className="grid sm:grid-cols-3 gap-5">
+                  {tier4Points.map(({ icon: Icon, title, desc }) => (
+                    <div
+                      key={title}
+                      className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-green-500/50"
+                    >
+                      <Icon className="h-7 w-7 text-green-400 mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+                      <p className="text-sm text-white/65">{desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </TierBlock>
+
+              {/* TIER 5 */}
+              <TierBlock
+                num={5}
+                label="MEASUREMENT & REVENUE"
+                title="Know what delivered and what earned"
+                desc="Reporting for both sides — publisher revenue analytics and advertiser campaign performance."
+              >
+                <div className="grid sm:grid-cols-2 gap-5">
+                  {tier5Cards.map(({ icon: Icon, title, items }) => (
+                    <ServiceCard key={title} Icon={Icon} title={title} items={items} />
+                  ))}
+                </div>
+              </TierBlock>
+            </div>
           </div>
         </div>
       </section>
+
 
       {/* Why Outsource */}
       <section className="py-20 md:py-28 border-t border-white/5 bg-gradient-to-b from-transparent via-green-500/[0.03] to-transparent">
