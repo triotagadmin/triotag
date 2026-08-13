@@ -62,7 +62,90 @@ const setMeta = (selector: string, attr: string, value: string) => {
   el.setAttribute(attr, value);
 };
 
+const ServiceCard = ({
+  Icon,
+  title,
+  items,
+}: {
+  Icon: React.ElementType;
+  title: string;
+  items: string[];
+}) => (
+  <div className="group relative bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-green-500/50 hover:shadow-[0_0_30px_-5px_rgba(34,197,94,0.35)]">
+    <div className="h-11 w-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center mb-4">
+      <Icon className="h-5 w-5 text-green-400" />
+    </div>
+    <h3 className="text-xl font-semibold mb-3">{title}</h3>
+    <ul className="space-y-2">
+      {items.map((it) => (
+        <li key={it} className="text-sm text-white/65 flex gap-2">
+          <span className="mt-1.5 h-1 w-1 rounded-full bg-green-400 shrink-0" />
+          {it}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+const TierBlock = ({
+  num,
+  label,
+  title,
+  desc,
+  highlight,
+  children,
+}: {
+  num: number;
+  label: string;
+  title: string;
+  desc: string;
+  highlight?: boolean;
+  children: React.ReactNode;
+}) => (
+  <div className="relative md:pl-20">
+    <div
+      className={`absolute left-0 top-0 hidden md:flex h-12 w-12 items-center justify-center rounded-full border-2 bg-black font-bold ${
+        highlight
+          ? "border-green-400 text-green-300 shadow-[0_0_28px_-4px_rgba(34,197,94,0.9)]"
+          : "border-green-500/50 text-green-400 shadow-[0_0_20px_-6px_rgba(34,197,94,0.7)]"
+      }`}
+    >
+      {num}
+    </div>
+
+    <div
+      className={
+        highlight
+          ? "rounded-3xl border border-green-500/30 bg-gradient-to-b from-green-500/[0.07] to-transparent p-6 md:p-8"
+          : ""
+      }
+    >
+      <div className="flex items-center gap-3 mb-3">
+        <span className="md:hidden h-8 w-8 shrink-0 rounded-full border-2 border-green-500/60 text-green-400 text-sm font-bold flex items-center justify-center">
+          {num}
+        </span>
+        <span className="text-xs font-semibold tracking-[0.18em] text-green-400">
+          TIER {num} — {label}
+        </span>
+        {highlight && (
+          <span className="px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/40 text-[10px] font-semibold text-green-300 uppercase tracking-wider">
+            Dual-Sided
+          </span>
+        )}
+      </div>
+      <h3 className="text-2xl md:text-3xl font-bold mb-3">{title}</h3>
+      <p className="text-white/60 mb-7 max-w-3xl">{desc}</p>
+      {children}
+    </div>
+
+    <div className="hidden md:flex absolute left-6 -bottom-10 -translate-x-1/2 text-green-500/50">
+      <ArrowRight className="h-5 w-5 rotate-90" />
+    </div>
+  </div>
+);
+
 const Brands = () => {
+
   const navigate = useNavigate();
 
   useEffect(() => {
