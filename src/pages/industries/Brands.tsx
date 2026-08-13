@@ -393,7 +393,7 @@ const Brands = () => {
               Outsource your Ad Operations and scale your business
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] mb-6 animate-fade-in">
-              We Provide Outsourced Advertising Operations Teams for <span className="text-green-500">Businesses.</span>
+              Outsourced Advertising Operations, Built for Your <span className="text-green-500">Business.</span>
             </h1>
             <p className="text-lg md:text-xl text-white/70 mb-10 max-w-3xl">
               Scale your advertising business without building an in-house AdOps department. Our dedicated specialists
