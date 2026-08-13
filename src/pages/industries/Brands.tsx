@@ -98,7 +98,7 @@ const Brands = () => {
     navigate("/auth");
   };
 
-  const services = [
+  const tier1Cards = [
     {
       icon: Layers,
       title: "Ad Inventory Management",
@@ -120,6 +120,26 @@ const Brands = () => {
         "Yield optimization",
       ],
     },
+  ];
+
+  const publisherAdOps = [
+    "Ad Inventory Management & Yield Optimization",
+    "SSP Integration & Header Bidding Setup",
+    "PMP (Private Marketplace) & Deal ID Management",
+    "Demand Partner Management",
+    "Fill Rate & eCPM Optimization",
+    "Ad Serving Operations (trafficking campaigns sold on your own inventory)",
+  ];
+
+  const advertiserAdOps = [
+    "Campaign Trafficking & Ad Operations",
+    "Programmatic Media Buying Operations (DSP management, bid strategy, pacing)",
+    "Creative Trafficking & Ad Tagging (versioning, tag implementation, QA)",
+    "Brand Safety & Verification Operations",
+    "Campaign Performance Monitoring & Optimization",
+  ];
+
+  const tier3Cards = [
     {
       icon: Server,
       title: "Ad Serving Operations",
@@ -129,17 +149,6 @@ const Brands = () => {
         "Creative quality assurance",
         "Delivery monitoring and troubleshooting",
         "Tag implementation and management",
-      ],
-    },
-    {
-      icon: LineChart,
-      title: "Reporting & Revenue Analytics",
-      items: [
-        "Revenue reporting dashboards",
-        "Fill rate and eCPM analysis",
-        "Inventory performance monitoring",
-        "Demand partner reporting",
-        "Optimization recommendations",
       ],
     },
     {
@@ -154,6 +163,38 @@ const Brands = () => {
       ],
     },
   ];
+
+  const tier4Points = [
+    { icon: Plug, title: "Demand Partner Integrations", desc: "Connect your retail inventory to SSPs, DSPs, and direct demand partners with clean, tested integrations." },
+    { icon: Gauge, title: "Header Bidding & Auction Setup", desc: "Wrapper configuration, timeout tuning, and bidder management to compete every impression properly." },
+    { icon: Handshake, title: "PMP & Deal Activation", desc: "Package retail inventory into Deal IDs and private marketplaces that buyers can actually transact on." },
+  ];
+
+  const tier5Cards = [
+    {
+      icon: LineChart,
+      title: "Publisher Revenue Analytics",
+      items: [
+        "Revenue reporting dashboards",
+        "Fill rate and eCPM analysis",
+        "Inventory performance monitoring",
+        "Demand partner reporting",
+        "Optimization recommendations",
+      ],
+    },
+    {
+      icon: MonitorPlay,
+      title: "Advertiser Campaign Reporting",
+      items: [
+        "Delivery, pacing, and spend reporting",
+        "Placement-level performance breakdowns",
+        "Creative and tag QA verification reporting",
+        "Brand safety and viewability results",
+        "Optimization actions and next-cycle recommendations",
+      ],
+    },
+  ];
+
 
   const benefits = [
     { icon: TrendingDown, title: "Reduce Operational Costs", desc: "Access experienced AdOps professionals without the cost of building and maintaining an internal team." },
