@@ -43,7 +43,6 @@ import {
   Handshake,
 } from "lucide-react";
 
-
 const CANONICAL = "https://triotag.com/industries/sspsource";
 
 const setMeta = (selector: string, attr: string, value: string) => {
@@ -62,15 +61,7 @@ const setMeta = (selector: string, attr: string, value: string) => {
   el.setAttribute(attr, value);
 };
 
-const ServiceCard = ({
-  Icon,
-  title,
-  items,
-}: {
-  Icon: React.ElementType;
-  title: string;
-  items: string[];
-}) => (
+const ServiceCard = ({ Icon, title, items }: { Icon: React.ElementType; title: string; items: string[] }) => (
   <div className="group relative bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-green-500/50 hover:shadow-[0_0_30px_-5px_rgba(34,197,94,0.35)]">
     <div className="h-11 w-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center mb-4">
       <Icon className="h-5 w-5 text-green-400" />
@@ -145,7 +136,6 @@ const TierBlock = ({
 );
 
 const Brands = () => {
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -249,9 +239,21 @@ const Brands = () => {
   ];
 
   const tier4Points = [
-    { icon: Plug, title: "Demand Partner Integrations", desc: "Connect your retail inventory to SSPs, DSPs, and direct demand partners with clean, tested integrations." },
-    { icon: Gauge, title: "Header Bidding & Auction Setup", desc: "Wrapper configuration, timeout tuning, and bidder management to compete every impression properly." },
-    { icon: Handshake, title: "PMP & Deal Activation", desc: "Package retail inventory into Deal IDs and private marketplaces that buyers can actually transact on." },
+    {
+      icon: Plug,
+      title: "Demand Partner Integrations",
+      desc: "Connect your retail inventory to SSPs, DSPs, and direct demand partners with clean, tested integrations.",
+    },
+    {
+      icon: Gauge,
+      title: "Header Bidding & Auction Setup",
+      desc: "Wrapper configuration, timeout tuning, and bidder management to compete every impression properly.",
+    },
+    {
+      icon: Handshake,
+      title: "PMP & Deal Activation",
+      desc: "Package retail inventory into Deal IDs and private marketplaces that buyers can actually transact on.",
+    },
   ];
 
   const tier5Cards = [
@@ -279,27 +281,70 @@ const Brands = () => {
     },
   ];
 
-
   const benefits = [
-    { icon: TrendingDown, title: "Reduce Operational Costs", desc: "Access experienced AdOps professionals without the cost of building and maintaining an internal team." },
-    { icon: TrendingUp, title: "Maximize Revenue", desc: "Continuously optimize inventory performance, fill rates, and monetization opportunities." },
-    { icon: Scaling, title: "Scale On Demand", desc: "Expand operational support as your inventory and advertising partnerships grow." },
-    { icon: Target, title: "Focus on Sales and Growth", desc: "Allow your team to concentrate on acquiring advertisers and strategic partnerships while we manage operations." },
-    { icon: EyeOff, title: "White-Label Support", desc: "Our team can work entirely behind your brand as your dedicated publisher AdOps department." },
+    {
+      icon: TrendingDown,
+      title: "Reduce Operational Costs",
+      desc: "Access experienced AdOps professionals without the cost of building and maintaining an internal team.",
+    },
+    {
+      icon: TrendingUp,
+      title: "Maximize Revenue",
+      desc: "Continuously optimize inventory performance, fill rates, and monetization opportunities.",
+    },
+    {
+      icon: Scaling,
+      title: "Scale On Demand",
+      desc: "Expand operational support as your inventory and advertising partnerships grow.",
+    },
+    {
+      icon: Target,
+      title: "Focus on Sales and Growth",
+      desc: "Allow your team to concentrate on acquiring advertisers and strategic partnerships while we manage operations.",
+    },
+    {
+      icon: EyeOff,
+      title: "White-Label Support",
+      desc: "Our team can work entirely behind your brand as your dedicated publisher AdOps department.",
+    },
   ];
 
   const clients = [
-    { icon: Home, title: "Real Estate Managers", desc: "Own or manage a building? Maximize your profit and turn blank walls into ad space. Register by booking our outsourced agents to survey your real estate property." },
-    
-    { icon: Building2, title: "Property and Venue Networks", desc: "Manage DOOH, in-store media, and physical advertising inventory through centralized operations." },
-    { icon: Newspaper, title: "Publishers & Media Owners", desc: "Monetize digital and physical inventory with expert supply-side operations and yield management." },
+    {
+      icon: Home,
+      title: "Real Estate Managers",
+      desc: "Own or manage a building? Maximize your profit and turn blank walls into ad space. Register by booking our outsourced agents to survey your real estate property.",
+    },
+
+    {
+      icon: Building2,
+      title: "Property and Venue Networks",
+      desc: "Manage DOOH, in-store media, and physical advertising inventory through centralized operations.",
+    },
+    {
+      icon: Newspaper,
+      title: "Publishers & Media Owners",
+      desc: "Monetize digital and physical inventory with expert supply-side operations and yield management.",
+    },
   ];
 
   const steps = [
-    { icon: Search, title: "Discovery", desc: "We evaluate your inventory, monetization strategy, and operational requirements." },
+    {
+      icon: Search,
+      title: "Discovery",
+      desc: "We evaluate your inventory, monetization strategy, and operational requirements.",
+    },
     { icon: Plug, title: "Integration", desc: "Our specialists integrate ad servers, SSPs, and reporting systems." },
-    { icon: PlayCircle, title: "Operations & Optimization", desc: "We manage inventory, monitor delivery, optimize revenue, and maintain operational performance." },
-    { icon: RefreshCw, title: "Continuous Growth", desc: "Receive ongoing reporting, strategic recommendations, and scalable operational support." },
+    {
+      icon: PlayCircle,
+      title: "Operations & Optimization",
+      desc: "We manage inventory, monitor delivery, optimize revenue, and maintain operational performance.",
+    },
+    {
+      icon: RefreshCw,
+      title: "Continuous Growth",
+      desc: "Receive ongoing reporting, strategic recommendations, and scalable operational support.",
+    },
   ];
 
   return (
@@ -348,21 +393,18 @@ const Brands = () => {
               Outsource your Ad Operations and scale your business
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] mb-6 animate-fade-in">
-              We Provide Outsourced Advertising Operations Teams to{" "}
-              <span className="text-green-500">Monetize Your Ad Spaces.</span>
+              We Provide Outsourced Advertising Operations Teams for <span className="text-green-500">Businesses.</span>
             </h1>
             <p className="text-lg md:text-xl text-white/70 mb-10 max-w-3xl">
-              Scale your advertising business without building an in-house AdOps department. Our
-              dedicated specialists manage your advertising inventory, ad serving operations,
-              programmatic monetization, reporting, and optimization so your team can focus on
-              sales and business growth.
+              Scale your advertising business without building an in-house AdOps department. Our dedicated specialists
+              manage a wide spectrum of advertising services from retail ad inventory, ad serving operations,
+              programmatic monetization, reporting, and optimization so your team can focus on sales and business
+              growth.
             </p>
             <p className="text-sm md:text-base text-green-300/90 mb-10 max-w-3xl">
-              Dual-sided AdOps: we operate the supply side for publishers monetizing retail media
-              inventory — and the demand side for advertisers running programmatic campaigns.
+              Dual-sided AdOps: we operate the supply side for publishers monetizing retail media inventory — and the
+              demand side for advertisers running programmatic campaigns.
             </p>
-
-
 
             <div className="flex flex-wrap gap-3">
               {[
@@ -388,17 +430,15 @@ const Brands = () => {
         <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-              Your Retail Media{" "}
-              <span className="text-green-500">Supply-Side Ad Operations Team</span>
+              Your Retail Media <span className="text-green-500">Supply-Side Ad Operations Team</span>
             </h2>
             <p className="text-white/70 text-lg mb-5">
-              We become an extension of your organization by providing experienced AdOps
-              professionals who manage and optimize your advertising inventory, programmatic
-              demand, and monetization operations.
+              We become an extension of your organization by providing experienced AdOps professionals who manage and
+              optimize your advertising inventory, programmatic demand, and monetization operations.
             </p>
             <p className="text-white/70 text-lg">
-              Whether you need support for ad serving or a fully managed publisher monetization
-              agent, we deliver the expertise needed to operate and scale your advertising business.
+              Whether you need support for ad serving or a fully managed publisher monetization agent, we deliver the
+              expertise needed to operate and scale your advertising business.
             </p>
           </div>
 
@@ -450,7 +490,10 @@ const Brands = () => {
                   ["PMP Deal · Retailer A", "Active"],
                   ["Inventory · DOOH Network", "Pacing well"],
                 ].map(([t, s]) => (
-                  <div key={t} className="flex items-center justify-between text-xs bg-black/40 border border-white/10 rounded-lg px-3 py-2">
+                  <div
+                    key={t}
+                    className="flex items-center justify-between text-xs bg-black/40 border border-white/10 rounded-lg px-3 py-2"
+                  >
                     <span className="text-white/70">{t}</span>
                     <span className="text-green-400">{s}</span>
                   </div>
@@ -470,9 +513,8 @@ const Brands = () => {
             </span>
             <h2 className="text-3xl md:text-5xl font-bold mb-4">Our Services</h2>
             <p className="text-white/60 text-lg">
-              Five connected tiers — from plugging your retail media inventory into demand, to
-              operating campaigns for both publishers and advertisers, to proving what delivered
-              and what earned.
+              Five connected tiers — from plugging your retail media inventory into demand, to operating campaigns for
+              both publishers and advertisers, to proving what delivered and what earned.
             </p>
           </div>
 
@@ -609,7 +651,6 @@ const Brands = () => {
         </div>
       </section>
 
-
       {/* Why Outsource */}
       <section className="py-20 md:py-28 border-t border-white/5 bg-gradient-to-b from-transparent via-green-500/[0.03] to-transparent">
         <div className="container mx-auto px-4 md:px-6">
@@ -736,12 +777,10 @@ const Brands = () => {
         <div className="container mx-auto px-4 md:px-6 relative">
           <div className="max-w-3xl mx-auto text-center bg-[#0a0a0a]/80 backdrop-blur-sm border border-green-500/30 rounded-3xl p-10 md:p-14 shadow-[0_0_60px_-10px_rgba(34,197,94,0.4)]">
             <h2 className="text-3xl md:text-5xl font-bold mb-5 leading-tight">
-              Build Your AdOps Team{" "}
-              <span className="text-green-500">with our Outsourced Agents</span>
+              Build Your AdOps Team <span className="text-green-500">with our Outsourced Agents</span>
             </h2>
             <p className="text-white/70 mb-8 text-lg">
-              We provide the people, expertise, and processes needed to monetize and scale your
-              advertising inventory.
+              We provide the people, expertise, and processes needed to monetize and scale your advertising inventory.
             </p>
 
             <div className="border-t border-white/10 pt-8 mb-8">
@@ -749,11 +788,10 @@ const Brands = () => {
                 Ready to Monetize Your Ad Spaces More Efficiently?
               </h3>
               <p className="text-white/65 max-w-2xl mx-auto">
-                Partner with TrioTag, an outsourced supply-side AdOps agency that delivers reliable
-                inventory management, revenue optimization, and operational excellence.
+                Partner with TrioTag, an outsourced supply-side AdOps agency that delivers reliable inventory
+                management, revenue optimization, and operational excellence.
               </p>
             </div>
-
           </div>
         </div>
       </section>
@@ -768,13 +806,11 @@ const Brands = () => {
               For Venues & Retailers
             </span>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              Turn your space into{" "}
-              <span className="text-green-500">passive income</span>
+              Turn your space into <span className="text-green-500">passive income</span>
             </h2>
             <p className="text-lg text-white/70 mb-8 max-w-xl">
-              TrioTag connects your venue with brands that want to reach real
-              shoppers. List your ad space for free, approve every booking, and
-              get paid monthly.
+              TrioTag connects your venue with brands that want to reach real shoppers. List your ad space for free,
+              approve every booking, and get paid monthly.
             </p>
           </div>
           <div className="bg-[#0c0c0c] border border-white/10 rounded-3xl p-8">
@@ -799,18 +835,26 @@ const Brands = () => {
       <section className="bg-[#0c0c0c] py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Why retailers list with TrioTag
-            </h2>
-            <p className="text-white/70">
-              We do the work of finding advertisers. You keep control of your space.
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why retailers list with TrioTag</h2>
+            <p className="text-white/70">We do the work of finding advertisers. You keep control of your space.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: Wallet, title: "Free to list", desc: "No setup cost, no monthly fees. You only earn — never owe." },
-              { icon: Shield, title: "Full control", desc: "Approve or reject every brand booking before any ad goes live." },
-              { icon: Sparkles, title: "Set & forget", desc: "Brands find you, book online, and pay directly. We handle ops." },
+              {
+                icon: Wallet,
+                title: "Free to list",
+                desc: "No setup cost, no monthly fees. You only earn — never owe.",
+              },
+              {
+                icon: Shield,
+                title: "Full control",
+                desc: "Approve or reject every brand booking before any ad goes live.",
+              },
+              {
+                icon: Sparkles,
+                title: "Set & forget",
+                desc: "Brands find you, book online, and pay directly. We handle ops.",
+              },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="bg-black border border-white/10 rounded-2xl p-6">
                 <Icon className="h-8 w-8 text-green-500 mb-4" />
@@ -826,7 +870,10 @@ const Brands = () => {
       <section className="container mx-auto px-4 md:px-6 py-20 md:py-28">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">How it works</h2>
-          <p className="text-white/70">From listing to first payout with any payment platform, from e-wallets to bank accounts. No account linking needed, cashout your earnings fast and secure!</p>
+          <p className="text-white/70">
+            From listing to first payout with any payment platform, from e-wallets to bank accounts. No account linking
+            needed, cashout your earnings fast and secure!
+          </p>
         </div>
         <div className="grid md:grid-cols-4 gap-6">
           {[
@@ -881,10 +928,9 @@ const Brands = () => {
                 Start earning from your space today!
               </h2>
               <p className="text-white/70 mb-6">
-                List your venue on TrioTag's retailer marketplace in under 10
-                minutes. Brands will find your space, book it, and pay you
-                directly. No sales calls. No chasing payments. Just passive
-                income directly paid to your account.
+                List your venue on TrioTag's retailer marketplace in under 10 minutes. Brands will find your space, book
+                it, and pay you directly. No sales calls. No chasing payments. Just passive income directly paid to your
+                account.
               </p>
 
               <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mt-4">
@@ -933,10 +979,14 @@ const Brands = () => {
               <p className="text-white/70 text-sm mb-6">
                 Create your free retailer account and submit your first space in minutes.
               </p>
-              <Button size="lg" variant="cyber" className="w-full whitespace-pre-line" onClick={() => navigate("/advertiser/explore")}>
+              <Button
+                size="lg"
+                variant="cyber"
+                className="w-full whitespace-pre-line"
+                onClick={() => navigate("/advertiser/explore")}
+              >
                 List your Ad Space{"\n"}
               </Button>
-
 
               <div className="flex items-center gap-3 my-5 text-white/40 text-xs">
                 <div className="flex-1 h-px bg-white/10" />
@@ -944,12 +994,7 @@ const Brands = () => {
                 <div className="flex-1 h-px bg-white/10" />
               </div>
 
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full"
-                onClick={() => navigate("/contact")}
-              >
+              <Button size="lg" variant="outline" className="w-full" onClick={() => navigate("/contact")}>
                 Talk to an Agent
               </Button>
 
@@ -967,10 +1012,7 @@ const Brands = () => {
 
               <p className="text-center text-xs text-white/50 mt-5">
                 Already a publisher?{" "}
-                <button
-                  onClick={() => navigate("/auth")}
-                  className="text-green-400 hover:underline"
-                >
+                <button onClick={() => navigate("/auth")} className="text-green-400 hover:underline">
                   Log in here
                 </button>
               </p>
