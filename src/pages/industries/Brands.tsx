@@ -36,7 +36,12 @@ import {
   Wallet,
   LayoutGrid,
   Sparkles,
+  Megaphone,
+  ShieldCheck,
+  Gauge,
+  MonitorPlay,
 } from "lucide-react";
+
 
 const CANONICAL = "https://triotag.com/industries/sspsource";
 
