@@ -2483,6 +2483,54 @@ export type Database = {
         }
         Relationships: []
       }
+      local_listing_clients: {
+        Row: {
+          address: string | null
+          assigned_admin_id: string | null
+          business_hours: string | null
+          business_name: string
+          category: string | null
+          created_at: string
+          description: string | null
+          gbp_status: string
+          id: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          assigned_admin_id?: string | null
+          business_hours?: string | null
+          business_name: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          gbp_status?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          assigned_admin_id?: string | null
+          business_hours?: string | null
+          business_name?: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          gbp_status?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       media_plan_requests: {
         Row: {
           advertiser_id: string | null
