@@ -21,6 +21,7 @@ import AdminTotalInventory from "./pages/admin/AdminTotalInventory";
 import AdminMediaPlans from "./pages/admin/AdminMediaPlans";
 import AdminExternalInventory from "./pages/admin/AdminExternalInventory";
 import AdminBrandCampaigns from "./pages/admin/AdminBrandCampaigns";
+import AdminLocalListings from "./pages/admin/AdminLocalListings";
 import AdminBrandAdvertiserApprovals from "./pages/admin/AdminBrandAdvertiserApprovals";
 import AdminVerifiedLocations from "./pages/admin/AdminVerifiedLocations";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
