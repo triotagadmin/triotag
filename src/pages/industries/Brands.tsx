@@ -357,6 +357,11 @@ const Brands = () => {
               programmatic monetization, reporting, and optimization so your team can focus on
               sales and business growth.
             </p>
+            <p className="text-sm md:text-base text-green-300/90 mb-10 max-w-3xl">
+              Dual-sided AdOps: we operate the supply side for publishers monetizing retail media
+              inventory — and the demand side for advertisers running programmatic campaigns.
+            </p>
+
 
 
             <div className="flex flex-wrap gap-3">
