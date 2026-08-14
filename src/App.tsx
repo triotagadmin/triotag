@@ -94,7 +94,6 @@ import AOOHPlayer from "./pages/player/AOOHPlayer";
 import TalentProfileSubmission from "./pages/TalentProfileSubmission";
 import TalentDashboard from "./pages/TalentDashboard";
 import BookTalent from "./pages/BookTalent";
-import RetailerDashboard from "./pages/retailer/RetailerDashboard";
 import RetailerSelfDashboard from "./pages/RetailerDashboard";
 import RetailerCreatives from "./pages/RetailerCreatives";
 import RetailerInventoryConfig from "./pages/RetailerInventoryConfig";
@@ -317,7 +316,6 @@ const App = () => (
           {/* AOOH player (token-based public) */}
           <Route path="/player/audio" element={<AOOHPlayer />} />
           {/* Retailer Portal — publisher only, all guarded inside RetailerLayout */}
-          <Route path="/retailer/dashboard" element={<RetailerDashboard />} />
           <Route path="/retailer/clients" element={<MyClients />} />
           <Route path="/retailer/creative-library" element={<CreativeLibrary />} />
           <Route path="/retailer/house-ads" element={<HouseAds />} />

@@ -58,7 +58,7 @@ const linksForRole = (role: Role, loggedIn: boolean): NavLinkDef[] => {
   if (!loggedIn) return PUBLIC_LINKS;
   const retailerLink: NavLinkDef =
     role === "agent"
-      ? { label: "For Retailers", to: "/retailer/dashboard" }
+      ? { label: "For Retailers", to: "/auth" }
       : { label: "For Retailers", to: "/#for-retailers" };
   switch (role) {
     case "retailer":
