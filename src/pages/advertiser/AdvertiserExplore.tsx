@@ -34,7 +34,7 @@ import { toast } from "@/hooks/use-toast";
 
 const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
 const MIN_LAUNCH_DATE = startOfDay(addMonths(new Date(), 1));
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
@@ -138,7 +138,8 @@ export default function AdvertiserExplore() {
   );
 
   // Wizard state
-  const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3 | 4>(1);
+  const [campaignPillar, setCampaignPillar] = useState<"event" | "product" | "service" | null>(null);
   const [chosenFormat, setChosenFormat] = useState<"OOH" | "DOOH" | "AOOH" | "MEDIA_TRUCK" | null>(null);
   const [selections, setSelections] = useState<Record<string, number>>({});
   const [exampleModal, setExampleModal] = useState<{ label: string; image: string; caption: string } | null>(null);
@@ -362,6 +363,7 @@ export default function AdvertiserExplore() {
           advertiser_id: user?.id ?? null,
           campaign_name: form.campaignName,
           campaign_type: campaignType,
+          campaign_pillar: campaignPillar,
           center_lat: center.lat,
           center_lng: center.lng,
           radius_meters: radiusMeters,
@@ -370,7 +372,7 @@ export default function AdvertiserExplore() {
           estimated_price: estimate.totalEstimate,
           preferred_start_date: form.preferredStartDate,
           notes: form.notes || null,
-          status: "paid",
+          status: "pending_review",
           requester_email: emailTrimmed,
         });
       if (error) throw error;
@@ -381,6 +383,7 @@ export default function AdvertiserExplore() {
           body: {
             campaignName: form.campaignName,
             campaignType,
+            campaignPillar,
             centerLat: center.lat,
             centerLng: center.lng,
             radiusMeters,
@@ -491,7 +494,7 @@ export default function AdvertiserExplore() {
     { id: "MEDIA_TRUCK" as const, label: "Media Truck", icon: <Truck className="w-5 h-5" />, color: "border-amber-300 hover:border-amber-500 hover:bg-amber-50", badge: "bg-amber-100 text-amber-700", desc: "Mobile LED truck fleet deployed on planned retail and commuter routes" },
   ];
 
-  const stepLabels = ["Location & Coverage", "Ad Format & Quantity", "Campaign Details"];
+  const stepLabels = ["Campaign Type", "Location & Coverage", "Ad Format & Quantity", "Campaign Details"];
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans">
@@ -524,8 +527,56 @@ export default function AdvertiserExplore() {
             </div>
 
             <div className="max-w-4xl mx-auto">
-              {/* STEP 1 */}
+              {/* STEP 1 — Campaign Type */}
               {wizardStep === 1 && (
+                <div className="space-y-5">
+                  <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Campaign Type</h3>
+                    <p className="text-xs text-gray-500 mb-4">What are you advertising? This helps us plan the right approach.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {[
+                        { id: "event" as const, label: "Event", desc: "Launches, shows, promos with a set date" },
+                        { id: "product" as const, label: "Product", desc: "A physical or digital product you sell" },
+                        { id: "service" as const, label: "Service", desc: "A service offering or business capability" },
+                      ].map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setCampaignPillar(p.id)}
+                          className={`text-left rounded-xl border p-4 transition-colors ${
+                            campaignPillar === p.id
+                              ? "border-green-500 bg-green-50"
+                              : "border-gray-200 hover:border-green-300 hover:bg-green-50/40"
+                          }`}
+                        >
+                          <div className="font-bold text-sm text-gray-900">{p.label}</div>
+                          <div className="text-xs text-gray-500 mt-1">{p.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {!campaignPillar && (
+                    <div className="flex items-start gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                      <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <span>Select a campaign type to continue.</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={() => setWizardStep(2)}
+                      disabled={!campaignPillar}
+                      className="bg-green-600 hover:bg-green-500 text-white"
+                    >
+                      Continue <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 2 */}
+              {wizardStep === 2 && (
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
                     {/* LEFT: map + coverage radius card */}
@@ -725,7 +776,7 @@ export default function AdvertiserExplore() {
 
                   <div className="flex justify-end">
                     <Button
-                      onClick={() => setWizardStep(2)}
+                      onClick={() => setWizardStep(3)}
                       disabled={!canAdvanceStep1}
                       className="bg-green-600 hover:bg-green-500 text-white"
                     >
@@ -735,8 +786,8 @@ export default function AdvertiserExplore() {
                 </div>
               )}
 
-              {/* STEP 2 */}
-              {wizardStep === 2 && (
+              {/* STEP 3 */}
+              {wizardStep === 3 && (
                 <div className="space-y-5">
                   <div id="choose-ad-formats" className="bg-white border border-gray-200 rounded-2xl p-6">
                     <h3 className="text-base font-bold text-gray-900 mb-1">Choose Your Ad Format & Quantity</h3>
@@ -824,11 +875,11 @@ export default function AdvertiserExplore() {
                   )}
 
                   <div className="flex justify-between">
-                    <Button variant="outline" onClick={() => setWizardStep(1)}>
+                    <Button variant="outline" onClick={() => setWizardStep(2)}>
                       <ChevronLeft className="w-4 h-4 mr-1" /> Back
                     </Button>
                     <Button
-                      onClick={() => setWizardStep(3)}
+                      onClick={() => setWizardStep(4)}
                       disabled={activeSelections.length === 0}
                       className="bg-green-600 hover:bg-green-500 text-white"
                     >
@@ -838,8 +889,8 @@ export default function AdvertiserExplore() {
                 </div>
               )}
 
-              {/* STEP 3 */}
-              {wizardStep === 3 && !submitted && (
+              {/* STEP 4 */}
+              {wizardStep === 4 && !submitted && (
                 <div className="space-y-5">
                   <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
                     <div>
@@ -937,7 +988,7 @@ export default function AdvertiserExplore() {
                   </div>
 
                   <div className="flex justify-between">
-                    <Button variant="outline" onClick={() => setWizardStep(2)} disabled={submitting}>
+                    <Button variant="outline" onClick={() => setWizardStep(3)} disabled={submitting}>
                       <ChevronLeft className="w-4 h-4 mr-1" /> Back
                     </Button>
                     <Button
@@ -951,7 +1002,7 @@ export default function AdvertiserExplore() {
                 </div>
               )}
 
-              {wizardStep === 3 && submitted && (
+              {wizardStep === 4 && submitted && (
                 <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center max-w-xl mx-auto">
                   <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
                     <CheckCircle2 className="w-7 h-7 text-green-600" />
@@ -965,6 +1016,7 @@ export default function AdvertiserExplore() {
                     onClick={() => {
                       setSubmitted(false);
                       setWizardStep(1);
+                      setCampaignPillar(null);
                       setChosenFormat(null);
                       setSelections({});
                       setForm({ campaignName: "", preferredStartDate: "", notes: "", email: "" });
@@ -1015,7 +1067,7 @@ export default function AdvertiserExplore() {
                   key={c.title}
                   onClick={() => {
                     document.getElementById("choose-ad-formats")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                    setWizardStep(2);
+                    setWizardStep(3);
                     setChosenFormat(null);
                     setSelections({});
                   }}
