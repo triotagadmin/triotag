@@ -5261,7 +5261,6 @@ export type Database = {
         | "talent"
         | "print_partner"
         | "agent"
-        | "retailer"
         | "brand_advertiser"
       approval_status: "pending" | "approved" | "rejected"
       booking_status:
@@ -5442,7 +5441,6 @@ export const Constants = {
         "talent",
         "print_partner",
         "agent",
-        "retailer",
         "brand_advertiser",
       ],
       approval_status: ["pending", "approved", "rejected"],
