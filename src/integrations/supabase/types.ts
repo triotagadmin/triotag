@@ -2537,6 +2537,7 @@ export type Database = {
           aooh_units: number | null
           budget_confirmation: number | null
           campaign_name: string
+          campaign_pillar: string | null
           campaign_type: string
           center_lat: number
           center_lng: number
@@ -2561,6 +2562,7 @@ export type Database = {
           aooh_units?: number | null
           budget_confirmation?: number | null
           campaign_name: string
+          campaign_pillar?: string | null
           campaign_type: string
           center_lat: number
           center_lng: number
@@ -2585,6 +2587,7 @@ export type Database = {
           aooh_units?: number | null
           budget_confirmation?: number | null
           campaign_name?: string
+          campaign_pillar?: string | null
           campaign_type?: string
           center_lat?: number
           center_lng?: number
