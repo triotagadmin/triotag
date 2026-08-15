@@ -60,7 +60,7 @@ const AdvertiserSettings = () => {
 
       const { data: roles } = await supabase
         .from("user_roles").select("role").eq("user_id", session.user.id).single();
-      if (!roles || roles.role !== "retailer") { navigate("/dashboard"); return; }
+      if (!roles || roles.role !== "print_partner") { navigate("/dashboard"); return; }
 
       setUser(session.user);
 

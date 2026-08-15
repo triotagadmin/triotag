@@ -89,49 +89,7 @@ const Auth = () => {
 
 
         if (existingRole) {
-          // The handle_new_user_role trigger defaults Google signups to
-          // 'retailer' (Google never sets user_type metadata). Correct it when
-          // there's no evidence of a genuine retailer account.
-          if (
-            urlAccountType === "brand_advertiser" &&
-            existingRole.role === "retailer"
-          ) {
-            const [{ data: baProfile }, { data: pubProfile }] = await Promise.all([
-              supabase
-                .from("brand_advertiser_profiles")
-                .select("id")
-                .eq("user_id", userId)
-                .maybeSingle(),
-              supabase
-                .from("publisher_profiles")
-                .select("id")
-                .eq("user_id", userId)
-                .maybeSingle(),
-            ]);
 
-            // publisher_profiles present = genuine retailer/venue account, never touch
-            if (!pubProfile) {
-              await supabase.rpc("set_own_role", { _role: "brand_advertiser" });
-
-              if (!baProfile) {
-                await supabase.from("brand_advertiser_profiles").insert({
-                  user_id: userId,
-                  company_name: session.user.user_metadata?.full_name || "",
-                  contact_name: session.user.user_metadata?.full_name || "",
-                  contact_email: userEmail,
-                  verified: true,
-                });
-              }
-
-              toast(
-                intent === "signup"
-                  ? { title: "Welcome back!", description: "We found your existing account and signed you in." }
-                  : { title: "Welcome!", description: "Your account has been created successfully." }
-              );
-              routeByRole("brand_advertiser");
-              return;
-            }
-          }
 
 
           // Existing account (including legacy retailers) — always honor its role
@@ -148,7 +106,6 @@ const Auth = () => {
         // New Google user - create role and profile
         const mappedRole =
           storedUserType === "venue" ? "agent" :
-          storedUserType === "advertiser" ? "retailer" :
           storedUserType === "brand_advertiser" ? "brand_advertiser" :
           storedUserType;
 
@@ -249,13 +206,6 @@ const Auth = () => {
     const routeByRole = async (role: string) => {
       if (role === "admin") {
         goAfterAuth("/admin/dashboard");
-      } else if (role === "retailer") {
-        try {
-          await supabase.functions.invoke("sync-pending-listing-ownership");
-        } catch (syncError) {
-          console.error("Failed to sync pending listings after OAuth:", syncError);
-        }
-        goAfterAuth("/retailer-dashboard");
       } else if (role === "print_partner") {
         goAfterAuth("/print-partner/dashboard");
       } else if (role === "agent") {
