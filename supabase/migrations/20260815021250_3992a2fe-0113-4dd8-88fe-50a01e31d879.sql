@@ -1,0 +1,1 @@
+ALTER TABLE public.media_plan_requests ADD COLUMN IF NOT EXISTS campaign_pillar text CHECK (campaign_pillar IN ('event','product','service'));
