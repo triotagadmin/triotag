@@ -106,7 +106,6 @@ const Auth = () => {
         // New Google user - create role and profile
         const mappedRole =
           storedUserType === "venue" ? "agent" :
-          storedUserType === "advertiser" ? "retailer" :
           storedUserType === "brand_advertiser" ? "brand_advertiser" :
           storedUserType;
 
@@ -207,13 +206,6 @@ const Auth = () => {
     const routeByRole = async (role: string) => {
       if (role === "admin") {
         goAfterAuth("/admin/dashboard");
-      } else if (role === "retailer") {
-        try {
-          await supabase.functions.invoke("sync-pending-listing-ownership");
-        } catch (syncError) {
-          console.error("Failed to sync pending listings after OAuth:", syncError);
-        }
-        goAfterAuth("/retailer-dashboard");
       } else if (role === "print_partner") {
         goAfterAuth("/print-partner/dashboard");
       } else if (role === "agent") {
