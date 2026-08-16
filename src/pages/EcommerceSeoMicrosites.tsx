@@ -260,7 +260,7 @@ const Hero = ({ onBook }: { onBook: () => void }) => (
           </p>
           <div className="flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-3 pt-2">
             <Button size="lg" onClick={onBook} className="bg-green-600 hover:bg-green-500 text-white px-8">
-              Book a service today and rank your products on Search Engines! <ArrowRight className="w-4 h-4 ml-2" />
+              Book our SEO services <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <a href="#pricing">
               <Button
