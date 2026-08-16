@@ -18,6 +18,7 @@ serve(async (req) => {
     const {
       campaignName,
       campaignType,
+      campaignPillar,
       centerLat,
       centerLng,
       radiusMeters,
@@ -58,6 +59,7 @@ serve(async (req) => {
           <h3 style="font-size:14px;margin:16px 0 6px;color:#111827;">Campaign Details</h3>
           <table style="width:100%;border-collapse:collapse;font-size:14px;">
             <tr><td style="padding:4px 0;color:#6b7280;width:170px;">Campaign Name</td><td style="padding:4px 0;font-weight:600;">${campaignName ?? "-"}</td></tr>
+            <tr><td style="padding:4px 0;color:#6b7280;">Campaign Pillar</td><td style="padding:4px 0;">${campaignPillar ? String(campaignPillar).charAt(0).toUpperCase() + String(campaignPillar).slice(1) : "-"}</td></tr>
             <tr><td style="padding:4px 0;color:#6b7280;">Type</td><td style="padding:4px 0;">${campaignType ?? "-"}</td></tr>
             <tr><td style="padding:4px 0;color:#6b7280;">Preferred Start Date</td><td style="padding:4px 0;">${preferredStartDate ?? "-"}</td></tr>
           </table>
