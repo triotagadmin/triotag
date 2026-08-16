@@ -19,31 +19,28 @@ import {
   Search,
   BarChart3,
   Globe,
-  Zap,
   CheckCircle2,
-  TrendingUp,
-  Users,
-  Sparkles,
-  Award,
-  ShoppingCart,
-  ShoppingBag,
-  Store,
+  RefreshCcw,
+  Hammer,
+  MapPin,
   Package,
-  LineChart,
   Layers,
-  FileSearch,
+  FileText,
+  ShoppingCart,
+  Wrench,
   Rocket,
-  ShieldCheck,
   Loader2,
-  Quote,
+  Repeat,
+  Compass,
+  Code2,
   Gauge,
-  Braces,
+  LineChart,
 } from "lucide-react";
 
 const PAGE_URL = "https://triotag.com/services/ecommerce-seo";
-const PAGE_TITLE = "eCommerce SEO Microsites | Triotag";
+const PAGE_TITLE = "SEO Microsite Development & Management | TRIOTAG";
 const PAGE_DESCRIPTION =
-  "Generate more organic traffic and online sales with professionally built eCommerce SEO Microsites. We create high-ranking product-focused websites that attract customers from Google Search.";
+  "TRIOTAG builds SEO microsites as a one-time development project, then keeps them optimized, updated, and expanding with an ongoing monthly SEO microsite management service.";
 
 /* ============================ HEAD METADATA ============================ */
 const setMeta = (selector: string, attr: string, key: string, content: string) => {
@@ -56,6 +53,50 @@ const setMeta = (selector: string, attr: string, key: string, content: string) =
   el.setAttribute("content", content);
 };
 
+/* ================================= FAQ DATA ================================= */
+const faqs = [
+  {
+    q: "What is an SEO microsite?",
+    a: "An SEO microsite is a focused site or set of pages built around a specific product, category, location, service, or search intent. Instead of forcing every topic onto one page, a microsite gives each demand cluster a dedicated, well-structured, technically sound search experience.",
+  },
+  {
+    q: "Is development a one-time fee?",
+    a: "Yes. SEO Microsite Development is a project-based engagement charged once. It covers strategy, information architecture, design, development, technical SEO configuration, deployment, and launch.",
+  },
+  {
+    q: "Is SEO Microsite Management a monthly service?",
+    a: "Yes. Management is a recurring monthly service covering ongoing SEO optimization, content publishing, new pages, technical and indexation monitoring, metadata and schema upkeep, and reporting.",
+  },
+  {
+    q: "Do I need Development before Management?",
+    a: "Not necessarily. Development is required if you do not yet have a microsite infrastructure. If you already have one live, we can start with Management after a technical review.",
+  },
+  {
+    q: "Can TRIOTAG manage a microsite we did not build?",
+    a: "Yes. We begin with an audit of your existing structure, technical setup, and content, then move it onto our monthly management workflow.",
+  },
+  {
+    q: "Can you create new microsites or pages during management?",
+    a: "Yes. Expansion is a core part of management — we identify new search opportunities and build keyword-targeted pages and additional microsite sections over time.",
+  },
+  {
+    q: "Do you guarantee Google rankings?",
+    a: "No. SEO results depend on competition, search demand, website quality, content, authority, technical factors, and other variables outside any agency's control. Rankings cannot be guaranteed. We commit to sound strategy, correct technical execution, and continuous optimization.",
+  },
+  {
+    q: "How long does development take?",
+    a: "Timelines depend on scope — the number of pages, integrations, and content requirements. A focused microsite build is typically faster than a large multi-section infrastructure. We confirm the schedule during planning.",
+  },
+  {
+    q: "What happens after the microsite launches?",
+    a: "Search does not stand still. After launch you can continue with monthly management so the microsite keeps getting optimized, updated, monitored, and expanded, or you can operate it yourself.",
+  },
+  {
+    q: "Can this be used for eCommerce businesses?",
+    a: "Yes. Commerce SEO microsites are one of the most common use cases, supporting product, category, and buying-intent discovery that feeds your store or marketplace listings.",
+  },
+];
+
 const usePageMetadata = () => {
   useEffect(() => {
     const prevTitle = document.title;
@@ -66,6 +107,7 @@ const usePageMetadata = () => {
     setMeta('meta[property="og:description"]', "property", "og:description", PAGE_DESCRIPTION);
     setMeta('meta[property="og:type"]', "property", "og:type", "website");
     setMeta('meta[property="og:url"]', "property", "og:url", PAGE_URL);
+    setMeta('meta[property="og:site_name"]', "property", "og:site_name", "TRIOTAG");
     setMeta('meta[name="twitter:card"]', "name", "twitter:card", "summary_large_image");
     setMeta('meta[name="twitter:title"]', "name", "twitter:title", PAGE_TITLE);
     setMeta('meta[name="twitter:description"]', "name", "twitter:description", PAGE_DESCRIPTION);
@@ -86,35 +128,36 @@ const usePageMetadata = () => {
       {
         "@context": "https://schema.org",
         "@type": "Service",
-        name: "eCommerce SEO Microsites",
-        serviceType: "eCommerce SEO Microsites",
+        name: "SEO Microsite Development",
+        serviceType: "SEO microsite web development project",
         url: PAGE_URL,
-        description: PAGE_DESCRIPTION,
+        description:
+          "A one-time web development project to design, build, configure, and launch an SEO-ready microsite infrastructure.",
         areaServed: "PH",
-        provider: { "@type": "Organization", name: "Triotag", url: "https://triotag.com" },
-        offers: [
-          {
-            "@type": "Offer",
-            name: "Starter",
-            price: "49888",
-            priceCurrency: "PHP",
-            description: "15 SEO Microsites per month",
-          },
-          {
-            "@type": "Offer",
-            name: "Growth",
-            price: "89888",
-            priceCurrency: "PHP",
-            description: "50 SEO Microsites per month",
-          },
-          {
-            "@type": "Offer",
-            name: "Enterprise",
-            price: "189888",
-            priceCurrency: "PHP",
-            description: "100 SEO Microsites per month",
-          },
-        ],
+        provider: { "@type": "Organization", name: "TRIOTAG", url: "https://triotag.com" },
+        offers: {
+          "@type": "Offer",
+          name: "One-Time Project",
+          description: "Custom project pricing",
+          url: PAGE_URL,
+        },
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        name: "SEO Microsite Management",
+        serviceType: "Monthly SEO microsite management service",
+        url: PAGE_URL,
+        description:
+          "An ongoing monthly service for maintaining, optimizing, publishing, and expanding an SEO microsite after launch.",
+        areaServed: "PH",
+        provider: { "@type": "Organization", name: "TRIOTAG", url: "https://triotag.com" },
+        offers: {
+          "@type": "Offer",
+          name: "Monthly Service",
+          description: "Custom monthly pricing",
+          url: PAGE_URL,
+        },
       },
       {
         "@context": "https://schema.org",
@@ -122,7 +165,7 @@ const usePageMetadata = () => {
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: "https://triotag.com/" },
           { "@type": "ListItem", position: 2, name: "Services", item: "https://triotag.com/services" },
-          { "@type": "ListItem", position: 3, name: "eCommerce SEO Microsites", item: PAGE_URL },
+          { "@type": "ListItem", position: 3, name: "SEO Microsite Development & Management", item: PAGE_URL },
         ],
       },
       {
@@ -161,84 +204,9 @@ const Breadcrumbs = () => (
         </Link>
       </li>
       <li aria-hidden>/</li>
-      <li className="text-zinc-300">eCommerce SEO Microsites</li>
+      <li className="text-zinc-300">SEO Microsite Development &amp; Management</li>
     </ol>
   </nav>
-);
-
-/* ============================ ANALYTICS PANEL ============================ */
-const analyticsStats = [
-  { icon: Users, label: "Organic Visitors", value: "184,920", delta: "+212%" },
-  { icon: ShoppingBag, label: "Monthly Orders", value: "3,486", delta: "+147%" },
-  { icon: LineChart, label: "Revenue", value: "₱6.4M", delta: "+189%" },
-  { icon: TrendingUp, label: "Conversion Rate", value: "4.7%", delta: "+1.9pts" },
-];
-
-const keywordRankings = [
-  { kw: "buy running shoes online", pos: 1 },
-  { kw: "organic skincare set ph", pos: 2 },
-  { kw: "wireless earbuds sale", pos: 3 },
-  { kw: "home coffee brewer kit", pos: 4 },
-];
-
-const StorefrontPreview = () => (
-  <div className="relative w-full max-w-md mx-auto">
-    {/* Floating store preview */}
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-5 shadow-2xl animate-fade-in">
-      <div className="flex items-center gap-2 mb-4">
-        <span className="w-2.5 h-2.5 rounded-full bg-red-400/70" />
-        <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" />
-        <span className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
-        <span className="ml-3 text-[10px] font-mono text-zinc-500 truncate">microsite.com/best-running-shoes</span>
-      </div>
-      <div className="grid grid-cols-3 gap-3">
-        {[Package, ShoppingBag, Store].map((I, i) => (
-          <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-3 space-y-2">
-            <div className="h-12 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-              <I className="w-5 h-5 text-green-400" />
-            </div>
-            <div className="h-1.5 w-3/4 rounded bg-white/15" />
-            <div className="h-1.5 w-1/2 rounded bg-green-500/40" />
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* Floating SEO analytics dashboard */}
-    <div className="mt-5 rounded-2xl border border-green-500/20 bg-[#0f0f0f]/90 backdrop-blur-sm p-5 shadow-2xl">
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-[10px] font-mono uppercase tracking-widest text-green-400">SEO Analytics</span>
-        <BarChart3 className="w-4 h-4 text-green-500" />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        {analyticsStats.map((s) => (
-          <div key={s.label} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
-            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-zinc-500">
-              <s.icon className="w-3 h-3 text-green-500" />
-              {s.label}
-            </div>
-            <div className="text-lg font-extrabold text-white mt-1">{s.value}</div>
-            <div className="text-[11px] font-semibold text-green-400">{s.delta}</div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-3">
-        <div className="text-[10px] uppercase tracking-wide text-zinc-500 mb-2 flex items-center gap-1.5">
-          <Search className="w-3 h-3 text-green-500" /> Keyword Rankings
-        </div>
-        <ul className="space-y-1.5">
-          {keywordRankings.map((k) => (
-            <li key={k.kw} className="flex items-center justify-between text-xs">
-              <span className="text-zinc-400 truncate pr-2">{k.kw}</span>
-              <span className="shrink-0 px-1.5 py-0.5 rounded bg-green-500/15 text-green-400 font-mono font-bold">
-                #{k.pos}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  </div>
 );
 
 /* ================================= HERO ================================= */
@@ -250,554 +218,307 @@ const Hero = ({ onBook }: { onBook: () => void }) => (
 
     <div className="container mx-auto px-4 md:px-6 py-20 md:py-28 relative">
       <div className="grid lg:grid-cols-2 gap-14 items-center">
-        <div className="space-y-6 text-center lg:text-left">
+        <div className="space-y-7 text-center lg:text-left">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] font-display">
-            More Rankings. <span className="text-green-500">More Sales. More Customers.</span>
+            SEO Microsites Built to Rank. <span className="text-green-500">Managed to Grow.</span>
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-            SEO tools built inside your Microsite, designed to rank product keywords and generate consistent organic
-            sales.
+            Build a scalable SEO microsite infrastructure for your business, then keep it optimized, updated, and
+            expanding with ongoing management.
           </p>
-          <div className="flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-3 pt-2">
-            <Button size="lg" onClick={onBook} className="bg-green-600 hover:bg-green-500 text-white px-8">
-              Book our SEO services <ArrowRight className="w-4 h-4 ml-2" />
+
+          <div className="grid sm:grid-cols-2 gap-4 max-w-xl mx-auto lg:mx-0 text-left">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-green-400">
+                <Hammer className="w-3.5 h-3.5" /> One-Time Development
+              </div>
+              <p className="mt-2 text-sm text-zinc-300 font-semibold">Build your SEO microsite.</p>
+            </div>
+            <div className="rounded-2xl border border-green-500/25 bg-green-500/[0.06] p-5">
+              <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-green-400">
+                <RefreshCcw className="w-3.5 h-3.5" /> Monthly Management
+              </div>
+              <p className="mt-2 text-sm text-zinc-300 font-semibold">Operate and grow your SEO presence.</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-3 pt-1">
+            <Button size="lg" onClick={onBook} className="bg-green-600 hover:bg-green-500 text-white px-8 w-full sm:w-auto">
+              Start Your SEO Project <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
-            <a href="#pricing">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-green-500 text-green-500 hover:bg-green-500/10 px-8"
-              >
-                See Packages
-              </Button>
-            </a>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={onBook}
+              className="border-white/20 text-white hover:bg-white/10 w-full sm:w-auto"
+            >
+              Talk to Us About Management
+            </Button>
           </div>
         </div>
-        <StorefrontPreview />
+
+        <BuildManageVisual />
       </div>
     </div>
   </section>
 );
 
-/* ============================== BENEFITS ============================== */
-const benefits = [
-  {
-    icon: Search,
-    title: "Rank Product Keywords",
-    description:
-      "Every microsite targets a tight cluster of buyer-intent product keywords, with schema, internal linking, and on-page structure engineered to win page-one positions.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Increase Organic Traffic",
-    description:
-      "Instead of one site fighting for everything, dozens of focused microsites capture long-tail searches and compound your organic sessions month after month.",
-  },
-  {
-    icon: ShoppingCart,
-    title: "Sell More Products",
-    description:
-      "Each microsite is a conversion-first product page: fast, mobile-optimized, review-rich, and wired directly to your checkout or marketplace listing.",
-  },
-  {
-    icon: Rocket,
-    title: "Scale Your eCommerce Brand",
-    description:
-      "Add new SKUs, categories, and cities every month. Your microsite network grows into a durable organic acquisition channel you own outright.",
-  },
-];
-
-const Benefits = () => (
-  <section className="bg-white py-20 md:py-28 text-zinc-900">
-    <div className="container mx-auto px-4 md:px-6">
-      <div className="text-center max-w-3xl mx-auto mb-14">
-        <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          Built to Rank. <span className="text-green-600">Built to Sell.</span>
-        </h2>
-        <p className="text-zinc-500 text-base md:text-lg">
-          Product-focused microsites that turn Google Search into your most reliable sales channel.
-        </p>
+const BuildManageVisual = () => (
+  <div className="relative w-full max-w-md mx-auto">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-5 shadow-2xl">
+      <div className="flex items-center gap-2 mb-4">
+        <span className="w-2.5 h-2.5 rounded-full bg-red-400/70" />
+        <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" />
+        <span className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
+        <span className="ml-3 text-[10px] font-mono text-zinc-500 truncate">microsite.yourbrand.com</span>
       </div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {benefits.map((b) => (
-          <div
-            key={b.title}
-            className="bg-white rounded-2xl shadow-sm border border-zinc-100 p-6 space-y-4 hover:shadow-lg transition-shadow"
-          >
-            <div className="w-12 h-12 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center">
-              <b.icon className="w-6 h-6 text-green-600" />
+      <div className="grid grid-cols-3 gap-3">
+        {[Package, Layers, MapPin].map((I, i) => (
+          <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-3 space-y-2">
+            <div className="h-12 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+              <I className="w-5 h-5 text-green-400" aria-hidden />
             </div>
-            <h3 className="text-lg font-extrabold text-zinc-900">{b.title}</h3>
-            <p className="text-sm text-zinc-500 leading-relaxed">{b.description}</p>
+            <div className="h-1.5 w-3/4 rounded bg-white/15" />
+            <div className="h-1.5 w-1/2 rounded bg-green-500/40" />
           </div>
         ))}
       </div>
     </div>
-  </section>
+
+    <div className="mt-5 rounded-2xl border border-green-500/20 bg-[#0f0f0f]/90 backdrop-blur-sm p-5 shadow-2xl">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-[10px] font-mono uppercase tracking-widest text-green-400">Build → Launch → Manage → Grow</span>
+        <BarChart3 className="w-4 h-4 text-green-500" aria-hidden />
+      </div>
+      <ul className="space-y-3">
+        {[
+          { icon: Compass, label: "Strategy & architecture", tag: "Development" },
+          { icon: Code2, label: "Build & technical SEO setup", tag: "Development" },
+          { icon: Rocket, label: "Deployment & launch", tag: "Development" },
+          { icon: FileText, label: "Content publishing & new pages", tag: "Management" },
+          { icon: Gauge, label: "Monitoring, reporting, expansion", tag: "Management" },
+        ].map((row) => (
+          <li key={row.label} className="flex items-center justify-between gap-3 text-xs">
+            <span className="flex items-center gap-2 text-zinc-300">
+              <row.icon className="w-3.5 h-3.5 text-green-500 shrink-0" aria-hidden />
+              {row.label}
+            </span>
+            <span
+              className={`shrink-0 px-1.5 py-0.5 rounded font-mono text-[10px] ${
+                row.tag === "Development" ? "bg-white/10 text-zinc-300" : "bg-green-500/15 text-green-400"
+              }`}
+            >
+              {row.tag}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
 );
 
-/* ============================= SERVICES GRID ============================= */
-const services = [
-  {
-    icon: Layers,
-    title: "Microsite Builds",
-    tagline: "Product · Category · Location",
-    description:
-      "We design and publish conversion-ready microsites for each of your priority products and categories — fully indexed, schema-marked, and Core Web Vitals clean from day one.",
-    bullets: [
-      "Keyword-to-microsite mapping",
-      "Product schema & rich-result markup",
-      "Core Web Vitals optimized templates",
-      "Mobile-first conversion layouts",
-      "Direct checkout / marketplace linking",
-    ],
-  },
-  {
-    icon: FileSearch,
-    title: "Technical eCommerce SEO",
-    tagline: "Crawl · Index · Authority",
-    description:
-      "Behind every microsite is a technical foundation: clean crawl paths, canonical hygiene, structured data, and authority links that push product pages up the SERP.",
-    bullets: [
-      "Crawl & index audits per microsite",
-      "Canonical, hreflang & duplicate control",
-      "Internal link architecture",
-      "Authority link building & digital PR",
-      "Google Search Console monitoring",
-    ],
-  },
-  {
-    icon: Sparkles,
-    title: "Content & AI Search",
-    tagline: "Buyer Intent · AEO · Reviews",
-    description:
-      "Product copy, comparison content, and FAQ hubs written for shoppers and for AI answer engines, so your store is the cited recommendation in ChatGPT, Gemini, and Perplexity.",
-    bullets: [
-      "Buyer-intent product copywriting",
-      "Comparison & buying-guide content",
-      "FAQ hubs optimized for AI answers",
-      "Review & UGC schema integration",
-      "Monthly content refresh cycles",
-    ],
-  },
+/* =========================== SERVICE MODEL =========================== */
+const developmentFeatures = [
+  "SEO microsite strategy",
+  "Information architecture",
+  "Responsive web development",
+  "SEO-friendly page structure",
+  "Technical SEO configuration",
+  "On-page SEO foundations",
+  "Metadata configuration",
+  "Schema markup",
+  "Sitemap and indexing setup",
+  "Search engine integration",
+  "Analytics integration",
+  "Performance optimization",
+  "Initial microsite/page setup",
+  "Deployment and launch",
 ];
 
-const ServicesGrid = () => (
-  <section className="bg-zinc-50 py-20 md:py-28 text-zinc-900">
+const managementFeatures = [
+  "Ongoing SEO optimization",
+  "Content publishing",
+  "New SEO landing pages",
+  "Microsite expansion",
+  "Keyword-targeted page development",
+  "Internal linking optimization",
+  "Technical SEO monitoring",
+  "Indexation monitoring",
+  "Search Console monitoring",
+  "Metadata optimization",
+  "Schema maintenance",
+  "Content updates",
+  "Performance monitoring",
+  "SEO reporting",
+  "Continuous optimization",
+];
+
+const ServiceModel = ({ onBook }: { onBook: () => void }) => (
+  <section id="services" className="bg-white py-20 md:py-28 text-zinc-900">
     <div className="container mx-auto px-4 md:px-6">
       <div className="text-center max-w-3xl mx-auto mb-14">
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          Three Layers. <span className="text-green-600">One Organic Engine.</span>
+          Build Your SEO Microsite Infrastructure. <br className="hidden md:block" />
+          <span className="text-green-600">Then Let Us Manage and Grow It.</span>
         </h2>
         <p className="text-zinc-500 text-base md:text-lg">
-          Microsite builds, technical SEO, and buyer-intent content — managed end-to-end by Triotag.
+          Two distinct services. Development creates the infrastructure. Management operates, optimizes, and expands it.
         </p>
       </div>
-      <div className="grid md:grid-cols-3 gap-6">
-        {services.map((s) => {
-          const I = s.icon;
-          return (
-            <div
-              key={s.title}
-              className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden hover:shadow-lg transition-shadow p-6 space-y-5"
-            >
-              <div className="w-12 h-12 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center">
-                <I className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-xl font-extrabold text-zinc-900">{s.title}</h3>
-                <p className="text-sm font-semibold text-green-600 mt-1">{s.tagline}</p>
-              </div>
-              <p className="text-sm text-zinc-500 leading-relaxed">{s.description}</p>
-              <ul className="space-y-2">
-                {s.bullets.map((b) => (
-                  <li key={b} className="flex items-start gap-2 text-sm text-zinc-700">
-                    <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
+
+      <div className="grid lg:grid-cols-2 gap-6 max-w-6xl mx-auto items-start">
+        {/* CARD 1 — DEVELOPMENT */}
+        <article className="rounded-3xl border border-zinc-200 bg-white p-8 md:p-10 space-y-6 shadow-sm">
+          <div className="space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 text-white text-[11px] font-bold uppercase tracking-widest">
+              <Hammer className="w-3.5 h-3.5" /> One-Time Project
+            </span>
+            <h3 className="text-2xl md:text-3xl font-extrabold text-zinc-900">SEO Microsite Development</h3>
+            <p className="text-zinc-500 leading-relaxed">
+              We design and develop the SEO microsite infrastructure your business needs to target search demand, create
+              scalable landing pages, and establish a strong technical SEO foundation.
+            </p>
+            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+              <div className="text-xs uppercase tracking-widest text-zinc-500 font-bold">One-Time Project</div>
+              <div className="text-2xl font-extrabold text-zinc-900 mt-1">Custom project pricing</div>
+              <p className="text-xs text-zinc-500 mt-1">
+                Charged once as a project — this is not a monthly subscription.
+              </p>
             </div>
-          );
-        })}
+          </div>
+          <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
+            {developmentFeatures.map((f) => (
+              <li key={f} className="flex items-start gap-2 text-sm text-zinc-700">
+                <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-zinc-400" aria-hidden />
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+          <Button onClick={onBook} className="w-full bg-zinc-900 hover:bg-zinc-800 text-white">
+            Build My SEO Microsite <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </article>
+
+        {/* CARD 2 — MANAGEMENT */}
+        <article className="rounded-3xl border border-green-500 ring-1 ring-green-500 bg-white p-8 md:p-10 space-y-6 shadow-lg shadow-green-500/10">
+          <div className="space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-600 text-white text-[11px] font-bold uppercase tracking-widest">
+              <RefreshCcw className="w-3.5 h-3.5" /> Monthly Service
+            </span>
+            <h3 className="text-2xl md:text-3xl font-extrabold text-zinc-900">SEO Microsite Management</h3>
+            <p className="text-zinc-500 leading-relaxed">
+              Keep your SEO microsite active, optimized, updated, and expanding with continuous SEO and content
+              management.
+            </p>
+            <div className="rounded-2xl border border-green-100 bg-green-50 p-4">
+              <div className="text-xs uppercase tracking-widest text-green-700 font-bold">Monthly Service</div>
+              <div className="text-2xl font-extrabold text-zinc-900 mt-1">Custom monthly pricing</div>
+              <p className="text-xs text-zinc-500 mt-1">Billed monthly and recurring — this is not a one-time package.</p>
+            </div>
+          </div>
+          <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
+            {managementFeatures.map((f) => (
+              <li key={f} className="flex items-start gap-2 text-sm text-zinc-700">
+                <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-green-600" aria-hidden />
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+          <Button onClick={onBook} className="w-full bg-green-600 hover:bg-green-500 text-white">
+            Start SEO Management <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </article>
       </div>
     </div>
   </section>
 );
 
-/* ========================= AI SEO ENGINE ========================= */
-
-const aiFeatures = [
-  {
-    icon: Sparkles,
-    title: "AI Content Generation",
-    tagline: "Copy · Outlines · FAQs",
-    description:
-      "AI writes product copy, meta titles and descriptions, and FAQ content tuned for both real shoppers and AI search engines — then keeps it fresh as your catalog changes.",
-    bullets: [
-      "SEO title & meta description generation",
-      "Auto-generated FAQ blocks",
-      "Outline & H1/H2 structure generation",
-      "Rewrite, expand & shorten tools",
-    ],
-  },
-  {
-    icon: Gauge,
-    title: "Live AI SEO Scoring",
-    tagline: "Real-Time · 0-100 Score",
-    description:
-      "Every microsite page is scored in real time against title, meta, headings, keyword placement, readability, and internal linking — with actionable fixes surfaced instantly.",
-    bullets: [
-      "Real-time 0-100 SEO score",
-      "Keyword density & placement checks",
-      "Readability & structure analysis",
-      "Actionable fix recommendations",
-    ],
-  },
-  {
-    icon: Search,
-    title: "AI Keyword & Competitor Research",
-    tagline: "Intent · Gaps · Trends",
-    description:
-      "AI surfaces primary, secondary, and long-tail keywords, classifies search intent, and maps content gaps against the competitors currently ranking above you.",
-    bullets: [
-      "Primary & long-tail keyword discovery",
-      "Search intent classification",
-      "Competitor content gap analysis",
-      "Trending topic surfacing",
-    ],
-  },
-  {
-    icon: Braces,
-    title: "Automated Schema & Rich Results",
-    tagline: "Structured Data · Auto-Generated",
-    description:
-      "Product, FAQ, Review, and Article schema is generated automatically for every microsite, so your pages qualify for rich results without anyone hand-writing markup.",
-    bullets: [
-      "Auto-generated Product/FAQ/Review schema",
-      "Rich snippet eligibility checks",
-      "Breadcrumb & Organization markup",
-      "Validated structured data on every page",
-    ],
-  },
-];
-
-const AiSeoEngine = () => (
-  <section className="bg-white py-20 md:py-28 text-zinc-900">
+/* ============================ PRICING MODELS ============================ */
+const Pricing = () => (
+  <section id="pricing" className="bg-zinc-50 py-20 md:py-28 text-zinc-900">
     <div className="container mx-auto px-4 md:px-6">
-      <div className="text-center max-w-3xl mx-auto mb-14">
+      <div className="text-center max-w-3xl mx-auto mb-12">
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          Built On An <span className="text-green-600">AI SEO Engine</span>
+          Two Service Models, <span className="text-green-600">Not Pricing Tiers</span>
         </h2>
         <p className="text-zinc-500 text-base md:text-lg">
-          Every microsite is optimized continuously by AI — scored, rewritten, and re-marked up as search shifts, not
-          just built once and left behind.
+          Pricing follows scope, not arbitrary quantities. We quote the development project and the monthly management
+          service separately.
         </p>
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {aiFeatures.map((s) => {
-          const I = s.icon;
-          return (
-            <div
-              key={s.title}
-              className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden hover:shadow-lg transition-shadow p-6 space-y-5"
-            >
-              <div className="w-12 h-12 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center">
-                <I className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-xl font-extrabold text-zinc-900">{s.title}</h3>
-                <p className="text-sm font-semibold text-green-600 mt-1">{s.tagline}</p>
-              </div>
-              <p className="text-sm text-zinc-500 leading-relaxed">{s.description}</p>
-              <ul className="space-y-2">
-                {s.bullets.map((b) => (
-                  <li key={b} className="flex items-start gap-2 text-sm text-zinc-700">
-                    <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        })}
+      <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center space-y-2">
+          <div className="text-xs font-bold uppercase tracking-widest text-zinc-500">One-Time Project</div>
+          <h3 className="text-xl font-extrabold">SEO Microsite Development</h3>
+          <div className="text-3xl font-extrabold text-zinc-900 pt-2">Custom Quote</div>
+          <p className="text-sm text-zinc-500">Custom project pricing based on scope, structure, and integrations.</p>
+        </div>
+        <div className="rounded-2xl border border-green-500 bg-white p-8 text-center space-y-2 ring-1 ring-green-500">
+          <div className="text-xs font-bold uppercase tracking-widest text-green-700">Monthly Service</div>
+          <h3 className="text-xl font-extrabold">SEO Microsite Management</h3>
+          <div className="text-3xl font-extrabold text-zinc-900 pt-2">Custom Quote</div>
+          <p className="text-sm text-zinc-500">Custom monthly pricing based on optimization and expansion workload.</p>
+        </div>
       </div>
     </div>
   </section>
 );
 
-/* ========================= HOW MICROSITES WORK ========================= */
-const microsteFlow = [
-  { icon: Search, label: "Buyer searches a product keyword" },
-  { icon: Globe, label: "Your microsite ranks on page one" },
-  { icon: Zap, label: "Fast, conversion-first product page", isCenter: true },
-  { icon: ShoppingCart, label: "Shopper adds to cart" },
-  { icon: TrendingUp, label: "Consistent organic revenue" },
-];
-
-const networkFeatures = [
+/* ============================== HOW IT WORKS ============================== */
+const steps = [
   {
-    icon: Package,
-    title: "One Microsite Per Product Cluster",
-    description: "Focused pages beat bloated catalogs — each site owns a single tight keyword theme.",
+    n: "01",
+    title: "Plan",
+    icon: Compass,
+    desc: "We identify your business, search opportunities, target audiences, site structure, and SEO requirements.",
+    optional: false,
   },
   {
-    icon: Users,
-    title: "Buyer-Intent Traffic Only",
-    description: "We target transactional queries, not vanity terms, so visitors arrive ready to purchase.",
+    n: "02",
+    title: "Build",
+    icon: Code2,
+    desc: "We design and develop the SEO microsite infrastructure and configure the technical SEO foundation.",
+    optional: false,
   },
   {
-    icon: BarChart3,
-    title: "Live Ranking Dashboards",
-    description: "Track positions, organic visitors, orders, and revenue per microsite in real time.",
+    n: "03",
+    title: "Manage & Grow",
+    icon: Repeat,
+    desc: "After launch, our monthly management service keeps the microsite optimized, updated, and expanding.",
+    optional: true,
   },
-  {
-    icon: ShieldCheck,
-    title: "White-Hat & Durable",
-    description: "No spam tactics. Clean technical builds and real content that survive core updates.",
-  },
-];
-
-const trustBadges = [
-  { icon: Search, label: "Product Keyword Focus" },
-  { icon: CheckCircle2, label: "Conversion-Ready Builds" },
-  { icon: ShieldCheck, label: "Transparent Reporting" },
-  { icon: TrendingUp, label: "Compounding Organic Growth" },
 ];
 
 const HowItWorks = () => (
-  <section className="relative bg-[#0c0c0c] text-white overflow-hidden border-t border-white/5">
-    <div className="absolute inset-0 bg-grid-dark opacity-20 pointer-events-none" />
-    <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-green-500/10 rounded-full blur-[130px] pointer-events-none" />
-    <div className="container mx-auto px-4 md:px-6 py-20 md:py-28 relative">
-      <div className="grid lg:grid-cols-2 gap-14 items-center mb-24">
-        <div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1] font-display mb-4">
-            Own page one. <span className="text-green-500">For every product you sell.</span>
-          </h2>
-          <span className="inline-block text-xs font-semibold tracking-wider uppercase text-green-400 mb-4">
-            The Microsite Network Model
-          </span>
-          <p className="text-zinc-400 leading-relaxed mb-10 max-w-xl">
-            A single store page can only rank for so much. We build a network of focused microsites — each engineered
-            around one product keyword cluster — so your brand occupies more of the search results and captures demand
-            your competitors miss.
-          </p>
-          <div className="space-y-7">
-            {benefits.slice(0, 3).map((f) => (
-              <div key={f.title} className="flex gap-4">
-                <div className="shrink-0 w-11 h-11 rounded-xl bg-green-500/10 border border-green-500/30 flex items-center justify-center">
-                  <f.icon className="w-5 h-5 text-green-500" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-white mb-1">{f.title}</h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">{f.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-4">
-          <div className="text-[10px] font-mono uppercase tracking-widest text-green-400">Live SERP Snapshot</div>
-          {keywordRankings.map((k) => (
-            <div key={k.kw} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-zinc-200 truncate pr-3">{k.kw}</span>
-                <span className="shrink-0 text-xs font-mono font-bold text-green-400 bg-green-500/15 px-2 py-0.5 rounded">
-                  #{k.pos}
-                </span>
-              </div>
-              <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-green-500 transition-all"
-                  style={{ width: `${100 - (k.pos - 1) * 15}%` }}
-                />
-              </div>
-            </div>
-          ))}
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            {analyticsStats.slice(0, 2).map((s) => (
-              <div key={s.label} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                <div className="text-[10px] uppercase tracking-wide text-zinc-500">{s.label}</div>
-                <div className="text-lg font-extrabold text-white">{s.value}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-8 md:p-10 mb-16">
-        <p className="text-center text-xs font-semibold tracking-widest uppercase text-green-400 mb-8">
-          From Search Query to Sale
-        </p>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {microsteFlow.map((step, i) => (
-            <div key={step.label} className="flex items-center gap-6">
-              <div className="flex flex-col items-center text-center gap-3 w-28">
-                <div
-                  className={`w-14 h-14 rounded-full flex items-center justify-center border ${
-                    step.isCenter
-                      ? "bg-green-500 border-green-400 shadow-[0_0_25px_rgba(34,197,94,0.5)]"
-                      : "bg-white/5 border-white/10"
-                  }`}
-                >
-                  <step.icon className={`w-6 h-6 ${step.isCenter ? "text-black" : "text-green-500"}`} />
-                </div>
-                <span className={`text-xs leading-tight ${step.isCenter ? "text-white font-bold" : "text-zinc-400"}`}>
-                  {step.label}
-                </span>
-              </div>
-              {i < microsteFlow.length - 1 && <ArrowRight className="hidden md:block w-4 h-4 text-zinc-600 shrink-0" />}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-        {networkFeatures.map((f) => (
-          <div
-            key={f.title}
-            className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-green-500/30 transition-colors"
-          >
-            <div className="w-11 h-11 rounded-xl bg-green-500/10 border border-green-500/30 flex items-center justify-center mb-4">
-              <f.icon className="w-5 h-5 text-green-500" />
-            </div>
-            <h3 className="font-bold text-white mb-2">{f.title}</h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">{f.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-8 pt-10 border-t border-white/10">
-        <div className="text-center lg:text-left">
-          <h3 className="text-2xl font-extrabold">
-            Rank more products. <span className="text-green-500">Sell more online.</span>
-          </h3>
-          <p className="text-zinc-400 mt-2 max-w-md">
-            Build an organic sales channel you own — no ad spend required to keep it running.
-          </p>
-        </div>
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-4">
-          {trustBadges.map((b) => (
-            <div key={b.label} className="flex items-center gap-2 text-sm text-zinc-400">
-              <b.icon className="w-4 h-4 text-green-500 shrink-0" />
-              {b.label}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
-);
-
-/* ============================= PRICING ============================= */
-const packages = [
-  {
-    name: "Starter",
-    price: "₱49,888",
-    period: "\n",
-    volume: "15 SEO Microsites",
-    description: "For growing online stores publishing their first product-keyword microsite network.",
-    features: [
-      "15 SEO microsites per month",
-      "Keyword-to-product mapping",
-      "Product schema & rich results",
-      "Core Web Vitals optimized builds",
-      "Monthly ranking & traffic report",
-    ],
-    cta: "Get Started",
-    highlight: false,
-  },
-  {
-    name: "Growth",
-    price: "₱89,888",
-    period: "\n",
-    volume: "50 SEO Microsites",
-    description: "For eCommerce brands scaling category coverage and organic order volume.",
-    features: [
-      "50 SEO microsites per month",
-      "Full technical SEO audit + fixes",
-      "Buying-guide & comparison content",
-      "Authority link building",
-      "AEO optimization for AI answers",
-      "Bi-weekly reporting & strategy calls",
-    ],
-    cta: "Book a Call",
-    highlight: true,
-  },
-  {
-    name: "Enterprise",
-    price: "₱189,888",
-    period: "\n",
-    volume: "100 SEO Microsites",
-    description: "Category-domination scale for multi-SKU retailers and marketplace sellers.",
-    features: [
-      "100 SEO microsites per month",
-      "Multi-brand & multi-city coverage",
-      "Advanced entity & AEO optimization",
-      "Digital PR & premium link placements",
-      "Dedicated SEO strategist",
-      "Weekly reporting & live dashboard",
-    ],
-    cta: "Talk to Sales",
-    highlight: false,
-  },
-];
-
-const Pricing = () => (
-  <section id="pricing" className="bg-white py-20 md:py-28 text-zinc-900">
+  <section className="bg-[#0c0c0c] py-20 md:py-28 text-white">
     <div className="container mx-auto px-4 md:px-6">
       <div className="text-center max-w-3xl mx-auto mb-14">
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          Microsite Packages, <span className="text-green-600">Transparent Pricing</span>
+          How It <span className="text-green-500">Works</span>
         </h2>
-        <p className="text-zinc-500 text-base md:text-lg">
-          Flat monthly fees based on microsite volume. Hosting, content, and technical SEO included — no hidden
-          commissions.
-        </p>
+        <p className="text-zinc-400 text-base md:text-lg">Build → Launch → Manage → Grow.</p>
       </div>
       <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        {packages.map((pkg) => (
+        {steps.map((s) => (
           <div
-            key={pkg.name}
-            className={`rounded-2xl border p-8 space-y-6 ${
-              pkg.highlight
-                ? "border-green-500 bg-white shadow-lg shadow-green-500/10 ring-1 ring-green-500"
-                : "border-zinc-200 bg-white"
+            key={s.n}
+            className={`rounded-2xl border p-8 space-y-4 ${
+              s.optional ? "border-green-500/40 bg-green-500/[0.06]" : "border-white/10 bg-white/[0.02]"
             }`}
           >
-            <div className="space-y-2">
-              <h3 className="text-xl font-extrabold text-zinc-900">{pkg.name}</h3>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold text-zinc-900">{pkg.price}</span>
-                <span className="text-sm text-zinc-500 whitespace-pre-line">{pkg.period}</span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 border border-green-100 text-xs font-semibold text-green-700">
-                <Layers className="w-3.5 h-3.5" /> {pkg.volume}
-              </div>
-              <p className="text-sm text-zinc-500 leading-relaxed">{pkg.description}</p>
+            <div className="flex items-center justify-between">
+              <span className={`font-mono text-3xl font-extrabold ${s.optional ? "text-green-400" : "text-zinc-600"}`}>
+                {s.n}
+              </span>
+              <s.icon className="w-5 h-5 text-green-500" aria-hidden />
             </div>
-            <ul className="space-y-3">
-              {pkg.features.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-zinc-700">
-                  <CheckCircle2
-                    className={`w-4 h-4 mt-0.5 shrink-0 ${pkg.highlight ? "text-green-600" : "text-zinc-400"}`}
-                  />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-            <Link to="/contact" className="block">
-              <Button
-                className={`w-full ${
-                  pkg.highlight
-                    ? "bg-green-600 hover:bg-green-500 text-white"
-                    : "bg-zinc-900 hover:bg-zinc-800 text-white"
-                }`}
-              >
-                {pkg.cta}
-              </Button>
-            </Link>
+            <h3 className="text-xl font-extrabold">{s.title}</h3>
+            <p className="text-sm text-zinc-400 leading-relaxed">{s.desc}</p>
+            {s.optional && (
+              <span className="inline-flex px-2.5 py-1 rounded-full bg-green-500/15 text-green-400 text-[11px] font-bold uppercase tracking-widest">
+                Optional — recommended for ongoing growth
+              </span>
+            )}
           </div>
         ))}
       </div>
@@ -805,114 +526,188 @@ const Pricing = () => (
   </section>
 );
 
-/* ============================= CASE STUDIES ============================= */
-const caseStudies = [
-  {
-    metric: "+312%",
-    label: "Organic Revenue",
-    title: "Footwear Retailer — 60 Microsites",
-    desc: "Mapped 60 buyer-intent product keywords to dedicated microsites with product schema and review markup. Organic revenue tripled in 5 months without any additional ad spend.",
-    tags: ["Microsites", "Product Schema", "Rich Results"],
-  },
-  {
-    metric: "+186%",
-    label: "Organic Traffic",
-    title: "Beauty Brand — Category Clusters",
-    desc: "Built category and comparison microsites around 40 long-tail skincare queries, fixed Core Web Vitals, and launched buying guides. Organic sessions nearly tripled within 6 months.",
-    tags: ["Technical SEO", "Content", "Core Web Vitals"],
-  },
-  {
-    metric: "4.7%",
-    label: "Conversion Rate",
-    title: "Home Goods Store — Conversion Rebuild",
-    desc: "Rebuilt 25 product microsites with faster mobile templates, trust signals, and one-tap checkout links. Conversion rate rose from 1.8% to 4.7% on the same traffic.",
-    tags: ["CRO", "Mobile", "Checkout"],
-  },
-];
-
-const CaseStudies = () => (
-  <section className="bg-zinc-50 py-20 md:py-28 text-zinc-900">
-    <div className="container mx-auto px-4 md:px-6">
-      <div className="text-center max-w-3xl mx-auto mb-14">
-        <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          Results That <span className="text-green-600">Speak</span>
-        </h2>
-        <p className="text-zinc-500 text-base md:text-lg">
-          Recent eCommerce wins across rankings, organic traffic, and online sales.
-        </p>
-      </div>
-      <div className="grid md:grid-cols-3 gap-6">
-        {caseStudies.map((cs) => (
-          <div
-            key={cs.title}
-            className="bg-white rounded-2xl border border-zinc-100 p-8 space-y-5 hover:shadow-lg transition-shadow"
-          >
-            <div className="space-y-1">
-              <div className="text-4xl font-extrabold text-green-600">{cs.metric}</div>
-              <div className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">{cs.label}</div>
-            </div>
-            <h3 className="text-lg font-bold text-zinc-900">{cs.title}</h3>
-            <p className="text-sm text-zinc-500 leading-relaxed">{cs.desc}</p>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {cs.tags.map((t) => (
-                <span
-                  key={t}
-                  className="px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium border border-green-100"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-/* ============================= TESTIMONIALS ============================= */
-const testimonials = [
-  {
-    quote:
-      "We went from invisible to page one for our best-selling SKUs. The microsites now bring in more orders than our paid campaigns ever did.",
-    name: "Marielle Santos",
-    role: "Founder, Luxe Skincare PH",
-  },
-  {
-    quote:
-      "Triotag's microsite network gave us organic coverage across 80 product keywords. Monthly orders more than doubled in one quarter.",
-    name: "Dan Villanueva",
-    role: "eCommerce Head, UrbanFit Gear",
-  },
-  {
-    quote:
-      "Clear reporting, real rankings, real revenue. It's the first SEO engagement where I could actually trace sales back to the work.",
-    name: "Karla Reyes",
-    role: "Marketing Director, HomeNest",
-  },
-];
-
-const Testimonials = () => (
+/* ======================= DEVELOPMENT VS MANAGEMENT ======================= */
+const Comparison = () => (
   <section className="bg-white py-20 md:py-28 text-zinc-900">
     <div className="container mx-auto px-4 md:px-6">
       <div className="text-center max-w-3xl mx-auto mb-14">
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          What eCommerce <span className="text-green-600">Brands Say</span>
+          Build Once. <span className="text-green-600">Grow Continuously.</span>
         </h2>
       </div>
-      <div className="grid md:grid-cols-3 gap-6">
-        {testimonials.map((t) => (
-          <figure
-            key={t.name}
-            className="rounded-2xl border border-zinc-100 bg-zinc-50 p-8 space-y-5 hover:shadow-lg transition-shadow"
+      <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-8 space-y-5">
+          <div className="space-y-2">
+            <span className="inline-flex px-2.5 py-1 rounded-full bg-zinc-900 text-white text-[11px] font-bold uppercase tracking-widest">
+              One-Time
+            </span>
+            <h3 className="text-xl font-extrabold">SEO Microsite Development</h3>
+            <p className="text-sm text-zinc-500">
+              <span className="font-semibold text-zinc-700">Purpose:</span> Build the infrastructure.
+            </p>
+          </div>
+          <ul className="space-y-2">
+            {["Strategy", "Design", "Development", "Technical SEO", "Initial configuration", "Deployment", "Launch"].map(
+              (i) => (
+                <li key={i} className="flex items-center gap-2 text-sm text-zinc-700">
+                  <CheckCircle2 className="w-4 h-4 text-zinc-400 shrink-0" aria-hidden /> {i}
+                </li>
+              ),
+            )}
+          </ul>
+        </div>
+        <div className="rounded-2xl border border-green-500 bg-white p-8 space-y-5 ring-1 ring-green-500">
+          <div className="space-y-2">
+            <span className="inline-flex px-2.5 py-1 rounded-full bg-green-600 text-white text-[11px] font-bold uppercase tracking-widest">
+              Monthly
+            </span>
+            <h3 className="text-xl font-extrabold">SEO Microsite Management</h3>
+            <p className="text-sm text-zinc-500">
+              <span className="font-semibold text-zinc-700">Purpose:</span> Operate and grow the infrastructure.
+            </p>
+          </div>
+          <ul className="space-y-2">
+            {[
+              "SEO optimization",
+              "Content",
+              "New pages",
+              "Technical monitoring",
+              "Indexation",
+              "Internal linking",
+              "Performance",
+              "Reporting",
+              "Continuous growth",
+            ].map((i) => (
+              <li key={i} className="flex items-center gap-2 text-sm text-zinc-700">
+                <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" aria-hidden /> {i}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+/* ============================ WHY SEO MICROSITES ============================ */
+const intents = [
+  "Products",
+  "Categories",
+  "Locations",
+  "Services",
+  "Brands",
+  "Topics",
+  "Customer intent",
+  "Commercial search queries",
+];
+
+const WhyMicrosites = () => (
+  <section className="bg-zinc-50 py-20 md:py-28 text-zinc-900">
+    <div className="container mx-auto px-4 md:px-6 max-w-5xl">
+      <div className="text-center max-w-3xl mx-auto mb-12">
+        <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
+          Turn Search Demand Into <span className="text-green-600">Scalable Digital Assets.</span>
+        </h2>
+        <p className="text-zinc-500 text-base md:text-lg">
+          SEO microsites let you build focused search experiences around the things your customers actually search for.
+          The value comes from creating a structured, scalable SEO ecosystem — not simply building one more website page.
+        </p>
+      </div>
+      <div className="flex flex-wrap justify-center gap-3">
+        {intents.map((i) => (
+          <span
+            key={i}
+            className="px-4 py-2 rounded-full border border-zinc-200 bg-white text-sm font-semibold text-zinc-700"
           >
-            <Quote className="w-7 h-7 text-green-600" />
-            <blockquote className="text-sm text-zinc-700 leading-relaxed">“{t.quote}”</blockquote>
-            <figcaption>
-              <div className="font-bold text-zinc-900 text-sm">{t.name}</div>
-              <div className="text-xs text-zinc-500">{t.role}</div>
-            </figcaption>
-          </figure>
+            {i}
+          </span>
+        ))}
+      </div>
+      <p className="text-center text-xs text-zinc-400 mt-8 max-w-2xl mx-auto">
+        Outcomes vary. SEO performance depends on competition, demand, content, authority, and technical factors — we do
+        not promise guaranteed rankings.
+      </p>
+    </div>
+  </section>
+);
+
+/* ============================== WHAT WE BUILD ============================== */
+const buildTypes = [
+  { icon: Package, title: "Product Microsites", desc: "Focused experiences around specific products." },
+  { icon: Layers, title: "Category Microsites", desc: "Search-focused category and collection pages." },
+  { icon: MapPin, title: "Location Microsites", desc: "Location-specific landing experiences." },
+  { icon: Wrench, title: "Service Microsites", desc: "Focused pages targeting specific services and search intent." },
+  { icon: FileText, title: "Content Microsites", desc: "Structured editorial/content experiences." },
+  {
+    icon: ShoppingCart,
+    title: "Commerce SEO Microsites",
+    desc: "SEO-focused experiences supporting eCommerce discovery and conversion.",
+  },
+];
+
+const WhatWeBuild = () => (
+  <section className="bg-[#0c0c0c] py-20 md:py-28 text-white">
+    <div className="container mx-auto px-4 md:px-6">
+      <div className="text-center max-w-3xl mx-auto mb-14">
+        <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
+          What We <span className="text-green-500">Build</span>
+        </h2>
+        <p className="text-zinc-400 text-base md:text-lg">
+          Microsite structures designed around real search behavior.
+        </p>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
+        {buildTypes.map((b) => (
+          <div key={b.title} className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-3 glass-hover transition-all">
+            <div className="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+              <b.icon className="w-5 h-5 text-green-400" aria-hidden />
+            </div>
+            <h3 className="text-lg font-extrabold">{b.title}</h3>
+            <p className="text-sm text-zinc-400 leading-relaxed">{b.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+/* =========================== ONGOING MANAGEMENT =========================== */
+const managementWork = [
+  { icon: Search, label: "Identifying new search opportunities" },
+  { icon: FileText, label: "Creating new pages" },
+  { icon: Gauge, label: "Optimizing existing pages" },
+  { icon: RefreshCcw, label: "Updating content" },
+  { icon: Globe, label: "Improving internal linking" },
+  { icon: BarChart3, label: "Monitoring indexation" },
+  { icon: Wrench, label: "Monitoring technical SEO" },
+  { icon: LineChart, label: "Reviewing Search Console data" },
+  { icon: Code2, label: "Improving metadata" },
+  { icon: Layers, label: "Expanding topical coverage" },
+  { icon: Compass, label: "Analyzing performance" },
+  { icon: CheckCircle2, label: "Producing reports" },
+];
+
+const OngoingManagement = () => (
+  <section className="bg-white py-20 md:py-28 text-zinc-900">
+    <div className="container mx-auto px-4 md:px-6">
+      <div className="text-center max-w-3xl mx-auto mb-14">
+        <span className="inline-flex px-3 py-1 rounded-full bg-green-600 text-white text-[11px] font-bold uppercase tracking-widest mb-4">
+          Monthly Service
+        </span>
+        <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
+          Your Microsite Should Keep <span className="text-green-600">Growing After Launch.</span>
+        </h2>
+        <p className="text-zinc-500 text-base md:text-lg">
+          SEO is not finished when the website goes live. Monthly management is a real operating service — continuous
+          optimization and expansion, not maintenance.
+        </p>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+        {managementWork.map((m) => (
+          <div key={m.label} className="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+            <m.icon className="w-4 h-4 text-green-600 shrink-0" aria-hidden />
+            <span className="text-sm font-semibold text-zinc-700">{m.label}</span>
+          </div>
         ))}
       </div>
     </div>
@@ -920,33 +715,6 @@ const Testimonials = () => (
 );
 
 /* ================================= FAQ ================================= */
-const faqs = [
-  {
-    q: "What exactly is an eCommerce SEO microsite?",
-    a: "A microsite is a focused, standalone web page or small site built around one product keyword cluster. It carries conversion-first design, product schema, and buyer-intent content, and links directly to your checkout or marketplace listing.",
-  },
-  {
-    q: "How is this different from optimizing my existing store?",
-    a: "We still fix your core store's technical SEO, but a single catalog can only rank for a limited set of terms. Microsites let you cover many more long-tail, high-intent queries in parallel, so your brand occupies more of the search results.",
-  },
-  {
-    q: "How long before I see rankings and sales?",
-    a: "Most clients see first-page movement on long-tail product keywords within 6 to 10 weeks, with meaningful organic order volume building from month three onward as the microsite network compounds.",
-  },
-  {
-    q: "Do you write the product content?",
-    a: "Yes. Every package includes buyer-intent product copy, comparison content, and FAQ sections written for shoppers and for AI answer engines like ChatGPT, Gemini, and Perplexity.",
-  },
-  {
-    q: "Is hosting included in the monthly fee?",
-    a: "Yes. Hosting, maintenance, performance monitoring, and Core Web Vitals upkeep for every microsite are included in your monthly package.",
-  },
-  {
-    q: "Can I use this with Shopify, WooCommerce, or Lazada and Shopee?",
-    a: "Absolutely. Microsites are platform-agnostic. We route traffic to whichever storefront, product page, or marketplace listing converts best for you.",
-  },
-];
-
 const FAQ = () => (
   <section className="bg-zinc-50 py-20 md:py-28 text-zinc-900">
     <div className="container mx-auto px-4 md:px-6 max-w-3xl">
@@ -967,62 +735,31 @@ const FAQ = () => (
   </section>
 );
 
-/* ============================= WHY US ============================= */
-const whyItems = [
-  { icon: Search, label: "Buyer-Intent Keyword Focus" },
-  { icon: BarChart3, label: "Data-Driven Decisions" },
-  { icon: Globe, label: "Local & National Coverage" },
-  { icon: Zap, label: "Fast Microsite Turnaround" },
-  { icon: Users, label: "Dedicated SEO Strategist" },
-  { icon: Award, label: "Proven Track Record" },
-];
-
-const WhyUs = () => (
-  <section className="bg-[#0c0c0c] py-20 md:py-28 text-white">
-    <div className="container mx-auto px-4 md:px-6">
-      <div className="text-center max-w-3xl mx-auto mb-14">
-        <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          Why Brands Choose <span className="text-green-500">Triotag</span>
-        </h2>
-        <p className="text-zinc-400 text-base md:text-lg">
-          We combine retail commerce expertise with technical SEO precision and organic search authority.
-        </p>
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-        {whyItems.map((it) => {
-          const I = it.icon;
-          return (
-            <div
-              key={it.label}
-              className="text-center space-y-3 p-6 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-            >
-              <div className="w-12 h-12 mx-auto rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-                <I className="w-5 h-5 text-green-400" />
-              </div>
-              <div className="text-sm font-semibold text-zinc-200 leading-tight">{it.label}</div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  </section>
-);
-
-/* ============================= FINAL CTA ============================= */
+/* ================================ FINAL CTA ================================ */
 const FinalCTA = ({ onBook }: { onBook: () => void }) => (
-  <section className="bg-zinc-50 py-20 md:py-28 text-zinc-900">
-    <div className="container mx-auto px-4 md:px-6">
+  <section className="relative bg-[#0c0c0c] py-20 md:py-28 text-white overflow-hidden">
+    <div className="absolute inset-0 bg-grid-dark opacity-20 pointer-events-none" />
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-green-500/10 rounded-full blur-[140px]" />
+    <div className="container mx-auto px-4 md:px-6 relative">
       <div className="max-w-3xl mx-auto text-center space-y-6">
         <h2 className="text-3xl md:text-5xl font-extrabold">
-          Ready to Own the <span className="text-green-600">Search Results?</span>
+          Build Your SEO Microsite. <span className="text-green-500">Then Keep Growing It.</span>
         </h2>
-        <p className="text-zinc-500 text-base md:text-lg max-w-xl mx-auto">
-          Book a free 30-minute SEO audit. We'll review your product keywords, rankings, and organic sales potential —
-          then map the microsite network to get you there.
+        <p className="text-zinc-400 text-base md:text-lg leading-relaxed">
+          Whether you need the initial microsite development or an ongoing partner to manage and expand it, TRIOTAG can
+          build the infrastructure and help turn it into a continuously growing SEO asset.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <Button size="lg" onClick={onBook} className="bg-green-600 hover:bg-green-500 text-white px-8">
-            Get a Free SEO Audit <ArrowRight className="w-4 h-4 ml-2" />
+          <Button size="lg" onClick={onBook} className="bg-green-600 hover:bg-green-500 text-white px-8 w-full sm:w-auto">
+            Start a Development Project <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={onBook}
+            className="border-white/20 text-white hover:bg-white/10 w-full sm:w-auto"
+          >
+            Ask About Monthly Management
           </Button>
         </div>
       </div>
@@ -1031,7 +768,11 @@ const FinalCTA = ({ onBook }: { onBook: () => void }) => (
 );
 
 /* ============================= BOOKING WIZARD ============================= */
-const SERVICE_OPTIONS = ["eCommerce SEO Microsites", "Technical eCommerce SEO", "Content & AI Search (AEO)"];
+const SERVICE_OPTIONS = [
+  "SEO Microsite Development (one-time project)",
+  "SEO Microsite Management (monthly service)",
+  "Both — Development then Management",
+];
 
 const BUDGET_OPTIONS = ["Under ₱50,000", "₱50,000 – ₱100,000", "₱100,000 – ₱200,000", "₱200,000+"];
 
@@ -1125,7 +866,7 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl bg-[#0c0c0c] border-white/10 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-white">{submitted ? "Audit Request Sent" : "Get a Free SEO Audit"}</DialogTitle>
+          <DialogTitle className="text-white">{submitted ? "Request Sent" : "Start Your SEO Microsite Project"}</DialogTitle>
           <DialogDescription className="text-zinc-400">
             {submitted ? "Thanks — we'll be in touch within 1 business day." : `Step ${step} of 4`}
           </DialogDescription>
@@ -1139,7 +880,7 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
               <CheckCircle2 className="w-8 h-8 text-green-500" />
             </div>
             <p className="text-zinc-300">
-              Your audit request has been sent to our team. We'll reach out to{" "}
+              Your request has been sent to our team. We'll reach out to{" "}
               <span className="text-green-400 font-semibold">{form.contactEmail}</span> within 1 business day.
             </p>
             <Button onClick={() => handleOpenChange(false)} className="bg-green-600 hover:bg-green-500 text-white">
@@ -1200,7 +941,7 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="website" className="text-zinc-300">
-                    Store URL (optional)
+                    Website URL (optional)
                   </Label>
                   <Input
                     id="website"
@@ -1215,7 +956,7 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
 
             {step === 2 && (
               <div className="space-y-3">
-                <p className="text-sm text-zinc-400">Select all services you're interested in (at least one).</p>
+                <p className="text-sm text-zinc-400">Select the service you're interested in (at least one).</p>
                 {SERVICE_OPTIONS.map((s) => (
                   <label
                     key={s}
@@ -1231,7 +972,7 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
             {step === 3 && (
               <div className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label className="text-zinc-300">Monthly Budget</Label>
+                  <Label className="text-zinc-300">Estimated Budget</Label>
                   <Select value={form.monthlyBudget} onValueChange={(v) => update("monthlyBudget", v)}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue placeholder="Select a budget range" />
@@ -1247,13 +988,13 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="targetAreas" className="text-zinc-300">
-                    Target Products / Keywords
+                    Target Topics / Keywords
                   </Label>
                   <Input
                     id="targetAreas"
                     value={form.targetAreas}
                     onChange={(e) => update("targetAreas", e.target.value)}
-                    placeholder="e.g. running shoes, skincare sets, coffee makers"
+                    placeholder="e.g. product categories, service areas, locations"
                     className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
@@ -1287,7 +1028,7 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
             {step === 4 && (
               <div className="space-y-4 text-sm">
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
-                  <h4 className="font-bold text-green-400 uppercase text-xs tracking-wider">Company & Contact</h4>
+                  <h4 className="font-bold text-green-400 uppercase text-xs tracking-wider">Company &amp; Contact</h4>
                   <div className="grid grid-cols-2 gap-2 text-zinc-300">
                     <div>
                       <span className="text-zinc-500">Company:</span> {form.companyName}
@@ -1302,7 +1043,7 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
                       <span className="text-zinc-500">Phone:</span> {form.contactPhone}
                     </div>
                     <div className="col-span-2">
-                      <span className="text-zinc-500">Store URL:</span> {form.website || "—"}
+                      <span className="text-zinc-500">Website:</span> {form.website || "—"}
                     </div>
                   </div>
                 </div>
@@ -1315,13 +1056,13 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
                   </ul>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
-                  <h4 className="font-bold text-green-400 uppercase text-xs tracking-wider">Program Details</h4>
+                  <h4 className="font-bold text-green-400 uppercase text-xs tracking-wider">Project Details</h4>
                   <div className="text-zinc-300 space-y-1">
                     <div>
                       <span className="text-zinc-500">Budget:</span> {form.monthlyBudget || "—"}
                     </div>
                     <div>
-                      <span className="text-zinc-500">Target Products / Keywords:</span> {form.targetAreas || "—"}
+                      <span className="text-zinc-500">Target Topics / Keywords:</span> {form.targetAreas || "—"}
                     </div>
                     <div>
                       <span className="text-zinc-500">Preferred Start:</span> {form.preferredStartDate || "—"}
@@ -1367,7 +1108,7 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting…
                     </>
                   ) : (
-                    "Submit Audit Request"
+                    "Submit Request"
                   )}
                 </Button>
               )}
@@ -1390,15 +1131,14 @@ const EcommerceSeoMicrosites = () => {
       <Navigation />
       <Breadcrumbs />
       <Hero onBook={openBooking} />
-      <HowItWorks />
-      <Benefits />
-      <ServicesGrid />
-      <AiSeoEngine />
+      <ServiceModel onBook={openBooking} />
       <Pricing />
-      <CaseStudies />
-      <Testimonials />
+      <HowItWorks />
+      <Comparison />
+      <WhyMicrosites />
+      <WhatWeBuild />
+      <OngoingManagement />
       <FAQ />
-      <WhyUs />
       <FinalCTA onBook={openBooking} />
       <Footer />
       <BookingWizard open={isBookingOpen} onOpenChange={setIsBookingOpen} />
