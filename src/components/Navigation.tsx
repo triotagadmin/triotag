@@ -40,7 +40,7 @@ const NAV_ITEMS_PUBLIC: NavItemDef[] = [
       { label: "DOOH", to: "/solutions/dooh" },
       { label: "AOOH", to: "/solutions/aooh" },
       { label: "Media Truck", to: "/solutions/media-truck" },
-      { label: "SEO Website", to: "/services/ecommerce-seo" },
+      { label: "SEO Microsite", to: "/services/ecommerce-seo" },
     ],
   },
   { label: "Advertise Your Brand", to: "/advertiser/explore" },
