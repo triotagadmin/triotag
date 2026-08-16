@@ -246,9 +246,6 @@ const Hero = ({ onBook }: { onBook: () => void }) => (
     <div className="container mx-auto px-4 md:px-6 py-20 md:py-28 relative">
       <div className="grid lg:grid-cols-2 gap-14 items-center">
         <div className="space-y-6 text-center lg:text-left">
-          <span className="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase text-green-400 bg-green-500/10 border border-green-500/30 rounded-full">
-            eCommerce SEO Microsites
-          </span>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] font-display">
             More Rankings.{" "}
             <span className="text-green-500">More Sales. More Customers.</span>
