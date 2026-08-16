@@ -7,26 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -110,9 +93,27 @@ const usePageMetadata = () => {
         areaServed: "PH",
         provider: { "@type": "Organization", name: "Triotag", url: "https://triotag.com" },
         offers: [
-          { "@type": "Offer", name: "Starter", price: "49888", priceCurrency: "PHP", description: "15 SEO Microsites per month" },
-          { "@type": "Offer", name: "Growth", price: "89888", priceCurrency: "PHP", description: "50 SEO Microsites per month" },
-          { "@type": "Offer", name: "Enterprise", price: "189888", priceCurrency: "PHP", description: "100 SEO Microsites per month" },
+          {
+            "@type": "Offer",
+            name: "Starter",
+            price: "49888",
+            priceCurrency: "PHP",
+            description: "15 SEO Microsites per month",
+          },
+          {
+            "@type": "Offer",
+            name: "Growth",
+            price: "89888",
+            priceCurrency: "PHP",
+            description: "50 SEO Microsites per month",
+          },
+          {
+            "@type": "Offer",
+            name: "Enterprise",
+            price: "189888",
+            priceCurrency: "PHP",
+            description: "100 SEO Microsites per month",
+          },
         ],
       },
       {
@@ -148,9 +149,17 @@ const usePageMetadata = () => {
 const Breadcrumbs = () => (
   <nav aria-label="Breadcrumb" className="bg-[#0c0c0c] border-b border-white/5">
     <ol className="container mx-auto px-4 md:px-6 py-3 flex items-center gap-2 text-xs text-zinc-500">
-      <li><Link to="/" className="hover:text-green-500">Home</Link></li>
+      <li>
+        <Link to="/" className="hover:text-green-500">
+          Home
+        </Link>
+      </li>
       <li aria-hidden>/</li>
-      <li><Link to="/services" className="hover:text-green-500">Services</Link></li>
+      <li>
+        <Link to="/services" className="hover:text-green-500">
+          Services
+        </Link>
+      </li>
       <li aria-hidden>/</li>
       <li className="text-zinc-300">eCommerce SEO Microsites</li>
     </ol>
@@ -180,9 +189,7 @@ const StorefrontPreview = () => (
         <span className="w-2.5 h-2.5 rounded-full bg-red-400/70" />
         <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" />
         <span className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
-        <span className="ml-3 text-[10px] font-mono text-zinc-500 truncate">
-          microsite.com/best-running-shoes
-        </span>
+        <span className="ml-3 text-[10px] font-mono text-zinc-500 truncate">microsite.com/best-running-shoes</span>
       </div>
       <div className="grid grid-cols-3 gap-3">
         {[Package, ShoppingBag, Store].map((I, i) => (
@@ -200,9 +207,7 @@ const StorefrontPreview = () => (
     {/* Floating SEO analytics dashboard */}
     <div className="mt-5 rounded-2xl border border-green-500/20 bg-[#0f0f0f]/90 backdrop-blur-sm p-5 shadow-2xl">
       <div className="flex items-center justify-between mb-4">
-        <span className="text-[10px] font-mono uppercase tracking-widest text-green-400">
-          SEO Analytics
-        </span>
+        <span className="text-[10px] font-mono uppercase tracking-widest text-green-400">SEO Analytics</span>
         <BarChart3 className="w-4 h-4 text-green-500" />
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -247,23 +252,22 @@ const Hero = ({ onBook }: { onBook: () => void }) => (
       <div className="grid lg:grid-cols-2 gap-14 items-center">
         <div className="space-y-6 text-center lg:text-left">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] font-display">
-            More Rankings.{" "}
-            <span className="text-green-500">More Sales. More Customers.</span>
+            More Rankings. <span className="text-green-500">More Sales. More Customers.</span>
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-            Done-for-you eCommerce SEO Microsites built to rank product keywords and
-            generate consistent organic sales.
+            SEO tools built inside your Microsite, designed to rank product keywords and generate consistent organic
+            sales.
           </p>
           <div className="flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-3 pt-2">
-            <Button
-              size="lg"
-              onClick={onBook}
-              className="bg-green-600 hover:bg-green-500 text-white px-8"
-            >
+            <Button size="lg" onClick={onBook} className="bg-green-600 hover:bg-green-500 text-white px-8">
               Get a Free SEO Audit <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <a href="#pricing">
-              <Button size="lg" variant="outline" className="border-green-500 text-green-500 hover:bg-green-500/10 px-8">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-green-500 text-green-500 hover:bg-green-500/10 px-8"
+              >
                 See Packages
               </Button>
             </a>
@@ -486,8 +490,8 @@ const AiSeoEngine = () => (
           Built On An <span className="text-green-600">AI SEO Engine</span>
         </h2>
         <p className="text-zinc-500 text-base md:text-lg">
-          Every microsite is optimized continuously by AI — scored, rewritten, and re-marked up as
-          search shifts, not just built once and left behind.
+          Every microsite is optimized continuously by AI — scored, rewritten, and re-marked up as search shifts, not
+          just built once and left behind.
         </p>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -569,16 +573,15 @@ const HowItWorks = () => (
       <div className="grid lg:grid-cols-2 gap-14 items-center mb-24">
         <div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1] font-display mb-4">
-            Own page one.{" "}
-            <span className="text-green-500">For every product you sell.</span>
+            Own page one. <span className="text-green-500">For every product you sell.</span>
           </h2>
           <span className="inline-block text-xs font-semibold tracking-wider uppercase text-green-400 mb-4">
             The Microsite Network Model
           </span>
           <p className="text-zinc-400 leading-relaxed mb-10 max-w-xl">
-            A single store page can only rank for so much. We build a network of focused
-            microsites — each engineered around one product keyword cluster — so your brand
-            occupies more of the search results and captures demand your competitors miss.
+            A single store page can only rank for so much. We build a network of focused microsites — each engineered
+            around one product keyword cluster — so your brand occupies more of the search results and captures demand
+            your competitors miss.
           </p>
           <div className="space-y-7">
             {benefits.slice(0, 3).map((f) => (
@@ -595,9 +598,7 @@ const HowItWorks = () => (
           </div>
         </div>
         <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-4">
-          <div className="text-[10px] font-mono uppercase tracking-widest text-green-400">
-            Live SERP Snapshot
-          </div>
+          <div className="text-[10px] font-mono uppercase tracking-widest text-green-400">Live SERP Snapshot</div>
           {keywordRankings.map((k) => (
             <div key={k.kw} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
               <div className="flex items-center justify-between mb-2">
@@ -646,9 +647,7 @@ const HowItWorks = () => (
                   {step.label}
                 </span>
               </div>
-              {i < microsteFlow.length - 1 && (
-                <ArrowRight className="hidden md:block w-4 h-4 text-zinc-600 shrink-0" />
-              )}
+              {i < microsteFlow.length - 1 && <ArrowRight className="hidden md:block w-4 h-4 text-zinc-600 shrink-0" />}
             </div>
           ))}
         </div>
@@ -656,7 +655,10 @@ const HowItWorks = () => (
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
         {networkFeatures.map((f) => (
-          <div key={f.title} className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-green-500/30 transition-colors">
+          <div
+            key={f.title}
+            className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-green-500/30 transition-colors"
+          >
             <div className="w-11 h-11 rounded-xl bg-green-500/10 border border-green-500/30 flex items-center justify-center mb-4">
               <f.icon className="w-5 h-5 text-green-500" />
             </div>
@@ -750,7 +752,8 @@ const Pricing = () => (
           Microsite Packages, <span className="text-green-600">Transparent Pricing</span>
         </h2>
         <p className="text-zinc-500 text-base md:text-lg">
-          Flat monthly fees based on microsite volume. Hosting, content, and technical SEO included — no hidden commissions.
+          Flat monthly fees based on microsite volume. Hosting, content, and technical SEO included — no hidden
+          commissions.
         </p>
       </div>
       <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -777,7 +780,9 @@ const Pricing = () => (
             <ul className="space-y-3">
               {pkg.features.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-sm text-zinc-700">
-                  <CheckCircle2 className={`w-4 h-4 mt-0.5 shrink-0 ${pkg.highlight ? "text-green-600" : "text-zinc-400"}`} />
+                  <CheckCircle2
+                    className={`w-4 h-4 mt-0.5 shrink-0 ${pkg.highlight ? "text-green-600" : "text-zinc-400"}`}
+                  />
                   <span>{f}</span>
                 </li>
               ))}
@@ -844,9 +849,7 @@ const CaseStudies = () => (
           >
             <div className="space-y-1">
               <div className="text-4xl font-extrabold text-green-600">{cs.metric}</div>
-              <div className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">
-                {cs.label}
-              </div>
+              <div className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">{cs.label}</div>
             </div>
             <h3 className="text-lg font-bold text-zinc-900">{cs.title}</h3>
             <p className="text-sm text-zinc-500 leading-relaxed">{cs.desc}</p>
@@ -954,17 +957,9 @@ const FAQ = () => (
       </div>
       <Accordion type="single" collapsible className="space-y-3">
         {faqs.map((f, i) => (
-          <AccordionItem
-            key={f.q}
-            value={`item-${i}`}
-            className="rounded-2xl border border-zinc-200 bg-white px-5"
-          >
-            <AccordionTrigger className="text-left font-bold text-zinc-900 hover:no-underline">
-              {f.q}
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-zinc-500 leading-relaxed">
-              {f.a}
-            </AccordionContent>
+          <AccordionItem key={f.q} value={`item-${i}`} className="rounded-2xl border border-zinc-200 bg-white px-5">
+            <AccordionTrigger className="text-left font-bold text-zinc-900 hover:no-underline">{f.q}</AccordionTrigger>
+            <AccordionContent className="text-sm text-zinc-500 leading-relaxed">{f.a}</AccordionContent>
           </AccordionItem>
         ))}
       </Accordion>
@@ -1022,15 +1017,11 @@ const FinalCTA = ({ onBook }: { onBook: () => void }) => (
           Ready to Own the <span className="text-green-600">Search Results?</span>
         </h2>
         <p className="text-zinc-500 text-base md:text-lg max-w-xl mx-auto">
-          Book a free 30-minute SEO audit. We'll review your product keywords, rankings, and
-          organic sales potential — then map the microsite network to get you there.
+          Book a free 30-minute SEO audit. We'll review your product keywords, rankings, and organic sales potential —
+          then map the microsite network to get you there.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <Button
-            size="lg"
-            onClick={onBook}
-            className="bg-green-600 hover:bg-green-500 text-white px-8"
-          >
+          <Button size="lg" onClick={onBook} className="bg-green-600 hover:bg-green-500 text-white px-8">
             Get a Free SEO Audit <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
@@ -1040,18 +1031,9 @@ const FinalCTA = ({ onBook }: { onBook: () => void }) => (
 );
 
 /* ============================= BOOKING WIZARD ============================= */
-const SERVICE_OPTIONS = [
-  "eCommerce SEO Microsites",
-  "Technical eCommerce SEO",
-  "Content & AI Search (AEO)",
-];
+const SERVICE_OPTIONS = ["eCommerce SEO Microsites", "Technical eCommerce SEO", "Content & AI Search (AEO)"];
 
-const BUDGET_OPTIONS = [
-  "Under ₱50,000",
-  "₱50,000 – ₱100,000",
-  "₱100,000 – ₱200,000",
-  "₱200,000+",
-];
+const BUDGET_OPTIONS = ["Under ₱50,000", "₱50,000 – ₱100,000", "₱100,000 – ₱200,000", "₱200,000+"];
 
 interface BookingForm {
   companyName: string;
@@ -1079,21 +1061,14 @@ const emptyForm: BookingForm = {
   additionalNotes: "",
 };
 
-const BookingWizard = ({
-  open,
-  onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-}) => {
+const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) => {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<BookingForm>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const update = <K extends keyof BookingForm>(k: K, v: BookingForm[K]) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const update = <K extends keyof BookingForm>(k: K, v: BookingForm[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const toggleService = (s: string) =>
     setForm((f) => ({
@@ -1120,12 +1095,7 @@ const BookingWizard = ({
 
   const canNext = () => {
     if (step === 1)
-      return (
-        form.companyName.trim() &&
-        form.contactPerson.trim() &&
-        emailValid &&
-        form.contactPhone.trim()
-      );
+      return form.companyName.trim() && form.contactPerson.trim() && emailValid && form.contactPhone.trim();
     if (step === 2) return form.servicesInterested.length > 0;
     if (step === 3) return true;
     return true;
@@ -1135,10 +1105,7 @@ const BookingWizard = ({
     setSubmitting(true);
     setError(null);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke(
-        "send-google-ads-booking",
-        { body: form },
-      );
+      const { data, error: fnError } = await supabase.functions.invoke("send-google-ads-booking", { body: form });
       if (fnError) throw fnError;
       if (data && (data as any).success === false) {
         throw new Error((data as any).error || "Submission failed");
@@ -1158,19 +1125,13 @@ const BookingWizard = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl bg-[#0c0c0c] border-white/10 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-white">
-            {submitted ? "Audit Request Sent" : "Get a Free SEO Audit"}
-          </DialogTitle>
+          <DialogTitle className="text-white">{submitted ? "Audit Request Sent" : "Get a Free SEO Audit"}</DialogTitle>
           <DialogDescription className="text-zinc-400">
-            {submitted
-              ? "Thanks — we'll be in touch within 1 business day."
-              : `Step ${step} of 4`}
+            {submitted ? "Thanks — we'll be in touch within 1 business day." : `Step ${step} of 4`}
           </DialogDescription>
         </DialogHeader>
 
-        {!submitted && (
-          <Progress value={progress} className="h-1.5 bg-white/10 [&>div]:bg-green-500" />
-        )}
+        {!submitted && <Progress value={progress} className="h-1.5 bg-white/10 [&>div]:bg-green-500" />}
 
         {submitted ? (
           <div className="py-8 text-center space-y-6">
@@ -1179,13 +1140,9 @@ const BookingWizard = ({
             </div>
             <p className="text-zinc-300">
               Your audit request has been sent to our team. We'll reach out to{" "}
-              <span className="text-green-400 font-semibold">{form.contactEmail}</span> within
-              1 business day.
+              <span className="text-green-400 font-semibold">{form.contactEmail}</span> within 1 business day.
             </p>
-            <Button
-              onClick={() => handleOpenChange(false)}
-              className="bg-green-600 hover:bg-green-500 text-white"
-            >
+            <Button onClick={() => handleOpenChange(false)} className="bg-green-600 hover:bg-green-500 text-white">
               Close
             </Button>
           </div>
@@ -1194,7 +1151,9 @@ const BookingWizard = ({
             {step === 1 && (
               <div className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="companyName" className="text-zinc-300">Company Name *</Label>
+                  <Label htmlFor="companyName" className="text-zinc-300">
+                    Company Name *
+                  </Label>
                   <Input
                     id="companyName"
                     value={form.companyName}
@@ -1203,7 +1162,9 @@ const BookingWizard = ({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="contactPerson" className="text-zinc-300">Contact Person *</Label>
+                  <Label htmlFor="contactPerson" className="text-zinc-300">
+                    Contact Person *
+                  </Label>
                   <Input
                     id="contactPerson"
                     value={form.contactPerson}
@@ -1212,7 +1173,9 @@ const BookingWizard = ({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="contactEmail" className="text-zinc-300">Contact Email *</Label>
+                  <Label htmlFor="contactEmail" className="text-zinc-300">
+                    Contact Email *
+                  </Label>
                   <Input
                     id="contactEmail"
                     type="email"
@@ -1225,7 +1188,9 @@ const BookingWizard = ({
                   )}
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="contactPhone" className="text-zinc-300">Contact Phone *</Label>
+                  <Label htmlFor="contactPhone" className="text-zinc-300">
+                    Contact Phone *
+                  </Label>
                   <Input
                     id="contactPhone"
                     value={form.contactPhone}
@@ -1234,7 +1199,9 @@ const BookingWizard = ({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="website" className="text-zinc-300">Store URL (optional)</Label>
+                  <Label htmlFor="website" className="text-zinc-300">
+                    Store URL (optional)
+                  </Label>
                   <Input
                     id="website"
                     value={form.website}
@@ -1254,10 +1221,7 @@ const BookingWizard = ({
                     key={s}
                     className="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-white/[0.02] hover:border-green-500/30 cursor-pointer"
                   >
-                    <Checkbox
-                      checked={form.servicesInterested.includes(s)}
-                      onCheckedChange={() => toggleService(s)}
-                    />
+                    <Checkbox checked={form.servicesInterested.includes(s)} onCheckedChange={() => toggleService(s)} />
                     <span className="text-white font-medium">{s}</span>
                   </label>
                 ))}
@@ -1268,22 +1232,23 @@ const BookingWizard = ({
               <div className="grid gap-4">
                 <div className="grid gap-2">
                   <Label className="text-zinc-300">Monthly Budget</Label>
-                  <Select
-                    value={form.monthlyBudget}
-                    onValueChange={(v) => update("monthlyBudget", v)}
-                  >
+                  <Select value={form.monthlyBudget} onValueChange={(v) => update("monthlyBudget", v)}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue placeholder="Select a budget range" />
                     </SelectTrigger>
                     <SelectContent>
                       {BUDGET_OPTIONS.map((b) => (
-                        <SelectItem key={b} value={b}>{b}</SelectItem>
+                        <SelectItem key={b} value={b}>
+                          {b}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="targetAreas" className="text-zinc-300">Target Products / Keywords</Label>
+                  <Label htmlFor="targetAreas" className="text-zinc-300">
+                    Target Products / Keywords
+                  </Label>
                   <Input
                     id="targetAreas"
                     value={form.targetAreas}
@@ -1293,7 +1258,9 @@ const BookingWizard = ({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="startDate" className="text-zinc-300">Preferred Start Date</Label>
+                  <Label htmlFor="startDate" className="text-zinc-300">
+                    Preferred Start Date
+                  </Label>
                   <Input
                     id="startDate"
                     type="date"
@@ -1303,7 +1270,9 @@ const BookingWizard = ({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="notes" className="text-zinc-300">Additional Notes</Label>
+                  <Label htmlFor="notes" className="text-zinc-300">
+                    Additional Notes
+                  </Label>
                   <Textarea
                     id="notes"
                     value={form.additionalNotes}
@@ -1320,25 +1289,43 @@ const BookingWizard = ({
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
                   <h4 className="font-bold text-green-400 uppercase text-xs tracking-wider">Company & Contact</h4>
                   <div className="grid grid-cols-2 gap-2 text-zinc-300">
-                    <div><span className="text-zinc-500">Company:</span> {form.companyName}</div>
-                    <div><span className="text-zinc-500">Contact:</span> {form.contactPerson}</div>
-                    <div><span className="text-zinc-500">Email:</span> {form.contactEmail}</div>
-                    <div><span className="text-zinc-500">Phone:</span> {form.contactPhone}</div>
-                    <div className="col-span-2"><span className="text-zinc-500">Store URL:</span> {form.website || "—"}</div>
+                    <div>
+                      <span className="text-zinc-500">Company:</span> {form.companyName}
+                    </div>
+                    <div>
+                      <span className="text-zinc-500">Contact:</span> {form.contactPerson}
+                    </div>
+                    <div>
+                      <span className="text-zinc-500">Email:</span> {form.contactEmail}
+                    </div>
+                    <div>
+                      <span className="text-zinc-500">Phone:</span> {form.contactPhone}
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-zinc-500">Store URL:</span> {form.website || "—"}
+                    </div>
                   </div>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
                   <h4 className="font-bold text-green-400 uppercase text-xs tracking-wider">Services</h4>
                   <ul className="list-disc list-inside text-zinc-300 space-y-1">
-                    {form.servicesInterested.map((s) => <li key={s}>{s}</li>)}
+                    {form.servicesInterested.map((s) => (
+                      <li key={s}>{s}</li>
+                    ))}
                   </ul>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
                   <h4 className="font-bold text-green-400 uppercase text-xs tracking-wider">Program Details</h4>
                   <div className="text-zinc-300 space-y-1">
-                    <div><span className="text-zinc-500">Budget:</span> {form.monthlyBudget || "—"}</div>
-                    <div><span className="text-zinc-500">Target Products / Keywords:</span> {form.targetAreas || "—"}</div>
-                    <div><span className="text-zinc-500">Preferred Start:</span> {form.preferredStartDate || "—"}</div>
+                    <div>
+                      <span className="text-zinc-500">Budget:</span> {form.monthlyBudget || "—"}
+                    </div>
+                    <div>
+                      <span className="text-zinc-500">Target Products / Keywords:</span> {form.targetAreas || "—"}
+                    </div>
+                    <div>
+                      <span className="text-zinc-500">Preferred Start:</span> {form.preferredStartDate || "—"}
+                    </div>
                   </div>
                 </div>
                 {form.additionalNotes && (
@@ -1374,13 +1361,11 @@ const BookingWizard = ({
                   Next <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
-                <Button
-                  onClick={submit}
-                  disabled={submitting}
-                  className="bg-green-600 hover:bg-green-500 text-white"
-                >
+                <Button onClick={submit} disabled={submitting} className="bg-green-600 hover:bg-green-500 text-white">
                   {submitting ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting…</>
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting…
+                    </>
                   ) : (
                     "Submit Audit Request"
                   )}
