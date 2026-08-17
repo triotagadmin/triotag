@@ -243,7 +243,11 @@ const Hero = ({ onBook }: { onBook: () => void }) => (
           </div>
 
           <div className="flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-3 pt-1">
-            <Button size="lg" onClick={onBook} className="bg-green-600 hover:bg-green-500 text-white px-8 w-full sm:w-auto">
+            <Button
+              size="lg"
+              onClick={onBook}
+              className="bg-green-600 hover:bg-green-500 text-white px-8 w-full sm:w-auto"
+            >
               Start Your SEO Project <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
@@ -287,7 +291,9 @@ const BuildManageVisual = () => (
 
     <div className="mt-5 rounded-2xl border border-green-500/20 bg-[#0f0f0f]/90 backdrop-blur-sm p-5 shadow-2xl">
       <div className="flex items-center justify-between mb-4">
-        <span className="text-[10px] font-mono uppercase tracking-widest text-green-400">Build → Launch → Manage → Grow</span>
+        <span className="text-[10px] font-mono uppercase tracking-widest text-green-400">
+          Build → Launch → Manage → Grow
+        </span>
         <BarChart3 className="w-4 h-4 text-green-500" aria-hidden />
       </div>
       <ul className="space-y-3">
@@ -358,7 +364,7 @@ const ServiceModel = ({ onBook }: { onBook: () => void }) => (
     <div className="container mx-auto px-4 md:px-6">
       <div className="text-center max-w-3xl mx-auto mb-14">
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          Build Your SEO Microsite Infrastructure. <br className="hidden md:block" />
+          We Build SEO Microsite Infrastructure. <br className="hidden md:block" />
           <span className="text-green-600">Then Let Us Manage and Grow It.</span>
         </h2>
         <p className="text-zinc-500 text-base md:text-lg">
@@ -413,7 +419,9 @@ const ServiceModel = ({ onBook }: { onBook: () => void }) => (
             <div className="rounded-2xl border border-green-100 bg-green-50 p-4">
               <div className="text-xs uppercase tracking-widest text-green-700 font-bold">Monthly Service</div>
               <div className="text-2xl font-extrabold text-zinc-900 mt-1">Custom monthly pricing</div>
-              <p className="text-xs text-zinc-500 mt-1">Billed monthly and recurring — this is not a one-time package.</p>
+              <p className="text-xs text-zinc-500 mt-1">
+                Billed monthly and recurring — this is not a one-time package.
+              </p>
             </div>
           </div>
           <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
@@ -547,13 +555,19 @@ const Comparison = () => (
             </p>
           </div>
           <ul className="space-y-2">
-            {["Strategy", "Design", "Development", "Technical SEO", "Initial configuration", "Deployment", "Launch"].map(
-              (i) => (
-                <li key={i} className="flex items-center gap-2 text-sm text-zinc-700">
-                  <CheckCircle2 className="w-4 h-4 text-zinc-400 shrink-0" aria-hidden /> {i}
-                </li>
-              ),
-            )}
+            {[
+              "Strategy",
+              "Design",
+              "Development",
+              "Technical SEO",
+              "Initial configuration",
+              "Deployment",
+              "Launch",
+            ].map((i) => (
+              <li key={i} className="flex items-center gap-2 text-sm text-zinc-700">
+                <CheckCircle2 className="w-4 h-4 text-zinc-400 shrink-0" aria-hidden /> {i}
+              </li>
+            ))}
           </ul>
         </div>
         <div className="rounded-2xl border border-green-500 bg-white p-8 space-y-5 ring-1 ring-green-500">
@@ -610,7 +624,8 @@ const WhyMicrosites = () => (
         </h2>
         <p className="text-zinc-500 text-base md:text-lg">
           SEO microsites let you build focused search experiences around the things your customers actually search for.
-          The value comes from creating a structured, scalable SEO ecosystem — not simply building one more website page.
+          The value comes from creating a structured, scalable SEO ecosystem — not simply building one more website
+          page.
         </p>
       </div>
       <div className="flex flex-wrap justify-center gap-3">
@@ -652,13 +667,14 @@ const WhatWeBuild = () => (
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
           What We <span className="text-green-500">Build</span>
         </h2>
-        <p className="text-zinc-400 text-base md:text-lg">
-          Microsite structures designed around real search behavior.
-        </p>
+        <p className="text-zinc-400 text-base md:text-lg">Microsite structures designed around real search behavior.</p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
         {buildTypes.map((b) => (
-          <div key={b.title} className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-3 glass-hover transition-all">
+          <div
+            key={b.title}
+            className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-3 glass-hover transition-all"
+          >
             <div className="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
               <b.icon className="w-5 h-5 text-green-400" aria-hidden />
             </div>
@@ -750,7 +766,11 @@ const FinalCTA = ({ onBook }: { onBook: () => void }) => (
           build the infrastructure and help turn it into a continuously growing SEO asset.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <Button size="lg" onClick={onBook} className="bg-green-600 hover:bg-green-500 text-white px-8 w-full sm:w-auto">
+          <Button
+            size="lg"
+            onClick={onBook}
+            className="bg-green-600 hover:bg-green-500 text-white px-8 w-full sm:w-auto"
+          >
             Start a Development Project <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
           <Button
@@ -866,7 +886,9 @@ const BookingWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl bg-[#0c0c0c] border-white/10 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-white">{submitted ? "Request Sent" : "Start Your SEO Microsite Project"}</DialogTitle>
+          <DialogTitle className="text-white">
+            {submitted ? "Request Sent" : "Start Your SEO Microsite Project"}
+          </DialogTitle>
           <DialogDescription className="text-zinc-400">
             {submitted ? "Thanks — we'll be in touch within 1 business day." : `Step ${step} of 4`}
           </DialogDescription>
