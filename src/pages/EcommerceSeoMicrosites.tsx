@@ -232,13 +232,13 @@ const Hero = ({ onBook }: { onBook: () => void }) => (
               <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-green-400">
                 <Hammer className="w-3.5 h-3.5" /> One-Time Development
               </div>
-              <p className="mt-2 text-sm text-zinc-300 font-semibold">Build your SEO microsite.</p>
+              <p className="mt-2 text-sm text-zinc-300 font-semibold">We Build your SEO microsite.</p>
             </div>
             <div className="rounded-2xl border border-green-500/25 bg-green-500/[0.06] p-5">
               <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-green-400">
                 <RefreshCcw className="w-3.5 h-3.5" /> Monthly Management
               </div>
-              <p className="mt-2 text-sm text-zinc-300 font-semibold">Operate and grow your SEO presence.</p>
+              <p className="mt-2 text-sm text-zinc-300 font-semibold">We Operate and Grow your SEO presence.</p>
             </div>
           </div>
 
