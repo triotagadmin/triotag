@@ -777,7 +777,7 @@ const Brands = () => {
         <div className="container mx-auto px-4 md:px-6 relative">
           <div className="max-w-3xl mx-auto text-center bg-[#0a0a0a]/80 backdrop-blur-sm border border-green-500/30 rounded-3xl p-10 md:p-14 shadow-[0_0_60px_-10px_rgba(34,197,94,0.4)]">
             <h2 className="text-3xl md:text-5xl font-bold mb-5 leading-tight">
-              Build Your AdOps Team <span className="text-green-500">with our Outsourced Agents</span>
+              We Provide Advertising Operations <span className="text-green-500">for businesses.</span>
             </h2>
             <p className="text-white/70 mb-8 text-lg">
               We provide the people, expertise, and processes needed to monetize and scale your advertising inventory.
