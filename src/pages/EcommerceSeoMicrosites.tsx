@@ -457,7 +457,7 @@ const Pricing = () => (
         <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center space-y-2">
           <div className="text-xs font-bold uppercase tracking-widest text-zinc-500">One-Time Project</div>
           <h3 className="text-xl font-extrabold">SEO Microsite Development</h3>
-          <div className="text-3xl font-extrabold text-zinc-900 pt-2">Custom Quote</div>
+          <div className="text-3xl font-extrabold text-zinc-900 pt-2">₱ 89,880 or $1,499</div>
           <p className="text-sm text-zinc-500">Custom project pricing based on scope, structure, and integrations.</p>
         </div>
         <div className="rounded-2xl border border-green-500 bg-white p-8 text-center space-y-2 ring-1 ring-green-500">
