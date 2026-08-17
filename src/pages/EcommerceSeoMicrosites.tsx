@@ -223,7 +223,7 @@ const Hero = ({ onBook }: { onBook: () => void }) => (
             SEO Microsites Built to Rank. <span className="text-green-500">Managed to Grow.</span>
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-            Build a scalable SEO microsite infrastructure for your business, then keep it optimized, updated, and
+            We Build a scalable SEO microsite infrastructure for your business, then keep it optimized, updated, and
             expanding with ongoing management.
           </p>
 
