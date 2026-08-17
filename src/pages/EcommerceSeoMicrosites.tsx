@@ -759,7 +759,7 @@ const FinalCTA = ({ onBook }: { onBook: () => void }) => (
     <div className="container mx-auto px-4 md:px-6 relative">
       <div className="max-w-3xl mx-auto text-center space-y-6">
         <h2 className="text-3xl md:text-5xl font-extrabold">
-          Build Your SEO Microsite. <span className="text-green-500">Then Keep Growing It.</span>
+          We Build Your SEO Microsite. <span className="text-green-500">Then Keep Growing It.</span>
         </h2>
         <p className="text-zinc-400 text-base md:text-lg leading-relaxed">
           Whether you need the initial microsite development or an ongoing partner to manage and expand it, TRIOTAG can
