@@ -365,7 +365,6 @@ const ServiceModel = ({ onBook }: { onBook: () => void }) => (
       <div className="text-center max-w-3xl mx-auto mb-14">
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
           We Build SEO Microsite Infrastructure. <br className="hidden md:block" />
-          <span className="text-green-600">Then Let Us Manage and Grow It.</span>
         </h2>
         <p className="text-zinc-500 text-base md:text-lg">
           Two distinct services. Development creates the infrastructure. Management operates, optimizes, and expands it.
