@@ -137,7 +137,7 @@ const usePageMetadata = () => {
         provider: { "@type": "Organization", name: "TRIOTAG", url: "https://triotag.com" },
         offers: {
           "@type": "Offer",
-          name: "One-Time Project",
+          name: "SEO Development",
           description: "Custom project pricing",
           url: PAGE_URL,
         },
