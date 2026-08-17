@@ -446,7 +446,7 @@ const Pricing = () => (
     <div className="container mx-auto px-4 md:px-6">
       <div className="text-center max-w-3xl mx-auto mb-12">
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          Two Service Models, <span className="text-green-600">Not Pricing Tiers</span>
+          Our Service Models <span className="text-green-600">SEO Plans</span>
         </h2>
         <p className="text-zinc-500 text-base md:text-lg">
           Pricing follows scope, not arbitrary quantities. We quote the development project and the monthly management
