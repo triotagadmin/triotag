@@ -1299,6 +1299,111 @@ export type Database = {
           },
         ]
       }
+      business_prospects: {
+        Row: {
+          address: string | null
+          assigned_to: string | null
+          business_name: string
+          category: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          discovered_at: string
+          google_maps_url: string | null
+          google_place_id: string
+          google_rating: number | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          opportunity_score: number
+          phone: string | null
+          prospect_status: string
+          region: string | null
+          review_count: number | null
+          saved_at: string
+          saved_by: string | null
+          search_id: string | null
+          source: string
+          updated_at: string
+          website_status: string
+          website_url: string | null
+        }
+        Insert: {
+          address?: string | null
+          assigned_to?: string | null
+          business_name: string
+          category?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          discovered_at?: string
+          google_maps_url?: string | null
+          google_place_id: string
+          google_rating?: number | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          opportunity_score?: number
+          phone?: string | null
+          prospect_status?: string
+          region?: string | null
+          review_count?: number | null
+          saved_at?: string
+          saved_by?: string | null
+          search_id?: string | null
+          source?: string
+          updated_at?: string
+          website_status?: string
+          website_url?: string | null
+        }
+        Update: {
+          address?: string | null
+          assigned_to?: string | null
+          business_name?: string
+          category?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          discovered_at?: string
+          google_maps_url?: string | null
+          google_place_id?: string
+          google_rating?: number | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          opportunity_score?: number
+          phone?: string | null
+          prospect_status?: string
+          region?: string | null
+          review_count?: number | null
+          saved_at?: string
+          saved_by?: string | null
+          search_id?: string | null
+          source?: string
+          updated_at?: string
+          website_status?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_prospects_google_place_id_fkey"
+            columns: ["google_place_id"]
+            isOneToOne: true
+            referencedRelation: "prospect_places"
+            referencedColumns: ["google_place_id"]
+          },
+          {
+            foreignKeyName: "business_prospects_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "prospect_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_ad_space_targets: {
         Row: {
           ad_space_id: string
@@ -3755,6 +3860,132 @@ export type Database = {
           provider?: string
           role?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      prospect_places: {
+        Row: {
+          address: string | null
+          business_name: string
+          business_status: string | null
+          category: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          details_fetched_at: string
+          google_maps_url: string | null
+          google_place_id: string
+          google_rating: number | null
+          latitude: number | null
+          longitude: number | null
+          opportunity_score: number
+          phone: string | null
+          region: string | null
+          review_count: number | null
+          updated_at: string
+          website_status: string
+          website_url: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_name: string
+          business_status?: string | null
+          category?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          details_fetched_at?: string
+          google_maps_url?: string | null
+          google_place_id: string
+          google_rating?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          opportunity_score?: number
+          phone?: string | null
+          region?: string | null
+          review_count?: number | null
+          updated_at?: string
+          website_status?: string
+          website_url?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_name?: string
+          business_status?: string | null
+          category?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          details_fetched_at?: string
+          google_maps_url?: string | null
+          google_place_id?: string
+          google_rating?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          opportunity_score?: number
+          phone?: string | null
+          region?: string | null
+          review_count?: number | null
+          updated_at?: string
+          website_status?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      prospect_searches: {
+        Row: {
+          business_type: string | null
+          created_at: string
+          id: string
+          keyword: string
+          lat: number | null
+          lng: number | null
+          location_text: string
+          min_rating: number | null
+          min_reviews: number | null
+          radius_km: number
+          result_limit: number
+          results_count: number
+          search_key: string
+          searched_by: string
+          updated_at: string
+          website_gap_count: number
+        }
+        Insert: {
+          business_type?: string | null
+          created_at?: string
+          id?: string
+          keyword: string
+          lat?: number | null
+          lng?: number | null
+          location_text: string
+          min_rating?: number | null
+          min_reviews?: number | null
+          radius_km?: number
+          result_limit?: number
+          results_count?: number
+          search_key: string
+          searched_by: string
+          updated_at?: string
+          website_gap_count?: number
+        }
+        Update: {
+          business_type?: string | null
+          created_at?: string
+          id?: string
+          keyword?: string
+          lat?: number | null
+          lng?: number | null
+          location_text?: string
+          min_rating?: number | null
+          min_reviews?: number | null
+          radius_km?: number
+          result_limit?: number
+          results_count?: number
+          search_key?: string
+          searched_by?: string
+          updated_at?: string
+          website_gap_count?: number
         }
         Relationships: []
       }
