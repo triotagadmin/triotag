@@ -1,0 +1,1 @@
+ALTER TABLE public.prospect_searches ADD COLUMN IF NOT EXISTS place_ids TEXT[] NOT NULL DEFAULT '{}';

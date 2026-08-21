@@ -3943,6 +3943,7 @@ export type Database = {
           location_text: string
           min_rating: number | null
           min_reviews: number | null
+          place_ids: string[]
           radius_km: number
           result_limit: number
           results_count: number
@@ -3961,6 +3962,7 @@ export type Database = {
           location_text: string
           min_rating?: number | null
           min_reviews?: number | null
+          place_ids?: string[]
           radius_km?: number
           result_limit?: number
           results_count?: number
@@ -3979,6 +3981,7 @@ export type Database = {
           location_text?: string
           min_rating?: number | null
           min_reviews?: number | null
+          place_ids?: string[]
           radius_km?: number
           result_limit?: number
           results_count?: number
