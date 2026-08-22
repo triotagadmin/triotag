@@ -22,6 +22,7 @@ import AdminMediaPlans from "./pages/admin/AdminMediaPlans";
 import AdminExternalInventory from "./pages/admin/AdminExternalInventory";
 import AdminBrandCampaigns from "./pages/admin/AdminBrandCampaigns";
 import AdminLocalListings from "./pages/admin/AdminLocalListings";
+import AdminBusinessProspecting from "./pages/admin/AdminBusinessProspecting";
 import AdminBrandAdvertiserApprovals from "./pages/admin/AdminBrandAdvertiserApprovals";
 import AdminVerifiedLocations from "./pages/admin/AdminVerifiedLocations";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
@@ -303,6 +304,11 @@ const App = () => (
           <Route path="/admin/local-listings" element={
             <ProtectedAdminRoute>
               <AdminLocalListings />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/business-prospecting" element={
+            <ProtectedAdminRoute>
+              <AdminBusinessProspecting />
             </ProtectedAdminRoute>
           } />
           {/* Advertiser inventory explorer — PUBLIC, no auth required */}
