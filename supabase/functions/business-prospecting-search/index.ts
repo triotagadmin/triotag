@@ -86,7 +86,7 @@ serve(async (req) => {
     if (authError || !user) return json({ error: "Invalid or expired session" }, 401);
 
     const admin = createClient(supabaseUrl, serviceKey);
-    const { data: isAdmin } = await admin.rpc("is_verified_admin", { _user_id: user.id });
+    const { data: isAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
     if (!isAdmin) return json({ error: "Admin access required" }, 403);
 
     // --- Validate input ---
@@ -101,17 +101,25 @@ serve(async (req) => {
     const resultLimit = Math.min(Math.max(Math.floor(Number(body?.limit)) || MAX_RESULTS, 1), MAX_RESULTS);
     const forceRefresh = body?.forceRefresh === true;
 
+    // Optional map-pin coordinates: when provided they are used directly as the
+    // search center and the geocoding step is skipped entirely.
+    const bodyLat = typeof body?.lat === "number" && Number.isFinite(body.lat) ? body.lat : null;
+    const bodyLng = typeof body?.lng === "number" && Number.isFinite(body.lng) ? body.lng : null;
+    const hasCoords =
+      bodyLat != null && bodyLng != null && Math.abs(bodyLat) <= 90 && Math.abs(bodyLng) <= 180;
+
     if (keyword.length < 2 || keyword.length > 120) {
       return json({ error: "Business category / keyword must be between 2 and 120 characters" }, 400);
     }
-    if (locationText.length < 2 || locationText.length > 200) {
+    if (locationText.length > 200 || (!hasCoords && locationText.length < 2)) {
       return json({ error: "Location must be between 2 and 200 characters" }, 400);
     }
     if (minRating != null && (isNaN(minRating) || minRating < 0 || minRating > 5)) {
       return json({ error: "Minimum rating must be between 0 and 5" }, 400);
     }
 
-    const searchKey = normalizeKey([keyword, locationText, radiusKm, minRating, minReviews, businessType, resultLimit]);
+    const locationKey = hasCoords ? `map:${bodyLat!.toFixed(3)},${bodyLng!.toFixed(3)}` : locationText;
+    const searchKey = normalizeKey([keyword, locationKey, radiusKm, minRating, minReviews, businessType, resultLimit]);
 
     // --- Cache: equivalent search within the window returns stored results (no Google call) ---
     if (!forceRefresh) {
@@ -168,15 +176,25 @@ serve(async (req) => {
       }
     }
 
-    // --- Geocode the location ---
-    const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationText)}&key=${apiKey}`;
-    const geoRes = await fetch(geoUrl);
-    const geoData = geoRes.ok ? await geoRes.json() : null;
-    if (geoData?.status !== "OK" || !geoData.results?.[0]) {
-      console.error("[prospecting] geocode failed", geoData?.status, geoData?.error_message);
-      return json({ error: "Could not locate that area. Try a more specific location (e.g. 'Makati City')." }, 400);
+    // --- Resolve the search center: use map-pin coordinates directly when
+    // provided, otherwise geocode the location text ---
+    let lat: number;
+    let lng: number;
+    if (hasCoords) {
+      lat = bodyLat!;
+      lng = bodyLng!;
+    } else {
+      const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationText)}&key=${apiKey}`;
+      const geoRes = await fetch(geoUrl);
+      const geoData = geoRes.ok ? await geoRes.json() : null;
+      if (geoData?.status !== "OK" || !geoData.results?.[0]) {
+        console.error("[prospecting] geocode failed", geoData?.status, geoData?.error_message);
+        return json({ error: "Could not locate that area. Try a more specific location (e.g. 'Makati City')." }, 400);
+      }
+      const loc = geoData.results[0].geometry.location;
+      lat = loc.lat;
+      lng = loc.lng;
     }
-    const { lat, lng } = geoData.results[0].geometry.location;
     const radiusMeters = Math.round(radiusKm * 1000);
 
     // --- Places Text Search ---
@@ -287,7 +305,7 @@ serve(async (req) => {
         search_key: searchKey,
         searched_by: user.id,
         keyword,
-        location_text: locationText,
+        location_text: locationText || `Map pin (${lat.toFixed(4)}, ${lng.toFixed(4)})`,
         lat,
         lng,
         radius_km: radiusKm,
