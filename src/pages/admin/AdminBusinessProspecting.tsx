@@ -585,7 +585,11 @@ export default function AdminBusinessProspecting() {
   // -------------------------------------------------------------------------
 
   const gapResults = results?.filter((r) => r.website_status === "not_listed") ?? [];
-  const allChecked = !!results?.length && selected.size === results.length;
+  const visibleResults = results ? (resultsFilter === "not_listed" ? gapResults : results) : [];
+  const allChecked = visibleResults.length > 0 && selected.size === visibleResults.length;
+  const mapMarkers: PlaceMarker[] = (results ?? [])
+    .filter((r) => typeof r.latitude === "number" && typeof r.longitude === "number")
+    .map((r) => ({ lat: r.latitude as number, lng: r.longitude as number, name: r.business_name, category: "other" }));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -651,19 +655,20 @@ export default function AdminBusinessProspecting() {
               <CardHeader>
                 <CardTitle className="text-base">Search Google Places</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-5">
+                <RadiusMapPlanner
+                  center={center}
+                  radiusMeters={radiusMeters}
+                  onCenterChange={setCenter}
+                  onRadiusChange={setRadiusMeters}
+                  onLocationSet={setLocationLabel}
+                  markers={mapMarkers}
+                  markersLoading={searching}
+                />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
                     <Label>Business category / keyword</Label>
                     <Input placeholder='e.g. "restaurants"' value={keyword} onChange={(e) => setKeyword(e.target.value)} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Location</Label>
-                    <Input placeholder='e.g. "Makati City"' value={location} onChange={(e) => setLocation(e.target.value)} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Radius (km, max 50)</Label>
-                    <Input type="number" min={0.5} max={50} value={radiusKm} onChange={(e) => setRadiusKm(e.target.value)} />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Min. rating (optional)</Label>
@@ -682,50 +687,79 @@ export default function AdminBusinessProspecting() {
                     <Input type="number" min={1} max={20} value={limit} onChange={(e) => setLimit(e.target.value)} />
                   </div>
                 </div>
-                <div className="flex items-center gap-3 mt-5 flex-wrap">
-                  <Button onClick={() => runSearch()} disabled={searching}>
-                    {searching ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Search className="w-4 h-4 mr-1.5" />}
-                    {searching ? "Searching Google Places…" : "Search Google Places"}
-                  </Button>
-                  <p className="text-xs text-gray-500">
-                    Identical searches within 24 hours reuse cached results to limit Google API usage.
-                  </p>
+                <div className="flex items-center gap-x-3 gap-y-1 flex-wrap text-xs text-gray-500">
+                  {searching ? (
+                    <span className="inline-flex items-center gap-1.5 text-gray-600">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Searching Google Places…
+                    </span>
+                  ) : nextSearchAt ? (
+                    <span className="inline-flex items-center gap-1.5 text-amber-700 font-medium">
+                      <Timer className="w-3.5 h-3.5" />
+                      Next search available in {Math.max(1, Math.ceil((nextSearchAt - nowTick) / 1000))}s
+                    </span>
+                  ) : keyword.trim().length < 2 ? (
+                    <span>Enter a business category, then move the pin or adjust the radius — searches run automatically.</span>
+                  ) : (
+                    <span>Searches run automatically when you move the pin or change the radius.</span>
+                  )}
+                  <span>Identical searches within 24 hours reuse cached results to limit Google API usage.</span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Results */}
-            {searching && (
+            {searching && !results && (
               <Card><CardContent className="p-6 space-y-3">
                 {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
               </CardContent></Card>
             )}
 
-            {!searching && results && (
+            {results && (
               <Card>
                 <CardHeader className="flex-row items-center justify-between space-y-0 flex-wrap gap-3">
                   <div>
-                    <CardTitle className="text-base">
-                      {results.length} businesses found — {gapResults.length} with no website listed on Google
-                      {resultCached && <span className="ml-2 text-xs font-normal text-gray-500">(cached results)</span>}
+                    <CardTitle className="text-base flex items-center gap-2 flex-wrap">
+                      {visibleResults.length} of {results.length} businesses shown — {gapResults.length} with no website listed on Google
+                      {resultCached && <span className="text-xs font-normal text-gray-500">(cached results)</span>}
+                      {searching && (
+                        <span className="inline-flex items-center gap-1 text-xs font-normal text-gray-500">
+                          <Loader2 className="w-3 h-3 animate-spin" /> Updating…
+                        </span>
+                      )}
                     </CardTitle>
                     <p className="text-xs text-gray-500 mt-1">
                       "No website listed on Google" indicates a potential website opportunity — it does not confirm
                       that the business has no website.
                     </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!selected.size}
-                    onClick={() => saveProspects(results.filter((r) => selected.has(r.google_place_id)))}
-                  >
-                    Save Selected ({selected.size})
-                  </Button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Tabs value={resultsFilter} onValueChange={(v) => setResultsFilter(v as "all" | "not_listed")}>
+                      <TabsList className="h-9">
+                        <TabsTrigger value="not_listed" className="text-xs">
+                          No Website Listed ({gapResults.length})
+                        </TabsTrigger>
+                        <TabsTrigger value="all" className="text-xs">
+                          All Results ({results.length})
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!selected.size}
+                      onClick={() => saveProspects(results.filter((r) => selected.has(r.google_place_id)))}
+                    >
+                      Save Selected ({selected.size})
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                  {results.length === 0 ? (
-                    <div className="p-10 text-center text-sm text-gray-500">No businesses matched this search.</div>
+                  {visibleResults.length === 0 ? (
+                    <div className="p-10 text-center text-sm text-gray-500">
+                      {results.length === 0
+                        ? "No businesses matched this search."
+                        : 'No website-gap businesses in these results — switch to "All Results" to see everything.'}
+                    </div>
                   ) : (
                     <Table>
                       <TableHeader>
@@ -734,7 +768,7 @@ export default function AdminBusinessProspecting() {
                             <Checkbox
                               checked={allChecked}
                               onCheckedChange={(c) =>
-                                setSelected(c ? new Set(results.map((r) => r.google_place_id)) : new Set())
+                                setSelected(c ? new Set(visibleResults.map((r) => r.google_place_id)) : new Set())
                               }
                             />
                           </TableHead>
@@ -763,7 +797,7 @@ export default function AdminBusinessProspecting() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {results.map((r) => {
+                        {visibleResults.map((r) => {
                           const isSaved = savedPlaceIds.has(r.google_place_id);
                           const isSaving = savingIds.has(r.google_place_id);
                           return (
