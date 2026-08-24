@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { FunctionsHttpError } from "@supabase/supabase-js";
+import { RadiusMapPlanner, type PlaceMarker } from "@/components/advertiser/RadiusMapPlanner";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 import {
   Target, Loader2, Search, Download, ExternalLink, Globe, GlobeLock,
-  MapPin, Star, Info, History, Users, TrendingUp, Building2, Trash2,
+  MapPin, Star, Info, History, Users, TrendingUp, Building2, Trash2, Timer,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -79,6 +81,9 @@ type SearchRow = {
   website_gap_count: number;
   created_at: string;
 };
+
+// Mirrors the server-side per-admin live-search window in business-prospecting-search.
+const MIN_SEARCH_INTERVAL_MS = 15_000;
 
 const PROSPECT_STATUSES = ["new", "reviewed", "contacted", "qualified", "proposal", "won", "lost"] as const;
 
@@ -166,10 +171,11 @@ function toCsv(rows: ProspectRow[]): string {
 // ---------------------------------------------------------------------------
 
 export default function AdminBusinessProspecting() {
-  // Search form
+  // Search controls — the map provides the center + radius
   const [keyword, setKeyword] = useState("");
-  const [location, setLocation] = useState("");
-  const [radiusKm, setRadiusKm] = useState("5");
+  const [center, setCenter] = useState({ lat: 14.5995, lng: 120.9842 });
+  const [radiusMeters, setRadiusMeters] = useState(5000);
+  const [locationLabel, setLocationLabel] = useState("");
   const [minRating, setMinRating] = useState("");
   const [minReviews, setMinReviews] = useState("");
   const [businessType, setBusinessType] = useState("");
@@ -180,9 +186,18 @@ export default function AdminBusinessProspecting() {
   const [results, setResults] = useState<PlaceRow[] | null>(null);
   const [searchId, setSearchId] = useState<string | null>(null);
   const [resultCached, setResultCached] = useState(false);
+  const [resultsFilter, setResultsFilter] = useState<"all" | "not_listed">("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [savedPlaceIds, setSavedPlaceIds] = useState<Set<string>>(new Set());
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
+
+  // Auto-search scheduling (debounce + server rate-limit queue)
+  const [nextSearchAt, setNextSearchAt] = useState<number | null>(null);
+  const [nowTick, setNowTick] = useState(Date.now());
+  const lastLiveSearchAtRef = useRef(0);
+  const queueTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const searchingRef = useRef(false);
+  const rerunRef = useRef(false);
 
   // Prospects state
   const [prospects, setProspects] = useState<ProspectRow[]>([]);
@@ -269,33 +284,38 @@ export default function AdminBusinessProspecting() {
   // Search
   // -------------------------------------------------------------------------
 
-  const runSearch = async (overrides?: {
-    keyword: string; location: string; radiusKm: number;
-    minRating: number | null; minReviews: number | null;
-    businessType: string | null; limit: number;
-  }) => {
-    const params = overrides ?? {
-      keyword: keyword.trim(),
-      location: location.trim(),
-      radiusKm: Number(radiusKm) || 5,
-      minRating: minRating ? Number(minRating) : null,
-      minReviews: minReviews ? Number(minReviews) : null,
-      businessType: businessType.trim() || null,
-      limit: Number(limit) || 20,
-    };
-    if (!overrides) {
-      if (params.keyword.length < 2) { toast.error("Enter a business category or keyword"); return; }
-      if (params.location.length < 2) { toast.error("Enter a location"); return; }
-    }
+  type SearchParams = {
+    keyword: string;
+    location: string;
+    lat?: number;
+    lng?: number;
+    radiusKm: number;
+    minRating: number | null;
+    minReviews: number | null;
+    businessType: string | null;
+    limit: number;
+  };
 
+  // Latest search inputs in a ref so debounce / rate-limit timers never fire
+  // with stale values.
+  const inputsRef = useRef({ keyword, center, radiusMeters, locationLabel, minRating, minReviews, businessType, limit });
+  useEffect(() => {
+    inputsRef.current = { keyword, center, radiusMeters, locationLabel, minRating, minReviews, businessType, limit };
+  }, [keyword, center, radiusMeters, locationLabel, minRating, minReviews, businessType, limit]);
+
+  const executeSearch = useCallback(async (
+    params: SearchParams,
+    opts?: { viaMap?: boolean },
+  ): Promise<"ok" | "error" | "rate_limited"> => {
     setSearching(true);
-    setResults(null);
+    searchingRef.current = true;
     setSelected(new Set());
     try {
       const { data, error } = await supabase.functions.invoke("business-prospecting-search", {
         body: {
           keyword: params.keyword,
           location: params.location,
+          ...(params.lat != null && params.lng != null ? { lat: params.lat, lng: params.lng } : {}),
           radiusKm: params.radiusKm,
           minRating: params.minRating,
           minReviews: params.minReviews,
@@ -303,37 +323,124 @@ export default function AdminBusinessProspecting() {
           limit: params.limit,
         },
       });
-      if (error) {
-        const msg = (data as any)?.error || error.message;
-        toast.error(msg);
-        return;
+
+      // Non-2xx responses (e.g. the 429 rate-limit window) carry the real
+      // message in the error context — read it before falling back.
+      let serverMsg = (data as any)?.error ?? "";
+      if (error && error instanceof FunctionsHttpError) {
+        try { serverMsg = serverMsg || (JSON.parse(await error.context.text())?.error ?? ""); } catch { /* ignore */ }
       }
-      if ((data as any)?.error) {
-        toast.error((data as any).error);
-        return;
+      const errMsg = serverMsg || error?.message || "";
+
+      // Rate-limited by the server: realign the local window and let the
+      // caller queue a retry instead of surfacing a failed request.
+      const waitMatch = /wait (\d+)s/i.exec(errMsg);
+      if (waitMatch) {
+        const waitMs = (Number(waitMatch[1]) + 1) * 1000;
+        lastLiveSearchAtRef.current = Date.now() - (MIN_SEARCH_INTERVAL_MS - waitMs);
+        return "rate_limited";
       }
+      if (error || (data as any)?.error) {
+        toast.error(errMsg || "Search failed. Please try again.");
+        return "error";
+      }
+      if (!data.cached) lastLiveSearchAtRef.current = Date.now();
       if (data.status === "ZERO_RESULTS") {
         setResults([]);
         setResultCached(false);
-        toast.info("No businesses found for that search on Google Places.");
+        if (opts?.viaMap) setResultsFilter("not_listed");
       } else {
         setResults((data.results ?? []) as PlaceRow[]);
         setSearchId(data.searchId ?? null);
         setResultCached(!!data.cached);
+        // Map-triggered searches default to the website-gap view.
+        if (opts?.viaMap) setResultsFilter("not_listed");
         if (data.cached) toast.info("Showing cached results from a recent identical search (no new Google API call).");
       }
       loadSummary();
       loadSearches();
+      return "ok";
     } catch (e: any) {
       toast.error(e?.message ?? "Search failed. Please try again.");
+      return "error";
     } finally {
       setSearching(false);
+      searchingRef.current = false;
     }
-  };
+  }, [loadSummary, loadSearches]);
+
+  const runMapSearch = useCallback(async () => {
+    const i = inputsRef.current;
+    const kw = i.keyword.trim();
+    if (kw.length < 2) return;
+    if (searchingRef.current) { rerunRef.current = true; return; }
+    const outcome = await executeSearch({
+      keyword: kw,
+      location: i.locationLabel.trim(),
+      lat: i.center.lat,
+      lng: i.center.lng,
+      radiusKm: i.radiusMeters / 1000,
+      minRating: i.minRating ? Number(i.minRating) : null,
+      minReviews: i.minReviews ? Number(i.minReviews) : null,
+      businessType: i.businessType.trim() || null,
+      limit: Number(i.limit) || 20,
+    }, { viaMap: true });
+    if (outcome === "rate_limited" || rerunRef.current) {
+      rerunRef.current = false;
+      scheduleMapSearchRef.current();
+    }
+  }, [executeSearch]);
+
+  // Queue a map search, respecting the server's per-admin live-search window:
+  // if the window hasn't elapsed, the search fires the moment it opens and a
+  // countdown indicator is shown instead of a failed request.
+  const scheduleMapSearch = useCallback(() => {
+    if (inputsRef.current.keyword.trim().length < 2) return;
+    if (queueTimerRef.current) { clearTimeout(queueTimerRef.current); queueTimerRef.current = undefined; }
+    const elapsed = Date.now() - lastLiveSearchAtRef.current;
+    const wait = lastLiveSearchAtRef.current > 0 ? MIN_SEARCH_INTERVAL_MS - elapsed : 0;
+    if (wait > 0) {
+      setNextSearchAt(Date.now() + wait);
+      queueTimerRef.current = setTimeout(() => {
+        queueTimerRef.current = undefined;
+        setNextSearchAt(null);
+        void runMapSearch();
+      }, wait + 150);
+    } else {
+      setNextSearchAt(null);
+      void runMapSearch();
+    }
+  }, [runMapSearch]);
+
+  const scheduleMapSearchRef = useRef(scheduleMapSearch);
+  useEffect(() => { scheduleMapSearchRef.current = scheduleMapSearch; }, [scheduleMapSearch]);
+
+  // Debounced auto-search: fires ~800ms after the pin, radius, or keyword settles.
+  useEffect(() => {
+    if (keyword.trim().length < 2) {
+      if (queueTimerRef.current) { clearTimeout(queueTimerRef.current); queueTimerRef.current = undefined; }
+      setNextSearchAt(null);
+      return;
+    }
+    const t = setTimeout(() => scheduleMapSearch(), 800);
+    return () => clearTimeout(t);
+  }, [center.lat, center.lng, radiusMeters, keyword, scheduleMapSearch]);
+
+  // Countdown ticker while a search is queued behind the rate-limit window.
+  useEffect(() => {
+    if (!nextSearchAt) return;
+    const iv = setInterval(() => setNowTick(Date.now()), 500);
+    return () => clearInterval(iv);
+  }, [nextSearchAt]);
+
+  // Cancel any queued search on unmount.
+  useEffect(() => () => {
+    if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
+  }, []);
 
   const reopenSearch = async (s: SearchRow) => {
     setReopening(s.id);
-    await runSearch({
+    await executeSearch({
       keyword: s.keyword,
       location: s.location_text,
       radiusKm: s.radius_km,
