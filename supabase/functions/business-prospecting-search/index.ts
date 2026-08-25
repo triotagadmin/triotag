@@ -248,7 +248,7 @@ serve(async (req) => {
         const d = detData?.status === "OK" ? detData.result : null;
         if (!d) continue;
 
-        const parts = parseAddressComponents(d.address_component);
+        const parts = parseAddressComponents(d.address_components);
         const websiteUrl = d.website ?? null;
         const row = {
           google_place_id: pid,
