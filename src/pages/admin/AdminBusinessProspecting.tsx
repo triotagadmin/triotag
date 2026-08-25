@@ -1,31 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import { RadiusMapPlanner, type PlaceMarker } from "@/components/advertiser/RadiusMapPlanner";
+import { ProspectMap, type ProspectMapMarker } from "@/components/admin/ProspectMap";
 import { Navigation } from "@/components/Navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
-} from "@/components/ui/dialog";
-import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   Target, Loader2, Search, Download, ExternalLink, Globe, GlobeLock,
-  MapPin, Star, Info, History, Users, TrendingUp, Building2, Trash2, Timer,
+  MapPin, Star, History, Building2, Trash2, Timer, AlertTriangle, Check, Phone,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -63,8 +58,6 @@ type ProspectRow = PlaceRow & {
   saved_by: string | null;
   discovered_at: string;
   saved_at: string;
-  created_at: string;
-  updated_at: string;
 };
 
 type SearchRow = {
@@ -82,65 +75,47 @@ type SearchRow = {
   created_at: string;
 };
 
+type Suggestion = { placeId: string; name: string; address: string; lat: number; lng: number };
+
 // Mirrors the server-side per-admin live-search window in business-prospecting-search.
 const MIN_SEARCH_INTERVAL_MS = 15_000;
+const RADIUS_PRESETS = [500, 1000, 2000, 5000, 10000];
+const DEFAULT_CENTER = { lat: 14.5547, lng: 121.0244 }; // Makati
+const LOCATION_EXAMPLES = ["Makati", "BGC", "Quezon City", "Ortigas", "Cebu City"];
 
 const PROSPECT_STATUSES = ["new", "reviewed", "contacted", "qualified", "proposal", "won", "lost"] as const;
 
 const PROSPECT_STATUS_LABEL: Record<string, string> = {
-  new: "New",
-  reviewed: "Reviewed",
-  contacted: "Contacted",
-  qualified: "Qualified",
-  proposal: "Proposal",
-  won: "Won",
-  lost: "Lost",
+  new: "New", reviewed: "Reviewed", contacted: "Contacted", qualified: "Qualified",
+  proposal: "Proposal", won: "Won", lost: "Lost",
 };
 
-const PROSPECT_STATUS_STYLE: Record<string, string> = {
-  new: "bg-blue-100 text-blue-700 border border-blue-200",
-  reviewed: "bg-gray-100 text-gray-600 border border-gray-200",
-  contacted: "bg-yellow-100 text-yellow-700 border border-yellow-300",
-  qualified: "bg-purple-100 text-purple-700 border border-purple-200",
-  proposal: "bg-cyan-100 text-cyan-700 border border-cyan-200",
-  won: "bg-green-100 text-green-700 border border-green-200",
-  lost: "bg-red-100 text-red-600 border border-red-200",
-};
+const radiusLabel = (m: number) => (m >= 1000 ? `${m / 1000}km` : `${m}m`);
 
 function WebsiteStatusBadge({ status }: { status: string }) {
   if (status === "listed") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-100 text-sky-800 border border-sky-300">
         <Globe className="w-3 h-3" /> Website Listed
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-300">
-      <GlobeLock className="w-3 h-3" /> No Website Listed
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-400">
+      <GlobeLock className="w-3 h-3" /> Website Opportunity
     </span>
   );
 }
 
-function ProspectStatusBadge({ status }: { status: string }) {
+function ScoreMeter({ score }: { score: number }) {
+  const tone = score >= 70 ? "bg-green-600" : score >= 40 ? "bg-amber-500" : "bg-gray-400";
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${PROSPECT_STATUS_STYLE[status] || "bg-gray-100 text-gray-600"}`}>
-      {PROSPECT_STATUS_LABEL[status] || status}
-    </span>
-  );
-}
-
-function ScoreBadge({ score }: { score: number }) {
-  const cls =
-    score >= 70
-      ? "bg-green-100 text-green-700 border-green-200"
-      : score >= 40
-        ? "bg-amber-100 text-amber-800 border-amber-300"
-        : "bg-gray-100 text-gray-600 border-gray-200";
-  return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${cls}`}>
-      {score}
-    </span>
+    <div className="flex items-center gap-2 min-w-[120px]">
+      <div className="h-1.5 w-16 rounded-full bg-gray-200 overflow-hidden">
+        <div className={`h-full ${tone}`} style={{ width: `${score}%` }} />
+      </div>
+      <span className="text-xs font-semibold text-gray-900">{score} / 100</span>
+    </div>
   );
 }
 
@@ -171,74 +146,57 @@ function toCsv(rows: ProspectRow[]): string {
 // ---------------------------------------------------------------------------
 
 export default function AdminBusinessProspecting() {
-  // Search controls — the map provides the center + radius
-  const [keyword, setKeyword] = useState("");
-  const [center, setCenter] = useState({ lat: 14.5995, lng: 120.9842 });
-  const [radiusMeters, setRadiusMeters] = useState(5000);
-  const [locationLabel, setLocationLabel] = useState("");
-  const [minRating, setMinRating] = useState("");
-  const [minReviews, setMinReviews] = useState("");
-  const [businessType, setBusinessType] = useState("");
-  const [limit, setLimit] = useState("20");
+  // --- Search controls ---
+  const [keyword, setKeyword] = useState("restaurants");
+  const [center, setCenter] = useState(DEFAULT_CENTER);
+  const [radiusMeters, setRadiusMeters] = useState(2000);
+  const [locationLabel, setLocationLabel] = useState("Makati");
+  const [locationText, setLocationText] = useState("");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [locLoading, setLocLoading] = useState(false);
+  const locDebounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Search state
+  // --- Search state ---
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState<PlaceRow[] | null>(null);
   const [searchId, setSearchId] = useState<string | null>(null);
   const [resultCached, setResultCached] = useState(false);
-  const [resultsFilter, setResultsFilter] = useState<"all" | "not_listed">("all");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [savedPlaceIds, setSavedPlaceIds] = useState<Set<string>>(new Set());
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"opportunities" | "all" | "saved">("opportunities");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
-  // Auto-search scheduling (debounce + server rate-limit queue)
+  // --- Auto-search scheduling ---
   const [nextSearchAt, setNextSearchAt] = useState<number | null>(null);
   const [nowTick, setNowTick] = useState(Date.now());
   const lastLiveSearchAtRef = useRef(0);
   const queueTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const searchingRef = useRef(false);
   const rerunRef = useRef(false);
+  const lastSearchKeyRef = useRef<string>("");
 
-  // Prospects state
+  // --- Prospects ---
   const [prospects, setProspects] = useState<ProspectRow[]>([]);
   const [prospectsLoading, setProspectsLoading] = useState(true);
-  const [detail, setDetail] = useState<ProspectRow | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [editNotes, setEditNotes] = useState("");
   const [editStatus, setEditStatus] = useState("new");
-  const [editAssigned, setEditAssigned] = useState<string>("unassigned");
   const [savingDetail, setSavingDetail] = useState(false);
 
-  // Filters (Saved Prospects)
-  const [fWebsite, setFWebsite] = useState("all");
-  const [fStatus, setFStatus] = useState("all");
-  const [fCategory, setFCategory] = useState("");
-  const [sortBy, setSortBy] = useState("score_desc");
-
-  // History + summary
+  // --- History ---
   const [searches, setSearches] = useState<SearchRow[]>([]);
-  const [searchesLoading, setSearchesLoading] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [adminNames, setAdminNames] = useState<Record<string, string>>({});
-  const [summary, setSummary] = useState({ found: 0, gaps: 0, saved: 0, high: 0 });
   const [reopening, setReopening] = useState<string | null>(null);
+
+  const savedPlaceIds = useMemo(
+    () => new Set(prospects.map((p) => p.google_place_id)),
+    [prospects],
+  );
 
   // -------------------------------------------------------------------------
   // Data loading
   // -------------------------------------------------------------------------
-
-  const loadSummary = useCallback(async () => {
-    const [found, gaps, saved, high] = await Promise.all([
-      supabase.from("prospect_places").select("google_place_id", { count: "exact", head: true }),
-      supabase.from("prospect_places").select("google_place_id", { count: "exact", head: true }).eq("website_status", "not_listed"),
-      supabase.from("business_prospects").select("id", { count: "exact", head: true }),
-      supabase.from("business_prospects").select("id", { count: "exact", head: true }).gte("opportunity_score", 70),
-    ]);
-    setSummary({
-      found: found.count ?? 0,
-      gaps: gaps.count ?? 0,
-      saved: saved.count ?? 0,
-      high: high.count ?? 0,
-    });
-  }, []);
 
   const loadProspects = useCallback(async () => {
     setProspectsLoading(true);
@@ -248,22 +206,15 @@ export default function AdminBusinessProspecting() {
       .order("saved_at", { ascending: false })
       .limit(1000);
     if (error) toast.error(error.message);
-    const rows = (data ?? []) as unknown as ProspectRow[];
-    setProspects(rows);
-    setSavedPlaceIds(new Set(rows.map((r) => r.google_place_id)));
+    setProspects((data ?? []) as unknown as ProspectRow[]);
     setProspectsLoading(false);
   }, []);
 
   const loadSearches = useCallback(async () => {
-    setSearchesLoading(true);
-    const { data, error } = await supabase
-      .from("prospect_searches")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(100);
-    if (error) toast.error(error.message);
+    const { data } = await supabase
+      .from("prospect_searches").select("*")
+      .order("created_at", { ascending: false }).limit(100);
     setSearches((data ?? []) as unknown as SearchRow[]);
-    setSearchesLoading(false);
   }, []);
 
   const loadAdminNames = useCallback(async () => {
@@ -274,42 +225,61 @@ export default function AdminBusinessProspecting() {
   }, []);
 
   useEffect(() => {
-    loadSummary();
     loadProspects();
     loadSearches();
     loadAdminNames();
-  }, [loadSummary, loadProspects, loadSearches, loadAdminNames]);
+  }, [loadProspects, loadSearches, loadAdminNames]);
 
   // -------------------------------------------------------------------------
-  // Search
+  // Location search (server-side Google Places — no key in the browser)
   // -------------------------------------------------------------------------
 
-  type SearchParams = {
-    keyword: string;
-    location: string;
-    lat?: number;
-    lng?: number;
-    radiusKm: number;
-    minRating: number | null;
-    minReviews: number | null;
-    businessType: string | null;
-    limit: number;
+  const onLocationInput = (v: string) => {
+    setLocationText(v);
+    if (locDebounceRef.current) clearTimeout(locDebounceRef.current);
+    if (v.trim().length < 3) { setSuggestions([]); return; }
+    locDebounceRef.current = setTimeout(async () => {
+      setLocLoading(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("search-places", {
+          body: { query: v.trim(), lat: center.lat, lng: center.lng },
+        });
+        if (error) throw error;
+        setSuggestions(((data as any)?.results ?? []) as Suggestion[]);
+      } catch {
+        setSuggestions([]);
+      }
+      setLocLoading(false);
+    }, 450);
   };
 
-  // Latest search inputs in a ref so debounce / rate-limit timers never fire
-  // with stale values.
-  const inputsRef = useRef({ keyword, center, radiusMeters, locationLabel, minRating, minReviews, businessType, limit });
+  const pickSuggestion = (s: Suggestion) => {
+    setCenter({ lat: Number(s.lat), lng: Number(s.lng) });
+    const display = s.address ? `${s.name} — ${s.address}` : s.name;
+    setLocationLabel(display);
+    setLocationText(display);
+    setSuggestions([]);
+  };
+
+  // -------------------------------------------------------------------------
+  // Search execution
+  // -------------------------------------------------------------------------
+
+  const inputsRef = useRef({ keyword, center, radiusMeters, locationLabel });
   useEffect(() => {
-    inputsRef.current = { keyword, center, radiusMeters, locationLabel, minRating, minReviews, businessType, limit };
-  }, [keyword, center, radiusMeters, locationLabel, minRating, minReviews, businessType, limit]);
+    inputsRef.current = { keyword, center, radiusMeters, locationLabel };
+  }, [keyword, center, radiusMeters, locationLabel]);
+
+  type SearchParams = {
+    keyword: string; location: string; lat?: number; lng?: number;
+    radiusKm: number; limit: number;
+  };
 
   const executeSearch = useCallback(async (
     params: SearchParams,
-    opts?: { viaMap?: boolean },
   ): Promise<"ok" | "error" | "rate_limited"> => {
     setSearching(true);
     searchingRef.current = true;
-    setSelected(new Set());
     try {
       const { data, error } = await supabase.functions.invoke("business-prospecting-search", {
         body: {
@@ -317,84 +287,74 @@ export default function AdminBusinessProspecting() {
           location: params.location,
           ...(params.lat != null && params.lng != null ? { lat: params.lat, lng: params.lng } : {}),
           radiusKm: params.radiusKm,
-          minRating: params.minRating,
-          minReviews: params.minReviews,
-          businessType: params.businessType,
           limit: params.limit,
         },
       });
 
-      // Non-2xx responses (e.g. the 429 rate-limit window) carry the real
-      // message in the error context — read it before falling back.
-      let serverMsg = (data as any)?.error ?? "";
+      // Non-2xx responses carry the real message in the error context.
+      let payload: any = data ?? null;
       if (error && error instanceof FunctionsHttpError) {
-        try { serverMsg = serverMsg || (JSON.parse(await error.context.text())?.error ?? ""); } catch { /* ignore */ }
+        try { payload = JSON.parse(await error.context.text()); } catch { /* ignore */ }
       }
+      const serverMsg: string = payload?.error ?? "";
       const errMsg = serverMsg || error?.message || "";
 
-      // Rate-limited by the server: realign the local window and let the
-      // caller queue a retry instead of surfacing a failed request.
-      const waitMatch = /wait (\d+)s/i.exec(errMsg);
-      if (waitMatch) {
-        const waitMs = (Number(waitMatch[1]) + 1) * 1000;
+      // Rate-limited: realign the local window and requeue instead of failing.
+      const retryAfter = payload?.retryAfterSeconds ?? Number(/wait (\d+)s/i.exec(errMsg)?.[1] ?? 0);
+      if (payload?.code === "rate_limited" || retryAfter > 0) {
+        const waitMs = (Number(retryAfter) + 1) * 1000;
         lastLiveSearchAtRef.current = Date.now() - (MIN_SEARCH_INTERVAL_MS - waitMs);
         return "rate_limited";
       }
-      if (error || (data as any)?.error) {
-        toast.error(errMsg || "Search failed. Please try again.");
+      if (error || serverMsg) {
+        console.error("[business-prospecting] search failed:", errMsg);
+        setSearchError(errMsg || "Unable to search Google Places right now.");
         return "error";
       }
-      if (!data.cached) lastLiveSearchAtRef.current = Date.now();
-      if (data.status === "ZERO_RESULTS") {
-        setResults([]);
-        setResultCached(false);
-        if (opts?.viaMap) setResultsFilter("not_listed");
-      } else {
-        setResults((data.results ?? []) as PlaceRow[]);
-        setSearchId(data.searchId ?? null);
-        setResultCached(!!data.cached);
-        // Map-triggered searches default to the website-gap view.
-        if (opts?.viaMap) setResultsFilter("not_listed");
-        if (data.cached) toast.info("Showing cached results from a recent identical search (no new Google API call).");
-      }
-      loadSummary();
+
+      setSearchError(null);
+      if (!payload.cached) lastLiveSearchAtRef.current = Date.now();
+      setResults((payload.results ?? []) as PlaceRow[]);
+      setSearchId(payload.searchId ?? null);
+      setResultCached(!!payload.cached);
       loadSearches();
       return "ok";
     } catch (e: any) {
-      toast.error(e?.message ?? "Search failed. Please try again.");
+      console.error("[business-prospecting] search threw:", e);
+      setSearchError("Unable to search Google Places right now.");
       return "error";
     } finally {
       setSearching(false);
       searchingRef.current = false;
     }
-  }, [loadSummary, loadSearches]);
+  }, [loadSearches]);
 
-  const runMapSearch = useCallback(async () => {
+  const runSearch = useCallback(async (force = false) => {
     const i = inputsRef.current;
     const kw = i.keyword.trim();
     if (kw.length < 2) return;
+    // Duplicate-search protection: identical parameters never re-hit the backend.
+    const key = [kw, i.center.lat.toFixed(4), i.center.lng.toFixed(4), i.radiusMeters].join("|");
+    if (!force && key === lastSearchKeyRef.current) return;
     if (searchingRef.current) { rerunRef.current = true; return; }
+    lastSearchKeyRef.current = key;
     const outcome = await executeSearch({
       keyword: kw,
       location: i.locationLabel.trim(),
       lat: i.center.lat,
       lng: i.center.lng,
       radiusKm: i.radiusMeters / 1000,
-      minRating: i.minRating ? Number(i.minRating) : null,
-      minReviews: i.minReviews ? Number(i.minReviews) : null,
-      businessType: i.businessType.trim() || null,
-      limit: Number(i.limit) || 20,
-    }, { viaMap: true });
+      limit: 20,
+    });
+    if (outcome !== "ok") lastSearchKeyRef.current = "";
     if (outcome === "rate_limited" || rerunRef.current) {
       rerunRef.current = false;
-      scheduleMapSearchRef.current();
+      scheduleRef.current();
     }
   }, [executeSearch]);
 
-  // Queue a map search, respecting the server's per-admin live-search window:
-  // if the window hasn't elapsed, the search fires the moment it opens and a
-  // countdown indicator is shown instead of a failed request.
-  const scheduleMapSearch = useCallback(() => {
+  // Queue a search respecting the server's per-admin live-search window.
+  const schedule = useCallback(() => {
     if (inputsRef.current.keyword.trim().length < 2) return;
     if (queueTimerRef.current) { clearTimeout(queueTimerRef.current); queueTimerRef.current = undefined; }
     const elapsed = Date.now() - lastLiveSearchAtRef.current;
@@ -404,714 +364,660 @@ export default function AdminBusinessProspecting() {
       queueTimerRef.current = setTimeout(() => {
         queueTimerRef.current = undefined;
         setNextSearchAt(null);
-        void runMapSearch();
+        void runSearch();
       }, wait + 150);
     } else {
       setNextSearchAt(null);
-      void runMapSearch();
+      void runSearch();
     }
-  }, [runMapSearch]);
+  }, [runSearch]);
 
-  const scheduleMapSearchRef = useRef(scheduleMapSearch);
-  useEffect(() => { scheduleMapSearchRef.current = scheduleMapSearch; }, [scheduleMapSearch]);
+  const scheduleRef = useRef(schedule);
+  useEffect(() => { scheduleRef.current = schedule; }, [schedule]);
 
-  // Debounced auto-search: fires ~800ms after the pin, radius, or keyword settles.
+  // Debounced auto-search: ~800ms after the location, category, radius or map settles.
   useEffect(() => {
     if (keyword.trim().length < 2) {
       if (queueTimerRef.current) { clearTimeout(queueTimerRef.current); queueTimerRef.current = undefined; }
       setNextSearchAt(null);
       return;
     }
-    const t = setTimeout(() => scheduleMapSearch(), 800);
+    const t = setTimeout(() => schedule(), 800);
     return () => clearTimeout(t);
-  }, [center.lat, center.lng, radiusMeters, keyword, scheduleMapSearch]);
+  }, [center.lat, center.lng, radiusMeters, keyword, schedule]);
 
-  // Countdown ticker while a search is queued behind the rate-limit window.
   useEffect(() => {
     if (!nextSearchAt) return;
     const iv = setInterval(() => setNowTick(Date.now()), 500);
     return () => clearInterval(iv);
   }, [nextSearchAt]);
 
-  // Cancel any queued search on unmount.
   useEffect(() => () => {
     if (queueTimerRef.current) clearTimeout(queueTimerRef.current);
   }, []);
 
+  const handleMapCenterChange = useCallback((c: { lat: number; lng: number }) => {
+    setCenter((prev) =>
+      Math.abs(prev.lat - c.lat) < 1e-5 && Math.abs(prev.lng - c.lng) < 1e-5 ? prev : c,
+    );
+  }, []);
+
   const reopenSearch = async (s: SearchRow) => {
     setReopening(s.id);
+    lastSearchKeyRef.current = "";
     await executeSearch({
-      keyword: s.keyword,
-      location: s.location_text,
-      radiusKm: s.radius_km,
-      minRating: s.min_rating,
-      minReviews: s.min_reviews,
-      businessType: s.business_type,
-      limit: s.result_limit,
+      keyword: s.keyword, location: s.location_text,
+      radiusKm: s.radius_km, limit: s.result_limit,
     });
+    setKeyword(s.keyword);
+    setLocationLabel(s.location_text);
     setReopening(null);
+    setHistoryOpen(false);
   };
 
   // -------------------------------------------------------------------------
   // Save prospects
   // -------------------------------------------------------------------------
 
-  const saveProspects = async (places: PlaceRow[]) => {
-    if (!places.length) return;
+  const saveProspect = async (p: PlaceRow) => {
+    if (savedPlaceIds.has(p.google_place_id)) return;
+    setSavingIds((s) => new Set(s).add(p.google_place_id));
     const { data: { user } } = await supabase.auth.getUser();
-    const ids = new Set(savingIds);
-    places.forEach((p) => ids.add(p.google_place_id));
-    setSavingIds(ids);
+    const { error } = await supabase.from("business_prospects").insert({
+      google_place_id: p.google_place_id,
+      business_name: p.business_name,
+      category: p.category,
+      address: p.address,
+      city: p.city,
+      region: p.region,
+      country: p.country,
+      phone: p.phone,
+      google_rating: p.google_rating,
+      review_count: p.review_count,
+      website_url: p.website_url,
+      website_status: p.website_status,
+      latitude: p.latitude,
+      longitude: p.longitude,
+      google_maps_url: p.google_maps_url,
+      opportunity_score: p.opportunity_score,
+      search_id: searchId,
+      saved_by: user?.id ?? null,
+      source: "google_places",
+    } as any);
+    setSavingIds((s) => { const n = new Set(s); n.delete(p.google_place_id); return n; });
 
-    let savedCount = 0;
-    let dupes = 0;
-    for (const p of places) {
-      const { error } = await supabase.from("business_prospects").insert({
-        google_place_id: p.google_place_id,
-        business_name: p.business_name,
-        category: p.category,
-        address: p.address,
-        city: p.city,
-        region: p.region,
-        country: p.country,
-        phone: p.phone,
-        google_rating: p.google_rating,
-        review_count: p.review_count,
-        website_url: p.website_url,
-        website_status: p.website_status,
-        latitude: p.latitude,
-        longitude: p.longitude,
-        google_maps_url: p.google_maps_url,
-        opportunity_score: p.opportunity_score,
-        search_id: searchId,
-        saved_by: user?.id ?? null,
-        source: "google_places",
-      } as any);
-      if (error) {
-        if (error.code === "23505") dupes++;
-        else toast.error(error.message);
-      } else {
-        savedCount++;
-      }
+    if (error) {
+      // Google Place ID uniqueness prevents duplicates.
+      if (error.code === "23505") toast.info("Already saved as a prospect");
+      else toast.error(error.message);
+    } else {
+      toast.success(`${p.business_name} saved as a prospect`);
     }
+    await loadProspects();
+  };
 
-    const done = new Set(savingIds);
-    places.forEach((p) => done.delete(p.google_place_id));
-    setSavingIds(done);
-    setSelected(new Set());
-
-    if (savedCount) toast.success(`${savedCount} prospect${savedCount > 1 ? "s" : ""} saved`);
-    if (dupes) toast.info(`${dupes} already saved — duplicates skipped`);
+  const removeProspect = async (id: string) => {
+    const { error } = await supabase.from("business_prospects").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Prospect removed");
+    setDetailId(null);
     loadProspects();
-    loadSummary();
   };
 
   // -------------------------------------------------------------------------
-  // Prospect detail
+  // Derived data
   // -------------------------------------------------------------------------
 
-  const openDetail = (p: ProspectRow) => {
-    setDetail(p);
-    setEditNotes(p.notes ?? "");
-    setEditStatus(p.prospect_status);
-    setEditAssigned(p.assigned_to ?? "unassigned");
-  };
+  const areaResults = results ?? [];
+  const opportunities = useMemo(
+    () => areaResults.filter((r) => r.website_status === "not_listed"),
+    [areaResults],
+  );
+  const visible: PlaceRow[] = useMemo(() => {
+    if (filter === "saved") return prospects as PlaceRow[];
+    const rows = filter === "opportunities" ? opportunities : areaResults;
+    return [...rows].sort((a, b) => b.opportunity_score - a.opportunity_score);
+  }, [filter, areaResults, opportunities, prospects]);
+
+  const markers: ProspectMapMarker[] = useMemo(() => {
+    const source = filter === "saved" ? (prospects as PlaceRow[]) : areaResults;
+    return source
+      .filter((r) => typeof r.latitude === "number" && typeof r.longitude === "number")
+      .map((r) => ({
+        id: r.google_place_id,
+        lat: r.latitude as number,
+        lng: r.longitude as number,
+        name: r.business_name,
+        opportunity: r.website_status === "not_listed",
+        saved: savedPlaceIds.has(r.google_place_id),
+      }));
+  }, [filter, areaResults, prospects, savedPlaceIds]);
+
+  const detailPlace: PlaceRow | null = useMemo(() => {
+    if (!detailId) return null;
+    return (
+      areaResults.find((r) => r.google_place_id === detailId) ??
+      (prospects.find((p) => p.google_place_id === detailId) as PlaceRow | undefined) ??
+      null
+    );
+  }, [detailId, areaResults, prospects]);
+
+  const detailProspect = useMemo(
+    () => (detailId ? prospects.find((p) => p.google_place_id === detailId) ?? null : null),
+    [detailId, prospects],
+  );
+
+  useEffect(() => {
+    setEditNotes(detailProspect?.notes ?? "");
+    setEditStatus(detailProspect?.prospect_status ?? "new");
+  }, [detailProspect]);
 
   const saveDetail = async () => {
-    if (!detail) return;
+    if (!detailProspect) return;
     setSavingDetail(true);
     const { error } = await supabase
       .from("business_prospects")
-      .update({
-        notes: editNotes || null,
-        prospect_status: editStatus,
-        assigned_to: editAssigned === "unassigned" ? null : editAssigned,
-      } as any)
-      .eq("id", detail.id);
+      .update({ notes: editNotes || null, prospect_status: editStatus } as any)
+      .eq("id", detailProspect.id);
     setSavingDetail(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Prospect updated");
-    setDetail(null);
     loadProspects();
   };
-
-  const removeProspect = async (p: ProspectRow) => {
-    const { error } = await supabase.from("business_prospects").delete().eq("id", p.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Prospect removed");
-    setDetail(null);
-    loadProspects();
-    loadSummary();
-  };
-
-  // -------------------------------------------------------------------------
-  // Filtering / sorting / export
-  // -------------------------------------------------------------------------
-
-  const filteredProspects = useMemo(() => {
-    let rows = [...prospects];
-    if (fWebsite !== "all") rows = rows.filter((r) => r.website_status === fWebsite);
-    if (fStatus !== "all") rows = rows.filter((r) => r.prospect_status === fStatus);
-    if (fCategory.trim()) {
-      const q = fCategory.trim().toLowerCase();
-      rows = rows.filter((r) => (r.category ?? "").toLowerCase().includes(q));
-    }
-    switch (sortBy) {
-      case "score_desc": rows.sort((a, b) => b.opportunity_score - a.opportunity_score); break;
-      case "score_asc": rows.sort((a, b) => a.opportunity_score - b.opportunity_score); break;
-      case "rating": rows.sort((a, b) => (b.google_rating ?? 0) - (a.google_rating ?? 0)); break;
-      case "reviews": rows.sort((a, b) => (b.review_count ?? 0) - (a.review_count ?? 0)); break;
-      case "name": rows.sort((a, b) => a.business_name.localeCompare(b.business_name)); break;
-      case "discovered": rows.sort((a, b) => b.discovered_at.localeCompare(a.discovered_at)); break;
-    }
-    return rows;
-  }, [prospects, fWebsite, fStatus, fCategory, sortBy]);
 
   const exportCsv = () => {
-    if (!filteredProspects.length) { toast.info("No prospects to export"); return; }
-    const csv = toCsv(filteredProspects);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    if (!prospects.length) { toast.info("No prospects to export"); return; }
+    const blob = new Blob([toCsv(prospects)], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `triotag-prospects-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success(`Exported ${filteredProspects.length} prospects`);
+    toast.success(`Exported ${prospects.length} prospects`);
   };
+
+  const openDetail = (id: string) => { setSelectedId(id); setDetailId(id); };
 
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
 
-  const gapResults = results?.filter((r) => r.website_status === "not_listed") ?? [];
-  const visibleResults = results ? (resultsFilter === "not_listed" ? gapResults : results) : [];
-  const allChecked = visibleResults.length > 0 && selected.size === visibleResults.length;
-  const mapMarkers: PlaceMarker[] = (results ?? [])
-    .filter((r) => typeof r.latitude === "number" && typeof r.longitude === "number")
-    .map((r) => ({ lat: r.latitude as number, lng: r.longitude as number, name: r.business_name, category: "other" }));
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       <Navigation />
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <Target className="w-7 h-7 text-green-600" />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Business Prospecting</h1>
-            <p className="text-sm text-gray-500">
-              Find businesses with website opportunities using Google Places data.
-            </p>
+
+      <div className="px-4 lg:px-6 py-4">
+        {/* Compact header */}
+        <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+          <div className="flex items-center gap-2.5">
+            <Target className="w-6 h-6 text-green-600" />
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 leading-tight">Business Prospecting</h1>
+              <p className="text-sm text-gray-700">
+                Find businesses with website opportunities using Google Places data.
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="text-gray-900" onClick={() => setHistoryOpen(true)}>
+            <History className="w-4 h-4 mr-1.5" /> Search History
+          </Button>
+        </div>
+
+        {/* Workspace: map (60%) + panel (40%) */}
+        <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-11rem)]">
+          {/* ---------------- MAP ---------------- */}
+          <div className="h-[380px] lg:h-auto lg:w-[60%] xl:w-[60%] md:w-full rounded-xl overflow-hidden border border-gray-300 bg-white shadow-sm relative">
+            <ProspectMap
+              center={center}
+              radiusMeters={radiusMeters}
+              markers={markers}
+              selectedId={selectedId}
+              searching={searching}
+              onCenterChange={handleMapCenterChange}
+              onSelect={openDetail}
+            />
+          </div>
+
+          {/* ---------------- PANEL ---------------- */}
+          <div className="lg:w-[40%] flex flex-col min-h-0 gap-3">
+            {/* Controls */}
+            <div className="bg-white border border-gray-300 rounded-xl p-4 space-y-3 shadow-sm">
+              <div className="space-y-1.5 relative">
+                <Label className="text-gray-900 font-semibold text-sm">Search location</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 w-4 h-4 text-gray-500 z-[1]" />
+                  <Input
+                    value={locationText}
+                    onChange={(e) => onLocationInput(e.target.value)}
+                    placeholder="Search location…"
+                    className="pl-9 h-10 bg-white text-gray-900 placeholder:text-gray-500 border-gray-300"
+                  />
+                  {locLoading && <Loader2 className="absolute right-3 top-3 w-4 h-4 text-gray-500 animate-spin" />}
+                </div>
+                <p className="text-xs text-gray-600">
+                  e.g. {LOCATION_EXAMPLES.join(", ")} — or click / drag the map pin.
+                </p>
+                {suggestions.length > 0 && (
+                  <div className="absolute z-[1000] top-full mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {suggestions.map((s) => (
+                      <button
+                        key={s.placeId}
+                        onClick={() => pickSuggestion(s)}
+                        className="w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-gray-100 border-b border-gray-100 last:border-0"
+                      >
+                        <MapPin className="inline w-3 h-3 mr-1 text-green-700" />
+                        <span className="font-medium">{s.name}</span>
+                        {s.address && <span className="text-gray-600"> — {s.address}</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-gray-900 font-semibold text-sm">Business category</Label>
+                <Input
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  placeholder="restaurants, dental clinic, hotel…"
+                  className="h-10 bg-white text-gray-900 placeholder:text-gray-500 border-gray-300"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-gray-900 font-semibold text-sm">Radius</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {RADIUS_PRESETS.map((r) => {
+                    const active = radiusMeters === r;
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRadiusMeters(r)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${
+                          active
+                            ? "bg-green-600 border-green-700 text-white shadow"
+                            : "bg-white border-gray-300 text-gray-800 hover:bg-gray-100"
+                        }`}
+                      >
+                        {radiusLabel(r)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="text-xs text-gray-700 flex items-center gap-2 flex-wrap">
+                {searching ? (
+                  <span className="inline-flex items-center gap-1.5 text-gray-800 font-medium">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Searching this area…
+                  </span>
+                ) : nextSearchAt ? (
+                  <span className="inline-flex items-center gap-1.5 text-amber-800 font-semibold">
+                    <Timer className="w-3.5 h-3.5" />
+                    Next search available in {Math.max(1, Math.ceil((nextSearchAt - nowTick) / 1000))}s
+                  </span>
+                ) : keyword.trim().length < 2 ? (
+                  <span>Enter a business category to start searching automatically.</span>
+                ) : (
+                  <span>
+                    Searches run automatically when you move the map, change the radius or the category.
+                    {resultCached && " Showing cached results (no new Google API call)."}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Error */}
+            {searchError && (
+              <div className="bg-red-50 border border-red-300 rounded-xl p-3 flex items-start gap-2.5">
+                <AlertTriangle className="w-5 h-5 text-red-700 shrink-0 mt-0.5" />
+                <div className="text-sm text-red-900 flex-1">
+                  <p className="font-semibold">Unable to search Google Places right now.</p>
+                  <p className="text-red-800">{searchError}</p>
+                </div>
+                <Button size="sm" variant="outline" className="border-red-300 text-red-800"
+                  onClick={() => { lastSearchKeyRef.current = ""; void runSearch(true); }}>
+                  Try Again
+                </Button>
+              </div>
+            )}
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-white border border-gray-300 rounded-xl px-3 py-2.5 shadow-sm">
+                <div className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-1">
+                  <Building2 className="w-3.5 h-3.5" /> Found
+                </div>
+                <div className="text-2xl font-bold text-gray-900">{areaResults.length}</div>
+              </div>
+              <div className="bg-white border border-gray-300 rounded-xl px-3 py-2.5 shadow-sm">
+                <div className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-1">
+                  <GlobeLock className="w-3.5 h-3.5" /> Opportunities
+                </div>
+                <div className="text-2xl font-bold text-amber-700">{opportunities.length}</div>
+              </div>
+              <div className="bg-white border border-gray-300 rounded-xl px-3 py-2.5 shadow-sm">
+                <div className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5" /> Saved
+                </div>
+                <div className="text-2xl font-bold text-green-700">{prospects.length}</div>
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {([
+                ["opportunities", `Website Opportunities (${opportunities.length})`],
+                ["all", `All Businesses (${areaResults.length})`],
+                ["saved", `Saved (${prospects.length})`],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setFilter(key)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                    filter === key
+                      ? "bg-gray-900 border-gray-900 text-white"
+                      : "bg-white border-gray-300 text-gray-800 hover:bg-gray-100"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+              {filter === "saved" && (
+                <Button variant="outline" size="sm" className="h-8 text-gray-900" onClick={exportCsv}>
+                  <Download className="w-3.5 h-3.5 mr-1.5" /> CSV
+                </Button>
+              )}
+            </div>
+
+            {/* Results list */}
+            <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2">
+              {searching && !results ? (
+                [0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-28 w-full rounded-xl" />)
+              ) : filter === "saved" && prospectsLoading ? (
+                [0, 1, 2].map((i) => <Skeleton key={i} className="h-28 w-full rounded-xl" />)
+              ) : visible.length === 0 ? (
+                <div className="bg-white border border-gray-300 rounded-xl p-8 text-center">
+                  <p className="text-sm font-semibold text-gray-900">
+                    {filter === "saved"
+                      ? "No saved prospects yet."
+                      : results === null
+                        ? "Set a location and category to start."
+                        : "No businesses found in this area."}
+                  </p>
+                  <p className="text-sm text-gray-700 mt-1">
+                    {filter === "saved"
+                      ? "Save businesses from the results list to track them here."
+                      : "Try increasing the radius, changing the category, or moving the map."}
+                  </p>
+                </div>
+              ) : (
+                visible.map((r) => {
+                  const isSaved = savedPlaceIds.has(r.google_place_id);
+                  const isSaving = savingIds.has(r.google_place_id);
+                  const isSelected = selectedId === r.google_place_id;
+                  return (
+                    <div
+                      key={r.google_place_id}
+                      onClick={() => setSelectedId(r.google_place_id)}
+                      className={`bg-white rounded-xl border p-3 cursor-pointer transition-shadow ${
+                        isSelected ? "border-gray-900 shadow-md" : "border-gray-300 hover:shadow-sm"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="text-sm font-bold text-gray-900 truncate">{r.business_name}</h3>
+                          <p className="text-xs text-gray-700 capitalize">{r.category || "Business"}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          {r.google_rating != null && (
+                            <div className="inline-flex items-center gap-1 text-xs font-semibold text-gray-900">
+                              <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                              {r.google_rating.toFixed(1)}
+                            </div>
+                          )}
+                          <div className="text-[11px] text-gray-600">{r.review_count ?? 0} reviews</div>
+                        </div>
+                      </div>
+
+                      <p className="mt-1.5 text-xs text-gray-700 flex items-start gap-1">
+                        <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-gray-500" />
+                        <span className="line-clamp-1">
+                          {[r.city, r.region].filter(Boolean).join(", ") || r.address || "—"}
+                        </span>
+                      </p>
+
+                      <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
+                        <div>
+                          <WebsiteStatusBadge status={r.website_status} />
+                          {r.website_status === "not_listed" && (
+                            <p className="text-[11px] text-amber-900 mt-1">No website listed on Google</p>
+                          )}
+                        </div>
+                        <ScoreMeter score={r.opportunity_score} />
+                      </div>
+
+                      <div className="mt-2.5 flex items-center gap-2">
+                        <Button
+                          size="sm" variant="outline" className="h-8 text-gray-900"
+                          onClick={(e) => { e.stopPropagation(); openDetail(r.google_place_id); }}
+                        >
+                          View
+                        </Button>
+                        {isSaved ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700">
+                            <Check className="w-3.5 h-3.5" /> Saved
+                          </span>
+                        ) : (
+                          <Button
+                            size="sm" className="h-8 bg-green-600 hover:bg-green-700 text-white"
+                            disabled={isSaving}
+                            onClick={(e) => { e.stopPropagation(); void saveProspect(r); }}
+                          >
+                            {isSaving && <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />}
+                            Save Prospect
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
-
-        {/* Summary cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Building2 className="w-4 h-4" /> Businesses Found
-              </CardTitle>
-            </CardHeader>
-            <CardContent><div className="text-3xl font-bold">{summary.found}</div></CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <GlobeLock className="w-4 h-4" /> Website Opportunities
-              </CardTitle>
-            </CardHeader>
-            <CardContent><div className="text-3xl font-bold text-amber-600">{summary.gaps}</div></CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="w-4 h-4" /> Saved Prospects
-              </CardTitle>
-            </CardHeader>
-            <CardContent><div className="text-3xl font-bold">{summary.saved}</div></CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" /> High Opportunity
-              </CardTitle>
-            </CardHeader>
-            <CardContent><div className="text-3xl font-bold text-green-600">{summary.high}</div></CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="search">
-          <TabsList className="mb-4">
-            <TabsTrigger value="search"><Search className="w-4 h-4 mr-1.5" /> Search</TabsTrigger>
-            <TabsTrigger value="prospects"><Users className="w-4 h-4 mr-1.5" /> Saved Prospects</TabsTrigger>
-            <TabsTrigger value="history"><History className="w-4 h-4 mr-1.5" /> Search History</TabsTrigger>
-          </TabsList>
-
-          {/* ================= SEARCH TAB ================= */}
-          <TabsContent value="search">
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="text-base">Search Google Places</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <RadiusMapPlanner
-                  center={center}
-                  radiusMeters={radiusMeters}
-                  onCenterChange={setCenter}
-                  onRadiusChange={setRadiusMeters}
-                  onLocationSet={setLocationLabel}
-                  markers={mapMarkers}
-                  markersLoading={searching}
-                />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-1.5">
-                    <Label>Business category / keyword</Label>
-                    <Input placeholder='e.g. "restaurants"' value={keyword} onChange={(e) => setKeyword(e.target.value)} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Min. rating (optional)</Label>
-                    <Input type="number" min={0} max={5} step={0.1} placeholder="e.g. 4.0" value={minRating} onChange={(e) => setMinRating(e.target.value)} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Min. reviews (optional)</Label>
-                    <Input type="number" min={0} placeholder="e.g. 10" value={minReviews} onChange={(e) => setMinReviews(e.target.value)} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Business type (optional)</Label>
-                    <Input placeholder="e.g. cafe, dental clinic" value={businessType} onChange={(e) => setBusinessType(e.target.value)} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Result limit (max 20)</Label>
-                    <Input type="number" min={1} max={20} value={limit} onChange={(e) => setLimit(e.target.value)} />
-                  </div>
-                </div>
-                <div className="flex items-center gap-x-3 gap-y-1 flex-wrap text-xs text-gray-500">
-                  {searching ? (
-                    <span className="inline-flex items-center gap-1.5 text-gray-600">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Searching Google Places…
-                    </span>
-                  ) : nextSearchAt ? (
-                    <span className="inline-flex items-center gap-1.5 text-amber-700 font-medium">
-                      <Timer className="w-3.5 h-3.5" />
-                      Next search available in {Math.max(1, Math.ceil((nextSearchAt - nowTick) / 1000))}s
-                    </span>
-                  ) : keyword.trim().length < 2 ? (
-                    <span>Enter a business category, then move the pin or adjust the radius — searches run automatically.</span>
-                  ) : (
-                    <span>Searches run automatically when you move the pin or change the radius.</span>
-                  )}
-                  <span>Identical searches within 24 hours reuse cached results to limit Google API usage.</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Results */}
-            {searching && !results && (
-              <Card><CardContent className="p-6 space-y-3">
-                {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
-              </CardContent></Card>
-            )}
-
-            {results && (
-              <Card>
-                <CardHeader className="flex-row items-center justify-between space-y-0 flex-wrap gap-3">
-                  <div>
-                    <CardTitle className="text-base flex items-center gap-2 flex-wrap">
-                      {visibleResults.length} of {results.length} businesses shown — {gapResults.length} with no website listed on Google
-                      {resultCached && <span className="text-xs font-normal text-gray-500">(cached results)</span>}
-                      {searching && (
-                        <span className="inline-flex items-center gap-1 text-xs font-normal text-gray-500">
-                          <Loader2 className="w-3 h-3 animate-spin" /> Updating…
-                        </span>
-                      )}
-                    </CardTitle>
-                    <p className="text-xs text-gray-500 mt-1">
-                      "No website listed on Google" indicates a potential website opportunity — it does not confirm
-                      that the business has no website.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Tabs value={resultsFilter} onValueChange={(v) => setResultsFilter(v as "all" | "not_listed")}>
-                      <TabsList className="h-9">
-                        <TabsTrigger value="not_listed" className="text-xs">
-                          No Website Listed ({gapResults.length})
-                        </TabsTrigger>
-                        <TabsTrigger value="all" className="text-xs">
-                          All Results ({results.length})
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={!selected.size}
-                      onClick={() => saveProspects(results.filter((r) => selected.has(r.google_place_id)))}
-                    >
-                      Save Selected ({selected.size})
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {visibleResults.length === 0 ? (
-                    <div className="p-10 text-center text-sm text-gray-500">
-                      {results.length === 0
-                        ? "No businesses matched this search."
-                        : 'No website-gap businesses in these results — switch to "All Results" to see everything.'}
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-10">
-                            <Checkbox
-                              checked={allChecked}
-                              onCheckedChange={(c) =>
-                                setSelected(c ? new Set(visibleResults.map((r) => r.google_place_id)) : new Set())
-                              }
-                            />
-                          </TableHead>
-                          <TableHead>Business</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Location</TableHead>
-                          <TableHead>Rating</TableHead>
-                          <TableHead>Reviews</TableHead>
-                          <TableHead>Website Status</TableHead>
-                          <TableHead>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger className="inline-flex items-center gap-1">
-                                  Opportunity Score <Info className="w-3.5 h-3.5 text-gray-400" />
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-xs text-xs">
-                                  Deterministic prioritization signal: no website listed (+50), review volume
-                                  (up to +20), rating (up to +10), operational status (+5). Capped at 100.
-                                  A lead-prioritization heuristic, not a business-quality metric.
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </TableHead>
-                          <TableHead>Google Maps</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {visibleResults.map((r) => {
-                          const isSaved = savedPlaceIds.has(r.google_place_id);
-                          const isSaving = savingIds.has(r.google_place_id);
-                          return (
-                            <TableRow
-                              key={r.google_place_id}
-                              className={r.website_status === "not_listed" ? "bg-amber-50/50" : undefined}
-                            >
-                              <TableCell>
-                                <Checkbox
-                                  checked={selected.has(r.google_place_id)}
-                                  onCheckedChange={(c) => {
-                                    const next = new Set(selected);
-                                    if (c) next.add(r.google_place_id);
-                                    else next.delete(r.google_place_id);
-                                    setSelected(next);
-                                  }}
-                                />
-                              </TableCell>
-                              <TableCell className="font-medium max-w-[220px] truncate">{r.business_name}</TableCell>
-                              <TableCell className="capitalize">{r.category || "—"}</TableCell>
-                              <TableCell className="max-w-[200px] truncate">
-                                {[r.city, r.region].filter(Boolean).join(", ") || r.address || "—"}
-                              </TableCell>
-                              <TableCell>
-                                {r.google_rating != null ? (
-                                  <span className="inline-flex items-center gap-1">
-                                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                                    {r.google_rating.toFixed(1)}
-                                  </span>
-                                ) : "—"}
-                              </TableCell>
-                              <TableCell>{r.review_count ?? "—"}</TableCell>
-                              <TableCell><WebsiteStatusBadge status={r.website_status} /></TableCell>
-                              <TableCell><ScoreBadge score={r.opportunity_score} /></TableCell>
-                              <TableCell>
-                                {r.google_maps_url ? (
-                                  <a href={r.google_maps_url} target="_blank" rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-green-700 hover:underline text-xs">
-                                    <MapPin className="w-3.5 h-3.5" /> Open
-                                  </a>
-                                ) : "—"}
-                              </TableCell>
-                              <TableCell>
-                                {isSaved ? (
-                                  <span className="text-xs font-medium text-green-700">Saved</span>
-                                ) : (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    disabled={isSaving}
-                                    onClick={() => saveProspects([r])}
-                                  >
-                                    {isSaving && <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />}
-                                    Save Prospect
-                                  </Button>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* ================= SAVED PROSPECTS TAB ================= */}
-          <TabsContent value="prospects">
-            <Card>
-              <CardHeader className="flex-row items-center justify-between space-y-0 flex-wrap gap-3">
-                <CardTitle className="text-base">Saved Prospects ({filteredProspects.length})</CardTitle>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Select value={fWebsite} onValueChange={setFWebsite}>
-                    <SelectTrigger className="w-[170px] h-9"><SelectValue placeholder="Website status" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Website Statuses</SelectItem>
-                      <SelectItem value="not_listed">No Website Listed</SelectItem>
-                      <SelectItem value="listed">Website Listed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={fStatus} onValueChange={setFStatus}>
-                    <SelectTrigger className="w-[150px] h-9"><SelectValue placeholder="Prospect status" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      {PROSPECT_STATUSES.map((s) => (
-                        <SelectItem key={s} value={s}>{PROSPECT_STATUS_LABEL[s]}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    className="w-[150px] h-9"
-                    placeholder="Filter category…"
-                    value={fCategory}
-                    onChange={(e) => setFCategory(e.target.value)}
-                  />
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-[170px] h-9"><SelectValue placeholder="Sort by" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="score_desc">Score: Highest first</SelectItem>
-                      <SelectItem value="score_asc">Score: Lowest first</SelectItem>
-                      <SelectItem value="rating">Rating</SelectItem>
-                      <SelectItem value="reviews">Review Count</SelectItem>
-                      <SelectItem value="name">Business Name</SelectItem>
-                      <SelectItem value="discovered">Date Discovered</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline" size="sm" onClick={exportCsv}>
-                    <Download className="w-4 h-4 mr-1.5" /> Export CSV
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                {prospectsLoading ? (
-                  <div className="p-6 space-y-3">
-                    {[0, 1, 2].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
-                  </div>
-                ) : filteredProspects.length === 0 ? (
-                  <div className="p-10 text-center text-sm text-gray-500">
-                    No saved prospects yet. Run a search and save the businesses you want to track.
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Business</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Rating</TableHead>
-                        <TableHead>Website Status</TableHead>
-                        <TableHead>Score</TableHead>
-                        <TableHead>Prospect Status</TableHead>
-                        <TableHead>Assigned</TableHead>
-                        <TableHead>Saved</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredProspects.map((p) => (
-                        <TableRow key={p.id} className="cursor-pointer" onClick={() => openDetail(p)}>
-                          <TableCell className="font-medium max-w-[220px] truncate">{p.business_name}</TableCell>
-                          <TableCell className="capitalize">{p.category || "—"}</TableCell>
-                          <TableCell>{p.google_rating != null ? p.google_rating.toFixed(1) : "—"}</TableCell>
-                          <TableCell><WebsiteStatusBadge status={p.website_status} /></TableCell>
-                          <TableCell><ScoreBadge score={p.opportunity_score} /></TableCell>
-                          <TableCell><ProspectStatusBadge status={p.prospect_status} /></TableCell>
-                          <TableCell>{p.assigned_to ? (adminNames[p.assigned_to] || "Admin") : "—"}</TableCell>
-                          <TableCell>{new Date(p.saved_at).toLocaleDateString()}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ================= SEARCH HISTORY TAB ================= */}
-          <TabsContent value="history">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Search History</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                {searchesLoading ? (
-                  <div className="p-6 space-y-3">
-                    {[0, 1, 2].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
-                  </div>
-                ) : searches.length === 0 ? (
-                  <div className="p-10 text-center text-sm text-gray-500">No searches yet.</div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Search Term</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead>Radius</TableHead>
-                        <TableHead>Results</TableHead>
-                        <TableHead>Website Opportunities</TableHead>
-                        <TableHead>Searched By</TableHead>
-                        <TableHead></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {searches.map((s) => (
-                        <TableRow key={s.id}>
-                          <TableCell className="whitespace-nowrap">{new Date(s.created_at).toLocaleString()}</TableCell>
-                          <TableCell className="font-medium">{s.keyword}{s.business_type ? ` · ${s.business_type}` : ""}</TableCell>
-                          <TableCell>{s.location_text}</TableCell>
-                          <TableCell>{s.radius_km} km</TableCell>
-                          <TableCell>{s.results_count}</TableCell>
-                          <TableCell className="text-amber-700 font-medium">{s.website_gap_count}</TableCell>
-                          <TableCell>{adminNames[s.searched_by] || "Admin"}</TableCell>
-                          <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={reopening === s.id}
-                              onClick={() => reopenSearch(s)}
-                            >
-                              {reopening === s.id && <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />}
-                              Reopen
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
 
-      {/* ================= PROSPECT DETAIL DIALOG ================= */}
-      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 flex-wrap">
-              {detail?.business_name}
-              {detail && <WebsiteStatusBadge status={detail.website_status} />}
-              {detail && <ScoreBadge score={detail.opportunity_score} />}
-            </DialogTitle>
-            <DialogDescription>
-              Prospect details from Google Places. Website status reflects Google data only — it does not confirm
-              whether the business operates a website.
-            </DialogDescription>
-          </DialogHeader>
+      {/* ---------------- DETAIL DRAWER ---------------- */}
+      <Sheet open={!!detailId} onOpenChange={(o) => !o && setDetailId(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto bg-white">
+          <SheetHeader>
+            <SheetTitle className="text-gray-900">{detailPlace?.business_name}</SheetTitle>
+            <SheetDescription className="text-gray-700">
+              Google Places data. "No website listed on Google" flags an opportunity — it does not
+              confirm the business has no website.
+            </SheetDescription>
+          </SheetHeader>
 
-          {detail && (
-            <div className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                <div><span className="text-gray-500">Category</span><p className="font-medium capitalize">{detail.category || "—"}</p></div>
-                <div><span className="text-gray-500">Phone</span><p className="font-medium">{detail.phone || "—"}</p></div>
-                <div className="sm:col-span-2"><span className="text-gray-500">Address</span><p className="font-medium">{detail.address || "—"}</p></div>
-                <div><span className="text-gray-500">Rating</span><p className="font-medium">{detail.google_rating != null ? `${detail.google_rating.toFixed(1)} / 5` : "—"}</p></div>
-                <div><span className="text-gray-500">Review Count</span><p className="font-medium">{detail.review_count ?? "—"}</p></div>
-                <div><span className="text-gray-500">Discovered</span><p className="font-medium">{new Date(detail.discovered_at).toLocaleString()}</p></div>
-                <div><span className="text-gray-500">Saved</span><p className="font-medium">{new Date(detail.saved_at).toLocaleString()}</p></div>
-                <div className="sm:col-span-2">
-                  <span className="text-gray-500">Google Place ID</span>
-                  <p className="font-mono text-xs break-all">{detail.google_place_id}</p>
+          {detailPlace && (
+            <div className="mt-4 space-y-4 text-sm">
+              <div className="flex items-center gap-2 flex-wrap">
+                <WebsiteStatusBadge status={detailPlace.website_status} />
+                {detailProspect && (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700">
+                    <Check className="w-3.5 h-3.5" /> Saved prospect
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                <div>
+                  <span className="text-xs text-gray-600">Category</span>
+                  <p className="font-medium text-gray-900 capitalize">{detailPlace.category || "—"}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-600">Phone</span>
+                  <p className="font-medium text-gray-900 flex items-center gap-1">
+                    <Phone className="w-3.5 h-3.5 text-gray-500" />{detailPlace.phone || "—"}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-xs text-gray-600">Address</span>
+                  <p className="font-medium text-gray-900">{detailPlace.address || "—"}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-600">Google rating</span>
+                  <p className="font-medium text-gray-900">
+                    {detailPlace.google_rating != null ? `${detailPlace.google_rating.toFixed(1)} / 5` : "—"}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-600">Reviews</span>
+                  <p className="font-medium text-gray-900">{detailPlace.review_count ?? "—"}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-xs text-gray-600">Website</span>
+                  <p className="font-medium text-gray-900 break-all">
+                    {detailPlace.website_url || "No website listed on Google"}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-xs text-gray-600">Google Place ID</span>
+                  <p className="font-mono text-xs text-gray-900 break-all">{detailPlace.google_place_id}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-xs text-gray-600">Opportunity score</span>
+                  <div className="mt-1"><ScoreMeter score={detailPlace.opportunity_score} /></div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
-                {detail.google_maps_url && (
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={detail.google_maps_url} target="_blank" rel="noopener noreferrer">
-                      <MapPin className="w-4 h-4 mr-1.5" /> Open in Google Maps
+                {detailProspect ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold bg-green-100 text-green-800 border border-green-300">
+                    <Check className="w-4 h-4" /> Saved
+                  </span>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    disabled={savingIds.has(detailPlace.google_place_id)}
+                    onClick={() => saveProspect(detailPlace)}
+                  >
+                    {savingIds.has(detailPlace.google_place_id) && (
+                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                    )}
+                    Save Prospect
+                  </Button>
+                )}
+                {detailPlace.google_maps_url && (
+                  <Button size="sm" variant="outline" className="text-gray-900" asChild>
+                    <a href={detailPlace.google_maps_url} target="_blank" rel="noopener noreferrer">
+                      <MapPin className="w-4 h-4 mr-1.5" /> Open Google Maps
                     </a>
                   </Button>
                 )}
-                {detail.website_url && (
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={detail.website_url} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="w-4 h-4 mr-1.5" /> Open Listed Website
+                {detailPlace.website_url && (
+                  <Button size="sm" variant="outline" className="text-gray-900" asChild>
+                    <a href={detailPlace.website_url} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="w-4 h-4 mr-1.5" /> Open Website
                     </a>
                   </Button>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label>Prospect Status</Label>
-                  <Select value={editStatus} onValueChange={setEditStatus}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {PROSPECT_STATUSES.map((s) => (
-                        <SelectItem key={s} value={s}>{PROSPECT_STATUS_LABEL[s]}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              {detailProspect && (
+                <div className="border-t border-gray-200 pt-4 space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-gray-900 font-semibold">Prospect status</Label>
+                    <Select value={editStatus} onValueChange={setEditStatus}>
+                      <SelectTrigger className="text-gray-900"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {PROSPECT_STATUSES.map((s) => (
+                          <SelectItem key={s} value={s}>{PROSPECT_STATUS_LABEL[s]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-gray-900 font-semibold">Notes</Label>
+                    <Textarea
+                      rows={4}
+                      value={editNotes}
+                      onChange={(e) => setEditNotes(e.target.value)}
+                      placeholder="Internal notes about this prospect…"
+                      className="text-gray-900 placeholder:text-gray-500"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" onClick={saveDetail} disabled={savingDetail}>
+                      {savingDetail && <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />} Save Changes
+                    </Button>
+                    <Button
+                      size="sm" variant="outline"
+                      className="text-red-700 border-red-300 hover:bg-red-50"
+                      onClick={() => removeProspect(detailProspect.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1.5" /> Remove
+                    </Button>
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Assigned Admin</Label>
-                  <Select value={editAssigned} onValueChange={setEditAssigned}>
-                    <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unassigned">Unassigned</SelectItem>
-                      {Object.entries(adminNames).map(([id, name]) => (
-                        <SelectItem key={id} value={id}>{name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Notes</Label>
-                <Textarea
-                  rows={4}
-                  placeholder="Internal notes about this prospect…"
-                  value={editNotes}
-                  onChange={(e) => setEditNotes(e.target.value)}
-                />
-              </div>
+              )}
             </div>
           )}
+        </SheetContent>
+      </Sheet>
 
-          <DialogFooter className="flex-wrap gap-2">
-            <Button
-              variant="outline"
-              className="text-red-600 border-red-200 hover:bg-red-50"
-              onClick={() => detail && removeProspect(detail)}
-            >
-              <Trash2 className="w-4 h-4 mr-1.5" /> Remove
-            </Button>
-            <Button variant="outline" onClick={() => setDetail(null)}>Close</Button>
-            <Button onClick={saveDetail} disabled={savingDetail}>
-              {savingDetail && <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />} Save Changes
-            </Button>
-          </DialogFooter>
+      {/* ---------------- SEARCH HISTORY ---------------- */}
+      <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900">Search History</DialogTitle>
+          </DialogHeader>
+          {searches.length === 0 ? (
+            <p className="py-8 text-center text-sm text-gray-700">No searches yet.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-gray-800">Date</TableHead>
+                  <TableHead className="text-gray-800">Search Term</TableHead>
+                  <TableHead className="text-gray-800">Location</TableHead>
+                  <TableHead className="text-gray-800">Radius</TableHead>
+                  <TableHead className="text-gray-800">Results</TableHead>
+                  <TableHead className="text-gray-800">Opportunities</TableHead>
+                  <TableHead className="text-gray-800">Searched By</TableHead>
+                  <TableHead />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {searches.map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell className="whitespace-nowrap text-gray-900">
+                      {new Date(s.created_at).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="font-medium text-gray-900">{s.keyword}</TableCell>
+                    <TableCell className="text-gray-800 max-w-[220px] truncate">{s.location_text}</TableCell>
+                    <TableCell className="text-gray-800">{s.radius_km} km</TableCell>
+                    <TableCell className="text-gray-800">{s.results_count}</TableCell>
+                    <TableCell className="text-amber-800 font-semibold">{s.website_gap_count}</TableCell>
+                    <TableCell className="text-gray-800">{adminNames[s.searched_by] || "Admin"}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline" size="sm" className="text-gray-900"
+                        disabled={reopening === s.id}
+                        onClick={() => reopenSearch(s)}
+                      >
+                        {reopening === s.id && <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />}
+                        Reopen
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </DialogContent>
       </Dialog>
     </div>
