@@ -169,8 +169,13 @@ serve(async (req) => {
     if (recentSearch) {
       const elapsed = Date.now() - new Date(recentSearch.created_at).getTime();
       if (elapsed < MIN_SEARCH_INTERVAL_MS) {
+        const retryAfterSeconds = Math.ceil((MIN_SEARCH_INTERVAL_MS - elapsed) / 1000);
         return json(
-          { error: `Please wait ${Math.ceil((MIN_SEARCH_INTERVAL_MS - elapsed) / 1000)}s before running another search` },
+          {
+            error: `Please wait ${retryAfterSeconds}s before running another search`,
+            code: "rate_limited",
+            retryAfterSeconds,
+          },
           429,
         );
       }
