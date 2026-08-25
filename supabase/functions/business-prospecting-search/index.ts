@@ -242,7 +242,7 @@ serve(async (req) => {
       try {
         const detUrl =
           `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(pid)}` +
-          `&fields=name,formatted_address,address_component,formatted_phone_number,international_phone_number,rating,user_ratings_total,website,url,business_status,geometry,types&key=${apiKey}`;
+          `&fields=name,formatted_address,address_components,formatted_phone_number,international_phone_number,rating,user_ratings_total,website,url,business_status,geometry,types&key=${apiKey}`;
         const detRes = await fetch(detUrl);
         const detData = detRes.ok ? await detRes.json() : null;
         const d = detData?.status === "OK" ? detData.result : null;
