@@ -87,7 +87,8 @@ serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceKey);
     const { data: isAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
-    if (!isAdmin) return json({ error: "Admin access required" }, 403);
+    const { data: isAgent } = await admin.rpc("has_role", { _user_id: user.id, _role: "agent" });
+    if (!isAdmin && !isAgent) return json({ error: "Admin or Agent access required" }, 403);
 
     // --- Validate input ---
     const body = await req.json().catch(() => ({}));
