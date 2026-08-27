@@ -734,7 +734,7 @@ export default function AdminBusinessProspecting() {
             </div>
 
             {/* Results list */}
-            <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2">
+            <div className="space-y-2 pr-1 lg:max-h-[calc(100vh-24rem)] lg:overflow-y-auto lg:overscroll-contain pb-6">
               {searching && !results ? (
                 [0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-28 w-full rounded-xl" />)
               ) : filter === "saved" && prospectsLoading ? (
