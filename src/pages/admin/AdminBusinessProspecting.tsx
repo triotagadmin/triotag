@@ -565,9 +565,9 @@ export default function AdminBusinessProspecting() {
         </div>
 
         {/* Workspace: map (60%) + panel (40%) */}
-        <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-11rem)]">
+        <div className="flex flex-col lg:flex-row gap-4 lg:items-start">
           {/* ---------------- MAP ---------------- */}
-          <div className="h-[380px] lg:h-auto lg:w-[60%] xl:w-[60%] md:w-full rounded-xl overflow-hidden border border-gray-300 bg-white shadow-sm relative">
+          <div className="h-[380px] lg:h-[calc(100vh-9rem)] lg:sticky lg:top-4 w-full lg:w-[60%] rounded-xl overflow-hidden border border-gray-300 bg-white shadow-sm relative shrink-0">
             <ProspectMap
               center={center}
               radiusMeters={radiusMeters}
@@ -580,7 +580,8 @@ export default function AdminBusinessProspecting() {
           </div>
 
           {/* ---------------- PANEL ---------------- */}
-          <div className="lg:w-[40%] flex flex-col min-h-0 gap-3">
+          <div className="w-full lg:w-[40%] min-w-0 flex flex-col gap-3">
+
             {/* Controls */}
             <div className="bg-white border border-gray-300 rounded-xl p-4 space-y-3 shadow-sm">
               <div className="space-y-1.5 relative">
@@ -733,7 +734,7 @@ export default function AdminBusinessProspecting() {
             </div>
 
             {/* Results list */}
-            <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2">
+            <div className="space-y-2 pr-1 lg:max-h-[calc(100vh-24rem)] lg:overflow-y-auto lg:overscroll-contain pb-6">
               {searching && !results ? (
                 [0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-28 w-full rounded-xl" />)
               ) : filter === "saved" && prospectsLoading ? (
