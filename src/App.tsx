@@ -311,6 +311,11 @@ const App = () => (
               <AdminBusinessProspecting />
             </ProtectedAdminRoute>
           } />
+          <Route path="/agent/business-prospecting" element={
+            <RoleProtectedRoute requireAuth allowedRoles={["agent"]}>
+              <AdminBusinessProspecting />
+            </RoleProtectedRoute>
+          } />
           {/* Advertiser inventory explorer — PUBLIC, no auth required */}
           <Route path="/advertiser/explore" element={<AdvertiserExplore />} />
           <Route path="/advertiser/explore/:city" element={<AdvertiserCityOverview />} />
