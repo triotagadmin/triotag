@@ -23,6 +23,8 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/venue-inventory", label: "My Ad Spaces", icon: Globe },
     { to: "/agent/verified-venues", label: "Verified Venues", icon: ShieldCheck },
     { to: "/agent/discover-locations", label: "Discover Locations", icon: Compass },
+    { to: "/agent/business-prospecting", label: "Business Prospecting", icon: Target },
+
 
     { to: "/publisher/campaigns", label: "Campaigns", icon: Megaphone },
     { to: "/messages", label: "Messages", icon: MessageSquare },
