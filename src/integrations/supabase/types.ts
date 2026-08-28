@@ -4456,6 +4456,102 @@ export type Database = {
           },
         ]
       }
+      social_scanner_leads: {
+        Row: {
+          company_name: string
+          created_at: string
+          created_by: string
+          evidence: Json
+          facebook_url: string | null
+          id: string
+          industry: string | null
+          instagram_url: string | null
+          lead_reasons: Json
+          lead_score: number
+          linkedin_url: string | null
+          location: string | null
+          normalized_name: string
+          notes: string | null
+          opportunity_level: string
+          public_email: string | null
+          public_phone: string | null
+          recommended_services: Json
+          search_criteria: string | null
+          search_industry: string | null
+          search_keywords: string | null
+          search_location: string | null
+          source_urls: Json
+          status: string
+          tiktok_shop_url: string | null
+          tiktok_url: string | null
+          updated_at: string
+          website_domain: string | null
+          website_url: string | null
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          created_by: string
+          evidence?: Json
+          facebook_url?: string | null
+          id?: string
+          industry?: string | null
+          instagram_url?: string | null
+          lead_reasons?: Json
+          lead_score?: number
+          linkedin_url?: string | null
+          location?: string | null
+          normalized_name: string
+          notes?: string | null
+          opportunity_level?: string
+          public_email?: string | null
+          public_phone?: string | null
+          recommended_services?: Json
+          search_criteria?: string | null
+          search_industry?: string | null
+          search_keywords?: string | null
+          search_location?: string | null
+          source_urls?: Json
+          status?: string
+          tiktok_shop_url?: string | null
+          tiktok_url?: string | null
+          updated_at?: string
+          website_domain?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          created_by?: string
+          evidence?: Json
+          facebook_url?: string | null
+          id?: string
+          industry?: string | null
+          instagram_url?: string | null
+          lead_reasons?: Json
+          lead_score?: number
+          linkedin_url?: string | null
+          location?: string | null
+          normalized_name?: string
+          notes?: string | null
+          opportunity_level?: string
+          public_email?: string | null
+          public_phone?: string | null
+          recommended_services?: Json
+          search_criteria?: string | null
+          search_industry?: string | null
+          search_keywords?: string | null
+          search_location?: string | null
+          source_urls?: Json
+          status?: string
+          tiktok_shop_url?: string | null
+          tiktok_url?: string | null
+          updated_at?: string
+          website_domain?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
