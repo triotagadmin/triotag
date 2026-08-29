@@ -79,7 +79,16 @@ function buildGroups(results: TavilyResult[]): Group[] {
     const isSocial = Object.values(SOCIAL_HOSTS).some((re) => re.test(host));
     const isDirectory = DIRECTORY_HOSTS.test(host);
 
-    const company = titleToCompany(r.title);
+    // For social/website URLs the handle or domain identifies the business far more
+    // reliably than the page title (which is often post copy).
+    let company = "";
+    if (isSocial) {
+      const handle = handleFromSocialUrl(r.url);
+      if (handle) company = handle;
+    } else if (!isDirectory) {
+      company = prettifyDomain(host);
+    }
+    if (!company) company = titleToCompany(r.title);
     if (!company || company.length < 2) continue;
     const key = normalizeName(company);
     if (!key) continue;
