@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   Globe, Megaphone, BarChart3, MessageSquare, Bell, User, LayoutDashboard, TrendingUp, Package,
   Image as ImageIcon, Users, History, ClipboardList, Layers, ShieldCheck, MapPinCheck, Compass,
-  Wrench, CalendarDays, QrCode, Smartphone, ChevronDown, MapPin, Target,
+  Wrench, CalendarDays, QrCode, Smartphone, ChevronDown, MapPin, Target, Radar,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
