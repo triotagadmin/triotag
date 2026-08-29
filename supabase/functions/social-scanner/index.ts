@@ -42,6 +42,32 @@ function normalizeName(name: string): string {
 }
 
 /** Derive a display company name from a result title. */
+const SOCIAL_SKIP_SEGMENTS = /^(p|pages|posts|reel|reels|video|videos|watch|company|in|tag|explore|photo|share|profile|groups|events|story|stories|@)$/i;
+
+/** facebook.com/purveyr/posts/123 -> "Purveyr"; tiktok.com/@brand -> "Brand" */
+function handleFromSocialUrl(url: string): string | null {
+  try {
+    const segs = new URL(url).pathname.split("/").filter(Boolean);
+    for (const raw of segs) {
+      const seg = decodeURIComponent(raw).replace(/^@/, "");
+      if (!seg || SOCIAL_SKIP_SEGMENTS.test(seg) || /^\d+$/.test(seg) || seg.length < 3) continue;
+      if (/\.(php|html)$/i.test(seg)) continue;
+      return titleCase(seg.replace(/[._-]+/g, " ").replace(/\s{2,}/g, " ").trim());
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+function prettifyDomain(host: string): string {
+  const base = host.split(".")[0];
+  if (!base || base.length < 3) return "";
+  return titleCase(base.replace(/[-_]+/g, " "));
+}
+
+function titleCase(s: string): string {
+  return s.replace(/\b[a-z]/g, (c) => c.toUpperCase()).slice(0, 120);
+}
+
 function titleToCompany(title: string): string {
   return title
     .split(/[|\u2013\u2014•·]|(?: - )/)[0]
@@ -79,7 +105,16 @@ function buildGroups(results: TavilyResult[]): Group[] {
     const isSocial = Object.values(SOCIAL_HOSTS).some((re) => re.test(host));
     const isDirectory = DIRECTORY_HOSTS.test(host);
 
-    const company = titleToCompany(r.title);
+    // For social/website URLs the handle or domain identifies the business far more
+    // reliably than the page title (which is often post copy).
+    let company = "";
+    if (isSocial) {
+      const handle = handleFromSocialUrl(r.url);
+      if (handle) company = handle;
+    } else if (!isDirectory) {
+      company = prettifyDomain(host);
+    }
+    if (!company) company = titleToCompany(r.title);
     if (!company || company.length < 2) continue;
     const key = normalizeName(company);
     if (!key) continue;
@@ -269,34 +304,57 @@ serve(async (req) => {
       .join(" ")
       .slice(0, 380);
 
-    const tavilyRes = await fetch("https://api.tavily.com/search", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${tavilyKey}` },
-      body: JSON.stringify({
-        query,
-        search_depth: "advanced",
-        max_results: 20,
-        include_answer: false,
-        include_domains: [],
-      }),
+    const runTavily = async (q: string, includeDomains: string[]) => {
+      const res = await fetch("https://api.tavily.com/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${tavilyKey}` },
+        body: JSON.stringify({
+          query: q.slice(0, 380),
+          search_depth: "advanced",
+          max_results: 15,
+          include_answer: false,
+          ...(includeDomains.length ? { include_domains: includeDomains } : {}),
+        }),
+      });
+      if (!res.ok) {
+        console.error("Tavily request failed", res.status);
+        return [] as TavilyResult[];
+      }
+      const data = await res.json();
+      return Array.isArray(data?.results)
+        ? data.results.map((r: any) => ({
+            title: String(r.title ?? ""),
+            url: String(r.url ?? ""),
+            content: String(r.content ?? ""),
+            score: r.score,
+          })) as TavilyResult[]
+        : [];
+    };
+
+    // Three complementary passes: official pages, social profiles, and commerce signals.
+    const [general, social, commerce] = await Promise.all([
+      runTavily(`${query} official website online shop`, []),
+      runTavily(query, ["facebook.com", "instagram.com", "tiktok.com", "linkedin.com"]),
+      runTavily(`${query} shop products order online`, []),
+    ]);
+
+    const seen = new Set<string>();
+    const merged = [...general, ...social, ...commerce].filter((r) => {
+      if (!r.url || seen.has(r.url)) return false;
+      seen.add(r.url);
+      return true;
     });
 
-    if (!tavilyRes.ok) {
-      console.error("Tavily request failed", tavilyRes.status);
-      return json({ error: "Discovery provider request failed. Please try again." }, 502);
+    if (merged.length === 0) {
+      return json({ error: "Discovery provider returned no results. Please try again." }, 502);
     }
 
-    const tavilyData = await tavilyRes.json();
-    const results: TavilyResult[] = Array.isArray(tavilyData?.results)
-      ? tavilyData.results.map((r: any) => ({
-          title: String(r.title ?? ""),
-          url: String(r.url ?? ""),
-          content: String(r.content ?? ""),
-          score: r.score,
-        }))
-      : [];
+    // Drop listicles / forum threads — they describe businesses but are not businesses.
+    const LISTICLE =
+      /^(top|best|\d+\s)|\b(top \d+|best \d+|guide to|list of|where to|things to|r\/|reddit|quora|blog|news|article)\b/i;
+    const results = merged.filter((r) => !LISTICLE.test(r.title.trim()));
 
-    const groups = buildGroups(results);
+    const groups = buildGroups(results.length ? results : merged);
 
     const leads = groups
       .map((g) => {
