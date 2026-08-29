@@ -42,6 +42,32 @@ function normalizeName(name: string): string {
 }
 
 /** Derive a display company name from a result title. */
+const SOCIAL_SKIP_SEGMENTS = /^(p|pages|posts|reel|reels|video|videos|watch|company|in|tag|explore|photo|share|profile|groups|events|story|stories|@)$/i;
+
+/** facebook.com/purveyr/posts/123 -> "Purveyr"; tiktok.com/@brand -> "Brand" */
+function handleFromSocialUrl(url: string): string | null {
+  try {
+    const segs = new URL(url).pathname.split("/").filter(Boolean);
+    for (const raw of segs) {
+      const seg = decodeURIComponent(raw).replace(/^@/, "");
+      if (!seg || SOCIAL_SKIP_SEGMENTS.test(seg) || /^\d+$/.test(seg) || seg.length < 3) continue;
+      if (/\.(php|html)$/i.test(seg)) continue;
+      return titleCase(seg.replace(/[._-]+/g, " ").replace(/\s{2,}/g, " ").trim());
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+function prettifyDomain(host: string): string {
+  const base = host.split(".")[0];
+  if (!base || base.length < 3) return "";
+  return titleCase(base.replace(/[-_]+/g, " "));
+}
+
+function titleCase(s: string): string {
+  return s.replace(/\b[a-z]/g, (c) => c.toUpperCase()).slice(0, 120);
+}
+
 function titleToCompany(title: string): string {
   return title
     .split(/[|\u2013\u2014•·]|(?: - )/)[0]
