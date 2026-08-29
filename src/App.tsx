@@ -23,6 +23,7 @@ import AdminExternalInventory from "./pages/admin/AdminExternalInventory";
 import AdminBrandCampaigns from "./pages/admin/AdminBrandCampaigns";
 import AdminLocalListings from "./pages/admin/AdminLocalListings";
 import AdminBusinessProspecting from "./pages/admin/AdminBusinessProspecting";
+import AdminSocialScanner from "./pages/admin/AdminSocialScanner";
 import AdminBrandAdvertiserApprovals from "./pages/admin/AdminBrandAdvertiserApprovals";
 import AdminVerifiedLocations from "./pages/admin/AdminVerifiedLocations";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
