@@ -269,34 +269,57 @@ serve(async (req) => {
       .join(" ")
       .slice(0, 380);
 
-    const tavilyRes = await fetch("https://api.tavily.com/search", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${tavilyKey}` },
-      body: JSON.stringify({
-        query,
-        search_depth: "advanced",
-        max_results: 20,
-        include_answer: false,
-        include_domains: [],
-      }),
+    const runTavily = async (q: string, includeDomains: string[]) => {
+      const res = await fetch("https://api.tavily.com/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${tavilyKey}` },
+        body: JSON.stringify({
+          query: q.slice(0, 380),
+          search_depth: "advanced",
+          max_results: 15,
+          include_answer: false,
+          ...(includeDomains.length ? { include_domains: includeDomains } : {}),
+        }),
+      });
+      if (!res.ok) {
+        console.error("Tavily request failed", res.status);
+        return [] as TavilyResult[];
+      }
+      const data = await res.json();
+      return Array.isArray(data?.results)
+        ? data.results.map((r: any) => ({
+            title: String(r.title ?? ""),
+            url: String(r.url ?? ""),
+            content: String(r.content ?? ""),
+            score: r.score,
+          })) as TavilyResult[]
+        : [];
+    };
+
+    // Three complementary passes: official pages, social profiles, and commerce signals.
+    const [general, social, commerce] = await Promise.all([
+      runTavily(`${query} official website online shop`, []),
+      runTavily(query, ["facebook.com", "instagram.com", "tiktok.com", "linkedin.com"]),
+      runTavily(`${query} shop products order online`, []),
+    ]);
+
+    const seen = new Set<string>();
+    const merged = [...general, ...social, ...commerce].filter((r) => {
+      if (!r.url || seen.has(r.url)) return false;
+      seen.add(r.url);
+      return true;
     });
 
-    if (!tavilyRes.ok) {
-      console.error("Tavily request failed", tavilyRes.status);
-      return json({ error: "Discovery provider request failed. Please try again." }, 502);
+    if (merged.length === 0) {
+      return json({ error: "Discovery provider returned no results. Please try again." }, 502);
     }
 
-    const tavilyData = await tavilyRes.json();
-    const results: TavilyResult[] = Array.isArray(tavilyData?.results)
-      ? tavilyData.results.map((r: any) => ({
-          title: String(r.title ?? ""),
-          url: String(r.url ?? ""),
-          content: String(r.content ?? ""),
-          score: r.score,
-        }))
-      : [];
+    // Drop listicles / forum threads — they describe businesses but are not businesses.
+    const LISTICLE =
+      /^(top|best|\d+\s)|\b(top \d+|best \d+|guide to|list of|where to|things to|r\/|reddit|quora|blog|news|article)\b/i;
+    const results = merged.filter((r) => !LISTICLE.test(r.title.trim()));
 
-    const groups = buildGroups(results);
+    const groups = buildGroups(results.length ? results : merged);
 
     const leads = groups
       .map((g) => {
