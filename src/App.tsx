@@ -317,6 +317,11 @@ const App = () => (
               <AdminBusinessProspecting />
             </RoleProtectedRoute>
           } />
+          <Route path="/admin/social-scanner" element={
+            <ProtectedAdminRoute>
+              <AdminSocialScanner />
+            </ProtectedAdminRoute>
+          } />
           {/* Advertiser inventory explorer — PUBLIC, no auth required */}
           <Route path="/advertiser/explore" element={<AdvertiserExplore />} />
           <Route path="/advertiser/explore/:city" element={<AdvertiserCityOverview />} />
