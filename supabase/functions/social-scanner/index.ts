@@ -512,33 +512,52 @@ serve(async (req) => {
 
     const groups = buildGroups(results.length ? results : merged);
 
-    const leads = groups
-      .map((g) => {
-        const blob = g.sources.map((s) => `${s.title} ${s.content}`).join(" ");
-        const intel = analyze(g, blob);
-        return {
-          company_name: g.company_name,
-          normalized_name: g.normalized_name,
-          website_url: g.website_url,
-          website_domain: g.website_domain,
-          industry: industry || null,
-          location: location || null,
-          facebook_url: g.facebook_url,
-          instagram_url: g.instagram_url,
-          tiktok_url: g.tiktok_url,
-          tiktok_shop_url: g.tiktok_shop_url,
-          linkedin_url: g.linkedin_url,
-          public_email: g.public_email,
-          public_phone: g.public_phone,
-          source_urls: g.sources.map((s) => s.url),
-          ...intel,
-        };
-      })
-      .sort((a, b) => b.lead_score - a.lead_score);
+    // Geographic context for the map: geocode the searched area once.
+    const googleKey =
+      Deno.env.get("GOOGLE_PLACES_API_KEY") ?? Deno.env.get("GOOGLEPLACESAPIKEY") ?? null;
+    let center: { lat: number; lng: number; label: string } | null = null;
+    if (typeof body?.lat === "number" && typeof body?.lng === "number") {
+      center = { lat: body.lat, lng: body.lng, label: location || "Searched area" };
+    } else if (location) {
+      const hit = await geocode(location, googleKey);
+      if (hit) center = { lat: hit.lat, lng: hit.lng, label: hit.formatted };
+    }
+    const fallback = center ? { label: center.label, lat: center.lat, lng: center.lng } : null;
+
+    const scored = groups
+      .map((g) => ({ g, blob: g.sources.map((s) => `${s.title} ${s.content}`).join(" ") }))
+      .map((x) => ({ ...x, intel: analyze(x.g, x.blob) }))
+      .sort((a, b) => b.intel.lead_score - a.intel.lead_score)
+      .slice(0, 24);
+
+    const leads = [];
+    for (const { g, blob, intel } of scored) {
+      const loc = await resolveLocation(g, blob, googleKey, fallback);
+      leads.push({
+        company_name: g.company_name,
+        normalized_name: g.normalized_name,
+        website_url: g.website_url,
+        website_domain: g.website_domain,
+        industry: industry || null,
+        location: loc.location_label || location || null,
+        facebook_url: g.facebook_url,
+        instagram_url: g.instagram_url,
+        tiktok_url: g.tiktok_url,
+        tiktok_shop_url: g.tiktok_shop_url,
+        linkedin_url: g.linkedin_url,
+        public_email: g.public_email,
+        public_phone: g.public_phone,
+        source_urls: g.sources.map((s) => s.url),
+        ...intel,
+        ...loc,
+      });
+    }
 
     return json({
       query,
       scanned_sources: results.length,
+      center,
+      radius_km: Number(body?.radius_km) || null,
       leads,
       search: { industry, location, keywords, criteria },
     });
