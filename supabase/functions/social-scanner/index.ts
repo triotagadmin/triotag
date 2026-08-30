@@ -163,6 +163,162 @@ function buildGroups(results: TavilyResult[]): Group[] {
 
 type Evidence = { label: string; source_url: string };
 
+/* ------------------------------------------------------------------ *
+ * LOCATION INTELLIGENCE
+ * Evidence-first: a real discovered address is geocoded and marked
+ * VERIFIED. Otherwise a city/area mentioned in sources is geocoded and
+ * clearly marked PREDICTED with a confidence score. Nothing invented.
+ * ------------------------------------------------------------------ */
+
+const PH_CITIES = [
+  "Makati","Taguig","Bonifacio Global City","BGC","Quezon City","Manila","Pasig","Mandaluyong","Parañaque",
+  "Paranaque","Pasay","Marikina","Muntinlupa","Las Piñas","Las Pinas","Caloocan","Valenzuela","San Juan",
+  "Alabang","Ortigas","Cebu City","Mandaue","Lapu-Lapu","Davao City","Iloilo City","Bacolod","Cagayan de Oro",
+  "Baguio","Angeles City","Clark","Pampanga","Bulacan","Cavite","Laguna","Batangas","Rizal","Antipolo",
+  "Tagaytay","Zamboanga City","General Santos","Naga City","Legazpi","Dumaguete","Tacloban","Butuan",
+  "Puerto Princesa","Subic","Olongapo","Santa Rosa","Biñan","Binan","Dasmariñas","Dasmarinas","Imus","Bacoor",
+];
+
+const STREET_RE =
+  /((?:\d{1,5}[A-Za-z]?\s|Unit\s|Suite\s|Blk\.?\s|Block\s|G\/F\s|\d(?:st|nd|rd|th)\s(?:Floor|Flr)\s)[^.\n;|]{6,90}?(?:St\.?|Street|Ave\.?|Avenue|Rd\.?|Road|Blvd\.?|Boulevard|Drive|Dr\.?|Highway|Hwy|Bldg\.?|Building|Tower|Mall|Plaza|Center|Centre|Complex|Village|Barangay|Brgy\.?)[^.\n;|]{0,60})/i;
+
+type LocationIntel = {
+  formatted_address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  location_label: string | null;
+  location_status: "verified" | "predicted" | "unknown";
+  location_confidence: number | null;
+  location_evidence_url: string | null;
+  is_philippines: boolean | null;
+  ph_evidence: string[];
+};
+
+const geoCache = new Map<string, { lat: number; lng: number; formatted: string; precise: boolean } | null>();
+
+async function geocode(query: string, apiKey: string | null) {
+  const key = query.toLowerCase().trim();
+  if (!apiKey || !key) return null;
+  if (geoCache.has(key)) return geoCache.get(key)!;
+  try {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const first = Array.isArray(data?.results) ? data.results[0] : null;
+    if (!first?.geometry?.location) {
+      geoCache.set(key, null);
+      return null;
+    }
+    const out = {
+      lat: Number(first.geometry.location.lat),
+      lng: Number(first.geometry.location.lng),
+      formatted: String(first.formatted_address ?? query),
+      precise: ["ROOFTOP", "RANGE_INTERPOLATED", "GEOMETRIC_CENTER"].includes(
+        String(first.geometry.location_type ?? ""),
+      ),
+    };
+    geoCache.set(key, out);
+    return out;
+  } catch (e) {
+    console.error("geocode failed", e);
+    geoCache.set(key, null);
+    return null;
+  }
+}
+
+function detectPhilippines(g: Group, blob: string) {
+  const ev: string[] = [];
+  if (g.public_phone && /^\+?63|^09|^\(0\d{2}\)/.test(g.public_phone.replace(/[\s-]/g, ""))) {
+    ev.push(`Philippine phone number (${g.public_phone})`);
+  }
+  if (g.website_domain && /\.ph$/i.test(g.website_domain)) ev.push(`.ph domain (${g.website_domain})`);
+  if (/\bphilippines\b|\bmanila\b|\bpinoy\b/i.test(blob)) ev.push("Philippines referenced in discovered sources");
+  const city = PH_CITIES.find((c) => new RegExp(`\\b${c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(blob));
+  if (city) ev.push(`Philippine city referenced: ${city}`);
+  if (/₱|\bPHP\b/.test(blob)) ev.push("Prices listed in Philippine pesos");
+  return { is_philippines: ev.length > 0 ? ev.length >= 1 : null, ph_evidence: ev, city: city ?? null };
+}
+
+async function resolveLocation(
+  g: Group,
+  blob: string,
+  apiKey: string | null,
+  fallback: { label: string; lat: number; lng: number } | null,
+): Promise<LocationIntel> {
+  const ph = detectPhilippines(g, blob);
+  const base: LocationIntel = {
+    formatted_address: null,
+    latitude: null,
+    longitude: null,
+    location_label: null,
+    location_status: "unknown",
+    location_confidence: null,
+    location_evidence_url: null,
+    is_philippines: ph.is_philippines,
+    ph_evidence: ph.ph_evidence,
+  };
+
+  // 1) An explicit street address in a discovered source -> VERIFIED
+  for (const s of g.sources) {
+    const text = `${s.title} ${s.content}`;
+    const m = text.match(STREET_RE);
+    if (!m) continue;
+    const candidate = m[1].replace(/\s{2,}/g, " ").trim();
+    const withCity = ph.city && !new RegExp(ph.city, "i").test(candidate)
+      ? `${candidate}, ${ph.city}, Philippines`
+      : candidate;
+    const hit = await geocode(withCity, apiKey);
+    if (hit && hit.precise) {
+      return {
+        ...base,
+        formatted_address: hit.formatted,
+        latitude: hit.lat,
+        longitude: hit.lng,
+        location_label: hit.formatted,
+        location_status: "verified",
+        location_confidence: null,
+        location_evidence_url: s.url,
+      };
+    }
+  }
+
+  // 2) A city / area referenced in sources -> PREDICTED at city centre
+  if (ph.city) {
+    const hit = await geocode(`${ph.city}, Philippines`, apiKey);
+    if (hit) {
+      let confidence = 55;
+      if (g.public_phone && /^\+?63|^09/.test(g.public_phone.replace(/[\s-]/g, ""))) confidence += 15;
+      if (g.website_domain && /\.ph$/i.test(g.website_domain)) confidence += 10;
+      const mentions = g.sources.filter((s) => new RegExp(ph.city!, "i").test(`${s.title} ${s.content}`));
+      confidence += Math.min(20, mentions.length * 7);
+      return {
+        ...base,
+        latitude: hit.lat,
+        longitude: hit.lng,
+        location_label: `${ph.city}, Philippines`,
+        location_status: "predicted",
+        location_confidence: Math.min(95, confidence),
+        location_evidence_url: mentions[0]?.url ?? g.sources[0]?.url ?? null,
+      };
+    }
+  }
+
+  // 3) Nothing business-specific: fall back to the searched area, low confidence
+  if (fallback) {
+    return {
+      ...base,
+      latitude: fallback.lat,
+      longitude: fallback.lng,
+      location_label: fallback.label,
+      location_status: "predicted",
+      location_confidence: 30,
+      location_evidence_url: g.sources[0]?.url ?? null,
+    };
+  }
+
+  return base;
+}
+
 /**
  * Deterministic, evidence-based TrioTag Lead Score (0-100).
  * Every point added is backed by a source URL shown in the UI.
