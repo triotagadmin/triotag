@@ -4463,16 +4463,24 @@ export type Database = {
           created_by: string
           evidence: Json
           facebook_url: string | null
+          formatted_address: string | null
           id: string
           industry: string | null
           instagram_url: string | null
+          is_philippines: boolean | null
+          latitude: number | null
           lead_reasons: Json
           lead_score: number
           linkedin_url: string | null
           location: string | null
+          location_confidence: number | null
+          location_evidence_url: string | null
+          location_status: string | null
+          longitude: number | null
           normalized_name: string
           notes: string | null
           opportunity_level: string
+          ph_evidence: Json
           public_email: string | null
           public_phone: string | null
           recommended_services: Json
@@ -4494,16 +4502,24 @@ export type Database = {
           created_by: string
           evidence?: Json
           facebook_url?: string | null
+          formatted_address?: string | null
           id?: string
           industry?: string | null
           instagram_url?: string | null
+          is_philippines?: boolean | null
+          latitude?: number | null
           lead_reasons?: Json
           lead_score?: number
           linkedin_url?: string | null
           location?: string | null
+          location_confidence?: number | null
+          location_evidence_url?: string | null
+          location_status?: string | null
+          longitude?: number | null
           normalized_name: string
           notes?: string | null
           opportunity_level?: string
+          ph_evidence?: Json
           public_email?: string | null
           public_phone?: string | null
           recommended_services?: Json
@@ -4525,16 +4541,24 @@ export type Database = {
           created_by?: string
           evidence?: Json
           facebook_url?: string | null
+          formatted_address?: string | null
           id?: string
           industry?: string | null
           instagram_url?: string | null
+          is_philippines?: boolean | null
+          latitude?: number | null
           lead_reasons?: Json
           lead_score?: number
           linkedin_url?: string | null
           location?: string | null
+          location_confidence?: number | null
+          location_evidence_url?: string | null
+          location_status?: string | null
+          longitude?: number | null
           normalized_name?: string
           notes?: string | null
           opportunity_level?: string
+          ph_evidence?: Json
           public_email?: string | null
           public_phone?: string | null
           recommended_services?: Json
