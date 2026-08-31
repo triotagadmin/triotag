@@ -422,6 +422,16 @@ function analyze(g: Group, blob: string) {
   };
 }
 
+function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const la1 = (a.lat * Math.PI) / 180;
+  const la2 = (b.lat * Math.PI) / 180;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -430,7 +440,6 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const tavilyKey = Deno.env.get("Tavily") ?? Deno.env.get("TAVILY_API_KEY");
-    if (!tavilyKey) return json({ error: "Search provider is not configured" }, 500);
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return json({ error: "Authentication required" }, 401);
@@ -446,10 +455,27 @@ serve(async (req) => {
     if (!isAdmin) return json({ error: "Admin access required" }, 403);
 
     const body = await req.json().catch(() => ({}));
+
+    const googleKey =
+      Deno.env.get("GOOGLE_PLACES_API_KEY") ?? Deno.env.get("GOOGLEPLACESAPIKEY") ?? null;
+
+    // Lightweight geocode mode — used to place the search centre + radius circle
+    // on the map before a scan is run.
+    if (body?.mode === "geocode") {
+      const q = String(body?.location ?? "").trim().slice(0, 160);
+      if (!q) return json({ center: null });
+      const hit = await geocode(q, googleKey);
+      return json({ center: hit ? { lat: hit.lat, lng: hit.lng, label: hit.formatted } : null });
+    }
+
+    if (!tavilyKey) return json({ error: "Search provider is not configured" }, 500);
+
     const industry = String(body?.industry ?? "").trim().slice(0, 120);
     const location = String(body?.location ?? "").trim().slice(0, 160);
     const keywords = String(body?.keywords ?? "").trim().slice(0, 200);
     const criteria = String(body?.criteria ?? "").trim().slice(0, 300);
+    const radiusKm = Number(body?.radius_km) > 0 ? Number(body.radius_km) : null;
+    const wantsStream = body?.stream === true;
 
     if (!industry && !keywords) {
       return json({ error: "Provide at least an industry or keywords to scan." }, 400);
@@ -487,82 +513,137 @@ serve(async (req) => {
         : [];
     };
 
-    // Three complementary passes: official pages, social profiles, and commerce signals.
-    const [general, social, commerce] = await Promise.all([
-      runTavily(`${query} official website online shop`, []),
-      runTavily(query, ["facebook.com", "instagram.com", "tiktok.com", "linkedin.com"]),
-      runTavily(`${query} shop products order online`, []),
-    ]);
+    /** Runs the whole scan, emitting each lead as soon as it is resolved. */
+    const runScan = async (emit: (event: string, payload: unknown) => Promise<void> | void) => {
+      // Geographic context for the map: geocode the searched area once.
+      let center: { lat: number; lng: number; label: string } | null = null;
+      if (typeof body?.lat === "number" && typeof body?.lng === "number") {
+        center = { lat: body.lat, lng: body.lng, label: location || "Searched area" };
+      } else if (location) {
+        const hit = await geocode(location, googleKey);
+        if (hit) center = { lat: hit.lat, lng: hit.lng, label: hit.formatted };
+      }
+      await emit("center", { center, radius_km: radiusKm });
 
-    const seen = new Set<string>();
-    const merged = [...general, ...social, ...commerce].filter((r) => {
-      if (!r.url || seen.has(r.url)) return false;
-      seen.add(r.url);
-      return true;
-    });
+      const areaHint = center?.label ?? location;
+      const geoQuery = radiusKm && areaHint ? `${query} near ${areaHint}` : query;
 
-    if (merged.length === 0) {
-      return json({ error: "Discovery provider returned no results. Please try again." }, 502);
-    }
+      const [general, social, commerce] = await Promise.all([
+        runTavily(`${geoQuery} official website online shop`, []),
+        runTavily(geoQuery, ["facebook.com", "instagram.com", "tiktok.com", "linkedin.com"]),
+        runTavily(`${geoQuery} shop products order online address branch`, []),
+      ]);
 
-    // Drop listicles / forum threads — they describe businesses but are not businesses.
-    const LISTICLE =
-      /^(top|best|\d+\s)|\b(top \d+|best \d+|guide to|list of|where to|things to|r\/|reddit|quora|blog|news|article)\b/i;
-    const results = merged.filter((r) => !LISTICLE.test(r.title.trim()));
+      const seen = new Set<string>();
+      const merged = [...general, ...social, ...commerce].filter((r) => {
+        if (!r.url || seen.has(r.url)) return false;
+        seen.add(r.url);
+        return true;
+      });
 
-    const groups = buildGroups(results.length ? results : merged);
+      if (merged.length === 0) {
+        await emit("error", { error: "Discovery provider returned no results. Please try again." });
+        return;
+      }
 
-    // Geographic context for the map: geocode the searched area once.
-    const googleKey =
-      Deno.env.get("GOOGLE_PLACES_API_KEY") ?? Deno.env.get("GOOGLEPLACESAPIKEY") ?? null;
-    let center: { lat: number; lng: number; label: string } | null = null;
-    if (typeof body?.lat === "number" && typeof body?.lng === "number") {
-      center = { lat: body.lat, lng: body.lng, label: location || "Searched area" };
-    } else if (location) {
-      const hit = await geocode(location, googleKey);
-      if (hit) center = { lat: hit.lat, lng: hit.lng, label: hit.formatted };
-    }
-    const fallback = center ? { label: center.label, lat: center.lat, lng: center.lng } : null;
+      const LISTICLE =
+        /^(top|best|\d+\s)|\b(top \d+|best \d+|guide to|list of|where to|things to|r\/|reddit|quora|blog|news|article)\b/i;
+      const results = merged.filter((r) => !LISTICLE.test(r.title.trim()));
 
-    const scored = groups
-      .map((g) => ({ g, blob: g.sources.map((s) => `${s.title} ${s.content}`).join(" ") }))
-      .map((x) => ({ ...x, intel: analyze(x.g, x.blob) }))
-      .sort((a, b) => b.intel.lead_score - a.intel.lead_score)
-      .slice(0, 24);
+      const groups = buildGroups(results.length ? results : merged);
+      const fallback = center ? { label: center.label, lat: center.lat, lng: center.lng } : null;
 
-    const leads = [];
-    for (const { g, blob, intel } of scored) {
-      const loc = await resolveLocation(g, blob, googleKey, fallback);
-      leads.push({
-        company_name: g.company_name,
-        normalized_name: g.normalized_name,
-        website_url: g.website_url,
-        website_domain: g.website_domain,
-        industry: industry || null,
-        location: loc.location_label || location || null,
-        facebook_url: g.facebook_url,
-        instagram_url: g.instagram_url,
-        tiktok_url: g.tiktok_url,
-        tiktok_shop_url: g.tiktok_shop_url,
-        linkedin_url: g.linkedin_url,
-        public_email: g.public_email,
-        public_phone: g.public_phone,
-        source_urls: g.sources.map((s) => s.url),
-        ...intel,
-        ...loc,
+      const scored = groups
+        .map((g) => ({ g, blob: g.sources.map((s) => `${s.title} ${s.content}`).join(" ") }))
+        .map((x) => ({ ...x, intel: analyze(x.g, x.blob) }))
+        .sort((a, b) => b.intel.lead_score - a.intel.lead_score)
+        .slice(0, 24);
+
+      await emit("progress", { scanned_sources: results.length, total_candidates: scored.length });
+
+      const leads: any[] = [];
+      for (const { g, blob, intel } of scored) {
+        const loc = await resolveLocation(g, blob, googleKey, fallback);
+        let distance_km: number | null = null;
+        let within_radius: boolean | null = null;
+        if (center && loc.latitude != null && loc.longitude != null) {
+          distance_km = Number(
+            haversineKm(center, { lat: loc.latitude, lng: loc.longitude }).toFixed(2),
+          );
+          within_radius = radiusKm ? distance_km <= radiusKm : null;
+        }
+        const lead = {
+          company_name: g.company_name,
+          normalized_name: g.normalized_name,
+          website_url: g.website_url,
+          website_domain: g.website_domain,
+          industry: industry || null,
+          location: loc.location_label || location || null,
+          facebook_url: g.facebook_url,
+          instagram_url: g.instagram_url,
+          tiktok_url: g.tiktok_url,
+          tiktok_shop_url: g.tiktok_shop_url,
+          linkedin_url: g.linkedin_url,
+          public_email: g.public_email,
+          public_phone: g.public_phone,
+          source_urls: g.sources.map((s) => s.url),
+          ...intel,
+          ...loc,
+          distance_km,
+          within_radius,
+        };
+        leads.push(lead);
+        await emit("lead", lead);
+      }
+
+      await emit("done", {
+        query,
+        scanned_sources: results.length,
+        center,
+        radius_km: radiusKm,
+        leads,
+        search: { industry, location, keywords, criteria },
+      });
+      return { center, results, leads };
+    };
+
+    if (wantsStream) {
+      const stream = new ReadableStream({
+        async start(controller) {
+          const enc = new TextEncoder();
+          const emit = (event: string, payload: unknown) => {
+            controller.enqueue(enc.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
+          };
+          try {
+            await runScan(emit);
+          } catch (err) {
+            console.error("social-scanner stream error", err);
+            emit("error", { error: "Unexpected error while scanning." });
+          } finally {
+            controller.close();
+          }
+        },
+      });
+      return new Response(stream, {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
       });
     }
 
-    return json({
-      query,
-      scanned_sources: results.length,
-      center,
-      radius_km: Number(body?.radius_km) || null,
-      leads,
-      search: { industry, location, keywords, criteria },
+    let final: any = null;
+    await runScan((event, payload) => {
+      if (event === "done") final = payload;
+      if (event === "error") final = payload;
     });
+    if (!final) return json({ error: "Scan produced no output." }, 502);
+    return json(final, (final as any).error ? 502 : 200);
   } catch (err) {
     console.error("social-scanner error", err);
     return json({ error: "Unexpected error while scanning." }, 500);
   }
 });
+
