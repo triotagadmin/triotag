@@ -444,12 +444,14 @@ export default function AdminSocialScanner() {
 
             <div className="space-y-3 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1">
               {loading && (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center text-sm text-gray-300">
-                  Searching the web and social platforms…
+                <div className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center text-sm text-gray-300">
+                  <Loader2 className="h-4 w-4 animate-spin text-green-400" />
+                  Scanning this area — results appear as they are found…
                 </div>
               )}
 
-              {!loading && leads.map((lead) => {
+              {visibleLeads.map((lead) => {
+
                 const saved = savedKeys.has(lead.normalized_name);
                 const active = selectedId === lead.normalized_name;
                 return (
