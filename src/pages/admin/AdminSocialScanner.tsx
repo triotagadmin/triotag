@@ -333,10 +333,12 @@ export default function AdminSocialScanner() {
           </div>
           <div className="flex gap-3">
             {[
-              { v: leads.length, l: "Prospects" },
+              { v: visibleLeads.length, l: "Prospects" },
+              { v: inRadiusCount, l: `In ${radiusKm} km` },
               { v: verifiedCount, l: "Verified" },
               { v: savedCount, l: "Saved leads" },
             ].map((s) => (
+
               <div key={s.l} className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center">
                 <div className="text-2xl font-bold text-green-400">{s.v}</div>
                 <div className="text-[11px] uppercase tracking-wide text-gray-300">{s.l}</div>
