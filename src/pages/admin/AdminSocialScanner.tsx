@@ -55,7 +55,7 @@ const INDUSTRIES = [
   "Education", "Travel & Hospitality", "Professional Services", "Retail & Convenience",
 ];
 
-const RADIUS_OPTIONS = [2, 5, 10, 25, 50];
+const RADIUS_OPTIONS = [1, 2, 5, 10, 25, 50];
 
 const Field = ({
   label, hint, value, onChange, placeholder, list,
