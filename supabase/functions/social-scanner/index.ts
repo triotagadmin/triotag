@@ -13,7 +13,30 @@ const json = (body: unknown, status = 200) =>
     headers: { "Content-Type": "application/json", ...corsHeaders },
   });
 
-type TavilyResult = { title: string; url: string; content: string; score?: number };
+type TavilyResult = {
+  title: string;
+  url: string;
+  content: string;
+  score?: number;
+  published_date?: string | null;
+};
+
+/** Where leads may be discovered. Keys are what the UI sends. */
+const SOURCE_DOMAINS: Record<string, string[]> = {
+  web: [],
+  facebook: ["facebook.com"],
+  instagram: ["instagram.com"],
+  tiktok: ["tiktok.com"],
+  linkedin: ["linkedin.com"],
+  reddit: ["reddit.com"],
+  x: ["x.com", "twitter.com"],
+  youtube: ["youtube.com"],
+  marketplaces: ["shopee.ph", "lazada.com.ph", "carousell.ph"],
+};
+
+/** Freshness ceiling — never surface posts older than this. */
+const MAX_AGE_DAYS = 60;
+
 
 const SOCIAL_HOSTS: Record<string, RegExp> = {
   facebook_url: /(^|\.)(facebook\.com|fb\.com)$/i,
@@ -477,6 +500,20 @@ serve(async (req) => {
     const radiusKm = Number(body?.radius_km) > 0 ? Number(body.radius_km) : null;
     const wantsStream = body?.stream === true;
 
+    // Where to look for leads. Defaults to the previous behaviour (web + social).
+    const requested: string[] = Array.isArray(body?.sources)
+      ? body.sources.map((s: unknown) => String(s)).filter((s: string) => s in SOURCE_DOMAINS)
+      : ["web", "facebook", "instagram", "tiktok", "linkedin"];
+    const sources = requested.length ? [...new Set(requested)] : ["web"];
+
+    // Freshness: default 7 days, hard-capped at 60 days so stale posts never surface.
+    const freshnessDays = Math.min(
+      MAX_AGE_DAYS,
+      Math.max(1, Number(body?.freshness_days) > 0 ? Number(body.freshness_days) : 7),
+    );
+    const timeRange = freshnessDays <= 1 ? "day" : freshnessDays <= 7 ? "week" : "month";
+    const cutoff = Date.now() - freshnessDays * 24 * 60 * 60 * 1000;
+
     if (!industry && !keywords) {
       return json({ error: "Provide at least an industry or keywords to scan." }, 400);
     }
@@ -495,6 +532,8 @@ serve(async (req) => {
           search_depth: "advanced",
           max_results: 15,
           include_answer: false,
+          time_range: timeRange,
+          days: freshnessDays,
           ...(includeDomains.length ? { include_domains: includeDomains } : {}),
         }),
       });
@@ -509,8 +548,17 @@ serve(async (req) => {
             url: String(r.url ?? ""),
             content: String(r.content ?? ""),
             score: r.score,
+            published_date: r.published_date ?? r.published_time ?? null,
           })) as TavilyResult[]
         : [];
+    };
+
+    /** Drops anything with a published date older than the freshness window. */
+    const isFresh = (r: TavilyResult) => {
+      if (!r.published_date) return true; // undated pages: keep, nothing proves they are stale
+      const t = Date.parse(r.published_date);
+      if (Number.isNaN(t)) return true;
+      return t >= cutoff;
     };
 
     /** Runs the whole scan, emitting each lead as soon as it is resolved. */
@@ -528,27 +576,38 @@ serve(async (req) => {
       const areaHint = center?.label ?? location;
       const geoQuery = radiusKm && areaHint ? `${query} near ${areaHint}` : query;
 
-      const [general, social, commerce] = await Promise.all([
-        runTavily(`${geoQuery} official website online shop`, []),
-        runTavily(geoQuery, ["facebook.com", "instagram.com", "tiktok.com", "linkedin.com"]),
-        runTavily(`${geoQuery} shop products order online address branch`, []),
-      ]);
+      // One pass per selected source; "web" runs the open-web passes.
+      const passes: Promise<TavilyResult[]>[] = [];
+      for (const s of sources) {
+        if (s === "web") {
+          passes.push(runTavily(`${geoQuery} official website online shop`, []));
+          passes.push(runTavily(`${geoQuery} shop products order online address branch`, []));
+        } else {
+          passes.push(runTavily(geoQuery, SOURCE_DOMAINS[s]));
+        }
+      }
+      const passResults = await Promise.all(passes);
 
       const seen = new Set<string>();
-      const merged = [...general, ...social, ...commerce].filter((r) => {
+      const merged = passResults.flat().filter((r) => {
         if (!r.url || seen.has(r.url)) return false;
         seen.add(r.url);
         return true;
-      });
+      }).filter(isFresh);
 
       if (merged.length === 0) {
-        await emit("error", { error: "Discovery provider returned no results. Please try again." });
+        await emit("error", {
+          error: `No results posted in the last ${freshnessDays} days for these sources. Widen the sources or the freshness window.`,
+        });
         return;
       }
 
-      const LISTICLE =
-        /^(top|best|\d+\s)|\b(top \d+|best \d+|guide to|list of|where to|things to|r\/|reddit|quora|blog|news|article)\b/i;
+      // Listicles/forum roundups are noise — unless Reddit was explicitly selected.
+      const LISTICLE = sources.includes("reddit")
+        ? /^(top|best|\d+\s)|\b(top \d+|best \d+|guide to|list of|where to|things to)\b/i
+        : /^(top|best|\d+\s)|\b(top \d+|best \d+|guide to|list of|where to|things to|r\/|reddit|quora|blog|news|article)\b/i;
       const results = merged.filter((r) => !LISTICLE.test(r.title.trim()));
+
 
       const groups = buildGroups(results.length ? results : merged);
       const fallback = center ? { label: center.label, lat: center.lat, lng: center.lng } : null;
@@ -601,6 +660,8 @@ serve(async (req) => {
         scanned_sources: results.length,
         center,
         radius_km: radiusKm,
+        sources,
+        freshness_days: freshnessDays,
         leads,
         search: { industry, location, keywords, criteria },
       });
