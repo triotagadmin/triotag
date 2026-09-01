@@ -38,7 +38,10 @@ type Lead = {
   location_evidence_url: string | null;
   is_philippines: boolean | null;
   ph_evidence: string[];
+  distance_km: number | null;
+  within_radius: boolean | null;
 };
+
 
 const levelStyles: Record<string, string> = {
   high: "bg-green-500/15 text-green-300 border-green-500/40",
@@ -52,7 +55,7 @@ const INDUSTRIES = [
   "Education", "Travel & Hospitality", "Professional Services", "Retail & Convenience",
 ];
 
-const RADIUS_OPTIONS = [2, 5, 10, 25, 50];
+const RADIUS_OPTIONS = [1, 2, 5, 10, 25, 50];
 
 const Field = ({
   label, hint, value, onChange, placeholder, list,
@@ -123,6 +126,9 @@ export default function AdminSocialScanner() {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set());
   const [savedCount, setSavedCount] = useState(0);
+  const [onlyInRadius, setOnlyInRadius] = useState(true);
+  const [centerLabel, setCenterLabel] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
 
   const loadSavedCount = async () => {
     const { count } = await supabase
@@ -133,9 +139,31 @@ export default function AdminSocialScanner() {
 
   useEffect(() => { loadSavedCount(); }, []);
 
+  /** Place the search centre + radius boundary on the map before scanning. */
+  const locateCenter = async () => {
+    if (!location.trim()) return;
+    setLocating(true);
+    const { data, error } = await supabase.functions.invoke("social-scanner", {
+      body: { mode: "geocode", location },
+    });
+    setLocating(false);
+    if (error || !(data as any)?.center) {
+      toast.error("Could not locate that area on the map.");
+      return;
+    }
+    const c = (data as any).center;
+    setCenter({ lat: c.lat, lng: c.lng });
+    setCenterLabel(c.label ?? location);
+  };
+
+  const visibleLeads = useMemo(
+    () => (onlyInRadius && center ? leads.filter((l) => l.within_radius !== false) : leads),
+    [leads, onlyInRadius, center],
+  );
+
   const markers: ScannerMapMarker[] = useMemo(
     () =>
-      leads
+      visibleLeads
         .filter((l) => l.latitude != null && l.longitude != null)
         .map((l) => ({
           id: l.normalized_name,
@@ -145,9 +173,10 @@ export default function AdminSocialScanner() {
           verified: l.location_status === "verified",
           score: l.lead_score,
         })),
-    [leads],
+    [visibleLeads],
   );
 
+  /** Streams the scan so businesses appear progressively as they are resolved. */
   const runScan = async () => {
     if (!industry.trim() && !keywords.trim()) {
       toast.error("Enter an industry or some keywords first.");
@@ -157,24 +186,77 @@ export default function AdminSocialScanner() {
     setLeads([]);
     setScanned(null);
     setSelectedId(null);
-    const { data, error } = await supabase.functions.invoke("social-scanner", {
-      body: { industry, location, keywords, criteria, radius_km: radiusKm },
-    });
-    setLoading(false);
-    if (error) {
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("no-session");
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-scanner`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            industry, location, keywords, criteria,
+            radius_km: radiusKm, stream: true,
+            ...(center ? { lat: center.lat, lng: center.lng } : {}),
+          }),
+        },
+      );
+
+      if (!res.ok || !res.body) {
+        const detail = await res.text().catch(() => "");
+        console.error("social-scanner failed", res.status, detail);
+        toast.error("Scan failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() ?? "";
+        for (const chunk of chunks) {
+          const evLine = chunk.split("\n").find((l) => l.startsWith("event: "));
+          const dataLine = chunk.split("\n").find((l) => l.startsWith("data: "));
+          if (!evLine || !dataLine) continue;
+          const event = evLine.slice(7).trim();
+          let payload: any;
+          try { payload = JSON.parse(dataLine.slice(6)); } catch { continue; }
+
+          if (event === "center" && payload.center) {
+            setCenter({ lat: payload.center.lat, lng: payload.center.lng });
+            setCenterLabel(payload.center.label ?? location);
+          } else if (event === "progress") {
+            setScanned(payload.scanned_sources ?? 0);
+          } else if (event === "lead") {
+            setLeads((prev) => [...prev, payload as Lead]);
+          } else if (event === "error") {
+            toast.error(payload.error ?? "Scan failed.");
+          } else if (event === "done") {
+            setScanned(payload.scanned_sources ?? 0);
+            if (!payload.leads?.length) toast.info("No businesses could be extracted from these sources.");
+          }
+        }
+      }
+    } catch (e) {
+      console.error("social-scanner stream error", e);
       toast.error("Scan failed. Please try again.");
-      return;
+    } finally {
+      setLoading(false);
     }
-    if ((data as any)?.error) {
-      toast.error((data as any).error);
-      return;
-    }
-    const found = ((data as any)?.leads ?? []) as Lead[];
-    setLeads(found);
-    setCenter((data as any)?.center ?? null);
-    setScanned((data as any)?.scanned_sources ?? 0);
-    if (!found.length) toast.info("No businesses could be extracted from these sources.");
   };
+
 
   const saveLead = async (lead: Lead) => {
     setSavingKey(lead.normalized_name);
@@ -229,8 +311,10 @@ export default function AdminSocialScanner() {
     toast.success(`${lead.company_name} saved to leads.`);
   };
 
-  const verifiedCount = leads.filter((l) => l.location_status === "verified").length;
+  const verifiedCount = visibleLeads.filter((l) => l.location_status === "verified").length;
+  const inRadiusCount = leads.filter((l) => l.within_radius === true).length;
   const mappedCount = markers.length;
+
 
   return (
     <div className="min-h-screen bg-[#0c0c0c] text-white">
@@ -249,10 +333,12 @@ export default function AdminSocialScanner() {
           </div>
           <div className="flex gap-3">
             {[
-              { v: leads.length, l: "Prospects" },
+              { v: visibleLeads.length, l: "Prospects" },
+              { v: inRadiusCount, l: `In ${radiusKm} km` },
               { v: verifiedCount, l: "Verified" },
               { v: savedCount, l: "Saved leads" },
             ].map((s) => (
+
               <div key={s.l} className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center">
                 <div className="text-2xl font-bold text-green-400">{s.v}</div>
                 <div className="text-[11px] uppercase tracking-wide text-gray-300">{s.l}</div>
@@ -287,7 +373,8 @@ export default function AdminSocialScanner() {
                 <Field label="Industry" value={industry} onChange={setIndustry}
                   placeholder="Fashion & Apparel" list="scanner-industries" />
                 <Field label="Location" value={location} onChange={setLocation}
-                  placeholder="Makati, Philippines" hint="Map centers on this area" />
+                  placeholder="Makati, Philippines" hint="Search centre for the radius" />
+
                 <Field label="Keywords" value={keywords} onChange={setKeywords}
                   placeholder="boutique, streetwear brand" />
                 <Field label="Business criteria" value={criteria} onChange={setCriteria}
@@ -316,29 +403,55 @@ export default function AdminSocialScanner() {
                 </div>
               </div>
 
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  onClick={locateCenter}
+                  disabled={locating || !location.trim()}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-gray-100 hover:bg-white/10 disabled:opacity-60"
+                >
+                  {locating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MapPin className="h-3.5 w-3.5 text-green-400" />}
+                  Show area on map
+                </button>
+                <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-gray-200">
+                  <input
+                    type="checkbox"
+                    checked={onlyInRadius}
+                    onChange={(e) => setOnlyInRadius(e.target.checked)}
+                    className="h-3.5 w-3.5 accent-green-500"
+                  />
+                  Only businesses inside the radius
+                </label>
+              </div>
+              {centerLabel && (
+                <p className="mt-2 text-[11px] text-gray-400">Centre: {centerLabel} · {radiusKm} km boundary</p>
+              )}
+
               <button
                 onClick={runScan}
                 disabled={loading}
                 className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 px-5 py-2.5 text-sm font-bold text-black transition hover:bg-green-400 disabled:opacity-60"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                {loading ? "Scanning…" : "Scan for businesses"}
+                {loading ? "Scanning…" : "Scan this area"}
               </button>
-              {scanned !== null && !loading && (
+              {scanned !== null && (
                 <p className="mt-3 text-xs text-gray-300">
-                  {scanned} sources analyzed · {leads.length} businesses · {mappedCount} placed on map
+                  {scanned} sources analyzed · {visibleLeads.length} businesses shown · {mappedCount} placed on map
                 </p>
               )}
+
             </section>
 
             <div className="space-y-3 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1">
               {loading && (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center text-sm text-gray-300">
-                  Searching the web and social platforms…
+                <div className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center text-sm text-gray-300">
+                  <Loader2 className="h-4 w-4 animate-spin text-green-400" />
+                  Scanning this area — results appear as they are found…
                 </div>
               )}
 
-              {!loading && leads.map((lead) => {
+              {visibleLeads.map((lead) => {
+
                 const saved = savedKeys.has(lead.normalized_name);
                 const active = selectedId === lead.normalized_name;
                 return (
@@ -361,6 +474,19 @@ export default function AdminSocialScanner() {
                         </p>
                         <div className="mt-2 flex flex-wrap items-center gap-2">
                           <LocationBadge lead={lead} />
+                          {lead.distance_km != null && (
+                            <span
+                              className={`rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                                lead.within_radius === false
+                                  ? "border-white/20 bg-white/10 text-gray-300"
+                                  : "border-green-500/40 bg-green-500/15 text-green-300"
+                              }`}
+                            >
+                              {lead.distance_km} km away
+                              {lead.within_radius === false ? " · outside radius" : ""}
+                            </span>
+                          )}
+
                           {lead.is_philippines && (
                             <span className="rounded-md border border-blue-400/40 bg-blue-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-200">
                               PH-based
