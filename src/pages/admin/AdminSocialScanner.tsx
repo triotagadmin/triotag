@@ -373,7 +373,8 @@ export default function AdminSocialScanner() {
                 <Field label="Industry" value={industry} onChange={setIndustry}
                   placeholder="Fashion & Apparel" list="scanner-industries" />
                 <Field label="Location" value={location} onChange={setLocation}
-                  placeholder="Makati, Philippines" hint="Map centers on this area" />
+                  placeholder="Makati, Philippines" hint="Search centre for the radius" />
+
                 <Field label="Keywords" value={keywords} onChange={setKeywords}
                   placeholder="boutique, streetwear brand" />
                 <Field label="Business criteria" value={criteria} onChange={setCriteria}
