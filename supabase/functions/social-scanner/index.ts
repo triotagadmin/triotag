@@ -13,7 +13,30 @@ const json = (body: unknown, status = 200) =>
     headers: { "Content-Type": "application/json", ...corsHeaders },
   });
 
-type TavilyResult = { title: string; url: string; content: string; score?: number };
+type TavilyResult = {
+  title: string;
+  url: string;
+  content: string;
+  score?: number;
+  published_date?: string | null;
+};
+
+/** Where leads may be discovered. Keys are what the UI sends. */
+const SOURCE_DOMAINS: Record<string, string[]> = {
+  web: [],
+  facebook: ["facebook.com"],
+  instagram: ["instagram.com"],
+  tiktok: ["tiktok.com"],
+  linkedin: ["linkedin.com"],
+  reddit: ["reddit.com"],
+  x: ["x.com", "twitter.com"],
+  youtube: ["youtube.com"],
+  marketplaces: ["shopee.ph", "lazada.com.ph", "carousell.ph"],
+};
+
+/** Freshness ceiling — never surface posts older than this. */
+const MAX_AGE_DAYS = 60;
+
 
 const SOCIAL_HOSTS: Record<string, RegExp> = {
   facebook_url: /(^|\.)(facebook\.com|fb\.com)$/i,
