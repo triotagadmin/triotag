@@ -311,8 +311,10 @@ export default function AdminSocialScanner() {
     toast.success(`${lead.company_name} saved to leads.`);
   };
 
-  const verifiedCount = leads.filter((l) => l.location_status === "verified").length;
+  const verifiedCount = visibleLeads.filter((l) => l.location_status === "verified").length;
+  const inRadiusCount = leads.filter((l) => l.within_radius === true).length;
   const mappedCount = markers.length;
+
 
   return (
     <div className="min-h-screen bg-[#0c0c0c] text-white">
