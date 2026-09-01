@@ -578,13 +578,11 @@ serve(async (req) => {
 
       // One pass per selected source; "web" runs the open-web passes.
       const passes: Promise<TavilyResult[]>[] = [];
-      const socialDomains: string[] = [];
       for (const s of sources) {
         if (s === "web") {
           passes.push(runTavily(`${geoQuery} official website online shop`, []));
           passes.push(runTavily(`${geoQuery} shop products order online address branch`, []));
         } else {
-          socialDomains.push(...SOURCE_DOMAINS[s]);
           passes.push(runTavily(geoQuery, SOURCE_DOMAINS[s]));
         }
       }
@@ -662,6 +660,8 @@ serve(async (req) => {
         scanned_sources: results.length,
         center,
         radius_km: radiusKm,
+        sources,
+        freshness_days: freshnessDays,
         leads,
         search: { industry, location, keywords, criteria },
       });
