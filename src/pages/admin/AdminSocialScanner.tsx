@@ -126,6 +126,9 @@ export default function AdminSocialScanner() {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set());
   const [savedCount, setSavedCount] = useState(0);
+  const [onlyInRadius, setOnlyInRadius] = useState(true);
+  const [centerLabel, setCenterLabel] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
 
   const loadSavedCount = async () => {
     const { count } = await supabase
@@ -136,9 +139,31 @@ export default function AdminSocialScanner() {
 
   useEffect(() => { loadSavedCount(); }, []);
 
+  /** Place the search centre + radius boundary on the map before scanning. */
+  const locateCenter = async () => {
+    if (!location.trim()) return;
+    setLocating(true);
+    const { data, error } = await supabase.functions.invoke("social-scanner", {
+      body: { mode: "geocode", location },
+    });
+    setLocating(false);
+    if (error || !(data as any)?.center) {
+      toast.error("Could not locate that area on the map.");
+      return;
+    }
+    const c = (data as any).center;
+    setCenter({ lat: c.lat, lng: c.lng });
+    setCenterLabel(c.label ?? location);
+  };
+
+  const visibleLeads = useMemo(
+    () => (onlyInRadius && center ? leads.filter((l) => l.within_radius !== false) : leads),
+    [leads, onlyInRadius, center],
+  );
+
   const markers: ScannerMapMarker[] = useMemo(
     () =>
-      leads
+      visibleLeads
         .filter((l) => l.latitude != null && l.longitude != null)
         .map((l) => ({
           id: l.normalized_name,
@@ -148,9 +173,10 @@ export default function AdminSocialScanner() {
           verified: l.location_status === "verified",
           score: l.lead_score,
         })),
-    [leads],
+    [visibleLeads],
   );
 
+  /** Streams the scan so businesses appear progressively as they are resolved. */
   const runScan = async () => {
     if (!industry.trim() && !keywords.trim()) {
       toast.error("Enter an industry or some keywords first.");
@@ -160,24 +186,77 @@ export default function AdminSocialScanner() {
     setLeads([]);
     setScanned(null);
     setSelectedId(null);
-    const { data, error } = await supabase.functions.invoke("social-scanner", {
-      body: { industry, location, keywords, criteria, radius_km: radiusKm },
-    });
-    setLoading(false);
-    if (error) {
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("no-session");
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-scanner`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            industry, location, keywords, criteria,
+            radius_km: radiusKm, stream: true,
+            ...(center ? { lat: center.lat, lng: center.lng } : {}),
+          }),
+        },
+      );
+
+      if (!res.ok || !res.body) {
+        const detail = await res.text().catch(() => "");
+        console.error("social-scanner failed", res.status, detail);
+        toast.error("Scan failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() ?? "";
+        for (const chunk of chunks) {
+          const evLine = chunk.split("\n").find((l) => l.startsWith("event: "));
+          const dataLine = chunk.split("\n").find((l) => l.startsWith("data: "));
+          if (!evLine || !dataLine) continue;
+          const event = evLine.slice(7).trim();
+          let payload: any;
+          try { payload = JSON.parse(dataLine.slice(6)); } catch { continue; }
+
+          if (event === "center" && payload.center) {
+            setCenter({ lat: payload.center.lat, lng: payload.center.lng });
+            setCenterLabel(payload.center.label ?? location);
+          } else if (event === "progress") {
+            setScanned(payload.scanned_sources ?? 0);
+          } else if (event === "lead") {
+            setLeads((prev) => [...prev, payload as Lead]);
+          } else if (event === "error") {
+            toast.error(payload.error ?? "Scan failed.");
+          } else if (event === "done") {
+            setScanned(payload.scanned_sources ?? 0);
+            if (!payload.leads?.length) toast.info("No businesses could be extracted from these sources.");
+          }
+        }
+      }
+    } catch (e) {
+      console.error("social-scanner stream error", e);
       toast.error("Scan failed. Please try again.");
-      return;
+    } finally {
+      setLoading(false);
     }
-    if ((data as any)?.error) {
-      toast.error((data as any).error);
-      return;
-    }
-    const found = ((data as any)?.leads ?? []) as Lead[];
-    setLeads(found);
-    setCenter((data as any)?.center ?? null);
-    setScanned((data as any)?.scanned_sources ?? 0);
-    if (!found.length) toast.info("No businesses could be extracted from these sources.");
   };
+
 
   const saveLead = async (lead: Lead) => {
     setSavingKey(lead.normalized_name);
