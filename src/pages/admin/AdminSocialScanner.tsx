@@ -474,6 +474,19 @@ export default function AdminSocialScanner() {
                         </p>
                         <div className="mt-2 flex flex-wrap items-center gap-2">
                           <LocationBadge lead={lead} />
+                          {lead.distance_km != null && (
+                            <span
+                              className={`rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                                lead.within_radius === false
+                                  ? "border-white/20 bg-white/10 text-gray-300"
+                                  : "border-green-500/40 bg-green-500/15 text-green-300"
+                              }`}
+                            >
+                              {lead.distance_km} km away
+                              {lead.within_radius === false ? " · outside radius" : ""}
+                            </span>
+                          )}
+
                           {lead.is_philippines && (
                             <span className="rounded-md border border-blue-400/40 bg-blue-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-200">
                               PH-based
