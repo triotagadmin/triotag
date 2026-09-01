@@ -38,7 +38,10 @@ type Lead = {
   location_evidence_url: string | null;
   is_philippines: boolean | null;
   ph_evidence: string[];
+  distance_km: number | null;
+  within_radius: boolean | null;
 };
+
 
 const levelStyles: Record<string, string> = {
   high: "bg-green-500/15 text-green-300 border-green-500/40",
