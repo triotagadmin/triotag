@@ -211,6 +211,10 @@ export default function AdminSocialScanner() {
       toast.error("Enter an industry or some keywords first.");
       return;
     }
+    if (sources.length === 0) {
+      toast.error("Pick at least one source to scan.");
+
+    }
     setLoading(true);
     setLeads([]);
     setScanned(null);
