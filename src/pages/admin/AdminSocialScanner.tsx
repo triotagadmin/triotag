@@ -232,6 +232,8 @@ export default function AdminSocialScanner() {
           body: JSON.stringify({
             industry, location, keywords, criteria,
             radius_km: radiusKm, stream: true,
+            sources, freshness_days: freshnessDays,
+
             ...(center ? { lat: center.lat, lng: center.lng } : {}),
           }),
         },
