@@ -57,6 +57,27 @@ const INDUSTRIES = [
 
 const RADIUS_OPTIONS = [1, 2, 5, 10, 25, 50];
 
+/** Where leads may be discovered. */
+const SOURCE_OPTIONS: { id: string; label: string }[] = [
+  { id: "web", label: "Open web" },
+  { id: "facebook", label: "Facebook" },
+  { id: "instagram", label: "Instagram" },
+  { id: "tiktok", label: "TikTok" },
+  { id: "linkedin", label: "LinkedIn" },
+  { id: "reddit", label: "Reddit" },
+  { id: "x", label: "X / Twitter" },
+  { id: "youtube", label: "YouTube" },
+  { id: "marketplaces", label: "Shopee / Lazada / Carousell" },
+];
+
+/** Freshness window — capped at 60 days so nothing older is ever surfaced. */
+const FRESHNESS_OPTIONS = [
+  { days: 7, label: "Last 7 days" },
+  { days: 14, label: "Last 14 days" },
+  { days: 30, label: "Last 30 days" },
+];
+
+
 const Field = ({
   label, hint, value, onChange, placeholder, list,
 }: {
