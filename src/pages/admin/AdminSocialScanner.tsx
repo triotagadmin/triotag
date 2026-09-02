@@ -57,6 +57,27 @@ const INDUSTRIES = [
 
 const RADIUS_OPTIONS = [1, 2, 5, 10, 25, 50];
 
+/** Where leads may be discovered. */
+const SOURCE_OPTIONS: { id: string; label: string }[] = [
+  { id: "web", label: "Open web" },
+  { id: "facebook", label: "Facebook" },
+  { id: "instagram", label: "Instagram" },
+  { id: "tiktok", label: "TikTok" },
+  { id: "linkedin", label: "LinkedIn" },
+  { id: "reddit", label: "Reddit" },
+  { id: "x", label: "X / Twitter" },
+  { id: "youtube", label: "YouTube" },
+  { id: "marketplaces", label: "Shopee / Lazada / Carousell" },
+];
+
+/** Freshness window — capped at 60 days so nothing older is ever surfaced. */
+const FRESHNESS_OPTIONS = [
+  { days: 7, label: "Last 7 days" },
+  { days: 14, label: "Last 14 days" },
+  { days: 30, label: "Last 30 days" },
+];
+
+
 const Field = ({
   label, hint, value, onChange, placeholder, list,
 }: {
@@ -129,6 +150,14 @@ export default function AdminSocialScanner() {
   const [onlyInRadius, setOnlyInRadius] = useState(true);
   const [centerLabel, setCenterLabel] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
+  const [sources, setSources] = useState<string[]>([
+    "web", "facebook", "instagram", "tiktok", "linkedin",
+  ]);
+  const [freshnessDays, setFreshnessDays] = useState(7);
+
+  const toggleSource = (id: string) =>
+    setSources((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
+
 
   const loadSavedCount = async () => {
     const { count } = await supabase
@@ -182,6 +211,10 @@ export default function AdminSocialScanner() {
       toast.error("Enter an industry or some keywords first.");
       return;
     }
+    if (sources.length === 0) {
+      toast.error("Pick at least one source to scan.");
+
+    }
     setLoading(true);
     setLeads([]);
     setScanned(null);
@@ -203,6 +236,8 @@ export default function AdminSocialScanner() {
           body: JSON.stringify({
             industry, location, keywords, criteria,
             radius_km: radiusKm, stream: true,
+            sources, freshness_days: freshnessDays,
+
             ...(center ? { lat: center.lat, lng: center.lng } : {}),
           }),
         },
@@ -380,6 +415,56 @@ export default function AdminSocialScanner() {
                 <Field label="Business criteria" value={criteria} onChange={setCriteria}
                   placeholder="Sells products online" />
               </div>
+
+              <div className="mt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-gray-300">
+                    Where to find leads
+                  </label>
+                  <span className="text-[11px] text-gray-400">{sources.length} selected</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {SOURCE_OPTIONS.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => toggleSource(s.id)}
+                      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                        sources.includes(s.id)
+                          ? "border-green-500 bg-green-500/20 text-green-300"
+                          : "border-white/15 bg-white/5 text-gray-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-300">
+                  Post freshness
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {FRESHNESS_OPTIONS.map((f) => (
+                    <button
+                      key={f.days}
+                      onClick={() => setFreshnessDays(f.days)}
+                      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                        freshnessDays === f.days
+                          ? "border-green-500 bg-green-500/20 text-green-300"
+                          : "border-white/15 bg-white/5 text-gray-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1.5 text-[11px] text-gray-400">
+                  Only posts from the last {freshnessDays} days are scanned — anything 2 months or older is never returned.
+                </p>
+              </div>
+
+
 
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between">
