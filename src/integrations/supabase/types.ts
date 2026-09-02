@@ -196,6 +196,9 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           availability_status: string | null
+          campaign_duration_days: number | null
+          campaign_end_date: string | null
+          campaign_start_date: string | null
           contact_verified_at: string | null
           created_at: string | null
           description: string | null
@@ -206,16 +209,24 @@ export type Database = {
           leased_advertiser_ids: string[]
           location: string | null
           longitude: number | null
+          media_owner_contact_person: string | null
+          media_owner_email: string | null
+          media_owner_name: string | null
+          media_owner_phone: string | null
           media_type: Database["public"]["Enums"]["media_type"]
           media_types: Database["public"]["Enums"]["media_type"][]
           media_urls: Json | null
           monthly_subscription_fee: number | null
           pending_advertiser_email: string | null
           pricing: Json | null
+          proof_urls: Json
           publisher_id: string
           rejection_reason: string | null
           specifications: Json | null
+          submitted_at: string
+          submitted_by_agent: string | null
           title: string
+          total_ad_units: number
           updated_at: string | null
         }
         Insert: {
@@ -228,6 +239,9 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           availability_status?: string | null
+          campaign_duration_days?: number | null
+          campaign_end_date?: string | null
+          campaign_start_date?: string | null
           contact_verified_at?: string | null
           created_at?: string | null
           description?: string | null
@@ -238,16 +252,24 @@ export type Database = {
           leased_advertiser_ids?: string[]
           location?: string | null
           longitude?: number | null
+          media_owner_contact_person?: string | null
+          media_owner_email?: string | null
+          media_owner_name?: string | null
+          media_owner_phone?: string | null
           media_type?: Database["public"]["Enums"]["media_type"]
           media_types?: Database["public"]["Enums"]["media_type"][]
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
           pending_advertiser_email?: string | null
           pricing?: Json | null
+          proof_urls?: Json
           publisher_id: string
           rejection_reason?: string | null
           specifications?: Json | null
+          submitted_at?: string
+          submitted_by_agent?: string | null
           title: string
+          total_ad_units?: number
           updated_at?: string | null
         }
         Update: {
@@ -260,6 +282,9 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           availability_status?: string | null
+          campaign_duration_days?: number | null
+          campaign_end_date?: string | null
+          campaign_start_date?: string | null
           contact_verified_at?: string | null
           created_at?: string | null
           description?: string | null
@@ -270,16 +295,24 @@ export type Database = {
           leased_advertiser_ids?: string[]
           location?: string | null
           longitude?: number | null
+          media_owner_contact_person?: string | null
+          media_owner_email?: string | null
+          media_owner_name?: string | null
+          media_owner_phone?: string | null
           media_type?: Database["public"]["Enums"]["media_type"]
           media_types?: Database["public"]["Enums"]["media_type"][]
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
           pending_advertiser_email?: string | null
           pricing?: Json | null
+          proof_urls?: Json
           publisher_id?: string
           rejection_reason?: string | null
           specifications?: Json | null
+          submitted_at?: string
+          submitted_by_agent?: string | null
           title?: string
+          total_ad_units?: number
           updated_at?: string | null
         }
         Relationships: [
@@ -2488,6 +2521,41 @@ export type Database = {
             columns: ["publisher_id"]
             isOneToOne: false
             referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_reviews: {
+        Row: {
+          action: string
+          ad_space_id: string
+          created_at: string
+          id: string
+          reason: string | null
+          reviewer_id: string | null
+        }
+        Insert: {
+          action: string
+          ad_space_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          reviewer_id?: string | null
+        }
+        Update: {
+          action?: string
+          ad_space_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          reviewer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_reviews_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
             referencedColumns: ["id"]
           },
         ]
@@ -5383,6 +5451,9 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           availability_status: string | null
+          campaign_duration_days: number | null
+          campaign_end_date: string | null
+          campaign_start_date: string | null
           contact_verified_at: string | null
           created_at: string | null
           description: string | null
@@ -5393,16 +5464,24 @@ export type Database = {
           leased_advertiser_ids: string[]
           location: string | null
           longitude: number | null
+          media_owner_contact_person: string | null
+          media_owner_email: string | null
+          media_owner_name: string | null
+          media_owner_phone: string | null
           media_type: Database["public"]["Enums"]["media_type"]
           media_types: Database["public"]["Enums"]["media_type"][]
           media_urls: Json | null
           monthly_subscription_fee: number | null
           pending_advertiser_email: string | null
           pricing: Json | null
+          proof_urls: Json
           publisher_id: string
           rejection_reason: string | null
           specifications: Json | null
+          submitted_at: string
+          submitted_by_agent: string | null
           title: string
+          total_ad_units: number
           updated_at: string | null
         }[]
         SetofOptions: {

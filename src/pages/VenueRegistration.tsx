@@ -591,10 +591,25 @@ const VenueRegistration = () => {
       const combinedFormatDetails: Record<string, any> = {};
       selectedFormats.forEach(fmt => { combinedFormatDetails[fmt] = formatDetails[fmt]; });
 
+      const totalUnits =
+        sumUnits(oohUnits) + sumUnits(doohUnits) + sumUnits(aoohUnits);
+      const supplyPayload: any = {
+        media_owner_name: mediaOwnerName.trim() || null,
+        media_owner_contact_person: mediaOwnerContact.trim() || null,
+        media_owner_email: mediaOwnerEmail.trim().toLowerCase() || null,
+        media_owner_phone: mediaOwnerPhone.trim() || null,
+        total_ad_units: totalUnits,
+        campaign_duration_days: campaignDurationDays ? parseInt(campaignDurationDays) : null,
+        campaign_start_date: campaignStartDate || null,
+        campaign_end_date: campaignEndDate || null,
+        proof_urls: proofUrls,
+      };
+
       if (isEditing) {
         const emailChanged = normalizedContactEmail !== originalContactEmail;
         const updatePayload: any = {
           ...venueData,
+          ...supplyPayload,
           media_type: selectedFormats[0] || editingMediaType,
           media_types: selectedFormats,
           specifications: {
@@ -619,6 +634,7 @@ const VenueRegistration = () => {
       } else {
         const insertPayload: any = {
           ...venueData,
+          ...supplyPayload,
           media_type: selectedFormats[0],
           media_types: selectedFormats,
           specifications: { ...(venueData.specifications as any), format_details: combinedFormatDetails },
