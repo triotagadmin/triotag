@@ -150,6 +150,14 @@ export default function AdminSocialScanner() {
   const [onlyInRadius, setOnlyInRadius] = useState(true);
   const [centerLabel, setCenterLabel] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
+  const [sources, setSources] = useState<string[]>([
+    "web", "facebook", "instagram", "tiktok", "linkedin",
+  ]);
+  const [freshnessDays, setFreshnessDays] = useState(7);
+
+  const toggleSource = (id: string) =>
+    setSources((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
+
 
   const loadSavedCount = async () => {
     const { count } = await supabase
