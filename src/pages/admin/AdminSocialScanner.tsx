@@ -418,6 +418,56 @@ export default function AdminSocialScanner() {
 
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-gray-300">
+                    Where to find leads
+                  </label>
+                  <span className="text-[11px] text-gray-400">{sources.length} selected</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {SOURCE_OPTIONS.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => toggleSource(s.id)}
+                      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                        sources.includes(s.id)
+                          ? "border-green-500 bg-green-500/20 text-green-300"
+                          : "border-white/15 bg-white/5 text-gray-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-300">
+                  Post freshness
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {FRESHNESS_OPTIONS.map((f) => (
+                    <button
+                      key={f.days}
+                      onClick={() => setFreshnessDays(f.days)}
+                      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                        freshnessDays === f.days
+                          ? "border-green-500 bg-green-500/20 text-green-300"
+                          : "border-white/15 bg-white/5 text-gray-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1.5 text-[11px] text-gray-400">
+                  Only posts from the last {freshnessDays} days are scanned — anything 2 months or older is never returned.
+                </p>
+              </div>
+
+
+
+              <div className="mt-4">
+                <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wide text-gray-300">Search radius</label>
                   <span className="text-sm font-bold text-green-400">{radiusKm} km</span>
                 </div>
