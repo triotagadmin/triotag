@@ -332,6 +332,14 @@ const VenueRegistration = () => {
       setDescription(venue.description || "");
       setUploadedImages(Array.isArray(venue.media_urls) ? venue.media_urls as string[] : []);
       setIsListedOnExplore(venue.availability_status !== "unlisted");
+      setMediaOwnerName((venue as any).media_owner_name || "");
+      setMediaOwnerContact((venue as any).media_owner_contact_person || "");
+      setMediaOwnerEmail((venue as any).media_owner_email || "");
+      setMediaOwnerPhone((venue as any).media_owner_phone || "");
+      setCampaignDurationDays((venue as any).campaign_duration_days ? String((venue as any).campaign_duration_days) : "");
+      setCampaignStartDate((venue as any).campaign_start_date || "");
+      setCampaignEndDate((venue as any).campaign_end_date || "");
+      setProofUrls(Array.isArray((venue as any).proof_urls) ? (venue as any).proof_urls : []);
       const specs = venue.specifications as any || {};
       const vt = specs.venue_type;
       setVenueTypes(Array.isArray(vt) ? vt : (typeof vt === "string" && vt ? vt.split(",").map((s: string) => s.trim()).filter(Boolean) : []));
