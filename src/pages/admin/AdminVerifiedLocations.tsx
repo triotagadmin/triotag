@@ -75,7 +75,7 @@ const adUnitTypes = (r: Row): string[] => {
 const unitsOf = (r: Row): number => {
   if (r.total_ad_units) return r.total_ad_units;
   const fd = r.specifications?.format_details || {};
-  const sum = (m: any) => Object.values(m || {}).reduce((s: number, n: any) => s + (Number(n) || 0), 0);
+  const sum = (m: any): number => Object.values(m || {}).reduce<number>((s, n: any) => s + (Number(n) || 0), 0);
   return sum(fd.OOH?.units_by_format) + sum(fd.DOOH?.units_by_type) + sum(fd.AOOH?.zones_by_duration);
 };
 
