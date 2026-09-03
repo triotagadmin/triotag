@@ -227,6 +227,38 @@ const VenueRegistration = () => {
   const [aoohPlayFrequency, setAoohPlayFrequency] = useState("");
   const [editingMediaType, setEditingMediaType] = useState<"OOH" | "DOOH" | "AOOH" | null>(null);
 
+  // SSP supply data (media owner + campaign availability + proof)
+  const [mediaOwnerName, setMediaOwnerName] = useState("");
+  const [mediaOwnerContact, setMediaOwnerContact] = useState("");
+  const [mediaOwnerEmail, setMediaOwnerEmail] = useState("");
+  const [mediaOwnerPhone, setMediaOwnerPhone] = useState("");
+  const [campaignDurationDays, setCampaignDurationDays] = useState("");
+  const [campaignStartDate, setCampaignStartDate] = useState("");
+  const [campaignEndDate, setCampaignEndDate] = useState("");
+  const [proofUrls, setProofUrls] = useState<string[]>([]);
+  const [uploadingProof, setUploadingProof] = useState(false);
+
+  const handleProofUpload = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setUploadingProof(true);
+    try {
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        const path = `inventory-proof/${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+        const { error } = await supabase.storage.from("ad-space-media").upload(path, file);
+        if (error) throw error;
+        const { data } = supabase.storage.from("ad-space-media").getPublicUrl(path);
+        uploaded.push(data.publicUrl);
+      }
+      setProofUrls(prev => [...prev, ...uploaded]);
+      toast({ title: "Proof uploaded", description: `${uploaded.length} file(s) attached` });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingProof(false);
+    }
+  };
+
   const toggleFormat = (f: "OOH" | "DOOH" | "AOOH") =>
     setSelectedFormats(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   const [verificationDocuments, setVerificationDocuments] = useState<DocumentUploadState[]>([
