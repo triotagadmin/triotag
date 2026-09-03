@@ -967,6 +967,43 @@ const VenueRegistration = () => {
                   </CardContent>
                 </Card>
 
+                {/* Media Owner & Supply Terms (SSP) */}
+                <Card className="rounded-[20px]">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Media Owner & Supply Terms</CardTitle>
+                    <p className="text-xs text-muted-foreground">The media owner owns the physical ad inventory. You are onboarding this supply on their behalf — it stays a separate entity from your agent account.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div><Label>Media Owner / Business *</Label><Input value={mediaOwnerName} onChange={e => setMediaOwnerName(e.target.value)} placeholder="Owner company name" /></div>
+                      <div><Label>Owner Contact Person</Label><Input value={mediaOwnerContact} onChange={e => setMediaOwnerContact(e.target.value)} placeholder="Full name" /></div>
+                      <div><Label>Owner Email</Label><Input type="email" value={mediaOwnerEmail} onChange={e => setMediaOwnerEmail(e.target.value)} placeholder="owner@business.com" /></div>
+                      <div><Label>Owner Phone</Label><Input value={mediaOwnerPhone} onChange={e => setMediaOwnerPhone(e.target.value)} placeholder="+63…" /></div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t pt-4">
+                      <div><Label>Campaign Duration (days) *</Label><Input type="number" min={1} value={campaignDurationDays} onChange={e => setCampaignDurationDays(e.target.value)} placeholder="e.g. 30" /></div>
+                      <div><Label>Available From</Label><Input type="date" value={campaignStartDate} onChange={e => setCampaignStartDate(e.target.value)} /></div>
+                      <div><Label>Available Until</Label><Input type="date" value={campaignEndDate} onChange={e => setCampaignEndDate(e.target.value)} /></div>
+                    </div>
+                    <div className="border-t pt-4">
+                      <Label>Inventory Proof / Photos</Label>
+                      <p className="text-xs text-muted-foreground mb-2">Upload photos of the actual ad units, screens or audio setup so Admin can verify this supply.</p>
+                      <Input type="file" accept="image/*,application/pdf" multiple disabled={uploadingProof} onChange={e => handleProofUpload(e.target.files)} />
+                      {uploadingProof && <p className="text-xs text-muted-foreground mt-2">Uploading…</p>}
+                      {proofUrls.length > 0 && (
+                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-3">
+                          {proofUrls.map((u, i) => (
+                            <div key={u} className="relative group rounded-[10px] overflow-hidden border">
+                              <img src={u} alt={`Inventory proof ${i + 1}`} className="w-full h-16 object-cover" />
+                              <button type="button" onClick={() => setProofUrls(prev => prev.filter(p => p !== u))}
+                                className="absolute top-1 right-1 bg-background/90 rounded px-1 text-[10px]">✕</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
 
 
                 {/* Contact Info */}
