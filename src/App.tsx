@@ -24,6 +24,7 @@ import AdminBrandCampaigns from "./pages/admin/AdminBrandCampaigns";
 import AdminLocalListings from "./pages/admin/AdminLocalListings";
 import AdminBusinessProspecting from "./pages/admin/AdminBusinessProspecting";
 import AdminSocialScanner from "./pages/admin/AdminSocialScanner";
+import AdminAgentCenter from "./pages/admin/AdminAgentCenter";
 import AdminBrandAdvertiserApprovals from "./pages/admin/AdminBrandAdvertiserApprovals";
 import AdminVerifiedLocations from "./pages/admin/AdminVerifiedLocations";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
@@ -37,6 +38,7 @@ import VenueDashboard from "./pages/VenueDashboard";
 import VenueRegistration from "./pages/VenueRegistration";
 import VenueVerification from "./pages/VenueVerification";
 import Verify from "./pages/Verify";
+import VerifyAgent from "./pages/VerifyAgent";
 
 import Insights from "./pages/Insights";
 import BlogPost from "./pages/BlogPost";
@@ -239,6 +241,7 @@ const App = () => (
           <Route path="/ticket-creator" element={<TicketMarket />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify" element={<Verify />} />
+          <Route path="/verify/agent" element={<VerifyAgent />} />
           <Route path="/dashboard" element={<Dashboard />} />
           
           <Route path="/retailer-dashboard" element={<RetailerSelfDashboard />} />
@@ -364,6 +367,11 @@ const App = () => (
             <RoleProtectedRoute requireAuth allowedRoles={["agent"]}>
               <AdminBusinessProspecting />
             </RoleProtectedRoute>
+          } />
+          <Route path="/admin/agents" element={
+            <TenantSuperAdminRoute>
+              <AdminAgentCenter />
+            </TenantSuperAdminRoute>
           } />
           <Route path="/admin/social-scanner" element={
             <ProtectedAdminRoute>
