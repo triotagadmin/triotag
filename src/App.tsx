@@ -172,6 +172,12 @@ const App = () => (
         <AppSidebarShell>
         <Routes>
           <Route path="/" element={<HomeRouter />} />
+
+          <Route path="/webmaster" element={<WebmasterLogin />} />
+          <Route path="/webmaster/dashboard" element={<WebmasterRoute><WebmasterDashboard /></WebmasterRoute>} />
+          <Route path="/tenant/dashboard" element={<TenantSuperAdminRoute><SuperAdminDashboard /></TenantSuperAdminRoute>} />
+          <Route path="/invite/:token" element={<InviteAccept />} />
+
           
           <Route path="/about" element={<About />} />
           <Route path="/insights" element={<Insights />} />
