@@ -152,6 +152,12 @@ import BrandApprovalGate from "./components/brand-advertiser/BrandApprovalGate";
 import EcommerceSeoMicrosites from "./pages/EcommerceSeoMicrosites";
 import VerifiedVenues from "./pages/agent/VerifiedVenues";
 import DiscoverLocations from "./pages/agent/DiscoverLocations";
+import WebmasterLogin from "./pages/webmaster/WebmasterLogin";
+import WebmasterDashboard from "./pages/webmaster/WebmasterDashboard";
+import WebmasterRoute from "./components/WebmasterRoute";
+import TenantSuperAdminRoute from "./components/TenantSuperAdminRoute";
+import SuperAdminDashboard from "./pages/tenant/SuperAdminDashboard";
+import InviteAccept from "./pages/InviteAccept";
 
 const queryClient = new QueryClient();
 
@@ -166,6 +172,12 @@ const App = () => (
         <AppSidebarShell>
         <Routes>
           <Route path="/" element={<HomeRouter />} />
+
+          <Route path="/webmaster" element={<WebmasterLogin />} />
+          <Route path="/webmaster/dashboard" element={<WebmasterRoute><WebmasterDashboard /></WebmasterRoute>} />
+          <Route path="/tenant/dashboard" element={<TenantSuperAdminRoute><SuperAdminDashboard /></TenantSuperAdminRoute>} />
+          <Route path="/invite/:token" element={<InviteAccept />} />
+
           
           <Route path="/about" element={<About />} />
           <Route path="/insights" element={<Insights />} />

@@ -191,6 +191,7 @@ export type Database = {
           admin_notes: string | null
           advertiser_id: string | null
           agent_disconnected: boolean
+          agent_id: string | null
           annual_subscription_fee: number | null
           approval_status: Database["public"]["Enums"]["approval_status"]
           approved_at: string | null
@@ -225,6 +226,7 @@ export type Database = {
           specifications: Json | null
           submitted_at: string
           submitted_by_agent: string | null
+          tenant_id: string | null
           title: string
           total_ad_units: number
           updated_at: string | null
@@ -234,6 +236,7 @@ export type Database = {
           admin_notes?: string | null
           advertiser_id?: string | null
           agent_disconnected?: boolean
+          agent_id?: string | null
           annual_subscription_fee?: number | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
@@ -268,6 +271,7 @@ export type Database = {
           specifications?: Json | null
           submitted_at?: string
           submitted_by_agent?: string | null
+          tenant_id?: string | null
           title: string
           total_ad_units?: number
           updated_at?: string | null
@@ -277,6 +281,7 @@ export type Database = {
           admin_notes?: string | null
           advertiser_id?: string | null
           agent_disconnected?: boolean
+          agent_id?: string | null
           annual_subscription_fee?: number | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
@@ -311,6 +316,7 @@ export type Database = {
           specifications?: Json | null
           submitted_at?: string
           submitted_by_agent?: string | null
+          tenant_id?: string | null
           title?: string
           total_ad_units?: number
           updated_at?: string | null
@@ -328,6 +334,13 @@ export type Database = {
             columns: ["publisher_id"]
             isOneToOne: false
             referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_spaces_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -946,6 +959,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_role: string | null
+          created_at: string
+          details: Json
+          id: string
+          record_id: string | null
+          tenant_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_role?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          record_id?: string | null
+          tenant_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_role?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          record_id?: string | null
+          tenant_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       blog_posts: {
         Row: {
@@ -4062,6 +4108,7 @@ export type Database = {
       }
       publisher_profiles: {
         Row: {
+          agent_id: string | null
           agent_role: Database["public"]["Enums"]["agent_role"] | null
           approved_at: string | null
           approved_by: string | null
@@ -4081,6 +4128,7 @@ export type Database = {
           publisher_type: Database["public"]["Enums"]["publisher_type"]
           rejection_reason: string | null
           social_media: Json | null
+          tenant_id: string | null
           token_expires: string | null
           updated_at: string | null
           user_id: string | null
@@ -4089,6 +4137,7 @@ export type Database = {
           verified: boolean | null
         }
         Insert: {
+          agent_id?: string | null
           agent_role?: Database["public"]["Enums"]["agent_role"] | null
           approved_at?: string | null
           approved_by?: string | null
@@ -4108,6 +4157,7 @@ export type Database = {
           publisher_type: Database["public"]["Enums"]["publisher_type"]
           rejection_reason?: string | null
           social_media?: Json | null
+          tenant_id?: string | null
           token_expires?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -4116,6 +4166,7 @@ export type Database = {
           verified?: boolean | null
         }
         Update: {
+          agent_id?: string | null
           agent_role?: Database["public"]["Enums"]["agent_role"] | null
           approved_at?: string | null
           approved_by?: string | null
@@ -4135,6 +4186,7 @@ export type Database = {
           publisher_type?: Database["public"]["Enums"]["publisher_type"]
           rejection_reason?: string | null
           social_media?: Json | null
+          tenant_id?: string | null
           token_expires?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -4142,7 +4194,15 @@ export type Database = {
           verification_token?: string | null
           verified?: boolean | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "publisher_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       publisher_tickets: {
         Row: {
@@ -4817,6 +4877,148 @@ export type Database = {
           },
         ]
       }
+      tenant_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          full_name: string | null
+          id: string
+          invited_by: string | null
+          invited_role: string
+          revoked_at: string | null
+          tenant_id: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          full_name?: string | null
+          id?: string
+          invited_by?: string | null
+          invited_role: string
+          revoked_at?: string | null
+          tenant_id: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          full_name?: string | null
+          id?: string
+          invited_by?: string | null
+          invited_role?: string
+          revoked_at?: string | null
+          tenant_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invitations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_members: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          invited_by: string | null
+          member_role: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          invited_by?: string | null
+          member_role: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          invited_by?: string | null
+          member_role?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          code: string
+          company_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ticket_orders: {
         Row: {
           buyer_email: string
@@ -5327,6 +5529,27 @@ export type Database = {
           },
         ]
       }
+      webmasters: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       advertiser_profiles_public: {
@@ -5418,6 +5641,13 @@ export type Database = {
       }
     }
     Functions: {
+      accept_invitation: {
+        Args: { _token: string }
+        Returns: {
+          member_role: string
+          tenant_id: string
+        }[]
+      }
       ad_space_owner_exists: {
         Args: { _advertiser_id: string; _publisher_id: string }
         Returns: boolean
@@ -5430,6 +5660,19 @@ export type Database = {
           listing_title: string
         }[]
       }
+      claim_webmaster: { Args: never; Returns: boolean }
+      create_tenant: {
+        Args: {
+          _company_email?: string
+          _contact_name?: string
+          _contact_phone?: string
+          _name: string
+          _notes?: string
+        }
+        Returns: string
+      }
+      current_tenant_id: { Args: never; Returns: string }
+      current_tenant_role: { Args: never; Returns: string }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -5446,6 +5689,7 @@ export type Database = {
           admin_notes: string | null
           advertiser_id: string | null
           agent_disconnected: boolean
+          agent_id: string | null
           annual_subscription_fee: number | null
           approval_status: Database["public"]["Enums"]["approval_status"]
           approved_at: string | null
@@ -5480,6 +5724,7 @@ export type Database = {
           specifications: Json | null
           submitted_at: string
           submitted_by_agent: string | null
+          tenant_id: string | null
           title: string
           total_ad_units: number
           updated_at: string | null
@@ -5523,6 +5768,16 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_invitation_preview: {
+        Args: { _token: string }
+        Returns: {
+          accepted: boolean
+          email: string
+          expires_at: string
+          invited_role: string
+          tenant_name: string
+        }[]
       }
       get_listing_branch_cities: {
         Args: { _listing_ids: string[] }
@@ -5583,11 +5838,33 @@ export type Database = {
         }
         Returns: boolean
       }
+      invite_member: {
+        Args: {
+          _email: string
+          _full_name?: string
+          _role: string
+          _tenant_id?: string
+        }
+        Returns: {
+          invitation_id: string
+          tenant_id: string
+          token: string
+        }[]
+      }
       is_advertiser_for_listing: {
         Args: { _ad_space_id: string; _user_id: string }
         Returns: boolean
       }
+      is_tenant_super_admin: {
+        Args: { _tenant_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_verified_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_webmaster: { Args: { _user_id: string }; Returns: boolean }
+      log_audit: {
+        Args: { _action: string; _details?: Json; _record_id: string }
+        Returns: undefined
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string

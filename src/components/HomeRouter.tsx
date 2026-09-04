@@ -22,6 +22,29 @@ export default function HomeRouter() {
         setLoading(false);
         return;
       }
+
+      const { data: wm } = await supabase
+        .from("webmasters")
+        .select("user_id")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      if (wm) {
+        setRedirectTo("/webmaster/dashboard");
+        setLoading(false);
+        return;
+      }
+
+      const { data: membership } = await supabase
+        .from("tenant_members")
+        .select("member_role, status")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      if (membership?.member_role === "super_admin" && membership.status === "active") {
+        setRedirectTo("/tenant/dashboard");
+        setLoading(false);
+        return;
+      }
+
       const { data: roleData } = await supabase
         .from("user_roles")
         .select("role")
