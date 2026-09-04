@@ -153,8 +153,19 @@ import EcommerceSeoMicrosites from "./pages/EcommerceSeoMicrosites";
 import VerifiedVenues from "./pages/agent/VerifiedVenues";
 import DiscoverLocations from "./pages/agent/DiscoverLocations";
 import WebmasterLogin from "./pages/webmaster/WebmasterLogin";
-import WebmasterDashboard from "./pages/webmaster/WebmasterDashboard";
+import WebmasterLayout from "./pages/webmaster/WebmasterLayout";
+import WebmasterOverview from "./pages/webmaster/WebmasterOverview";
+import WebmasterTenants from "./pages/webmaster/WebmasterTenants";
+import WebmasterTenantNew from "./pages/webmaster/WebmasterTenantNew";
+import WebmasterTenantDetail from "./pages/webmaster/WebmasterTenantDetail";
+import WebmasterSuperAdmins from "./pages/webmaster/WebmasterSuperAdmins";
+import WebmasterAgents from "./pages/webmaster/WebmasterAgents";
+import WebmasterSupply from "./pages/webmaster/WebmasterSupply";
+import WebmasterOperations from "./pages/webmaster/WebmasterOperations";
+import WebmasterSystem from "./pages/webmaster/WebmasterSystem";
+import WebmasterSecurity from "./pages/webmaster/WebmasterSecurity";
 import WebmasterRoute from "./components/WebmasterRoute";
+
 import TenantSuperAdminRoute from "./components/TenantSuperAdminRoute";
 import SuperAdminDashboard from "./pages/tenant/SuperAdminDashboard";
 import InviteAccept from "./pages/InviteAccept";
@@ -174,7 +185,32 @@ const App = () => (
           <Route path="/" element={<HomeRouter />} />
 
           <Route path="/webmaster" element={<WebmasterLogin />} />
-          <Route path="/webmaster/dashboard" element={<WebmasterRoute><WebmasterDashboard /></WebmasterRoute>} />
+          <Route element={<WebmasterRoute><WebmasterLayout /></WebmasterRoute>}>
+            <Route path="/webmaster/dashboard" element={<WebmasterOverview />} />
+            <Route path="/webmaster/tenants" element={<WebmasterTenants />} />
+            <Route path="/webmaster/tenants/new" element={<WebmasterTenantNew />} />
+            <Route path="/webmaster/tenants/:tenantId" element={<WebmasterTenantDetail />} />
+            <Route path="/webmaster/super-admins" element={<WebmasterSuperAdmins />} />
+            <Route path="/webmaster/agents" element={<WebmasterAgents />} />
+            <Route path="/webmaster/media-owners" element={<WebmasterSupply mode="media-owners" />} />
+            <Route path="/webmaster/locations" element={<WebmasterSupply mode="locations" />} />
+            <Route path="/webmaster/inventory" element={<WebmasterSupply mode="inventory" />} />
+            <Route path="/webmaster/inventory-verification" element={<WebmasterSupply mode="verification" />} />
+            <Route path="/webmaster/pending-approvals" element={<WebmasterSupply mode="pending" />} />
+            <Route path="/webmaster/campaigns" element={<WebmasterOperations mode="campaigns" />} />
+            <Route path="/webmaster/proposals" element={<WebmasterOperations mode="proposals" />} />
+            <Route path="/webmaster/transactions" element={<WebmasterOperations mode="transactions" />} />
+            <Route path="/webmaster/commissions" element={<WebmasterOperations mode="commissions" />} />
+            <Route path="/webmaster/reports" element={<WebmasterOperations mode="reports" />} />
+            <Route path="/webmaster/users" element={<WebmasterSystem mode="users" />} />
+            <Route path="/webmaster/roles" element={<WebmasterSystem mode="roles" />} />
+            <Route path="/webmaster/audit-logs" element={<WebmasterSystem mode="audit" />} />
+            <Route path="/webmaster/settings" element={<WebmasterSystem mode="settings" />} />
+            <Route path="/webmaster/security" element={<WebmasterSecurity mode="overview" />} />
+            <Route path="/webmaster/auth-activity" element={<WebmasterSecurity mode="auth-activity" />} />
+            <Route path="/webmaster/access-logs" element={<WebmasterSecurity mode="access-logs" />} />
+          </Route>
+
           <Route path="/tenant/dashboard" element={<TenantSuperAdminRoute><SuperAdminDashboard /></TenantSuperAdminRoute>} />
           <Route path="/invite/:token" element={<InviteAccept />} />
 

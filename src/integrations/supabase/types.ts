@@ -219,6 +219,10 @@ export type Database = {
           media_urls: Json | null
           monthly_subscription_fee: number | null
           pending_advertiser_email: string | null
+          platform_review_notes: string | null
+          platform_verification_status: string
+          platform_verified_at: string | null
+          platform_verified_by: string | null
           pricing: Json | null
           proof_urls: Json
           publisher_id: string
@@ -264,6 +268,10 @@ export type Database = {
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
           pending_advertiser_email?: string | null
+          platform_review_notes?: string | null
+          platform_verification_status?: string
+          platform_verified_at?: string | null
+          platform_verified_by?: string | null
           pricing?: Json | null
           proof_urls?: Json
           publisher_id: string
@@ -309,6 +317,10 @@ export type Database = {
           media_urls?: Json | null
           monthly_subscription_fee?: number | null
           pending_advertiser_email?: string | null
+          platform_review_notes?: string | null
+          platform_verification_status?: string
+          platform_verified_at?: string | null
+          platform_verified_by?: string | null
           pricing?: Json | null
           proof_urls?: Json
           publisher_id?: string
@@ -5717,6 +5729,10 @@ export type Database = {
           media_urls: Json | null
           monthly_subscription_fee: number | null
           pending_advertiser_email: string | null
+          platform_review_notes: string | null
+          platform_verification_status: string
+          platform_verified_at: string | null
+          platform_verified_by: string | null
           pricing: Json | null
           proof_urls: Json
           publisher_id: string
@@ -5944,6 +5960,26 @@ export type Database = {
           p_ticket_id: string
         }
         Returns: Json
+      }
+      webmaster_cancel_invitation: {
+        Args: { _invitation_id: string }
+        Returns: undefined
+      }
+      webmaster_reissue_invitation: {
+        Args: { _invitation_id: string }
+        Returns: string
+      }
+      webmaster_set_member_status: {
+        Args: { _member_id: string; _status: string }
+        Returns: undefined
+      }
+      webmaster_set_tenant_status: {
+        Args: { _status: string; _tenant_id: string }
+        Returns: undefined
+      }
+      webmaster_verify_inventory: {
+        Args: { _ad_space_id: string; _decision: string; _notes?: string }
+        Returns: undefined
       }
     }
     Enums: {
