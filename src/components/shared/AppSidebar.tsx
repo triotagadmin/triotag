@@ -100,9 +100,13 @@ export function AppSidebar({ role, campaignPillar }: { role: string; campaignPil
   const [expanded, setExpanded] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
-  const baseItems = ROLE_SIDEBAR_ITEMS[role] || [];
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const baseItems = (ROLE_SIDEBAR_ITEMS[role] || []).filter(
+    (it) => it.to !== "/admin/agents" || isSuperAdmin,
+  );
   const pillarItem = role === "brand_advertiser" && campaignPillar ? PILLAR_ITEM[campaignPillar] : undefined;
   const items = pillarItem ? [...baseItems, pillarItem] : baseItems;
+
   const settingsPath = ROLE_SETTINGS_PATH[role] || "/auth";
   const isActive = (to: string) => pathname === to || pathname.startsWith(to + "/");
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
@@ -112,6 +116,22 @@ export function AppSidebar({ role, campaignPillar }: { role: string; campaignPil
     });
     return init;
   });
+
+  useEffect(() => {
+    if (role !== "admin") return;
+    let cancelled = false;
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data } = await supabase
+        .from("tenant_members")
+        .select("member_role, status")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      if (!cancelled) setIsSuperAdmin(data?.member_role === "super_admin" && data?.status === "active");
+    })();
+    return () => { cancelled = true; };
+  }, [role]);
 
   useEffect(() => {
     if (role !== "admin") return;
@@ -127,6 +147,7 @@ export function AppSidebar({ role, campaignPillar }: { role: string; campaignPil
     const interval = setInterval(fetchPending, 30000);
     return () => { cancelled = true; clearInterval(interval); };
   }, [role, pathname]);
+
 
   const handleLogout = async () => {
     setSigningOut(true);
