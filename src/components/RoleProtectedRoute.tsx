@@ -55,6 +55,18 @@ export const RoleProtectedRoute = ({ children, allowedRoles, requireAuth = true 
         return;
       }
       const role = (data?.role as Role | undefined) ?? null;
+      // Agents lose access the moment their Super Admin suspends or removes them.
+      if (role === "agent") {
+        const { data: membership } = await supabase
+          .from("tenant_members")
+          .select("status")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        if (membership && membership.status !== "active") {
+          if (!cancelled) setState({ loading: false, loggedIn: true, role: null, error: false });
+          return;
+        }
+      }
       if (!cancelled) setState({ loading: false, loggedIn: true, role, error: false });
     })();
     return () => { cancelled = true; };

@@ -11,6 +11,10 @@ project_id = "jungfmgsxbayxzptvpky"
     verify_jwt = false
   [functions.create-checkout]
     verify_jwt = false
+  [functions.agent-manage]
+    verify_jwt = false
+  [functions.agent-verify]
+    verify_jwt = false
   [functions.delete-agent]
     verify_jwt = false
   [functions.deploy-creative]
