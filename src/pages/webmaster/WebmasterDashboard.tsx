@@ -145,7 +145,8 @@ export default function WebmasterDashboard() {
       <Tabs defaultValue="tenants">
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="tenants">Tenants</TabsTrigger>
-          <TabsTrigger value="people">Super Admins &amp; Agents</TabsTrigger>
+          <TabsTrigger value="super_admins">Super Admins</TabsTrigger>
+          <TabsTrigger value="agents">Agents</TabsTrigger>
           <TabsTrigger value="invites">Invitations</TabsTrigger>
           <TabsTrigger value="inventory">Locations &amp; Inventory</TabsTrigger>
           <TabsTrigger value="audit">Audit Logs</TabsTrigger>
