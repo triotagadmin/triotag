@@ -145,7 +145,8 @@ export default function WebmasterDashboard() {
       <Tabs defaultValue="tenants">
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="tenants">Tenants</TabsTrigger>
-          <TabsTrigger value="people">Super Admins &amp; Agents</TabsTrigger>
+          <TabsTrigger value="super_admins">Super Admins</TabsTrigger>
+          <TabsTrigger value="agents">Agents</TabsTrigger>
           <TabsTrigger value="invites">Invitations</TabsTrigger>
           <TabsTrigger value="inventory">Locations &amp; Inventory</TabsTrigger>
           <TabsTrigger value="audit">Audit Logs</TabsTrigger>
@@ -220,8 +221,8 @@ export default function WebmasterDashboard() {
           {!loading && tenants.length === 0 && <p className="text-sm text-muted-foreground">No tenants yet.</p>}
         </TabsContent>
 
-        <TabsContent value="people" className="space-y-2">
-          {members.map((m) => (
+        <TabsContent value="super_admins" className="space-y-2">
+          {superAdmins.map((m) => (
             <Card key={m.id} className="border-green-500/20 bg-black/40">
               <CardContent className="p-4 flex flex-wrap items-center justify-between gap-2 text-sm">
                 <div>
@@ -229,13 +230,31 @@ export default function WebmasterDashboard() {
                   <p className="text-muted-foreground">{m.email} · {tenantName(m.tenant_id)}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Badge variant="outline">{m.member_role === "super_admin" ? "Super Admin" : "Agent"}</Badge>
+                  <Badge variant="outline">Super Admin</Badge>
                   <Badge variant={m.status === "active" ? "default" : "secondary"}>{m.status}</Badge>
                 </div>
               </CardContent>
             </Card>
           ))}
-          {!loading && members.length === 0 && <p className="text-sm text-muted-foreground">No tenant members yet.</p>}
+          {!loading && superAdmins.length === 0 && <p className="text-sm text-muted-foreground">No Super Admins yet.</p>}
+        </TabsContent>
+
+        <TabsContent value="agents" className="space-y-2">
+          {agents.map((m) => (
+            <Card key={m.id} className="border-green-500/20 bg-black/40">
+              <CardContent className="p-4 flex flex-wrap items-center justify-between gap-2 text-sm">
+                <div>
+                  <p className="font-medium">{m.full_name || m.email}</p>
+                  <p className="text-muted-foreground">{m.email} · {tenantName(m.tenant_id)}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Badge variant="outline">Agent</Badge>
+                  <Badge variant={m.status === "active" ? "default" : "secondary"}>{m.status}</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          {!loading && agents.length === 0 && <p className="text-sm text-muted-foreground">No Agents yet.</p>}
         </TabsContent>
 
         <TabsContent value="invites" className="space-y-2">
