@@ -4896,13 +4896,20 @@ export type Database = {
           created_at: string
           email: string
           expires_at: string
+          first_name: string | null
           full_name: string | null
           id: string
           invited_by: string | null
           invited_role: string
+          last_name: string | null
+          last_sent_at: string | null
+          phone: string | null
+          position: string | null
           revoked_at: string | null
+          send_count: number
           tenant_id: string
           token: string
+          token_hash: string | null
         }
         Insert: {
           accepted_at?: string | null
@@ -4910,13 +4917,20 @@ export type Database = {
           created_at?: string
           email: string
           expires_at?: string
+          first_name?: string | null
           full_name?: string | null
           id?: string
           invited_by?: string | null
           invited_role: string
+          last_name?: string | null
+          last_sent_at?: string | null
+          phone?: string | null
+          position?: string | null
           revoked_at?: string | null
+          send_count?: number
           tenant_id: string
           token: string
+          token_hash?: string | null
         }
         Update: {
           accepted_at?: string | null
@@ -4924,13 +4938,20 @@ export type Database = {
           created_at?: string
           email?: string
           expires_at?: string
+          first_name?: string | null
           full_name?: string | null
           id?: string
           invited_by?: string | null
           invited_role?: string
+          last_name?: string | null
+          last_sent_at?: string | null
+          phone?: string | null
+          position?: string | null
           revoked_at?: string | null
+          send_count?: number
           tenant_id?: string
           token?: string
+          token_hash?: string | null
         }
         Relationships: [
           {
@@ -4949,7 +4970,11 @@ export type Database = {
           full_name: string | null
           id: string
           invited_by: string | null
+          last_login_at: string | null
           member_role: string
+          phone: string | null
+          position: string | null
+          removed_at: string | null
           status: string
           tenant_id: string
           updated_at: string
@@ -4961,7 +4986,11 @@ export type Database = {
           full_name?: string | null
           id?: string
           invited_by?: string | null
+          last_login_at?: string | null
           member_role: string
+          phone?: string | null
+          position?: string | null
+          removed_at?: string | null
           status?: string
           tenant_id: string
           updated_at?: string
@@ -4973,7 +5002,11 @@ export type Database = {
           full_name?: string | null
           id?: string
           invited_by?: string | null
+          last_login_at?: string | null
           member_role?: string
+          phone?: string | null
+          position?: string | null
+          removed_at?: string | null
           status?: string
           tenant_id?: string
           updated_at?: string
