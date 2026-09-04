@@ -1107,6 +1107,10 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
+        <AgentCenterCard />
+
+
+
         <Tabs defaultValue="bookings" className="space-y-6">
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="bookings"><Calendar className="w-4 h-4 mr-2" />Bookings</TabsTrigger>
