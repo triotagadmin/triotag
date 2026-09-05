@@ -1,3 +1,4 @@
+import { OSM_TILE_URL, OSM_TILE_OPTIONS } from "@/lib/mapTiles";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -136,9 +137,7 @@ export function RadiusMapPlanner({
       });
       mapRef.current = map;
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-        attribution: "© OpenStreetMap, © CARTO", maxZoom: 19,
-      }).addTo(map);
+      L.tileLayer(OSM_TILE_URL, OSM_TILE_OPTIONS).addTo(map);
 
       const pinIcon = L.divIcon({
         className: "",

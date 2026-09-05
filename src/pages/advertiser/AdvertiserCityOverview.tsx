@@ -1,3 +1,4 @@
+import { OSM_TILE_URL, OSM_TILE_OPTIONS } from "@/lib/mapTiles";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ export default function AdvertiserCityOverview() {
       const L = await import("leaflet");
       if (cancelled || !mapRef.current) return;
       map = L.map(mapRef.current, { zoomControl: false, scrollWheelZoom: false }).setView([meta.lat, meta.lng], 11);
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 19 }).addTo(map);
+      L.tileLayer(OSM_TILE_URL, OSM_TILE_OPTIONS).addTo(map);
       L.circle([meta.lat, meta.lng], { radius: 6000, color: "#16a34a", fillColor: "#22c55e", fillOpacity: 0.12, weight: 2 }).addTo(map);
       L.marker([meta.lat, meta.lng]).addTo(map);
     })();
