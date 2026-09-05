@@ -1,3 +1,4 @@
+import { OSM_TILE_URL, OSM_TILE_OPTIONS } from "@/lib/mapTiles";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -78,10 +79,7 @@ export const MultiPinLocationMap = ({
       if (!mapContainerRef.current || mapRef.current || cancelled) return;
       const L = await import("leaflet");
       const map = L.map(mapContainerRef.current).setView(DEFAULT_CENTER, 6);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; OpenStreetMap',
-        maxZoom: 19,
-      }).addTo(map);
+      L.tileLayer(OSM_TILE_URL, OSM_TILE_OPTIONS).addTo(map);
       mapRef.current = map;
 
       map.on("click", (e: any) => {
