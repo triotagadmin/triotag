@@ -687,17 +687,10 @@ export default function AdvertiserExplore() {
                                           >
                                             <div className="flex items-center gap-1.5 flex-wrap">
                                               <span className="text-xs font-medium text-gray-900">{p.name}</span>
-                                              {p.verified ? (
+                                              {p.verified && (
                                                 <Badge className="h-4 px-1.5 gap-1 bg-green-100 text-green-700 hover:bg-green-100 border border-green-300 text-[10px]">
                                                   <ShieldCheck className="w-2.5 h-2.5" />
                                                   Verified
-                                                </Badge>
-                                              ) : (
-                                                <Badge
-                                                  variant="secondary"
-                                                  className="h-4 px-1.5 bg-gray-100 text-gray-600 hover:bg-gray-100 border border-gray-200 text-[10px]"
-                                                >
-                                                  Unverified
                                                 </Badge>
                                               )}
                                             </div>
