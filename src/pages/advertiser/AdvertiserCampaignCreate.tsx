@@ -1,3 +1,4 @@
+import { OSM_TILE_URL, OSM_TILE_OPTIONS } from "@/lib/mapTiles";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -89,7 +90,7 @@ export default function AdvertiserCampaignCreate() {
 
       if (cancelled || !mapRef.current) return;
       map = L.map(mapRef.current, { zoomControl: false, scrollWheelZoom: false }).setView([city.lat, city.lng], 11);
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 19 }).addTo(map);
+      L.tileLayer(OSM_TILE_URL, OSM_TILE_OPTIONS).addTo(map);
       L.circle([city.lat, city.lng], { radius: area ? 1500 : 5000, color: "#16a34a", fillColor: "#22c55e", fillOpacity: 0.15, weight: 2 }).addTo(map);
     })();
     return () => { cancelled = true; map?.remove(); };

@@ -1,3 +1,4 @@
+import { OSM_TILE_URL, OSM_TILE_OPTIONS } from "@/lib/mapTiles";
 import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -54,10 +55,7 @@ export function SocialScannerMap({
         minZoom: 3,
       });
       mapRef.current = map;
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
-        maxZoom: 19,
-      }).addTo(map);
+      L.tileLayer(OSM_TILE_URL, OSM_TILE_OPTIONS).addTo(map);
       setTimeout(() => map.invalidateSize(), 150);
     })();
     return () => {

@@ -1,3 +1,4 @@
+import { OSM_TILE_URL, OSM_TILE_OPTIONS } from "@/lib/mapTiles";
 import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -66,10 +67,7 @@ export function ProspectMap({
       });
       mapRef.current = map;
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
-        maxZoom: 19,
-      }).addTo(map);
+      L.tileLayer(OSM_TILE_URL, OSM_TILE_OPTIONS).addTo(map);
 
       const pinIcon = L.divIcon({
         className: "",

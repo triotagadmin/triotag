@@ -1,3 +1,4 @@
+import { OSM_TILE_URL, OSM_TILE_OPTIONS } from "@/lib/mapTiles";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -114,10 +115,7 @@ export const LocationPickerMap = ({
         : DEFAULT_CENTER;
 
       const map = L.map(mapContainerRef.current).setView(center, initialLocation ? 15 : 10);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-      }).addTo(map);
+      L.tileLayer(OSM_TILE_URL, OSM_TILE_OPTIONS).addTo(map);
 
       mapRef.current = map;
 
