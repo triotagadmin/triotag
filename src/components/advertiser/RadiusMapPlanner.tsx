@@ -248,6 +248,11 @@ export function RadiusMapPlanner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center.lat, center.lng]);
 
+  const selectFirstSuggestion = () => {
+    const first = suggestions[0];
+    if (first) pickSuggestion(first);
+  };
+
   const pickSuggestion = (s: Suggestion) => {
     const lat = Number(s.lat);
     const lng = Number(s.lng);
