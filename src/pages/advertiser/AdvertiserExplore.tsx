@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2, AlertTriangle,
-  RefreshCw, Package, Clock, Calendar as CalendarIcon, Eye, MapPin,
+  RefreshCw, Package, Clock, Calendar as CalendarIcon, Eye, MapPin, Check,
   Image as ImageIcon, Monitor, Volume2, Truck, ChevronRight, ChevronLeft,
 } from "lucide-react";
 import { addMonths, format, startOfDay, isBefore } from "date-fns";
