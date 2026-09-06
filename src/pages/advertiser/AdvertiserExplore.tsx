@@ -407,7 +407,7 @@ export default function AdvertiserExplore() {
       const { data: { user } } = await supabase.auth.getUser();
       const enriched = activeSelections.map((s) => {
         const v = ALL_VARIANTS.find((vv) => vv.id === s.variantId);
-        return { ...s, label: v?.label, price: v?.price, category: v?.category, specs: v?.specs };
+        return { ...s, label: v?.label, category: v?.category, specs: v?.specs };
       });
       const campaignType = [...new Set(enriched.map((s) => s.category).filter(Boolean))].join(", ");
 
@@ -423,7 +423,6 @@ export default function AdvertiserExplore() {
           radius_meters: radiusMeters,
           venue_count: nearbyPlaces.length,
           selections: enriched,
-          estimated_price: estimate.totalEstimate,
           preferred_start_date: form.preferredStartDate,
           notes: form.notes || null,
           status: "pending_review",
@@ -442,7 +441,6 @@ export default function AdvertiserExplore() {
             centerLng: center.lng,
             radiusMeters,
             selections: enriched,
-            estimatedPrice: estimate.totalEstimate,
             preferredStartDate: form.preferredStartDate,
             notes: form.notes || null,
             requesterEmail: emailTrimmed,
@@ -452,6 +450,7 @@ export default function AdvertiserExplore() {
         console.error("[AdvertiserExplore] admin email failed", mailErr);
       }
 
+
       setSubmitted(true);
     } catch (e: any) {
       toast({ title: "Submission failed", description: e?.message ?? "Try again.", variant: "destructive" });
@@ -460,13 +459,8 @@ export default function AdvertiserExplore() {
     }
   }
 
-  const tierColor = estimate.tier === "Domination"
-    ? "bg-purple-100 text-purple-700 border-purple-300"
-    : estimate.tier === "Growth"
-    ? "bg-blue-100 text-blue-700 border-blue-300"
-    : "bg-green-100 text-green-700 border-green-300";
-
   function renderVariantRow(variant: FormatVariant) {
+
     const qty = selections[variant.id] || 0;
     const selected = qty > 0;
     return (
@@ -493,7 +487,6 @@ export default function AdvertiserExplore() {
               </button>
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-0.5">
-              <span className="text-green-600 font-medium text-xs">₱{variant.price.toLocaleString()} / unit</span>
               {variant.billingType === "monthly" ? (
                 <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2 py-0.5">
                   <RefreshCw className="w-3 h-3" />
@@ -506,6 +499,7 @@ export default function AdvertiserExplore() {
                 </span>
               )}
             </div>
+
           </div>
           <div className="flex items-center gap-2 shrink-0 min-w-[140px]">
             <input
@@ -927,15 +921,12 @@ export default function AdvertiserExplore() {
                     )}
                   </div>
 
-                  {/* Running estimate */}
+                  {/* Selection summary */}
                   {activeSelections.length > 0 && (
                     <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-5">
                       <div className="flex items-center justify-between">
-                        <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Estimated Ad Campaign Fee</div>
-                        <Badge className={`${tierColor} border`}>{estimate.tier}</Badge>
-                      </div>
-                      <div className="text-3xl font-bold text-gray-900 mt-1">
-                        ₱{estimate.totalEstimate.toLocaleString()}
+                        <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Selected Ad Formats</div>
+                        <Badge className="bg-green-100 text-green-700 border-green-300 border">{estimate.totalUnits} units</Badge>
                       </div>
                       <div className="mt-3 space-y-1.5 text-sm">
                         {activeSelections.map((s) => {
@@ -943,7 +934,6 @@ export default function AdvertiserExplore() {
                           return (
                             <div key={s.variantId} className="flex justify-between text-gray-700">
                               <span className="truncate pr-2">{v.label} × {s.quantity}</span>
-                              <span className="font-medium shrink-0">₱{(v.price * s.quantity).toLocaleString()}</span>
                             </div>
                           );
                         })}
@@ -951,10 +941,10 @@ export default function AdvertiserExplore() {
                           <span>Coverage Radius ({estimate.radiusPercent}% of {MAX_RADIUS_METERS / 1000}km)</span>
                           <span className="font-medium">{estimate.radiusKm}km</span>
                         </div>
-
                       </div>
                     </div>
                   )}
+
 
                   <div className="flex justify-between">
                     <Button variant="outline" onClick={() => setWizardStep(2)}>
@@ -1054,7 +1044,6 @@ export default function AdvertiserExplore() {
                         return (
                           <div key={s.variantId} className="flex justify-between text-gray-700">
                             <span className="truncate pr-2">{v.label} × {s.quantity}</span>
-                            <span className="font-medium shrink-0">₱{(v.price * s.quantity).toLocaleString()}</span>
                           </div>
                         );
                       })}
@@ -1063,11 +1052,12 @@ export default function AdvertiserExplore() {
                         <span className="font-medium">{estimate.radiusKm}km ({estimate.radiusPercent}%)</span>
                       </div>
                       <div className="flex justify-between items-center pt-1">
-                        <span className="font-bold text-gray-900">Estimated Total</span>
-                        <span className="font-bold text-lg text-green-700">₱{estimate.totalEstimate.toLocaleString()}</span>
+                        <span className="font-bold text-gray-900">Total Units</span>
+                        <span className="font-bold text-lg text-green-700">{estimate.totalUnits}</span>
                       </div>
                     </div>
                   </div>
+
 
                   <div className="flex justify-between">
                     <Button variant="outline" onClick={() => setWizardStep(3)} disabled={submitting}>
