@@ -291,9 +291,7 @@ export default function AdminMediaPlans() {
                       <div key={i} className="flex justify-between items-start p-3 bg-gray-50 rounded border">
                         <div className="flex-1">
                           <p className="font-medium text-sm">{s.label || s.variantId}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {s.category} · ₱{Number(s.price || 0).toLocaleString()} / unit
-                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">{s.category}</p>
                           {s.specs && typeof s.specs === "object" && (
                             <div className="text-[11px] text-gray-500 mt-1 space-x-2">
                               {Object.entries(s.specs).map(([k, v]: any) => (
@@ -304,16 +302,14 @@ export default function AdminMediaPlans() {
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-sm">× {s.quantity}</p>
-                          <p className="text-xs text-gray-600">
-                            ₱{(Number(s.price || 0) * Number(s.quantity || 0)).toLocaleString()}
-                          </p>
                         </div>
                       </div>
                     ))}
                     <div className="flex justify-between items-center px-3 py-2 bg-green-50 border border-green-200 rounded font-semibold text-sm">
-                      <span>Total Estimate</span>
-                      <span>₱{Number(selected.estimated_price || 0).toLocaleString()}</span>
+                      <span>Total Units</span>
+                      <span>{selected.selections.reduce((sum: number, s: any) => sum + Number(s.quantity || 0), 0)}</span>
                     </div>
+
                   </div>
                 </div>
               )}
