@@ -335,9 +335,11 @@ export default function AdvertiserExplore() {
   const [form, setForm] = useState({
     campaignName: "",
     preferredStartDate: "",
+    preferredEndDate: "",
     notes: "",
     email: "",
   });
+
 
   const canAdvanceStep1 =
     selectedPlaceCount >= 1 && selectedPlaceCount <= MAX_SELECTED_LOCATIONS;
@@ -397,6 +399,11 @@ export default function AdvertiserExplore() {
       toast({ title: "Start date too soon", description: `Campaigns require at least 1 month lead time. Earliest available date is ${format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}.`, variant: "destructive" });
       return;
     }
+    if (form.preferredEndDate && isBefore(new Date(form.preferredEndDate), new Date(form.preferredStartDate))) {
+      toast({ title: "End date invalid", description: "Campaign end date must be on or after the start date.", variant: "destructive" });
+      return;
+    }
+
     if (activeSelections.length === 0) {
       toast({ title: "Add at least one unit", description: "Select at least one ad format and quantity.", variant: "destructive" });
       return;
@@ -424,7 +431,9 @@ export default function AdvertiserExplore() {
           venue_count: nearbyPlaces.length,
           selections: enriched,
           preferred_start_date: form.preferredStartDate,
+          preferred_end_date: form.preferredEndDate || null,
           notes: form.notes || null,
+
           status: "pending_review",
           requester_email: emailTrimmed,
         });
