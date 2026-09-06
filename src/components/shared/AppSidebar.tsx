@@ -85,7 +85,6 @@ const ROLE_SETTINGS_PATH: Record<string, string> = {
   print_partner: "/print-partner/settings",
   talent: "/talent-profile",
   admin: "/admin/dashboard",
-  brand_advertiser: "/brand-advertiser/settings",
 };
 
 const PILLAR_ITEM: Record<string, Item> = {
