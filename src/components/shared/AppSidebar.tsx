@@ -49,7 +49,6 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/admin/agents", label: "Agent Center", icon: UsersRound },
     { to: "/admin/verified-locations", label: "SSP (Supply)", icon: Layers },
 
-    { to: "/admin/media-partners", label: "Media Partners", icon: Users },
     { to: "/admin/media-plans", label: "Media Request", icon: ClipboardList },
     { to: "/admin/total-inventory", label: "Total Inventory", icon: Package },
     { to: "/campaigns", label: "All Campaigns", icon: Megaphone, children: [
