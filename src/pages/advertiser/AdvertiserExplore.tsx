@@ -922,15 +922,12 @@ export default function AdvertiserExplore() {
                     )}
                   </div>
 
-                  {/* Running estimate */}
+                  {/* Selection summary */}
                   {activeSelections.length > 0 && (
                     <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-5">
                       <div className="flex items-center justify-between">
-                        <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Estimated Ad Campaign Fee</div>
-                        <Badge className={`${tierColor} border`}>{estimate.tier}</Badge>
-                      </div>
-                      <div className="text-3xl font-bold text-gray-900 mt-1">
-                        ₱{estimate.totalEstimate.toLocaleString()}
+                        <div className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Selected Ad Formats</div>
+                        <Badge className="bg-green-100 text-green-700 border-green-300 border">{estimate.totalUnits} units</Badge>
                       </div>
                       <div className="mt-3 space-y-1.5 text-sm">
                         {activeSelections.map((s) => {
@@ -938,7 +935,6 @@ export default function AdvertiserExplore() {
                           return (
                             <div key={s.variantId} className="flex justify-between text-gray-700">
                               <span className="truncate pr-2">{v.label} × {s.quantity}</span>
-                              <span className="font-medium shrink-0">₱{(v.price * s.quantity).toLocaleString()}</span>
                             </div>
                           );
                         })}
@@ -946,10 +942,10 @@ export default function AdvertiserExplore() {
                           <span>Coverage Radius ({estimate.radiusPercent}% of {MAX_RADIUS_METERS / 1000}km)</span>
                           <span className="font-medium">{estimate.radiusKm}km</span>
                         </div>
-
                       </div>
                     </div>
                   )}
+
 
                   <div className="flex justify-between">
                     <Button variant="outline" onClick={() => setWizardStep(2)}>
@@ -1049,7 +1045,6 @@ export default function AdvertiserExplore() {
                         return (
                           <div key={s.variantId} className="flex justify-between text-gray-700">
                             <span className="truncate pr-2">{v.label} × {s.quantity}</span>
-                            <span className="font-medium shrink-0">₱{(v.price * s.quantity).toLocaleString()}</span>
                           </div>
                         );
                       })}
@@ -1058,11 +1053,12 @@ export default function AdvertiserExplore() {
                         <span className="font-medium">{estimate.radiusKm}km ({estimate.radiusPercent}%)</span>
                       </div>
                       <div className="flex justify-between items-center pt-1">
-                        <span className="font-bold text-gray-900">Estimated Total</span>
-                        <span className="font-bold text-lg text-green-700">₱{estimate.totalEstimate.toLocaleString()}</span>
+                        <span className="font-bold text-gray-900">Total Units</span>
+                        <span className="font-bold text-lg text-green-700">{estimate.totalUnits}</span>
                       </div>
                     </div>
                   </div>
+
 
                   <div className="flex justify-between">
                     <Button variant="outline" onClick={() => setWizardStep(3)} disabled={submitting}>
