@@ -19,17 +19,8 @@ const PageLoader = () => (
   </div>
 );
 
-export const getDashboardByRole = (role: Role | null | undefined): string => {
-  switch (role) {
-    case "admin": return "/admin/dashboard";
-    case "retailer": return "/retailer-dashboard";
-    case "agent": return "/venue-publishers";
-    case "print_partner": return "/print-partner/dashboard";
-    case "talent": return "/talent-dashboard";
-    case "brand_advertiser": return "/brand-advertiser/dashboard";
-    default: return "/";
-  }
-};
+export const getDashboardByRole = (role: Role | null | undefined): string =>
+  dashboardForRole(role ?? null);
 
 export const RoleProtectedRoute = ({ children, allowedRoles, requireAuth = true }: Props) => {
   const location = useLocation();
