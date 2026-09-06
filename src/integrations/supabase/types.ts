@@ -2770,8 +2770,8 @@ export type Database = {
           campaign_name: string
           campaign_pillar: string | null
           campaign_type: string
-          center_lat: number
-          center_lng: number
+          center_lat: number | null
+          center_lng: number | null
           created_at: string
           dooh_units: number | null
           estimated_price: number | null
@@ -2796,8 +2796,8 @@ export type Database = {
           campaign_name: string
           campaign_pillar?: string | null
           campaign_type: string
-          center_lat: number
-          center_lng: number
+          center_lat?: number | null
+          center_lng?: number | null
           created_at?: string
           dooh_units?: number | null
           estimated_price?: number | null
@@ -2822,8 +2822,8 @@ export type Database = {
           campaign_name?: string
           campaign_pillar?: string | null
           campaign_type?: string
-          center_lat?: number
-          center_lng?: number
+          center_lat?: number | null
+          center_lng?: number | null
           created_at?: string
           dooh_units?: number | null
           estimated_price?: number | null

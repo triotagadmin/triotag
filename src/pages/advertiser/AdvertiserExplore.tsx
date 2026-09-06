@@ -367,11 +367,8 @@ export default function AdvertiserExplore() {
 
   async function handleSubmitRequest() {
 
-    if (!selectedLocationAddress) {
-      toast({ title: "Location required", description: "Search and select a location for your campaign before proceeding.", variant: "destructive" });
-      return;
-    }
-    if (!withinServiceArea) {
+    // Location is optional — TrioTag will propose locations if none is pinned.
+    if (selectedLocationAddress && !withinServiceArea) {
       toast({ title: "Selected location is outside our service area", description: `TrioTag currently only operates in ${getActiveAreaNamesText()}. Please choose a location within our service area to continue.`, variant: "destructive" });
       return;
     }
@@ -418,8 +415,8 @@ export default function AdvertiserExplore() {
           campaign_name: form.campaignName,
           campaign_type: campaignType,
           campaign_pillar: campaignPillar,
-          center_lat: center.lat,
-          center_lng: center.lng,
+          center_lat: selectedLocationAddress ? center.lat : null,
+          center_lng: selectedLocationAddress ? center.lng : null,
           radius_meters: radiusMeters,
           venue_count: nearbyPlaces.length,
           selections: enriched,
@@ -439,8 +436,9 @@ export default function AdvertiserExplore() {
             campaignName: form.campaignName,
             campaignType,
             campaignPillar,
-            centerLat: center.lat,
-            centerLng: center.lng,
+            centerLat: selectedLocationAddress ? center.lat : null,
+            centerLng: selectedLocationAddress ? center.lng : null,
+            locationAddress: selectedLocationAddress || null,
             radiusMeters,
             selections: enriched,
             preferredStartDate: form.preferredStartDate,
