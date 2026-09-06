@@ -856,12 +856,13 @@ export default function AdvertiserExplore() {
 
                   <div className="flex justify-end">
                     <Button
-                      onClick={() => setWizardStep(3)}
+                      onClick={handleContinueFromStep2}
                       disabled={!canAdvanceStep1}
                       className="bg-green-600 hover:bg-green-500 text-white"
                     >
                       Continue <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
+
                   </div>
                 </div>
               )}
