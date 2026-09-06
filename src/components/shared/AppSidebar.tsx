@@ -283,11 +283,11 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
     const load = async (session: any) => {
       const userId = session?.user?.id;
       if (!userId) { setRole(null); setPillar(null); setReady(true); return; }
-      const [{ data }, { data: brandProfile }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
+      const [account, { data: brandProfile }] = await Promise.all([
+        resolveAccount(),
         supabase.from("brand_advertiser_profiles").select("campaign_pillar").eq("user_id", userId).maybeSingle(),
       ]);
-      const resolved = (data?.role as string) || null;
+      const resolved = (account.role as string) || null;
       setRole(resolved);
       setPillar(((brandProfile as any)?.campaign_pillar as string) || null);
       setReady(true);
