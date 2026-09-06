@@ -859,7 +859,10 @@ export default function AdvertiserExplore() {
                   )}
 
 
-                  <div className="flex justify-end">
+                  <div className="flex justify-between">
+                    <Button variant="outline" onClick={() => setWizardStep(1)}>
+                      <ChevronLeft className="w-4 h-4 mr-1" /> Back
+                    </Button>
                     <Button
                       onClick={handleContinueFromStep2}
                       disabled={!canAdvanceStep1}
@@ -867,7 +870,6 @@ export default function AdvertiserExplore() {
                     >
                       Continue <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
-
                   </div>
                 </div>
               )}
