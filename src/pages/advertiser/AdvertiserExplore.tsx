@@ -839,7 +839,7 @@ export default function AdvertiserExplore() {
                   </div>
 
 
-                  {!canAdvanceStep1 && (
+                  {(!selectedLocationAddress || !withinServiceArea || radiusMeters < 250 || selectedPlaceCount < 1) && (
                     <div className="flex items-start gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
                       <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                       <span>
@@ -853,6 +853,7 @@ export default function AdvertiserExplore() {
                       </span>
                     </div>
                   )}
+
 
                   <div className="flex justify-end">
                     <Button
