@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
+import { resolveAccount } from "@/lib/account";
 
 // Self-serve signup only creates Brand Advertiser accounts.
 const SIGNUP_USER_TYPE = "brand_advertiser";
