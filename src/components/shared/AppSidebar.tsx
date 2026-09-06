@@ -61,6 +61,18 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
   ],
+  brand_advertiser: [
+    { to: "/brand-advertiser/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/brand-advertiser/discover", label: "Discover Inventory", icon: Compass },
+    { to: "/brand-advertiser/inventory", label: "Launch Campaign", icon: Target },
+    { to: "/brand-advertiser/saved", label: "Saved Inventory", icon: Heart },
+    { to: "/brand-advertiser/campaigns", label: "Campaigns", icon: Megaphone },
+    { to: "/brand-advertiser/proposals", label: "Proposals", icon: ClipboardList },
+    { to: "/brand-advertiser/bookings", label: "Bookings", icon: CalendarCheck },
+    { to: "/brand-advertiser/transactions", label: "Transactions", icon: Receipt },
+    { to: "/brand-advertiser/reports", label: "Campaign Reports", icon: BarChart3 },
+    { to: "/notifications", label: "Notifications", icon: Bell },
+  ],
 };
 
 const ROLE_SETTINGS_PATH: Record<string, string> = {
@@ -69,6 +81,7 @@ const ROLE_SETTINGS_PATH: Record<string, string> = {
   print_partner: "/print-partner/settings",
   talent: "/talent-profile",
   admin: "/admin/dashboard",
+  brand_advertiser: "/brand-advertiser/settings",
 };
 
 const PILLAR_ITEM: Record<string, Item> = {
