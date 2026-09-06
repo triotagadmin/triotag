@@ -819,7 +819,9 @@ export default function AdvertiserExplore() {
                           ? "Search and select a campaign location to continue."
                           : !withinServiceArea
                           ? `This location is outside our service area. TrioTag currently only operates in ${getActiveAreaNamesText()}.`
-                          : "Minimum campaign radius is 250 m (5% coverage)."}
+                          : radiusMeters < 250
+                          ? "Minimum campaign radius is 250 m (5% coverage)."
+                          : `Select at least 1 location (up to ${MAX_SELECTED_LOCATIONS}) to continue.`}
                       </span>
                     </div>
                   )}
