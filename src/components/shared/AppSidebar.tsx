@@ -23,7 +23,7 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/venue-inventory", label: "My Ad Spaces", icon: Globe },
     { to: "/agent/verified-venues", label: "Verified Venues", icon: ShieldCheck },
     { to: "/agent/discover-locations", label: "Discover Locations", icon: Compass },
-    { to: "/agent/business-prospecting", label: "Business Prospecting", icon: Target },
+    
 
 
     { to: "/publisher/campaigns", label: "Campaigns", icon: Megaphone },
@@ -52,9 +52,6 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/admin/media-partners", label: "Media Partners", icon: Users },
     { to: "/admin/media-plans", label: "Media Request", icon: ClipboardList },
     { to: "/admin/total-inventory", label: "Total Inventory", icon: Package },
-    { to: "/admin/local-listings", label: "Local SEO / Maps", icon: MapPin },
-    { to: "/admin/business-prospecting", label: "Business Prospecting", icon: Target },
-    { to: "/admin/social-scanner", label: "Social Scanner", icon: Radar },
     { to: "/campaigns", label: "All Campaigns", icon: Megaphone, children: [
       { to: "/admin/brand-advertiser-approvals", label: "Account Approvals", icon: ShieldCheck },
       { to: "/admin/brand-campaigns", label: "Brand Campaigns", icon: Megaphone },

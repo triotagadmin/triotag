@@ -1045,10 +1045,6 @@ export default function AdminDashboard() {
               <BarChart3 className="w-4 h-4 mr-2" />
               Total Inventory
             </Button>
-            <Button variant="outline" onClick={() => navigate("/admin/business-prospecting")}>
-              <Target className="w-4 h-4 mr-2" />
-              Business Prospecting
-            </Button>
             <Button variant="outline" onClick={() => navigate("/admin/external-inventory")}>
               <Package className="w-4 h-4 mr-2" />
               External Inventory

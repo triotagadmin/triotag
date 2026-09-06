@@ -8,6 +8,7 @@ import {
   LayoutDashboard, Building2, PlusCircle, ShieldCheck, Users, Store, MapPin, Boxes,
   BadgeCheck, ClipboardCheck, Megaphone, FileText, Receipt, Percent, BarChart3,
   UserCog, KeyRound, ScrollText, Settings, Lock, Activity, FileSearch, LogOut, Menu,
+  Target, Radar,
 } from "lucide-react";
 
 type Ctx = { data: PlatformData; loading: boolean; reload: () => Promise<void> };
@@ -47,6 +48,14 @@ const NAV: { group: string; items: { to: string; label: string; icon: React.Elem
       { to: "/webmaster/transactions", label: "Transactions", icon: Receipt },
       { to: "/webmaster/commissions", label: "Commissions", icon: Percent },
       { to: "/webmaster/reports", label: "Reports", icon: BarChart3 },
+    ],
+  },
+  {
+    group: "Growth Tools",
+    items: [
+      { to: "/webmaster/business-prospecting", label: "Business Prospecting", icon: Target },
+      { to: "/webmaster/social-scanner", label: "Social Scanner", icon: Radar },
+      { to: "/webmaster/local-listings", label: "Local SEO / Maps", icon: MapPin },
     ],
   },
   {

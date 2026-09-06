@@ -211,6 +211,9 @@ const App = () => (
             <Route path="/webmaster/security" element={<WebmasterSecurity mode="overview" />} />
             <Route path="/webmaster/auth-activity" element={<WebmasterSecurity mode="auth-activity" />} />
             <Route path="/webmaster/access-logs" element={<WebmasterSecurity mode="access-logs" />} />
+            <Route path="/webmaster/local-listings" element={<AdminLocalListings />} />
+            <Route path="/webmaster/business-prospecting" element={<AdminBusinessProspecting />} />
+            <Route path="/webmaster/social-scanner" element={<AdminSocialScanner />} />
           </Route>
 
           <Route path="/tenant/dashboard" element={<TenantSuperAdminRoute><SuperAdminDashboard /></TenantSuperAdminRoute>} />
@@ -353,30 +356,10 @@ const App = () => (
               <AdminBrandCampaigns />
             </ProtectedAdminRoute>
           } />
-          <Route path="/admin/local-listings" element={
-            <ProtectedAdminRoute>
-              <AdminLocalListings />
-            </ProtectedAdminRoute>
-          } />
-          <Route path="/admin/business-prospecting" element={
-            <ProtectedAdminRoute>
-              <AdminBusinessProspecting />
-            </ProtectedAdminRoute>
-          } />
-          <Route path="/agent/business-prospecting" element={
-            <RoleProtectedRoute requireAuth allowedRoles={["agent"]}>
-              <AdminBusinessProspecting />
-            </RoleProtectedRoute>
-          } />
           <Route path="/admin/agents" element={
             <TenantSuperAdminRoute>
               <AdminAgentCenter />
             </TenantSuperAdminRoute>
-          } />
-          <Route path="/admin/social-scanner" element={
-            <ProtectedAdminRoute>
-              <AdminSocialScanner />
-            </ProtectedAdminRoute>
           } />
           {/* Advertiser inventory explorer — PUBLIC, no auth required */}
           <Route path="/advertiser/explore" element={<AdvertiserExplore />} />
