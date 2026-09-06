@@ -20,6 +20,7 @@ function BrandAdvertiserDashboard() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState("My Brand");
   const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [spendEvents, setSpendEvents] = useState<any[]>([]);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState<Date>(subDays(new Date(), 6));
