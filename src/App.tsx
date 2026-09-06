@@ -19,7 +19,7 @@ import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminOrders from "./pages/AdminOrders";
 import AdminTotalInventory from "./pages/admin/AdminTotalInventory";
 import AdminMediaPlans from "./pages/admin/AdminMediaPlans";
-import AdminExternalInventory from "./pages/admin/AdminExternalInventory";
+
 import AdminBrandCampaigns from "./pages/admin/AdminBrandCampaigns";
 import AdminLocalListings from "./pages/admin/AdminLocalListings";
 import AdminBusinessProspecting from "./pages/admin/AdminBusinessProspecting";
@@ -343,11 +343,6 @@ const App = () => (
           <Route path="/admin/media-plans" element={
             <ProtectedAdminRoute>
               <AdminMediaPlans />
-            </ProtectedAdminRoute>
-          } />
-          <Route path="/admin/external-inventory" element={
-            <ProtectedAdminRoute>
-              <AdminExternalInventory />
             </ProtectedAdminRoute>
           } />
           <Route path="/admin/brand-advertiser-approvals" element={<AdminBrandAdvertiserApprovals />} />
