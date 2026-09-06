@@ -61,22 +61,6 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
   ],
-  brand_advertiser: [
-    { to: "/brand-advertiser/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/brand-advertiser/discover", label: "Discover Inventory", icon: Compass },
-    { to: "/brand-advertiser/inventory", label: "Ad Inventory", icon: Layers },
-    { to: "/brand-advertiser/saved", label: "Saved Inventory", icon: Heart },
-    { to: "/brand-advertiser/campaigns", label: "Campaigns", icon: Megaphone },
-    { to: "/brand-advertiser/creatives", label: "Creative Sets", icon: ImageIcon },
-    { to: "/brand-advertiser/proposals", label: "Proposals", icon: ClipboardList },
-    { to: "/brand-advertiser/bookings", label: "Bookings", icon: CalendarCheck },
-    { to: "/brand-advertiser/transactions", label: "Transactions", icon: Receipt },
-    { to: "/brand-advertiser/reports", label: "Reports", icon: BarChart3 },
-    { to: "/brand-advertiser/audiences", label: "Audiences", icon: Users },
-    { to: "/brand-advertiser/changelog", label: "Changelog", icon: History },
-    { to: "/messages", label: "Messages", icon: MessageSquare },
-    { to: "/notifications", label: "Notifications", icon: Bell },
-  ],
 };
 
 const ROLE_SETTINGS_PATH: Record<string, string> = {
