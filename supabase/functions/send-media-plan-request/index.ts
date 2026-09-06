@@ -24,9 +24,11 @@ serve(async (req) => {
       radiusMeters,
       selections,
       preferredStartDate,
+      preferredEndDate,
       notes,
       requesterEmail,
     } = await req.json();
+
 
 
     const mapsLink = `https://www.google.com/maps?q=${centerLat},${centerLng}`;
@@ -61,6 +63,8 @@ serve(async (req) => {
             <tr><td style="padding:4px 0;color:#6b7280;">Campaign Pillar</td><td style="padding:4px 0;">${campaignPillar ? String(campaignPillar).charAt(0).toUpperCase() + String(campaignPillar).slice(1) : "-"}</td></tr>
             <tr><td style="padding:4px 0;color:#6b7280;">Type</td><td style="padding:4px 0;">${campaignType ?? "-"}</td></tr>
             <tr><td style="padding:4px 0;color:#6b7280;">Preferred Start Date</td><td style="padding:4px 0;">${preferredStartDate ?? "-"}</td></tr>
+            <tr><td style="padding:4px 0;color:#6b7280;">Preferred End Date</td><td style="padding:4px 0;">${preferredEndDate ?? "-"}</td></tr>
+
           </table>
 
           <h3 style="font-size:14px;margin:20px 0 6px;color:#111827;">Location</h3>
