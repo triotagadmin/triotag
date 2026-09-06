@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Bell, Globe, Layers, ShieldCheck, BadgeCheck, Loader2, CheckCircle2, AlertTriangle,
-  RefreshCw, Package, Clock, Calendar as CalendarIcon, Eye, MapPin,
+  RefreshCw, Package, Clock, Calendar as CalendarIcon, Eye, MapPin, Check,
   Image as ImageIcon, Monitor, Volume2, Truck, ChevronRight, ChevronLeft,
 } from "lucide-react";
 import { addMonths, format, startOfDay, isBefore } from "date-fns";
@@ -248,6 +248,31 @@ export default function AdvertiserExplore() {
     if (!on) loadPlacesForCategory(t);
   };
 
+  // ---- Location selection (1–50 locations) ----
+  const MAX_SELECTED_LOCATIONS = 50;
+  const [selectedPlaces, setSelectedPlaces] = useState<Record<string, PlaceMarker>>({});
+  const selectedPlacesList = useMemo(() => Object.values(selectedPlaces), [selectedPlaces]);
+  const selectedPlaceCount = selectedPlacesList.length;
+
+  const togglePlaceSelection = (p: PlaceMarker) => {
+    setSelectedPlaces((prev) => {
+      if (prev[p.id]) {
+        const next = { ...prev };
+        delete next[p.id];
+        return next;
+      }
+      if (Object.keys(prev).length >= MAX_SELECTED_LOCATIONS) {
+        toast({
+          title: "Selection limit reached",
+          description: `You can select up to ${MAX_SELECTED_LOCATIONS} locations.`,
+          variant: "destructive",
+        });
+        return prev;
+      }
+      return { ...prev, [p.id]: p };
+    });
+  };
+
   // Markers shown on the map = every place discovered for the opened categories
   const nearbyPlaces = useMemo(() => {
     const seen = new Set<string>();
@@ -315,7 +340,8 @@ export default function AdvertiserExplore() {
   });
 
   const canAdvanceStep1 =
-    !!selectedLocationAddress && withinServiceArea && radiusMeters >= 250;
+    !!selectedLocationAddress && withinServiceArea && radiusMeters >= 250 &&
+    selectedPlaceCount >= 1 && selectedPlaceCount <= MAX_SELECTED_LOCATIONS;
 
   async function handleSubmitRequest() {
     if (!selectedLocationAddress) {
@@ -629,10 +655,24 @@ export default function AdvertiserExplore() {
                     {/* RIGHT: browse real nearby locations by category */}
                     <div className="lg:col-span-2 space-y-4">
                       <div className="bg-white border border-gray-200 rounded-2xl p-4">
-                        <h3 className="text-sm font-bold text-gray-900">Retail Media Locations in This Area</h3>
-                        <p className="text-xs text-gray-500 mt-0.5 mb-3">
-                          Open a location type to see real businesses within your radius.
-                        </p>
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h3 className="text-sm font-bold text-gray-900">Retail Media Locations in This Area</h3>
+                            <p className="text-xs text-gray-500 mt-0.5 mb-3">
+                              Open location types and select the businesses you want to target — pick 1 to {MAX_SELECTED_LOCATIONS} locations.
+                            </p>
+                          </div>
+                          <Badge
+                            variant="secondary"
+                            className={`shrink-0 text-[11px] ${
+                              selectedPlaceCount > 0
+                                ? "bg-green-100 text-green-700 border border-green-300"
+                                : "bg-gray-100 text-gray-500 border border-gray-200"
+                            }`}
+                          >
+                            {selectedPlaceCount}/{MAX_SELECTED_LOCATIONS} selected
+                          </Badge>
+                        </div>
                         <div className="space-y-1.5 max-h-[520px] overflow-y-auto pr-1">
                           {LOCATION_TYPES.map((t) => {
                             const on = !!openCategories[t];
@@ -679,30 +719,47 @@ export default function AdvertiserExplore() {
                                       <p className="text-xs text-gray-500 py-2">No {t} found in this radius.</p>
                                     )}
                                     {!loading && results && results.length > 0 && (
-                                      <div className="max-h-56 overflow-y-auto space-y-1 pr-1">
-                                        {results.map((p) => (
-                                          <div
-                                            key={p.id}
-                                            className="rounded-md border border-gray-200 bg-white px-2 py-1.5"
-                                          >
-                                            <div className="flex items-center gap-1.5 flex-wrap">
-                                              <span className="text-xs font-medium text-gray-900">{p.name}</span>
-                                              {p.verified && (
-                                                <Badge className="h-4 px-1.5 gap-1 bg-green-100 text-green-700 hover:bg-green-100 border border-green-300 text-[10px]">
-                                                  <ShieldCheck className="w-2.5 h-2.5" />
-                                                  Verified
-                                                </Badge>
-                                              )}
-                                            </div>
-                                            {p.address && (
-                                              <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-0.5">
-                                                <MapPin className="w-3 h-3 shrink-0" />
-                                                <span className="truncate">{p.address}</span>
-                                              </div>
-                                            )}
-                                          </div>
-                                        ))}
-                                      </div>
+                                       <div className="max-h-56 overflow-y-auto space-y-1 pr-1">
+                                         {results.map((p) => {
+                                           const isSelected = !!selectedPlaces[p.id];
+                                           return (
+                                             <button
+                                               key={p.id}
+                                               type="button"
+                                               onClick={() => togglePlaceSelection(p)}
+                                               aria-pressed={isSelected}
+                                               className={`w-full text-left rounded-md border px-2 py-1.5 transition-colors ${
+                                                 isSelected
+                                                   ? "border-green-400 bg-green-50"
+                                                   : "border-gray-200 bg-white hover:border-green-300"
+                                               }`}
+                                             >
+                                               <div className="flex items-center gap-1.5 flex-wrap">
+                                                 <span
+                                                   className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 ${
+                                                     isSelected ? "bg-green-600 border-green-600" : "border-gray-300 bg-white"
+                                                   }`}
+                                                 >
+                                                   {isSelected && <Check className="w-2.5 h-2.5 text-white" />}
+                                                 </span>
+                                                 <span className="text-xs font-medium text-gray-900">{p.name}</span>
+                                                 {p.verified && (
+                                                   <Badge className="h-4 px-1.5 gap-1 bg-green-100 text-green-700 hover:bg-green-100 border border-green-300 text-[10px]">
+                                                     <ShieldCheck className="w-2.5 h-2.5" />
+                                                     Verified
+                                                   </Badge>
+                                                 )}
+                                               </div>
+                                               {p.address && (
+                                                 <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-0.5 pl-5">
+                                                   <MapPin className="w-3 h-3 shrink-0" />
+                                                   <span className="truncate">{p.address}</span>
+                                                 </div>
+                                               )}
+                                             </button>
+                                           );
+                                         })}
+                                       </div>
                                     )}
                                   </div>
                                 )}
@@ -762,7 +819,9 @@ export default function AdvertiserExplore() {
                           ? "Search and select a campaign location to continue."
                           : !withinServiceArea
                           ? `This location is outside our service area. TrioTag currently only operates in ${getActiveAreaNamesText()}.`
-                          : "Minimum campaign radius is 250 m (5% coverage)."}
+                          : radiusMeters < 250
+                          ? "Minimum campaign radius is 250 m (5% coverage)."
+                          : `Select at least 1 location (up to ${MAX_SELECTED_LOCATIONS}) to continue.`}
                       </span>
                     </div>
                   )}
