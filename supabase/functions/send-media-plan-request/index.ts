@@ -23,11 +23,11 @@ serve(async (req) => {
       centerLng,
       radiusMeters,
       selections,
-      estimatedPrice,
       preferredStartDate,
       notes,
       requesterEmail,
     } = await req.json();
+
 
     const mapsLink = `https://www.google.com/maps?q=${centerLat},${centerLng}`;
     const radiusKm = (Number(radiusMeters) / 1000).toFixed(2);
@@ -35,7 +35,6 @@ serve(async (req) => {
     const selectionsRows = Array.isArray(selections) && selections.length > 0
       ? selections
           .map((s: any) => {
-            const lineTotal = (Number(s.price) || 0) * (Number(s.quantity) || 0);
             return `
               <tr>
                 <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;">
@@ -43,12 +42,12 @@ serve(async (req) => {
                   <div style="font-size:12px;color:#6b7280;">${s.category ?? ""}</div>
                 </td>
                 <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center;color:#111827;">${s.quantity}</td>
-                <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:right;color:#16a34a;font-weight:600;">₱${lineTotal.toLocaleString()}</td>
               </tr>
             `;
           })
           .join("")
-      : `<tr><td colspan="3" style="padding:12px;color:#6b7280;">No formats selected</td></tr>`;
+      : `<tr><td colspan="2" style="padding:12px;color:#6b7280;">No formats selected</td></tr>`;
+
 
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#f9fafb;color:#111827;">
@@ -76,16 +75,11 @@ serve(async (req) => {
               <tr style="background:#f3f4f6;">
                 <th style="padding:8px 12px;text-align:left;color:#374151;">Format</th>
                 <th style="padding:8px 12px;text-align:center;color:#374151;">Qty</th>
-                <th style="padding:8px 12px;text-align:right;color:#374151;">Line Total</th>
               </tr>
             </thead>
             <tbody>${selectionsRows}</tbody>
           </table>
 
-          <div style="margin-top:16px;padding:12px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;display:flex;justify-content:space-between;font-size:15px;">
-            <strong style="color:#111827;">Estimated Total</strong>
-            <strong style="color:#16a34a;">₱${Number(estimatedPrice || 0).toLocaleString()}</strong>
-          </div>
 
           <h3 style="font-size:14px;margin:20px 0 6px;color:#111827;">Requester</h3>
           <p style="margin:0;font-size:14px;">
