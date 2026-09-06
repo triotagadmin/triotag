@@ -141,6 +141,13 @@ export type Database = {
             referencedRelation: "ad_spaces"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "activations_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ad_material_pricing: {
@@ -460,6 +467,13 @@ export type Database = {
             referencedRelation: "ad_spaces"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "advertiser_branches_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
         ]
       }
       advertiser_franchises: {
@@ -590,6 +604,48 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: []
+      }
+      advertiser_saved_inventory: {
+        Row: {
+          ad_space_id: string
+          created_at: string
+          id: string
+          note: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ad_space_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          ad_space_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advertiser_saved_inventory_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advertiser_saved_inventory_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agent_service_files: {
         Row: {
@@ -830,6 +886,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "aooh_play_logs_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "aooh_play_logs_aooh_campaign_id_fkey"
             columns: ["aooh_campaign_id"]
             isOneToOne: false
@@ -892,6 +955,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "aooh_player_sessions_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "aooh_player_sessions_venue_id_fkey"
             columns: ["venue_id"]
             isOneToOne: false
@@ -947,6 +1017,13 @@ export type Database = {
             columns: ["ad_space_id"]
             isOneToOne: false
             referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aooh_venue_assignments_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
             referencedColumns: ["id"]
           },
           {
@@ -1115,6 +1192,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branch_materials_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
             referencedColumns: ["id"]
           },
         ]
@@ -1523,6 +1607,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "campaign_ad_space_targets_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "campaign_ad_space_targets_campaign_id_fkey"
             columns: ["campaign_id"]
             isOneToOne: false
@@ -1565,6 +1656,13 @@ export type Database = {
             columns: ["ad_space_id"]
             isOneToOne: false
             referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_spend_ledger_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
             referencedColumns: ["id"]
           },
           {
@@ -1875,6 +1973,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "dooh_play_logs_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "dooh_play_logs_player_session_id_fkey"
             columns: ["player_session_id"]
             isOneToOne: false
@@ -1923,6 +2028,13 @@ export type Database = {
             columns: ["ad_space_id"]
             isOneToOne: false
             referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dooh_player_sessions_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
             referencedColumns: ["id"]
           },
           {
@@ -2278,6 +2390,13 @@ export type Database = {
             referencedRelation: "ad_spaces"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "external_inventory_published_ad_space_id_fkey"
+            columns: ["published_ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
         ]
       }
       franchise_branches: {
@@ -2332,6 +2451,13 @@ export type Database = {
             columns: ["franchise_id"]
             isOneToOne: false
             referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "franchise_branches_franchise_id_fkey"
+            columns: ["franchise_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
             referencedColumns: ["id"]
           },
         ]
@@ -2561,6 +2687,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "house_ad_schedules_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "house_ad_schedules_creative_id_fkey"
             columns: ["creative_id"]
             isOneToOne: false
@@ -2614,6 +2747,13 @@ export type Database = {
             columns: ["ad_space_id"]
             isOneToOne: false
             referencedRelation: "ad_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_reviews_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
             referencedColumns: ["id"]
           },
         ]
@@ -4405,6 +4545,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "qr_codes_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "qr_codes_campaign_id_fkey"
             columns: ["campaign_id"]
             isOneToOne: false
@@ -5456,6 +5603,13 @@ export type Database = {
             referencedRelation: "ad_spaces"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "venue_subscriptions_ad_space_id_fkey"
+            columns: ["ad_space_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_inventory"
+            referencedColumns: ["id"]
+          },
         ]
       }
       venue_tickets: {
@@ -5632,6 +5786,115 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: []
+      }
+      marketplace_inventory: {
+        Row: {
+          activation_fee: number | null
+          agent_id: string | null
+          annual_subscription_fee: number | null
+          availability_status: string | null
+          campaign_duration_days: number | null
+          campaign_end_date: string | null
+          campaign_start_date: string | null
+          contact_verified_at: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          media_owner_name: string | null
+          media_type: Database["public"]["Enums"]["media_type"] | null
+          media_types: Database["public"]["Enums"]["media_type"][] | null
+          media_urls: Json | null
+          monthly_subscription_fee: number | null
+          platform_verification_status: string | null
+          pricing: Json | null
+          publisher_id: string | null
+          specifications: Json | null
+          tenant_id: string | null
+          title: string | null
+          total_ad_units: number | null
+        }
+        Insert: {
+          activation_fee?: number | null
+          agent_id?: string | null
+          annual_subscription_fee?: number | null
+          availability_status?: string | null
+          campaign_duration_days?: number | null
+          campaign_end_date?: string | null
+          campaign_start_date?: string | null
+          contact_verified_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          media_owner_name?: string | null
+          media_type?: Database["public"]["Enums"]["media_type"] | null
+          media_types?: Database["public"]["Enums"]["media_type"][] | null
+          media_urls?: Json | null
+          monthly_subscription_fee?: number | null
+          platform_verification_status?: string | null
+          pricing?: Json | null
+          publisher_id?: string | null
+          specifications?: never
+          tenant_id?: string | null
+          title?: string | null
+          total_ad_units?: number | null
+        }
+        Update: {
+          activation_fee?: number | null
+          agent_id?: string | null
+          annual_subscription_fee?: number | null
+          availability_status?: string | null
+          campaign_duration_days?: number | null
+          campaign_end_date?: string | null
+          campaign_start_date?: string | null
+          contact_verified_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          media_owner_name?: string | null
+          media_type?: Database["public"]["Enums"]["media_type"] | null
+          media_types?: Database["public"]["Enums"]["media_type"][] | null
+          media_urls?: Json | null
+          monthly_subscription_fee?: number | null
+          platform_verification_status?: string | null
+          pricing?: Json | null
+          publisher_id?: string | null
+          specifications?: never
+          tenant_id?: string | null
+          title?: string | null
+          total_ad_units?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_spaces_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_spaces_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publisher_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_spaces_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       publisher_profiles_public: {
         Row: {

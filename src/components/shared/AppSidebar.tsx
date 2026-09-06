@@ -4,6 +4,7 @@ import {
   Globe, Megaphone, BarChart3, MessageSquare, Bell, User, LayoutDashboard, TrendingUp, Package,
   Image as ImageIcon, Users, History, ClipboardList, Layers, ShieldCheck, MapPinCheck, Compass,
   Wrench, CalendarDays, QrCode, Smartphone, ChevronDown, MapPin, Target, Radar, UsersRound,
+  Heart, CalendarCheck, Receipt,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
@@ -61,9 +62,15 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/notifications", label: "Notifications", icon: Bell },
   ],
   brand_advertiser: [
-    { to: "/brand-advertiser/inventory", label: "Inventory", icon: Layers },
-    { to: "/brand-advertiser/creatives", label: "Creative Sets", icon: ImageIcon },
+    { to: "/brand-advertiser/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/brand-advertiser/discover", label: "Discover Inventory", icon: Compass },
+    { to: "/brand-advertiser/inventory", label: "Ad Inventory", icon: Layers },
+    { to: "/brand-advertiser/saved", label: "Saved Inventory", icon: Heart },
     { to: "/brand-advertiser/campaigns", label: "Campaigns", icon: Megaphone },
+    { to: "/brand-advertiser/creatives", label: "Creative Sets", icon: ImageIcon },
+    { to: "/brand-advertiser/proposals", label: "Proposals", icon: ClipboardList },
+    { to: "/brand-advertiser/bookings", label: "Bookings", icon: CalendarCheck },
+    { to: "/brand-advertiser/transactions", label: "Transactions", icon: Receipt },
     { to: "/brand-advertiser/reports", label: "Reports", icon: BarChart3 },
     { to: "/brand-advertiser/audiences", label: "Audiences", icon: Users },
     { to: "/brand-advertiser/changelog", label: "Changelog", icon: History },
@@ -298,7 +305,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (!ready) return <>{children}</>;
-  const showSidebar = role && role !== "brand_advertiser";
+  const showSidebar = !!role && !!ROLE_SIDEBAR_ITEMS[role]?.length;
   return (
     <>
       {showSidebar && <AppSidebar role={role} campaignPillar={pillar} />}
