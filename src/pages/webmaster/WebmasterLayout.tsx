@@ -38,6 +38,7 @@ const NAV: { group: string; items: { to: string; label: string; icon: React.Elem
       { to: "/webmaster/inventory", label: "All Inventory", icon: Boxes },
       { to: "/webmaster/inventory-verification", label: "Inventory Verification", icon: BadgeCheck },
       { to: "/webmaster/pending-approvals", label: "Pending Approvals", icon: ClipboardCheck },
+      { to: "/webmaster/media-partners", label: "Media Partners", icon: Users },
     ],
   },
   {

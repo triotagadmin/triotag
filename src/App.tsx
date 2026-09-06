@@ -199,6 +199,7 @@ const App = () => (
             <Route path="/webmaster/inventory" element={<WebmasterSupply mode="inventory" />} />
             <Route path="/webmaster/inventory-verification" element={<WebmasterSupply mode="verification" />} />
             <Route path="/webmaster/pending-approvals" element={<WebmasterSupply mode="pending" />} />
+            <Route path="/webmaster/media-partners" element={<AdminMediaPartners />} />
             <Route path="/webmaster/campaigns" element={<WebmasterOperations mode="campaigns" />} />
             <Route path="/webmaster/proposals" element={<WebmasterOperations mode="proposals" />} />
             <Route path="/webmaster/transactions" element={<WebmasterOperations mode="transactions" />} />
@@ -395,7 +396,7 @@ const App = () => (
           <Route path="/ecommerce" element={<EcommerceOperations />} />
           <Route path="/media-partners" element={<MediaPartners />} />
           <Route path="/partners/register" element={<MediaPartnerRegister />} />
-          <Route path="/admin/media-partners" element={<ProtectedAdminRoute><AdminMediaPartners /></ProtectedAdminRoute>} />
+          <Route path="/admin/media-partners" element={<Navigate to="/webmaster/media-partners" replace />} />
 
           {/* Brand Advertiser portal */}
           <Route path="/brand-advertiser/dashboard" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserDashboard /></BrandApprovalGate></RoleProtectedRoute>} />
