@@ -150,7 +150,13 @@ export default function AdminVerifiedLocations() {
   useEffect(() => { load(); }, []);
 
   const mediaOwnerLabel = (r: Row) =>
-    r.media_owner_name || r.subscription?.venue_name || r.publisher?.business_name || "—";
+    r.media_owner_name || r.specifications?.contact_person || r.subscription?.venue_name || r.publisher?.business_name || "—";
+  const mediaOwnerContact = (r: Row) =>
+    r.media_owner_contact_person || r.specifications?.contact_person || null;
+  const mediaOwnerEmail = (r: Row) =>
+    r.media_owner_email || r.specifications?.contact_email || r.subscription?.email || null;
+  const mediaOwnerPhone = (r: Row) =>
+    r.media_owner_phone || r.specifications?.contact_number || null;
 
   const owners = useMemo(
     () => Array.from(new Set(rows.map(mediaOwnerLabel).filter(o => o !== "—"))).sort(),
@@ -463,9 +469,9 @@ export default function AdminVerifiedLocations() {
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-muted-foreground uppercase">Media Owner</p>
                   <p>{mediaOwnerLabel(detail)}</p>
-                  <p className="text-xs text-muted-foreground">{detail.media_owner_contact_person || "—"}</p>
-                  <p className="text-xs text-muted-foreground">{detail.media_owner_email || detail.subscription?.email || "—"}</p>
-                  <p className="text-xs text-muted-foreground">{detail.media_owner_phone || "—"}</p>
+                  <p className="text-xs text-muted-foreground">{mediaOwnerContact(detail) || "—"}</p>
+                  <p className="text-xs text-muted-foreground">{mediaOwnerEmail(detail) || "—"}</p>
+                  <p className="text-xs text-muted-foreground">{mediaOwnerPhone(detail) || "—"}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-muted-foreground uppercase">Submitted By (Agent)</p>
