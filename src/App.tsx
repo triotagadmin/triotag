@@ -8,6 +8,7 @@ import { GuestBasketProvider } from "@/contexts/GuestBasketContext";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
+import AuthRoleSelect from "./pages/AuthRoleSelect";
 import Dashboard from "./pages/Dashboard";
 import AdminLogin from "./pages/AdminLogin";
 import AdminRegister from "./pages/AdminRegister";
@@ -251,6 +252,7 @@ const App = () => (
           <Route path="/ticket-market" element={<TicketMarket />} />
           <Route path="/ticket-creator" element={<TicketMarket />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/select-role" element={<AuthRoleSelect />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/verify/agent" element={<VerifyAgent />} />
           <Route path="/dashboard" element={<Dashboard />} />
