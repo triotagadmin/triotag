@@ -303,6 +303,12 @@ export function RadiusMapPlanner({
           <Input
             value={reverseLoading ? "" : searchText}
             onChange={(e) => handleSearchChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                selectFirstSuggestion();
+              }
+            }}
             placeholder={reverseLoading ? "Getting address…" : "Search an address, business or area..."}
             disabled={reverseLoading}
             className="pl-9 h-11 bg-white text-gray-900 border border-gray-300 rounded-lg focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:border-green-500"
@@ -315,6 +321,7 @@ export function RadiusMapPlanner({
               {suggestions.map((s) => (
                 <button
                   key={s.placeId}
+                  type="button"
                   onClick={() => pickSuggestion(s)}
                   className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 border-b border-gray-100 last:border-0"
                 >
