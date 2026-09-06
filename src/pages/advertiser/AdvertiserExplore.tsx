@@ -655,10 +655,24 @@ export default function AdvertiserExplore() {
                     {/* RIGHT: browse real nearby locations by category */}
                     <div className="lg:col-span-2 space-y-4">
                       <div className="bg-white border border-gray-200 rounded-2xl p-4">
-                        <h3 className="text-sm font-bold text-gray-900">Retail Media Locations in This Area</h3>
-                        <p className="text-xs text-gray-500 mt-0.5 mb-3">
-                          Open a location type to see real businesses within your radius.
-                        </p>
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h3 className="text-sm font-bold text-gray-900">Retail Media Locations in This Area</h3>
+                            <p className="text-xs text-gray-500 mt-0.5 mb-3">
+                              Open location types and select the businesses you want to target — pick 1 to {MAX_SELECTED_LOCATIONS} locations.
+                            </p>
+                          </div>
+                          <Badge
+                            variant="secondary"
+                            className={`shrink-0 text-[11px] ${
+                              selectedPlaceCount > 0
+                                ? "bg-green-100 text-green-700 border border-green-300"
+                                : "bg-gray-100 text-gray-500 border border-gray-200"
+                            }`}
+                          >
+                            {selectedPlaceCount}/{MAX_SELECTED_LOCATIONS} selected
+                          </Badge>
+                        </div>
                         <div className="space-y-1.5 max-h-[520px] overflow-y-auto pr-1">
                           {LOCATION_TYPES.map((t) => {
                             const on = !!openCategories[t];
