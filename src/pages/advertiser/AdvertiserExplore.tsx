@@ -1141,7 +1141,7 @@ export default function AdvertiserExplore() {
                       setCampaignPillar(null);
                       setChosenFormat(null);
                       setSelections({});
-                      setForm({ campaignName: "", preferredStartDate: "", notes: "", email: "" });
+                      setForm({ campaignName: "", preferredStartDate: "", preferredEndDate: "", notes: "", email: "" });
                     }}
                   >
                     Start a New Request
