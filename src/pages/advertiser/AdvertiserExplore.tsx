@@ -11,7 +11,7 @@ import {
   RefreshCw, Package, Clock, Calendar as CalendarIcon, Eye, MapPin, Check,
   Image as ImageIcon, Monitor, Volume2, Truck, ChevronRight, ChevronLeft,
 } from "lucide-react";
-import { addMonths, format, startOfDay, isBefore } from "date-fns";
+import { addDays, format, startOfDay, isBefore } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { RadiusMapPlanner, CATEGORY_STYLES } from "@/components/advertiser/RadiusMapPlanner";
@@ -33,7 +33,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
-const MIN_LAUNCH_DATE = startOfDay(addMonths(new Date(), 1));
+const MIN_LAUNCH_DATE = startOfDay(addDays(new Date(), 1));
 const TOTAL_STEPS = 4;
 
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -389,7 +389,7 @@ export default function AdvertiserExplore() {
       return;
     }
     if (isBefore(new Date(form.preferredStartDate), MIN_LAUNCH_DATE)) {
-      toast({ title: "Start date too soon", description: `Campaigns require at least 1 month lead time. Earliest available date is ${format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}.`, variant: "destructive" });
+      toast({ title: "Start date too soon", description: `TrioTag can process your media request within 24 hours. Earliest available date is ${format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}.`, variant: "destructive" });
       return;
     }
     if (form.preferredEndDate && isBefore(new Date(form.preferredEndDate), new Date(form.preferredStartDate))) {
@@ -1050,7 +1050,7 @@ export default function AdvertiserExplore() {
                     </div>
                     <p className="text-[11px] text-gray-500 mt-1.5 inline-flex items-start gap-1">
                       <Clock className="w-3 h-3 mt-0.5 shrink-0" />
-                      <span>Earliest available start date: <strong className="text-gray-700">{format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}</strong> — TrioTag requires 1 week or up to 1 month lead time to prepare your campaign.</span>
+                      <span>TrioTag can process your media request within <strong className="text-gray-700">24 hours</strong>.</span>
                     </p>
 
 
