@@ -1,0 +1,1 @@
+ALTER VIEW public.marketplace_inventory SET (security_invoker = on);
