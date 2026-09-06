@@ -267,6 +267,10 @@ export function RadiusMapPlanner({
     }
     const display = s.address ? `${s.name} — ${s.address}` : s.name;
     reportPin(lat, lng);
+    // Pan map immediately so the user sees the selected location
+    if (mapRef.current) {
+      mapRef.current.setView([lat, lng], 15);
+    }
     // cancel any in-flight reverse lookup so it can't overwrite the picked name
     reverseSeqRef.current++;
     setReverseLoading(false);
