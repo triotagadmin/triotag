@@ -189,7 +189,8 @@ export default function AdminMediaPlans() {
                   <TableRow>
                     <TableHead>Campaign</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Estimated</TableHead>
+                    <TableHead>Campaign Dates</TableHead>
+
                     <TableHead>Requester</TableHead>
                     <TableHead>Start Date</TableHead>
                     <TableHead>Submitted</TableHead>
@@ -213,9 +214,12 @@ export default function AdminMediaPlans() {
                           ))}
                         </div>
                       </TableCell>
-                      <TableCell>₱{Number(r.estimated_price || 0).toLocaleString()}</TableCell>
+                      <TableCell className="text-xs">
+                        {r.preferred_start_date || "—"}
+                        {r.preferred_end_date ? ` → ${r.preferred_end_date}` : ""}
+                      </TableCell>
                       <TableCell className="text-xs">{r.requester_email || "—"}</TableCell>
-                      <TableCell className="text-xs">{r.preferred_start_date || "—"}</TableCell>
+
                       <TableCell className="text-xs">{r.created_at ? new Date(r.created_at).toLocaleDateString("en-PH") : "—"}</TableCell>
                       <TableCell className="text-xs">
                         {r.paid_at ? new Date(r.paid_at).toLocaleDateString("en-PH") : <span className="text-gray-400">Unpaid</span>}
@@ -246,8 +250,9 @@ export default function AdminMediaPlans() {
 
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <Detail label="Requester Email" value={selected.requester_email || "—"} />
-                <Detail label="Estimated Price" value={`₱${Number(selected.estimated_price || 0).toLocaleString()}`} />
                 <Detail label="Preferred Start" value={selected.preferred_start_date || "—"} />
+                <Detail label="Preferred End" value={selected.preferred_end_date || "—"} />
+
                 <Detail label="Radius" value={selected.radius_meters ? `${selected.radius_meters} m` : "—"} />
                 <Detail label="Venue Count" value={selected.venue_count ?? "—"} />
                 <Detail label="Submitted" value={selected.created_at ? new Date(selected.created_at).toLocaleString("en-PH") : "—"} />
