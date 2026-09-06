@@ -693,7 +693,7 @@ export default function AdvertiserExplore() {
                           <div>
                             <h3 className="text-sm font-bold text-gray-900">Retail Media Locations in This Area</h3>
                             <p className="text-xs text-gray-500 mt-0.5 mb-3">
-                              Open location types and select the businesses you want to target — pick 1 to {MAX_SELECTED_LOCATIONS} locations.
+                              Optional: open location types and hand-pick up to {MAX_SELECTED_LOCATIONS} businesses to target.
                             </p>
                           </div>
                           <Badge
