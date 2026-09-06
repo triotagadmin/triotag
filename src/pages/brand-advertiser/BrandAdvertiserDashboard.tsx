@@ -54,6 +54,19 @@ function BrandAdvertiserDashboard() {
       .eq("brand_advertiser_id", profile.id)
       .order("created_at", { ascending: false });
     setCampaigns(camps || []);
+
+    const ids = (camps || []).map((c: any) => c.id);
+    if (ids.length) {
+      const { data: ledger } = await supabase
+        .from("campaign_spend_ledger")
+        .select("campaign_id, event_type, amount, created_at")
+        .in("campaign_id", ids)
+        .order("created_at", { ascending: false })
+        .limit(5000);
+      setSpendEvents(ledger || []);
+    } else {
+      setSpendEvents([]);
+    }
     setLoading(false);
   };
 
@@ -61,12 +74,23 @@ function BrandAdvertiserDashboard() {
 
   const totalBudget = campaigns.reduce((s, c) => s + Number(c.budget || 0), 0);
 
-  // NOTE: Wire up to real ad-serving stats once campaigns go live.
-  // For now we show honest zero placeholders.
-  const impressions = 0;
+  const inRange = useMemo(
+    () => spendEvents.filter((e) => {
+      const d = new Date(e.created_at);
+      return d >= dateFrom && d <= dateTo;
+    }),
+    [spendEvents, dateFrom, dateTo]
+  );
+
+  // Real delivery data derived from the campaign spend ledger.
+  // Click/conversion tracking is not yet recorded, so those stay at zero.
+  const impressions = inRange.filter((e) => e.event_type === "win").length;
+  const spend = inRange
+    .filter((e) => e.event_type === "billed")
+    .reduce((s, e) => s + Number(e.amount || 0), 0);
   const clicks = 0;
   const conversions = 0;
-  const ecpm = 0;
+  const ecpm = impressions > 0 ? (spend / impressions) * 1000 : 0;
   const ecpc = 0;
   const winRate = 0;
   const ctr = 0;
@@ -74,12 +98,17 @@ function BrandAdvertiserDashboard() {
 
   const chartData = useMemo(() => {
     const days = eachDayOfInterval({ start: dateFrom, end: dateTo });
-    return days.map((d) => ({
-      date: format(d, "MMM d"),
-      impressions: 0,
-      clicks: 0,
-    }));
-  }, [dateFrom, dateTo]);
+    return days.map((d) => {
+      const key = format(d, "yyyy-MM-dd");
+      return {
+        date: format(d, "MMM d"),
+        impressions: inRange.filter(
+          (e) => e.event_type === "win" && format(new Date(e.created_at), "yyyy-MM-dd") === key
+        ).length,
+        clicks: 0,
+      };
+    });
+  }, [dateFrom, dateTo, inRange]);
 
   const filteredCampaigns = useMemo(
     () =>
