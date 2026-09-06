@@ -248,6 +248,11 @@ export function RadiusMapPlanner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center.lat, center.lng]);
 
+  const selectFirstSuggestion = () => {
+    const first = suggestions[0];
+    if (first) pickSuggestion(first);
+  };
+
   const pickSuggestion = (s: Suggestion) => {
     const lat = Number(s.lat);
     const lng = Number(s.lng);
@@ -262,6 +267,10 @@ export function RadiusMapPlanner({
     }
     const display = s.address ? `${s.name} — ${s.address}` : s.name;
     reportPin(lat, lng);
+    // Pan map immediately so the user sees the selected location
+    if (mapRef.current) {
+      mapRef.current.setView([lat, lng], 15);
+    }
     // cancel any in-flight reverse lookup so it can't overwrite the picked name
     reverseSeqRef.current++;
     setReverseLoading(false);
@@ -294,6 +303,12 @@ export function RadiusMapPlanner({
           <Input
             value={reverseLoading ? "" : searchText}
             onChange={(e) => handleSearchChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                selectFirstSuggestion();
+              }
+            }}
             placeholder={reverseLoading ? "Getting address…" : "Search an address, business or area..."}
             disabled={reverseLoading}
             className="pl-9 h-11 bg-white text-gray-900 border border-gray-300 rounded-lg focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:border-green-500"
@@ -306,6 +321,7 @@ export function RadiusMapPlanner({
               {suggestions.map((s) => (
                 <button
                   key={s.placeId}
+                  type="button"
                   onClick={() => pickSuggestion(s)}
                   className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 border-b border-gray-100 last:border-0"
                 >
