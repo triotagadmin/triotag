@@ -248,6 +248,31 @@ export default function AdvertiserExplore() {
     if (!on) loadPlacesForCategory(t);
   };
 
+  // ---- Location selection (1–50 locations) ----
+  const MAX_SELECTED_LOCATIONS = 50;
+  const [selectedPlaces, setSelectedPlaces] = useState<Record<string, PlaceMarker>>({});
+  const selectedPlacesList = useMemo(() => Object.values(selectedPlaces), [selectedPlaces]);
+  const selectedPlaceCount = selectedPlacesList.length;
+
+  const togglePlaceSelection = (p: PlaceMarker) => {
+    setSelectedPlaces((prev) => {
+      if (prev[p.id]) {
+        const next = { ...prev };
+        delete next[p.id];
+        return next;
+      }
+      if (Object.keys(prev).length >= MAX_SELECTED_LOCATIONS) {
+        toast({
+          title: "Selection limit reached",
+          description: `You can select up to ${MAX_SELECTED_LOCATIONS} locations.`,
+          variant: "destructive",
+        });
+        return prev;
+      }
+      return { ...prev, [p.id]: p };
+    });
+  };
+
   // Markers shown on the map = every place discovered for the opened categories
   const nearbyPlaces = useMemo(() => {
     const seen = new Set<string>();
