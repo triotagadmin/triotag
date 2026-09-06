@@ -341,8 +341,9 @@ export default function AdvertiserExplore() {
   });
 
 
-  const canAdvanceStep1 =
-    selectedPlaceCount >= 1 && selectedPlaceCount <= MAX_SELECTED_LOCATIONS;
+  // Continue activates as soon as the user has picked a campaign location
+  // in the location finder. Service-area and radius checks run on click.
+  const canAdvanceStep1 = !!selectedLocationAddress;
 
   const handleContinueFromStep2 = () => {
     if (!selectedLocationAddress) {
@@ -692,7 +693,7 @@ export default function AdvertiserExplore() {
                           <div>
                             <h3 className="text-sm font-bold text-gray-900">Retail Media Locations in This Area</h3>
                             <p className="text-xs text-gray-500 mt-0.5 mb-3">
-                              Open location types and select the businesses you want to target — pick 1 to {MAX_SELECTED_LOCATIONS} locations.
+                              Optional: open location types and hand-pick up to {MAX_SELECTED_LOCATIONS} businesses to target.
                             </p>
                           </div>
                           <Badge
@@ -844,7 +845,7 @@ export default function AdvertiserExplore() {
                   </div>
 
 
-                  {(!selectedLocationAddress || !withinServiceArea || radiusMeters < 250 || selectedPlaceCount < 1) && (
+                  {(!selectedLocationAddress || !withinServiceArea || radiusMeters < 250) && (
                     <div className="flex items-start gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
                       <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                       <span>
@@ -852,9 +853,7 @@ export default function AdvertiserExplore() {
                           ? "Search and select a campaign location to continue."
                           : !withinServiceArea
                           ? `This location is outside our service area. TrioTag currently only operates in ${getActiveAreaNamesText()}.`
-                          : radiusMeters < 250
-                          ? "Minimum campaign radius is 250 m (5% coverage)."
-                          : `Select at least 1 location (up to ${MAX_SELECTED_LOCATIONS}) to continue.`}
+                          : "Minimum campaign radius is 250 m (5% coverage)."}
                       </span>
                     </div>
                   )}
