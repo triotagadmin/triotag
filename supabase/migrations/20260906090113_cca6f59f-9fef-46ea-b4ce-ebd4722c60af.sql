@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.set_brand_campaign_ref() FROM PUBLIC, anon, authenticated;

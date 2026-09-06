@@ -1,1283 +1,1252 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Image as ImageIcon,
   Monitor,
   Volume2,
   ArrowRight,
   ArrowLeft,
-  ClipboardList,
   MapPin,
   Search as SearchIcon,
   Check,
   Save,
-  Rocket,
-  Trash2,
-  Lock as LockIcon,
-  Unlock as UnlockIcon,
-  FolderOpen,
-  FileImage,
-  Video as VideoIcon,
-  Music,
-  ShieldCheck,
   Loader2,
+  Layers,
+  Calendar as CalendarIcon,
+  Users,
+  Wallet,
+  Palette,
+  ClipboardCheck,
+  Send,
+  Target,
+  X,
+  ShieldCheck,
+  ChevronDown,
 } from "lucide-react";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
-import { RadiusMapPlanner } from "@/components/advertiser/RadiusMapPlanner";
-import { calculateMediaPlanEstimate } from "@/lib/mediaPlanPricing";
-
-const DEFAULT_CENTER = { lat: 14.5995, lng: 120.9842 };
+import { useAdvertiserProfile } from "@/hooks/useAdvertiserProfile";
 
 type MediaType = "OOH" | "DOOH" | "AOOH";
 
-interface AdSpaceRow {
-  id: string;
-  title: string;
-  location: string | null;
-  media_type: string;
-  media_types?: string[] | null;
-  pricing: any;
-  monthly_subscription_fee: number | null;
-  latitude: number | null;
-  longitude: number | null;
-  specifications: any;
-  publisher_profiles?: { business_name: string | null; is_house_account: boolean | null } | null;
-}
-
-const FORMATS: {
-  key: MediaType;
-  title: string;
-  desc: string;
-  icon: any;
-  border: string;
-  bg: string;
-  iconColor: string;
-}[] = [
-  {
-    key: "OOH",
-    title: "OOH",
-    desc: "Out-of-Home print placements",
-    icon: ImageIcon,
-    border: "border-purple-400",
-    bg: "bg-purple-50",
-    iconColor: "text-purple-600",
-  },
-  {
-    key: "DOOH",
-    title: "DOOH",
-    desc: "Digital screens with scheduled creative",
-    icon: Monitor,
-    border: "border-cyan-400",
-    bg: "bg-cyan-50",
-    iconColor: "text-cyan-600",
-  },
-  {
-    key: "AOOH",
-    title: "AOOH",
-    desc: "Ambient / audio placements",
-    icon: Volume2,
-    border: "border-green-400",
-    bg: "bg-green-50",
-    iconColor: "text-green-600",
-  },
+const STEPS = [
+  { n: 1, key: "type", label: "Campaign", icon: Target },
+  { n: 2, key: "media", label: "Media", icon: Monitor },
+  { n: 3, key: "objective", label: "Objective", icon: ClipboardCheck },
+  { n: 4, key: "discovery", label: "Inventory", icon: SearchIcon },
+  { n: 5, key: "selection", label: "Selection", icon: Layers },
+  { n: 6, key: "format", label: "Format", icon: ImageIcon },
+  { n: 7, key: "duration", label: "Duration", icon: CalendarIcon },
+  { n: 8, key: "audience", label: "Audience", icon: Users },
+  { n: 9, key: "budget", label: "Budget", icon: Wallet },
+  { n: 10, key: "creative", label: "Creative", icon: Palette },
+  { n: 11, key: "review", label: "Review", icon: ClipboardCheck },
+  { n: 12, key: "submit", label: "Submit", icon: Send },
 ];
 
-const SUBTYPES: Record<MediaType, string[]> = {
-  OOH: [
-    "Table Tents",
-    "Floor Stickers",
-    "Window Stickers",
-    "Wall Posters",
-    "Wall Decals",
-    "Counter Cards",
-    "Hanging Danglers",
-    "Standees",
-  ],
-  DOOH: [
-    "Indoor LED Screens",
-    "Outdoor LED Billboards",
-    "Digital Menu Boards",
-    "Elevator Screens",
-    "Checkout Counter Screens",
-    "Transit Digital Panels",
-  ],
-  AOOH: [
-    "In-Store Audio Spots",
-    "Radio Ad Insertions",
-    "Ambient Jingles",
-    "PA System Announcements",
-    "Scent / Sensory Ambient",
-  ],
+const CAMPAIGN_TYPES = [
+  { value: "event", title: "EVENT", desc: "Promote a launch, activation, concert or happening." },
+  { value: "product", title: "PRODUCT", desc: "Drive awareness and sales for a physical or digital product." },
+  { value: "service", title: "SERVICE", desc: "Generate demand and leads for a service offering." },
+];
+
+const MEDIA_TYPES: { key: MediaType; title: string; desc: string; icon: any; accent: string }[] = [
+  { key: "OOH", title: "OOH", desc: "Out-of-Home printed placements", icon: ImageIcon, accent: "text-purple-600" },
+  { key: "DOOH", title: "DOOH", desc: "Digital Out-of-Home screens", icon: Monitor, accent: "text-cyan-600" },
+  { key: "AOOH", title: "AOOH", desc: "Alternative Out-of-Home formats", icon: Volume2, accent: "text-green-600" },
+];
+
+const OBJECTIVES = [
+  "Brand Awareness",
+  "Product Launch",
+  "Event Promotion",
+  "Store Traffic",
+  "Lead Generation",
+  "Sales / Conversions",
+  "Promotional Campaign",
+  "Other",
+];
+
+const FORMAT_OPTIONS: Record<MediaType, string[]> = {
+  OOH: ["Billboard", "Poster", "Wall Advertising", "Transit Advertising", "Sticker / Decal", "Tabletop", "Signage", "Other"],
+  DOOH: ["Static Digital Display", "Video", "Motion Graphic", "Digital Billboard", "LED Screen", "Retail Screen", "Kiosk"],
+  AOOH: ["Custom Installation", "Experiential", "Street Furniture", "Vehicle / Mobile Media", "Alternative Format", "Other"],
 };
 
-// PHP price per unit (per placement / per slot / per month)
-const SUBTYPE_PRICES: Record<string, number> = {
-  // OOH — per printed unit
-  "Table Tents": 150,
-  "Floor Stickers": 220,
-  "Window Stickers": 180,
-  "Wall Posters": 120,
-  "Wall Decals": 200,
-  "Counter Cards": 130,
-  "Hanging Danglers": 110,
-  "Standees": 450,
-  // DOOH — per screen / month
-  "Indoor LED Screens": 3500,
-  "Outdoor LED Billboards": 12000,
-  "Digital Menu Boards": 2800,
-  "Elevator Screens": 2200,
-  "Checkout Counter Screens": 1800,
-  "Transit Digital Panels": 4200,
-  // AOOH — per spot / month
-  "In-Store Audio Spots": 900,
-  "Radio Ad Insertions": 1500,
-  "Ambient Jingles": 700,
-  "PA System Announcements": 500,
-  "Scent / Sensory Ambient": 2500,
-};
+const DURATION_PRESETS = [
+  { key: "1d", label: "1 Day", days: 1 },
+  { key: "3d", label: "3 Days", days: 3 },
+  { key: "1w", label: "1 Week", days: 7 },
+  { key: "2w", label: "2 Weeks", days: 14 },
+  { key: "1m", label: "1 Month", days: 30 },
+  { key: "custom", label: "Custom", days: 0 },
+];
 
-const priceFor = (sub: string) => SUBTYPE_PRICES[sub] ?? 0;
-const fmtPHP = (n: number) => `₱${n.toLocaleString("en-PH")}`;
-
-const LOCATION_TYPES = [
-  "Cafe",
-  "Co-working Space",
-  "Barber Shop",
-  "Salon",
-  "Supermarket",
-  "Convenience Store",
-  "Restaurant",
-  "Fast Food",
-  "Bar",
-  "Nightclub",
-  "Gym",
-  "Pharmacy",
-  "Mall",
-  "Clothing Store",
-  "Department Store",
-] as const;
-
-const LOCATION_TYPE_QUERY: Record<string, { type?: string; keyword?: string }> = {
-  "Cafe": { type: "cafe" },
-  "Co-working Space": { keyword: "co-working space" },
-  "Barber Shop": { keyword: "barber shop" },
-  "Salon": { type: "beauty_salon" },
-  "Supermarket": { type: "supermarket" },
-  "Convenience Store": { type: "convenience_store" },
-  "Restaurant": { type: "restaurant" },
-  "Fast Food": { type: "meal_takeaway" },
-  "Bar": { type: "bar" },
-  "Nightclub": { type: "night_club" },
-  "Gym": { type: "gym" },
-  "Pharmacy": { type: "pharmacy" },
-  "Mall": { type: "shopping_mall" },
-  "Clothing Store": { type: "clothing_store" },
-  "Department Store": { type: "department_store" },
-};
-
-interface PlaceMarker {
+type InventoryRow = {
   id: string;
-  name: string;
-  address: string;
-  lat: number;
-  lng: number;
-  verified?: boolean;
-}
+  title: string;
+  description: string | null;
+  location: string | null;
+  media_urls: any;
+  specifications: any;
+  pricing: any;
+  media_type: string;
+  media_types: string[] | null;
+  total_ad_units: number | null;
+  monthly_subscription_fee: number | null;
+  availability_status: string | null;
+  media_owner_name: string | null;
+  contact_verified_at: string | null;
+  created_at: string;
+};
 
+type SelectionState = Record<string, { quantity: number; adFormat: string | null }>;
 
+const firstImage = (media: any): string | null => {
+  const arr = Array.isArray(media) ? media : media?.images || media?.urls;
+  if (Array.isArray(arr) && arr.length) return typeof arr[0] === "string" ? arr[0] : arr[0]?.url || null;
+  return null;
+};
 
-function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371000;
-  const toRad = (v: number) => (v * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(a));
-}
+const monthlyRate = (row: InventoryRow): number => {
+  const p = row.pricing || {};
+  return Number(row.monthly_subscription_fee || p.monthly || p.monthly_rate || p.price || 0);
+};
 
-function distanceLabel(m: number): string {
-  if (m < 1000) return `${Math.round(m)}m away`;
-  return `${(m / 1000).toFixed(m < 10000 ? 2 : 1)}km away`;
-}
+const rowTypes = (row: InventoryRow): string[] =>
+  (row.media_types?.length ? row.media_types : [row.media_type]).filter(Boolean).map((t) => String(t).toUpperCase());
 
-function BrandAdvertiserInventory() {
+const cityOf = (row: InventoryRow): string => {
+  const loc = row.location || "";
+  const parts = loc.split(",").map((s) => s.trim()).filter(Boolean);
+  return parts.length > 1 ? parts[parts.length - 2] : parts[0] || "Unspecified";
+};
+
+const reachOf = (row: InventoryRow): number => Number(row.specifications?.estimated_reach || row.specifications?.reach || 0);
+
+const peso = (n: number) => `₱${Number(n || 0).toLocaleString()}`;
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const addDays = (iso: string, days: number) => {
+  const d = new Date(iso);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+};
+
+export default function BrandAdvertiserInventory() {
   const navigate = useNavigate();
-  const [companyName, setCompanyName] = useState("My Brand");
-  const [center, setCenter] = useState(DEFAULT_CENTER);
-  const [radiusMeters, setRadiusMeters] = useState(1000);
-  const [radiusLocked, setRadiusLocked] = useState(false);
+  const { companyName, totalBudget } = useAdvertiserProfile();
 
-  const [chosenFormat, setChosenFormat] = useState<MediaType | null>(null);
-  const [unitCounts, setUnitCounts] = useState<Record<MediaType, Record<string, string>>>({
-    OOH: {},
-    DOOH: {},
-    AOOH: {},
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [loadingDraft, setLoadingDraft] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [step, setStep] = useState(1);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+
+  // wizard state
+  const [campaignName, setCampaignName] = useState("");
+  const [campaignType, setCampaignType] = useState<string>("");
+  const [mediaTypes, setMediaTypes] = useState<MediaType[]>([]);
+  const [objective, setObjective] = useState("");
+  const [objectiveNotes, setObjectiveNotes] = useState("");
+  const [selections, setSelections] = useState<SelectionState>({});
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [durationPreset, setDurationPreset] = useState("custom");
+  const [audience, setAudience] = useState<any>({
+    geography: "",
+    ageMin: "",
+    ageMax: "",
+    gender: "All",
+    interests: "",
+    lifestyle: "",
+    consumerType: "",
+    estimatedSize: "",
+    description: "",
   });
-  const [rows, setRows] = useState<AdSpaceRow[]>([]);
+  const [budget, setBudget] = useState("");
+  const [minBudget, setMinBudget] = useState("");
+  const [maxBudget, setMaxBudget] = useState("");
+  const [creativeMode, setCreativeMode] = useState("");
+  const [creativeSetId, setCreativeSetId] = useState<string | null>(null);
+  const [creativeReq, setCreativeReq] = useState<any>({
+    creativeType: "",
+    message: "",
+    brand: "",
+    cta: "",
+    dimensions: "",
+    fileFormat: "",
+    videoDuration: "",
+    resolution: "",
+    aspectRatio: "",
+    instructions: "",
+  });
 
-  const [totalLocations, setTotalLocations] = useState<string>("");
-  const [selectedLocationTypes, setSelectedLocationTypes] = useState<Record<string, PlaceMarker[]>>({});
-  const [placeResults, setPlaceResults] = useState<Record<string, PlaceMarker[]>>({});
-  const [placeLoading, setPlaceLoading] = useState<Record<string, boolean>>({});
+  // inventory
+  const [rows, setRows] = useState<InventoryRow[]>([]);
+  const [loadingInv, setLoadingInv] = useState(false);
+  const [q, setQ] = useState("");
+  const [cityFilter, setCityFilter] = useState("all");
+  const [availabilityFilter, setAvailabilityFilter] = useState("all");
+  const [minReach, setMinReach] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sortBy, setSortBy] = useState("relevance");
+  const [availabilityIssues, setAvailabilityIssues] = useState<{ adSpaceId: string; title: string; reason: string }[]>([]);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
 
-  const selectedPlacesTotal = Object.values(selectedLocationTypes).reduce(
-    (s, arr) => s + arr.length,
-    0,
-  );
-
-  const fetchVerifiedAdSpaces = async () => {
-    const { data: spaces } = await supabase
-      .from("ad_spaces")
-      .select("id, latitude, longitude, contact_verified_at")
-      .not("latitude", "is", null)
-      .not("longitude", "is", null);
-    const inRadius = (spaces || []).filter(
-      (s: any) =>
-        haversineMeters(center.lat, center.lng, Number(s.latitude), Number(s.longitude)) <=
-        radiusMeters,
-    );
-    if (inRadius.length === 0) return [] as { lat: number; lng: number }[];
-    const { data: subs } = await supabase
-      .from("venue_subscriptions")
-      .select("id, ad_space_id, subscription_status")
-      .in("ad_space_id", inRadius.map((s: any) => s.id));
-    const activeIds = new Set(
-      (subs || [])
-        .filter((s: any) => s.subscription_status === "active")
-        .map((s: any) => s.ad_space_id),
-    );
-    return inRadius
-      .filter((s: any) => s.contact_verified_at != null || activeIds.has(s.id))
-      .map((s: any) => ({ lat: Number(s.latitude), lng: Number(s.longitude) }));
-  };
-
-  const loadPlacesForCategory = async (category: string) => {
-    if (placeResults[category]) return;
-    setPlaceLoading((p) => ({ ...p, [category]: true }));
-    try {
-      const q = LOCATION_TYPE_QUERY[category] || {};
-      const [{ data, error }, verifiedPoints] = await Promise.all([
-        supabase.functions.invoke("discover-nearby-places", {
-          body: { lat: center.lat, lng: center.lng, radiusMeters, ...q },
-        }),
-        fetchVerifiedAdSpaces(),
-      ]);
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      const places: PlaceMarker[] = (data?.results ?? [])
-        .filter((r: any) => typeof r.lat === "number" && typeof r.lng === "number")
-        .map((r: any) => ({
-          id: r.placeId,
-          name: r.name,
-          address: r.address || "",
-          lat: r.lat,
-          lng: r.lng,
-          verified: verifiedPoints.some(
-            (v) => haversineMeters(v.lat, v.lng, r.lat, r.lng) <= 60,
-          ),
-        }));
-      setPlaceResults((p) => ({ ...p, [category]: places }));
-    } catch (err: any) {
-      console.error("[BrandAdvertiserInventory] places fetch failed", err);
-      toast({
-        title: "Could not load locations",
-        description: err?.message || `Failed to fetch ${category} nearby.`,
-        variant: "destructive",
-      });
-      setPlaceResults((p) => ({ ...p, [category]: [] }));
-    } finally {
-      setPlaceLoading((p) => ({ ...p, [category]: false }));
-    }
-  };
-
-  const toggleCategory = (t: string, on: boolean) => {
-    setSelectedLocationTypes((prev) => {
-      const next = { ...prev };
-      if (on) delete next[t];
-      else next[t] = [];
-      return next;
-    });
-    if (!on) loadPlacesForCategory(t);
-  };
-
-  const togglePlace = (t: string, place: PlaceMarker) => {
-    setSelectedLocationTypes((prev) => {
-      const cur = prev[t] || [];
-      const exists = cur.some((p) => p.id === place.id);
-      return {
-        ...prev,
-        [t]: exists ? cur.filter((p) => p.id !== place.id) : [...cur, place],
-      };
-    });
-  };
-
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-
-  const [loadingRows, setLoadingRows] = useState(false);
-
-  // Creative sets (step 3)
   const [creativeSets, setCreativeSets] = useState<any[]>([]);
-  const [loadingCreatives, setLoadingCreatives] = useState(false);
-  const [chosenCreativeSetId, setChosenCreativeSetId] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState<{ ref: string; id: string } | null>(null);
 
-  interface SavedTarget {
-    id: string;
-    createdAt: number;
-    format: MediaType;
-    unitBreakdown: Record<string, number>;
-    unitCount: number;
-    totalLocations: number;
-    locationTypes: Record<string, number>;
-    radiusMeters: number;
-    center: { lat: number; lng: number };
-    creativeSetId?: string | null;
-    creativeSetTitle?: string | null;
-  }
-  const [savedTargets, setSavedTargets] = useState<SavedTarget[]>(() => {
-    try {
-      const raw = localStorage.getItem("ba_saved_inventory_targets");
-      return raw ? (JSON.parse(raw) as SavedTarget[]) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("ba_saved_inventory_targets", JSON.stringify(savedTargets));
-    } catch {}
-  }, [savedTargets]);
-
-
+  /* ---------------- draft load ---------------- */
   useEffect(() => {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from("brand_advertiser_profiles")
-          .select("id, company_name")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-        if (profile?.company_name) setCompanyName(profile.company_name);
-        if (profile?.id) {
-          setLoadingCreatives(true);
-          const { data: sets } = await supabase
-            .from("brand_creative_sets" as any)
-            .select("*")
-            .eq("brand_advertiser_id", profile.id)
-            .order("created_at", { ascending: false });
-          setCreativeSets(sets || []);
-          setLoadingCreatives(false);
-        }
+      if (!session?.user) { setLoadingDraft(false); return; }
+      const { data: profile } = await supabase
+        .from("brand_advertiser_profiles")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      if (!profile) { setLoadingDraft(false); return; }
+      setProfileId(profile.id);
+
+      const { data: draft } = await supabase
+        .from("brand_campaigns")
+        .select("*")
+        .eq("brand_advertiser_id", profile.id)
+        .eq("status", "draft")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (draft) {
+        setDraftId(draft.id);
+        const s = (draft.draft_state || {}) as any;
+        setCampaignName(draft.campaign_name === "Untitled campaign" ? "" : draft.campaign_name || "");
+        setCampaignType((draft as any).campaign_type || "");
+        setMediaTypes(((draft as any).media_types || []) as MediaType[]);
+        setObjective((draft as any).objective || "");
+        setObjectiveNotes((draft as any).objective_notes || "");
+        setSelections(s.selections || {});
+        setStartDate(draft.start_date || "");
+        setEndDate(draft.end_date || "");
+        setDurationPreset(s.durationPreset || "custom");
+        if ((draft as any).audience) setAudience((a: any) => ({ ...a, ...(draft as any).audience }));
+        setBudget(draft.budget ? String(draft.budget) : "");
+        setMinBudget(s.minBudget || "");
+        setMaxBudget(s.maxBudget || "");
+        setCreativeMode((draft as any).creative_mode || "");
+        setCreativeSetId(draft.creative_set_id || null);
+        if ((draft as any).creative_requirements) setCreativeReq((c: any) => ({ ...c, ...(draft as any).creative_requirements }));
+        setStep(Math.min(11, Math.max(1, (draft as any).wizard_step || 1)));
+        toast.info("We restored your saved campaign draft.");
       }
+      setLoadingDraft(false);
     })();
   }, []);
 
+  /* ---------------- inventory load ---------------- */
+  const loadInventory = useCallback(async () => {
+    setLoadingInv(true);
+    const { data, error } = await (supabase as any)
+      .from("marketplace_inventory")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) toast.error("Could not load the TrioTag inventory network");
+    setRows(((data || []) as InventoryRow[]).filter((r) => (r.availability_status || "available") === "available"));
+    setLoadingInv(false);
+  }, []);
+
   useEffect(() => {
-    if (!chosenFormat) {
-      setRows([]);
-      return;
-    }
+    if (step === 4 || step === 5) loadInventory();
+  }, [step, loadInventory]);
+
+  useEffect(() => {
+    if (step !== 10 || !profileId) return;
     (async () => {
-      setLoadingRows(true);
       const { data } = await supabase
-        .from("ad_spaces")
-        .select(
-          "id,title,location,media_type,media_types,pricing,monthly_subscription_fee,latitude,longitude,specifications,publisher_profiles(business_name,is_house_account)"
-        )
-        .eq("approval_status", "approved")
-        .or("agent_disconnected.is.null,agent_disconnected.eq.false")
+        .from("brand_creative_sets")
+        .select("id, title, creative_format, creative_count")
+        .eq("brand_advertiser_id", profileId)
         .order("created_at", { ascending: false });
-      setRows((data || []) as any);
-      setLoadingRows(false);
+      setCreativeSets(data || []);
     })();
-  }, [chosenFormat]);
+  }, [step, profileId]);
 
-  const matches = useMemo(() => {
-    if (!chosenFormat) return [];
-    return rows
-      .filter((r) => {
-        const units = (r.specifications && r.specifications.units) || null;
-        const unitCt = units ? Number(units[chosenFormat] || 0) : 0;
-        const inArray = Array.isArray(r.media_types) && r.media_types.includes(chosenFormat);
-        return inArray || r.media_type === chosenFormat || unitCt > 0;
-      })
-      .filter((r) => r.latitude != null && r.longitude != null)
-      .map((r) => ({
-        row: r,
-        distance: haversineMeters(center.lat, center.lng, Number(r.latitude), Number(r.longitude)),
-      }))
-      .filter((m) => m.distance <= radiusMeters)
-      .sort((a, b) => a.distance - b.distance);
-  }, [rows, chosenFormat, center.lat, center.lng, radiusMeters]);
-
-  const estimate = useMemo(
-    () => calculateMediaPlanEstimate([], radiusMeters),
-    [radiusMeters]
+  /* ---------------- derived ---------------- */
+  const matching = useMemo(
+    () => rows.filter((r) => (mediaTypes.length ? rowTypes(r).some((t) => mediaTypes.includes(t as MediaType)) : true)),
+    [rows, mediaTypes]
   );
 
-  const displayBusinessName = (r: AdSpaceRow) =>
-    r.publisher_profiles?.is_house_account
-      ? "TrioTag"
-      : r.publisher_profiles?.business_name || "Retail Partner";
+  const cities = useMemo(() => [...new Set(matching.map(cityOf))].sort(), [matching]);
 
-  const totalUnitsForFormat = (fmt: MediaType) =>
-    Object.values(unitCounts[fmt]).reduce((sum, v) => sum + (Number(v) || 0), 0);
+  const visible = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    const cap = Number(maxPrice) || 0;
+    const reachMin = Number(minReach) || 0;
+    let list = matching.filter((r) => {
+      if (needle) {
+        const hay = `${r.title} ${r.location || ""} ${r.description || ""} ${r.media_owner_name || ""}`.toLowerCase();
+        if (!hay.includes(needle)) return false;
+      }
+      if (cityFilter !== "all" && cityOf(r) !== cityFilter) return false;
+      if (availabilityFilter !== "all" && (r.availability_status || "available") !== availabilityFilter) return false;
+      if (cap > 0 && monthlyRate(r) > cap) return false;
+      if (reachMin > 0 && reachOf(r) < reachMin) return false;
+      return true;
+    });
+    if (sortBy === "price") list = [...list].sort((a, b) => monthlyRate(a) - monthlyRate(b));
+    if (sortBy === "location") list = [...list].sort((a, b) => (a.location || "").localeCompare(b.location || ""));
+    if (sortBy === "reach") list = [...list].sort((a, b) => reachOf(b) - reachOf(a));
+    if (sortBy === "availability") list = [...list].sort((a, b) => (b.total_ad_units || 0) - (a.total_ad_units || 0));
+    return list;
+  }, [matching, q, cityFilter, availabilityFilter, maxPrice, minReach, sortBy]);
 
-  const submitRegistry = () => {
-    if (!chosenFormat) return;
-    const breakdown = unitCounts[chosenFormat];
-    const unitBreakdown = Object.fromEntries(
-      Object.entries(breakdown)
-        .map(([k, v]) => [k, Number(v) || 0])
-        .filter(([, n]) => (n as number) > 0),
-    ) as Record<string, number>;
-    const locationTypes = Object.fromEntries(
-      Object.entries(selectedLocationTypes)
-        .map(([k, v]) => [k, v.length])
-        .filter(([, n]) => (n as number) > 0),
-    ) as Record<string, number>;
-    const chosenSet = creativeSets.find((s) => s.id === chosenCreativeSetId);
-    const target: SavedTarget = {
-      id: (crypto as any).randomUUID?.() || String(Date.now()),
-      createdAt: Date.now(),
-      format: chosenFormat,
-      unitBreakdown,
-      unitCount: totalUnitsForFormat(chosenFormat),
-      totalLocations: Number(totalLocations) || 0,
-      locationTypes,
-      radiusMeters,
-      center,
-      creativeSetId: chosenCreativeSetId,
-      creativeSetTitle: chosenSet?.title || null,
-    };
-    setSavedTargets((prev) => [target, ...prev]);
-    // Reset wizard for a fresh save
-    setChosenFormat(null);
-    setUnitCounts({ OOH: {}, DOOH: {}, AOOH: {} });
-    setSelectedLocationTypes({});
-    setTotalLocations("");
-    setChosenCreativeSetId(null);
-    setRadiusLocked(false);
-    setStep(1);
-  };
+  const selectedRows = useMemo(
+    () => rows.filter((r) => selections[r.id]),
+    [rows, selections]
+  );
+  const selectedIds = Object.keys(selections);
+  const totalUnits = Object.values(selections).reduce((s, v) => s + Number(v.quantity || 1), 0);
+  const estimatedMediaCost = selectedRows.reduce(
+    (s, r) => s + monthlyRate(r) * Number(selections[r.id]?.quantity || 1),
+    0
+  );
 
-  const launchFromTarget = (t: SavedTarget) => {
-    navigate("/brand-advertiser/campaigns", {
-      state: {
-        openWizard: true,
-        adSpaceIds: [],
-        prefill: {
-          radiusMeters: t.radiusMeters,
-          center: t.center,
-          format: t.format,
-          unitCount: t.unitCount,
-          unitBreakdown: t.unitBreakdown,
-          totalLocations: t.totalLocations,
-          locationTypes: t.locationTypes,
-          creativeSetId: t.creativeSetId,
-          creativeSetTitle: t.creativeSetTitle,
-        },
-      },
+  const toggleSelect = (row: InventoryRow) => {
+    setSelections((prev) => {
+      const next = { ...prev };
+      if (next[row.id]) delete next[row.id];
+      else next[row.id] = { quantity: 1, adFormat: null };
+      return next;
     });
   };
 
-  const deleteTarget = (id: string) => {
-    setSavedTargets((prev) => prev.filter((t) => t.id !== id));
+  const capacityOf = (row: InventoryRow) => (Number(row.total_ad_units || 0) > 0 ? Number(row.total_ad_units) : null);
+
+  /* ---------------- persistence ---------------- */
+  const draftPayload = (status: "draft") => ({
+    brand_advertiser_id: profileId!,
+    campaign_name: campaignName || "Untitled campaign",
+    campaign_type: campaignType || null,
+    media_types: mediaTypes,
+    objective: objective || null,
+    objective_notes: objectiveNotes || null,
+    start_date: startDate || null,
+    end_date: endDate || null,
+    budget: Number(budget || 0),
+    estimated_cost: estimatedMediaCost,
+    audience,
+    creative_mode: creativeMode || null,
+    creative_requirements: creativeReq,
+    creative_set_id: creativeSetId,
+    location_count: selectedIds.length,
+    status,
+    wizard_step: step,
+    draft_state: { selections, durationPreset, minBudget, maxBudget },
+    updated_at: new Date().toISOString(),
+  });
+
+  const saveDraft = async (silent = false) => {
+    if (!profileId) return null;
+    setSaving(true);
+    try {
+      if (draftId) {
+        const { error } = await supabase.from("brand_campaigns").update(draftPayload("draft") as any).eq("id", draftId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("brand_campaigns")
+          .insert(draftPayload("draft") as any)
+          .select("id")
+          .single();
+        if (error) throw error;
+        setDraftId(data.id);
+      }
+      if (!silent) toast.success("Draft saved. You can come back to it any time.");
+      return true;
+    } catch (e: any) {
+      if (!silent) toast.error(e.message || "Could not save the draft");
+      return null;
+    } finally {
+      setSaving(false);
+    }
   };
 
+  const cancelWizard = () => navigate("/brand-advertiser/campaigns");
 
-  const selectedFormatMeta = FORMATS.find((f) => f.key === chosenFormat);
+  /* ---------------- availability engine ---------------- */
+  const runAvailabilityCheck = async () => {
+    if (!selectedIds.length) return true;
+    setCheckingAvailability(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("submit-brand-campaign", {
+        body: {
+          mode: "check",
+          campaignId: draftId,
+          selections: selectedIds.map((id) => ({
+            adSpaceId: id,
+            quantity: selections[id].quantity,
+            adFormat: selections[id].adFormat,
+          })),
+          mediaTypes,
+          startDate: startDate || null,
+          endDate: endDate || null,
+        },
+      });
+      if (error) throw error;
+      setAvailabilityIssues(data?.problems || []);
+      return (data?.problems || []).length === 0;
+    } catch (e: any) {
+      toast.error(e.message || "Could not verify inventory availability");
+      return false;
+    } finally {
+      setCheckingAvailability(false);
+    }
+  };
 
+  /* ---------------- validation ---------------- */
+  const canContinue = () => {
+    switch (step) {
+      case 1: return !!campaignType && !!campaignName.trim();
+      case 2: return mediaTypes.length > 0;
+      case 3: return !!objective;
+      case 4: return true;
+      case 5: return selectedIds.length > 0;
+      case 6: return selectedIds.every((id) => !!selections[id].adFormat);
+      case 7: return !!startDate && !!endDate && new Date(endDate) >= new Date(startDate);
+      case 8: return true;
+      case 9: return Number(budget) > 0;
+      case 10: return !!creativeMode;
+      case 11: return true;
+      default: return true;
+    }
+  };
+
+  const next = async () => {
+    if (!canContinue()) { toast.error("Please complete this step before continuing."); return; }
+    if (step === 7) {
+      const ok = await runAvailabilityCheck();
+      if (!ok) return;
+    }
+    await saveDraft(true);
+    setStep((s) => Math.min(12, s + 1));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const back = () => {
+    setStep((s) => Math.max(1, s - 1));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  /* ---------------- submit ---------------- */
+  const submitCampaign = async () => {
+    setSubmitting(true);
+    try {
+      await saveDraft(true);
+      const { data, error } = await supabase.functions.invoke("submit-brand-campaign", {
+        body: {
+          mode: "submit",
+          campaignId: draftId,
+          campaignName: campaignName || "Untitled campaign",
+          campaignType,
+          mediaTypes,
+          objective,
+          objectiveNotes,
+          selections: selectedIds.map((id) => ({
+            adSpaceId: id,
+            quantity: selections[id].quantity,
+            adFormat: selections[id].adFormat,
+          })),
+          startDate,
+          endDate,
+          budget: Number(budget || 0),
+          audience,
+          creativeMode,
+          creativeSetId,
+          creativeFormat: creativeReq.creativeType || null,
+          creativeRequirements: creativeReq,
+          notes: objectiveNotes,
+          draftState: { selections, durationPreset, minBudget, maxBudget },
+        },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        setAvailabilityIssues(data.problems || []);
+        toast.error(data.error);
+        setStep(7);
+        return;
+      }
+      setSubmitted({ ref: data.campaignRef, id: data.campaignId });
+      setDraftId(null);
+      setStep(12);
+      toast.success(`Campaign request ${data.campaignRef} submitted for review.`);
+    } catch (e: any) {
+      toast.error(e.message || "Could not submit the campaign request");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /* ---------------- UI pieces ---------------- */
+  const availableFormats = useMemo(() => {
+    const set = new Set<string>();
+    (mediaTypes.length ? mediaTypes : (["OOH", "DOOH", "AOOH"] as MediaType[])).forEach((t) =>
+      FORMAT_OPTIONS[t].forEach((f) => set.add(f))
+    );
+    return [...set];
+  }, [mediaTypes]);
+
+  const StepHeader = ({ n, title, hint }: { n: number; title: string; hint: string }) => (
+    <div className="mb-5">
+      <p className="text-xs font-semibold tracking-wide text-blue-600">STEP {n} OF 12</p>
+      <h2 className="text-xl font-semibold text-gray-900 mt-1">{title}</h2>
+      <p className="text-sm text-gray-500 mt-1">{hint}</p>
+    </div>
+  );
+
+  const SummaryPanel = (
+    <div className="space-y-4">
+      <Card className="p-4 bg-white border-gray-200">
+        <p className="text-sm font-semibold text-gray-900 mb-3">Campaign Summary</p>
+        <dl className="space-y-2 text-sm">
+          <Row label="Name" value={campaignName || "—"} />
+          <Row label="Type" value={campaignType ? campaignType.toUpperCase() : "—"} />
+          <Row label="Media" value={mediaTypes.length ? mediaTypes.join(", ") : "—"} />
+          <Row label="Objective" value={objective || "—"} />
+          <Row label="Locations" value={selectedIds.length ? `${selectedIds.length} selected` : "—"} />
+          <Row label="Units" value={totalUnits ? String(totalUnits) : "—"} />
+          <Row label="Dates" value={startDate && endDate ? `${startDate} → ${endDate}` : "—"} />
+          <Row label="Budget" value={budget ? peso(Number(budget)) : "—"} />
+        </dl>
+        <div className="mt-4 pt-3 border-t border-gray-100">
+          <p className="text-xs text-gray-500">Estimated Media Cost</p>
+          <p className="text-lg font-semibold text-gray-900">{peso(estimatedMediaCost)}</p>
+          <p className="text-[11px] text-gray-400 mt-1">Estimate only — final costs are confirmed in your proposal.</p>
+        </div>
+      </Card>
+      {selectedRows.length > 0 && (
+        <Card className="p-4 bg-white border-gray-200">
+          <p className="text-sm font-semibold text-gray-900 mb-2">Selected inventory</p>
+          <ul className="space-y-2 max-h-64 overflow-auto">
+            {selectedRows.map((r) => (
+              <li key={r.id} className="text-xs text-gray-600 flex items-start justify-between gap-2">
+                <span className="line-clamp-2">{r.title}</span>
+                <span className="shrink-0 text-gray-900 font-medium">×{selections[r.id].quantity}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+    </div>
+  );
+
+  if (loadingDraft) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-500">
+        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading campaign builder...
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <BrandAdvertiserTopBar companyName={companyName} totalBudget={0} />
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">Campaign Unit Registry</h1>
+    <div className="min-h-screen bg-gray-50">
+      <BrandAdvertiserTopBar companyName={companyName} totalBudget={totalBudget} />
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+        <header className="mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">Retail Media Campaign Builder</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Pick your target area and register your ad format and units for this campaign.
+            Plan your requirements, scan the TrioTag inventory network and request a campaign proposal.
           </p>
+        </header>
+
+        {/* progress */}
+        <div className="mb-6 overflow-x-auto">
+          <ol className="flex items-center gap-2 min-w-max">
+            {STEPS.map((s) => {
+              const state = s.n === step ? "current" : s.n < step ? "done" : "todo";
+              return (
+                <li key={s.key} className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { if (s.n < step && !submitted) setStep(s.n); }}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs border transition-colors ${
+                      state === "current"
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : state === "done"
+                        ? "bg-white text-blue-700 border-blue-200 hover:bg-blue-50"
+                        : "bg-white text-gray-400 border-gray-200"
+                    }`}
+                  >
+                    {state === "done" ? <Check className="w-3 h-3" /> : <s.icon className="w-3 h-3" />}
+                    <span className="font-medium">{s.n}. {s.label}</span>
+                  </button>
+                  {s.n !== STEPS.length && <span className="text-gray-300">→</span>}
+                </li>
+              );
+            })}
+          </ol>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* LEFT: Map + radius planner */}
-          <div className="lg:col-span-3 space-y-4">
-            <RadiusMapPlanner
-              center={center}
-              radiusMeters={radiusMeters}
-              onCenterChange={(c) => {
-                setCenter(c);
-                setRadiusLocked(false);
-              }}
-              onRadiusChange={(r) => {
-                setRadiusMeters(r);
-                setRadiusLocked(false);
-              }}
-            />
-
-            <div
-              className={`border rounded-xl p-4 transition-colors ${
-                radiusLocked ? "bg-green-50 border-green-300" : "bg-white border-gray-200"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                    Coverage Radius
-                  </div>
-                  <div className="text-sm text-gray-700">
-                    {estimate.radiusPercent}% coverage
-                    <span className="text-gray-500">
-                      {" "}
-                      · {(radiusMeters / 1000).toFixed(radiusMeters < 1000 ? 2 : 1)}km
-                    </span>
-                  </div>
-
-                  <div className="text-xs text-gray-500 mt-1.5">
-                    Lock the radius to save it as a requirement for this inventory target.
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  onClick={() => setRadiusLocked((v) => !v)}
-                  className={`shrink-0 ${
-                    radiusLocked
-                      ? "bg-green-600 hover:bg-green-500 text-white"
-                      : "bg-white border border-green-500 text-green-700 hover:bg-green-50"
-                  }`}
-                >
-                  {radiusLocked ? (
-                    <>
-                      <LockIcon className="w-4 h-4 mr-1" /> Radius Locked
-                    </>
-                  ) : (
-                    <>
-                      <UnlockIcon className="w-4 h-4 mr-1" /> Lock Radius
-                    </>
-                  )}
-                </Button>
-              </div>
+        <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+          <div>
+            {/* mobile summary */}
+            <div className="lg:hidden mb-4">
+              <button
+                onClick={() => setSummaryOpen((v) => !v)}
+                className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900"
+              >
+                <span className="font-medium">Campaign Summary · {peso(estimatedMediaCost)}</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${summaryOpen ? "rotate-180" : ""}`} />
+              </button>
+              {summaryOpen && <div className="mt-3">{SummaryPanel}</div>}
             </div>
 
-          </div>
-
-          {/* RIGHT: Registry form */}
-          <div className="lg:col-span-2">
-            <Card className="p-5 bg-white border border-gray-200 sticky top-4">
-              <div className="mb-4 flex items-center gap-2">
-                <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
-                  <ClipboardList className="w-5 h-5 text-green-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-bold text-gray-900 leading-tight">Unit Registry</h2>
-                  <p className="text-xs text-gray-500">
-                    {step === 1
-                      ? "Step 1 of 4 — Radius & pin location"
-                      : step === 2
-                      ? "Step 2 of 4 — Ad locations"
-                      : step === 3
-                      ? "Step 3 of 4 — Ad format & units"
-                      : "Step 4 of 4 — Creative set"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Step indicator */}
-              <div className="flex items-center gap-2 mb-4">
-                {[1, 2, 3, 4].map((n) => (
-                  <div key={n} className="flex-1 flex items-center gap-2">
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
-                        step >= (n as 1 | 2 | 3 | 4)
-                          ? "bg-green-600 text-white"
-                          : "bg-gray-200 text-gray-500"
-                      }`}
-                    >
-                      {step > (n as 1 | 2 | 3 | 4) ? <Check className="w-3.5 h-3.5" /> : n}
-                    </div>
-                    {n < 4 && (
-                      <div
-                        className={`flex-1 h-1 rounded-full ${
-                          step > (n as 1 | 2 | 3 | 4) ? "bg-green-600" : "bg-gray-200"
-                        }`}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-
+            <Card className="p-5 md:p-6 bg-white border-gray-200">
+              {/* STEP 1 */}
               {step === 1 && (
                 <>
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-sm font-semibold text-gray-900">
-                        Radius & pin location
-                      </Label>
-                      <p className="text-xs text-gray-500 mb-2">
-                        Drop the pin on the map and lock the coverage radius. This defines where your campaign runs.
-                      </p>
-                    </div>
-
-                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Pin location</span>
-                        <span className="text-xs font-mono text-gray-900">
-                          {center.lat.toFixed(4)}, {center.lng.toFixed(4)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Radius</span>
-                        <span className="text-sm font-semibold text-green-700">
-                          {(radiusMeters / 1000).toFixed(radiusMeters < 1000 ? 2 : 1)} km
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Coverage</span>
-                        <span className="text-sm font-semibold text-gray-900">
-                          {estimate.radiusPercent}%
-                        </span>
-                      </div>
-
-                    </div>
-
-                    <div
-                      className={`rounded-md border px-3 py-2 flex items-center gap-2 ${
-                        radiusLocked
-                          ? "bg-green-50 border-green-300 text-green-800"
-                          : "bg-amber-50 border-amber-200 text-amber-800"
-                      }`}
-                    >
-                      {radiusLocked ? (
-                        <LockIcon className="w-4 h-4 shrink-0" />
-                      ) : (
-                        <UnlockIcon className="w-4 h-4 shrink-0" />
-                      )}
-                      <span className="text-xs">
-                        {radiusLocked
-                          ? "Radius locked — you can proceed to Unit Registry."
-                          : "Lock the radius on the map to continue."}
-                      </span>
-                    </div>
+                  <StepHeader n={1} title="What are you advertising?" hint="Pick the primary focus of this campaign." />
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    {CAMPAIGN_TYPES.map((t) => (
+                      <button
+                        key={t.value}
+                        onClick={() => setCampaignType(t.value)}
+                        className={`text-left p-5 rounded-xl border-2 transition-all ${
+                          campaignType === t.value ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white hover:border-gray-300"
+                        }`}
+                      >
+                        <p className="text-lg font-semibold text-gray-900">{t.title}</p>
+                        <p className="text-xs text-gray-500 mt-2">{t.desc}</p>
+                      </button>
+                    ))}
                   </div>
-
-                  <Button
-                    onClick={() => setStep(2)}
-                    disabled={!radiusLocked}
-                    className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white"
-                  >
-                    Next: Unit Registry <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
+                  <div className="mt-5">
+                    <Label className="text-gray-900">Campaign name</Label>
+                    <Input
+                      value={campaignName}
+                      onChange={(e) => setCampaignName(e.target.value)}
+                      placeholder="e.g. Summer Product Launch"
+                      className="mt-1 bg-white text-gray-900"
+                    />
+                  </div>
                 </>
               )}
 
+              {/* STEP 2 */}
               {step === 2 && (
                 <>
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-sm font-semibold text-gray-900">
-                        Type of ad locations
-                      </Label>
-                      <p className="text-xs text-gray-500 mb-2">
-                        Check a venue type to browse real nearby locations, then pick the
-                        specific venues you want.
-                      </p>
-                      <div className="space-y-1.5">
-                        {LOCATION_TYPES.map((t) => {
-                          const on = selectedLocationTypes[t] !== undefined;
-                          const results = placeResults[t];
-                          const loading = !!placeLoading[t];
-                          const chosen = selectedLocationTypes[t] || [];
-                          return (
-                            <div
-                              key={t}
-                              className={`rounded-md border transition-colors ${
-                                on ? "bg-green-50 border-green-300" : "bg-white border-gray-200"
-                              }`}
-                            >
-                              <div className="flex items-center gap-2 px-2 py-1.5">
-                                <button
-                                  type="button"
-                                  onClick={() => toggleCategory(t, on)}
-                                  className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
-                                    on
-                                      ? "bg-green-600 border-green-600"
-                                      : "bg-white border-gray-400"
-                                  }`}
-                                  aria-label={`Select ${t}`}
-                                >
-                                  {on && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
-                                </button>
-                                <Label
-                                  className="text-xs text-gray-900 flex-1 min-w-0 truncate cursor-pointer"
-                                  onClick={() => toggleCategory(t, on)}
-                                >
-                                  {t}
-                                </Label>
-                                {on && chosen.length > 0 && (
-                                  <span className="text-xs font-semibold text-green-700">
-                                    {chosen.length} selected
-                                  </span>
-                                )}
-                              </div>
-
-                              {on && (
-                                <div className="border-t border-green-200 px-2 py-2">
-                                  {loading && (
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 py-2">
-                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                      Finding {t} nearby...
-                                    </div>
-                                  )}
-                                  {!loading && results && results.length === 0 && (
-                                    <p className="text-xs text-gray-500 py-2">
-                                      No {t} found in this radius.
-                                    </p>
-                                  )}
-                                  {!loading && results && results.length > 0 && (
-                                    <div className="max-h-56 overflow-y-auto space-y-1 pr-1">
-                                      {results.map((p) => {
-                                        const picked = chosen.some((c) => c.id === p.id);
-                                        return (
-                                          <button
-                                            key={p.id}
-                                            type="button"
-                                            onClick={() => togglePlace(t, p)}
-                                            className={`w-full text-left flex items-start gap-2 rounded-md border px-2 py-1.5 ${
-                                              picked
-                                                ? "border-green-500 bg-white"
-                                                : "border-gray-200 bg-white hover:border-gray-300"
-                                            }`}
-                                          >
-                                            <span
-                                              className={`w-3.5 h-3.5 mt-0.5 rounded border-2 flex items-center justify-center shrink-0 ${
-                                                picked
-                                                  ? "bg-green-600 border-green-600"
-                                                  : "bg-white border-gray-400"
-                                              }`}
-                                            >
-                                              {picked && (
-                                                <Check
-                                                  className="w-2.5 h-2.5 text-white"
-                                                  strokeWidth={3}
-                                                />
-                                              )}
-                                            </span>
-                                            <span className="min-w-0 flex-1">
-                                              <span className="flex items-center gap-1.5 flex-wrap">
-                                                <span className="text-xs font-medium text-gray-900">
-                                                  {p.name}
-                                                </span>
-                                                {p.verified ? (
-                                                  <Badge className="h-4 px-1.5 gap-1 bg-green-100 text-green-700 hover:bg-green-100 border border-green-300 text-[10px]">
-                                                    <ShieldCheck className="w-2.5 h-2.5" />
-                                                    Verified
-                                                  </Badge>
-                                                ) : (
-                                                  <Badge
-                                                    variant="secondary"
-                                                    className="h-4 px-1.5 bg-gray-100 text-gray-600 hover:bg-gray-100 border border-gray-200 text-[10px]"
-                                                  >
-                                                    Unverified
-                                                  </Badge>
-                                                )}
-                                              </span>
-                                              <span className="block text-[11px] text-gray-500 truncate">
-                                                {p.address}
-                                              </span>
-                                            </span>
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-
-                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 flex items-center justify-between">
-                      <span className="text-xs text-gray-600">Total ad locations</span>
-                      <span className="text-sm font-semibold text-green-700">
-                        {selectedPlacesTotal}
-                      </span>
-                    </div>
-
-                  </div>
-
-                  <div className="flex gap-2 mt-4">
-                    <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                      <ArrowLeft className="w-4 h-4 mr-1" /> Back
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setTotalLocations(String(selectedPlacesTotal));
-                        setStep(3);
-                      }}
-                      disabled={selectedPlacesTotal === 0}
-
-                      className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
-                    >
-                      Next: Ad format <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
+                  <StepHeader n={2} title="Where would you like your campaign to appear?" hint="Select one or more media environments. We use this to scan matching inventory." />
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    {MEDIA_TYPES.map((m) => {
+                      const active = mediaTypes.includes(m.key);
+                      return (
+                        <button
+                          key={m.key}
+                          onClick={() =>
+                            setMediaTypes((p) => (active ? p.filter((x) => x !== m.key) : [...p, m.key]))
+                          }
+                          className={`text-left p-5 rounded-xl border-2 transition-all ${
+                            active ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white hover:border-gray-300"
+                          }`}
+                        >
+                          <m.icon className={`w-6 h-6 ${m.accent}`} />
+                          <p className="text-lg font-semibold text-gray-900 mt-3">{m.title}</p>
+                          <p className="text-xs text-gray-500 mt-1">{m.desc}</p>
+                        </button>
+                      );
+                    })}
                   </div>
                 </>
               )}
 
+              {/* STEP 3 */}
               {step === 3 && (
                 <>
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-sm font-semibold text-gray-900">Ad format</Label>
-                      <p className="text-xs text-gray-500 mb-2">
-                        Pick one format and enter units per placement type.
-                      </p>
+                  <StepHeader n={3} title="What is the main goal of this campaign?" hint="This helps our media planners shape the proposal." />
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    {OBJECTIVES.map((o) => (
+                      <button
+                        key={o}
+                        onClick={() => setObjective(o)}
+                        className={`text-left px-4 py-3 rounded-lg border text-sm transition-colors ${
+                          objective === o ? "border-blue-600 bg-blue-50 text-blue-800" : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                        }`}
+                      >
+                        {o}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-5">
+                    <Label className="text-gray-900">Additional campaign objective (optional)</Label>
+                    <Textarea
+                      value={objectiveNotes}
+                      onChange={(e) => setObjectiveNotes(e.target.value)}
+                      placeholder="Anything else we should know about the goal of this campaign?"
+                      className="mt-1 bg-white text-gray-900"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* STEP 4 */}
+              {step === 4 && (
+                <>
+                  <StepHeader
+                    n={4}
+                    title="Scanning the TrioTag inventory network"
+                    hint="We search every approved and available location across the platform — you never have to pick a partner."
+                  />
+                  {loadingInv ? (
+                    <div className="flex items-center gap-2 text-gray-500 py-10 justify-center">
+                      <Loader2 className="w-5 h-5 animate-spin" /> Scanning approved inventory...
                     </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <Stat label="Matching locations" value={String(matching.length)} />
+                        <Stat label="Cities covered" value={String(cities.length)} />
+                        <Stat
+                          label="Advertising units"
+                          value={String(matching.reduce((s, r) => s + (r.total_ad_units || 1), 0))}
+                        />
+                        <Stat label="Media types" value={mediaTypes.join(", ") || "All"} />
+                      </div>
+                      {matching.length === 0 && (
+                        <p className="text-sm text-gray-500 mt-5">
+                          No approved inventory currently matches those media types. Try adding another media type in step 2.
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-5">
+                        Only approved, verified and available inventory is shown. Draft, rejected or suspended listings are never included.
+                      </p>
+                    </>
+                  )}
+                </>
+              )}
 
-                    {/* Format picker */}
-                    <div className="space-y-2">
-                      {FORMATS.map((f) => {
-                        const Icon = f.icon;
-                        const active = chosenFormat === f.key;
+              {/* STEP 5 */}
+              {step === 5 && (
+                <>
+                  <StepHeader n={5} title="Select your inventory" hint="Choose the locations you want in this campaign." />
+                  <div className="grid md:grid-cols-4 gap-2 mb-4">
+                    <div className="relative md:col-span-2">
+                      <SearchIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Input
+                        value={q}
+                        onChange={(e) => setQ(e.target.value)}
+                        placeholder="Search inventory"
+                        className="pl-9 bg-white text-gray-900"
+                      />
+                    </div>
+                    <Select value={cityFilter} onValueChange={setCityFilter}>
+                      <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="City" /></SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="all">All cities</SelectItem>
+                        {cities.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Sort by" /></SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="relevance">Sort: Relevance</SelectItem>
+                        <SelectItem value="price">Sort: Price</SelectItem>
+                        <SelectItem value="location">Sort: Location</SelectItem>
+                        <SelectItem value="reach">Sort: Reach</SelectItem>
+                        <SelectItem value="availability">Sort: Availability</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value.replace(/[^0-9]/g, ""))}
+                      placeholder="Max ₱ / month"
+                      className="bg-white text-gray-900"
+                    />
+                    <Input
+                      value={minReach}
+                      onChange={(e) => setMinReach(e.target.value.replace(/[^0-9]/g, ""))}
+                      placeholder="Min reach"
+                      className="bg-white text-gray-900"
+                    />
+                    <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+                      <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Availability" /></SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="all">Any availability</SelectItem>
+                        <SelectItem value="available">Available now</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {loadingInv ? (
+                    <div className="flex items-center gap-2 text-gray-500 py-10 justify-center">
+                      <Loader2 className="w-5 h-5 animate-spin" /> Loading inventory...
+                    </div>
+                  ) : visible.length === 0 ? (
+                    <p className="text-sm text-gray-500 py-10 text-center">No inventory matches these filters.</p>
+                  ) : (
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {visible.map((r) => {
+                        const img = firstImage(r.media_urls);
+                        const selected = !!selections[r.id];
+                        const cap = capacityOf(r);
                         return (
-                          <div
-                            key={f.key}
-                            className={`w-full rounded-xl border-2 transition-all overflow-hidden ${
-                              active
-                                ? `${f.border} ${f.bg}`
-                                : "border-gray-200 hover:border-gray-300 bg-white"
-                            }`}
-                          >
-                            <button
-                              type="button"
-                              onClick={() => setChosenFormat(f.key)}
-                              className="w-full text-left p-3 flex items-center gap-3"
-                            >
-                              <div
-                                className={`w-10 h-10 rounded-lg ${f.bg} flex items-center justify-center shrink-0`}
-                              >
-                                <Icon className={`w-5 h-5 ${f.iconColor}`} />
+                          <Card key={r.id} className={`overflow-hidden border ${selected ? "border-blue-600 ring-1 ring-blue-200" : "border-gray-200"}`}>
+                            <div className="h-32 bg-gray-100">
+                              {img ? (
+                                <img src={img} alt={r.title} loading="lazy" className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400"><Layers className="w-6 h-6" /></div>
+                              )}
+                            </div>
+                            <div className="p-4">
+                              <div className="flex items-start justify-between gap-2">
+                                <p className="font-medium text-gray-900 line-clamp-1">{r.title}</p>
+                                {r.contact_verified_at && (
+                                  <Badge className="bg-green-600 shrink-0"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
+                                )}
                               </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="text-sm font-semibold text-gray-900">{f.title}</div>
-                                <div className="text-xs text-gray-500">{f.desc}</div>
+                              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 line-clamp-1">
+                                <MapPin className="w-3 h-3" /> {r.location || "Location on request"}
+                              </p>
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {rowTypes(r).map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
+                                {cap && <Badge variant="outline">{cap} unit{cap > 1 ? "s" : ""}</Badge>}
+                                {reachOf(r) > 0 && <Badge variant="outline">{reachOf(r).toLocaleString()} reach</Badge>}
                               </div>
-                              <div
-                                className={`w-4 h-4 rounded-full border-2 ${
-                                  active ? "border-green-600 bg-green-600" : "border-gray-300"
-                                }`}
-                              />
-                            </button>
-
-                            {active && (
-                              <div className="px-3 pb-3">
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <Label className="text-sm font-semibold text-green-900">
-                                      {f.title} units by type
-                                    </Label>
-                                    <span className="text-xs text-green-700 font-medium">
-                                      Total: {totalUnitsForFormat(f.key)} ·{" "}
-                                      {fmtPHP(
-                                        SUBTYPES[f.key].reduce(
-                                          (s, sub) =>
-                                            s + priceFor(sub) * (Number(unitCounts[f.key][sub]) || 0),
-                                          0,
-                                        ),
-                                      )}
-                                    </span>
-                                  </div>
-                                  <div className="space-y-1.5 pt-1">
-                                    {SUBTYPES[f.key].map((sub) => {
-                                      const qty = Number(unitCounts[f.key][sub]) || 0;
-                                      const unitPrice = priceFor(sub);
-                                      const subtotal = unitPrice * qty;
-                                      const priceUnit =
-                                        f.key === "OOH" ? "unit" : "screen / mo";
-                                      return (
-                                        <div
-                                          key={sub}
-                                          className="flex items-center gap-2 bg-white/60 rounded-md border border-green-200/60 px-2 py-1.5"
-                                        >
-                                          <div className="flex-1 min-w-0">
-                                            <Label
-                                              htmlFor={`unit-${f.key}-${sub}`}
-                                              className="text-xs text-green-900 truncate block"
-                                            >
-                                              {sub}
-                                            </Label>
-                                            <div className="text-[10px] text-green-700/80">
-                                              {fmtPHP(unitPrice)} / {priceUnit}
-                                              {qty > 0 && (
-                                                <>
-                                                  {" "}
-                                                  ·{" "}
-                                                  <span className="font-semibold text-green-800">
-                                                    {fmtPHP(subtotal)}
-                                                  </span>
-                                                </>
-                                              )}
-                                            </div>
-                                          </div>
-                                          <Input
-                                            id={`unit-${f.key}-${sub}`}
-                                            type="number"
-                                            min="0"
-                                            placeholder="0"
-                                            value={unitCounts[f.key][sub] || ""}
-                                            onChange={(e) =>
-                                              setUnitCounts((prev) => ({
-                                                ...prev,
-                                                [f.key]: { ...prev[f.key], [sub]: e.target.value },
-                                              }))
-                                            }
-                                            className="h-8 w-20 text-right text-green-900 placeholder:text-green-700/60"
-                                          />
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
+                              {r.description && <p className="text-xs text-gray-500 mt-2 line-clamp-2">{r.description}</p>}
+                              <div className="mt-3 flex items-center justify-between">
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {monthlyRate(r) > 0 ? `${peso(monthlyRate(r))}/mo` : "Rate on request"}
+                                </span>
+                                <div className="flex gap-2">
+                                  <Button size="sm" variant="outline" onClick={() => window.open(`/brand-advertiser/inventory/${r.id}`, "_blank")}>
+                                    View Details
+                                  </Button>
+                                  <Button size="sm" variant={selected ? "default" : "outline"} onClick={() => toggleSelect(r)}>
+                                    {selected ? <><Check className="w-3 h-3 mr-1" />Selected</> : "Select"}
+                                  </Button>
                                 </div>
                               </div>
-                            )}
-                          </div>
+                            </div>
+                          </Card>
                         );
                       })}
                     </div>
-                  </div>
+                  )}
+                </>
+              )}
 
-                  <div className="flex gap-2 mt-4">
-                    <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
-                      <ArrowLeft className="w-4 h-4 mr-1" /> Back
-                    </Button>
-                    <Button
-                      onClick={() => setStep(4)}
-                      disabled={!chosenFormat || totalUnitsForFormat(chosenFormat) === 0}
-                      className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
-                    >
-                      Next: Creative set <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
+              {/* STEP 6 */}
+              {step === 6 && (
+                <>
+                  <StepHeader n={6} title="What advertising material will you run?" hint="Set the ad format and number of units per location." />
+                  <div className="space-y-3">
+                    {selectedRows.map((r) => {
+                      const cap = capacityOf(r);
+                      const sel = selections[r.id];
+                      const formats = [...new Set(rowTypes(r).flatMap((t) => FORMAT_OPTIONS[(t as MediaType)] || []))];
+                      return (
+                        <Card key={r.id} className="p-4 border-gray-200">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="font-medium text-gray-900">{r.title}</p>
+                              <p className="text-xs text-gray-500">{r.location || "Location on request"}</p>
+                            </div>
+                            <Button size="icon" variant="ghost" onClick={() => toggleSelect(r)} aria-label="Remove">
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <div className="grid sm:grid-cols-3 gap-3 mt-3">
+                            <div>
+                              <Label className="text-xs text-gray-700">Ad format</Label>
+                              <Select
+                                value={sel.adFormat || ""}
+                                onValueChange={(v) => setSelections((p) => ({ ...p, [r.id]: { ...p[r.id], adFormat: v } }))}
+                              >
+                                <SelectTrigger className="bg-white text-gray-900 mt-1"><SelectValue placeholder="Choose format" /></SelectTrigger>
+                                <SelectContent className="bg-white">
+                                  {(formats.length ? formats : availableFormats).map((f) => (
+                                    <SelectItem key={f} value={f}>{f}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-gray-700">
+                                Quantity {cap ? `(max ${cap})` : ""}
+                              </Label>
+                              <Input
+                                type="number"
+                                min={1}
+                                max={cap || undefined}
+                                value={sel.quantity}
+                                onChange={(e) => {
+                                  let v = Math.max(1, Number(e.target.value) || 1);
+                                  if (cap) v = Math.min(cap, v);
+                                  setSelections((p) => ({ ...p, [r.id]: { ...p[r.id], quantity: v } }));
+                                }}
+                                className="bg-white text-gray-900 mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-gray-700">Creative specification</Label>
+                              <p className="text-sm text-gray-600 mt-2">
+                                {r.specifications?.dimensions || r.specifications?.size || "Provided with your proposal"}
+                              </p>
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
                   </div>
                 </>
               )}
 
-              {step === 4 && (
+              {/* STEP 7 */}
+              {step === 7 && (
                 <>
-                  <div className="space-y-3">
+                  <StepHeader n={7} title="When should your campaign run?" hint="We check live availability for your selected inventory." />
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {DURATION_PRESETS.map((d) => (
+                      <button
+                        key={d.key}
+                        onClick={() => {
+                          setDurationPreset(d.key);
+                          if (d.days > 0) {
+                            const s = startDate || addDays(todayISO(), 1);
+                            setStartDate(s);
+                            setEndDate(addDays(s, d.days - 1));
+                          }
+                        }}
+                        className={`px-3 py-2 rounded-md text-sm border ${
+                          durationPreset === d.key ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-200"
+                        }`}
+                      >
+                        {d.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-sm font-semibold text-gray-900">
-                        Select a creative set
-                      </Label>
-                      <p className="text-xs text-gray-500 mb-2">
-                        Pick from creatives uploaded on the{" "}
-                        <button
-                          type="button"
-                          onClick={() => navigate("/brand-advertiser/creatives")}
-                          className="text-green-700 font-medium underline hover:text-green-800"
-                        >
-                          Creatives
-                        </button>{" "}
-                        page.
-                      </p>
+                      <Label className="text-gray-900">Start date</Label>
+                      <Input
+                        type="date"
+                        min={addDays(todayISO(), 1)}
+                        value={startDate}
+                        onChange={(e) => { setStartDate(e.target.value); setDurationPreset("custom"); }}
+                        className="bg-white text-gray-900 mt-1"
+                      />
                     </div>
+                    <div>
+                      <Label className="text-gray-900">End date</Label>
+                      <Input
+                        type="date"
+                        min={startDate || addDays(todayISO(), 1)}
+                        value={endDate}
+                        onChange={(e) => { setEndDate(e.target.value); setDurationPreset("custom"); }}
+                        className="bg-white text-gray-900 mt-1"
+                      />
+                    </div>
+                  </div>
+                  {checkingAvailability && (
+                    <p className="text-sm text-gray-500 mt-4 flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" /> Checking availability...
+                    </p>
+                  )}
+                  {availabilityIssues.length > 0 && (
+                    <Card className="mt-4 p-4 border-amber-300 bg-amber-50">
+                      <p className="text-sm font-medium text-amber-900">Some selected inventory is unavailable for these dates.</p>
+                      <ul className="mt-2 space-y-1 text-xs text-amber-800">
+                        {availabilityIssues.map((p) => (
+                          <li key={p.adSpaceId}>• {p.title} — {p.reason}</li>
+                        ))}
+                      </ul>
+                      <Button size="sm" variant="outline" className="mt-3" onClick={() => setStep(5)}>
+                        Find Alternative Inventory
+                      </Button>
+                    </Card>
+                  )}
+                </>
+              )}
 
-                    <div className="max-h-[360px] overflow-y-auto -mx-1 px-1 space-y-2">
-                      {loadingCreatives ? (
-                        <div className="text-center text-gray-500 py-6 text-sm">Loading…</div>
-                      ) : creativeSets.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center bg-gray-50">
-                          <FolderOpen className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                          <p className="text-xs text-gray-600 mb-3">
-                            No creatives folder saved yet. Save one on the Creatives page first.
-                          </p>
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              toast({
-                                title: "Save a creatives folder first",
-                                description:
-                                  "You don't have any creatives yet. Save a creatives folder on the Creatives page, then come back to choose it.",
-                              });
-                              navigate("/brand-advertiser/creatives");
-                            }}
-                            className="bg-green-600 hover:bg-green-500 text-white"
-                          >
-                            <FolderOpen className="w-4 h-4 mr-1" /> Choose Creatives
+              {/* STEP 8 */}
+              {step === 8 && (
+                <>
+                  <StepHeader n={8} title="Who are you trying to reach?" hint="Optional — share what you know about your audience." />
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <Field label="Geographic location" value={audience.geography} onChange={(v) => setAudience({ ...audience, geography: v })} placeholder="e.g. Metro Manila" />
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Age from" value={audience.ageMin} onChange={(v) => setAudience({ ...audience, ageMin: v })} placeholder="18" />
+                      <Field label="Age to" value={audience.ageMax} onChange={(v) => setAudience({ ...audience, ageMax: v })} placeholder="45" />
+                    </div>
+                    <div>
+                      <Label className="text-gray-900">Gender</Label>
+                      <Select value={audience.gender} onValueChange={(v) => setAudience({ ...audience, gender: v })}>
+                        <SelectTrigger className="bg-white text-gray-900 mt-1"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white">
+                          {["All", "Female", "Male", "Non-binary"].map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Field label="Interests" value={audience.interests} onChange={(v) => setAudience({ ...audience, interests: v })} placeholder="e.g. fitness, coffee" />
+                    <Field label="Lifestyle" value={audience.lifestyle} onChange={(v) => setAudience({ ...audience, lifestyle: v })} placeholder="e.g. urban commuters" />
+                    <Field label="Consumer type" value={audience.consumerType} onChange={(v) => setAudience({ ...audience, consumerType: v })} placeholder="e.g. young professionals" />
+                    <Field label="Estimated audience size" value={audience.estimatedSize} onChange={(v) => setAudience({ ...audience, estimatedSize: v })} placeholder="e.g. 100,000" />
+                  </div>
+                  <div className="mt-4">
+                    <Label className="text-gray-900">Target audience description</Label>
+                    <Textarea
+                      value={audience.description}
+                      onChange={(e) => setAudience({ ...audience, description: e.target.value })}
+                      className="mt-1 bg-white text-gray-900"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* STEP 9 */}
+              {step === 9 && (
+                <>
+                  <StepHeader n={9} title="What is your campaign budget?" hint="All amounts in Philippine Peso (PHP)." />
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <Field label="Total budget (₱)" value={budget} onChange={(v) => setBudget(v.replace(/[^0-9]/g, ""))} placeholder="250000" />
+                    <Field label="Minimum budget (optional)" value={minBudget} onChange={(v) => setMinBudget(v.replace(/[^0-9]/g, ""))} placeholder="" />
+                    <Field label="Maximum budget (optional)" value={maxBudget} onChange={(v) => setMaxBudget(v.replace(/[^0-9]/g, ""))} placeholder="" />
+                  </div>
+                  <Card className="mt-5 p-4 bg-gray-50 border-gray-200">
+                    <div className="flex justify-between text-sm text-gray-700"><span>Selected inventory cost</span><span>{peso(estimatedMediaCost)}</span></div>
+                    <div className="flex justify-between text-sm text-gray-700 mt-1"><span>Estimated media cost</span><span>{peso(estimatedMediaCost)}</span></div>
+                    <div className="flex justify-between text-base font-semibold text-gray-900 mt-2 pt-2 border-t border-gray-200">
+                      <span>Estimated campaign cost</span><span>{peso(estimatedMediaCost)}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">This is an estimate, not an invoice. Final pricing is confirmed in your proposal.</p>
+                  </Card>
+                </>
+              )}
+
+              {/* STEP 10 */}
+              {step === 10 && (
+                <>
+                  <StepHeader n={10} title="Do you already have your advertising creative?" hint="We can also produce it for you." />
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    {[
+                      { v: "have", t: "YES — I have the creative" },
+                      { v: "need", t: "NO — I need creative production" },
+                      { v: "unsure", t: "NOT SURE" },
+                    ].map((o) => (
+                      <button
+                        key={o.v}
+                        onClick={() => setCreativeMode(o.v)}
+                        className={`text-left p-4 rounded-xl border-2 text-sm ${
+                          creativeMode === o.v ? "border-blue-600 bg-blue-50 text-blue-900" : "border-gray-200 bg-white text-gray-700"
+                        }`}
+                      >
+                        {o.t}
+                      </button>
+                    ))}
+                  </div>
+
+                  {creativeMode === "have" && (
+                    <div className="mt-5">
+                      <Label className="text-gray-900">Choose a creative set</Label>
+                      {creativeSets.length === 0 ? (
+                        <Card className="p-4 mt-2 bg-gray-50 border-gray-200">
+                          <p className="text-sm text-gray-600">You have no creative folders yet.</p>
+                          <Button className="mt-3" variant="outline" onClick={() => navigate("/brand-advertiser/creatives")}>
+                            Go to Creatives
                           </Button>
-                        </div>
+                        </Card>
                       ) : (
-                        creativeSets.map((s: any) => {
-                          const active = chosenCreativeSetId === s.id;
-                          const FmtIcon =
-                            s.creative_format === "video"
-                              ? VideoIcon
-                              : s.creative_format === "audio"
-                              ? Music
-                              : FileImage;
-                          return (
-                            <button
-                              key={s.id}
-                              type="button"
-                              onClick={() => setChosenCreativeSetId(s.id)}
-                              className={`w-full text-left rounded-lg border-2 p-3 flex items-center gap-3 transition-all ${
-                                active
-                                  ? "border-green-500 bg-green-50"
-                                  : "border-gray-200 hover:border-gray-300 bg-white"
-                              }`}
-                            >
-                              <div
-                                className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                                  active ? "bg-green-100" : "bg-gray-100"
-                                }`}
-                              >
-                                <FmtIcon
-                                  className={`w-5 h-5 ${
-                                    active ? "text-green-700" : "text-gray-600"
-                                  }`}
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="text-sm font-semibold text-gray-900 truncate">
-                                  {s.title}
-                                </div>
-                                <div className="text-xs text-gray-500 capitalize">
-                                  {s.creative_format} · {s.creative_count || 0} file
-                                  {(s.creative_count || 0) === 1 ? "" : "s"}
-                                </div>
-                              </div>
-                              <div
-                                className={`w-4 h-4 rounded-full border-2 shrink-0 ${
-                                  active ? "border-green-600 bg-green-600" : "border-gray-300"
-                                }`}
-                              />
-                            </button>
-                          );
-                        })
+                        <Select value={creativeSetId || ""} onValueChange={setCreativeSetId}>
+                          <SelectTrigger className="bg-white text-gray-900 mt-1"><SelectValue placeholder="Select creative folder" /></SelectTrigger>
+                          <SelectContent className="bg-white">
+                            {creativeSets.map((cs) => (
+                              <SelectItem key={cs.id} value={cs.id}>
+                                {cs.title} · {cs.creative_count} file{cs.creative_count === 1 ? "" : "s"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       )}
                     </div>
-                  </div>
+                  )}
 
-                  <div className="flex gap-2 mt-4">
-                    <Button variant="outline" onClick={() => setStep(3)} className="flex-1">
-                      <ArrowLeft className="w-4 h-4 mr-1" /> Back
-                    </Button>
-                    <Button
-                      onClick={submitRegistry}
-                      disabled={!chosenFormat || !radiusLocked || !chosenCreativeSetId}
-                      className="flex-[2] bg-green-600 hover:bg-green-500 text-white"
-                    >
-                      <Save className="w-4 h-4 mr-1" /> Save Inventory Target
-                    </Button>
-                  </div>
-                  <p className="text-[11px] text-gray-500 text-center mt-2">
-                    {!radiusLocked
-                      ? "Radius must be locked (Step 1)."
-                      : !chosenCreativeSetId
-                      ? "Select a creative set to save."
-                      : "Saved targets appear below and can be launched as campaigns anytime."}
-                  </p>
+                  {(creativeMode === "need" || creativeMode === "unsure") && (
+                    <div className="grid sm:grid-cols-2 gap-3 mt-5">
+                      <Field label="Creative type" value={creativeReq.creativeType} onChange={(v) => setCreativeReq({ ...creativeReq, creativeType: v })} placeholder="e.g. Video, Poster" />
+                      <Field label="Brand" value={creativeReq.brand} onChange={(v) => setCreativeReq({ ...creativeReq, brand: v })} placeholder="Brand name" />
+                      <Field label="Key message" value={creativeReq.message} onChange={(v) => setCreativeReq({ ...creativeReq, message: v })} placeholder="Main message" />
+                      <Field label="Call to action" value={creativeReq.cta} onChange={(v) => setCreativeReq({ ...creativeReq, cta: v })} placeholder="e.g. Visit our store" />
+                      <Field label="Required dimensions" value={creativeReq.dimensions} onChange={(v) => setCreativeReq({ ...creativeReq, dimensions: v })} placeholder="e.g. 1080x1920" />
+                      <Field label="File format" value={creativeReq.fileFormat} onChange={(v) => setCreativeReq({ ...creativeReq, fileFormat: v })} placeholder="e.g. MP4, PDF" />
+                      {mediaTypes.includes("DOOH") && (
+                        <>
+                          <Field label="Video duration" value={creativeReq.videoDuration} onChange={(v) => setCreativeReq({ ...creativeReq, videoDuration: v })} placeholder="e.g. 15s" />
+                          <Field label="Resolution" value={creativeReq.resolution} onChange={(v) => setCreativeReq({ ...creativeReq, resolution: v })} placeholder="e.g. 1080p" />
+                          <Field label="Aspect ratio" value={creativeReq.aspectRatio} onChange={(v) => setCreativeReq({ ...creativeReq, aspectRatio: v })} placeholder="e.g. 9:16" />
+                        </>
+                      )}
+                      <div className="sm:col-span-2">
+                        <Label className="text-gray-900">Additional instructions</Label>
+                        <Textarea
+                          value={creativeReq.instructions}
+                          onChange={(e) => setCreativeReq({ ...creativeReq, instructions: e.target.value })}
+                          className="mt-1 bg-white text-gray-900"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </>
+              )}
 
+              {/* STEP 11 */}
+              {step === 11 && (
+                <>
+                  <StepHeader n={11} title="Review your campaign" hint="Check everything before requesting your proposal." />
+                  <div className="space-y-3">
+                    <ReviewBlock title="Campaign" onEdit={() => setStep(1)}>
+                      {campaignName} · {campaignType.toUpperCase() || "—"}
+                    </ReviewBlock>
+                    <ReviewBlock title="Media" onEdit={() => setStep(2)}>{mediaTypes.join(", ") || "—"}</ReviewBlock>
+                    <ReviewBlock title="Objective" onEdit={() => setStep(3)}>
+                      {objective}{objectiveNotes ? ` — ${objectiveNotes}` : ""}
+                    </ReviewBlock>
+                    <ReviewBlock title="Inventory" onEdit={() => setStep(5)}>
+                      {selectedIds.length} selected location{selectedIds.length === 1 ? "" : "s"} · {totalUnits} advertising unit{totalUnits === 1 ? "" : "s"}
+                    </ReviewBlock>
+                    <ReviewBlock title="Format" onEdit={() => setStep(6)}>
+                      {[...new Set(Object.values(selections).map((s) => s.adFormat).filter(Boolean))].join(", ") || "—"}
+                    </ReviewBlock>
+                    <ReviewBlock title="Duration" onEdit={() => setStep(7)}>{startDate} – {endDate}</ReviewBlock>
+                    <ReviewBlock title="Target" onEdit={() => setStep(8)}>
+                      {audience.geography || "Not specified"}{audience.gender && audience.gender !== "All" ? ` · ${audience.gender}` : ""}
+                    </ReviewBlock>
+                    <ReviewBlock title="Budget" onEdit={() => setStep(9)}>{peso(Number(budget || 0))}</ReviewBlock>
+                    <ReviewBlock title="Creative" onEdit={() => setStep(10)}>
+                      {creativeMode === "have" ? "Creative ready" : creativeMode === "need" ? "Creative production needed" : "Not sure yet"}
+                    </ReviewBlock>
+                  </div>
+                  <Card className="mt-5 p-4 bg-gray-50 border-gray-200">
+                    <div className="flex justify-between text-sm text-gray-700"><span>Estimated media cost</span><span>{peso(estimatedMediaCost)}</span></div>
+                    <div className="flex justify-between text-base font-semibold text-gray-900 mt-2 pt-2 border-t border-gray-200">
+                      <span>Estimated total campaign cost</span><span>{peso(estimatedMediaCost)}</span>
+                    </div>
+                  </Card>
+                </>
+              )}
+
+              {/* STEP 12 */}
+              {step === 12 && (
+                <div className="text-center py-8">
+                  {submitted ? (
+                    <>
+                      <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+                        <Check className="w-7 h-7 text-green-600" />
+                      </div>
+                      <h2 className="text-xl font-semibold text-gray-900 mt-4">Campaign request submitted</h2>
+                      <p className="text-sm text-gray-600 mt-2">
+                        Your reference is <span className="font-mono font-semibold">{submitted.ref}</span>. Our media team is reviewing it now.
+                      </p>
+                      <Button className="mt-6" onClick={() => navigate("/brand-advertiser/campaigns")}>
+                        View my campaigns
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-xl font-semibold text-gray-900">Ready to request your proposal?</h2>
+                      <p className="text-sm text-gray-600 mt-2 max-w-md mx-auto">
+                        We will confirm inventory availability, prepare pricing and send you a full campaign proposal for approval.
+                      </p>
+                      <Button className="mt-6" size="lg" disabled={submitting} onClick={submitCampaign}>
+                        {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting...</> : "REQUEST CAMPAIGN PROPOSAL"}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* nav */}
+              {!(step === 12 && submitted) && (
+                <div className="flex flex-wrap items-center justify-between gap-3 mt-8 pt-5 border-t border-gray-100">
+                  <div className="flex gap-2">
+                    <Button variant="ghost" onClick={cancelWizard}>Cancel</Button>
+                    <Button variant="outline" onClick={() => saveDraft(false)} disabled={saving || !profileId}>
+                      {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                      Save Draft
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    {step > 1 && (
+                      <Button variant="outline" onClick={back}><ArrowLeft className="w-4 h-4 mr-2" />Back</Button>
+                    )}
+                    {step < 12 && (
+                      <Button onClick={next} disabled={!canContinue() || checkingAvailability}>
+                        {step === 11 ? "Continue to submit" : "Continue"}
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
               )}
             </Card>
           </div>
+
+          <aside className="hidden lg:block">{SummaryPanel}</aside>
         </div>
-
-        {/* Pending Campaigns */}
-        <div className="mt-8">
-          <div className="flex items-end justify-between mb-3">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Pending Campaigns</h2>
-              <p className="text-sm text-gray-500">
-                Saved targeting presets ready to launch as campaigns.
-              </p>
-            </div>
-            <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
-              {savedTargets.length} pending
-            </Badge>
-          </div>
-
-          {savedTargets.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center">
-              <ClipboardList className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-600">
-                No pending campaigns yet. Complete the wizard and click{" "}
-                <span className="font-semibold text-green-700">Save Inventory Target</span> to add one.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {savedTargets.map((t) => {
-                const meta = FORMATS.find((f) => f.key === t.format);
-                const Icon = meta?.icon || ClipboardList;
-                const locEntries = Object.entries(t.locationTypes);
-                const unitEntries = Object.entries(t.unitBreakdown);
-                return (
-                  <div
-                    key={t.id}
-                    className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div
-                        className={`w-9 h-9 rounded-lg ${meta?.bg || "bg-gray-100"} flex items-center justify-center`}
-                      >
-                        <Icon className={`w-5 h-5 ${meta?.iconColor || "text-gray-600"}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-900">
-                          {t.format} · {t.unitCount} units
-                        </div>
-                        <div className="text-[11px] text-gray-500">
-                          {new Date(t.createdAt).toLocaleString()}
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => deleteTarget(t.id)}
-                        className="text-gray-400 hover:text-red-600 p-1"
-                        aria-label="Delete target"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="text-xs text-gray-700 space-y-2 flex-1">
-                      <div className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">
-                        Campaign Details
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="rounded-md bg-green-50 border border-green-100 px-2 py-1.5">
-                          <div className="flex items-center gap-1 text-[10px] text-green-700 font-semibold uppercase tracking-wide">
-                            <LockIcon className="w-3 h-3" /> Radius
-                          </div>
-                          <div className="text-sm font-semibold text-green-800">
-                            {(t.radiusMeters / 1000).toFixed(t.radiusMeters < 1000 ? 2 : 1)} km
-                          </div>
-                        </div>
-                        <div className="rounded-md bg-gray-50 border border-gray-100 px-2 py-1.5">
-                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
-                            Locations
-                          </div>
-                          <div className="text-sm font-semibold text-gray-900">
-                            {t.totalLocations}
-                          </div>
-                        </div>
-                        <div className="rounded-md bg-gray-50 border border-gray-100 px-2 py-1.5">
-                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
-                            Ad Format
-                          </div>
-                          <div className="text-sm font-semibold text-gray-900">{t.format}</div>
-                        </div>
-                        <div className="rounded-md bg-gray-50 border border-gray-100 px-2 py-1.5">
-                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
-                            Total Units
-                          </div>
-                          <div className="text-sm font-semibold text-gray-900">{t.unitCount}</div>
-                        </div>
-                      </div>
-
-                      {t.creativeSetTitle && (
-                        <div className="rounded-md bg-blue-50 border border-blue-100 px-2 py-1.5 flex items-center gap-1.5">
-                          <FolderOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                          <div className="min-w-0 flex-1">
-                            <div className="text-[10px] text-blue-700 font-semibold uppercase tracking-wide">
-                              Creative Set
-                            </div>
-                            <div className="text-xs font-semibold text-blue-900 truncate">
-                              {t.creativeSetTitle}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {locEntries.length > 0 && (
-                        <div>
-                          <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mb-1">
-                            Ad Location Types
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {locEntries.map(([k, v]) => (
-                              <span
-                                key={k}
-                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700"
-                              >
-                                {k} · {v}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {unitEntries.length > 0 && (
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
-                              Units by Type
-                            </div>
-                            <div className="text-[10px] font-semibold text-green-700">
-                              Est.{" "}
-                              {fmtPHP(
-                                unitEntries.reduce(
-                                  (s, [k, v]) => s + priceFor(k) * (v as number),
-                                  0,
-                                ),
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {unitEntries.map(([k, v]) => (
-                              <span
-                                key={k}
-                                className="text-[10px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 border border-green-100"
-                              >
-                                {k} · {v} · {fmtPHP(priceFor(k) * (v as number))}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                    </div>
-
-
-                    <Button
-                      onClick={() => launchFromTarget(t)}
-                      className="w-full mt-3 bg-green-600 hover:bg-green-500 text-white"
-                    >
-                      <Rocket className="w-4 h-4 mr-1" /> Launch Campaign
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
       </div>
     </div>
   );
 }
 
-import BrandApprovalGate from "@/components/brand-advertiser/BrandApprovalGate";
-
-export default function BrandAdvertiserInventoryGated() {
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <BrandApprovalGate>
-      <BrandAdvertiserInventory />
-    </BrandApprovalGate>
+    <div className="flex items-start justify-between gap-3">
+      <dt className="text-gray-500">{label}</dt>
+      <dd className="text-gray-900 text-right font-medium">{value}</dd>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <Card className="p-4 bg-gray-50 border-gray-200">
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-lg font-semibold text-gray-900 mt-1">{value}</p>
+    </Card>
+  );
+}
+
+function Field({
+  label, value, onChange, placeholder,
+}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  return (
+    <div>
+      <Label className="text-gray-900">{label}</Label>
+      <Input value={value || ""} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="mt-1 bg-white text-gray-900" />
+    </div>
+  );
+}
+
+function ReviewBlock({ title, onEdit, children }: { title: string; onEdit: () => void; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start justify-between gap-3 p-3 rounded-lg border border-gray-200 bg-white">
+      <div>
+        <p className="text-xs uppercase tracking-wide text-gray-400">{title}</p>
+        <p className="text-sm text-gray-900 mt-0.5">{children}</p>
+      </div>
+      <Button size="sm" variant="ghost" onClick={onEdit}>Edit</Button>
+    </div>
   );
 }

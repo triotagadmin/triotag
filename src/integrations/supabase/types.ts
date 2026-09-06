@@ -1307,73 +1307,109 @@ export type Database = {
       }
       brand_campaigns: {
         Row: {
+          audience: Json | null
           brand_advertiser_id: string
           budget: number
           campaign_name: string
+          campaign_ref: string | null
+          campaign_type: string | null
           countries: string[] | null
           created_at: string | null
           creative_format: string | null
+          creative_mode: string | null
+          creative_requirements: Json | null
           creative_set_id: string | null
+          draft_state: Json | null
           end_date: string | null
           environments: string[] | null
+          estimated_cost: number | null
           id: string
           location_count: number | null
           location_types: string[] | null
+          media_types: string[] | null
           notes: string | null
+          objective: string | null
+          objective_notes: string | null
           rejection_reason: string | null
           scope_name: string | null
           start_date: string | null
           status: string | null
+          submitted_at: string | null
           target_age_max: number | null
           target_age_min: number | null
           target_gender: string | null
           updated_at: string | null
+          wizard_step: number | null
         }
         Insert: {
+          audience?: Json | null
           brand_advertiser_id: string
-          budget: number
+          budget?: number
           campaign_name: string
+          campaign_ref?: string | null
+          campaign_type?: string | null
           countries?: string[] | null
           created_at?: string | null
           creative_format?: string | null
+          creative_mode?: string | null
+          creative_requirements?: Json | null
           creative_set_id?: string | null
+          draft_state?: Json | null
           end_date?: string | null
           environments?: string[] | null
+          estimated_cost?: number | null
           id?: string
           location_count?: number | null
           location_types?: string[] | null
+          media_types?: string[] | null
           notes?: string | null
+          objective?: string | null
+          objective_notes?: string | null
           rejection_reason?: string | null
           scope_name?: string | null
           start_date?: string | null
           status?: string | null
+          submitted_at?: string | null
           target_age_max?: number | null
           target_age_min?: number | null
           target_gender?: string | null
           updated_at?: string | null
+          wizard_step?: number | null
         }
         Update: {
+          audience?: Json | null
           brand_advertiser_id?: string
           budget?: number
           campaign_name?: string
+          campaign_ref?: string | null
+          campaign_type?: string | null
           countries?: string[] | null
           created_at?: string | null
           creative_format?: string | null
+          creative_mode?: string | null
+          creative_requirements?: Json | null
           creative_set_id?: string | null
+          draft_state?: Json | null
           end_date?: string | null
           environments?: string[] | null
+          estimated_cost?: number | null
           id?: string
           location_count?: number | null
           location_types?: string[] | null
+          media_types?: string[] | null
           notes?: string | null
+          objective?: string | null
+          objective_notes?: string | null
           rejection_reason?: string | null
           scope_name?: string | null
           start_date?: string | null
           status?: string | null
+          submitted_at?: string | null
           target_age_max?: number | null
           target_age_min?: number | null
           target_gender?: string | null
           updated_at?: string | null
+          wizard_step?: number | null
         }
         Relationships: [
           {
@@ -1581,22 +1617,31 @@ export type Database = {
       }
       campaign_ad_space_targets: {
         Row: {
+          ad_format: string | null
           ad_space_id: string
           campaign_id: string
           created_at: string
           id: string
+          quantity: number
+          unit_rate: number | null
         }
         Insert: {
+          ad_format?: string | null
           ad_space_id: string
           campaign_id: string
           created_at?: string
           id?: string
+          quantity?: number
+          unit_rate?: number | null
         }
         Update: {
+          ad_format?: string | null
           ad_space_id?: string
           campaign_id?: string
           created_at?: string
           id?: string
+          quantity?: number
+          unit_rate?: number | null
         }
         Relationships: [
           {

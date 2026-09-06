@@ -19,6 +19,8 @@ const STATUS_STYLES: Record<string, string> = {
   budget_limit: "bg-orange-100 text-orange-700 border-orange-200",
   expired: "bg-gray-100 text-gray-600 border-gray-200",
   pending_review: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  under_review: "bg-blue-100 text-blue-700 border-blue-200",
+  draft: "bg-gray-100 text-gray-600 border-gray-200",
 };
 
 function BrandAdvertiserCampaignsList() {
@@ -144,7 +146,9 @@ function BrandAdvertiserCampaignsList() {
                 <TableHead>Status</TableHead>
                 <TableHead>Campaign</TableHead>
                 <TableHead>Scope</TableHead>
+                <TableHead>Media</TableHead>
                 <TableHead>Locations</TableHead>
+                <TableHead>Dates</TableHead>
                 <TableHead>Creative</TableHead>
                 <TableHead>Budget</TableHead>
                 <TableHead>Spend</TableHead>
@@ -154,9 +158,9 @@ function BrandAdvertiserCampaignsList() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={10} className="text-center text-gray-500 py-8">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={12} className="text-center text-gray-500 py-8">Loading...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={10} className="text-center text-gray-500 py-8">No campaigns match filters</TableCell></TableRow>
+                <TableRow><TableCell colSpan={12} className="text-center text-gray-500 py-8">No campaigns match filters</TableCell></TableRow>
               ) : (
                 filtered.map((c) => {
                   const status = c.status || "pending_review";
@@ -166,7 +170,7 @@ function BrandAdvertiserCampaignsList() {
                     : "—";
                   return (
                     <TableRow key={c.id}>
-                      <TableCell className="font-mono text-xs">{String(c.id).slice(0, 8)}</TableCell>
+                      <TableCell className="font-mono text-xs">{c.campaign_ref || String(c.id).slice(0, 8)}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={STATUS_STYLES[status] || STATUS_STYLES.expired}>
                           {String(status).replace("_", " ")}
@@ -174,7 +178,9 @@ function BrandAdvertiserCampaignsList() {
                       </TableCell>
                       <TableCell className="font-medium text-blue-600">{c.campaign_name}</TableCell>
                       <TableCell className="text-sm text-gray-600">{c.scope_name || "—"}</TableCell>
+                      <TableCell className="text-sm text-gray-600">{((c.media_types || []) as string[]).join(", ") || "—"}</TableCell>
                       <TableCell className="text-sm text-gray-600">{locSummary}</TableCell>
+                      <TableCell className="text-sm text-gray-600">{c.start_date && c.end_date ? `${c.start_date} – ${c.end_date}` : "—"}</TableCell>
                       <TableCell className="text-sm text-gray-600">{c.creative_format || "—"}</TableCell>
                       <TableCell>₱{Number(c.budget || 0).toLocaleString()}</TableCell>
                       <TableCell>₱0</TableCell>
@@ -194,7 +200,7 @@ function BrandAdvertiserCampaignsList() {
               )}
               {filtered.length > 0 && (
                 <TableRow className="bg-gray-50 font-semibold">
-                  <TableCell colSpan={6}>Totals</TableCell>
+                  <TableCell colSpan={8}>Totals</TableCell>
                   <TableCell>₱{totalBudget.toLocaleString()}</TableCell>
                   <TableCell>₱0</TableCell>
                   <TableCell>₱{totalBudget.toLocaleString()}</TableCell>
