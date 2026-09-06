@@ -305,7 +305,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (!ready) return <>{children}</>;
-  const showSidebar = role && role !== "brand_advertiser";
+  const showSidebar = !!role && !!ROLE_SIDEBAR_ITEMS[role]?.length;
   return (
     <>
       {showSidebar && <AppSidebar role={role} campaignPillar={pillar} />}
