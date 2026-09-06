@@ -451,10 +451,12 @@ export default function AdvertiserExplore() {
             radiusMeters,
             selections: enriched,
             preferredStartDate: form.preferredStartDate,
+            preferredEndDate: form.preferredEndDate || null,
             notes: form.notes || null,
             requesterEmail: emailTrimmed,
           },
         });
+
       } catch (mailErr) {
         console.error("[AdvertiserExplore] admin email failed", mailErr);
       }
