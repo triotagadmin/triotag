@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
+import { resolveAccount } from "@/lib/account";
 
 type Item = { to: string; label: string; icon: any; children?: Item[] };
 
