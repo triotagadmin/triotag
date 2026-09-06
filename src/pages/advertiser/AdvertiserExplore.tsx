@@ -460,13 +460,8 @@ export default function AdvertiserExplore() {
     }
   }
 
-  const tierColor = estimate.tier === "Domination"
-    ? "bg-purple-100 text-purple-700 border-purple-300"
-    : estimate.tier === "Growth"
-    ? "bg-blue-100 text-blue-700 border-blue-300"
-    : "bg-green-100 text-green-700 border-green-300";
-
   function renderVariantRow(variant: FormatVariant) {
+
     const qty = selections[variant.id] || 0;
     const selected = qty > 0;
     return (
@@ -493,7 +488,6 @@ export default function AdvertiserExplore() {
               </button>
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-0.5">
-              <span className="text-green-600 font-medium text-xs">₱{variant.price.toLocaleString()} / unit</span>
               {variant.billingType === "monthly" ? (
                 <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2 py-0.5">
                   <RefreshCw className="w-3 h-3" />
@@ -506,6 +500,7 @@ export default function AdvertiserExplore() {
                 </span>
               )}
             </div>
+
           </div>
           <div className="flex items-center gap-2 shrink-0 min-w-[140px]">
             <input
