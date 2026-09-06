@@ -27,6 +27,7 @@ const NAV: { group: string; items: { to: string; label: string; icon: React.Elem
       { to: "/webmaster/tenants", label: "Tenants", icon: Building2, end: true },
       { to: "/webmaster/tenants/new", label: "Create Tenant", icon: PlusCircle },
       { to: "/webmaster/super-admins", label: "Super Admins", icon: ShieldCheck },
+      { to: "/webmaster/account-approvals", label: "Account Approvals", icon: BadgeCheck },
       { to: "/webmaster/agents", label: "Agent Accounts", icon: Users },
     ],
   },
