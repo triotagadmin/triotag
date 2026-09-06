@@ -210,8 +210,10 @@ function ExploreCampaignRequests() {
 
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <Detail label="Campaign Type" value={selected.campaign_type || "—"} />
-                <Detail label="Estimated Price" value={`₱${Number(selected.estimated_price || 0).toLocaleString()}`} />
+                <Detail label="Preferred Start" value={selected.preferred_start_date || "—"} />
+                <Detail label="Preferred End" value={selected.preferred_end_date || "—"} />
                 <Detail label="Map Location" value={
+
                   selected.center_lat != null && selected.center_lng != null ? (
                     <a
                       className="text-green-700 underline"
