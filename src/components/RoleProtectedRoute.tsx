@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveAccount, dashboardForRole, type AccountRole } from "@/lib/account";
 
-type Role = "retailer" | "agent" | "print_partner" | "talent" | "admin" | "brand_advertiser";
+type Role = AccountRole;
 
 interface Props {
   children: React.ReactNode;
