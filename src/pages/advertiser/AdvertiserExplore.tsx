@@ -342,8 +342,36 @@ export default function AdvertiserExplore() {
   const canAdvanceStep1 =
     selectedPlaceCount >= 1 && selectedPlaceCount <= MAX_SELECTED_LOCATIONS;
 
+  const handleContinueFromStep2 = () => {
+    if (!selectedLocationAddress) {
+      toast({
+        title: "Location required",
+        description: "Search and select a campaign location to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!withinServiceArea) {
+      toast({
+        title: "Outside service area",
+        description: `TrioTag currently only operates in ${getActiveAreaNamesText()}. Please choose a location within our service area.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (radiusMeters < 250) {
+      toast({
+        title: "Minimum coverage required",
+        description: "The minimum campaign radius is 250 m (5% coverage).",
+        variant: "destructive",
+      });
+      return;
+    }
+    setWizardStep(3);
+  };
 
   async function handleSubmitRequest() {
+
     if (!selectedLocationAddress) {
       toast({ title: "Location required", description: "Search and select a location for your campaign before proceeding.", variant: "destructive" });
       return;
