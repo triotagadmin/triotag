@@ -150,6 +150,12 @@ import BrandAdvertiserProductCampaigns from "./pages/brand-advertiser/BrandAdver
 import BrandAdvertiserServiceCampaigns from "./pages/brand-advertiser/BrandAdvertiserServiceCampaigns";
 import BrandAdvertiserEventCampaigns from "./pages/brand-advertiser/BrandAdvertiserEventCampaigns";
 import BrandApprovalGate from "./components/brand-advertiser/BrandApprovalGate";
+import BrandAdvertiserDiscover from "./pages/brand-advertiser/BrandAdvertiserDiscover";
+import BrandAdvertiserInventoryDetail from "./pages/brand-advertiser/BrandAdvertiserInventoryDetail";
+import BrandAdvertiserSaved from "./pages/brand-advertiser/BrandAdvertiserSaved";
+import BrandAdvertiserProposals from "./pages/brand-advertiser/BrandAdvertiserProposals";
+import BrandAdvertiserBookings from "./pages/brand-advertiser/BrandAdvertiserBookings";
+import BrandAdvertiserTransactions from "./pages/brand-advertiser/BrandAdvertiserTransactions";
 
 import EcommerceSeoMicrosites from "./pages/EcommerceSeoMicrosites";
 import VerifiedVenues from "./pages/agent/VerifiedVenues";
@@ -411,6 +417,12 @@ const App = () => (
           <Route path="/brand-advertiser/products" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserProductCampaigns /></BrandApprovalGate></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/services" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserServiceCampaigns /></BrandApprovalGate></RoleProtectedRoute>} />
           <Route path="/brand-advertiser/events" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserEventCampaigns /></BrandApprovalGate></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/discover" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserDiscover /></BrandApprovalGate></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/inventory/:id" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserInventoryDetail /></BrandApprovalGate></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/saved" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserSaved /></BrandApprovalGate></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/proposals" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserProposals /></BrandApprovalGate></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/bookings" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserBookings /></BrandApprovalGate></RoleProtectedRoute>} />
+          <Route path="/brand-advertiser/transactions" element={<RoleProtectedRoute requireAuth allowedRoles={["brand_advertiser"]}><BrandApprovalGate><BrandAdvertiserTransactions /></BrandApprovalGate></RoleProtectedRoute>} />
 
           <Route path="/services/ecommerce-seo" element={<EcommerceSeoMicrosites />} />
           <Route path="/services/google-ads" element={<Navigate to="/services/ecommerce-seo" replace />} />
