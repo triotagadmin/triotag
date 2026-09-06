@@ -193,6 +193,7 @@ const App = () => (
             <Route path="/webmaster/tenants/new" element={<WebmasterTenantNew />} />
             <Route path="/webmaster/tenants/:tenantId" element={<WebmasterTenantDetail />} />
             <Route path="/webmaster/super-admins" element={<WebmasterSuperAdmins />} />
+            <Route path="/webmaster/account-approvals" element={<AdminBrandAdvertiserApprovals />} />
             <Route path="/webmaster/agents" element={<WebmasterAgents />} />
             <Route path="/webmaster/media-owners" element={<WebmasterSupply mode="media-owners" />} />
             <Route path="/webmaster/locations" element={<WebmasterSupply mode="locations" />} />
@@ -346,7 +347,7 @@ const App = () => (
               <AdminMediaPlans />
             </ProtectedAdminRoute>
           } />
-          <Route path="/admin/brand-advertiser-approvals" element={<AdminBrandAdvertiserApprovals />} />
+          <Route path="/admin/brand-advertiser-approvals" element={<Navigate to="/webmaster/account-approvals" replace />} />
           <Route path="/admin/brand-campaigns" element={
             <ProtectedAdminRoute>
               <AdminBrandCampaigns />
