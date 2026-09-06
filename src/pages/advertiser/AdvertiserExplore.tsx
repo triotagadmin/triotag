@@ -407,7 +407,7 @@ export default function AdvertiserExplore() {
       const { data: { user } } = await supabase.auth.getUser();
       const enriched = activeSelections.map((s) => {
         const v = ALL_VARIANTS.find((vv) => vv.id === s.variantId);
-        return { ...s, label: v?.label, price: v?.price, category: v?.category, specs: v?.specs };
+        return { ...s, label: v?.label, category: v?.category, specs: v?.specs };
       });
       const campaignType = [...new Set(enriched.map((s) => s.category).filter(Boolean))].join(", ");
 
@@ -423,7 +423,6 @@ export default function AdvertiserExplore() {
           radius_meters: radiusMeters,
           venue_count: nearbyPlaces.length,
           selections: enriched,
-          estimated_price: estimate.totalEstimate,
           preferred_start_date: form.preferredStartDate,
           notes: form.notes || null,
           status: "pending_review",
@@ -442,7 +441,6 @@ export default function AdvertiserExplore() {
             centerLng: center.lng,
             radiusMeters,
             selections: enriched,
-            estimatedPrice: estimate.totalEstimate,
             preferredStartDate: form.preferredStartDate,
             notes: form.notes || null,
             requesterEmail: emailTrimmed,
@@ -451,6 +449,7 @@ export default function AdvertiserExplore() {
       } catch (mailErr) {
         console.error("[AdvertiserExplore] admin email failed", mailErr);
       }
+
 
       setSubmitted(true);
     } catch (e: any) {
