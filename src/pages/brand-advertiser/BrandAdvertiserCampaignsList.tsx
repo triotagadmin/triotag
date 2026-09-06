@@ -166,7 +166,7 @@ function BrandAdvertiserCampaignsList() {
                     : "—";
                   return (
                     <TableRow key={c.id}>
-                      <TableCell className="font-mono text-xs">{String(c.id).slice(0, 8)}</TableCell>
+                      <TableCell className="font-mono text-xs">{c.campaign_ref || String(c.id).slice(0, 8)}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={STATUS_STYLES[status] || STATUS_STYLES.expired}>
                           {String(status).replace("_", " ")}
