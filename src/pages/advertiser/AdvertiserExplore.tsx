@@ -341,20 +341,12 @@ export default function AdvertiserExplore() {
   });
 
 
-  // Continue activates as soon as the user has picked a campaign location
-  // in the location finder. Service-area and radius checks run on click.
-  const canAdvanceStep1 = !!selectedLocationAddress;
+  // Continue is always available — the radius alone is enough to proceed.
+  // Location search is optional; service-area and radius checks run on click.
+  const canAdvanceStep1 = true;
 
   const handleContinueFromStep2 = () => {
-    if (!selectedLocationAddress) {
-      toast({
-        title: "Location required",
-        description: "Search and select a campaign location to continue.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (!withinServiceArea) {
+    if (selectedLocationAddress && !withinServiceArea) {
       toast({
         title: "Outside service area",
         description: `TrioTag currently only operates in ${getActiveAreaNamesText()}. Please choose a location within our service area.`,
