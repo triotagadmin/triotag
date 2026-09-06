@@ -340,8 +340,8 @@ export default function AdvertiserExplore() {
   });
 
   const canAdvanceStep1 =
-    !!selectedLocationAddress && withinServiceArea && radiusMeters >= 250 &&
     selectedPlaceCount >= 1 && selectedPlaceCount <= MAX_SELECTED_LOCATIONS;
+
 
   async function handleSubmitRequest() {
     if (!selectedLocationAddress) {
