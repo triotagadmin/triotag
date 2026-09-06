@@ -51,10 +51,10 @@ const AuthRoleSelect = () => {
                 <div className="w-10 h-10 rounded-lg bg-green-500/10 border border-green-500/30 flex items-center justify-center">
                   <Users className="w-5 h-5 text-green-400" />
                 </div>
-                <span className="text-lg font-semibold text-white">Agency</span>
+                <span className="text-lg font-semibold text-white">Publisher</span>
               </div>
               <p className="text-sm text-zinc-400 leading-relaxed">
-                I am an Agency looking for partnership
+                I am an Publisher looking for partnership
               </p>
             </Button>
           </CardContent>
