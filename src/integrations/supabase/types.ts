@@ -2774,12 +2774,13 @@ export type Database = {
           center_lng: number
           created_at: string
           dooh_units: number | null
-          estimated_price: number
+          estimated_price: number | null
           id: string
           notes: string | null
           ooh_units: number | null
           paid_at: string | null
           paymongo_checkout_id: string | null
+          preferred_end_date: string | null
           preferred_start_date: string | null
           radius_meters: number
           requester_email: string | null
@@ -2799,12 +2800,13 @@ export type Database = {
           center_lng: number
           created_at?: string
           dooh_units?: number | null
-          estimated_price: number
+          estimated_price?: number | null
           id?: string
           notes?: string | null
           ooh_units?: number | null
           paid_at?: string | null
           paymongo_checkout_id?: string | null
+          preferred_end_date?: string | null
           preferred_start_date?: string | null
           radius_meters: number
           requester_email?: string | null
@@ -2824,12 +2826,13 @@ export type Database = {
           center_lng?: number
           created_at?: string
           dooh_units?: number | null
-          estimated_price?: number
+          estimated_price?: number | null
           id?: string
           notes?: string | null
           ooh_units?: number | null
           paid_at?: string | null
           paymongo_checkout_id?: string | null
+          preferred_end_date?: string | null
           preferred_start_date?: string | null
           radius_meters?: number
           requester_email?: string | null

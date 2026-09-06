@@ -335,9 +335,11 @@ export default function AdvertiserExplore() {
   const [form, setForm] = useState({
     campaignName: "",
     preferredStartDate: "",
+    preferredEndDate: "",
     notes: "",
     email: "",
   });
+
 
   const canAdvanceStep1 =
     selectedPlaceCount >= 1 && selectedPlaceCount <= MAX_SELECTED_LOCATIONS;
@@ -397,6 +399,11 @@ export default function AdvertiserExplore() {
       toast({ title: "Start date too soon", description: `Campaigns require at least 1 month lead time. Earliest available date is ${format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}.`, variant: "destructive" });
       return;
     }
+    if (form.preferredEndDate && isBefore(new Date(form.preferredEndDate), new Date(form.preferredStartDate))) {
+      toast({ title: "End date invalid", description: "Campaign end date must be on or after the start date.", variant: "destructive" });
+      return;
+    }
+
     if (activeSelections.length === 0) {
       toast({ title: "Add at least one unit", description: "Select at least one ad format and quantity.", variant: "destructive" });
       return;
@@ -424,7 +431,9 @@ export default function AdvertiserExplore() {
           venue_count: nearbyPlaces.length,
           selections: enriched,
           preferred_start_date: form.preferredStartDate,
+          preferred_end_date: form.preferredEndDate || null,
           notes: form.notes || null,
+
           status: "pending_review",
           requester_email: emailTrimmed,
         });
@@ -442,10 +451,12 @@ export default function AdvertiserExplore() {
             radiusMeters,
             selections: enriched,
             preferredStartDate: form.preferredStartDate,
+            preferredEndDate: form.preferredEndDate || null,
             notes: form.notes || null,
             requesterEmail: emailTrimmed,
           },
         });
+
       } catch (mailErr) {
         console.error("[AdvertiserExplore] admin email failed", mailErr);
       }
@@ -979,39 +990,78 @@ export default function AdvertiserExplore() {
                       />
                     </div>
 
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700">Preferred Start Date *</label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={`w-full justify-start text-left font-normal ${!form.preferredStartDate ? "text-muted-foreground" : ""}`}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {form.preferredStartDate
-                              ? format(new Date(form.preferredStartDate), "PPP")
-                              : "Pick your campaign start date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={form.preferredStartDate ? new Date(form.preferredStartDate) : undefined}
-                            onSelect={(date) => {
-                              if (date) setForm({ ...form, preferredStartDate: format(date, "yyyy-MM-dd") });
-                            }}
-                            disabled={(date) => isBefore(date, MIN_LAUNCH_DATE)}
-                            defaultMonth={MIN_LAUNCH_DATE}
-                            initialFocus
-                            className="pointer-events-auto"
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <p className="text-[11px] text-gray-500 mt-1.5 inline-flex items-start gap-1">
-                        <Clock className="w-3 h-3 mt-0.5 shrink-0" />
-                        <span>Earliest available start date: <strong className="text-gray-700">{format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}</strong> — TrioTag requires 1 week or up to 1 month lead time to prepare your campaign.</span>
-                      </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-semibold text-gray-700">Preferred Start Date *</label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={`w-full justify-start text-left font-normal ${
+                                form.preferredStartDate ? "text-gray-900" : "text-gray-500"
+                              }`}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4 text-gray-600" />
+                              {form.preferredStartDate
+                                ? format(new Date(form.preferredStartDate), "PPP")
+                                : "Pick your campaign start date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={form.preferredStartDate ? new Date(form.preferredStartDate) : undefined}
+                              onSelect={(date) => {
+                                if (date) setForm({ ...form, preferredStartDate: format(date, "yyyy-MM-dd") });
+                              }}
+                              disabled={(date) => isBefore(date, MIN_LAUNCH_DATE)}
+                              defaultMonth={MIN_LAUNCH_DATE}
+                              initialFocus
+                              className="pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-gray-700">Preferred End Date</label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={`w-full justify-start text-left font-normal ${
+                                form.preferredEndDate ? "text-gray-900" : "text-gray-500"
+                              }`}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4 text-gray-600" />
+                              {form.preferredEndDate
+                                ? format(new Date(form.preferredEndDate), "PPP")
+                                : "Pick your campaign end date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={form.preferredEndDate ? new Date(form.preferredEndDate) : undefined}
+                              onSelect={(date) => {
+                                if (date) setForm({ ...form, preferredEndDate: format(date, "yyyy-MM-dd") });
+                              }}
+                              disabled={(date) =>
+                                isBefore(date, MIN_LAUNCH_DATE) ||
+                                (form.preferredStartDate ? isBefore(date, new Date(form.preferredStartDate)) : false)
+                              }
+                              defaultMonth={form.preferredStartDate ? new Date(form.preferredStartDate) : MIN_LAUNCH_DATE}
+                              initialFocus
+                              className="pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                     </div>
+                    <p className="text-[11px] text-gray-500 mt-1.5 inline-flex items-start gap-1">
+                      <Clock className="w-3 h-3 mt-0.5 shrink-0" />
+                      <span>Earliest available start date: <strong className="text-gray-700">{format(MIN_LAUNCH_DATE, "MMMM d, yyyy")}</strong> — TrioTag requires 1 week or up to 1 month lead time to prepare your campaign.</span>
+                    </p>
+
 
                     <div>
                       <label className="text-xs font-semibold text-gray-700">Email *</label>
@@ -1091,7 +1141,7 @@ export default function AdvertiserExplore() {
                       setCampaignPillar(null);
                       setChosenFormat(null);
                       setSelections({});
-                      setForm({ campaignName: "", preferredStartDate: "", notes: "", email: "" });
+                      setForm({ campaignName: "", preferredStartDate: "", preferredEndDate: "", notes: "", email: "" });
                     }}
                   >
                     Start a New Request

@@ -189,7 +189,8 @@ export default function AdminMediaPlans() {
                   <TableRow>
                     <TableHead>Campaign</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Estimated</TableHead>
+                    <TableHead>Campaign Dates</TableHead>
+
                     <TableHead>Requester</TableHead>
                     <TableHead>Start Date</TableHead>
                     <TableHead>Submitted</TableHead>
@@ -213,9 +214,12 @@ export default function AdminMediaPlans() {
                           ))}
                         </div>
                       </TableCell>
-                      <TableCell>₱{Number(r.estimated_price || 0).toLocaleString()}</TableCell>
+                      <TableCell className="text-xs">
+                        {r.preferred_start_date || "—"}
+                        {r.preferred_end_date ? ` → ${r.preferred_end_date}` : ""}
+                      </TableCell>
                       <TableCell className="text-xs">{r.requester_email || "—"}</TableCell>
-                      <TableCell className="text-xs">{r.preferred_start_date || "—"}</TableCell>
+
                       <TableCell className="text-xs">{r.created_at ? new Date(r.created_at).toLocaleDateString("en-PH") : "—"}</TableCell>
                       <TableCell className="text-xs">
                         {r.paid_at ? new Date(r.paid_at).toLocaleDateString("en-PH") : <span className="text-gray-400">Unpaid</span>}
@@ -246,8 +250,9 @@ export default function AdminMediaPlans() {
 
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <Detail label="Requester Email" value={selected.requester_email || "—"} />
-                <Detail label="Estimated Price" value={`₱${Number(selected.estimated_price || 0).toLocaleString()}`} />
                 <Detail label="Preferred Start" value={selected.preferred_start_date || "—"} />
+                <Detail label="Preferred End" value={selected.preferred_end_date || "—"} />
+
                 <Detail label="Radius" value={selected.radius_meters ? `${selected.radius_meters} m` : "—"} />
                 <Detail label="Venue Count" value={selected.venue_count ?? "—"} />
                 <Detail label="Submitted" value={selected.created_at ? new Date(selected.created_at).toLocaleString("en-PH") : "—"} />
@@ -286,9 +291,7 @@ export default function AdminMediaPlans() {
                       <div key={i} className="flex justify-between items-start p-3 bg-gray-50 rounded border">
                         <div className="flex-1">
                           <p className="font-medium text-sm">{s.label || s.variantId}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {s.category} · ₱{Number(s.price || 0).toLocaleString()} / unit
-                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">{s.category}</p>
                           {s.specs && typeof s.specs === "object" && (
                             <div className="text-[11px] text-gray-500 mt-1 space-x-2">
                               {Object.entries(s.specs).map(([k, v]: any) => (
@@ -299,16 +302,14 @@ export default function AdminMediaPlans() {
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-sm">× {s.quantity}</p>
-                          <p className="text-xs text-gray-600">
-                            ₱{(Number(s.price || 0) * Number(s.quantity || 0)).toLocaleString()}
-                          </p>
                         </div>
                       </div>
                     ))}
                     <div className="flex justify-between items-center px-3 py-2 bg-green-50 border border-green-200 rounded font-semibold text-sm">
-                      <span>Total Estimate</span>
-                      <span>₱{Number(selected.estimated_price || 0).toLocaleString()}</span>
+                      <span>Total Units</span>
+                      <span>{selected.selections.reduce((sum: number, s: any) => sum + Number(s.quantity || 0), 0)}</span>
                     </div>
+
                   </div>
                 </div>
               )}

@@ -84,8 +84,9 @@ type MediaPlanRequest = {
   center_lng: number | null;
   radius_meters: number | null;
   selections: any;
-  estimated_price: number | null;
   preferred_start_date: string | null;
+  preferred_end_date: string | null;
+
   notes: string | null;
   status: string | null;
   created_at: string | null;
@@ -150,7 +151,8 @@ function ExploreCampaignRequests() {
                   <TableHead>Requester</TableHead>
                   <TableHead>Location / Radius</TableHead>
                   <TableHead>Formats</TableHead>
-                  <TableHead>Estimate</TableHead>
+                  <TableHead>Campaign Dates</TableHead>
+
                   <TableHead>Status</TableHead>
                   <TableHead>Submitted</TableHead>
                 </TableRow>
@@ -177,7 +179,11 @@ function ExploreCampaignRequests() {
                         {formats(r.selections).length === 0 && <span className="text-xs text-gray-400">—</span>}
                       </div>
                     </TableCell>
-                    <TableCell>₱{Number(r.estimated_price || 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-xs">
+                      {r.preferred_start_date || "—"}
+                      {r.preferred_end_date ? ` → ${r.preferred_end_date}` : ""}
+                    </TableCell>
+
                     <TableCell><StatusBadge status={r.status || ""} /></TableCell>
                     <TableCell className="text-xs">
                       {r.created_at ? new Date(r.created_at).toLocaleDateString("en-PH") : "—"}
@@ -204,8 +210,10 @@ function ExploreCampaignRequests() {
 
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <Detail label="Campaign Type" value={selected.campaign_type || "—"} />
-                <Detail label="Estimated Price" value={`₱${Number(selected.estimated_price || 0).toLocaleString()}`} />
+                <Detail label="Preferred Start" value={selected.preferred_start_date || "—"} />
+                <Detail label="Preferred End" value={selected.preferred_end_date || "—"} />
                 <Detail label="Map Location" value={
+
                   selected.center_lat != null && selected.center_lng != null ? (
                     <a
                       className="text-green-700 underline"
