@@ -175,7 +175,7 @@ export default function AdminMediaPlans() {
           </TabsList>
         </Tabs>
 
-        <Card className="bg-white">
+        <Card className="bg-white text-gray-900">
           <CardContent className="p-0">
             {loading ? (
               <div className="p-6 space-y-3">
@@ -203,7 +203,7 @@ export default function AdminMediaPlans() {
                   {filtered.map((r) => (
                     <TableRow
                       key={r.id}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-gray-50"
                       onClick={() => setSelected(r)}
                     >
                       <TableCell className="font-medium">{r.campaign_name}</TableCell>
@@ -226,7 +226,12 @@ export default function AdminMediaPlans() {
                       </TableCell>
                       <TableCell><StatusBadge status={r.status} /></TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <ActionButtons request={r} onUpdate={(s) => updateStatus(r.id, s, r)} working={working} />
+                        <div className="flex gap-1 justify-end items-center">
+                          <Button size="sm" variant="outline" className="h-7 text-xs text-gray-700" onClick={() => setSelected(r)}>
+                            View
+                          </Button>
+                          <ActionButtons request={r} onUpdate={(s) => updateStatus(r.id, s, r)} working={working} />
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
