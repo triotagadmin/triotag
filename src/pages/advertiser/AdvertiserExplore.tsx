@@ -341,8 +341,9 @@ export default function AdvertiserExplore() {
   });
 
 
-  const canAdvanceStep1 =
-    selectedPlaceCount >= 1 && selectedPlaceCount <= MAX_SELECTED_LOCATIONS;
+  // Continue activates as soon as the user has picked a campaign location
+  // in the location finder. Service-area and radius checks run on click.
+  const canAdvanceStep1 = !!selectedLocationAddress;
 
   const handleContinueFromStep2 = () => {
     if (!selectedLocationAddress) {
