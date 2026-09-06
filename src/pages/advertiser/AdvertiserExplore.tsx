@@ -340,10 +340,38 @@ export default function AdvertiserExplore() {
   });
 
   const canAdvanceStep1 =
-    !!selectedLocationAddress && withinServiceArea && radiusMeters >= 250 &&
     selectedPlaceCount >= 1 && selectedPlaceCount <= MAX_SELECTED_LOCATIONS;
 
+  const handleContinueFromStep2 = () => {
+    if (!selectedLocationAddress) {
+      toast({
+        title: "Location required",
+        description: "Search and select a campaign location to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!withinServiceArea) {
+      toast({
+        title: "Outside service area",
+        description: `TrioTag currently only operates in ${getActiveAreaNamesText()}. Please choose a location within our service area.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (radiusMeters < 250) {
+      toast({
+        title: "Minimum coverage required",
+        description: "The minimum campaign radius is 250 m (5% coverage).",
+        variant: "destructive",
+      });
+      return;
+    }
+    setWizardStep(3);
+  };
+
   async function handleSubmitRequest() {
+
     if (!selectedLocationAddress) {
       toast({ title: "Location required", description: "Search and select a location for your campaign before proceeding.", variant: "destructive" });
       return;
@@ -811,7 +839,7 @@ export default function AdvertiserExplore() {
                   </div>
 
 
-                  {!canAdvanceStep1 && (
+                  {(!selectedLocationAddress || !withinServiceArea || radiusMeters < 250 || selectedPlaceCount < 1) && (
                     <div className="flex items-start gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
                       <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                       <span>
@@ -826,14 +854,16 @@ export default function AdvertiserExplore() {
                     </div>
                   )}
 
+
                   <div className="flex justify-end">
                     <Button
-                      onClick={() => setWizardStep(3)}
+                      onClick={handleContinueFromStep2}
                       disabled={!canAdvanceStep1}
                       className="bg-green-600 hover:bg-green-500 text-white"
                     >
                       Continue <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
+
                   </div>
                 </div>
               )}
