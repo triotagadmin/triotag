@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND_NAME } from "@/lib/brand";
+import { resolveAccount } from "@/lib/account";
 
 type Item = { to: string; label: string; icon: any; children?: Item[] };
 
@@ -61,6 +62,18 @@ const ROLE_SIDEBAR_ITEMS: Record<string, Item[]> = {
     { to: "/messages", label: "Messages", icon: MessageSquare },
     { to: "/notifications", label: "Notifications", icon: Bell },
   ],
+  brand_advertiser: [
+    { to: "/brand-advertiser/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/brand-advertiser/discover", label: "Discover Inventory", icon: Compass },
+    { to: "/brand-advertiser/inventory", label: "Launch Campaign", icon: Target },
+    { to: "/brand-advertiser/saved", label: "Saved Inventory", icon: Heart },
+    { to: "/brand-advertiser/campaigns", label: "Campaigns", icon: Megaphone },
+    { to: "/brand-advertiser/proposals", label: "Proposals", icon: ClipboardList },
+    { to: "/brand-advertiser/bookings", label: "Bookings", icon: CalendarCheck },
+    { to: "/brand-advertiser/transactions", label: "Transactions", icon: Receipt },
+    { to: "/brand-advertiser/reports", label: "Campaign Reports", icon: BarChart3 },
+    { to: "/notifications", label: "Notifications", icon: Bell },
+  ],
 };
 
 const ROLE_SETTINGS_PATH: Record<string, string> = {
@@ -69,6 +82,7 @@ const ROLE_SETTINGS_PATH: Record<string, string> = {
   print_partner: "/print-partner/settings",
   talent: "/talent-profile",
   admin: "/admin/dashboard",
+  brand_advertiser: "/brand-advertiser/settings",
 };
 
 const PILLAR_ITEM: Record<string, Item> = {
@@ -270,11 +284,11 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
     const load = async (session: any) => {
       const userId = session?.user?.id;
       if (!userId) { setRole(null); setPillar(null); setReady(true); return; }
-      const [{ data }, { data: brandProfile }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
+      const [account, { data: brandProfile }] = await Promise.all([
+        resolveAccount(),
         supabase.from("brand_advertiser_profiles").select("campaign_pillar").eq("user_id", userId).maybeSingle(),
       ]);
-      const resolved = (data?.role as string) || null;
+      const resolved = (account.role as string) || null;
       setRole(resolved);
       setPillar(((brandProfile as any)?.campaign_pillar as string) || null);
       setReady(true);

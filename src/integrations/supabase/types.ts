@@ -6243,6 +6243,14 @@ export type Database = {
           read_ct: number
         }[]
       }
+      resolve_my_account: {
+        Args: never
+        Returns: {
+          brand_profile_id: string
+          needs_manual_review: boolean
+          role: string
+        }[]
+      }
       search_nearby_listings: {
         Args: { radius_km?: number; user_lat: number; user_lng: number }
         Returns: {

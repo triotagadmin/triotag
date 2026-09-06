@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveAccount, dashboardForRole, type AccountRole } from "@/lib/account";
 
-type Role = "retailer" | "agent" | "print_partner" | "talent" | "admin" | "brand_advertiser";
+type Role = AccountRole;
 
 interface Props {
   children: React.ReactNode;
@@ -18,17 +19,8 @@ const PageLoader = () => (
   </div>
 );
 
-export const getDashboardByRole = (role: Role | null | undefined): string => {
-  switch (role) {
-    case "admin": return "/admin/dashboard";
-    case "retailer": return "/retailer-dashboard";
-    case "agent": return "/venue-publishers";
-    case "print_partner": return "/print-partner/dashboard";
-    case "talent": return "/talent-dashboard";
-    case "brand_advertiser": return "/brand-advertiser/dashboard";
-    default: return "/";
-  }
-};
+export const getDashboardByRole = (role: Role | null | undefined): string =>
+  dashboardForRole(role ?? null);
 
 export const RoleProtectedRoute = ({ children, allowedRoles, requireAuth = true }: Props) => {
   const location = useLocation();
@@ -39,28 +31,20 @@ export const RoleProtectedRoute = ({ children, allowedRoles, requireAuth = true 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      // getUser() re-validates the restored session with the auth server.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
         if (!cancelled) setState({ loading: false, loggedIn: false, role: null, error: false });
         return;
       }
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-      if (error) {
-        console.error("RoleProtectedRoute: failed to load user role", error);
-        if (!cancelled) setState({ loading: false, loggedIn: true, role: null, error: true });
-        return;
-      }
-      const role = (data?.role as Role | undefined) ?? null;
+      const account = await resolveAccount();
+      const role = account.role;
       // Agents lose access the moment their Super Admin suspends or removes them.
       if (role === "agent") {
         const { data: membership } = await supabase
           .from("tenant_members")
           .select("status")
-          .eq("user_id", session.user.id)
+          .eq("user_id", user.id)
           .maybeSingle();
         if (membership && membership.status !== "active") {
           if (!cancelled) setState({ loading: false, loggedIn: true, role: null, error: false });

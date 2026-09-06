@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
+import { resolveAccount } from "@/lib/account";
 
 // Self-serve signup only creates Brand Advertiser accounts.
 const SIGNUP_USER_TYPE = "brand_advertiser";
@@ -25,172 +26,75 @@ const Auth = () => {
   })();
   const goAfterAuth = (fallback: string) => navigate(redirectTo || fallback);
 
-  // Handle post-OAuth redirect: detect session, create profile if needed, route to dashboard
+  // Handle post-OAuth redirect: the database (not the browser) decides who this user is.
   useEffect(() => {
     const handleOAuthRedirect = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-      // Read account_type from URL params first, fallback to localStorage
+      // Signup hints are only used for messaging / first-time profile creation.
       const urlParams = new URLSearchParams(window.location.search);
       const urlAccountType = urlParams.get("account_type");
       const storedUserType = urlAccountType || localStorage.getItem("google_signup_user_type");
-
-      if (!storedUserType) {
-        // Already logged in, no fresh OAuth flow — route to their dashboard
-        const { data: roleRow, error: roleRowError } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-        if (roleRowError) {
-          console.error("Failed to load user role:", roleRowError);
-          toast({
-            title: "Couldn't load your account",
-            description: roleRowError.message,
-            variant: "destructive",
-          });
-          return;
-        }
-        if (roleRow?.role) routeByRole(roleRow.role);
-        return;
-      }
-
       localStorage.removeItem("google_signup_user_type");
-      // Clean up URL params
-      if (urlAccountType) {
-        window.history.replaceState({}, "", window.location.pathname);
-      }
       const intent = localStorage.getItem("google_auth_intent");
       localStorage.removeItem("google_auth_intent");
+      if (urlAccountType) window.history.replaceState({}, "", window.location.pathname);
+
       setLoading(true);
-
       try {
-        const userId = session.user.id;
-        const userEmail = session.user.email || "";
+        // Database-backed identity: role + brand profile keyed on auth.users.id.
+        const account = await resolveAccount();
 
-        // Check if user_roles already exist (returning user)
-        const { data: existingRole, error: existingRoleError } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userId)
-          .maybeSingle();
-
-        if (existingRoleError) {
-          console.error("Failed to load user role:", existingRoleError);
+        if (account.needsManualReview) {
           toast({
-            title: "Couldn't load your account",
-            description: existingRoleError.message,
+            title: "We need to check your account",
+            description: "More than one company record matches your email. Our team will sort this out for you.",
+            variant: "destructive",
+          });
+        }
+
+        const isReturning = !!account.brandProfileId || (!!account.role && intent !== "signup");
+
+        // Brand advertisers always keep exactly one profile row, keyed on the auth UUID.
+        if (account.role === "brand_advertiser" && !account.brandProfileId) {
+          const { data: existingProfile } = await supabase
+            .from("brand_advertiser_profiles")
+            .select("id")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (!existingProfile) {
+            const { error: insertError } = await supabase.from("brand_advertiser_profiles").insert({
+              user_id: user.id,
+              company_name: user.user_metadata?.full_name || "",
+              contact_name: user.user_metadata?.full_name || "",
+              contact_email: user.email || "",
+              verified: true,
+            } as any);
+            // A duplicate here just means another tab already created it — never a second account.
+            if (insertError && insertError.code !== "23505") {
+              console.error("Failed to create brand advertiser profile:", insertError);
+            }
+          }
+        }
+
+        if (!account.role) {
+          toast({
+            title: "Your account isn't set up yet",
+            description: "Please use the invitation link you were sent, or contact TrioTag support.",
             variant: "destructive",
           });
           setLoading(false);
           return;
         }
 
-
-        if (existingRole) {
-
-
-
-          // Existing account (including legacy retailers) — always honor its role
-          if (intent === "signup") {
-            toast({ title: "Welcome back!", description: "We found your existing account and signed you in." });
-          }
-          routeByRole(existingRole.role);
-          return;
-        }
-
-
-
-
-        // New Google user - create role and profile
-        const mappedRole =
-          storedUserType === "venue" ? "agent" :
-          storedUserType === "brand_advertiser" ? "brand_advertiser" :
-          storedUserType;
-
-        // The trigger handle_new_user_role should handle this, but ensure it exists
-        // Create the appropriate profile and mark as verified
-        if (storedUserType === "print_partner") {
-
-          const { data: existingProfile } = await supabase
-            .from("print_partner_profiles")
-            .select("id")
-            .eq("user_id", userId)
-            .maybeSingle();
-
-          if (!existingProfile) {
-            await supabase.from("print_partner_profiles").insert({
-              user_id: userId,
-              company_name: session.user.user_metadata?.full_name || "",
-              contact_person: session.user.user_metadata?.full_name || "",
-              contact_email: userEmail,
-              verified: true,
-            });
-          } else {
-            await supabase
-              .from("print_partner_profiles")
-              .update({ verified: true })
-              .eq("user_id", userId);
-          }
-        } else if (storedUserType === "venue") {
-          const { data: existingProfile } = await supabase
-            .from("publisher_profiles")
-            .select("id")
-            .eq("user_id", userId)
-            .maybeSingle();
-
-          if (!existingProfile) {
-            await supabase.from("publisher_profiles").insert({
-              user_id: userId,
-              publisher_type: "venue",
-              business_name: session.user.user_metadata?.full_name || session.user.email || "Agent",
-              contact_email: userEmail,
-              verified: true,
-              verification_status: "pending",
-            });
-          } else {
-            await supabase
-              .from("publisher_profiles")
-              .update({ verified: true })
-              .eq("user_id", userId);
-          }
-        } else if (storedUserType === "brand_advertiser") {
-          const { data: existingProfile } = await supabase
-            .from("brand_advertiser_profiles")
-            .select("id")
-            .eq("user_id", userId)
-            .maybeSingle();
-
-          if (!existingProfile) {
-            await supabase.from("brand_advertiser_profiles").insert({
-              user_id: userId,
-              company_name: session.user.user_metadata?.full_name || "",
-              contact_name: session.user.user_metadata?.full_name || "",
-              contact_email: userEmail,
-              verified: true,
-            });
-          } else {
-            await supabase
-              .from("brand_advertiser_profiles")
-              .update({ verified: true })
-              .eq("user_id", userId);
-          }
-        } else if (storedUserType === "talent") {
-          // Ensure the role is set to talent (trigger may have defaulted to advertiser)
-          if (!existingRole || existingRole.role !== "talent") {
-            await supabase.rpc("set_own_role", { _role: "talent" });
-          }
-          // Talent profiles are created via the /talent-profile onboarding form
-          // No automatic profile creation here — routeByRole will redirect to /talent-profile
-        }
-
         toast(
-          intent === "signin"
-            ? { title: "Looks like this is your first time", description: "Setting up your account now." }
+          isReturning
+            ? { title: "Welcome back!", description: "We found your existing account and signed you in." }
             : { title: "Welcome!", description: "Your account has been created successfully." }
         );
-        routeByRole(mappedRole);
+        void storedUserType;
+        routeByRole(account.role);
       } catch (error: any) {
         console.error("OAuth post-redirect error:", error);
         toast({
