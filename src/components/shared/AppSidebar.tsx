@@ -306,7 +306,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       {showSidebar && <AppSidebar role={role} campaignPillar={pillar} />}
-      <div className={showSidebar ? "md:pl-[68px]" : ""}>{children}</div>
+      <div className={showSidebar ? "md:pr-[68px]" : ""}>{children}</div>
     </>
   );
 }
