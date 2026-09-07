@@ -165,7 +165,7 @@ export function AppSidebar({ role, campaignPillar }: { role: string; campaignPil
     <aside
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
-      className={`hidden md:flex flex-col ${expanded ? "w-60" : "w-[68px]"} bg-[#0c0c0c] text-white h-screen fixed right-0 top-0 transition-all duration-200 ease-in-out z-40 border-l border-white/5`}
+      className={`hidden md:flex flex-col ${expanded ? "w-60" : "w-[68px]"} bg-[#0c0c0c] text-white h-screen fixed left-0 top-0 transition-all duration-200 ease-in-out z-40 border-r border-white/5`}
     >
       <div className="flex items-center gap-2 px-4 py-4 border-b border-white/5">
         <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-green-600 text-white shrink-0">
@@ -189,8 +189,8 @@ export function AppSidebar({ role, campaignPillar }: { role: string; campaignPil
                   title={it.label}
                   className={`relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors flex-1 min-w-0 ${
                     active
-                      ? "bg-green-900/40 text-green-400 border-r-2 border-green-500"
-                      : "text-gray-400 hover:text-white hover:bg-white/5 border-r-2 border-transparent"
+                      ? "bg-green-900/40 text-green-400 border-l-2 border-green-500"
+                      : "text-gray-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent"
                   }`}
                 >
                   <div className="relative shrink-0">
@@ -233,10 +233,10 @@ export function AppSidebar({ role, campaignPillar }: { role: string; campaignPil
                         key={child.to}
                         to={child.to}
                         title={child.label}
-                        className={`flex items-center gap-2.5 pr-8 pl-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                        className={`flex items-center gap-2.5 pl-8 pr-3 py-2 rounded-md text-xs font-medium transition-colors ${
                           childActive
-                            ? "bg-green-900/40 text-green-400 border-r-2 border-green-500"
-                            : "text-gray-400 hover:text-white hover:bg-white/5 border-r-2 border-transparent"
+                            ? "bg-green-900/40 text-green-400 border-l-2 border-green-500"
+                            : "text-gray-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent"
                         }`}
                       >
                         <ChildIcon className="w-4 h-4 shrink-0" />
@@ -306,7 +306,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       {showSidebar && <AppSidebar role={role} campaignPillar={pillar} />}
-      <div className={showSidebar ? "md:pr-[68px]" : ""}>{children}</div>
+      <div className={showSidebar ? "md:pl-[68px]" : ""}>{children}</div>
     </>
   );
 }
