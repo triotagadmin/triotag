@@ -189,8 +189,8 @@ export function AppSidebar({ role, campaignPillar }: { role: string; campaignPil
                   title={it.label}
                   className={`relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors flex-1 min-w-0 ${
                     active
-                      ? "bg-green-900/40 text-green-400 border-l-2 border-green-500"
-                      : "text-gray-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent"
+                      ? "bg-green-900/40 text-green-400 border-r-2 border-green-500"
+                      : "text-gray-400 hover:text-white hover:bg-white/5 border-r-2 border-transparent"
                   }`}
                 >
                   <div className="relative shrink-0">
