@@ -19,7 +19,7 @@ export const usePlatform = () => {
   return ctx;
 };
 
-const NAV: { group: string; items: { to: string; label: string; icon: React.ElementType; end?: boolean }[] }[] = [
+const NAV: { group: string; items: { to: string; label: string; icon: React.ElementType; end?: boolean; badge?: "brandRequests" }[] }[] = [
   { group: "", items: [{ to: "/webmaster/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true }] },
   {
     group: "Tenant Management",
@@ -27,8 +27,13 @@ const NAV: { group: string; items: { to: string; label: string; icon: React.Elem
       { to: "/webmaster/tenants", label: "Tenants", icon: Building2, end: true },
       { to: "/webmaster/tenants/new", label: "Create Tenant", icon: PlusCircle },
       { to: "/webmaster/super-admins", label: "Super Admins", icon: ShieldCheck },
-      { to: "/webmaster/account-approvals", label: "Account Approvals", icon: BadgeCheck },
       { to: "/webmaster/agents", label: "Agent Accounts", icon: Users },
+    ],
+  },
+  {
+    group: "Brand Accounts",
+    items: [
+      { to: "/webmaster/brand-advertiser-requests", label: "Brand Account Request", icon: BadgeCheck, badge: "brandRequests" },
     ],
   },
   {
