@@ -26,7 +26,6 @@ import AdminLocalListings from "./pages/admin/AdminLocalListings";
 import AdminBusinessProspecting from "./pages/admin/AdminBusinessProspecting";
 import AdminSocialScanner from "./pages/admin/AdminSocialScanner";
 import AdminAgentCenter from "./pages/admin/AdminAgentCenter";
-import AdminBrandAdvertiserApprovals from "./pages/admin/AdminBrandAdvertiserApprovals";
 import AdminVerifiedLocations from "./pages/admin/AdminVerifiedLocations";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
@@ -173,6 +172,7 @@ import WebmasterSupply from "./pages/webmaster/WebmasterSupply";
 import WebmasterOperations from "./pages/webmaster/WebmasterOperations";
 import WebmasterSystem from "./pages/webmaster/WebmasterSystem";
 import WebmasterSecurity from "./pages/webmaster/WebmasterSecurity";
+import WebmasterBrandAccountRequests from "./pages/webmaster/WebmasterBrandAccountRequests";
 import WebmasterRoute from "./components/WebmasterRoute";
 
 import TenantSuperAdminRoute from "./components/TenantSuperAdminRoute";
@@ -200,7 +200,8 @@ const App = () => (
             <Route path="/webmaster/tenants/new" element={<WebmasterTenantNew />} />
             <Route path="/webmaster/tenants/:tenantId" element={<WebmasterTenantDetail />} />
             <Route path="/webmaster/super-admins" element={<WebmasterSuperAdmins />} />
-            <Route path="/webmaster/account-approvals" element={<AdminBrandAdvertiserApprovals />} />
+            <Route path="/webmaster/brand-advertiser-requests" element={<WebmasterBrandAccountRequests />} />
+            <Route path="/webmaster/account-approvals" element={<Navigate to="/webmaster/brand-advertiser-requests" replace />} />
             <Route path="/webmaster/agents" element={<WebmasterAgents />} />
             <Route path="/webmaster/media-owners" element={<WebmasterSupply mode="media-owners" />} />
             <Route path="/webmaster/locations" element={<WebmasterSupply mode="locations" />} />
@@ -355,7 +356,7 @@ const App = () => (
               <AdminMediaPlans />
             </ProtectedAdminRoute>
           } />
-          <Route path="/admin/brand-advertiser-approvals" element={<Navigate to="/webmaster/account-approvals" replace />} />
+          <Route path="/admin/brand-advertiser-approvals" element={<Navigate to="/admin" replace />} />
           <Route path="/admin/brand-campaigns" element={
             <ProtectedAdminRoute>
               <AdminBrandCampaigns />

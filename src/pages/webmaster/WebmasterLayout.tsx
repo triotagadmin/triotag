@@ -19,7 +19,7 @@ export const usePlatform = () => {
   return ctx;
 };
 
-const NAV: { group: string; items: { to: string; label: string; icon: React.ElementType; end?: boolean }[] }[] = [
+const NAV: { group: string; items: { to: string; label: string; icon: React.ElementType; end?: boolean; badge?: "brandRequests" }[] }[] = [
   { group: "", items: [{ to: "/webmaster/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true }] },
   {
     group: "Tenant Management",
@@ -27,8 +27,13 @@ const NAV: { group: string; items: { to: string; label: string; icon: React.Elem
       { to: "/webmaster/tenants", label: "Tenants", icon: Building2, end: true },
       { to: "/webmaster/tenants/new", label: "Create Tenant", icon: PlusCircle },
       { to: "/webmaster/super-admins", label: "Super Admins", icon: ShieldCheck },
-      { to: "/webmaster/account-approvals", label: "Account Approvals", icon: BadgeCheck },
       { to: "/webmaster/agents", label: "Agent Accounts", icon: Users },
+    ],
+  },
+  {
+    group: "Brand Accounts",
+    items: [
+      { to: "/webmaster/brand-advertiser-requests", label: "Brand Account Request", icon: BadgeCheck, badge: "brandRequests" },
     ],
   },
   {
@@ -79,7 +84,7 @@ const NAV: { group: string; items: { to: string; label: string; icon: React.Elem
   },
 ];
 
-const SidebarNav = ({ onNavigate }: { onNavigate?: () => void }) => (
+const SidebarNav = ({ onNavigate, pendingBrandRequests = 0 }: { onNavigate?: () => void; pendingBrandRequests?: number }) => (
   <nav className="space-y-5 pb-10">
     {NAV.map((section, idx) => (
       <div key={idx} className="space-y-1">
@@ -104,6 +109,11 @@ const SidebarNav = ({ onNavigate }: { onNavigate?: () => void }) => (
           >
             <item.icon className="h-4 w-4 shrink-0" />
             <span className="truncate">{item.label}</span>
+            {item.badge === "brandRequests" && pendingBrandRequests > 0 && (
+              <span className="ml-auto rounded-full bg-green-500 px-2 py-0.5 text-[11px] font-bold text-black">
+                {pendingBrandRequests}
+              </span>
+            )}
           </NavLink>
         ))}
       </div>
@@ -118,14 +128,37 @@ export default function WebmasterLayout() {
   });
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [pendingBrandRequests, setPendingBrandRequests] = useState(0);
+
+  const loadPendingBrandRequests = useCallback(async () => {
+    const { count } = await supabase
+      .from("brand_advertiser_profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("approval_status", "pending");
+    setPendingBrandRequests(count ?? 0);
+  }, []);
 
   const reload = useCallback(async () => {
     setLoading(true);
     setData(await loadPlatformData());
+    await loadPendingBrandRequests();
     setLoading(false);
-  }, []);
+  }, [loadPendingBrandRequests]);
 
   useEffect(() => { reload(); }, [reload]);
+
+  useEffect(() => {
+    const onChanged = () => loadPendingBrandRequests();
+    window.addEventListener("brand-requests-changed", onChanged);
+    const channel = supabase
+      .channel("webmaster-brand-requests")
+      .on("postgres_changes", { event: "*", schema: "public", table: "brand_advertiser_profiles" }, onChanged)
+      .subscribe();
+    return () => {
+      window.removeEventListener("brand-requests-changed", onChanged);
+      supabase.removeChannel(channel);
+    };
+  }, [loadPendingBrandRequests]);
 
   const ctx = useMemo(() => ({ data, loading, reload }), [data, loading, reload]);
 
@@ -142,7 +175,7 @@ export default function WebmasterLayout() {
             <p className="text-lg font-black tracking-tight text-green-400">TRIOTAG</p>
             <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Webmaster</p>
           </div>
-          <div className="flex-1 overflow-y-auto px-3 py-4"><SidebarNav /></div>
+          <div className="flex-1 overflow-y-auto px-3 py-4"><SidebarNav pendingBrandRequests={pendingBrandRequests} /></div>
           <div className="border-t border-green-500/15 p-3">
             <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />Sign out
@@ -158,7 +191,7 @@ export default function WebmasterLayout() {
               </SheetTrigger>
               <SheetContent side="left" className="w-72 overflow-y-auto bg-black/95 p-4">
                 <p className="mb-4 text-lg font-black text-green-400">TRIOTAG <span className="text-xs font-normal text-muted-foreground">Webmaster</span></p>
-                <SidebarNav onNavigate={() => setMobileOpen(false)} />
+                <SidebarNav pendingBrandRequests={pendingBrandRequests} onNavigate={() => setMobileOpen(false)} />
               </SheetContent>
             </Sheet>
             <div className="min-w-0">

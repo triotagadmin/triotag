@@ -1206,6 +1206,8 @@ export type Database = {
       brand_advertiser_profiles: {
         Row: {
           approval_status: Database["public"]["Enums"]["approval_status"]
+          approved_at: string | null
+          approved_by: string | null
           campaign_pillar: string | null
           company_name: string | null
           contact_email: string | null
@@ -1214,6 +1216,8 @@ export type Database = {
           created_at: string | null
           id: string
           industry: string | null
+          rejected_at: string | null
+          rejected_by: string | null
           rejection_reason: string | null
           updated_at: string | null
           user_id: string
@@ -1223,6 +1227,8 @@ export type Database = {
         }
         Insert: {
           approval_status?: Database["public"]["Enums"]["approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
           campaign_pillar?: string | null
           company_name?: string | null
           contact_email?: string | null
@@ -1231,6 +1237,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           industry?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
           rejection_reason?: string | null
           updated_at?: string | null
           user_id: string
@@ -1240,6 +1248,8 @@ export type Database = {
         }
         Update: {
           approval_status?: Database["public"]["Enums"]["approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
           campaign_pillar?: string | null
           company_name?: string | null
           contact_email?: string | null
@@ -1248,6 +1258,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           industry?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
           rejection_reason?: string | null
           updated_at?: string | null
           user_id?: string
@@ -6363,7 +6375,7 @@ export type Database = {
         | "print_partner"
         | "agent"
         | "brand_advertiser"
-      approval_status: "pending" | "approved" | "rejected"
+      approval_status: "pending" | "approved" | "rejected" | "suspended"
       booking_status:
         | "pending"
         | "accepted"
@@ -6544,7 +6556,7 @@ export const Constants = {
         "agent",
         "brand_advertiser",
       ],
-      approval_status: ["pending", "approved", "rejected"],
+      approval_status: ["pending", "approved", "rejected", "suspended"],
       booking_status: [
         "pending",
         "accepted",
