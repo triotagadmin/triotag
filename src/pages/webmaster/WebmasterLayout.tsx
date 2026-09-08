@@ -84,7 +84,7 @@ const NAV: { group: string; items: { to: string; label: string; icon: React.Elem
   },
 ];
 
-const SidebarNav = ({ onNavigate }: { onNavigate?: () => void }) => (
+const SidebarNav = ({ onNavigate, pendingBrandRequests = 0 }: { onNavigate?: () => void; pendingBrandRequests?: number }) => (
   <nav className="space-y-5 pb-10">
     {NAV.map((section, idx) => (
       <div key={idx} className="space-y-1">
