@@ -175,7 +175,7 @@ export default function WebmasterLayout() {
             <p className="text-lg font-black tracking-tight text-green-400">TRIOTAG</p>
             <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Webmaster</p>
           </div>
-          <div className="flex-1 overflow-y-auto px-3 py-4"><SidebarNav /></div>
+          <div className="flex-1 overflow-y-auto px-3 py-4"><SidebarNav pendingBrandRequests={pendingBrandRequests} /></div>
           <div className="border-t border-green-500/15 p-3">
             <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />Sign out
@@ -191,7 +191,7 @@ export default function WebmasterLayout() {
               </SheetTrigger>
               <SheetContent side="left" className="w-72 overflow-y-auto bg-black/95 p-4">
                 <p className="mb-4 text-lg font-black text-green-400">TRIOTAG <span className="text-xs font-normal text-muted-foreground">Webmaster</span></p>
-                <SidebarNav onNavigate={() => setMobileOpen(false)} />
+                <SidebarNav pendingBrandRequests={pendingBrandRequests} onNavigate={() => setMobileOpen(false)} />
               </SheetContent>
             </Sheet>
             <div className="min-w-0">
