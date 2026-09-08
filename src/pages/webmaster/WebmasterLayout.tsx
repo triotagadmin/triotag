@@ -109,6 +109,11 @@ const SidebarNav = ({ onNavigate, pendingBrandRequests = 0 }: { onNavigate?: () 
           >
             <item.icon className="h-4 w-4 shrink-0" />
             <span className="truncate">{item.label}</span>
+            {item.badge === "brandRequests" && pendingBrandRequests > 0 && (
+              <span className="ml-auto rounded-full bg-green-500 px-2 py-0.5 text-[11px] font-bold text-black">
+                {pendingBrandRequests}
+              </span>
+            )}
           </NavLink>
         ))}
       </div>
