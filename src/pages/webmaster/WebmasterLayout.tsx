@@ -128,14 +128,37 @@ export default function WebmasterLayout() {
   });
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [pendingBrandRequests, setPendingBrandRequests] = useState(0);
+
+  const loadPendingBrandRequests = useCallback(async () => {
+    const { count } = await supabase
+      .from("brand_advertiser_profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("approval_status", "pending");
+    setPendingBrandRequests(count ?? 0);
+  }, []);
 
   const reload = useCallback(async () => {
     setLoading(true);
     setData(await loadPlatformData());
+    await loadPendingBrandRequests();
     setLoading(false);
-  }, []);
+  }, [loadPendingBrandRequests]);
 
   useEffect(() => { reload(); }, [reload]);
+
+  useEffect(() => {
+    const onChanged = () => loadPendingBrandRequests();
+    window.addEventListener("brand-requests-changed", onChanged);
+    const channel = supabase
+      .channel("webmaster-brand-requests")
+      .on("postgres_changes", { event: "*", schema: "public", table: "brand_advertiser_profiles" }, onChanged)
+      .subscribe();
+    return () => {
+      window.removeEventListener("brand-requests-changed", onChanged);
+      supabase.removeChannel(channel);
+    };
+  }, [loadPendingBrandRequests]);
 
   const ctx = useMemo(() => ({ data, loading, reload }), [data, loading, reload]);
 
