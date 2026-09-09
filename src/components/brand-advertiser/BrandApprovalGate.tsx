@@ -260,21 +260,26 @@ export default function BrandApprovalGate({ children }: { children: React.ReactN
   }
 
   if (profile?.approval_status !== "approved") {
-    const rejected = profile?.approval_status === "rejected";
+    const status = profile?.approval_status || "pending";
+    const blocked = status === "rejected" || status === "suspended";
+    const heading = status === "rejected"
+      ? "Your Brand Advertiser application was rejected"
+      : status === "suspended"
+        ? "Your Brand Advertiser account has been suspended"
+        : "Your Brand Advertiser account is currently awaiting Webmaster approval.";
+    const detail = status === "rejected"
+      ? profile?.rejection_reason || "Please contact support for more details."
+      : status === "suspended"
+        ? profile?.rejection_reason || "Contact TrioTag support to restore access to your account."
+        : "We'll email you as soon as the Webmaster has reviewed your registration.";
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <Card className="max-w-md w-full p-8 text-center bg-white border border-gray-200">
-          <div className={`w-12 h-12 rounded-full mx-auto flex items-center justify-center ${rejected ? "bg-red-100" : "bg-yellow-100"}`}>
-            {rejected ? <XCircle className="w-6 h-6 text-red-600" /> : <Clock className="w-6 h-6 text-yellow-600" />}
+          <div className={`w-12 h-12 rounded-full mx-auto flex items-center justify-center ${blocked ? "bg-red-100" : "bg-yellow-100"}`}>
+            {blocked ? <XCircle className="w-6 h-6 text-red-600" /> : <Clock className="w-6 h-6 text-yellow-600" />}
           </div>
-          <h1 className="text-lg font-semibold text-gray-900 mt-4">
-            {rejected ? "Your Brand Advertiser application was rejected" : "Your Brand Advertiser account is awaiting Super Admin approval"}
-          </h1>
-          <p className="text-sm text-gray-600 mt-2">
-            {rejected
-              ? profile?.rejection_reason || "Please contact support for more details."
-              : "We'll notify you once your account has been reviewed and approved."}
-          </p>
+          <h1 className="text-lg font-semibold text-gray-900 mt-4">{heading}</h1>
+          <p className="text-sm text-gray-600 mt-2">{detail}</p>
         </Card>
       </div>
     );
