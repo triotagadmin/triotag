@@ -1,15 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { loadPlatformData, PlatformData } from "./platformData";
-import {
-  LayoutDashboard, Building2, PlusCircle, ShieldCheck, Users, Store, MapPin, Boxes,
-  BadgeCheck, ClipboardCheck, Megaphone, FileText, Receipt, Percent, BarChart3,
-  UserCog, KeyRound, ScrollText, Settings, Lock, Activity, FileSearch, LogOut, Menu,
-  Target, Radar,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 
 type Ctx = { data: PlatformData; loading: boolean; reload: () => Promise<void> };
 const PlatformCtx = createContext<Ctx | null>(null);
@@ -18,71 +12,6 @@ export const usePlatform = () => {
   if (!ctx) throw new Error("usePlatform must be used inside the Webmaster dashboard");
   return ctx;
 };
-
-const NAV: { group: string; items: { to: string; label: string; icon: React.ElementType; end?: boolean; badge?: "brandRequests" }[] }[] = [
-  { group: "", items: [{ to: "/webmaster/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true }] },
-  {
-    group: "Tenant Management",
-    items: [
-      { to: "/webmaster/tenants", label: "Tenants", icon: Building2, end: true },
-      { to: "/webmaster/tenants/new", label: "Create Tenant", icon: PlusCircle },
-      { to: "/webmaster/super-admins", label: "Super Admins", icon: ShieldCheck },
-      { to: "/webmaster/agents", label: "Agent Accounts", icon: Users },
-    ],
-  },
-  {
-    group: "Brand Accounts",
-    items: [
-      { to: "/webmaster/brand-advertiser-requests", label: "Brand Account Request", icon: BadgeCheck, badge: "brandRequests" },
-    ],
-  },
-  {
-    group: "Platform Supply",
-    items: [
-      { to: "/webmaster/media-owners", label: "All Media Owners", icon: Store },
-      { to: "/webmaster/locations", label: "All Locations", icon: MapPin },
-      { to: "/webmaster/inventory", label: "All Inventory", icon: Boxes },
-      { to: "/webmaster/inventory-verification", label: "Inventory Verification", icon: BadgeCheck },
-      { to: "/webmaster/pending-approvals", label: "Pending Approvals", icon: ClipboardCheck },
-      { to: "/webmaster/media-partners", label: "Media Partners", icon: Users },
-    ],
-  },
-  {
-    group: "Platform Operations",
-    items: [
-      { to: "/webmaster/campaigns", label: "Campaigns", icon: Megaphone },
-      { to: "/webmaster/proposals", label: "Proposals", icon: FileText },
-      { to: "/webmaster/transactions", label: "Transactions", icon: Receipt },
-      { to: "/webmaster/commissions", label: "Commissions", icon: Percent },
-      { to: "/webmaster/reports", label: "Reports", icon: BarChart3 },
-    ],
-  },
-  {
-    group: "Growth Tools",
-    items: [
-      { to: "/webmaster/business-prospecting", label: "Business Prospecting", icon: Target },
-      { to: "/webmaster/social-scanner", label: "Social Scanner", icon: Radar },
-      { to: "/webmaster/local-listings", label: "Local SEO / Maps", icon: MapPin },
-    ],
-  },
-  {
-    group: "System",
-    items: [
-      { to: "/webmaster/users", label: "User Management", icon: UserCog },
-      { to: "/webmaster/roles", label: "Roles & Permissions", icon: KeyRound },
-      { to: "/webmaster/audit-logs", label: "Audit Logs", icon: ScrollText },
-      { to: "/webmaster/settings", label: "Platform Settings", icon: Settings },
-    ],
-  },
-  {
-    group: "Security",
-    items: [
-      { to: "/webmaster/security", label: "Security Overview", icon: Lock },
-      { to: "/webmaster/auth-activity", label: "Authentication Activity", icon: Activity },
-      { to: "/webmaster/access-logs", label: "Access Logs", icon: FileSearch },
-    ],
-  },
-];
 
 
 export default function WebmasterLayout() {
