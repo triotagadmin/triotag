@@ -84,42 +84,6 @@ const NAV: { group: string; items: { to: string; label: string; icon: React.Elem
   },
 ];
 
-const SidebarNav = ({ onNavigate, pendingBrandRequests = 0 }: { onNavigate?: () => void; pendingBrandRequests?: number }) => (
-  <nav className="space-y-5 pb-10">
-    {NAV.map((section, idx) => (
-      <div key={idx} className="space-y-1">
-        {section.group && (
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-green-400/50">
-            {section.group}
-          </p>
-        )}
-        {section.items.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
-                isActive
-                  ? "bg-green-500/15 text-green-300 border border-green-500/30"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent"
-              }`
-            }
-          >
-            <item.icon className="h-4 w-4 shrink-0" />
-            <span className="truncate">{item.label}</span>
-            {item.badge === "brandRequests" && pendingBrandRequests > 0 && (
-              <span className="ml-auto rounded-full bg-green-500 px-2 py-0.5 text-[11px] font-bold text-black">
-                {pendingBrandRequests}
-              </span>
-            )}
-          </NavLink>
-        ))}
-      </div>
-    ))}
-  </nav>
-);
 
 export default function WebmasterLayout() {
   const navigate = useNavigate();
