@@ -137,7 +137,7 @@ import AdminMediaPartners from "./pages/admin/AdminMediaPartners";
 import UnderConstruction from "./pages/UnderConstruction";
 import HomeRouter from "./components/HomeRouter";
 import Notifications from "./pages/Notifications";
-import { AppSidebarShell } from "./components/shared/AppSidebar";
+import { AccountSidebarShell as AppSidebarShell } from "./components/navigation/AccountSidebarShell";
 import BrandAdvertiserDashboard from "./pages/brand-advertiser/BrandAdvertiserDashboard";
 import BrandAdvertiserSettings from "./pages/brand-advertiser/BrandAdvertiserSettings";
 import BrandAdvertiserCampaignsList from "./pages/brand-advertiser/BrandAdvertiserCampaignsList";
