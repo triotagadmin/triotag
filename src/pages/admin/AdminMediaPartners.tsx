@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AppSidebar } from "@/components/shared/AppSidebar";
+import SuperAdminSidebar from "@/components/navigation/SuperAdminSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { BadgeCheck, CheckCircle2, ExternalLink, Loader2, Search, Sparkles, XCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -143,7 +143,7 @@ export default function AdminMediaPartners() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar role="admin" />
+        <SuperAdminSidebar />
         <main className="flex-1 p-6 space-y-6">
           <div className="flex items-center gap-3">
             <SidebarTrigger />
