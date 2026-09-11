@@ -91,8 +91,8 @@ const Hero = () => {
             AI-Powered Retail Media Platform
           </span>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1]">
-            Retail Media DSP Platform for <span className="text-green-500">OOH</span>,{" "}
-            <span className="text-green-500">DOOH</span>, and <span className="text-green-500">AOOH</span>
+            Retail Media SSP & DSP Platform for <span className="text-green-500">OOH</span>,{" "}
+            <span className="text-green-500">DOOH</span>, and <span className="text-green-500">AOOH.</span>
           </h1>
           <p className="text-lg text-zinc-400 max-w-xl leading-relaxed">
             Triotag is a Retail Media Ad Exchange that connects commercial ad inventory with advertisers through
