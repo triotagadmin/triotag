@@ -888,6 +888,9 @@ export default function BrandAdvertiserInventory() {
                                 <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
                               </p>
                               <div className="flex flex-wrap gap-1 mt-1">
+                                {venueTypeOf(r) && (
+                                  <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
+                                )}
                                 {rowTypes(r).map((t) => <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>)}
                               </div>
                             </div>
