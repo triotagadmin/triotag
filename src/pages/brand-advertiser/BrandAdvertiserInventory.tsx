@@ -901,8 +901,12 @@ export default function BrandAdvertiserInventory() {
                         <Card key={r.id} className="p-4 border-gray-200">
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <p className="font-medium text-gray-900">{r.title}</p>
-                              <p className="text-xs text-gray-500">{r.location || "Location on request"}</p>
+                              <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
+                                <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
+                              </p>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {rowTypes(r).map((t) => <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>)}
+                              </div>
                             </div>
                             <Button size="icon" variant="ghost" onClick={() => toggleSelect(r)} aria-label="Remove">
                               <X className="w-4 h-4" />
