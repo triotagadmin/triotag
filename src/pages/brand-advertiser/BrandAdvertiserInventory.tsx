@@ -537,19 +537,19 @@ export default function BrandAdvertiserInventory() {
           <p className="text-[11px] text-gray-400 mt-1">Estimate only — final costs are confirmed in your proposal.</p>
         </div>
       </Card>
-      {selectedRows.length > 0 && (
-        <Card className="p-4 bg-white border-gray-200">
-          <p className="text-sm font-semibold text-gray-900 mb-2">Selected inventory</p>
-          <ul className="space-y-2 max-h-64 overflow-auto">
-            {selectedRows.map((r) => (
-              <li key={r.id} className="text-xs text-gray-600 flex items-start justify-between gap-2">
-                <span className="line-clamp-2">{r.title}</span>
-                <span className="shrink-0 text-gray-900 font-medium">×{selections[r.id].quantity}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
+            {selectedRows.length > 0 && (
+              <Card className="p-4 bg-white border-gray-200">
+                <p className="text-sm font-semibold text-gray-900 mb-2">Selected inventory</p>
+                <ul className="space-y-2 max-h-64 overflow-auto">
+                  {selectedRows.map((r) => (
+                    <li key={r.id} className="text-xs text-gray-600 flex items-start justify-between gap-2">
+                      <span className="line-clamp-2">{r.location || "Location on request"}</span>
+                      <span className="shrink-0 text-gray-900 font-medium">×{selections[r.id].quantity}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
     </div>
   );
 
