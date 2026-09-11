@@ -537,19 +537,19 @@ export default function BrandAdvertiserInventory() {
           <p className="text-[11px] text-gray-400 mt-1">Estimate only — final costs are confirmed in your proposal.</p>
         </div>
       </Card>
-      {selectedRows.length > 0 && (
-        <Card className="p-4 bg-white border-gray-200">
-          <p className="text-sm font-semibold text-gray-900 mb-2">Selected inventory</p>
-          <ul className="space-y-2 max-h-64 overflow-auto">
-            {selectedRows.map((r) => (
-              <li key={r.id} className="text-xs text-gray-600 flex items-start justify-between gap-2">
-                <span className="line-clamp-2">{r.title}</span>
-                <span className="shrink-0 text-gray-900 font-medium">×{selections[r.id].quantity}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
+            {selectedRows.length > 0 && (
+              <Card className="p-4 bg-white border-gray-200">
+                <p className="text-sm font-semibold text-gray-900 mb-2">Selected inventory</p>
+                <ul className="space-y-2 max-h-64 overflow-auto">
+                  {selectedRows.map((r) => (
+                    <li key={r.id} className="text-xs text-gray-600 flex items-start justify-between gap-2">
+                      <span className="line-clamp-2">{r.location || "Location on request"}</span>
+                      <span className="shrink-0 text-gray-900 font-medium">×{selections[r.id].quantity}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
     </div>
   );
 
@@ -732,6 +732,47 @@ export default function BrandAdvertiserInventory() {
                       <p className="text-xs text-gray-400 mt-5">
                         Only approved, verified and available inventory is shown. Draft, rejected or suspended listings are never included.
                       </p>
+
+                      {matching.length > 0 && (
+                        <div className="mt-6">
+                          <p className="text-sm font-medium text-gray-900 mb-3">Available locations</p>
+                          <div className="grid sm:grid-cols-2 gap-3">
+                            {matching.slice(0, 12).map((r) => (
+                              <Card key={r.id} className="overflow-hidden border border-gray-200">
+                                <div className="h-28 bg-gray-100">
+                                  {firstImage(r.media_urls) ? (
+                                    <img
+                                      src={firstImage(r.media_urls)!}
+                                      alt="Inventory location"
+                                      loading="lazy"
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                      <Layers className="w-6 h-6" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="p-3">
+                                  <p className="text-xs text-gray-500 flex items-center gap-1 line-clamp-2">
+                                    <MapPin className="w-3 h-3 shrink-0" /> {r.location || "Location on request"}
+                                  </p>
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {rowTypes(r).map((t) => (
+                                      <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              </Card>
+                            ))}
+                          </div>
+                          {matching.length > 12 && (
+                            <p className="text-xs text-gray-400 mt-3 text-center">
+                              {matching.length - 12} more location{matching.length - 12 === 1 ? "" : "s"} available — continue to step 5 to browse all.
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </>
                   )}
                 </>
@@ -805,21 +846,20 @@ export default function BrandAdvertiserInventory() {
                           <Card key={r.id} className={`overflow-hidden border ${selected ? "border-blue-600 ring-1 ring-blue-200" : "border-gray-200"}`}>
                             <div className="h-32 bg-gray-100">
                               {img ? (
-                                <img src={img} alt={r.title} loading="lazy" className="w-full h-full object-cover" />
+                                <img src={img} alt="Inventory location" loading="lazy" className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-400"><Layers className="w-6 h-6" /></div>
                               )}
                             </div>
                             <div className="p-4">
                               <div className="flex items-start justify-between gap-2">
-                                <p className="font-medium text-gray-900 line-clamp-1">{r.title}</p>
+                                <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
+                                  <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
+                                </p>
                                 {r.contact_verified_at && (
-                                  <Badge className="bg-green-600 shrink-0"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
+                                  <Badge className="bg-green-600 shrink-0 text-[10px]"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
                                 )}
                               </div>
-                              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 line-clamp-1">
-                                <MapPin className="w-3 h-3" /> {r.location || "Location on request"}
-                              </p>
                               <div className="flex flex-wrap gap-1 mt-2">
                                 {rowTypes(r).map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
                                 {cap && <Badge variant="outline">{cap} unit{cap > 1 ? "s" : ""}</Badge>}
@@ -861,8 +901,12 @@ export default function BrandAdvertiserInventory() {
                         <Card key={r.id} className="p-4 border-gray-200">
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <p className="font-medium text-gray-900">{r.title}</p>
-                              <p className="text-xs text-gray-500">{r.location || "Location on request"}</p>
+                              <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
+                                <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
+                              </p>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {rowTypes(r).map((t) => <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>)}
+                              </div>
                             </div>
                             <Button size="icon" variant="ghost" onClick={() => toggleSelect(r)} aria-label="Remove">
                               <X className="w-4 h-4" />
