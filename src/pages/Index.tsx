@@ -57,7 +57,6 @@ import aoohInstoreAudio from "@/assets/formats/aooh-instore-audio.jpg";
 import aoohQueueAudio from "@/assets/formats/aooh-queue-audio.jpg";
 import aoohPlaylist from "@/assets/formats/aooh-playlist.jpg";
 
-
 const Hero = () => {
   const [totals, setTotals] = useState<{
     approvedSpaces: number | null;
@@ -96,10 +95,9 @@ const Hero = () => {
             <span className="text-green-500">DOOH</span>, and <span className="text-green-500">AOOH</span>
           </h1>
           <p className="text-lg text-zinc-400 max-w-xl leading-relaxed">
-            Triotag is a Retail Media DSP platform built to help location-based businesses
-            monetize their vacant space, blank walls, digital screens and audio system into OOH, DOOH, and AOOH
-            inventory — powered by smart, location-based matching that connects advertisers to the right
-            venues in real time.
+            Triotag is a Retail Media Ad Exchange that connects commercial ad inventory with advertisers through
+            integrated SSP and DSP technology. Businesses can monetize their physical and digital ad spaces, while
+            brands can reach consumers with targeted, hyperlocal advertising.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link to="/auth">
@@ -124,8 +122,8 @@ const Hero = () => {
           </div>
           <div className="absolute -top-4 -right-4 w-24 h-24 bg-green-500/20 rounded-full blur-2xl" />
           <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-green-600/20 rounded-full blur-2xl" />
-          </div>
         </div>
+      </div>
     </section>
   );
 };
@@ -354,7 +352,6 @@ const PopularFormats = () => {
       { label: "Floor Stickers", icon: ScanLine, img: oohFloorSticker },
       { label: "Aisle Signage", icon: MapPin, img: oohAisleSignage },
       { label: "Entrance Banners", icon: Layers, img: oohEntranceBanner },
-
     ],
     DOOH: [
       { label: "In-store Screens", icon: Monitor, img: doohInstoreScreen },
@@ -396,7 +393,13 @@ const PopularFormats = () => {
             ))}
           </div>
         </div>
-        <div className="overflow-hidden relative" style={{ maskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)" }}>
+        <div
+          className="overflow-hidden relative"
+          style={{
+            maskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",
+            WebkitMaskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",
+          }}
+        >
           <div key={active} className="flex gap-4 w-max animate-marquee-x">
             {looped.map((f, idx) => {
               const I = f.icon;
@@ -485,7 +488,6 @@ const CTABanner = () => (
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
         <Link to="/partners/register">
-
           <Button variant="secondary" size="lg" className="w-full sm:w-auto">
             Partner With Triotag
           </Button>
@@ -515,8 +517,8 @@ const MediaTruckSection = () => (
           Truck
         </h2>
         <p className="text-zinc-200 text-lg max-w-xl">
-          Retail Media. Real Results. Deploy high-impact Retail Media trucks across your target districts
-          with route-based campaign planning and full proof-of-run reporting.
+          Retail Media. Real Results. Deploy high-impact Retail Media trucks across your target districts with
+          route-based campaign planning and full proof-of-run reporting.
         </p>
         <ul className="grid sm:grid-cols-2 gap-2 text-sm text-zinc-200 max-w-xl">
           {["Route-based deployment", "Digital LED display", "Campaign documentation", "Retail-area focus"].map((f) => (
@@ -554,14 +556,15 @@ const ExchangeIntro = () => (
     <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-green-500/10 blur-3xl" />
     <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-green-500/10 blur-3xl" />
 
-
     <div className="container mx-auto px-4 md:px-6 py-16 md:py-20 relative">
       <div className="max-w-3xl mx-auto text-center space-y-5">
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1]">
           The Central Hub for <span className="text-green-500">Retail Advertising</span>
         </h2>
         <p className="text-base md:text-lg text-zinc-400 leading-relaxed">
-          Triotag is an advertising exchange that connects brands and retail media owners. Discover, plan, and activate OOH, DOOH, and AOOH inventory across stores, shops, cafe, studio, hotel and other types of high-traffic locations, all from one centralized dashboard.
+          Triotag is an advertising exchange that connects brands and retail media owners. Discover, plan, and activate
+          OOH, DOOH, and AOOH inventory across stores, shops, cafe, studio, hotel and other types of high-traffic
+          locations, all from one centralized dashboard.
         </p>
       </div>
 
