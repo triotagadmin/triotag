@@ -133,6 +133,9 @@ const cityOf = (row: InventoryRow): string => {
 
 const reachOf = (row: InventoryRow): number => Number(row.specifications?.estimated_reach || row.specifications?.reach || 0);
 
+const venueTypeOf = (row: InventoryRow): string | null =>
+  row.specifications?.venue_type || row.specifications?.place_type || row.specifications?.category || null;
+
 const peso = (n: number) => `₱${Number(n || 0).toLocaleString()}`;
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const addDays = (iso: string, days: number) => {
