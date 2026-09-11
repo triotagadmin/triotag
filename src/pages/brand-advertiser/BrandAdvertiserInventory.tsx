@@ -846,21 +846,20 @@ export default function BrandAdvertiserInventory() {
                           <Card key={r.id} className={`overflow-hidden border ${selected ? "border-blue-600 ring-1 ring-blue-200" : "border-gray-200"}`}>
                             <div className="h-32 bg-gray-100">
                               {img ? (
-                                <img src={img} alt={r.title} loading="lazy" className="w-full h-full object-cover" />
+                                <img src={img} alt="Inventory location" loading="lazy" className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-400"><Layers className="w-6 h-6" /></div>
                               )}
                             </div>
                             <div className="p-4">
                               <div className="flex items-start justify-between gap-2">
-                                <p className="font-medium text-gray-900 line-clamp-1">{r.title}</p>
+                                <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
+                                  <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
+                                </p>
                                 {r.contact_verified_at && (
-                                  <Badge className="bg-green-600 shrink-0"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
+                                  <Badge className="bg-green-600 shrink-0 text-[10px]"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
                                 )}
                               </div>
-                              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 line-clamp-1">
-                                <MapPin className="w-3 h-3" /> {r.location || "Location on request"}
-                              </p>
                               <div className="flex flex-wrap gap-1 mt-2">
                                 {rowTypes(r).map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
                                 {cap && <Badge variant="outline">{cap} unit{cap > 1 ? "s" : ""}</Badge>}
