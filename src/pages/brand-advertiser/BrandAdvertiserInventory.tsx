@@ -732,6 +732,47 @@ export default function BrandAdvertiserInventory() {
                       <p className="text-xs text-gray-400 mt-5">
                         Only approved, verified and available inventory is shown. Draft, rejected or suspended listings are never included.
                       </p>
+
+                      {matching.length > 0 && (
+                        <div className="mt-6">
+                          <p className="text-sm font-medium text-gray-900 mb-3">Available locations</p>
+                          <div className="grid sm:grid-cols-2 gap-3">
+                            {matching.slice(0, 12).map((r) => (
+                              <Card key={r.id} className="overflow-hidden border border-gray-200">
+                                <div className="h-28 bg-gray-100">
+                                  {firstImage(r.media_urls) ? (
+                                    <img
+                                      src={firstImage(r.media_urls)!}
+                                      alt="Inventory location"
+                                      loading="lazy"
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                      <Layers className="w-6 h-6" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="p-3">
+                                  <p className="text-xs text-gray-500 flex items-center gap-1 line-clamp-2">
+                                    <MapPin className="w-3 h-3 shrink-0" /> {r.location || "Location on request"}
+                                  </p>
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {rowTypes(r).map((t) => (
+                                      <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              </Card>
+                            ))}
+                          </div>
+                          {matching.length > 12 && (
+                            <p className="text-xs text-gray-400 mt-3 text-center">
+                              {matching.length - 12} more location{matching.length - 12 === 1 ? "" : "s"} available — continue to step 5 to browse all.
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </>
                   )}
                 </>
