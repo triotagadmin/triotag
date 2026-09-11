@@ -133,6 +133,9 @@ const cityOf = (row: InventoryRow): string => {
 
 const reachOf = (row: InventoryRow): number => Number(row.specifications?.estimated_reach || row.specifications?.reach || 0);
 
+const venueTypeOf = (row: InventoryRow): string | null =>
+  row.specifications?.venue_type || row.specifications?.place_type || row.specifications?.category || null;
+
 const peso = (n: number) => `₱${Number(n || 0).toLocaleString()}`;
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const addDays = (iso: string, days: number) => {
@@ -738,30 +741,17 @@ export default function BrandAdvertiserInventory() {
                           <p className="text-sm font-medium text-gray-900 mb-3">Available locations</p>
                           <div className="grid sm:grid-cols-2 gap-3">
                             {matching.slice(0, 12).map((r) => (
-                              <Card key={r.id} className="overflow-hidden border border-gray-200">
-                                <div className="h-28 bg-gray-100">
-                                  {firstImage(r.media_urls) ? (
-                                    <img
-                                      src={firstImage(r.media_urls)!}
-                                      alt="Inventory location"
-                                      loading="lazy"
-                                      className="w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                      <Layers className="w-6 h-6" />
-                                    </div>
+                              <Card key={r.id} className="overflow-hidden border border-gray-200 p-3">
+                                <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
+                                  <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
+                                </p>
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {venueTypeOf(r) && (
+                                    <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
                                   )}
-                                </div>
-                                <div className="p-3">
-                                  <p className="text-xs text-gray-500 flex items-center gap-1 line-clamp-2">
-                                    <MapPin className="w-3 h-3 shrink-0" /> {r.location || "Location on request"}
-                                  </p>
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {rowTypes(r).map((t) => (
-                                      <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
-                                    ))}
-                                  </div>
+                                  {rowTypes(r).map((t) => (
+                                    <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
+                                  ))}
                                 </div>
                               </Card>
                             ))}
@@ -839,45 +829,38 @@ export default function BrandAdvertiserInventory() {
                   ) : (
                     <div className="grid sm:grid-cols-2 gap-3">
                       {visible.map((r) => {
-                        const img = firstImage(r.media_urls);
                         const selected = !!selections[r.id];
                         const cap = capacityOf(r);
                         return (
-                          <Card key={r.id} className={`overflow-hidden border ${selected ? "border-blue-600 ring-1 ring-blue-200" : "border-gray-200"}`}>
-                            <div className="h-32 bg-gray-100">
-                              {img ? (
-                                <img src={img} alt="Inventory location" loading="lazy" className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400"><Layers className="w-6 h-6" /></div>
+                          <Card key={r.id} className={`overflow-hidden border p-4 ${selected ? "border-blue-600 ring-1 ring-blue-200" : "border-gray-200"}`}>
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
+                                <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
+                              </p>
+                              {r.contact_verified_at && (
+                                <Badge className="bg-green-600 shrink-0 text-[10px]"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
                               )}
                             </div>
-                            <div className="p-4">
-                              <div className="flex items-start justify-between gap-2">
-                                <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
-                                  <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
-                                </p>
-                                {r.contact_verified_at && (
-                                  <Badge className="bg-green-600 shrink-0 text-[10px]"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
-                                )}
-                              </div>
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                {rowTypes(r).map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
-                                {cap && <Badge variant="outline">{cap} unit{cap > 1 ? "s" : ""}</Badge>}
-                                {reachOf(r) > 0 && <Badge variant="outline">{reachOf(r).toLocaleString()} reach</Badge>}
-                              </div>
-                              {r.description && <p className="text-xs text-gray-500 mt-2 line-clamp-2">{r.description}</p>}
-                              <div className="mt-3 flex items-center justify-between">
-                                <span className="text-sm font-semibold text-gray-900">
-                                  {monthlyRate(r) > 0 ? `${peso(monthlyRate(r))}/mo` : "Rate on request"}
-                                </span>
-                                <div className="flex gap-2">
-                                  <Button size="sm" variant="outline" onClick={() => window.open(`/brand-advertiser/inventory/${r.id}`, "_blank")}>
-                                    View Details
-                                  </Button>
-                                  <Button size="sm" variant={selected ? "default" : "outline"} onClick={() => toggleSelect(r)}>
-                                    {selected ? <><Check className="w-3 h-3 mr-1" />Selected</> : "Select"}
-                                  </Button>
-                                </div>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {venueTypeOf(r) && (
+                                <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
+                              )}
+                              {rowTypes(r).map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
+                              {cap && <Badge variant="outline">{cap} unit{cap > 1 ? "s" : ""}</Badge>}
+                              {reachOf(r) > 0 && <Badge variant="outline">{reachOf(r).toLocaleString()} reach</Badge>}
+                            </div>
+                            {r.description && <p className="text-xs text-gray-500 mt-2 line-clamp-2">{r.description}</p>}
+                            <div className="mt-3 flex items-center justify-between">
+                              <span className="text-sm font-semibold text-gray-900">
+                                {monthlyRate(r) > 0 ? `${peso(monthlyRate(r))}/mo` : "Rate on request"}
+                              </span>
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline" onClick={() => window.open(`/brand-advertiser/inventory/${r.id}`, "_blank")}>
+                                  View Details
+                                </Button>
+                                <Button size="sm" variant={selected ? "default" : "outline"} onClick={() => toggleSelect(r)}>
+                                  {selected ? <><Check className="w-3 h-3 mr-1" />Selected</> : "Select"}
+                                </Button>
                               </div>
                             </div>
                           </Card>
@@ -905,6 +888,9 @@ export default function BrandAdvertiserInventory() {
                                 <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
                               </p>
                               <div className="flex flex-wrap gap-1 mt-1">
+                                {venueTypeOf(r) && (
+                                  <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
+                                )}
                                 {rowTypes(r).map((t) => <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>)}
                               </div>
                             </div>
