@@ -4,10 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MapPin, Layers, Loader2 } from "lucide-react";
+import { Heart, MapPin, Layers, Loader2, Store } from "lucide-react";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 import { useAdvertiserProfile } from "@/hooks/useAdvertiserProfile";
-import { MarketplaceRow, firstImage, monthlyRate } from "./marketplace";
+import { MarketplaceRow, monthlyRate, venueTypeOf } from "./marketplace";
 
 export default function BrandAdvertiserSaved() {
   const { companyName, totalBudget } = useAdvertiserProfile();
@@ -64,24 +64,20 @@ export default function BrandAdvertiserSaved() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {rows.map((r) => (
               <Card key={r.id} className="overflow-hidden bg-white border-gray-200">
-                <Link to={`/brand-advertiser/inventory/${r.id}`}>
-                  <div className="h-36 bg-gray-100">
-                    {firstImage(r.media_urls) ? (
-                      <img src={firstImage(r.media_urls)!} alt={r.title} loading="lazy" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400"><Layers className="w-6 h-6" /></div>
-                    )}
-                  </div>
-                </Link>
                 <div className="p-4">
-                  <Link to={`/brand-advertiser/inventory/${r.id}`} className="font-medium text-gray-900 hover:underline line-clamp-1">
-                    {r.title}
-                  </Link>
-                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 line-clamp-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                      {venueTypeOf(r) ? <Store className="w-5 h-5 text-gray-400" /> : <Layers className="w-5 h-5 text-gray-400" />}
+                    </div>
+                    <Link to={`/brand-advertiser/inventory/${r.id}`} className="font-medium text-gray-900 hover:underline line-clamp-1 capitalize">
+                      {venueTypeOf(r) || "Ad Location"}
+                    </Link>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 flex items-center gap-1 line-clamp-1">
                     <MapPin className="w-3 h-3" /> {r.location || "Location on request"}
                   </p>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {(r.media_types?.length ? r.media_types : [r.media_type]).map((t) => (
+                    {(r.media_types?.length ? r.media_types : [r.media_type]).filter(Boolean).map((t) => (
                       <Badge key={String(t)} variant="secondary">{String(t)}</Badge>
                     ))}
                   </div>
