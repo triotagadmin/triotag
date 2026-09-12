@@ -77,7 +77,7 @@ export default function BrandAdvertiserBookings() {
                       <CalendarCheck className="w-7 h-7 text-gray-400" />
                       <p className="text-gray-900 font-medium mt-3">No bookings yet</p>
                       <p className="text-sm text-gray-500 mt-1">
-                        Book inventory from <Link to="/brand-advertiser/discover" className="underline">Discover Inventory</Link>.
+                        Book inventory from the <Link to="/brand-advertiser/inventory" className="underline">Ad Inventory</Link> wizard.
                       </p>
                     </div>
                   </TableCell>

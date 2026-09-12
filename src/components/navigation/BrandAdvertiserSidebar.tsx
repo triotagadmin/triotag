@@ -11,7 +11,7 @@ import { SidebarFrame, SidebarItem } from "./SidebarFrame";
  */
 const BRAND_ADVERTISER_NAV: SidebarItem[] = [
   { to: "/brand-advertiser/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/brand-advertiser/discover", label: "Discover Inventory", icon: Compass },
+  
   { to: "/brand-advertiser/inventory", label: "Ad Inventory", icon: Package },
   { to: "/brand-advertiser/saved", label: "Saved Inventory", icon: Heart },
   { to: "/brand-advertiser/campaigns", label: "Campaigns", icon: Megaphone },
