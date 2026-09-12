@@ -57,8 +57,8 @@ export default function BrandAdvertiserSaved() {
           <Card className="p-14 text-center bg-white border-gray-200">
             <Heart className="w-8 h-8 text-gray-400 mx-auto" />
             <p className="text-gray-900 font-medium mt-3">Nothing saved yet</p>
-            <p className="text-sm text-gray-500 mt-1">Save listings from Discover Inventory to compare them later.</p>
-            <Button asChild className="mt-4"><Link to="/brand-advertiser/discover">Discover inventory</Link></Button>
+            <p className="text-sm text-gray-500 mt-1">Save listings from your campaign wizard to compare them later.</p>
+            <Button asChild className="mt-4"><Link to="/brand-advertiser/inventory">Browse Ad Inventory</Link></Button>
           </Card>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

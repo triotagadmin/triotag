@@ -78,7 +78,7 @@ export default function BrandAdvertiserInventoryDetail() {
         <div className="max-w-3xl mx-auto px-6 py-20 text-center">
           <p className="text-gray-900 font-medium">This listing isn't available</p>
           <p className="text-sm text-gray-500 mt-1">It may no longer be approved or available for advertising.</p>
-          <Button className="mt-4" onClick={() => navigate("/brand-advertiser/discover")}>Back to Discover</Button>
+          <Button className="mt-4" onClick={() => navigate("/brand-advertiser/inventory")}>Back to Ad Inventory</Button>
         </div>
       </div>
     );
@@ -91,8 +91,8 @@ export default function BrandAdvertiserInventoryDetail() {
     <div className="min-h-screen bg-gray-50">
       <BrandAdvertiserTopBar companyName={companyName} totalBudget={totalBudget} />
       <div className="max-w-6xl mx-auto px-6 py-6">
-        <Link to="/brand-advertiser/discover" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4">
-          <ArrowLeft className="w-4 h-4" /> Back to Discover
+        <Link to="/brand-advertiser/inventory" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4">
+          <ArrowLeft className="w-4 h-4" /> Back to Ad Inventory
         </Link>
 
         <div className="grid lg:grid-cols-3 gap-6">
