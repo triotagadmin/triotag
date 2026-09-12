@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, MapPin, Layers, Loader2 } from "lucide-react";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 import { useAdvertiserProfile } from "@/hooks/useAdvertiserProfile";
-import { MarketplaceRow, firstImage, monthlyRate } from "./BrandAdvertiserDiscover";
+import { MarketplaceRow, firstImage, monthlyRate } from "./marketplace";
 
 export default function BrandAdvertiserSaved() {
   const { companyName, totalBudget } = useAdvertiserProfile();

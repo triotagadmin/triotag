@@ -8,7 +8,7 @@ import { ArrowLeft, MapPin, Heart, Layers, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import BrandAdvertiserTopBar from "@/components/brand-advertiser/BrandAdvertiserTopBar";
 import { useAdvertiserProfile } from "@/hooks/useAdvertiserProfile";
-import { MarketplaceRow, firstImage, monthlyRate } from "./BrandAdvertiserDiscover";
+import { MarketplaceRow, firstImage, monthlyRate } from "./marketplace";
 
 export default function BrandAdvertiserInventoryDetail() {
   const { id } = useParams();
