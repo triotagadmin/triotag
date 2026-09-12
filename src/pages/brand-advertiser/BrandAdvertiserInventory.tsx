@@ -738,24 +738,56 @@ export default function BrandAdvertiserInventory() {
 
                       {matching.length > 0 && (
                         <div className="mt-6">
-                          <p className="text-sm font-medium text-gray-900 mb-3">Available locations</p>
-                          <div className="grid sm:grid-cols-2 gap-3">
-                            {matching.slice(0, 12).map((r) => (
-                              <Card key={r.id} className="overflow-hidden border border-gray-200 p-3">
-                                <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
-                                  <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
-                                </p>
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {venueTypeOf(r) && (
-                                    <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
-                                  )}
-                                  {rowTypes(r).map((t) => (
-                                    <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
-                                  ))}
-                                </div>
-                              </Card>
-                            ))}
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-sm font-medium text-gray-900">Available locations</p>
+                            {selectedIds.length > 0 && (
+                              <Badge className="bg-blue-600">{selectedIds.length} selected</Badge>
+                            )}
                           </div>
+                          <div className="grid sm:grid-cols-2 gap-3">
+                            {matching.slice(0, 12).map((r) => {
+                              const selected = !!selections[r.id];
+                              return (
+                                <Card
+                                  key={r.id}
+                                  className={`overflow-hidden border p-3 cursor-pointer transition-all ${
+                                    selected ? "border-blue-600 ring-1 ring-blue-200 bg-blue-50/40" : "border-gray-200 hover:border-gray-300"
+                                  }`}
+                                  onClick={() => toggleSelect(r)}
+                                >
+                                  <div className="flex items-start justify-between gap-2">
+                                    <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
+                                      <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
+                                    </p>
+                                    {selected && (
+                                      <span className="shrink-0 w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center">
+                                        <Check className="w-3 h-3" />
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {venueTypeOf(r) && (
+                                      <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
+                                    )}
+                                    {rowTypes(r).map((t) => (
+                                      <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
+                                    ))}
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant={selected ? "default" : "outline"}
+                                    className="mt-3 w-full"
+                                    onClick={(e) => { e.stopPropagation(); toggleSelect(r); }}
+                                  >
+                                    {selected ? <><Check className="w-3 h-3 mr-1" />Selected</> : "Select this location"}
+                                  </Button>
+                                </Card>
+                              );
+                            })}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-3">
+                            Tap a location to add it to your campaign. You can review and refine your choices in the next step.
+                          </p>
                           {matching.length > 12 && (
                             <p className="text-xs text-gray-400 mt-3 text-center">
                               {matching.length - 12} more location{matching.length - 12 === 1 ? "" : "s"} available — continue to step 5 to browse all.
