@@ -707,13 +707,13 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 4 */}
+              {/* STEP 4 — scan + select inventory (merged) */}
               {step === 4 && (
                 <>
                   <StepHeader
                     n={4}
-                    title="Scanning the TrioTag inventory network"
-                    hint="We search every approved and available location across the platform — you never have to pick a partner."
+                    title="Choose your inventory"
+                    hint="Browse every approved location across the TrioTag network and select at least 1 location for this campaign."
                   />
                   {loadingInv ? (
                     <div className="flex items-center gap-2 text-gray-500 py-10 justify-center">
@@ -743,165 +743,121 @@ export default function BrandAdvertiserInventory() {
                         <div className="mt-6">
                           <div className="flex items-center justify-between mb-3">
                             <p className="text-sm font-medium text-gray-900">Available locations</p>
-                            {selectedIds.length > 0 && (
-                              <Badge className="bg-blue-600">{selectedIds.length} selected</Badge>
-                            )}
+                            <Badge className={selectedIds.length > 0 ? "bg-blue-600" : "bg-gray-400"}>
+                              {selectedIds.length} selected{selectedIds.length === 0 ? " — pick at least 1" : ""}
+                            </Badge>
                           </div>
-                          <div className="grid sm:grid-cols-2 gap-3">
-                            {matching.slice(0, 12).map((r) => {
-                              const selected = !!selections[r.id];
-                              return (
-                                <Card
-                                  key={r.id}
-                                  className={`overflow-hidden border p-3 cursor-pointer transition-all ${
-                                    selected ? "border-blue-600 ring-1 ring-blue-200 bg-blue-50/40" : "border-gray-200 hover:border-gray-300"
-                                  }`}
-                                  onClick={() => toggleSelect(r)}
-                                >
-                                  <div className="flex items-start justify-between gap-2">
-                                    <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
-                                      <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
-                                    </p>
-                                    {selected && (
-                                      <span className="shrink-0 w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center">
-                                        <Check className="w-3 h-3" />
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {venueTypeOf(r) && (
-                                      <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
-                                    )}
-                                    {rowTypes(r).map((t) => (
-                                      <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
-                                    ))}
-                                  </div>
-                                  <Button
-                                    size="sm"
-                                    variant={selected ? "default" : "outline"}
-                                    className="mt-3 w-full"
-                                    onClick={(e) => { e.stopPropagation(); toggleSelect(r); }}
+
+                          <div className="grid md:grid-cols-4 gap-2 mb-4">
+                            <div className="relative md:col-span-2">
+                              <SearchIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                              <Input
+                                value={q}
+                                onChange={(e) => setQ(e.target.value)}
+                                placeholder="Search inventory"
+                                className="pl-9 bg-white text-gray-900"
+                              />
+                            </div>
+                            <Select value={cityFilter} onValueChange={setCityFilter}>
+                              <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="City" /></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                <SelectItem value="all">All cities</SelectItem>
+                                {cities.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                            <Select value={sortBy} onValueChange={setSortBy}>
+                              <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Sort by" /></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                <SelectItem value="relevance">Sort: Relevance</SelectItem>
+                                <SelectItem value="price">Sort: Price</SelectItem>
+                                <SelectItem value="location">Sort: Location</SelectItem>
+                                <SelectItem value="reach">Sort: Reach</SelectItem>
+                                <SelectItem value="availability">Sort: Availability</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Input
+                              value={maxPrice}
+                              onChange={(e) => setMaxPrice(e.target.value.replace(/[^0-9]/g, ""))}
+                              placeholder="Max ₱ / month"
+                              className="bg-white text-gray-900"
+                            />
+                            <Input
+                              value={minReach}
+                              onChange={(e) => setMinReach(e.target.value.replace(/[^0-9]/g, ""))}
+                              placeholder="Min reach"
+                              className="bg-white text-gray-900"
+                            />
+                            <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+                              <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Availability" /></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                <SelectItem value="all">Any availability</SelectItem>
+                                <SelectItem value="available">Available now</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {visible.length === 0 ? (
+                            <p className="text-sm text-gray-500 py-10 text-center">No inventory matches these filters.</p>
+                          ) : (
+                            <div className="grid sm:grid-cols-2 gap-3">
+                              {visible.map((r) => {
+                                const selected = !!selections[r.id];
+                                const cap = capacityOf(r);
+                                return (
+                                  <Card
+                                    key={r.id}
+                                    className={`overflow-hidden border p-4 cursor-pointer transition-all ${
+                                      selected ? "border-blue-600 ring-1 ring-blue-200 bg-blue-50/40" : "border-gray-200 hover:border-gray-300"
+                                    }`}
+                                    onClick={() => toggleSelect(r)}
                                   >
-                                    {selected ? <><Check className="w-3 h-3 mr-1" />Selected</> : "Select this location"}
-                                  </Button>
-                                </Card>
-                              );
-                            })}
-                          </div>
-                          <p className="text-xs text-gray-500 mt-3">
-                            Tap a location to add it to your campaign. You can review and refine your choices in the next step.
-                          </p>
-                          {matching.length > 12 && (
-                            <p className="text-xs text-gray-400 mt-3 text-center">
-                              {matching.length - 12} more location{matching.length - 12 === 1 ? "" : "s"} available — continue to step 5 to browse all.
-                            </p>
+                                    <div className="flex items-start justify-between gap-2">
+                                      <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
+                                        <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
+                                      </p>
+                                      <div className="flex items-center gap-2 shrink-0">
+                                        {r.contact_verified_at && (
+                                          <Badge className="bg-green-600 text-[10px]"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
+                                        )}
+                                        {selected && (
+                                          <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center">
+                                            <Check className="w-3 h-3" />
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                      {venueTypeOf(r) && (
+                                        <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
+                                      )}
+                                      {rowTypes(r).map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
+                                      {cap && <Badge variant="outline">{cap} unit{cap > 1 ? "s" : ""}</Badge>}
+                                      {reachOf(r) > 0 && <Badge variant="outline">{reachOf(r).toLocaleString()} reach</Badge>}
+                                    </div>
+                                    {r.description && <p className="text-xs text-gray-500 mt-2 line-clamp-2">{r.description}</p>}
+                                    <div className="mt-3 flex items-center justify-between">
+                                      <span className="text-sm font-semibold text-gray-900">
+                                        {monthlyRate(r) > 0 ? `${peso(monthlyRate(r))}/mo` : "Rate on request"}
+                                      </span>
+                                      <Button
+                                        size="sm"
+                                        variant={selected ? "default" : "outline"}
+                                        onClick={(e) => { e.stopPropagation(); toggleSelect(r); }}
+                                      >
+                                        {selected ? <><Check className="w-3 h-3 mr-1" />Selected</> : "Select"}
+                                      </Button>
+                                    </div>
+                                  </Card>
+                                );
+                              })}
+                            </div>
                           )}
+                          <p className="text-xs text-gray-500 mt-3">
+                            Tap a location to add or remove it from your campaign. At least 1 location is required to continue.
+                          </p>
                         </div>
                       )}
                     </>
-                  )}
-                </>
-              )}
-
-              {/* STEP 5 */}
-              {step === 5 && (
-                <>
-                  <StepHeader n={5} title="Select your inventory" hint="Choose the locations you want in this campaign." />
-                  <div className="grid md:grid-cols-4 gap-2 mb-4">
-                    <div className="relative md:col-span-2">
-                      <SearchIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <Input
-                        value={q}
-                        onChange={(e) => setQ(e.target.value)}
-                        placeholder="Search inventory"
-                        className="pl-9 bg-white text-gray-900"
-                      />
-                    </div>
-                    <Select value={cityFilter} onValueChange={setCityFilter}>
-                      <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="City" /></SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="all">All cities</SelectItem>
-                        {cities.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Sort by" /></SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="relevance">Sort: Relevance</SelectItem>
-                        <SelectItem value="price">Sort: Price</SelectItem>
-                        <SelectItem value="location">Sort: Location</SelectItem>
-                        <SelectItem value="reach">Sort: Reach</SelectItem>
-                        <SelectItem value="availability">Sort: Availability</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(e.target.value.replace(/[^0-9]/g, ""))}
-                      placeholder="Max ₱ / month"
-                      className="bg-white text-gray-900"
-                    />
-                    <Input
-                      value={minReach}
-                      onChange={(e) => setMinReach(e.target.value.replace(/[^0-9]/g, ""))}
-                      placeholder="Min reach"
-                      className="bg-white text-gray-900"
-                    />
-                    <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
-                      <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Availability" /></SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="all">Any availability</SelectItem>
-                        <SelectItem value="available">Available now</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {loadingInv ? (
-                    <div className="flex items-center gap-2 text-gray-500 py-10 justify-center">
-                      <Loader2 className="w-5 h-5 animate-spin" /> Loading inventory...
-                    </div>
-                  ) : visible.length === 0 ? (
-                    <p className="text-sm text-gray-500 py-10 text-center">No inventory matches these filters.</p>
-                  ) : (
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      {visible.map((r) => {
-                        const selected = !!selections[r.id];
-                        const cap = capacityOf(r);
-                        return (
-                          <Card key={r.id} className={`overflow-hidden border p-4 ${selected ? "border-blue-600 ring-1 ring-blue-200" : "border-gray-200"}`}>
-                            <div className="flex items-start justify-between gap-2">
-                              <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
-                                <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
-                              </p>
-                              {r.contact_verified_at && (
-                                <Badge className="bg-green-600 shrink-0 text-[10px]"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
-                              )}
-                            </div>
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {venueTypeOf(r) && (
-                                <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
-                              )}
-                              {rowTypes(r).map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
-                              {cap && <Badge variant="outline">{cap} unit{cap > 1 ? "s" : ""}</Badge>}
-                              {reachOf(r) > 0 && <Badge variant="outline">{reachOf(r).toLocaleString()} reach</Badge>}
-                            </div>
-                            {r.description && <p className="text-xs text-gray-500 mt-2 line-clamp-2">{r.description}</p>}
-                            <div className="mt-3 flex items-center justify-between">
-                              <span className="text-sm font-semibold text-gray-900">
-                                {monthlyRate(r) > 0 ? `${peso(monthlyRate(r))}/mo` : "Rate on request"}
-                              </span>
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="outline" onClick={() => window.open(`/brand-advertiser/inventory/${r.id}`, "_blank")}>
-                                  View Details
-                                </Button>
-                                <Button size="sm" variant={selected ? "default" : "outline"} onClick={() => toggleSelect(r)}>
-                                  {selected ? <><Check className="w-3 h-3 mr-1" />Selected</> : "Select"}
-                                </Button>
-                              </div>
-                            </div>
-                          </Card>
-                        );
-                      })}
-                    </div>
                   )}
                 </>
               )}
