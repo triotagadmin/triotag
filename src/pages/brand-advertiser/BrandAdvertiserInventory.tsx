@@ -936,7 +936,7 @@ export default function BrandAdvertiserInventory() {
               )}
 
               {/* STEP 5 */}
-              {step === 5 && (
+              {step === 6 && (
                 <>
                   <StepHeader n={7} title="When should your campaign run?" hint="We check live availability for your selected inventory." />
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -1003,7 +1003,7 @@ export default function BrandAdvertiserInventory() {
               )}
 
               {/* STEP 5 */}
-              {step === 5 && (
+              {step === 7 && (
                 <>
                   <StepHeader n={8} title="Who are you trying to reach?" hint="Optional — share what you know about your audience." />
                   <div className="grid sm:grid-cols-2 gap-3">
@@ -1038,7 +1038,7 @@ export default function BrandAdvertiserInventory() {
               )}
 
               {/* STEP 5 */}
-              {step === 5 && (
+              {step === 8 && (
                 <>
                   <StepHeader n={9} title="What is your campaign budget?" hint="All amounts in Philippine Peso (PHP)." />
                   <div className="grid sm:grid-cols-3 gap-3">
@@ -1058,7 +1058,7 @@ export default function BrandAdvertiserInventory() {
               )}
 
               {/* STEP 5 */}
-              {step === 5 && (
+              {step === 9 && (
                 <>
                   <StepHeader n={10} title="Do you already have your advertising creative?" hint="We can also produce it for you." />
                   <div className="grid sm:grid-cols-3 gap-3">
@@ -1133,7 +1133,7 @@ export default function BrandAdvertiserInventory() {
               )}
 
               {/* STEP 5 */}
-              {step === 5 && (
+              {step === 10 && (
                 <>
                   <StepHeader n={11} title="Review your campaign" hint="Check everything before requesting your proposal." />
                   <div className="space-y-3">
@@ -1169,7 +1169,7 @@ export default function BrandAdvertiserInventory() {
               )}
 
               {/* STEP 5 */}
-              {step === 5 && (
+              {step === 11 && (
                 <div className="text-center py-8">
                   {submitted ? (
                     <>
