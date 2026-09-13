@@ -42,15 +42,14 @@ const STEPS = [
   { n: 1, key: "type", label: "Campaign", icon: Target },
   { n: 2, key: "media", label: "Media", icon: Monitor },
   { n: 3, key: "objective", label: "Objective", icon: ClipboardCheck },
-  { n: 4, key: "discovery", label: "Inventory", icon: SearchIcon },
-  { n: 5, key: "selection", label: "Selection", icon: Layers },
-  { n: 6, key: "format", label: "Format", icon: ImageIcon },
-  { n: 7, key: "duration", label: "Duration", icon: CalendarIcon },
-  { n: 8, key: "audience", label: "Audience", icon: Users },
-  { n: 9, key: "budget", label: "Budget", icon: Wallet },
-  { n: 10, key: "creative", label: "Creative", icon: Palette },
-  { n: 11, key: "review", label: "Review", icon: ClipboardCheck },
-  { n: 12, key: "submit", label: "Submit", icon: Send },
+  { n: 4, key: "inventory", label: "Inventory", icon: SearchIcon },
+  { n: 5, key: "format", label: "Format", icon: ImageIcon },
+  { n: 6, key: "duration", label: "Duration", icon: CalendarIcon },
+  { n: 7, key: "audience", label: "Audience", icon: Users },
+  { n: 8, key: "budget", label: "Budget", icon: Wallet },
+  { n: 9, key: "creative", label: "Creative", icon: Palette },
+  { n: 10, key: "review", label: "Review", icon: ClipboardCheck },
+  { n: 11, key: "submit", label: "Submit", icon: Send },
 ];
 
 const CAMPAIGN_TYPES = [
@@ -251,7 +250,9 @@ export default function BrandAdvertiserInventory() {
         setCreativeMode((draft as any).creative_mode || "");
         setCreativeSetId(draft.creative_set_id || null);
         if ((draft as any).creative_requirements) setCreativeReq((c: any) => ({ ...c, ...(draft as any).creative_requirements }));
-        setStep(Math.min(11, Math.max(1, (draft as any).wizard_step || 1)));
+        // drafts saved before steps 4+5 were merged store the old numbering — shift steps 5+ down by one
+        const savedStep = Math.min(11, Math.max(1, (draft as any).wizard_step || 1));
+        setStep(savedStep >= 5 ? savedStep - 1 : savedStep);
         toast.info("We restored your saved campaign draft.");
       }
       setLoadingDraft(false);
@@ -272,11 +273,11 @@ export default function BrandAdvertiserInventory() {
   }, []);
 
   useEffect(() => {
-    if (step === 4 || step === 5) loadInventory();
+    if (step === 4) loadInventory();
   }, [step, loadInventory]);
 
   useEffect(() => {
-    if (step !== 10 || !profileId) return;
+    if (step !== 9 || !profileId) return;
     (async () => {
       const { data } = await supabase
         .from("brand_creative_sets")
@@ -426,26 +427,28 @@ export default function BrandAdvertiserInventory() {
       case 1: return !!campaignType && !!campaignName.trim();
       case 2: return mediaTypes.length > 0;
       case 3: return !!objective;
-      case 4: return true;
-      case 5: return selectedIds.length > 0;
-      case 6: return selectedIds.every((id) => !!selections[id].adFormat);
-      case 7: return !!startDate && !!endDate && new Date(endDate) >= new Date(startDate);
-      case 8: return true;
-      case 9: return Number(budget) > 0;
-      case 10: return !!creativeMode;
-      case 11: return true;
+      case 4: return selectedIds.length > 0; // at least 1 location required
+      case 5: return selectedIds.every((id) => !!selections[id].adFormat);
+      case 6: return !!startDate && !!endDate && new Date(endDate) >= new Date(startDate);
+      case 7: return true;
+      case 8: return Number(budget) > 0;
+      case 9: return !!creativeMode;
+      case 10: return true;
       default: return true;
     }
   };
 
   const next = async () => {
-    if (!canContinue()) { toast.error("Please complete this step before continuing."); return; }
-    if (step === 7) {
+    if (!canContinue()) {
+      toast.error(step === 4 ? "Please select at least 1 location before continuing." : "Please complete this step before continuing.");
+      return;
+    }
+    if (step === 6) {
       const ok = await runAvailabilityCheck();
       if (!ok) return;
     }
     await saveDraft(true);
-    setStep((s) => Math.min(12, s + 1));
+    setStep((s) => Math.min(11, s + 1));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -489,12 +492,12 @@ export default function BrandAdvertiserInventory() {
       if (data?.error) {
         setAvailabilityIssues(data.problems || []);
         toast.error(data.error);
-        setStep(7);
+        setStep(6);
         return;
       }
       setSubmitted({ ref: data.campaignRef, id: data.campaignId });
       setDraftId(null);
-      setStep(12);
+      setStep(11);
       toast.success(`Campaign request ${data.campaignRef} submitted for review.`);
     } catch (e: any) {
       toast.error(e.message || "Could not submit the campaign request");
