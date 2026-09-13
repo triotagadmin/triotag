@@ -21,7 +21,6 @@ import {
   Check,
   Save,
   Loader2,
-  Layers,
   Calendar as CalendarIcon,
   Users,
   Wallet,
@@ -42,15 +41,14 @@ const STEPS = [
   { n: 1, key: "type", label: "Campaign", icon: Target },
   { n: 2, key: "media", label: "Media", icon: Monitor },
   { n: 3, key: "objective", label: "Objective", icon: ClipboardCheck },
-  { n: 4, key: "discovery", label: "Inventory", icon: SearchIcon },
-  { n: 5, key: "selection", label: "Selection", icon: Layers },
-  { n: 6, key: "format", label: "Format", icon: ImageIcon },
-  { n: 7, key: "duration", label: "Duration", icon: CalendarIcon },
-  { n: 8, key: "audience", label: "Audience", icon: Users },
-  { n: 9, key: "budget", label: "Budget", icon: Wallet },
-  { n: 10, key: "creative", label: "Creative", icon: Palette },
-  { n: 11, key: "review", label: "Review", icon: ClipboardCheck },
-  { n: 12, key: "submit", label: "Submit", icon: Send },
+  { n: 4, key: "inventory", label: "Inventory", icon: SearchIcon },
+  { n: 5, key: "format", label: "Format", icon: ImageIcon },
+  { n: 6, key: "duration", label: "Duration", icon: CalendarIcon },
+  { n: 7, key: "audience", label: "Audience", icon: Users },
+  { n: 8, key: "budget", label: "Budget", icon: Wallet },
+  { n: 9, key: "creative", label: "Creative", icon: Palette },
+  { n: 10, key: "review", label: "Review", icon: ClipboardCheck },
+  { n: 11, key: "submit", label: "Submit", icon: Send },
 ];
 
 const CAMPAIGN_TYPES = [
@@ -251,7 +249,9 @@ export default function BrandAdvertiserInventory() {
         setCreativeMode((draft as any).creative_mode || "");
         setCreativeSetId(draft.creative_set_id || null);
         if ((draft as any).creative_requirements) setCreativeReq((c: any) => ({ ...c, ...(draft as any).creative_requirements }));
-        setStep(Math.min(11, Math.max(1, (draft as any).wizard_step || 1)));
+        // drafts saved before steps 4+5 were merged store the old numbering — shift steps 5+ down by one
+        const savedStep = Math.min(11, Math.max(1, (draft as any).wizard_step || 1));
+        setStep(savedStep >= 5 ? savedStep - 1 : savedStep);
         toast.info("We restored your saved campaign draft.");
       }
       setLoadingDraft(false);
@@ -272,11 +272,11 @@ export default function BrandAdvertiserInventory() {
   }, []);
 
   useEffect(() => {
-    if (step === 4 || step === 5) loadInventory();
+    if (step === 4) loadInventory();
   }, [step, loadInventory]);
 
   useEffect(() => {
-    if (step !== 10 || !profileId) return;
+    if (step !== 9 || !profileId) return;
     (async () => {
       const { data } = await supabase
         .from("brand_creative_sets")
@@ -426,26 +426,28 @@ export default function BrandAdvertiserInventory() {
       case 1: return !!campaignType && !!campaignName.trim();
       case 2: return mediaTypes.length > 0;
       case 3: return !!objective;
-      case 4: return true;
-      case 5: return selectedIds.length > 0;
-      case 6: return selectedIds.every((id) => !!selections[id].adFormat);
-      case 7: return !!startDate && !!endDate && new Date(endDate) >= new Date(startDate);
-      case 8: return true;
-      case 9: return Number(budget) > 0;
-      case 10: return !!creativeMode;
-      case 11: return true;
+      case 4: return selectedIds.length > 0; // at least 1 location required
+      case 5: return selectedIds.every((id) => !!selections[id].adFormat);
+      case 6: return !!startDate && !!endDate && new Date(endDate) >= new Date(startDate);
+      case 7: return true;
+      case 8: return Number(budget) > 0;
+      case 9: return !!creativeMode;
+      case 10: return true;
       default: return true;
     }
   };
 
   const next = async () => {
-    if (!canContinue()) { toast.error("Please complete this step before continuing."); return; }
-    if (step === 7) {
+    if (!canContinue()) {
+      toast.error(step === 4 ? "Please select at least 1 location before continuing." : "Please complete this step before continuing.");
+      return;
+    }
+    if (step === 6) {
       const ok = await runAvailabilityCheck();
       if (!ok) return;
     }
     await saveDraft(true);
-    setStep((s) => Math.min(12, s + 1));
+    setStep((s) => Math.min(11, s + 1));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -489,12 +491,12 @@ export default function BrandAdvertiserInventory() {
       if (data?.error) {
         setAvailabilityIssues(data.problems || []);
         toast.error(data.error);
-        setStep(7);
+        setStep(6);
         return;
       }
       setSubmitted({ ref: data.campaignRef, id: data.campaignId });
       setDraftId(null);
-      setStep(12);
+      setStep(11);
       toast.success(`Campaign request ${data.campaignRef} submitted for review.`);
     } catch (e: any) {
       toast.error(e.message || "Could not submit the campaign request");
@@ -514,7 +516,7 @@ export default function BrandAdvertiserInventory() {
 
   const StepHeader = ({ n, title, hint }: { n: number; title: string; hint: string }) => (
     <div className="mb-5">
-      <p className="text-xs font-semibold tracking-wide text-blue-600">STEP {n} OF 12</p>
+      <p className="text-xs font-semibold tracking-wide text-blue-600">STEP {n} OF 11</p>
       <h2 className="text-xl font-semibold text-gray-900 mt-1">{title}</h2>
       <p className="text-sm text-gray-500 mt-1">{hint}</p>
     </div>
@@ -704,13 +706,13 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 4 */}
+              {/* STEP 4 — scan + select inventory (merged) */}
               {step === 4 && (
                 <>
                   <StepHeader
                     n={4}
-                    title="Scanning the TrioTag inventory network"
-                    hint="We search every approved and available location across the platform — you never have to pick a partner."
+                    title="Choose your inventory"
+                    hint="Browse every approved location across the TrioTag network and select at least 1 location for this campaign."
                   />
                   {loadingInv ? (
                     <div className="flex items-center gap-2 text-gray-500 py-10 justify-center">
@@ -740,59 +742,118 @@ export default function BrandAdvertiserInventory() {
                         <div className="mt-6">
                           <div className="flex items-center justify-between mb-3">
                             <p className="text-sm font-medium text-gray-900">Available locations</p>
-                            {selectedIds.length > 0 && (
-                              <Badge className="bg-blue-600">{selectedIds.length} selected</Badge>
-                            )}
+                            <Badge className={selectedIds.length > 0 ? "bg-blue-600" : "bg-gray-400"}>
+                              {selectedIds.length} selected{selectedIds.length === 0 ? " — pick at least 1" : ""}
+                            </Badge>
                           </div>
-                          <div className="grid sm:grid-cols-2 gap-3">
-                            {matching.slice(0, 12).map((r) => {
-                              const selected = !!selections[r.id];
-                              return (
-                                <Card
-                                  key={r.id}
-                                  className={`overflow-hidden border p-3 cursor-pointer transition-all ${
-                                    selected ? "border-blue-600 ring-1 ring-blue-200 bg-blue-50/40" : "border-gray-200 hover:border-gray-300"
-                                  }`}
-                                  onClick={() => toggleSelect(r)}
-                                >
-                                  <div className="flex items-start justify-between gap-2">
-                                    <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
-                                      <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
-                                    </p>
-                                    {selected && (
-                                      <span className="shrink-0 w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center">
-                                        <Check className="w-3 h-3" />
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {venueTypeOf(r) && (
-                                      <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
-                                    )}
-                                    {rowTypes(r).map((t) => (
-                                      <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
-                                    ))}
-                                  </div>
-                                  <Button
-                                    size="sm"
-                                    variant={selected ? "default" : "outline"}
-                                    className="mt-3 w-full"
-                                    onClick={(e) => { e.stopPropagation(); toggleSelect(r); }}
+
+                          <div className="grid md:grid-cols-4 gap-2 mb-4">
+                            <div className="relative md:col-span-2">
+                              <SearchIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                              <Input
+                                value={q}
+                                onChange={(e) => setQ(e.target.value)}
+                                placeholder="Search inventory"
+                                className="pl-9 bg-white text-gray-900"
+                              />
+                            </div>
+                            <Select value={cityFilter} onValueChange={setCityFilter}>
+                              <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="City" /></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                <SelectItem value="all">All cities</SelectItem>
+                                {cities.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                            <Select value={sortBy} onValueChange={setSortBy}>
+                              <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Sort by" /></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                <SelectItem value="relevance">Sort: Relevance</SelectItem>
+                                <SelectItem value="price">Sort: Price</SelectItem>
+                                <SelectItem value="location">Sort: Location</SelectItem>
+                                <SelectItem value="reach">Sort: Reach</SelectItem>
+                                <SelectItem value="availability">Sort: Availability</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Input
+                              value={maxPrice}
+                              onChange={(e) => setMaxPrice(e.target.value.replace(/[^0-9]/g, ""))}
+                              placeholder="Max ₱ / month"
+                              className="bg-white text-gray-900"
+                            />
+                            <Input
+                              value={minReach}
+                              onChange={(e) => setMinReach(e.target.value.replace(/[^0-9]/g, ""))}
+                              placeholder="Min reach"
+                              className="bg-white text-gray-900"
+                            />
+                            <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+                              <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Availability" /></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                <SelectItem value="all">Any availability</SelectItem>
+                                <SelectItem value="available">Available now</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {visible.length === 0 ? (
+                            <p className="text-sm text-gray-500 py-10 text-center">No inventory matches these filters.</p>
+                          ) : (
+                            <div className="grid sm:grid-cols-2 gap-3">
+                              {visible.map((r) => {
+                                const selected = !!selections[r.id];
+                                const cap = capacityOf(r);
+                                return (
+                                  <Card
+                                    key={r.id}
+                                    className={`overflow-hidden border p-4 cursor-pointer transition-all ${
+                                      selected ? "border-blue-600 ring-1 ring-blue-200 bg-blue-50/40" : "border-gray-200 hover:border-gray-300"
+                                    }`}
+                                    onClick={() => toggleSelect(r)}
                                   >
-                                    {selected ? <><Check className="w-3 h-3 mr-1" />Selected</> : "Select this location"}
-                                  </Button>
-                                </Card>
-                              );
-                            })}
-                          </div>
-                          <p className="text-xs text-gray-500 mt-3">
-                            Tap a location to add it to your campaign. You can review and refine your choices in the next step.
-                          </p>
-                          {matching.length > 12 && (
-                            <p className="text-xs text-gray-400 mt-3 text-center">
-                              {matching.length - 12} more location{matching.length - 12 === 1 ? "" : "s"} available — continue to step 5 to browse all.
-                            </p>
+                                    <div className="flex items-start justify-between gap-2">
+                                      <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
+                                        <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
+                                      </p>
+                                      <div className="flex items-center gap-2 shrink-0">
+                                        {r.contact_verified_at && (
+                                          <Badge className="bg-green-600 text-[10px]"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
+                                        )}
+                                        {selected && (
+                                          <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center">
+                                            <Check className="w-3 h-3" />
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                      {venueTypeOf(r) && (
+                                        <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
+                                      )}
+                                      {rowTypes(r).map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
+                                      {cap && <Badge variant="outline">{cap} unit{cap > 1 ? "s" : ""}</Badge>}
+                                      {reachOf(r) > 0 && <Badge variant="outline">{reachOf(r).toLocaleString()} reach</Badge>}
+                                    </div>
+                                    {r.description && <p className="text-xs text-gray-500 mt-2 line-clamp-2">{r.description}</p>}
+                                    <div className="mt-3 flex items-center justify-between">
+                                      <span className="text-sm font-semibold text-gray-900">
+                                        {monthlyRate(r) > 0 ? `${peso(monthlyRate(r))}/mo` : "Rate on request"}
+                                      </span>
+                                      <Button
+                                        size="sm"
+                                        variant={selected ? "default" : "outline"}
+                                        onClick={(e) => { e.stopPropagation(); toggleSelect(r); }}
+                                      >
+                                        {selected ? <><Check className="w-3 h-3 mr-1" />Selected</> : "Select"}
+                                      </Button>
+                                    </div>
+                                  </Card>
+                                );
+                              })}
+                            </div>
                           )}
+                          <p className="text-xs text-gray-500 mt-3">
+                            Tap a location to add or remove it from your campaign. At least 1 location is required to continue.
+                          </p>
                         </div>
                       )}
                     </>
@@ -803,110 +864,7 @@ export default function BrandAdvertiserInventory() {
               {/* STEP 5 */}
               {step === 5 && (
                 <>
-                  <StepHeader n={5} title="Select your inventory" hint="Choose the locations you want in this campaign." />
-                  <div className="grid md:grid-cols-4 gap-2 mb-4">
-                    <div className="relative md:col-span-2">
-                      <SearchIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <Input
-                        value={q}
-                        onChange={(e) => setQ(e.target.value)}
-                        placeholder="Search inventory"
-                        className="pl-9 bg-white text-gray-900"
-                      />
-                    </div>
-                    <Select value={cityFilter} onValueChange={setCityFilter}>
-                      <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="City" /></SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="all">All cities</SelectItem>
-                        {cities.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Sort by" /></SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="relevance">Sort: Relevance</SelectItem>
-                        <SelectItem value="price">Sort: Price</SelectItem>
-                        <SelectItem value="location">Sort: Location</SelectItem>
-                        <SelectItem value="reach">Sort: Reach</SelectItem>
-                        <SelectItem value="availability">Sort: Availability</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(e.target.value.replace(/[^0-9]/g, ""))}
-                      placeholder="Max ₱ / month"
-                      className="bg-white text-gray-900"
-                    />
-                    <Input
-                      value={minReach}
-                      onChange={(e) => setMinReach(e.target.value.replace(/[^0-9]/g, ""))}
-                      placeholder="Min reach"
-                      className="bg-white text-gray-900"
-                    />
-                    <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
-                      <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Availability" /></SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="all">Any availability</SelectItem>
-                        <SelectItem value="available">Available now</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {loadingInv ? (
-                    <div className="flex items-center gap-2 text-gray-500 py-10 justify-center">
-                      <Loader2 className="w-5 h-5 animate-spin" /> Loading inventory...
-                    </div>
-                  ) : visible.length === 0 ? (
-                    <p className="text-sm text-gray-500 py-10 text-center">No inventory matches these filters.</p>
-                  ) : (
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      {visible.map((r) => {
-                        const selected = !!selections[r.id];
-                        const cap = capacityOf(r);
-                        return (
-                          <Card key={r.id} className={`overflow-hidden border p-4 ${selected ? "border-blue-600 ring-1 ring-blue-200" : "border-gray-200"}`}>
-                            <div className="flex items-start justify-between gap-2">
-                              <p className="text-sm text-gray-900 flex items-center gap-1 line-clamp-2">
-                                <MapPin className="w-3 h-3 shrink-0 text-gray-400" /> {r.location || "Location on request"}
-                              </p>
-                              {r.contact_verified_at && (
-                                <Badge className="bg-green-600 shrink-0 text-[10px]"><ShieldCheck className="w-3 h-3 mr-1" />Verified</Badge>
-                              )}
-                            </div>
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {venueTypeOf(r) && (
-                                <Badge variant="outline" className="text-[10px]">{venueTypeOf(r)}</Badge>
-                              )}
-                              {rowTypes(r).map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
-                              {cap && <Badge variant="outline">{cap} unit{cap > 1 ? "s" : ""}</Badge>}
-                              {reachOf(r) > 0 && <Badge variant="outline">{reachOf(r).toLocaleString()} reach</Badge>}
-                            </div>
-                            {r.description && <p className="text-xs text-gray-500 mt-2 line-clamp-2">{r.description}</p>}
-                            <div className="mt-3 flex items-center justify-between">
-                              <span className="text-sm font-semibold text-gray-900">
-                                {monthlyRate(r) > 0 ? `${peso(monthlyRate(r))}/mo` : "Rate on request"}
-                              </span>
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="outline" onClick={() => window.open(`/brand-advertiser/inventory/${r.id}`, "_blank")}>
-                                  View Details
-                                </Button>
-                                <Button size="sm" variant={selected ? "default" : "outline"} onClick={() => toggleSelect(r)}>
-                                  {selected ? <><Check className="w-3 h-3 mr-1" />Selected</> : "Select"}
-                                </Button>
-                              </div>
-                            </div>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* STEP 6 */}
-              {step === 6 && (
-                <>
-                  <StepHeader n={6} title="What advertising material will you run?" hint="Set the ad format and number of units per location." />
+                  <StepHeader n={5} title="What advertising material will you run?" hint="Set the ad format and number of units per location." />
                   <div className="space-y-3">
                     {selectedRows.map((r) => {
                       const cap = capacityOf(r);
@@ -976,10 +934,10 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 7 */}
-              {step === 7 && (
+              {/* STEP 6 */}
+              {step === 6 && (
                 <>
-                  <StepHeader n={7} title="When should your campaign run?" hint="We check live availability for your selected inventory." />
+                  <StepHeader n={6} title="When should your campaign run?" hint="We check live availability for your selected inventory." />
                   <div className="flex flex-wrap gap-2 mb-4">
                     {DURATION_PRESETS.map((d) => (
                       <button
@@ -1035,7 +993,7 @@ export default function BrandAdvertiserInventory() {
                           <li key={p.adSpaceId}>• {p.title} — {p.reason}</li>
                         ))}
                       </ul>
-                      <Button size="sm" variant="outline" className="mt-3" onClick={() => setStep(5)}>
+                      <Button size="sm" variant="outline" className="mt-3" onClick={() => setStep(4)}>
                         Find Alternative Inventory
                       </Button>
                     </Card>
@@ -1043,10 +1001,10 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 8 */}
-              {step === 8 && (
+              {/* STEP 7 */}
+              {step === 7 && (
                 <>
-                  <StepHeader n={8} title="Who are you trying to reach?" hint="Optional — share what you know about your audience." />
+                  <StepHeader n={7} title="Who are you trying to reach?" hint="Optional — share what you know about your audience." />
                   <div className="grid sm:grid-cols-2 gap-3">
                     <Field label="Geographic location" value={audience.geography} onChange={(v) => setAudience({ ...audience, geography: v })} placeholder="e.g. Metro Manila" />
                     <div className="grid grid-cols-2 gap-3">
@@ -1078,10 +1036,10 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 9 */}
-              {step === 9 && (
+              {/* STEP 8 */}
+              {step === 8 && (
                 <>
-                  <StepHeader n={9} title="What is your campaign budget?" hint="All amounts in Philippine Peso (PHP)." />
+                  <StepHeader n={8} title="What is your campaign budget?" hint="All amounts in Philippine Peso (PHP)." />
                   <div className="grid sm:grid-cols-3 gap-3">
                     <Field label="Total budget (₱)" value={budget} onChange={(v) => setBudget(v.replace(/[^0-9]/g, ""))} placeholder="250000" />
                     <Field label="Minimum budget (optional)" value={minBudget} onChange={(v) => setMinBudget(v.replace(/[^0-9]/g, ""))} placeholder="" />
@@ -1098,10 +1056,10 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 10 */}
-              {step === 10 && (
+              {/* STEP 9 */}
+              {step === 9 && (
                 <>
-                  <StepHeader n={10} title="Do you already have your advertising creative?" hint="We can also produce it for you." />
+                  <StepHeader n={9} title="Do you already have your advertising creative?" hint="We can also produce it for you." />
                   <div className="grid sm:grid-cols-3 gap-3">
                     {[
                       { v: "have", t: "YES — I have the creative" },
@@ -1173,10 +1131,10 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 11 */}
-              {step === 11 && (
+              {/* STEP 10 */}
+              {step === 10 && (
                 <>
-                  <StepHeader n={11} title="Review your campaign" hint="Check everything before requesting your proposal." />
+                  <StepHeader n={10} title="Review your campaign" hint="Check everything before requesting your proposal." />
                   <div className="space-y-3">
                     <ReviewBlock title="Campaign" onEdit={() => setStep(1)}>
                       {campaignName} · {campaignType.toUpperCase() || "—"}
@@ -1185,18 +1143,18 @@ export default function BrandAdvertiserInventory() {
                     <ReviewBlock title="Objective" onEdit={() => setStep(3)}>
                       {objective}{objectiveNotes ? ` — ${objectiveNotes}` : ""}
                     </ReviewBlock>
-                    <ReviewBlock title="Inventory" onEdit={() => setStep(5)}>
+                    <ReviewBlock title="Inventory" onEdit={() => setStep(4)}>
                       {selectedIds.length} selected location{selectedIds.length === 1 ? "" : "s"} · {totalUnits} advertising unit{totalUnits === 1 ? "" : "s"}
                     </ReviewBlock>
-                    <ReviewBlock title="Format" onEdit={() => setStep(6)}>
+                    <ReviewBlock title="Format" onEdit={() => setStep(5)}>
                       {[...new Set(Object.values(selections).map((s) => s.adFormat).filter(Boolean))].join(", ") || "—"}
                     </ReviewBlock>
-                    <ReviewBlock title="Duration" onEdit={() => setStep(7)}>{startDate} – {endDate}</ReviewBlock>
-                    <ReviewBlock title="Target" onEdit={() => setStep(8)}>
+                    <ReviewBlock title="Duration" onEdit={() => setStep(6)}>{startDate} – {endDate}</ReviewBlock>
+                    <ReviewBlock title="Target" onEdit={() => setStep(7)}>
                       {audience.geography || "Not specified"}{audience.gender && audience.gender !== "All" ? ` · ${audience.gender}` : ""}
                     </ReviewBlock>
-                    <ReviewBlock title="Budget" onEdit={() => setStep(9)}>{peso(Number(budget || 0))}</ReviewBlock>
-                    <ReviewBlock title="Creative" onEdit={() => setStep(10)}>
+                    <ReviewBlock title="Budget" onEdit={() => setStep(8)}>{peso(Number(budget || 0))}</ReviewBlock>
+                    <ReviewBlock title="Creative" onEdit={() => setStep(9)}>
                       {creativeMode === "have" ? "Creative ready" : creativeMode === "need" ? "Creative production needed" : "Not sure yet"}
                     </ReviewBlock>
                   </div>
@@ -1209,8 +1167,8 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 12 */}
-              {step === 12 && (
+              {/* STEP 11 */}
+              {step === 11 && (
                 <div className="text-center py-8">
                   {submitted ? (
                     <>
@@ -1240,7 +1198,7 @@ export default function BrandAdvertiserInventory() {
               )}
 
               {/* nav */}
-              {!(step === 12 && submitted) && (
+              {!(step === 11 && submitted) && (
                 <div className="flex flex-wrap items-center justify-between gap-3 mt-8 pt-5 border-t border-gray-100">
                   <div className="flex gap-2">
                     <Button variant="ghost" onClick={cancelWizard}>Cancel</Button>
@@ -1253,9 +1211,9 @@ export default function BrandAdvertiserInventory() {
                     {step > 1 && (
                       <Button variant="outline" onClick={back}><ArrowLeft className="w-4 h-4 mr-2" />Back</Button>
                     )}
-                    {step < 12 && (
+                    {step < 11 && (
                       <Button onClick={next} disabled={!canContinue() || checkingAvailability}>
-                        {step === 11 ? "Continue to submit" : "Continue"}
+                        {step === 10 ? "Continue to submit" : "Continue"}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     )}
