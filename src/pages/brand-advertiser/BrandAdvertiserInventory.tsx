@@ -862,8 +862,8 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 6 */}
-              {step === 6 && (
+              {/* STEP 5 */}
+              {step === 5 && (
                 <>
                   <StepHeader n={6} title="What advertising material will you run?" hint="Set the ad format and number of units per location." />
                   <div className="space-y-3">
@@ -935,8 +935,8 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 7 */}
-              {step === 7 && (
+              {/* STEP 5 */}
+              {step === 5 && (
                 <>
                   <StepHeader n={7} title="When should your campaign run?" hint="We check live availability for your selected inventory." />
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -994,7 +994,7 @@ export default function BrandAdvertiserInventory() {
                           <li key={p.adSpaceId}>• {p.title} — {p.reason}</li>
                         ))}
                       </ul>
-                      <Button size="sm" variant="outline" className="mt-3" onClick={() => setStep(5)}>
+                      <Button size="sm" variant="outline" className="mt-3" onClick={() => setStep(4)}>
                         Find Alternative Inventory
                       </Button>
                     </Card>
@@ -1002,8 +1002,8 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 8 */}
-              {step === 8 && (
+              {/* STEP 5 */}
+              {step === 5 && (
                 <>
                   <StepHeader n={8} title="Who are you trying to reach?" hint="Optional — share what you know about your audience." />
                   <div className="grid sm:grid-cols-2 gap-3">
@@ -1037,8 +1037,8 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 9 */}
-              {step === 9 && (
+              {/* STEP 5 */}
+              {step === 5 && (
                 <>
                   <StepHeader n={9} title="What is your campaign budget?" hint="All amounts in Philippine Peso (PHP)." />
                   <div className="grid sm:grid-cols-3 gap-3">
@@ -1057,8 +1057,8 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 10 */}
-              {step === 10 && (
+              {/* STEP 5 */}
+              {step === 5 && (
                 <>
                   <StepHeader n={10} title="Do you already have your advertising creative?" hint="We can also produce it for you." />
                   <div className="grid sm:grid-cols-3 gap-3">
@@ -1132,8 +1132,8 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 11 */}
-              {step === 11 && (
+              {/* STEP 5 */}
+              {step === 5 && (
                 <>
                   <StepHeader n={11} title="Review your campaign" hint="Check everything before requesting your proposal." />
                   <div className="space-y-3">
@@ -1144,18 +1144,18 @@ export default function BrandAdvertiserInventory() {
                     <ReviewBlock title="Objective" onEdit={() => setStep(3)}>
                       {objective}{objectiveNotes ? ` — ${objectiveNotes}` : ""}
                     </ReviewBlock>
-                    <ReviewBlock title="Inventory" onEdit={() => setStep(5)}>
+                    <ReviewBlock title="Inventory" onEdit={() => setStep(4)}>
                       {selectedIds.length} selected location{selectedIds.length === 1 ? "" : "s"} · {totalUnits} advertising unit{totalUnits === 1 ? "" : "s"}
                     </ReviewBlock>
-                    <ReviewBlock title="Format" onEdit={() => setStep(6)}>
+                    <ReviewBlock title="Format" onEdit={() => setStep(5)}>
                       {[...new Set(Object.values(selections).map((s) => s.adFormat).filter(Boolean))].join(", ") || "—"}
                     </ReviewBlock>
-                    <ReviewBlock title="Duration" onEdit={() => setStep(7)}>{startDate} – {endDate}</ReviewBlock>
-                    <ReviewBlock title="Target" onEdit={() => setStep(8)}>
+                    <ReviewBlock title="Duration" onEdit={() => setStep(6)}>{startDate} – {endDate}</ReviewBlock>
+                    <ReviewBlock title="Target" onEdit={() => setStep(7)}>
                       {audience.geography || "Not specified"}{audience.gender && audience.gender !== "All" ? ` · ${audience.gender}` : ""}
                     </ReviewBlock>
-                    <ReviewBlock title="Budget" onEdit={() => setStep(9)}>{peso(Number(budget || 0))}</ReviewBlock>
-                    <ReviewBlock title="Creative" onEdit={() => setStep(10)}>
+                    <ReviewBlock title="Budget" onEdit={() => setStep(8)}>{peso(Number(budget || 0))}</ReviewBlock>
+                    <ReviewBlock title="Creative" onEdit={() => setStep(9)}>
                       {creativeMode === "have" ? "Creative ready" : creativeMode === "need" ? "Creative production needed" : "Not sure yet"}
                     </ReviewBlock>
                   </div>
@@ -1168,8 +1168,8 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 12 */}
-              {step === 12 && (
+              {/* STEP 5 */}
+              {step === 5 && (
                 <div className="text-center py-8">
                   {submitted ? (
                     <>
@@ -1199,7 +1199,7 @@ export default function BrandAdvertiserInventory() {
               )}
 
               {/* nav */}
-              {!(step === 12 && submitted) && (
+              {!(step === 11 && submitted) && (
                 <div className="flex flex-wrap items-center justify-between gap-3 mt-8 pt-5 border-t border-gray-100">
                   <div className="flex gap-2">
                     <Button variant="ghost" onClick={cancelWizard}>Cancel</Button>
@@ -1212,9 +1212,9 @@ export default function BrandAdvertiserInventory() {
                     {step > 1 && (
                       <Button variant="outline" onClick={back}><ArrowLeft className="w-4 h-4 mr-2" />Back</Button>
                     )}
-                    {step < 12 && (
+                    {step < 11 && (
                       <Button onClick={next} disabled={!canContinue() || checkingAvailability}>
-                        {step === 11 ? "Continue to submit" : "Continue"}
+                        {step === 10 ? "Continue to submit" : "Continue"}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     )}
