@@ -517,7 +517,7 @@ export default function BrandAdvertiserInventory() {
 
   const StepHeader = ({ n, title, hint }: { n: number; title: string; hint: string }) => (
     <div className="mb-5">
-      <p className="text-xs font-semibold tracking-wide text-blue-600">STEP {n} OF 12</p>
+      <p className="text-xs font-semibold tracking-wide text-blue-600">STEP {n} OF 11</p>
       <h2 className="text-xl font-semibold text-gray-900 mt-1">{title}</h2>
       <p className="text-sm text-gray-500 mt-1">{hint}</p>
     </div>
@@ -935,7 +935,7 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 5 */}
+              {/* STEP 6 */}
               {step === 6 && (
                 <>
                   <StepHeader n={6} title="When should your campaign run?" hint="We check live availability for your selected inventory." />
@@ -1002,7 +1002,7 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 5 */}
+              {/* STEP 7 */}
               {step === 7 && (
                 <>
                   <StepHeader n={7} title="Who are you trying to reach?" hint="Optional — share what you know about your audience." />
@@ -1037,7 +1037,7 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 5 */}
+              {/* STEP 8 */}
               {step === 8 && (
                 <>
                   <StepHeader n={8} title="What is your campaign budget?" hint="All amounts in Philippine Peso (PHP)." />
@@ -1057,7 +1057,7 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 5 */}
+              {/* STEP 9 */}
               {step === 9 && (
                 <>
                   <StepHeader n={9} title="Do you already have your advertising creative?" hint="We can also produce it for you." />
@@ -1132,7 +1132,7 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 5 */}
+              {/* STEP 10 */}
               {step === 10 && (
                 <>
                   <StepHeader n={10} title="Review your campaign" hint="Check everything before requesting your proposal." />
@@ -1168,7 +1168,7 @@ export default function BrandAdvertiserInventory() {
                 </>
               )}
 
-              {/* STEP 5 */}
+              {/* STEP 11 */}
               {step === 11 && (
                 <div className="text-center py-8">
                   {submitted ? (
