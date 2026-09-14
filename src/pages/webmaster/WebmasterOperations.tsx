@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { usePlatform } from "./WebmasterLayout";
 import { PageHeader, Panel, Stat, StatusBadge, Empty } from "./ui";
 import { peso } from "./platformData";
+import RequestDetailDialog, { RequestItem } from "./RequestDetailDialog";
 
 type Mode = "campaigns" | "proposals" | "transactions" | "commissions" | "reports";
 
