@@ -73,10 +73,13 @@ export async function loadPlatformData(): Promise<PlatformData> {
     supabase.from("ad_spaces").select(SPACE_COLUMNS).order("created_at", { ascending: false }).limit(1000),
     supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(300),
     supabase.from("media_plan_requests")
-      .select("id,campaign_name,campaign_type,campaign_pillar,status,estimated_price,venue_count,requester_email,paid_at,created_at")
+      .select("*")
       .order("created_at", { ascending: false }).limit(300),
     supabase.from("client_checkouts")
       .select("id,client_name,client_company,listing_title,grand_total,currency,status,paid_at,created_at")
+      .order("created_at", { ascending: false }).limit(300),
+    supabase.from("brand_campaigns")
+      .select("*, brand_advertiser_profiles(company_name,contact_name,contact_email,contact_phone,industry,website_domain)")
       .order("created_at", { ascending: false }).limit(300),
   ]);
 
@@ -86,8 +89,9 @@ export async function loadPlatformData(): Promise<PlatformData> {
     invitations: (i.data as Invitation[]) ?? [],
     spaces: (s.data as unknown as Space[]) ?? [],
     logs: (l.data as AuditRow[]) ?? [],
-    proposals: (p.data as Proposal[]) ?? [],
+    proposals: (p.data as unknown as Proposal[]) ?? [],
     transactions: (c.data as Transaction[]) ?? [],
+    brandCampaigns: (b.data as unknown as BrandCampaign[]) ?? [],
   };
 }
 
