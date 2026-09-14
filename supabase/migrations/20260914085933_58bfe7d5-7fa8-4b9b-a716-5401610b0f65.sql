@@ -1,0 +1,4 @@
+CREATE POLICY "Webmaster can view all brand campaigns" ON public.brand_campaigns FOR SELECT TO authenticated USING (public.is_webmaster(auth.uid()));
+CREATE POLICY "Webmaster can view all campaign targets" ON public.campaign_ad_space_targets FOR SELECT TO authenticated USING (public.is_webmaster(auth.uid()));
+CREATE POLICY "Webmaster can view all brand creative sets" ON public.brand_creative_sets FOR SELECT TO authenticated USING (public.is_webmaster(auth.uid()));
+CREATE POLICY "Webmaster can view all brand creative set files" ON public.brand_creative_set_files FOR SELECT TO authenticated USING (public.is_webmaster(auth.uid()));
