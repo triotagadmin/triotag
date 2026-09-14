@@ -39,9 +39,27 @@ export type Transaction = {
   status: string | null; paid_at: string | null; created_at: string;
 };
 
+export type BrandCampaign = {
+  id: string; campaign_ref: string | null; campaign_name: string | null;
+  campaign_type: string | null; objective: string | null; objective_notes: string | null;
+  media_types: string[] | null; environments: string[] | null; countries: string[] | null;
+  location_types: string[] | null; location_count: number | null; scope_name: string | null;
+  creative_format: string | null; creative_mode: string | null; creative_requirements: unknown;
+  audience: unknown; target_age_min: number | null; target_age_max: number | null;
+  target_gender: string | null; budget: number | null; estimated_cost: number | null;
+  start_date: string | null; end_date: string | null; notes: string | null;
+  status: string | null; rejection_reason: string | null; submitted_at: string | null;
+  created_at: string; brand_advertiser_id: string | null;
+  brand_advertiser_profiles?: {
+    company_name: string | null; contact_name: string | null; contact_email: string | null;
+    contact_phone: string | null; industry: string | null; website_domain: string | null;
+  } | null;
+};
+
 export type PlatformData = {
   tenants: Tenant[]; members: Member[]; invitations: Invitation[];
   spaces: Space[]; logs: AuditRow[]; proposals: Proposal[]; transactions: Transaction[];
+  brandCampaigns: BrandCampaign[];
 };
 
 export const SPACE_COLUMNS =
