@@ -759,14 +759,14 @@ export default function BrandAdvertiserInventory() {
                             </div>
                             <Select value={cityFilter} onValueChange={setCityFilter}>
                               <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="City" /></SelectTrigger>
-                              <SelectContent className="bg-white">
+                              <SelectContent className="bg-white text-gray-900">
                                 <SelectItem value="all">All cities</SelectItem>
                                 {cities.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                               </SelectContent>
                             </Select>
                             <Select value={sortBy} onValueChange={setSortBy}>
                               <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Sort by" /></SelectTrigger>
-                              <SelectContent className="bg-white">
+                              <SelectContent className="bg-white text-gray-900">
                                 <SelectItem value="relevance">Sort: Relevance</SelectItem>
                                 <SelectItem value="price">Sort: Price</SelectItem>
                                 <SelectItem value="location">Sort: Location</SelectItem>
@@ -788,7 +788,7 @@ export default function BrandAdvertiserInventory() {
                             />
                             <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
                               <SelectTrigger className="bg-white text-gray-900"><SelectValue placeholder="Availability" /></SelectTrigger>
-                              <SelectContent className="bg-white">
+                              <SelectContent className="bg-white text-gray-900">
                                 <SelectItem value="all">Any availability</SelectItem>
                                 <SelectItem value="available">Available now</SelectItem>
                               </SelectContent>
@@ -896,7 +896,7 @@ export default function BrandAdvertiserInventory() {
                                 onValueChange={(v) => setSelections((p) => ({ ...p, [r.id]: { ...p[r.id], adFormat: v } }))}
                               >
                                 <SelectTrigger className="bg-white text-gray-900 mt-1"><SelectValue placeholder="Choose format" /></SelectTrigger>
-                                <SelectContent className="bg-white">
+                                <SelectContent className="bg-white text-gray-900">
                                   {(formats.length ? formats : availableFormats).map((f) => (
                                     <SelectItem key={f} value={f}>{f}</SelectItem>
                                   ))}
@@ -1015,7 +1015,7 @@ export default function BrandAdvertiserInventory() {
                       <Label className="text-gray-900">Gender</Label>
                       <Select value={audience.gender} onValueChange={(v) => setAudience({ ...audience, gender: v })}>
                         <SelectTrigger className="bg-white text-gray-900 mt-1"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-white text-gray-900">
                           {["All", "Female", "Male", "Non-binary"].map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -1091,7 +1091,7 @@ export default function BrandAdvertiserInventory() {
                       ) : (
                         <Select value={creativeSetId || ""} onValueChange={setCreativeSetId}>
                           <SelectTrigger className="bg-white text-gray-900 mt-1"><SelectValue placeholder="Select creative folder" /></SelectTrigger>
-                          <SelectContent className="bg-white">
+                          <SelectContent className="bg-white text-gray-900">
                             {creativeSets.map((cs) => (
                               <SelectItem key={cs.id} value={cs.id}>
                                 {cs.title} · {cs.creative_count} file{cs.creative_count === 1 ? "" : "s"}
