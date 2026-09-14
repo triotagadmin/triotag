@@ -66,7 +66,7 @@ export const SPACE_COLUMNS =
   "id,title,location,category,approval_status,platform_verification_status,platform_review_notes,platform_verified_at,tenant_id,agent_id,total_ad_units,media_types,media_owner_name,media_owner_contact_person,media_owner_email,media_owner_phone,contact_verified_at,created_at";
 
 export async function loadPlatformData(): Promise<PlatformData> {
-  const [t, m, i, s, l, p, c] = await Promise.all([
+  const [t, m, i, s, l, p, c, b] = await Promise.all([
     supabase.from("tenants").select("*").order("created_at", { ascending: false }),
     supabase.from("tenant_members").select("*").order("created_at", { ascending: false }),
     supabase.from("tenant_invitations").select("*").order("created_at", { ascending: false }),
