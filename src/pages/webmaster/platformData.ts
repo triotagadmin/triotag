@@ -39,26 +39,47 @@ export type Transaction = {
   status: string | null; paid_at: string | null; created_at: string;
 };
 
+export type BrandCampaign = {
+  id: string; campaign_ref: string | null; campaign_name: string | null;
+  campaign_type: string | null; objective: string | null; objective_notes: string | null;
+  media_types: string[] | null; environments: string[] | null; countries: string[] | null;
+  location_types: string[] | null; location_count: number | null; scope_name: string | null;
+  creative_format: string | null; creative_mode: string | null; creative_requirements: unknown;
+  audience: unknown; target_age_min: number | null; target_age_max: number | null;
+  target_gender: string | null; budget: number | null; estimated_cost: number | null;
+  start_date: string | null; end_date: string | null; notes: string | null;
+  status: string | null; rejection_reason: string | null; submitted_at: string | null;
+  created_at: string; brand_advertiser_id: string | null;
+  brand_advertiser_profiles?: {
+    company_name: string | null; contact_name: string | null; contact_email: string | null;
+    contact_phone: string | null; industry: string | null; website_domain: string | null;
+  } | null;
+};
+
 export type PlatformData = {
   tenants: Tenant[]; members: Member[]; invitations: Invitation[];
   spaces: Space[]; logs: AuditRow[]; proposals: Proposal[]; transactions: Transaction[];
+  brandCampaigns: BrandCampaign[];
 };
 
 export const SPACE_COLUMNS =
   "id,title,location,category,approval_status,platform_verification_status,platform_review_notes,platform_verified_at,tenant_id,agent_id,total_ad_units,media_types,media_owner_name,media_owner_contact_person,media_owner_email,media_owner_phone,contact_verified_at,created_at";
 
 export async function loadPlatformData(): Promise<PlatformData> {
-  const [t, m, i, s, l, p, c] = await Promise.all([
+  const [t, m, i, s, l, p, c, b] = await Promise.all([
     supabase.from("tenants").select("*").order("created_at", { ascending: false }),
     supabase.from("tenant_members").select("*").order("created_at", { ascending: false }),
     supabase.from("tenant_invitations").select("*").order("created_at", { ascending: false }),
     supabase.from("ad_spaces").select(SPACE_COLUMNS).order("created_at", { ascending: false }).limit(1000),
     supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(300),
     supabase.from("media_plan_requests")
-      .select("id,campaign_name,campaign_type,campaign_pillar,status,estimated_price,venue_count,requester_email,paid_at,created_at")
+      .select("*")
       .order("created_at", { ascending: false }).limit(300),
     supabase.from("client_checkouts")
       .select("id,client_name,client_company,listing_title,grand_total,currency,status,paid_at,created_at")
+      .order("created_at", { ascending: false }).limit(300),
+    supabase.from("brand_campaigns")
+      .select("*, brand_advertiser_profiles(company_name,contact_name,contact_email,contact_phone,industry,website_domain)")
       .order("created_at", { ascending: false }).limit(300),
   ]);
 
@@ -68,8 +89,9 @@ export async function loadPlatformData(): Promise<PlatformData> {
     invitations: (i.data as Invitation[]) ?? [],
     spaces: (s.data as unknown as Space[]) ?? [],
     logs: (l.data as AuditRow[]) ?? [],
-    proposals: (p.data as Proposal[]) ?? [],
+    proposals: (p.data as unknown as Proposal[]) ?? [],
     transactions: (c.data as Transaction[]) ?? [],
+    brandCampaigns: (b.data as unknown as BrandCampaign[]) ?? [],
   };
 }
 
