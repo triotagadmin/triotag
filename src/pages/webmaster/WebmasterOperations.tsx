@@ -8,37 +8,74 @@ type Mode = "campaigns" | "proposals" | "transactions" | "commissions" | "report
 
 export default function WebmasterOperations({ mode }: { mode: Mode }) {
   const { data, loading } = usePlatform();
-  const { proposals, transactions, tenants, spaces, members } = data;
+  const { proposals, transactions, tenants, spaces, members, brandCampaigns } = data;
+  const [selected, setSelected] = useState<RequestItem | null>(null);
 
   const settled = transactions.filter((t) => t.status === "paid" || !!t.paid_at);
   const revenue = settled.reduce((sum, t) => sum + (Number(t.grand_total) || 0), 0);
 
   if (mode === "campaigns" || mode === "proposals") {
     const isCampaigns = mode === "campaigns";
-    const rows = isCampaigns ? proposals.filter((p) => !!p.paid_at || p.status === "approved") : proposals;
+
+    type UnifiedRow = {
+      key: string; item: RequestItem; name: string; source: string;
+      status: string | null; meta: string; created: string; settled: boolean;
+    };
+
+    const unified: UnifiedRow[] = [
+      ...proposals.map((p) => ({
+        key: `mp-${p.id}`,
+        item: { kind: "media_plan", row: p as unknown as Record<string, any> } as RequestItem,
+        name: p.campaign_name || "Untitled campaign",
+        source: "Media plan request",
+        status: p.status,
+        meta: `${p.campaign_pillar || p.campaign_type || "—"} · ${p.requester_email || "no requester"} · ${p.venue_count ?? 0} locations · ${peso(p.estimated_price)}`,
+        created: p.created_at,
+        settled: !!p.paid_at || p.status === "approved",
+      })),
+      ...brandCampaigns
+        .filter((b) => b.status !== "draft")
+        .map((b) => ({
+          key: `bc-${b.id}`,
+          item: { kind: "brand", row: b } as RequestItem,
+          name: b.campaign_name || "Untitled campaign",
+          source: `Brand advertiser${b.campaign_ref ? ` · ${b.campaign_ref}` : ""}`,
+          status: b.status,
+          meta: `${b.campaign_type || "—"} · ${b.brand_advertiser_profiles?.company_name || "Unknown brand"} · ${b.brand_advertiser_profiles?.contact_email || "no email"} · ${b.location_count ?? 0} locations · ${peso(b.budget ?? b.estimated_cost)}`,
+          created: b.submitted_at || b.created_at,
+          settled: ["approved", "active", "live", "paid"].includes((b.status || "").toLowerCase()),
+        })),
+    ].sort((a, c) => +new Date(c.created) - +new Date(a.created));
+
+    const rows = isCampaigns ? unified.filter((r) => r.settled) : unified;
+
     return (
       <div>
         <PageHeader
           title={isCampaigns ? "Campaigns" : "Proposals"}
-          subtitle={isCampaigns ? "Approved and running campaign activity across the platform." : "Every campaign request submitted to TRIOTAG."}
+          subtitle={isCampaigns ? "Approved and running campaign activity across the platform." : "Every campaign request submitted to TRIOTAG, including brand advertiser requests."}
         />
         <div className="space-y-3">
-          {rows.map((p) => (
-            <Panel key={p.id}>
-              <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-                <div>
-                  <p className="font-medium">{p.campaign_name || "Untitled campaign"}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {p.campaign_pillar || p.campaign_type || "—"} · {p.requester_email || "no requester"} ·
-                    {" "}{p.venue_count ?? 0} locations · {peso(p.estimated_price)} · {new Date(p.created_at).toLocaleDateString()}
-                  </p>
+          {rows.map((r) => (
+            <Panel key={r.key} className="cursor-pointer transition hover:border-green-500/50">
+              <button type="button" onClick={() => setSelected(r.item)} className="w-full text-left">
+                <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                  <div>
+                    <p className="font-medium">{r.name}</p>
+                    <p className="text-xs text-muted-foreground">{r.meta} · {new Date(r.created).toLocaleDateString()}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-wider text-green-400/70">{r.source}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status={r.status} />
+                    <span className="text-xs text-muted-foreground">View details</span>
+                  </div>
                 </div>
-                <StatusBadge status={p.status} />
-              </div>
+              </button>
             </Panel>
           ))}
           {!loading && rows.length === 0 && <Empty>Nothing here yet.</Empty>}
         </div>
+        <RequestDetailDialog item={selected} onClose={() => setSelected(null)} />
       </div>
     );
   }
