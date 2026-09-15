@@ -124,7 +124,7 @@ const SidebarNav = ({ onNavigate, pendingBrandRequests = 0 }: { onNavigate?: () 
 export default function WebmasterLayout() {
   const navigate = useNavigate();
   const [data, setData] = useState<PlatformData>({
-    tenants: [], members: [], invitations: [], spaces: [], logs: [], proposals: [], transactions: [],
+    tenants: [], members: [], invitations: [], spaces: [], logs: [], proposals: [], transactions: [], brandCampaigns: [],
   });
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
