@@ -744,7 +744,7 @@ const Brands = () => {
           <div className="container relative mx-auto px-4 text-center md:px-6">
             <p className="mb-5 text-xs font-semibold uppercase text-primary">Outsourced Advertising Agency</p>
             <h2 className="mx-auto max-w-4xl text-4xl font-bold leading-tight md:text-6xl">
-              Stop Building Your Advertising Operation From Scratch.
+              Scale your advertising operations today.
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
               Partner with TRIOTAG and access a broader advertising operation without taking on the full overhead of
