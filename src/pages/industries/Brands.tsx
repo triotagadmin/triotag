@@ -5,12 +5,10 @@ import {
   ArrowRight,
   BarChart3,
   Bot,
-  Building2,
   Check,
   ChevronRight,
   CircleDot,
   ClipboardCheck,
-  Code2,
   Compass,
   Gauge,
   Layers3,
@@ -25,7 +23,6 @@ import {
   Store,
   Target,
   Users,
-  Video,
   Workflow,
 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
@@ -122,6 +119,12 @@ const technology = [
   [Store, "Physical advertising opportunities", "Access posters, tabletop media, retail screens, OOH, DOOH and AOOH formats."],
   [MonitorPlay, "Digital campaign integration", "Coordinate digital screen delivery and physical-to-digital campaign touchpoints."],
 ] as const;
+
+const mediaLayers: { icon: ElementType; title: string; items: string[] }[] = [
+  { icon: Megaphone, title: "Digital Advertising", items: ["Meta", "TikTok", "Google", "YouTube", "SEO", "Web"] },
+  { icon: Store, title: "Retail Media", items: ["OOH", "DOOH", "In-Store", "Tabletop", "Retail Screens", "Print"] },
+  { icon: BarChart3, title: "Data", items: ["QR Tracking", "Lead Capture", "Campaign Analytics", "Conversion Data"] },
+];
 
 const packages = [
   {
@@ -266,16 +269,12 @@ const Brands = () => {
           <div className="container relative mx-auto px-4 md:px-6">
             <SectionHeading eyebrow="The TRIOTAG difference" title="Where Digital Advertising Meets Retail Media." copy="TRIOTAG goes beyond traditional digital advertising. Through its retail media ecosystem, businesses can extend campaigns into physical environments where customers shop, eat, work and interact." center />
             <div className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:items-stretch">
-              {[
-                [Megaphone, "Digital Advertising", ["Meta", "TikTok", "Google", "YouTube", "SEO", "Web"]],
-                [Store, "Retail Media", ["OOH", "DOOH", "In-Store", "Tabletop", "Retail Screens", "Print"]],
-                [BarChart3, "Data", ["QR Tracking", "Lead Capture", "Campaign Analytics", "Conversion Data"]],
-              ].map(([Icon, title, items], index) => (
-                <div key={String(title)} className="contents">
+              {mediaLayers.map(({ icon: Icon, title, items }, index) => (
+                <div key={title} className="contents">
                   {index > 0 && <div className="flex items-center justify-center text-primary"><ArrowRight className="hidden h-5 w-5 lg:block" /><ArrowDown className="h-5 w-5 lg:hidden" /></div>}
                   <GlassCard className="p-7">
-                    <div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center bg-primary text-primary-foreground"><Icon className="h-5 w-5" /></div><h3 className="text-lg font-semibold uppercase">{String(title)}</h3></div>
-                    <div className="mt-6 flex flex-wrap gap-2">{(items as string[]).map((item) => <span key={item} className="border border-border bg-secondary px-3 py-1.5 text-xs text-secondary-foreground">{item}</span>)}</div>
+                    <div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center bg-primary text-primary-foreground"><Icon className="h-5 w-5" /></div><h3 className="text-lg font-semibold uppercase">{title}</h3></div>
+                    <div className="mt-6 flex flex-wrap gap-2">{items.map((item) => <span key={item} className="border border-border bg-secondary px-3 py-1.5 text-xs text-secondary-foreground">{item}</span>)}</div>
                   </GlassCard>
                 </div>
               ))}
