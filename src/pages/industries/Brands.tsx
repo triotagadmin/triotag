@@ -1,1040 +1,421 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, type ElementType, type ReactNode } from "react";
+import { Link } from "react-router-dom";
+import {
+  ArrowDown,
+  ArrowRight,
+  BarChart3,
+  Bot,
+  Building2,
+  Check,
+  ChevronRight,
+  CircleDot,
+  ClipboardCheck,
+  Code2,
+  Compass,
+  Gauge,
+  Layers3,
+  Megaphone,
+  MonitorPlay,
+  MousePointerClick,
+  Network,
+  PanelsTopLeft,
+  QrCode,
+  Search,
+  Sparkles,
+  Store,
+  Target,
+  Users,
+  Video,
+  Workflow,
+} from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import {
-  Users,
-  DollarSign,
-  Scaling,
-  Layers,
-  Cpu,
-  Server,
-  LineChart,
-  ShoppingBag,
-  TrendingDown,
-  TrendingUp,
-  Rocket,
-  Target,
-  EyeOff,
-  Home,
-  Newspaper,
-  Store,
-  Building2,
-  Search,
-  Plug,
-  PlayCircle,
-  RefreshCw,
-  ArrowRight,
-  PhoneCall,
-  ClipboardList,
-  Utensils,
-  Dumbbell,
-  CheckCircle2,
-  Shield,
-  Clock,
-  Wallet,
-  LayoutGrid,
-  Sparkles,
-  Megaphone,
-  ShieldCheck,
-  Gauge,
-  MonitorPlay,
-  Handshake,
-} from "lucide-react";
 
 const CANONICAL = "https://triotag.com/industries/sspsource";
+const TITLE = "Outsourced Advertising Agency & Retail Media | TRIOTAG";
+const DESCRIPTION =
+  "TRIOTAG is an outsourced advertising agency providing social media advertising, paid media, creative, SEO, analytics, OOH, DOOH and retail media services through one integrated advertising partner.";
 
 const setMeta = (selector: string, attr: string, value: string) => {
-  let el = document.head.querySelector<HTMLMetaElement | HTMLLinkElement>(selector);
-  if (!el) {
+  let element = document.head.querySelector<HTMLMetaElement | HTMLLinkElement>(selector);
+  if (!element) {
     if (selector.startsWith("link")) {
-      el = document.createElement("link");
-      (el as HTMLLinkElement).rel = "canonical";
+      element = document.createElement("link");
+      (element as HTMLLinkElement).rel = "canonical";
     } else {
-      el = document.createElement("meta");
-      const m = selector.match(/\[(name|property)="([^"]+)"\]/);
-      if (m) (el as HTMLMetaElement).setAttribute(m[1], m[2]);
+      element = document.createElement("meta");
+      const match = selector.match(/\[(name|property)="([^"]+)"\]/);
+      if (match) element.setAttribute(match[1], match[2]);
     }
-    document.head.appendChild(el);
+    document.head.appendChild(element);
   }
-  el.setAttribute(attr, value);
+  element.setAttribute(attr, value);
 };
 
-const ServiceCard = ({ Icon, title, items }: { Icon: React.ElementType; title: string; items: string[] }) => (
-  <div className="group relative bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-green-500/50 hover:shadow-[0_0_30px_-5px_rgba(34,197,94,0.35)]">
-    <div className="h-11 w-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center mb-4">
-      <Icon className="h-5 w-5 text-green-400" />
-    </div>
-    <h3 className="text-xl font-semibold mb-3">{title}</h3>
-    <ul className="space-y-2">
-      {items.map((it) => (
-        <li key={it} className="text-sm text-white/65 flex gap-2">
-          <span className="mt-1.5 h-1 w-1 rounded-full bg-green-400 shrink-0" />
-          {it}
-        </li>
-      ))}
-    </ul>
+const services = [
+  {
+    number: "01",
+    icon: Megaphone,
+    title: "Social Media Advertising",
+    items: ["Facebook Advertising", "Instagram Advertising", "TikTok Advertising", "Social Campaign Strategy", "Audience Targeting", "Retargeting", "Creative Testing", "Campaign Optimization"],
+  },
+  {
+    number: "02",
+    icon: Target,
+    title: "Search & Performance Advertising",
+    items: ["Google Ads", "Search Advertising", "Display Advertising", "YouTube Advertising", "Performance Campaigns", "Remarketing", "Conversion Tracking", "Campaign Optimization"],
+  },
+  {
+    number: "03",
+    icon: Sparkles,
+    title: "Creative & Content",
+    items: ["Advertising Creatives", "Social Media Creatives", "Display Banners", "Promotional Graphics", "Video Advertising", "Short-Form Video", "Copywriting", "Campaign Concepts"],
+  },
+  {
+    number: "04",
+    icon: Search,
+    title: "SEO & Search Visibility",
+    items: ["SEO Strategy", "Keyword Research", "On-Page SEO", "Technical SEO", "Local SEO", "Google Business Profile Optimization", "SEO Content", "AI/GEO Search Visibility"],
+  },
+  {
+    number: "05",
+    icon: PanelsTopLeft,
+    title: "Digital Campaign Infrastructure",
+    items: ["Landing Pages", "Campaign Microsites", "SEO Websites", "Lead Generation Pages", "QR Landing Pages", "Conversion Optimization", "Tracking", "Analytics Integration"],
+  },
+  {
+    number: "06",
+    icon: BarChart3,
+    title: "Analytics & Advertising Intelligence",
+    items: ["Campaign Reporting", "Conversion Tracking", "Analytics", "Audience Analysis", "Competitor Research", "Performance Analysis", "Advertising Dashboards", "Campaign Insights"],
+  },
+  {
+    number: "07",
+    icon: Bot,
+    title: "AI & Advertising Automation",
+    items: ["AI Advertising Assistants", "AI Lead Generation", "Automated Lead Capture", "Advertising Workflows", "CRM Automation", "Customer Engagement Automation", "AI-Assisted Content Operations"],
+  },
+  {
+    number: "08",
+    icon: Store,
+    title: "Retail Media Advertising",
+    items: ["OOH Advertising", "DOOH Advertising", "In-Store Advertising", "Tabletop Advertising", "Retail Screens", "Physical Advertising Spaces", "Retail Media Campaigns", "QR Campaigns", "Physical-to-Digital Campaigns"],
+  },
+];
+
+const audiences = [
+  ["Growing Businesses", "Outsource advertising instead of building a large internal advertising department."],
+  ["Startups", "Access professional advertising capabilities without immediately hiring a complete advertising operation."],
+  ["Retailers & Consumer Brands", "Connect digital advertising with physical retail media opportunities."],
+  ["Franchises", "Develop scalable advertising campaigns across multiple locations."],
+  ["Multi-Location Businesses", "Coordinate advertising across multiple physical locations and markets."],
+  ["Agencies & Business Partners", "Add advertising and retail media capabilities to your existing operation through an outsourced partnership."],
+];
+
+const technology = [
+  [Layers3, "Retail media inventory", "Discover and organize OOH, DOOH and audio opportunities across physical locations."],
+  [ClipboardCheck, "Campaign management", "Plan, submit and manage advertising campaigns with location and budget requirements."],
+  [Users, "Media owner relationships", "Connect campaign demand with registered media partners and physical advertising spaces."],
+  [QrCode, "QR tracking", "Bridge physical placements to digital experiences with trackable QR interactions."],
+  [BarChart3, "Campaign analytics", "Review QR engagement and campaign signals through reporting interfaces."],
+  [Store, "Physical advertising opportunities", "Access posters, tabletop media, retail screens, OOH, DOOH and AOOH formats."],
+  [MonitorPlay, "Digital campaign integration", "Coordinate digital screen delivery and physical-to-digital campaign touchpoints."],
+] as const;
+
+const packages = [
+  {
+    name: "Foundation",
+    description: "For businesses that need essential advertising support.",
+    items: ["Social Advertising", "Creative", "Basic SEO", "Campaign Reporting"],
+  },
+  {
+    name: "Growth",
+    description: "For businesses that want a broader advertising operation.",
+    items: ["Social Advertising", "Google Ads", "Creative", "SEO", "Landing Pages", "Analytics", "Retargeting", "Content"],
+    featured: true,
+  },
+  {
+    name: "Retail Media",
+    description: "For businesses combining digital and physical media.",
+    items: ["Digital Advertising", "Social Advertising", "Search", "Creative", "SEO", "Analytics", "OOH", "DOOH", "Retail Media", "QR Campaigns", "Physical-to-Digital Advertising"],
+  },
+];
+
+const SectionHeading = ({ eyebrow, title, copy, center = false }: { eyebrow?: string; title: string; copy?: string; center?: boolean }) => (
+  <div className={center ? "mx-auto mb-12 max-w-3xl text-center md:mb-16" : "mb-12 max-w-3xl md:mb-16"}>
+    {eyebrow && <p className="mb-4 text-xs font-semibold uppercase text-primary">{eyebrow}</p>}
+    <h2 className="text-3xl font-bold leading-tight text-foreground md:text-5xl">{title}</h2>
+    {copy && <p className="mt-5 text-base leading-7 text-muted-foreground md:text-lg">{copy}</p>}
   </div>
 );
 
-const TierBlock = ({
-  num,
-  label,
-  title,
-  desc,
-  highlight,
-  children,
-}: {
-  num: number;
-  label: string;
-  title: string;
-  desc: string;
-  highlight?: boolean;
-  children: React.ReactNode;
-}) => (
-  <div className="relative md:pl-20">
-    <div
-      className={`absolute left-0 top-0 hidden md:flex h-12 w-12 items-center justify-center rounded-full border-2 bg-black font-bold ${
-        highlight
-          ? "border-green-400 text-green-300 shadow-[0_0_28px_-4px_rgba(34,197,94,0.9)]"
-          : "border-green-500/50 text-green-400 shadow-[0_0_20px_-6px_rgba(34,197,94,0.7)]"
-      }`}
-    >
-      {num}
-    </div>
+const GlassCard = ({ children, className = "" }: { children: ReactNode; className?: string }) => (
+  <div className={`border border-border bg-card/70 backdrop-blur-xl ${className}`}>{children}</div>
+);
 
-    <div
-      className={
-        highlight
-          ? "rounded-3xl border border-green-500/30 bg-gradient-to-b from-green-500/[0.07] to-transparent p-6 md:p-8"
-          : ""
-      }
-    >
-      <div className="flex items-center gap-3 mb-3">
-        <span className="md:hidden h-8 w-8 shrink-0 rounded-full border-2 border-green-500/60 text-green-400 text-sm font-bold flex items-center justify-center">
-          {num}
-        </span>
-        <span className="text-xs font-semibold tracking-[0.18em] text-green-400">
-          TIER {num} — {label}
-        </span>
-        {highlight && (
-          <span className="px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/40 text-[10px] font-semibold text-green-300 uppercase tracking-wider">
-            Dual-Sided
-          </span>
-        )}
+const Ecosystem = () => {
+  const channels = ["SOCIAL", "PAID MEDIA", "SEARCH", "CREATIVE", "SEO", "WEB", "ANALYTICS", "RETAIL MEDIA", "OOH", "DOOH"];
+  return (
+    <div className="relative mx-auto aspect-square w-full max-w-[620px]" aria-label="TRIOTAG connected advertising ecosystem">
+      <div className="absolute inset-[12%] rounded-full border border-primary/15" />
+      <div className="absolute inset-[27%] rounded-full border border-primary/25" />
+      <svg className="absolute inset-0 h-full w-full text-primary/35" viewBox="0 0 100 100" aria-hidden="true">
+        <g stroke="currentColor" strokeWidth="0.25" strokeDasharray="1.5 1.5">
+          <line x1="50" y1="50" x2="50" y2="8" /><line x1="50" y1="50" x2="75" y2="15" />
+          <line x1="50" y1="50" x2="91" y2="35" /><line x1="50" y1="50" x2="91" y2="65" />
+          <line x1="50" y1="50" x2="75" y2="85" /><line x1="50" y1="50" x2="50" y2="92" />
+          <line x1="50" y1="50" x2="25" y2="85" /><line x1="50" y1="50" x2="9" y2="65" />
+          <line x1="50" y1="50" x2="9" y2="35" /><line x1="50" y1="50" x2="25" y2="15" />
+        </g>
+      </svg>
+      <div className="adops-core absolute left-1/2 top-1/2 z-10 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-primary/60 bg-background text-center shadow-[0_0_45px_hsl(var(--primary)/0.18)] md:h-36 md:w-36">
+        <div><Network className="mx-auto mb-2 h-6 w-6 text-primary" /><span className="text-sm font-bold text-foreground md:text-base">TRIOTAG</span><span className="mt-1 block text-[9px] uppercase text-muted-foreground">Advertising Operations</span></div>
       </div>
-      <h3 className="text-2xl md:text-3xl font-bold mb-3">{title}</h3>
-      <p className="text-white/60 mb-7 max-w-3xl">{desc}</p>
-      {children}
+      {channels.map((channel, index) => <span key={channel} className={`adops-node adops-node-${index + 1}`}>{channel}</span>)}
     </div>
-
-    <div className="hidden md:flex absolute left-6 -bottom-10 -translate-x-1/2 text-green-500/50">
-      <ArrowRight className="h-5 w-5 rotate-90" />
-    </div>
-  </div>
-);
+  );
+};
 
 const Brands = () => {
-  const navigate = useNavigate();
-
   useEffect(() => {
-    const prevTitle = document.title;
-    document.title = "Outsourced Supply-Side Ad Operations for Publishers | TrioTag";
-    setMeta(
-      'meta[name="description"]',
-      "content",
-      "Outsourced publisher AdOps teams that monetize your advertising inventory — ad serving, programmatic monetization, retail media, reporting, and revenue optimization.",
-    );
-    setMeta(
-      'meta[name="keywords"]',
-      "content",
-      "Supply-Side Ad Operations, Publisher AdOps Services, Advertising Inventory Monetization, Programmatic Monetization Services, Outsourced Publisher Operations",
-    );
+    const previousTitle = document.title;
+    document.title = TITLE;
+    setMeta('meta[name="description"]', "content", DESCRIPTION);
+    setMeta('meta[name="keywords"]', "content", "outsourced advertising agency, outsourced advertising services, advertising agency Philippines, digital advertising agency, social media advertising agency, performance advertising, paid media agency, retail media agency, OOH advertising, DOOH advertising, advertising outsourcing, outsourced media buying, Google advertising, retail advertising");
     setMeta('link[rel="canonical"]', "href", CANONICAL);
-    setMeta('meta[property="og:title"]', "content", "Outsourced Supply-Side Ad Operations for Publishers | TrioTag");
+    setMeta('meta[property="og:title"]', "content", TITLE);
+    setMeta('meta[property="og:description"]', "content", DESCRIPTION);
     setMeta('meta[property="og:url"]', "content", CANONICAL);
     setMeta('meta[property="og:type"]', "content", "website");
-    setMeta(
-      'meta[property="og:description"]',
-      "content",
-      "Scale your publisher ad business with TrioTag's outsourced supply-side AdOps team — inventory management, programmatic monetization, ad serving, and revenue optimization.",
-    );
-    return () => {
-      document.title = prevTitle;
-    };
+    setMeta('meta[name="twitter:title"]', "content", TITLE);
+    setMeta('meta[name="twitter:description"]', "content", DESCRIPTION);
+    return () => { document.title = previousTitle; };
   }, []);
 
-  const bookCall = () => navigate("/contact");
-  const registerInventory = () => navigate("/list-space");
-  const goPublisherSignup = () => {
-    localStorage.setItem("intended_role", "venue");
-    navigate("/auth");
-  };
-
-  const tier1Cards = [
-    {
-      icon: Layers,
-      title: "Ad Inventory Management",
-      items: [
-        "Inventory setup and organization",
-        "Placement creation and management",
-        "Ad unit implementation",
-        "Inventory packaging and forecasting",
-      ],
-    },
-    {
-      icon: Cpu,
-      title: "Programmatic Monetization",
-      items: [
-        "SSP onboarding and management",
-        "Header bidding operations",
-        "PMP and Deal ID management",
-        "Demand partner integrations",
-        "Yield optimization",
-      ],
-    },
-  ];
-
-  const publisherAdOps = [
-    "Ad Inventory Management & Yield Optimization",
-    "SSP Integration & Header Bidding Setup",
-    "PMP (Private Marketplace) & Deal ID Management",
-    "Demand Partner Management",
-    "Fill Rate & eCPM Optimization",
-    "Ad Serving Operations (trafficking campaigns sold on your own inventory)",
-  ];
-
-  const advertiserAdOps = [
-    "Campaign Trafficking & Ad Operations",
-    "Programmatic Media Buying Operations (DSP management, bid strategy, pacing)",
-    "Creative Trafficking & Ad Tagging (versioning, tag implementation, QA)",
-    "Brand Safety & Verification Operations",
-    "Campaign Performance Monitoring & Optimization",
-  ];
-
-  const tier3Cards = [
-    {
-      icon: Server,
-      title: "Ad Serving Operations",
-      items: [
-        "Ad server setup and administration",
-        "Campaign trafficking for sold inventory",
-        "Creative quality assurance",
-        "Delivery monitoring and troubleshooting",
-        "Tag implementation and management",
-      ],
-    },
-    {
-      icon: ShoppingBag,
-      title: "Retail Media Network Operations",
-      items: [
-        "Sponsored inventory management",
-        "Advertiser onboarding support",
-        "Retail media campaign fulfillment",
-        "Onsite and in-store media operations",
-        "Revenue and performance reporting",
-      ],
-    },
-  ];
-
-  const tier4Points = [
-    {
-      icon: Plug,
-      title: "Demand Partner Integrations",
-      desc: "Connect your retail inventory to SSPs, DSPs, and direct demand partners with clean, tested integrations.",
-    },
-    {
-      icon: Gauge,
-      title: "Header Bidding & Auction Setup",
-      desc: "Wrapper configuration, timeout tuning, and bidder management to compete every impression properly.",
-    },
-    {
-      icon: Handshake,
-      title: "PMP & Deal Activation",
-      desc: "Package retail inventory into Deal IDs and private marketplaces that buyers can actually transact on.",
-    },
-  ];
-
-  const tier5Cards = [
-    {
-      icon: LineChart,
-      title: "Publisher Revenue Analytics",
-      items: [
-        "Revenue reporting dashboards",
-        "Fill rate and eCPM analysis",
-        "Inventory performance monitoring",
-        "Demand partner reporting",
-        "Optimization recommendations",
-      ],
-    },
-    {
-      icon: MonitorPlay,
-      title: "Advertiser Campaign Reporting",
-      items: [
-        "Delivery, pacing, and spend reporting",
-        "Placement-level performance breakdowns",
-        "Creative and tag QA verification reporting",
-        "Brand safety and viewability results",
-        "Optimization actions and next-cycle recommendations",
-      ],
-    },
-  ];
-
-  const benefits = [
-    {
-      icon: TrendingDown,
-      title: "Reduce Operational Costs",
-      desc: "Access experienced AdOps professionals without the cost of building and maintaining an internal team.",
-    },
-    {
-      icon: TrendingUp,
-      title: "Maximize Revenue",
-      desc: "Continuously optimize inventory performance, fill rates, and monetization opportunities.",
-    },
-    {
-      icon: Scaling,
-      title: "Scale On Demand",
-      desc: "Expand operational support as your inventory and advertising partnerships grow.",
-    },
-    {
-      icon: Target,
-      title: "Focus on Sales and Growth",
-      desc: "Allow your team to concentrate on acquiring advertisers and strategic partnerships while we manage operations.",
-    },
-    {
-      icon: EyeOff,
-      title: "White-Label Support",
-      desc: "Our team can work entirely behind your brand as your dedicated publisher AdOps department.",
-    },
-  ];
-
-  const clients = [
-    {
-      icon: Home,
-      title: "Real Estate Managers",
-      desc: "Own or manage a building? Maximize your profit and turn blank walls into ad space. Register by booking our outsourced agents to survey your real estate property.",
-    },
-
-    {
-      icon: Building2,
-      title: "Property and Venue Networks",
-      desc: "Manage DOOH, in-store media, and physical advertising inventory through centralized operations.",
-    },
-    {
-      icon: Newspaper,
-      title: "Publishers & Media Owners",
-      desc: "Monetize digital and physical inventory with expert supply-side operations and yield management.",
-    },
-  ];
-
-  const steps = [
-    {
-      icon: Search,
-      title: "Discovery",
-      desc: "We evaluate your inventory, monetization strategy, and operational requirements.",
-    },
-    { icon: Plug, title: "Integration", desc: "Our specialists integrate ad servers, SSPs, and reporting systems." },
-    {
-      icon: PlayCircle,
-      title: "Operations & Optimization",
-      desc: "We manage inventory, monitor delivery, optimize revenue, and maintain operational performance.",
-    },
-    {
-      icon: RefreshCw,
-      title: "Continuous Growth",
-      desc: "Receive ongoing reporting, strategic recommendations, and scalable operational support.",
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-black text-white font-sans">
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <Navigation />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0">
-          <div
-            className="absolute inset-0 opacity-[0.07]"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(34,197,94,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(34,197,94,0.6) 1px, transparent 1px)",
-              backgroundSize: "56px 56px",
-              maskImage: "radial-gradient(ellipse at center, black 40%, transparent 75%)",
-              WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 75%)",
-              animation: "adops-grid-pan 24s linear infinite",
-            }}
-          />
-          <div className="absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-green-500/20 blur-[120px] animate-pulse" />
-          <div className="absolute -bottom-40 -right-24 h-[32rem] w-[32rem] rounded-full bg-emerald-400/10 blur-[140px]" />
-          {[
-            { t: "12%", l: "18%" },
-            { t: "30%", l: "78%" },
-            { t: "62%", l: "12%" },
-            { t: "75%", l: "65%" },
-            { t: "45%", l: "48%" },
-          ].map((p, i) => (
-            <span
-              key={i}
-              className="absolute h-1.5 w-1.5 rounded-full bg-green-400/70 shadow-[0_0_12px_2px_rgba(34,197,94,0.7)]"
-              style={{
-                top: p.t,
-                left: p.l,
-                animation: `adops-float ${6 + i}s ease-in-out infinite`,
-                animationDelay: `${i * 0.6}s`,
-              }}
-            />
-          ))}
-        </div>
+      <main>
+        <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden border-b border-border">
+          <div className="adops-grid absolute inset-0 opacity-40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-background" />
+          <div className="container relative mx-auto grid items-center gap-12 px-4 py-16 md:px-6 md:py-20 lg:grid-cols-[0.95fr_1.05fr] lg:py-24">
+            <div className="max-w-3xl">
+              <p className="mb-5 inline-flex items-center gap-2 border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold uppercase text-primary">
+                <CircleDot className="h-3.5 w-3.5" /> Outsourced Advertising Agency
+              </p>
+              <h1 className="text-4xl font-bold leading-[1.08] text-foreground md:text-6xl lg:text-7xl">
+                Your Advertising Agency. <span className="text-primary">Without the Overhead.</span>
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl">
+                Access a multidisciplinary advertising operation without building one from scratch. TRIOTAG manages digital advertising, social media, creative, search, analytics and retail media through one integrated advertising partner.
+              </p>
+              <p className="mt-5 text-sm font-medium text-foreground/80">One agency. Multiple advertising capabilities. Lower operational overhead.</p>
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <Button asChild size="lg" className="h-12 px-7"><Link to="/contact">Talk to TRIOTAG <ArrowRight /></Link></Button>
+                <Button asChild size="lg" variant="outline" className="h-12 px-7"><a href="#services">Explore Advertising Services <ArrowDown /></a></Button>
+              </div>
+            </div>
+            <Ecosystem />
+          </div>
+        </section>
 
-        <div className="container mx-auto px-4 md:px-6 py-24 md:py-32 relative">
-          <div className="max-w-4xl">
-            <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-semibold mb-6 animate-fade-in">
-              Outsource your Ad Operations and scale your business
-            </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] mb-6 animate-fade-in">
-              Outsourced Advertising Operations, Built for Your <span className="text-green-500">Business.</span>
-            </h1>
-            <p className="text-lg md:text-xl text-white/70 mb-10 max-w-3xl">
-              Scale your advertising business without building an in-house AdOps department. Our dedicated specialists
-              manage a wide spectrum of advertising services from retail ad inventory, ad serving operations,
-              programmatic monetization, reporting, and optimization so your team can focus on sales and business
-              growth.
-            </p>
-            <p className="text-sm md:text-base text-green-300/90 mb-10 max-w-3xl">
-              Dual-sided AdOps: we operate the supply side for publishers monetizing retail media inventory — and the
-              demand side for advertisers running programmatic campaigns.
-            </p>
-
-            <div className="flex flex-wrap gap-3">
+        <section className="border-b border-border py-20 md:py-28">
+          <div className="container mx-auto px-4 md:px-6">
+            <SectionHeading eyebrow="The outsourced model" title="An Advertising Agency Built Around Your Business." copy="Traditional advertising services often require businesses to coordinate multiple specialists, freelancers, vendors and media providers. TRIOTAG brings these capabilities together under one advertising partner." />
+            <div className="grid gap-5 md:grid-cols-3">
               {[
-                { icon: Users, label: "Dedicated AdOps Teams" },
-                { icon: DollarSign, label: "Revenue Optimization" },
-                { icon: Scaling, label: "Flexible Scaling" },
-              ].map(({ icon: Icon, label }) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-sm"
-                >
-                  <Icon className="h-4 w-4 text-green-400" />
-                  <span>{label}</span>
-                </div>
+                ["01", "Lower Overhead", "Access multiple advertising capabilities without the recruitment, payroll and management burden of building every function internally."],
+                ["02", "One Advertising Partner", "Strategy, media buying, creative, digital advertising and retail media can be coordinated through one agency relationship."],
+                ["03", "Scale Without Rebuilding", "Expand your advertising capabilities as your business grows without having to build a new department for every channel."],
+              ].map(([number, title, copy]) => (
+                <GlassCard key={number} className="group p-7 transition duration-300 hover:-translate-y-1 hover:border-primary/40">
+                  <span className="font-mono text-sm text-primary">{number}</span>
+                  <h3 className="mt-8 text-xl font-semibold uppercase text-foreground">{title}</h3>
+                  <p className="mt-4 text-sm leading-6 text-muted-foreground">{copy}</p>
+                </GlassCard>
               ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Your Remote Publisher Ad Operations Team */}
-      <section className="py-20 md:py-28 border-t border-white/5">
-        <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-              Your Retail Media <span className="text-green-500">Supply-Side Ad Operations Team</span>
-            </h2>
-            <p className="text-white/70 text-lg mb-5">
-              We become an extension of your organization by providing experienced AdOps professionals who manage and
-              optimize your advertising inventory, programmatic demand, and monetization operations.
-            </p>
-            <p className="text-white/70 text-lg">
-              Whether you need support for ad serving or a fully managed publisher monetization agent, we deliver the
-              expertise needed to operate and scale your advertising business.
-            </p>
-          </div>
-
-          {/* Dashboard mockup */}
-          <div className="relative">
-            <div className="absolute -inset-4 bg-gradient-to-br from-green-500/20 to-emerald-400/0 blur-2xl rounded-3xl" />
-            <div className="relative bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 shadow-2xl">
-              <div className="flex items-center gap-2 mb-5">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
-                <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
-                <span className="h-2.5 w-2.5 rounded-full bg-green-500/70" />
-                <span className="ml-3 text-xs text-white/40">inventory / yield-monitor</span>
-              </div>
-              <div className="grid grid-cols-3 gap-3 mb-5">
-                {[
-                  { label: "Fill Rate", value: "94%" },
-                  { label: "eCPM", value: "$3.42" },
-                  { label: "Revenue", value: "$128K" },
-                ].map((s) => (
-                  <div key={s.label} className="bg-black/60 border border-white/10 rounded-xl p-3">
-                    <div className="text-xs text-white/50">{s.label}</div>
-                    <div className="text-lg font-bold text-green-400">{s.value}</div>
+        <section id="services" className="scroll-mt-20 border-b border-border bg-card/25 py-20 md:py-28">
+          <div className="container mx-auto px-4 md:px-6">
+            <SectionHeading eyebrow="Managed advertising services" title="Complete Advertising Capabilities." copy="Instead of hiring multiple advertising specialists, managing separate vendors, and building an expensive internal advertising operation, businesses can outsource their advertising to TRIOTAG." />
+            <div className="grid gap-px overflow-hidden border border-border bg-border md:grid-cols-2">
+              {services.map(({ number, icon: Icon, title, items }) => (
+                <article key={number} className="group bg-background p-6 transition-colors hover:bg-card md:p-8">
+                  <div className="flex items-start justify-between gap-5">
+                    <div className="flex h-11 w-11 items-center justify-center border border-primary/30 bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div>
+                    <span className="font-mono text-xs text-muted-foreground">{number}</span>
                   </div>
-                ))}
-              </div>
-              <div className="h-32 rounded-xl border border-white/10 bg-black/40 p-4 mb-4 relative overflow-hidden">
-                <svg viewBox="0 0 200 80" className="w-full h-full">
-                  <defs>
-                    <linearGradient id="adopsLine" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor="rgb(34,197,94)" stopOpacity="0.5" />
-                      <stop offset="100%" stopColor="rgb(34,197,94)" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M0,60 L20,52 L40,55 L60,40 L80,45 L100,28 L120,32 L140,18 L160,22 L180,12 L200,16 L200,80 L0,80 Z"
-                    fill="url(#adopsLine)"
-                  />
-                  <path
-                    d="M0,60 L20,52 L40,55 L60,40 L80,45 L100,28 L120,32 L140,18 L160,22 L180,12 L200,16"
-                    fill="none"
-                    stroke="rgb(34,197,94)"
-                    strokeWidth="1.5"
-                  />
-                </svg>
-              </div>
-              <div className="space-y-2">
-                {[
-                  ["SSP Yield · Header Bidding", "+18%"],
-                  ["PMP Deal · Retailer A", "Active"],
-                  ["Inventory · DOOH Network", "Pacing well"],
-                ].map(([t, s]) => (
-                  <div
-                    key={t}
-                    className="flex items-center justify-between text-xs bg-black/40 border border-white/10 rounded-lg px-3 py-2"
-                  >
-                    <span className="text-white/70">{t}</span>
-                    <span className="text-green-400">{s}</span>
+                  <h3 className="mt-6 text-xl font-semibold uppercase text-foreground">{title}</h3>
+                  <div className="mt-5 grid grid-cols-1 gap-x-5 gap-y-2 sm:grid-cols-2">
+                    {items.map((item) => <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground"><ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><span>{item}</span></div>)}
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 5-Tier Narrative: Our Services ===== */}
-      <section className="py-20 md:py-28 border-t border-white/5">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mb-16">
-            <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-semibold mb-5">
-              The TrioTag AdOps Stack · Tier 1 → Tier 5
-            </span>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Our Services</h2>
-            <p className="text-white/60 text-lg">
-              Five connected tiers — from plugging your retail media inventory into demand, to operating campaigns for
-              both publishers and advertisers, to proving what delivered and what earned.
-            </p>
-          </div>
-
-          {/* Tier rail */}
-          <div className="relative">
-            <div className="hidden md:block absolute left-6 top-4 bottom-4 w-px bg-gradient-to-b from-green-500/60 via-green-500/25 to-transparent" />
-
-            <div className="space-y-14 md:space-y-20">
-              {/* TIER 1 */}
-              <TierBlock
-                num={1}
-                label="SSP SOURCE"
-                title="Connect & monetize retail media inventory"
-                desc="The technical monetization foundation — your inventory structured, packaged, and wired into programmatic demand."
-              >
-                <div className="grid sm:grid-cols-2 gap-5">
-                  {tier1Cards.map(({ icon: Icon, title, items }) => (
-                    <ServiceCard key={title} Icon={Icon} title={title} items={items} />
-                  ))}
-                </div>
-              </TierBlock>
-
-              {/* TIER 2 — dual-sided */}
-              <TierBlock
-                num={2}
-                label="RETAIL MEDIA ADOPS"
-                title="TrioTag operates it for you"
-                desc="Whether you're monetizing retail media inventory or running programmatic campaigns as an advertiser, TrioTag's outsourced AdOps team operates the technical and operational layer for you."
-                highlight
-              >
-                <div className="grid lg:grid-cols-2 gap-5">
-                  <div className="relative bg-[#0a0a0a] border border-green-500/30 rounded-2xl p-6 shadow-[0_0_40px_-15px_rgba(34,197,94,0.5)]">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="h-11 w-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center">
-                        <Server className="h-5 w-5 text-green-400" />
-                      </div>
-                      <div>
-                        <div className="text-[11px] uppercase tracking-wider text-green-400 font-semibold">
-                          Supply-Side
-                        </div>
-                        <h3 className="text-xl font-semibold">For Publishers</h3>
-                      </div>
-                    </div>
-                    <p className="text-sm text-white/60 mb-4">
-                      Publisher / supply-side AdOps that keeps inventory sold, served, and yielding.
-                    </p>
-                    <ul className="space-y-2.5">
-                      {publisherAdOps.map((it) => (
-                        <li key={it} className="text-sm text-white/70 flex gap-2.5">
-                          <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-                          {it}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="relative bg-[#0a0a0a] border border-green-500/30 rounded-2xl p-6 shadow-[0_0_40px_-15px_rgba(34,197,94,0.5)]">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="h-11 w-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center">
-                        <Megaphone className="h-5 w-5 text-green-400" />
-                      </div>
-                      <div>
-                        <div className="text-[11px] uppercase tracking-wider text-green-400 font-semibold">
-                          Demand-Side
-                        </div>
-                        <h3 className="text-xl font-semibold">For Advertisers</h3>
-                      </div>
-                    </div>
-                    <p className="text-sm text-white/60 mb-4">
-                      Advertiser / demand-side AdOps that runs your buys, creatives, and pacing.
-                    </p>
-                    <ul className="space-y-2.5">
-                      {advertiserAdOps.map((it) => (
-                        <li key={it} className="text-sm text-white/70 flex gap-2.5">
-                          <ShieldCheck className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-                          {it}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </TierBlock>
-
-              {/* TIER 3 */}
-              <TierBlock
-                num={3}
-                label="MONETIZATION SUITE"
-                title="Manage demand, inventory, campaigns & revenue"
-                desc="Trafficking, advertiser onboarding, sponsored inventory, and revenue reporting — operated day to day."
-              >
-                <div className="grid sm:grid-cols-2 gap-5">
-                  {tier3Cards.map(({ icon: Icon, title, items }) => (
-                    <ServiceCard key={title} Icon={Icon} title={title} items={items} />
-                  ))}
-                </div>
-              </TierBlock>
-
-              {/* TIER 4 */}
-              <TierBlock
-                num={4}
-                label="PROGRAMMATIC ENABLEMENT"
-                title="Connect retail inventory to demand"
-                desc="The plumbing between your retail media supply and the buyers who want it."
-              >
-                <div className="grid sm:grid-cols-3 gap-5">
-                  {tier4Points.map(({ icon: Icon, title, desc }) => (
-                    <div
-                      key={title}
-                      className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-green-500/50"
-                    >
-                      <Icon className="h-7 w-7 text-green-400 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-                      <p className="text-sm text-white/65">{desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </TierBlock>
-
-              {/* TIER 5 */}
-              <TierBlock
-                num={5}
-                label="MEASUREMENT & REVENUE"
-                title="Know what delivered and what earned"
-                desc="Reporting for both sides — publisher revenue analytics and advertiser campaign performance."
-              >
-                <div className="grid sm:grid-cols-2 gap-5">
-                  {tier5Cards.map(({ icon: Icon, title, items }) => (
-                    <ServiceCard key={title} Icon={Icon} title={title} items={items} />
-                  ))}
-                </div>
-              </TierBlock>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Outsource */}
-      <section className="py-20 md:py-28 border-t border-white/5 bg-gradient-to-b from-transparent via-green-500/[0.03] to-transparent">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-2xl mb-14">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Why Outsource Your <span className="text-green-500">Supply-Side Ad Operations?</span>
-            </h2>
-            <p className="text-white/60 text-lg">
-              Five reasons publishers and media owners trust an outsourced AdOps partner.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {benefits.map(({ icon: Icon, title, desc }) => (
-              <div
-                key={title}
-                className="group bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-green-500/50 hover:shadow-[0_0_30px_-5px_rgba(34,197,94,0.35)]"
-              >
-                <Icon className="h-7 w-7 text-green-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">{title}</h3>
-                <p className="text-sm text-white/65">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Who We Work With */}
-      <section className="py-20 md:py-28 border-t border-white/5">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-2xl mb-14">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Who We Work With</h2>
-            <p className="text-white/60 text-lg">
-              Trusted by inventory owners across the supply-side advertising ecosystem.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {clients.map(({ icon: Icon, title, desc }) => (
-              <div
-                key={title}
-                className="group bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-green-500/50 hover:shadow-[0_0_30px_-5px_rgba(34,197,94,0.35)]"
-              >
-                <div className="h-11 w-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center mb-4">
-                  <Icon className="h-5 w-5 text-green-400" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">{title}</h3>
-                <p className="text-sm text-white/65">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-20 md:py-28 border-t border-white/5">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-2xl mb-14">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">How It Works</h2>
-            <p className="text-white/60 text-lg">
-              From discovery to continuous growth — a clear path to monetization excellence.
-            </p>
-          </div>
-
-          {/* Desktop timeline */}
-          <div className="hidden lg:block relative">
-            <div className="absolute top-7 left-[6%] right-[6%] h-px bg-gradient-to-r from-transparent via-green-500/40 to-transparent">
-              <div
-                className="h-full w-1/3 bg-gradient-to-r from-transparent via-green-400 to-transparent"
-                style={{ animation: "adops-flow 4s linear infinite" }}
-              />
-            </div>
-            <div className="grid grid-cols-4 gap-6 relative">
-              {steps.map(({ icon: Icon, title, desc }, i) => (
-                <div key={title} className="text-center">
-                  <div className="mx-auto h-14 w-14 rounded-full bg-black border-2 border-green-500/60 flex items-center justify-center mb-5 relative z-10 shadow-[0_0_20px_-5px_rgba(34,197,94,0.6)]">
-                    <Icon className="h-6 w-6 text-green-400" />
-                  </div>
-                  <div className="text-xs text-green-400 font-semibold mb-2">STEP {i + 1}</div>
-                  <h3 className="text-lg font-semibold mb-2">{title}</h3>
-                  <p className="text-sm text-white/65">{desc}</p>
-                </div>
+                </article>
               ))}
             </div>
           </div>
+        </section>
 
-          {/* Mobile stacked */}
-          <div className="lg:hidden space-y-4">
-            {steps.map(({ icon: Icon, title, desc }, i) => (
-              <div key={title} className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-5 flex gap-4">
-                <div className="h-12 w-12 shrink-0 rounded-full bg-green-500/15 border border-green-500/40 flex items-center justify-center">
-                  <Icon className="h-5 w-5 text-green-400" />
-                </div>
-                <div>
-                  <div className="text-xs text-green-400 font-semibold mb-1">STEP {i + 1}</div>
-                  <h3 className="text-lg font-semibold mb-1">{title}</h3>
-                  <p className="text-sm text-white/65">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="relative py-20 md:py-28 overflow-hidden">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-green-500/15 via-emerald-500/5 to-transparent" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[36rem] w-[36rem] rounded-full bg-green-500/20 blur-[160px]" />
-          {[...Array(8)].map((_, i) => (
-            <span
-              key={i}
-              className="absolute h-1 w-1 rounded-full bg-green-300/70 shadow-[0_0_10px_2px_rgba(34,197,94,0.7)]"
-              style={{
-                top: `${10 + i * 9}%`,
-                left: `${(i * 13) % 100}%`,
-                animation: `adops-float ${5 + (i % 4)}s ease-in-out infinite`,
-                animationDelay: `${i * 0.4}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="container mx-auto px-4 md:px-6 relative">
-          <div className="max-w-3xl mx-auto text-center bg-[#0a0a0a]/80 backdrop-blur-sm border border-green-500/30 rounded-3xl p-10 md:p-14 shadow-[0_0_60px_-10px_rgba(34,197,94,0.4)]">
-            <h2 className="text-3xl md:text-5xl font-bold mb-5 leading-tight">
-              We Provide Advertising Operations <span className="text-green-500">for businesses.</span>
-            </h2>
-            <p className="text-white/70 mb-8 text-lg">
-              We provide the people, expertise, and processes needed to monetize and scale your advertising inventory.
-            </p>
-
-            <div className="border-t border-white/10 pt-8 mb-8">
-              <h3 className="text-xl md:text-2xl font-semibold mb-3">
-                Ready to Monetize Your Ad Spaces More Efficiently?
-              </h3>
-              <p className="text-white/65 max-w-2xl mx-auto">
-                Partner with TrioTag, an outsourced supply-side AdOps agency that delivers reliable inventory
-                management, revenue optimization, and operational excellence.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================== Retailer Sections ================== */}
-
-      {/* Retailer Hero */}
-      <section className="container mx-auto px-4 md:px-6 py-20 md:py-28 border-t border-white/5">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold mb-5">
-              For Venues & Retailers
-            </span>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              Turn your space into <span className="text-green-500">passive income</span>
-            </h2>
-            <p className="text-lg text-white/70 mb-8 max-w-xl">
-              TrioTag connects your venue with brands that want to reach real shoppers. List your ad space for free,
-              approve every booking, and get paid monthly.
-            </p>
-          </div>
-          <div className="bg-[#0c0c0c] border border-white/10 rounded-3xl p-8">
-            <div className="grid grid-cols-2 gap-4">
+        <section className="relative overflow-hidden border-b border-border py-20 md:py-32">
+          <div className="adops-grid absolute inset-0 opacity-20" />
+          <div className="container relative mx-auto px-4 md:px-6">
+            <SectionHeading eyebrow="The TRIOTAG difference" title="Where Digital Advertising Meets Retail Media." copy="TRIOTAG goes beyond traditional digital advertising. Through its retail media ecosystem, businesses can extend campaigns into physical environments where customers shop, eat, work and interact." center />
+            <div className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:items-stretch">
               {[
-                { icon: Wallet, label: "Monthly payouts" },
-                { icon: Users, label: "Verified brands" },
-                { icon: Shield, label: "You approve ads" },
-                { icon: TrendingUp, label: "Grow over time" },
-              ].map(({ icon: Icon, label }) => (
-                <div key={label} className="bg-black border border-white/10 rounded-xl p-4">
-                  <Icon className="h-6 w-6 text-green-500 mb-2" />
-                  <div className="text-sm text-white/80">{label}</div>
+                [Megaphone, "Digital Advertising", ["Meta", "TikTok", "Google", "YouTube", "SEO", "Web"]],
+                [Store, "Retail Media", ["OOH", "DOOH", "In-Store", "Tabletop", "Retail Screens", "Print"]],
+                [BarChart3, "Data", ["QR Tracking", "Lead Capture", "Campaign Analytics", "Conversion Data"]],
+              ].map(([Icon, title, items], index) => (
+                <div key={String(title)} className="contents">
+                  {index > 0 && <div className="flex items-center justify-center text-primary"><ArrowRight className="hidden h-5 w-5 lg:block" /><ArrowDown className="h-5 w-5 lg:hidden" /></div>}
+                  <GlassCard className="p-7">
+                    <div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center bg-primary text-primary-foreground"><Icon className="h-5 w-5" /></div><h3 className="text-lg font-semibold uppercase">{String(title)}</h3></div>
+                    <div className="mt-6 flex flex-wrap gap-2">{(items as string[]).map((item) => <span key={item} className="border border-border bg-secondary px-3 py-1.5 text-xs text-secondary-foreground">{item}</span>)}</div>
+                  </GlassCard>
                 </div>
               ))}
             </div>
+            <p className="mt-12 text-center text-2xl font-semibold text-foreground md:text-3xl">One Advertising Strategy. <span className="text-primary">Multiple Media Environments.</span></p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Why TrioTag */}
-      <section className="bg-[#0c0c0c] py-20 md:py-28">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why retailers list with TrioTag</h2>
-            <p className="text-white/70">We do the work of finding advertisers. You keep control of your space.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Wallet,
-                title: "Free to list",
-                desc: "No setup cost, no monthly fees. You only earn — never owe.",
-              },
-              {
-                icon: Shield,
-                title: "Full control",
-                desc: "Approve or reject every brand booking before any ad goes live.",
-              },
-              {
-                icon: Sparkles,
-                title: "Set & forget",
-                desc: "Brands find you, book online, and pay directly. We handle ops.",
-              },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-black border border-white/10 rounded-2xl p-6">
-                <Icon className="h-8 w-8 text-green-500 mb-4" />
-                <h3 className="text-xl font-semibold mb-2">{title}</h3>
-                <p className="text-white/70 text-sm">{desc}</p>
+        <section className="border-b border-border py-20 md:py-28">
+          <div className="container mx-auto px-4 md:px-6">
+            <SectionHeading eyebrow="Operational comparison" title="Why Build The Operation In-House?" />
+            <div className="grid overflow-hidden border border-border lg:grid-cols-2">
+              <div className="bg-card/40 p-7 md:p-10">
+                <p className="text-xs font-semibold uppercase text-muted-foreground">Build your own advertising operation</p>
+                <ul className="mt-7 space-y-4">{["Recruit specialists", "Manage employees", "Coordinate freelancers", "Manage multiple vendors", "Purchase software", "Build media relationships", "Manage campaign operations", "Handle reporting"].map((item) => <li key={item} className="flex items-center gap-3 text-muted-foreground"><span className="h-px w-4 bg-muted-foreground" />{item}</li>)}</ul>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works (retailers) */}
-      <section className="container mx-auto px-4 md:px-6 py-20 md:py-28">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">How it works</h2>
-          <p className="text-white/70">
-            From listing to first payout with any payment platform, from e-wallets to bank accounts. No account linking
-            needed, cashout your earnings fast and secure!
-          </p>
-        </div>
-        <div className="grid md:grid-cols-4 gap-6">
-          {[
-            ["01", "Create your account", "Sign up free as a publisher."],
-            ["02", "Add your space", "Photos, location, and ad formats."],
-            ["03", "Approve bookings", "Brands request, you accept."],
-            ["04", "Get paid monthly", "GCash or bank transfer."],
-          ].map(([num, title, desc]) => (
-            <div key={num} className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-6">
-              <div className="text-green-500 font-bold text-2xl mb-3">{num}</div>
-              <h3 className="font-semibold mb-2">{title}</h3>
-              <p className="text-white/70 text-sm">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Formats */}
-      <section className="bg-[#0c0c0c] py-20 md:py-28">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Any space, any format</h2>
-            <p className="text-white/70">
-              Window stickers, posters, table tents, in-store screens, audio spots — list whatever you have.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { icon: LayoutGrid, title: "Print (OOH)", desc: "Stickers, posters, table tents." },
-              { icon: TrendingUp, title: "Screens (DOOH)", desc: "TVs, tablets, LED displays." },
-              { icon: Users, title: "Audio (AOOH)", desc: "In-store sound systems." },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-black border border-white/10 rounded-2xl p-6">
-                <Icon className="h-8 w-8 text-green-500 mb-4" />
-                <h3 className="text-xl font-semibold mb-2">{title}</h3>
-                <p className="text-white/70 text-sm">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Retailer Sign-Up CTA */}
-      <section className="bg-black py-20 md:py-28">
-        <div className="border border-green-500/20 rounded-3xl mx-4 md:mx-12 p-8 md:p-12 bg-[#070707]">
-          <div className="grid lg:grid-cols-2 gap-10">
-            <div>
-              <span className="inline-block px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold mb-5">
-                Join the TrioTag Retailer Network
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-5">
-                Start earning from your space today!
-              </h2>
-              <p className="text-white/70 mb-6">
-                List your venue on TrioTag's retailer marketplace in under 10 minutes. Brands will find your space, book
-                it, and pay you directly. No sales calls. No chasing payments. Just passive income directly paid to your
-                account.
-              </p>
-
-              <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mt-4">
-                <div className="text-xs uppercase tracking-wider text-green-400 font-semibold mb-3">
-                  Estimated monthly earnings
-                </div>
-                <div className="space-y-2">
-                  {[
-                    { icon: Utensils, label: "Cafe / Restaurant", amt: "₱13,500 – ₱19,000 / month" },
-                    { icon: Dumbbell, label: "Gym / Fitness", amt: "₱19,000 – ₱25,000 / month" },
-                    { icon: Store, label: "Retail", amt: "₱18,000 – ₱30,000 / month" },
-                  ].map(({ icon: Icon, label, amt }) => (
-                    <div key={label} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-white/80">
-                        <Icon className="h-4 w-4 text-green-500" />
-                        {label}
-                      </div>
-                      <span className="text-white font-medium">{amt}</span>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-white/50 mt-3">
-                  *Earnings vary based on location, foot traffic, and format type
-                </p>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-3 mt-6">
-                {[
-                  "Free to list — no upfront cost",
-                  "You approve every ad booking",
-                  "Monthly GCash or bank payouts",
-                  "Dedicated retailer support team",
-                  "Real-time earnings dashboard",
-                  "Pause or remove listings anytime",
-                ].map((c) => (
-                  <div key={c} className="flex items-start gap-2 text-sm text-white/80">
-                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                    {c}
-                  </div>
-                ))}
+              <div className="border-t border-primary/30 bg-primary/5 p-7 md:p-10 lg:border-l lg:border-t-0">
+                <p className="text-xs font-semibold uppercase text-primary">Outsource to TRIOTAG</p>
+                <ul className="mt-7 space-y-4">{["One agency relationship", "Access multiple specialists", "Integrated advertising services", "Managed campaign execution", "Advertising technology", "Retail media access", "Campaign reporting", "Ongoing optimization"].map((item) => <li key={item} className="flex items-center gap-3 text-foreground"><Check className="h-4 w-4 text-primary" />{item}</li>)}</ul>
               </div>
             </div>
+            <p className="mt-7 max-w-4xl text-base leading-7 text-muted-foreground">Outsourcing allows businesses to access broader advertising capabilities while reducing the operational burden associated with building and managing every function internally.</p>
+          </div>
+        </section>
 
-            <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-8 self-start">
-              <h3 className="text-2xl font-bold mb-2">List Your Space Today</h3>
-              <p className="text-white/70 text-sm mb-6">
-                Create your free retailer account and submit your first space in minutes.
-              </p>
-              <Button
-                size="lg"
-                variant="cyber"
-                className="w-full whitespace-pre-line"
-                onClick={() => navigate("/advertiser/explore")}
-              >
-                List your Ad Space{"\n"}
-              </Button>
-
-              <div className="flex items-center gap-3 my-5 text-white/40 text-xs">
-                <div className="flex-1 h-px bg-white/10" />
-                or
-                <div className="flex-1 h-px bg-white/10" />
-              </div>
-
-              <Button size="lg" variant="outline" className="w-full" onClick={() => navigate("/contact")}>
-                Talk to an Agent
-              </Button>
-
-              <div className="flex justify-center gap-6 mt-6 text-xs text-white/70">
-                <div className="flex items-center gap-1.5">
-                  <Shield className="h-4 w-4 text-green-500" /> Free to join
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-green-500" /> Approved in 48hrs
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" /> No commitment
-                </div>
-              </div>
-
-              <p className="text-center text-xs text-white/50 mt-5">
-                Already a publisher?{" "}
-                <button onClick={() => navigate("/auth")} className="text-green-400 hover:underline">
-                  Log in here
-                </button>
-              </p>
+        <section className="border-b border-border bg-card/25 py-20 md:py-28">
+          <div className="container mx-auto px-4 md:px-6">
+            <SectionHeading eyebrow="One coordinated relationship" title="Your Advertising Operation, Managed By One Agency." copy="Your TRIOTAG account is coordinated through one agency relationship while specialized resources support the advertising functions required by your business." center />
+            <div className="mx-auto max-w-5xl">
+              <div className="mx-auto w-fit border border-border bg-card px-8 py-4 text-center"><span className="text-xs uppercase text-muted-foreground">Your business</span><strong className="mt-1 block text-lg">CLIENT</strong></div>
+              <div className="mx-auto h-10 w-px bg-primary/50" />
+              <div className="mx-auto w-fit border border-primary/50 bg-primary px-10 py-5 text-center text-primary-foreground shadow-[0_0_35px_hsl(var(--primary)/0.15)]"><Network className="mx-auto mb-2 h-5 w-5" /><strong className="text-xl">TRIOTAG</strong></div>
+              <div className="mx-auto h-10 w-px bg-primary/50" />
+              <p className="mx-auto w-fit border border-border bg-card px-6 py-3 text-center text-xs font-semibold uppercase text-muted-foreground">Advertising Specialists</p>
+              <div className="mx-auto h-6 w-px bg-border" />
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">{["Social Advertising", "Paid Media", "Creative", "SEO", "Search", "Web", "Analytics", "Retail Media", "OOH", "DOOH", "AI & Automation"].map((item) => <div key={item} className="flex min-h-16 items-center justify-center border border-border bg-background px-3 text-center text-xs font-medium text-foreground transition hover:border-primary/40">{item}</div>)}</div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        <section className="border-b border-border py-20 md:py-28">
+          <div className="container mx-auto px-4 md:px-6">
+            <SectionHeading eyebrow="Working model" title="From Objectives To Ongoing Optimization." />
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+              {[
+                [Compass, "01", "Discover", "We understand your business, customers, objectives, existing advertising and available media budget."],
+                [Workflow, "02", "Strategize", "We develop an advertising strategy based on your goals, audience and media opportunities."],
+                [MousePointerClick, "03", "Execute", "Our advertising specialists manage campaigns, creative, media, digital channels and retail media."],
+                [Gauge, "04", "Optimize", "We monitor performance, analyze results and continuously improve the advertising operation."],
+              ].map(([Icon, number, title, copy]) => (
+                <article key={String(number)} className="relative border-t border-primary/40 pt-6">
+                  <div className="flex items-center justify-between"><Icon className="h-6 w-6 text-primary" /><span className="font-mono text-xs text-muted-foreground">{String(number)}</span></div>
+                  <h3 className="mt-7 text-xl font-semibold uppercase">{String(title)}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{String(copy)}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-border bg-card/25 py-20 md:py-28">
+          <div className="container mx-auto px-4 md:px-6">
+            <SectionHeading eyebrow="Who we work with" title="Built For Businesses That Need More Advertising Capability." />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">{audiences.map(([title, copy], index) => <GlassCard key={title} className="p-6 transition hover:border-primary/40"><span className="font-mono text-xs text-primary">0{index + 1}</span><h3 className="mt-5 text-lg font-semibold uppercase">{title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{copy}</p></GlassCard>)}</div>
+          </div>
+        </section>
+
+        <section className="border-b border-border py-20 md:py-28">
+          <div className="container mx-auto px-4 md:px-6">
+            <SectionHeading eyebrow="TRIOTAG technology" title="An Advertising Agency Powered By Technology." copy="TRIOTAG combines advertising services with technology designed to support retail media, campaign management, tracking and physical-to-digital advertising." />
+            <div className="grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+              {technology.map(([Icon, title, copy]) => <article key={title} className="bg-background p-6"><Icon className="h-6 w-6 text-primary" /><h3 className="mt-5 font-semibold text-foreground">{title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{copy}</p></article>)}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-border bg-card/25 py-20 md:py-28">
+          <div className="container mx-auto px-4 md:px-6">
+            <SectionHeading eyebrow="Managed packages" title="Choose The Level Of Advertising Support You Need." copy="Build a managed service scope around the channels and advertising functions your business needs now." center />
+            <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-3">
+              {packages.map((item) => (
+                <GlassCard key={item.name} className={`flex flex-col p-7 ${item.featured ? "border-primary/50 bg-primary/5" : ""}`}>
+                  <div className="flex items-center justify-between gap-3"><h3 className="text-xl font-semibold uppercase">{item.name}</h3>{item.featured && <span className="border border-primary/30 bg-primary/10 px-2 py-1 text-[10px] font-semibold uppercase text-primary">Expanded</span>}</div>
+                  <p className="mt-3 min-h-12 text-sm leading-6 text-muted-foreground">{item.description}</p>
+                  <ul className="mt-6 flex-1 space-y-2.5">{item.items.map((service) => <li key={service} className="flex items-center gap-2 text-sm text-foreground/85"><Check className="h-4 w-4 text-primary" />{service}</li>)}</ul>
+                  <Button asChild variant={item.featured ? "default" : "outline"} className="mt-8 w-full"><Link to="/contact">Talk to TRIOTAG <ArrowRight /></Link></Button>
+                </GlassCard>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden py-24 md:py-36">
+          <div className="adops-grid absolute inset-0 opacity-25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-background" />
+          <div className="container relative mx-auto px-4 text-center md:px-6">
+            <p className="mb-5 text-xs font-semibold uppercase text-primary">Outsourced Advertising Agency</p>
+            <h2 className="mx-auto max-w-4xl text-4xl font-bold leading-tight md:text-6xl">Stop Building Your Advertising Operation From Scratch.</h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">Partner with TRIOTAG and access a broader advertising operation without taking on the full overhead of building one internally.</p>
+            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button asChild size="lg" className="h-12 px-7"><Link to="/contact">Talk to TRIOTAG <ArrowRight /></Link></Button>
+              <Button asChild size="lg" variant="outline" className="h-12 px-7"><a href="#services">Explore Our Services</a></Button>
+            </div>
+          </div>
+        </section>
+      </main>
 
       <Footer />
-
       <style>{`
-        @keyframes adops-grid-pan {
-          0% { background-position: 0 0, 0 0; }
-          100% { background-position: 56px 56px, 56px 56px; }
+        .adops-grid {
+          background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+          background-size: 48px 48px;
+          mask-image: radial-gradient(circle at center, black, transparent 82%);
         }
-        @keyframes adops-float {
-          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.7; }
-          50% { transform: translateY(-18px) translateX(8px); opacity: 1; }
+        .adops-core { animation: adops-pulse 4s ease-in-out infinite; }
+        .adops-node {
+          position: absolute; z-index: 10; display: flex; min-height: 2rem; align-items: center; justify-content: center;
+          border: 1px solid hsl(var(--border)); background: hsl(var(--card) / .88); padding: .4rem .65rem;
+          color: hsl(var(--muted-foreground)); font-size: .6rem; font-weight: 700; backdrop-filter: blur(12px);
+          animation: adops-drift 6s ease-in-out infinite;
         }
-        @keyframes adops-flow {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(400%); }
+        .adops-node-1 { top: 3%; left: 50%; transform: translateX(-50%); }
+        .adops-node-2 { top: 11%; right: 8%; animation-delay: -.6s; }
+        .adops-node-3 { top: 32%; right: 0; animation-delay: -1.2s; }
+        .adops-node-4 { bottom: 28%; right: 0; animation-delay: -1.8s; }
+        .adops-node-5 { bottom: 9%; right: 10%; animation-delay: -2.4s; }
+        .adops-node-6 { bottom: 1%; left: 50%; transform: translateX(-50%); animation-delay: -3s; }
+        .adops-node-7 { bottom: 9%; left: 8%; animation-delay: -3.6s; }
+        .adops-node-8 { bottom: 28%; left: 0; animation-delay: -4.2s; }
+        .adops-node-9 { top: 32%; left: 0; animation-delay: -4.8s; }
+        .adops-node-10 { top: 11%; left: 8%; animation-delay: -5.4s; }
+        @keyframes adops-pulse { 50% { box-shadow: 0 0 65px hsl(var(--primary) / .25); } }
+        @keyframes adops-drift { 50% { margin-top: -5px; border-color: hsl(var(--primary) / .45); color: hsl(var(--foreground)); } }
+        @media (max-width: 420px) {
+          .adops-node { font-size: .5rem; padding: .3rem .4rem; }
+          .adops-node-2, .adops-node-5 { right: 1%; }
+          .adops-node-7, .adops-node-10 { left: 1%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .adops-core, .adops-node { animation: none; }
+          html { scroll-behavior: auto; }
         }
       `}</style>
     </div>
