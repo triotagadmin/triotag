@@ -226,14 +226,18 @@ export default function AdvertiserExplore() {
           lat: r.lat,
           lng: r.lng,
           category,
-          verified: verifiedPoints.some((v) => haversineMeters(v.lat, v.lng, r.lat, r.lng) <= 60),
+          verified:
+            r.source === "triotag" ||
+            verifiedPoints.some((v) => haversineMeters(v.lat, v.lng, r.lat, r.lng) <= 60),
         }));
+      // An empty result is a valid answer, not a failure.
       setPlaceResults((p) => ({ ...p, [category]: places }));
     } catch (err: any) {
+      // Technical detail stays in the console / edge function logs only.
       console.error("[AdvertiserExplore] places fetch failed", err);
       toast({
-        title: "Could not load locations",
-        description: err?.message || `Failed to fetch ${category} nearby.`,
+        title: "Unable to load advertising locations",
+        description: "Please try again in a moment.",
         variant: "destructive",
       });
       setPlaceResults((p) => ({ ...p, [category]: [] }));
@@ -241,6 +245,7 @@ export default function AdvertiserExplore() {
       setPlaceLoading((p) => ({ ...p, [category]: false }));
     }
   };
+
 
   const toggleCategory = (t: string) => {
     const on = !!openCategories[t];
