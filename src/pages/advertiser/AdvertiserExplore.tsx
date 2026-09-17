@@ -745,7 +745,7 @@ export default function AdvertiserExplore() {
                                       </div>
                                     )}
                                     {!loading && results && results.length === 0 && (
-                                      <p className="text-xs text-gray-500 py-2">No {t} found in this radius.</p>
+                                      <p className="text-xs text-gray-500 py-2">No advertising locations found for your search.</p>
                                     )}
                                     {!loading && results && results.length > 0 && (
                                        <div className="max-h-56 overflow-y-auto space-y-1 pr-1">
