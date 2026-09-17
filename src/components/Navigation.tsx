@@ -43,7 +43,7 @@ const NAV_ITEMS_PUBLIC: NavItemDef[] = [
       { label: "Digital Retail", to: "/services/ecommerce-seo" },
     ],
   },
-  { label: "Advertise Your Brand", to: "/advertiser/explore" },
+  { label: "Explore", to: "/advertiser/explore" },
 ];
 
 const NAV_ITEMS_ADMIN: NavItemDef[] = [
